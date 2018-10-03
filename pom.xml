@@ -293,12 +293,12 @@
 					<include>maven.properties</include>
 				</includes>
 			</resource>
-			<!-- <resource> -->
-			<!-- <directory>../opensrp-core/src/main/resources</directory> -->
-			<!-- </resource> -->
-			<!-- <resource> -->
-			<!-- <directory>../opensrp-connector/src/main/resources</directory> -->
-			<!-- </resource> -->
+			<resource>
+				<directory>configs/modules/core</directory>
+			</resource>
+			<resource>
+				<directory>configs/modules/connector</directory>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -498,6 +498,31 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>couchdb</id>
+			<activation>
+				<property>
+					<name>opensrp.database.type</name>
+					<value>couchdb</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.database.profile>couchDb</opensrp.database.profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>postgres</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>opensrp.database.type</name>
+					<value>postgres</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.database.profile>postgres</opensrp.database.profile>
+			</properties>
+		</profile>
 		<profile>
 			<id>jedis</id>
 			<activation>

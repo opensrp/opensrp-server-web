@@ -15,8 +15,8 @@
 		testOnBorrow="true"
 		removeAbandoned="true"
 		removeAbandonedTimeout="233"
-		username="root"
-		password="VA1913wm"
+		username="opensrp_admin"
+		password="admin"
 		driverClassName="org.postgresql.Driver"
 		url="jdbc:postgresql://localhost:5432/opensrp"
      />
