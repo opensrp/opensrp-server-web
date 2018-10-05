@@ -371,7 +371,7 @@
 						</systemProperty>
 						<systemProperty>
 							<name>log4j.configuration</name>
-							<value>file:${main.basedir}/assets/config/log4j.xml</value>
+							<value>file:${main.basedir}/configs/assets/config/log4j.xml</value>
 						</systemProperty>
 					</systemProperties>
 					<webAppConfig>
@@ -386,7 +386,7 @@
 						<connector
 							implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
 							<port>8443</port>
-							<keystore>${main.basedir}/assets/security/drishti_server.keystore</keystore>
+							<keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
 							<keyPassword>mouse monitor cube</keyPassword>
 							<password>mouse monitor cube</password>
 						</connector>
