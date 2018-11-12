@@ -6,6 +6,8 @@ import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import com.google.gson.JsonSyntaxException;
 @Controller
 @RequestMapping(value = "/rest/campaign")
 public class CampaignResource {
+	private static Logger logger = LoggerFactory.getLogger(CampaignResource.class.toString());
 
 	@Autowired
 	private CampaignService campaignService;
@@ -48,7 +51,7 @@ public class CampaignResource {
 			campaignService.addCampaign(campaign);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			e.printStackTrace();
+			logger.error("The request doesnt contain a valid campaign representation" + entity);
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -60,7 +63,7 @@ public class CampaignResource {
 			campaignService.updateCampaign(campaign);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			e.printStackTrace();
+			logger.error("The request doesnt contain a valid campaign representation" + entity);
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
