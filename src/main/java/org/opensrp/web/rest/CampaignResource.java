@@ -1,7 +1,12 @@
 package org.opensrp.web.rest;
 
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
 import org.opensrp.util.DateTypeConverter;
@@ -27,10 +32,14 @@ import com.google.gson.JsonSyntaxException;
 public class CampaignResource {
 	private static Logger logger = LoggerFactory.getLogger(CampaignResource.class.toString());
 
-	@Autowired
 	private CampaignService campaignService;
 
-	private static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+	@Autowired
+	public void setCampaignService(CampaignService campaignService) {
+		this.campaignService = campaignService;
+	}
+
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 			.registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
@@ -66,6 +75,19 @@ public class CampaignResource {
 			logger.error("The request doesnt contain a valid campaign representation" + entity);
 		}
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> syncByServerVersion(HttpServletRequest request) {
+		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = Long.parseLong(serverVersion);
+		} catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+		return new ResponseEntity<>(gson.toJson(campaignService.getCampaignsByServerVersion(currentServerVersion)),
+				HttpStatus.OK);
 	}
 
 }

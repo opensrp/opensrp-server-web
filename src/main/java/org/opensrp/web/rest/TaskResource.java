@@ -31,14 +31,18 @@ public class TaskResource {
 
 	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
 
-	private static final String CAMPAIGN = "campaign";
+	public static final String CAMPAIGN = "campaign";
 
-	private static final String GROUP = "group";
+	public static final String GROUP = "group";
 
-	@Autowired
 	private TaskService taskService;
 
-	private static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+	@Autowired
+	public void setTaskService(TaskService taskService) {
+		this.taskService = taskService;
+	}
+
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 			.serializeNulls().create();
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
@@ -58,7 +62,8 @@ public class TaskResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		return new ResponseEntity<>(gson.toJson(taskService.getTasks(campaign, group, currentServerVersion)),
+		return new ResponseEntity<>(
+				gson.toJson(taskService.getTasksByCampaignAndGroup(campaign, group, currentServerVersion)),
 				HttpStatus.OK);
 	}
 
