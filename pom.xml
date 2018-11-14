@@ -7,7 +7,7 @@
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
 
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
@@ -18,7 +18,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.1.0.RELEASE</spring.version>
+		<spring.version>3.1.1.RELEASE</spring.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<jackson.version>1.9.7</jackson.version>
@@ -265,6 +265,13 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-redis</artifactId>
 			<version>1.3.6.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.skyscreamer</groupId>
+			<artifactId>jsonassert</artifactId>
+			<version>1.5.0</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
