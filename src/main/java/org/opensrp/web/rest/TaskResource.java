@@ -31,6 +31,9 @@ public class TaskResource {
 
 	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
 
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+			.serializeNulls().create();
+
 	public static final String CAMPAIGN = "campaign";
 
 	public static final String GROUP = "group";
@@ -41,9 +44,6 @@ public class TaskResource {
 	public void setTaskService(TaskService taskService) {
 		this.taskService = taskService;
 	}
-
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			.serializeNulls().create();
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })

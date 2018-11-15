@@ -32,15 +32,15 @@ import com.google.gson.JsonSyntaxException;
 public class CampaignResource {
 	private static Logger logger = LoggerFactory.getLogger(CampaignResource.class.toString());
 
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+			.registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
+
 	private CampaignService campaignService;
 
 	@Autowired
 	public void setCampaignService(CampaignService campaignService) {
 		this.campaignService = campaignService;
 	}
-
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			.registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
