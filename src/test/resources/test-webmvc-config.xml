@@ -15,7 +15,8 @@
 	<mvc:default-servlet-handler />
 
 	<bean class="org.opensrp.web.rest.shadow.CampaignResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.TestResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.TaskResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.LocationResourseShadow" />
 
 
 </beans>

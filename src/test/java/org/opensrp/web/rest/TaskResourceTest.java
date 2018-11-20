@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
@@ -87,6 +87,22 @@ public class TaskResourceTest {
 	}
 
 	@Test
+	public void testGetTasksByCampaignAndGroupWithInvalidServerVersionShouldReturnAllServerVersions() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		when(taskService.getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l)).thenReturn(tasks);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/sync").param(TaskResource.CAMPAIGN, "IRS_2018_S1")
+						.param(TaskResource.GROUP, "2018_IRS-3734").param(BaseEntity.SERVER_VERSIOIN, ""))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
 	public void testCreate() throws Exception {
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
 				.andExpect(status().isCreated());
@@ -96,12 +112,28 @@ public class TaskResourceTest {
 	}
 
 	@Test
+	public void testCreateWithInvalidJsonShouldReturnInternalError() throws Exception {
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.substring(3).getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(taskService, never()).addTask(argumentCaptor.capture());
+		verifyNoMoreInteractions(taskService);
+	}
+
+	@Test
 	public void testUpdate() throws Exception {
 		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(taskService, times(1)).updateTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 		assertEquals(taskJson, TaskResource.gson.toJson(argumentCaptor.getValue()));
+	}
+
+	@Test
+	public void testUpdateWithInvalidJsonShouldReturnInternalError() throws Exception {
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.substring(1).getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(taskService, never()).updateTask(argumentCaptor.capture());
+		verifyNoMoreInteractions(taskService);
 	}
 
 	private Task getTask() {

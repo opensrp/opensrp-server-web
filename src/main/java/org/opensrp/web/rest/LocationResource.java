@@ -33,11 +33,11 @@ public class LocationResource {
 	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
 
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			.serializeNulls().create();
+			.create();
 
-	private static final String IS_JURISDICTION = "is_jurisdiction";
+	public static final String IS_JURISDICTION = "is_jurisdiction";
 
-	private static final String PARENT_ID = "parent_id";
+	public static final String PARENT_ID = "parent_id";
 
 	private static final String FALSE = "false";
 
@@ -50,7 +50,7 @@ public class LocationResource {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
-			@RequestParam(defaultValue = FALSE, required = false) boolean isJurisdiction) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		return new ResponseEntity<>(
 				gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
 				HttpStatus.OK);
@@ -66,13 +66,20 @@ public class LocationResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (isJurisdiction)
-			return new ResponseEntity<>(gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-					HttpStatus.OK);
-		else
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findStructuresByParentAndServerVersion(parentId, currentServerVersion)),
-					HttpStatus.OK);
+
+		try {
+			if (isJurisdiction)
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
+			else
+				return new ResponseEntity<>(
+						gson.toJson(
+								locationService.findStructuresByParentAndServerVersion(parentId, currentServerVersion)),
+						HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })

@@ -7,7 +7,7 @@
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
 
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
