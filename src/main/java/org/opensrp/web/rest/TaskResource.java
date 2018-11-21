@@ -2,6 +2,9 @@ package org.opensrp.web.rest;
 
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
+import java.lang.reflect.Type;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -84,6 +88,20 @@ public class TaskResource {
 		try {
 			Task task = gson.fromJson(entity, Task.class);
 			taskService.updateTask(task);
+			return new ResponseEntity<>(HttpStatus.CREATED);
+		} catch (JsonSyntaxException e) {
+			logger.error("The request doesnt contain a valid task representation" + entity);
+		}
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<HttpStatus> batchSave(@RequestBody String entity) {
+		try {
+			Type listType = new TypeToken<List<Task>>() {
+			}.getType();
+			List<Task> tasks = gson.fromJson(entity, listType);
+			taskService.saveTasks(tasks);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);

@@ -1,11 +1,14 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -92,12 +95,30 @@ public class CampaignResourceTest {
 	}
 
 	@Test
+	public void testCreateWithInvalidJsonShouldReturnInternalError() throws Exception {
+		mockMvc.perform(
+				post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(1).getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
+		verifyNoMoreInteractions(campaignService);
+	}
+
+	@Test
 	public void testUpdate() throws Exception {
 		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(campaignService, times(1)).updateCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
 		assertEquals(campaignJson, CampaignResource.gson.toJson(argumentCaptor.getValue()));
+	}
+
+	@Test
+	public void testUpdateWithInvalidJsonShouldReturnInternalError() throws Exception {
+		mockMvc.perform(
+				put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(2).getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
+		verifyNoMoreInteractions(campaignService);
 	}
 
 	@Test
@@ -112,6 +133,19 @@ public class CampaignResourceTest {
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(campaignJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
+	public void testSyncByServerVersionWithInvalidServerVersionShouldReturnAll() throws Exception {
+		List<Campaign> campaigns = new ArrayList<>();
+		campaigns.add(getCampaign());
+		when(campaignService.getCampaignsByServerVersion(15421904649873l)).thenReturn(campaigns);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "sdg"))
+				.andExpect(status().isOk()).andReturn();
+		verify(campaignService).getCampaignsByServerVersion(0l);
+		verifyNoMoreInteractions(campaignService);
+
+		assertEquals("[]", result.getResponse().getContentAsString());
 	}
 
 	private Campaign getCampaign() {
