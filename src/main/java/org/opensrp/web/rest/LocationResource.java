@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -130,14 +131,19 @@ public class LocationResource {
 
 	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> saveBatch(@RequestBody String entity,
+	public ResponseEntity<String> saveBatch(@RequestBody String entity,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		try {
 			Type listType = new TypeToken<List<PhysicalLocation>>() {
 			}.getType();
 			List<PhysicalLocation> locations = gson.fromJson(entity, listType);
-			locationService.saveLocations(locations, isJurisdiction);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			Set<String> locationWithErrors = locationService.saveLocations(locations, isJurisdiction);
+			if (locationWithErrors.isEmpty())
+				return new ResponseEntity<>("All Locations  processed", HttpStatus.CREATED);
+			else
+				return new ResponseEntity<>("Locations with Ids not processed: " + String.join(",", locationWithErrors),
+						HttpStatus.CREATED);
+
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid location representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

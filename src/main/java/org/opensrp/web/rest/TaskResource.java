@@ -4,6 +4,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -118,13 +119,18 @@ public class TaskResource {
 
 	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> batchSave(@RequestBody String entity) {
+	public ResponseEntity<String> batchSave(@RequestBody String entity) {
 		try {
 			Type listType = new TypeToken<List<Task>>() {
 			}.getType();
 			List<Task> tasks = gson.fromJson(entity, listType);
-			taskService.saveTasks(tasks);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			Set<String> tasksWithErrors = taskService.saveTasks(tasks);
+			if (tasksWithErrors.isEmpty())
+				return new ResponseEntity<>("All Tasks  processed", HttpStatus.CREATED);
+			else
+				return new ResponseEntity<>(
+						"Tasks with identifiers not processed: " + String.join(",", tasksWithErrors),
+						HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
