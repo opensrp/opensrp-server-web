@@ -4,9 +4,11 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
@@ -52,7 +54,12 @@ public class TaskResource {
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -66,12 +73,20 @@ public class TaskResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		return new ResponseEntity<>(
-				gson.toJson(taskService.getTasksByCampaignAndGroup(campaign, group, currentServerVersion)),
-				HttpStatus.OK);
+		if (StringUtils.isBlank(campaign) || StringUtils.isBlank(group))
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.getTasksByCampaignAndGroup(campaign, group, currentServerVersion)),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
 		try {
 			Task task = gson.fromJson(entity, Task.class);
@@ -79,11 +94,15 @@ public class TaskResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
 		try {
 			Task task = gson.fromJson(entity, Task.class);
@@ -91,22 +110,34 @@ public class TaskResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<HttpStatus> batchSave(@RequestBody String entity) {
+	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> batchSave(@RequestBody String entity) {
 		try {
 			Type listType = new TypeToken<List<Task>>() {
 			}.getType();
 			List<Task> tasks = gson.fromJson(entity, listType);
-			taskService.saveTasks(tasks);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			Set<String> tasksWithErrors = taskService.saveTasks(tasks);
+			if (tasksWithErrors.isEmpty())
+				return new ResponseEntity<>("All Tasks  processed", HttpStatus.CREATED);
+			else
+				return new ResponseEntity<>(
+						"Tasks with identifiers not processed: " + String.join(",", tasksWithErrors),
+						HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

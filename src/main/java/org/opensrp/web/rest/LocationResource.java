@@ -2,7 +2,9 @@ package org.opensrp.web.rest;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.PhysicalLocation;
@@ -51,9 +53,14 @@ public class LocationResource {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
-		return new ResponseEntity<>(
-				gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
-				HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -68,21 +75,26 @@ public class LocationResource {
 		}
 
 		try {
-			if (isJurisdiction)
+			if (isJurisdiction) {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
-			else
+			} else {
+				if (StringUtils.isBlank(parentId)) {
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				}
 				return new ResponseEntity<>(
 						gson.toJson(
 								locationService.findStructuresByParentAndServerVersion(parentId, currentServerVersion)),
 						HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+			}
+		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		try {
@@ -91,12 +103,16 @@ public class LocationResource {
 			locationService.add(location);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid location representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		try {
@@ -105,24 +121,36 @@ public class LocationResource {
 			locationService.update(location);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid location representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<HttpStatus> saveBatch(@RequestBody String entity,
+	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> saveBatch(@RequestBody String entity,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		try {
 			Type listType = new TypeToken<List<PhysicalLocation>>() {
 			}.getType();
 			List<PhysicalLocation> locations = gson.fromJson(entity, listType);
-			locationService.saveLocations(locations, isJurisdiction);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			Set<String> locationWithErrors = locationService.saveLocations(locations, isJurisdiction);
+			if (locationWithErrors.isEmpty())
+				return new ResponseEntity<>("All Locations  processed", HttpStatus.CREATED);
+			else
+				return new ResponseEntity<>("Locations with Ids not processed: " + String.join(",", locationWithErrors),
+						HttpStatus.CREATED);
+
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid location representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

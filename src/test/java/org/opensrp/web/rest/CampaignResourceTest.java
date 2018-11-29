@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,6 +74,15 @@ public class CampaignResourceTest {
 	}
 
 	@Test
+	public void testGetByUniqueIdShouldReturnServerError() throws Exception {
+		when(campaignService.getCampaign("IRS_2018_S1")).thenThrow(new RuntimeException());
+		mockMvc.perform(get(BASE_URL + "/{identifier}", "IRS_2018_S1")).andExpect(status().isInternalServerError());
+		verify(campaignService, times(1)).getCampaign("IRS_2018_S1");
+		verifyNoMoreInteractions(campaignService);
+
+	}
+
+	@Test
 	public void testGetCampaigns() throws Exception {
 		List<Campaign> campaigns = new ArrayList<>();
 		campaigns.add(getCampaign());
@@ -86,6 +96,14 @@ public class CampaignResourceTest {
 	}
 
 	@Test
+	public void testGetCampaignsShouldReturnServerError() throws Exception {
+		when(campaignService.getAllCampaigns()).thenThrow(new RuntimeException());
+		mockMvc.perform(get(BASE_URL)).andExpect(status().isInternalServerError());
+		verify(campaignService, times(1)).getAllCampaigns();
+		verifyNoMoreInteractions(campaignService);
+	}
+
+	@Test
 	public void testCreate() throws Exception {
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
 				.andExpect(status().isCreated());
@@ -95,11 +113,20 @@ public class CampaignResourceTest {
 	}
 
 	@Test
-	public void testCreateWithInvalidJsonShouldReturnInternalError() throws Exception {
+	public void testCreateWithInvalidJsonShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(
 				post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(1).getBytes()))
-				.andExpect(status().isInternalServerError());
+				.andExpect(status().isBadRequest());
 		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
+		verifyNoMoreInteractions(campaignService);
+	}
+
+	@Test
+	public void testCreateShouldReturnServerError() throws Exception {
+		when(campaignService.addCampaign(any(Campaign.class))).thenThrow(new RuntimeException());
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(campaignService).addCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
 	}
 
@@ -113,11 +140,20 @@ public class CampaignResourceTest {
 	}
 
 	@Test
-	public void testUpdateWithInvalidJsonShouldReturnInternalError() throws Exception {
+	public void testUpdateWithInvalidJsonShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(
 				put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(2).getBytes()))
-				.andExpect(status().isInternalServerError());
+				.andExpect(status().isBadRequest());
 		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
+		verifyNoMoreInteractions(campaignService);
+	}
+
+	@Test
+	public void testUpdateShouldReturnServerError() throws Exception {
+		when(campaignService.updateCampaign(any(Campaign.class))).thenThrow(new RuntimeException());
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(campaignService).updateCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
 	}
 

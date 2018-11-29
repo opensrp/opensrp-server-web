@@ -45,15 +45,26 @@ public class CampaignResource {
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(campaignService.getCampaign(identifier)), HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(gson.toJson(campaignService.getCampaign(identifier)), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getCampaigns() {
-		return new ResponseEntity<>(gson.toJson(campaignService.getAllCampaigns()), HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(gson.toJson(campaignService.getAllCampaigns()), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
 		try {
 			Campaign campaign = gson.fromJson(entity, Campaign.class);
@@ -61,11 +72,16 @@ public class CampaignResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid campaign representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
 		try {
 			Campaign campaign = gson.fromJson(entity, Campaign.class);
@@ -73,8 +89,11 @@ public class CampaignResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid campaign representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -86,8 +105,13 @@ public class CampaignResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		return new ResponseEntity<>(gson.toJson(campaignService.getCampaignsByServerVersion(currentServerVersion)),
-				HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(gson.toJson(campaignService.getCampaignsByServerVersion(currentServerVersion)),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
