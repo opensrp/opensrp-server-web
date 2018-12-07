@@ -83,7 +83,7 @@ public class LocationResource {
 				if(StringUtils.isBlank(locationNames)) {
 					return new ResponseEntity<>(gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
 				}
-				return new ResponseEntity<>(gson.toJson(locationService.findLocationsByNames(locationNames)), HttpStatus.OK);
+				return new ResponseEntity<>(gson.toJson(locationService.findLocationsByNames(locationNames,currentServerVersion)), HttpStatus.OK);
 
 			} else {
 				if (StringUtils.isBlank(parentId)) {
