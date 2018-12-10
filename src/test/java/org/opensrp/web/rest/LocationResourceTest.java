@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -138,6 +139,50 @@ public class LocationResourceTest {
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
+	public void testsSyncLocationsByNames() throws Exception {
+
+		String locationNames="01_5";
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+				.param(LocationResource.IS_JURISDICTION, "true")
+				.param(LocationResource.LOCATION_NAMES, locationNames)).andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames,0l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(), PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+
+//		search with more than one name
+		locationNames="01_5,other_location_name";
+		expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+				.param(LocationResource.IS_JURISDICTION, "true")
+				.param(LocationResource.LOCATION_NAMES, locationNames)).andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames,0l);
+		verifyNoMoreInteractions(locationService);
+
+		jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(), PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+
 	}
 
 	@Test
