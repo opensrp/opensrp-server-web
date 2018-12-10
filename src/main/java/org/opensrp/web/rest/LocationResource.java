@@ -45,6 +45,9 @@ public class LocationResource {
 
 	private PhysicalLocationService locationService;
 
+	public static final String LOCATION_NAMES = "location_names";
+
+
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -66,6 +69,7 @@ public class LocationResource {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocations(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
 			@RequestParam(value = PARENT_ID, required = false) String parentId) {
 		long currentServerVersion = 0;
 		try {
@@ -76,8 +80,11 @@ public class LocationResource {
 
 		try {
 			if (isJurisdiction) {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
+				if(StringUtils.isBlank(locationNames)) {
+					return new ResponseEntity<>(gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
+				}
+				return new ResponseEntity<>(gson.toJson(locationService.findLocationsByNames(locationNames,currentServerVersion)), HttpStatus.OK);
+
 			} else {
 				if (StringUtils.isBlank(parentId)) {
 					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
