@@ -227,6 +227,21 @@ public class LocationResourceTest {
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+		when(locationService.findStructuresByParentAndServerVersion("3734,001", 1542640316l)).thenReturn(expected);
+		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316")
+				.param(LocationResource.PARENT_ID, "3734,001")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByParentAndServerVersion("3734,001", 1542640316l);
+		verifyNoMoreInteractions(locationService);
+
+		jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+
+
+
+
 	}
 
 	@SuppressWarnings("unchecked")
