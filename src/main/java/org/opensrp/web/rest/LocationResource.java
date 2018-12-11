@@ -70,7 +70,7 @@ public class LocationResource {
 	public ResponseEntity<String> getLocations(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
-			@RequestParam(value = PARENT_ID, required = false) String parentId) {
+			@RequestParam(value = PARENT_ID, required = false) String parentIds) {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -86,12 +86,12 @@ public class LocationResource {
 				return new ResponseEntity<>(gson.toJson(locationService.findLocationsByNames(locationNames,currentServerVersion)), HttpStatus.OK);
 
 			} else {
-				if (StringUtils.isBlank(parentId)) {
+				if (StringUtils.isBlank(parentIds)) {
 					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 				}
 				return new ResponseEntity<>(
 						gson.toJson(
-								locationService.findStructuresByParentAndServerVersion(parentId, currentServerVersion)),
+								locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
 						HttpStatus.OK);
 			}
 		} catch (Exception e) {
