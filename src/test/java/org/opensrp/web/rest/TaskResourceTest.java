@@ -19,6 +19,7 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +32,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
+import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -59,6 +61,7 @@ public class TaskResourceTest {
 	private TaskService taskService;
 
 	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"campaignIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionStartDate\":\"2018-11-10T2200\",\"executionEndDate\":null,\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879}";
+	private String taskUpdateJson = "{\"businessStatus\": \"Not Sprayed\", \"identifier\": \"tsk11231jh22\", \"status\": \"completed\" }";
 
 	private String BASE_URL = "/rest/task/";
 
@@ -66,6 +69,8 @@ public class TaskResourceTest {
 
 	@Captor
 	private ArgumentCaptor<List<Task>> listArgumentCaptor;
+	@Captor
+	private ArgumentCaptor<List<TaskUpdate>> taskUpdatelistArguments;
 
 	@Before
 	public void setUp() {
@@ -236,6 +241,20 @@ public class TaskResourceTest {
 
 	private Task getTask() {
 		return TaskResource.gson.fromJson(taskJson, Task.class);
+	}
+	private TaskUpdate getTaskUpdates() {
+		return new Gson().fromJson(taskUpdateJson, TaskUpdate.class);
+	}
+
+	@Test
+	public void testupdateStatus() throws Exception {
+		List<TaskUpdate> taskUpdates = new ArrayList<>();
+		taskUpdates.add(getTaskUpdates());
+		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON).body(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
+
+		verify(taskService).updateTaskStatus(taskUpdatelistArguments.capture());
+		verifyNoMoreInteractions(taskService);
+		assertEquals(1, taskUpdatelistArguments.getValue().size());
 	}
 
 }

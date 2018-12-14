@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
+import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
 import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
@@ -133,6 +134,29 @@ public class TaskResource {
 						HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid task representation" + entity);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@RequestMapping(value = "/update_status", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> updateStatus(@RequestBody String entity) {
+		try {
+			Type listType = new TypeToken<List<TaskUpdate>>() {
+			}.getType();
+			List<TaskUpdate> taskUpdates = gson.fromJson(entity, listType);
+			Set<String> tasksUpdatedErrors = taskService.updateTaskStatus (taskUpdates);
+			if (tasksUpdatedErrors.isEmpty()) {
+				return new ResponseEntity<>("All tasks updated", HttpStatus.CREATED);
+			}
+			else {
+				return new ResponseEntity<>("Tasks with identifiers not Updated: " + String.join(",", tasksUpdatedErrors), HttpStatus.CREATED);
+			}
+		} catch (JsonSyntaxException e) {
+			logger.error("The request doesnt contain a valid task update representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
