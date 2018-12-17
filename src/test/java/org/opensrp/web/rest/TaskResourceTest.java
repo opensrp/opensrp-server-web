@@ -247,7 +247,7 @@ public class TaskResourceTest {
 	}
 
 	@Test
-	public void testupdateStatus() throws Exception {
+	public void testUpdateStatus() throws Exception {
 		List<TaskUpdate> taskUpdates = new ArrayList<>();
 		taskUpdates.add(getTaskUpdates());
 		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON).body(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
