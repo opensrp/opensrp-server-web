@@ -152,10 +152,10 @@ public class TaskResource {
 			Type listType = new TypeToken<List<TaskUpdate>>() {
 			}.getType();
 			List<TaskUpdate> taskUpdates = gson.fromJson(entity, listType);
-			JSONArray tasksUpdatedErrors = taskService.updateTaskStatus (taskUpdates);
-			if (tasksUpdatedErrors.length()>0) {
+			List updateTasks= taskService.updateTaskStatus (taskUpdates);
+			if (updateTasks.size()>0) {
 				JSONObject json = new JSONObject();
-				json.put("task_ids", tasksUpdatedErrors);
+				json.put("task_ids", updateTasks);
 				return new ResponseEntity<>(json.toString(), HttpStatus.CREATED);
 			}
 			else {
