@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -249,12 +250,19 @@ public class TaskResourceTest {
 	@Test
 	public void testUpdateStatus() throws Exception {
 		List<TaskUpdate> taskUpdates = new ArrayList<>();
-		taskUpdates.add(getTaskUpdates());
-		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON).body(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
+		List<String> ids = new ArrayList<>();
+		TaskUpdate taskUpdate = getTaskUpdates();
+		taskUpdate.setServerVersion(System.currentTimeMillis());
+		ids.add(taskUpdate.getIdentifier());
+		taskUpdates.add(taskUpdate);
 
+		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON).body(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
 		verify(taskService).updateTaskStatus(taskUpdatelistArguments.capture());
+
 		verifyNoMoreInteractions(taskService);
 		assertEquals(1, taskUpdatelistArguments.getValue().size());
+		assertEquals(taskUpdate.getIdentifier(), taskUpdatelistArguments.getValue().get(0).getIdentifier());
+		assertEquals(ids.get(0),taskUpdatelistArguments.getValue().get(0).getIdentifier());
 	}
 
 }
