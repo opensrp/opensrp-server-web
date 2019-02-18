@@ -24,7 +24,7 @@
 		<jackson.version>1.9.7</jackson.version>
 		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-
+    
 		<opensrp.core.version>1.1.1-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>1.0.2-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>

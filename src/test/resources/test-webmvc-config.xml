@@ -17,6 +17,7 @@
 	<bean class="org.opensrp.web.rest.shadow.CampaignResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.TaskResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.LocationResourseShadow" />
+	<bean class="org.opensrp.web.rest.shadow.SettingResourceShadow" />
 
 
 </beans>
