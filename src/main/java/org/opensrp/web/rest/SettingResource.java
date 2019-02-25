@@ -4,17 +4,15 @@ import static java.text.MessageFormat.format;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.postgres.SettingsMetadata;
-import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
@@ -51,14 +49,32 @@ public class SettingResource {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/sync")
 	@ResponseBody
-	public List<SettingConfiguration> findSettingsByVersion(HttpServletRequest request) {
-		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-		String teamId = getStringFilter(TEAM_ID, request);
-		Long lastSyncedServerVersion = null;
-		if (serverVersion != null) {
-			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+	public ResponseEntity<JSONObject> findSettingsByVersion(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		try {
+			
+			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+			String teamId = getStringFilter(TEAM_ID, request);
+			
+			if (TextUtils.isBlank(teamId) || TextUtils.isBlank(serverVersion)) {
+				return new ResponseEntity<JSONObject>(response, HttpStatus.BAD_REQUEST);
+			}
+			
+			Long lastSyncedServerVersion = null;
+			if (serverVersion != null) {
+				lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+			}
+			
+			response.put("settings", settingService.findLatestSettingsByVersionAndTeamId(lastSyncedServerVersion, teamId));
+			
 		}
-		return settingService.findLatestSettingsByVersionAndTeamId(lastSyncedServerVersion, teamId);
+		catch (Exception e) {
+			logger.error(format("Sync data processing failed with exception {0}.- ", e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
+		
 	}
 	
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/sync")
