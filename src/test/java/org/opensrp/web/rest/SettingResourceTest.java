@@ -46,6 +46,7 @@ public class SettingResourceTest {
 	
 	private String settingJson = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
 	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
+            + "    \"documentId\": \"document-id\",\n"
 	        + "    \"locationId\": \"\",\n" + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
 	        + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n" + "    \"serverVersion\": 1,\n"
 	        + "    \"settings\": [\n" + "        {\n" + "            \"key\": \"site_ipv_assess\",\n"
@@ -105,7 +106,7 @@ public class SettingResourceTest {
 	@Test
 	public void testSaveSetting() throws Exception {
 		settingService.saveSetting(settingJson);
-		verify(settingRepository, times(1)).getSettingMetadataByIdentifierAndTeamId("site_characteristics", "my-team-id");
+		verify(settingRepository, times(1)).getSettingMetadataByDocumentId("document-id");
 		
 		verify(settingRepository, times(1)).saveSetting(settingConfigurationArgumentCaptor.capture(),
 		    settingMetadataArgumentCaptor.capture());

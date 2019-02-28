@@ -4,6 +4,8 @@ import static java.text.MessageFormat.format;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.util.TextUtils;
@@ -13,11 +15,13 @@ import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.postgres.SettingsMetadata;
+import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,6 +32,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/settings")
@@ -48,38 +54,44 @@ public class SettingResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/sync")
-	@ResponseBody
-	public ResponseEntity<JSONObject> findSettingsByVersion(HttpServletRequest request) {
+	public @ResponseBody ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
+		
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		try {
 			
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String teamId = getStringFilter(TEAM_ID, request);
 			
 			if (TextUtils.isBlank(teamId) || TextUtils.isBlank(serverVersion)) {
-				return new ResponseEntity<JSONObject>(response, HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
 			
-			Long lastSyncedServerVersion = null;
-			if (serverVersion != null) {
-				lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
-			}
+			Long lastSyncedServerVersion = serverVersion != null ? Long.valueOf(serverVersion) + 1 : 0;
 			
-			response.put("settings", settingService.findLatestSettingsByVersionAndTeamId(lastSyncedServerVersion, teamId));
+			List<SettingConfiguration> SettingConfigurations = settingService
+			        .findLatestSettingsByVersionAndTeamId(lastSyncedServerVersion, teamId);
+			
+			JsonArray settingConfigurationsArray = (JsonArray) gson.toJsonTree(SettingConfigurations,
+			    new TypeToken<List<SettingConfiguration>>() {}.getType());
+			
+			return new ResponseEntity<>(new JSONArray(settingConfigurationsArray.toString()).toString(), responseHeaders,
+			        HttpStatus.OK);
 			
 		}
 		catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
-		return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
 		
 	}
 	
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/sync")
-	public ResponseEntity<JSONObject> saveSetting(@RequestBody String data) {
+	public ResponseEntity<String> saveSetting(@RequestBody String data) {
 		JSONObject response = new JSONObject();
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		
 		try {
 			JSONObject syncData = new JSONObject(data);
@@ -100,7 +112,7 @@ public class SettingResource {
 					
 				}
 				
-				response.append("validated_records", dbSettingsArray);
+				response.put("validated_records", dbSettingsArray);
 				
 			}
 			
@@ -111,6 +123,6 @@ public class SettingResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.OK);
 	}
 }
