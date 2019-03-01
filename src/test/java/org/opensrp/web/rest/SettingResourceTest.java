@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.opensrp.domain.postgres.SettingsMetadata;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
+import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -46,10 +47,10 @@ public class SettingResourceTest {
 	
 	private String settingJson = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
 	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
-            + "    \"documentId\": \"document-id\",\n"
-	        + "    \"locationId\": \"\",\n" + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
-	        + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n" + "    \"serverVersion\": 1,\n"
-	        + "    \"settings\": [\n" + "        {\n" + "            \"key\": \"site_ipv_assess\",\n"
+	        + "    \"documentId\": \"document-id\",\n" + "    \"locationId\": \"\",\n" + "    \"providerId\": \"\",\n"
+	        + "    \"teamId\": \"my-team-id\",\n" + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n"
+	        + "    \"serverVersion\": 1,\n" + "    \"settings\": [\n" + "        {\n"
+	        + "            \"key\": \"site_ipv_assess\",\n"
 	        + "            \"label\": \"Minimum requirements for IPV assessment\",\n" + "            \"value\": null,\n"
 	        + "            \"description\": \"Are all of the following in place at your facility: \\r\\n\\ta. A protocol or standard operating procedure for Intimate Partner Violence (IPV); \\r\\n\\tb. A health worker trained on how to ask about IPV and how to provide the minimum response or beyond;\\r\\n\\tc. A private setting; \\r\\n\\td. A way to ensure confidentiality; \\r\\n\\te. Time to allow for appropriate disclosure; and\\r\\n\\tf. A system for referral in place. \"\n"
 	        + "        },\n" + "        {\n" + "            \"key\": \"site_anc_hiv\",\n"
@@ -87,18 +88,16 @@ public class SettingResourceTest {
 	}
 	
 	@Test
-	public void testFindLatestSettingsByVersionAndTeamId() throws Exception {
-		settingService.findLatestSettingsByVersionAndTeamId(1000L, "my-team-id");
-		verify(settingRepository, times(1)).findAllLatestSettingsByVersion(1000L, "my-team-id");
-		verifyNoMoreInteractions(settingRepository);
-		
-	}
-	
-	@Test
 	public void testFindSettingsByVersionAndTeamId() throws Exception {
+		SettingSearchBean sQB = new SettingSearchBean();
+		sQB.setTeamId("my-team-id");
+		sQB.setTeam(null);
+		sQB.setLocationId(null);
+		sQB.setProviderId(null);
+		sQB.setServerVersion(1000L);
 		
-		settingService.findSettingsByVersionAndTeamId(1000L, "my-team-id");
-		verify(settingRepository, times(1)).findAllSettingsByVersion(1000L, "my-team-id");
+		settingService.findSettings(sQB);
+		verify(settingRepository, times(1)).findSettings(sQB);
 		verifyNoMoreInteractions(settingRepository);
 		
 	}
@@ -108,8 +107,16 @@ public class SettingResourceTest {
 		settingService.saveSetting(settingJson);
 		verify(settingRepository, times(1)).getSettingMetadataByDocumentId("document-id");
 		
-		verify(settingRepository, times(1)).saveSetting(settingConfigurationArgumentCaptor.capture(),
-		    settingMetadataArgumentCaptor.capture());
+		verify(settingRepository, times(1)).add(settingConfigurationArgumentCaptor.capture());
+		verifyNoMoreInteractions(settingRepository);
+	}
+	
+	@Test
+	public void testUpdateSetting() throws Exception {
+		settingService.saveSetting(settingJson);
+		verify(settingRepository, times(1)).getSettingMetadataByDocumentId("document-id");
+		
+		verify(settingRepository, times(1)).update(settingConfigurationArgumentCaptor.capture());
 		verifyNoMoreInteractions(settingRepository);
 	}
 	

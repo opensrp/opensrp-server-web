@@ -1,6 +1,9 @@
 package org.opensrp.web.rest;
 
 import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -14,8 +17,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.postgres.SettingsMetadata;
 import org.opensrp.domain.setting.SettingConfiguration;
+import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
@@ -62,16 +65,26 @@ public class SettingResource {
 		try {
 			
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+			String providerId = getStringFilter(PROVIDER_ID, request);
+			String locationId = getStringFilter(LOCATION_ID, request);
+			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
 			
-			if (TextUtils.isBlank(teamId) || TextUtils.isBlank(serverVersion)) {
+			if ((TextUtils.isBlank(team) && TextUtils.isBlank(providerId) && TextUtils.isBlank(locationId)
+			        && TextUtils.isBlank(teamId) && TextUtils.isBlank(teamId)) || TextUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
 			
 			Long lastSyncedServerVersion = serverVersion != null ? Long.valueOf(serverVersion) + 1 : 0;
 			
-			List<SettingConfiguration> SettingConfigurations = settingService
-			        .findLatestSettingsByVersionAndTeamId(lastSyncedServerVersion, teamId);
+			SettingSearchBean settingQueryBean = new SettingSearchBean();
+			settingQueryBean.setTeam(team);
+			settingQueryBean.setTeamId(teamId);
+			settingQueryBean.setProviderId(providerId);
+			settingQueryBean.setLocationId(locationId);
+			settingQueryBean.setServerVersion(lastSyncedServerVersion);
+			
+			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
 			
 			JsonArray settingConfigurationsArray = (JsonArray) gson.toJsonTree(SettingConfigurations,
 			    new TypeToken<List<SettingConfiguration>>() {}.getType());
@@ -103,12 +116,9 @@ public class SettingResource {
 				JSONArray clientSettings = syncData.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
 				JSONArray dbSettingsArray = new JSONArray();
 				
-				SettingsMetadata dbSettingMetadata = null;
-				
 				for (int i = 0; i < clientSettings.length(); i++) {
 					
-					dbSettingMetadata = settingService.saveSetting(clientSettings.getString(i).toString());
-					dbSettingsArray.put(dbSettingMetadata.getIdentifier());
+					dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
 					
 				}
 				
