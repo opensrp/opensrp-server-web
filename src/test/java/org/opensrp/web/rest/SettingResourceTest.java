@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.common.AllConstants.Event;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
@@ -25,6 +30,9 @@ import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.server.MockMvc;
+import org.springframework.test.web.server.MvcResult;
+import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.google.gson.Gson;
@@ -44,6 +52,8 @@ public class SettingResourceTest {
 	
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+	
+	private String BASE_URL = "/rest/settings/";
 	
 	private String settingJson = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
 	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
@@ -88,6 +98,8 @@ public class SettingResourceTest {
 	private ArgumentCaptor<SettingConfiguration> settingConfigurationArgumentCaptor = ArgumentCaptor
 	        .forClass(SettingConfiguration.class);
 	
+	private MockMvc mockMvc;
+	
 	@Before
 	public void setUp() {
 		settingService = Mockito.spy(new SettingService());
@@ -102,6 +114,30 @@ public class SettingResourceTest {
 		settingConfiguration.setIdentifier("site_characteristics");
 		settingConfiguration.setTeamId("my-team-id");
 		listSettingConfigurations.add(settingConfiguration);
+		
+		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+	}
+	
+	@Test
+	public void testGetByUniqueId() throws Exception {
+		SettingSearchBean settingQueryBean = new SettingSearchBean();
+		settingQueryBean.setTeamId("my-team-id");
+		
+		List<SettingConfiguration> settingConfig = new ArrayList<>();
+		
+		SettingConfiguration config = new SettingConfiguration();
+		settingConfig.add(config);
+		settingQueryBean.setServerVersion(0L);
+		when(settingService.findSettings(settingQueryBean)).thenReturn(settingConfig);
+		
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+		        .param(Event.TEAM_ID, "my-team-id").param(Event.PROVIDER_ID, "demo")).andExpect(status().isOk()).andReturn();
+		
+		verify(settingService, times(1)).findSettings(settingQueryBean);
+		
+		//verifyNoMoreInteractions(settingService);
+		assertEquals(new ArrayList<>().toString(), result.getResponse().getContentAsString());
+		
 	}
 	
 	@Test
