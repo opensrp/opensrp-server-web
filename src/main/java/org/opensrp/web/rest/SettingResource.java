@@ -44,7 +44,7 @@ public class SettingResource {
 	
 	private SettingService settingService;
 	
-	private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+	private static Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 	
 	private String TEAM_ID = "teamId";
 	

@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.opensrp.domain.postgres.SettingsMetadata;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
@@ -64,12 +63,29 @@ public class SettingResourceTest {
 	        + "            \"description\": \"Does your facility use an automated blood pressure (BP) measurement tool?\"\n"
 	        + "        }\n" + "    ]\n" + "}";
 	
+	private String settingJsonUpdate = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
+	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
+	        + "    \"documentId\": \"document-id\",\n" + "    \"id\": \"document-id\",\n" + "    \"locationId\": \"\",\n"
+	        + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
+	        + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n" + "    \"serverVersion\": 1,\n"
+	        + "    \"settings\": [\n" + "        {\n" + "            \"key\": \"site_ipv_assess\",\n"
+	        + "            \"label\": \"Minimum requirements for IPV assessment\",\n" + "            \"value\": null,\n"
+	        + "            \"description\": \"Are all of the following in place at your facility: \\r\\n\\ta. A protocol or standard operating procedure for Intimate Partner Violence (IPV); \\r\\n\\tb. A health worker trained on how to ask about IPV and how to provide the minimum response or beyond;\\r\\n\\tc. A private setting; \\r\\n\\td. A way to ensure confidentiality; \\r\\n\\te. Time to allow for appropriate disclosure; and\\r\\n\\tf. A system for referral in place. \"\n"
+	        + "        },\n" + "        {\n" + "            \"key\": \"site_anc_hiv\",\n"
+	        + "            \"label\": \"Generalized HIV epidemic\",\n" + "            \"value\": null,\n"
+	        + "            \"description\": \"Is the HIV prevalence consistently > 1% in pregnant women attending antenatal clinics at your facility?\"\n"
+	        + "        },\n" + "        {\n" + "            \"key\": \"site_ultrasound\",\n"
+	        + "            \"label\": \"Ultrasound available\",\n" + "            \"value\": null,\n"
+	        + "            \"description\": \"Is an ultrasound machine available and functional at your facility and a trained health worker available to use it?\"\n"
+	        + "        },\n" + "        {\n" + "            \"key\": \"site_bp_tool\",\n"
+	        + "            \"label\": \"Automated BP measurement tool\",\n" + "            \"value\": null,\n"
+	        + "            \"description\": \"Does your facility use an automated blood pressure (BP) measurement tool?\"\n"
+	        + "        }\n" + "    ]\n" + "}";
+	
 	private List<SettingConfiguration> listSettingConfigurations;
 	
 	private ArgumentCaptor<SettingConfiguration> settingConfigurationArgumentCaptor = ArgumentCaptor
 	        .forClass(SettingConfiguration.class);
-	
-	private ArgumentCaptor<SettingsMetadata> settingMetadataArgumentCaptor = ArgumentCaptor.forClass(SettingsMetadata.class);
 	
 	@Before
 	public void setUp() {
@@ -105,7 +121,6 @@ public class SettingResourceTest {
 	@Test
 	public void testSaveSetting() throws Exception {
 		settingService.saveSetting(settingJson);
-		verify(settingRepository, times(1)).getSettingMetadataByDocumentId("document-id");
 		
 		verify(settingRepository, times(1)).add(settingConfigurationArgumentCaptor.capture());
 		verifyNoMoreInteractions(settingRepository);
@@ -113,8 +128,7 @@ public class SettingResourceTest {
 	
 	@Test
 	public void testUpdateSetting() throws Exception {
-		settingService.saveSetting(settingJson);
-		verify(settingRepository, times(1)).getSettingMetadataByDocumentId("document-id");
+		settingService.saveSetting(settingJsonUpdate);
 		
 		verify(settingRepository, times(1)).update(settingConfigurationArgumentCaptor.capture());
 		verifyNoMoreInteractions(settingRepository);
