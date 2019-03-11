@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
@@ -65,8 +66,8 @@ public class SettingResourceTest {
 	
 	private String settingJsonUpdate = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
 	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
-	        + "    \"documentId\": \"document-id\",\n" + "    \"id\": \"document-id\",\n" + "    \"locationId\": \"\",\n"
-	        + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
+	        + "    \"documentId\": \"settings-document-id-2\",\n" + "    \"id\": \"settings-document-id-2\",\n"
+	        + "    \"locationId\": \"\",\n" + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
 	        + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n" + "    \"serverVersion\": 1,\n"
 	        + "    \"settings\": [\n" + "        {\n" + "            \"key\": \"site_ipv_assess\",\n"
 	        + "            \"label\": \"Minimum requirements for IPV assessment\",\n" + "            \"value\": null,\n"
@@ -120,6 +121,7 @@ public class SettingResourceTest {
 	
 	@Test
 	public void testSaveSetting() throws Exception {
+		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
 		
 		verify(settingRepository, times(1)).add(settingConfigurationArgumentCaptor.capture());
@@ -128,8 +130,13 @@ public class SettingResourceTest {
 	
 	@Test
 	public void testUpdateSetting() throws Exception {
+		String documentId = "settings-document-id-2";
+		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(new SettingConfiguration());
+		Mockito.doNothing().when(settingRepository).update(Matchers.any(SettingConfiguration.class));
+		
 		settingService.saveSetting(settingJsonUpdate);
 		
+		verify(settingRepository, times(1)).get(documentId);
 		verify(settingRepository, times(1)).update(settingConfigurationArgumentCaptor.capture());
 		verifyNoMoreInteractions(settingRepository);
 	}
