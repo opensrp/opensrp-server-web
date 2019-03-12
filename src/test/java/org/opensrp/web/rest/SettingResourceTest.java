@@ -2,10 +2,6 @@ package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
@@ -128,14 +124,14 @@ public class SettingResourceTest {
 		SettingConfiguration config = new SettingConfiguration();
 		settingConfig.add(config);
 		settingQueryBean.setServerVersion(0L);
-		when(settingService.findSettings(settingQueryBean)).thenReturn(settingConfig);
+		Mockito.when(settingService.findSettings(settingQueryBean)).thenReturn(settingConfig);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
 		        .param(Event.TEAM_ID, "my-team-id").param(Event.PROVIDER_ID, "demo")).andExpect(status().isOk()).andReturn();
 		
-		verify(settingService, times(1)).findSettings(settingQueryBean);
+		Mockito.verify(settingService, Mockito.times(1)).findSettings(settingQueryBean);
 		
-		//verifyNoMoreInteractions(settingService);
+		//Mockito.verifyNoMoreInteractions(settingService);
 		assertEquals(new ArrayList<>().toString(), result.getResponse().getContentAsString());
 		
 	}
@@ -150,8 +146,8 @@ public class SettingResourceTest {
 		sQB.setServerVersion(1000L);
 		
 		settingService.findSettings(sQB);
-		verify(settingRepository, times(1)).findSettings(sQB);
-		verifyNoMoreInteractions(settingRepository);
+		Mockito.verify(settingRepository, Mockito.times(1)).findSettings(sQB);
+		Mockito.verifyNoMoreInteractions(settingRepository);
 		
 	}
 	
@@ -160,8 +156,8 @@ public class SettingResourceTest {
 		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
 		
-		verify(settingRepository, times(1)).add(settingConfigurationArgumentCaptor.capture());
-		verifyNoMoreInteractions(settingRepository);
+		Mockito.verify(settingRepository, Mockito.times(1)).add(settingConfigurationArgumentCaptor.capture());
+		Mockito.verifyNoMoreInteractions(settingRepository);
 	}
 	
 	@Test
@@ -172,17 +168,17 @@ public class SettingResourceTest {
 		
 		settingService.saveSetting(settingJsonUpdate);
 		
-		verify(settingRepository, times(1)).get(documentId);
-		verify(settingRepository, times(1)).update(settingConfigurationArgumentCaptor.capture());
-		verifyNoMoreInteractions(settingRepository);
+		Mockito.verify(settingRepository, Mockito.times(1)).get(documentId);
+		Mockito.verify(settingRepository, Mockito.times(1)).update(settingConfigurationArgumentCaptor.capture());
+		Mockito.verifyNoMoreInteractions(settingRepository);
 	}
 	
 	@Test
 	public void testAddServerVersion() throws Exception {
 		
 		settingService.addServerVersion();
-		verify(settingRepository, times(1)).findByEmptyServerVersion();
-		verifyNoMoreInteractions(settingRepository);
+		Mockito.verify(settingRepository, Mockito.times(1)).findByEmptyServerVersion();
+		Mockito.verifyNoMoreInteractions(settingRepository);
 	}
 	
 	@Test
