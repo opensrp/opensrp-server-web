@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	<!--//////// Configuration for combined Resource & Authorization Server 
+		//////// -->
+
+
+	<!--//// Resource server //// -->
+
+	<!-- The OAuth2 protected resources are separated out into their own block 
+		so we can deal with authorization and error handling separately. This isn't 
+		mandatory, but it makes it easier to control the behaviour. -->
+	<sec:http pattern="/photos/**" create-session="never"
+		entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager">
+
+		<sec:anonymous enabled="false" />
+		<sec:intercept-url pattern="/photos"
+			access="ROLE_TRUSTED_CLIENT,SCOPE_READ" />
+		<sec:intercept-url pattern="/photos/trusted/**"
+			access="ROLE_TRUSTED_CLIENT,SCOPE_TRUST" />
+		<sec:intercept-url pattern="/photos/user/**"
+			access="ROLE_TRUSTED_CLIENT,SCOPE_TRUST" />
+		<sec:intercept-url pattern="/photos/**"
+			access="ROLE_TRUSTED_CLIENT,SCOPE_READ" />
+		<sec:custom-filter ref="resourceServerFilter"
+			before="PRE_AUTH_FILTER" />
+		<sec:access-denied-handler
+			ref="oauthAccessDeniedHandler" />
+	</sec:http>
+
+
+
+	<!--//// Authorization Server //// -->
+
+	<!-- Just for testing... -->
+	<sec:http pattern="/oauth/cache_approvals" security="none" />
+	<sec:http pattern="/oauth/uncache_approvals" security="none" />
+
+	<sec:http pattern="/oauth/token" create-session="stateless"
+		authentication-manager-ref="clientAuthenticationManager"
+		entry-point-ref="oauthAuthenticationEntryPoint">
+
+		<sec:intercept-url pattern="/oauth/token"
+			access="IS_AUTHENTICATED_FULLY" />
+		<sec:anonymous enabled="false" />
+		<sec:http-basic
+			entry-point-ref="oauthAuthenticationEntryPoint" />
+		<!-- include this only if you need to authenticate clients via request 
+			parameters -->
+		<sec:custom-filter
+			ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER" />
+		<sec:access-denied-handler
+			ref="oauthAccessDeniedHandler" />
+	</sec:http>
+
+	<!-- The OAuth2 protected resources are separated out into their own block 
+		so we can deal with authorization and error handling separately. This isn't 
+		mandatory, but it makes it easier to control the behaviour. -->
+	<sec:http pattern="/oauth/(users|clients)/.*"
+		request-matcher="regex" create-session="stateless"
+		entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true">
+
+		<sec:anonymous enabled="false" />
+
+		<sec:intercept-url
+			pattern="/oauth/users/([^/].*?)/tokens/.*"
+			access="#oauth2.clientHasRole('ROLE_TRUSTED_CLIENT') and (hasRole('ROLE_OPENMRS') or #oauth2.isClient()) and #oauth2.hasScope('write')"
+			method="DELETE" />
+
+		<sec:intercept-url pattern="/oauth/users/.*"
+			access="#oauth2.clientHasRole('ROLE_TRUSTED_CLIENT') and (hasRole('ROLE_OPENMRS') or #oauth2.isClient()) and #oauth2.hasScope('read')"
+			method="GET" />
+
+		<sec:intercept-url pattern="/oauth/clients/.*"
+			access="#oauth2.clientHasRole('ROLE_TRUSTED_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')"
+			method="GET" />
+
+		<sec:custom-filter ref="resourceServerFilter"
+			before="PRE_AUTH_FILTER" />
+		<sec:access-denied-handler
+			ref="oauthAccessDeniedHandler" />
+		<sec:expression-handler
+			ref="oauthWebExpressionHandler" />
+	</sec:http>
+
+
+	<bean id="clientCredentialsTokenEndpointFilter"
+		class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+		<property name="authenticationManager"
+			ref="clientAuthenticationManager" />
+	</bean>
+
+	<sec:authentication-manager
+		id="clientAuthenticationManager">
+		<sec:authentication-provider
+			user-service-ref="clientDetailsUserService" />
+	</sec:authentication-manager>
+
+	<bean id="clientDetailsUserService"
+		class="org.opensrp.web.security.OpenSRPClientDetailsUserDetailsService">
+		<constructor-arg ref="clientDetails" />
+	</bean>
+
+
+	<oauth:authorization-server
+		client-details-service-ref="clientDetails"
+		token-services-ref="tokenServices">
+		<oauth:authorization-code />
+		<oauth:implicit />
+		<oauth:refresh-token />
+		<oauth:client-credentials />
+		<oauth:password />
+	</oauth:authorization-server>
+
+	<oauth:client-details-service
+		id="clientDetails">
+		<oauth:client client-id="opensrp-trusted-client"
+			authorized-grant-types="password,authorization_code,refresh_token,implicit"
+			authorities="ROLE_TRUSTED_CLIENT"
+			scope="read,write,trust" access-token-validity="60" />
+
+		<oauth:client
+			client-id="opensrp-trusted-client-with-secret"
+			authorized-grant-types="password,authorization_code,refresh_token,implicit"
+			secret="somesecret" authorities="ROLE_TRUSTED_CLIENT" />
+
+
+	</oauth:client-details-service>
+
+
+	<bean id="tokenServices"
+		class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore" ref="tokenStore" />
+		<property name="supportRefreshToken" value="true" />
+		<property name="clientDetailsService" ref="clientDetails" />
+	</bean>
+
+	<bean id="tokenStore"
+		class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+
+</beans>

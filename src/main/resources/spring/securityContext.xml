@@ -25,4 +25,7 @@
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
 
+	<import resource="oauth-common.xml" />
+	<import resource="oauth-authorization-local.xml" />
+
 </beans>
