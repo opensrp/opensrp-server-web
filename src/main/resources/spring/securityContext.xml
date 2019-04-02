@@ -7,17 +7,6 @@
           http://www.springframework.org/schema/security
           http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
-    <security:http auto-config="true" realm="OpenSRP" create-session="stateless">
-        <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <security:intercept-url pattern="/multimedia/profileimage/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <security:intercept-url pattern="/user-details" access="IS_AUTHENTICATED_ANONYMOUSLY"/>        
-        <security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
-        <security:http-basic/>
-    </security:http>
-
     <bean id="shaPasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
     <bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider"/>
 
@@ -27,5 +16,16 @@
 
 	<import resource="oauth-common.xml" />
 	<import resource="oauth-authorization-local.xml" />
+	
+	<security:http auto-config="true" realm="OpenSRP" create-session="stateless">
+        <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/multimedia/profileimage/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/user-details" access="IS_AUTHENTICATED_ANONYMOUSLY"/>        
+        <security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
+        <security:http-basic/>
+    </security:http>
 
 </beans>
