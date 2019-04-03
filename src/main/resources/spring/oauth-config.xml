@@ -138,14 +138,10 @@
 	<oauth:client-details-service
 		id="clientDetails">
 		<oauth:client client-id="opensrp-trusted-client"
-			authorized-grant-types="password,authorization_code,refresh_token"
+			authorized-grant-types="password,authorization_code,implicit"
 			authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT"
 			scope="read,write,trust" secret="S0M3S3crET"
-			access-token-validity="60" />
-
-		<oauth:client client-id="opensrp-less-trusted-client"
-			authorized-grant-types="authorization_code,implicit"
-			authorities="ROLE_CLIENT" scope="read" />
+			access-token-validity="300" />
 
 	</oauth:client-details-service>
 
