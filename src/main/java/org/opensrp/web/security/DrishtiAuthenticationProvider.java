@@ -67,7 +67,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	}
 	
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {	
 		String userAddress = ((WebAuthenticationDetails) authentication.getDetails()).getRemoteAddress();
 		String key = userAddress + authentication.getName();
 		if (hashOps.hasKey(key, AUTH_HASH_KEY)) {
@@ -103,7 +103,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 		        && authentication.equals(UsernamePasswordAuthenticationToken.class);
 	}
 	
-	private List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
+	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
 		return Lambda.convert(user.getRoles(), new Converter<String, SimpleGrantedAuthority>() {
 			
 			@Override

@@ -14,10 +14,12 @@
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
 
-	<import resource="oauth-common.xml" />
-	<import resource="oauth-authorization-local.xml" />
+	<!-- <import resource="oauth-common.xml" />
+	<import resource="oauth-authorization-local.xml" /> -->
 	
-	<security:http auto-config="true" realm="OpenSRP" create-session="stateless">
+	<import resource="oauth-config.xml" />
+	
+	<!-- <security:http auto-config="true" realm="OpenSRP" create-session="stateless">
         <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
@@ -26,6 +28,6 @@
         <security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
         <security:http-basic/>
-    </security:http>
+    </security:http> -->
 
 </beans>
