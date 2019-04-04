@@ -14,7 +14,7 @@
 
 	<!--//////// Resource server //////// -->
 
-	<sec:http
+	<sec:http pattern="login**"
 		access-denied-page="/login.jsp?authorization_error=true"
 		disable-url-rewriting="true">
 		<sec:intercept-url pattern="/oauth/**"
@@ -76,11 +76,11 @@
 	<!--//////// Common beans for Resource and Authorization server //////// -->
 
 	<oauth:resource-server id="resourceServerFilter"
-		resource-id="sparklr" token-services-ref="tokenServices" />
+		resource-id="OpenSRP2" token-services-ref="tokenServices" />
 
 	<bean id="oauthAuthenticationEntryPoint"
 		class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
-		<property name="realmName" value="openSRP" />
+		<property name="realmName" value="OpenSRP" />
 	</bean>
 
 	<bean id="oauthAccessDeniedHandler"
