@@ -13,8 +13,6 @@
 		access-denied-page="/login.jsp?authorization_error=true"
 		disable-url-rewriting="true"
 		authentication-manager-ref="userAuthenticationManager">
-		<sec:intercept-url pattern="/oauth/**"
-			access="IS_AUTHENTICATED_FULLY" />
 
 		<sec:form-login
 			authentication-failure-url="/login.jsp?authentication_error=true"
@@ -29,7 +27,7 @@
 
 	<sec:http pattern="/oauth/token" create-session="stateless"
 		authentication-manager-ref="authenticationManager">
-		<sec:intercept-url pattern="/oauth/token"
+		<sec:intercept-url pattern="/oauth/**"
 			access="IS_AUTHENTICATED_FULLY" />
 		<sec:anonymous enabled="false" />
 		<sec:http-basic
@@ -52,7 +50,7 @@
 			ref="oauthAccessDeniedHandler" />
 	</sec:http>
 
-	<sec:http auto-config="true" create-session="never"
+	<sec:http create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint">
 		<sec:intercept-url pattern="/index.html"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" />
@@ -83,11 +81,12 @@
 
 	<bean id="oauthAuthenticationEntryPoint"
 		class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="OpenSRP" />
 	</bean>
 
 	<bean id="clientAuthenticationEntryPoint"
 		class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
-		<property name="realmName" value="OpenSRP" />
+		<property name="realmName" value="OpenSRP/client" />
 		<property name="typeName" value="Basic" />
 	</bean>
 
@@ -112,23 +111,27 @@
 		<constructor-arg ref="clientDetails" />
 	</bean>
 
-	<!-- <bean id="clientDetails" class="org.opensrp.web.security.ClientDetailsServiceImpl" 
-		/> -->
-
 	<sec:authentication-manager
 		id="userAuthenticationManager">
 		<sec:authentication-provider
-			ref="customUserAuthenticationProvider">
+			ref="userAuthenticationProvider">
 		</sec:authentication-provider>
 	</sec:authentication-manager>
 
-	<bean id="customUserAuthenticationProvider"
+	<bean id="userAuthenticationProvider"
 		class="org.opensrp.web.security.OauthAuthenticationProvider">
 	</bean>
 
+	<bean id="userApprovalHandler"
+		class="org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler">
+		<property name="tokenServices" ref="tokenServices" />
+	</bean>
+
+
 	<oauth:authorization-server
 		client-details-service-ref="clientDetails"
-		token-services-ref="tokenServices">
+		token-services-ref="tokenServices"
+		user-approval-handler-ref="userApprovalHandler">
 		<oauth:authorization-code />
 		<oauth:implicit />
 		<oauth:refresh-token />
@@ -138,7 +141,7 @@
 	</oauth:authorization-server>
 
 	<oauth:resource-server id="resourceServerFilter"
-		resource-id="springsec" token-services-ref="tokenServices" />
+		resource-id="OpenSRP" token-services-ref="tokenServices" />
 
 	<bean id="tokenStore"
 		class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
@@ -151,6 +154,8 @@
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
 
+	<oauth:resource-server id="resourceServerFilter"
+		resource-id="OpenSRP" token-services-ref="tokenServices" />
 
 	<oauth:client-details-service
 		id="clientDetails">
@@ -161,5 +166,21 @@
 			access-token-validity="300" />
 
 	</oauth:client-details-service>
+
+
+	<sec:global-method-security
+		pre-post-annotations="enabled" proxy-target-class="true">
+		<!--you could also wire in the expression handler up at the layer of the 
+			http filters. See https://jira.springsource.org/browse/SEC-1452 -->
+		<sec:expression-handler
+			ref="oauthExpressionHandler" />
+	</sec:global-method-security>
+
+	<oauth:expression-handler
+		id="oauthExpressionHandler" />
+
+	<oauth:web-expression-handler
+		id="oauthWebExpressionHandler" />
+
 
 </beans>

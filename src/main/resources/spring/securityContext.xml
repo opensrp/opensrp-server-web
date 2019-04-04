@@ -10,13 +10,13 @@
     <bean id="shaPasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
     <bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider"/>
 
-    <security:authentication-manager>
+    <security:authentication-manager id="opensrpAuthenticationManager">
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
-	
-	<import resource="oauth-config.xml" />
-	
-	<!-- <security:http auto-config="true" realm="OpenSRP" create-session="stateless">
+    
+    <import resource="oauth-config.xml" />
+    
+   <!--  <security:http auto-config="true" realm="OpenSRP" create-session="stateless" authentication-manager-ref="opensrpAuthenticationManager">
         <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
