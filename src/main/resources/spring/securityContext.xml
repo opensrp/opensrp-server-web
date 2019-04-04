@@ -13,8 +13,9 @@
     <security:authentication-manager id="opensrpAuthenticationManager">
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
-    
-    <import resource="oauth-config.xml" />
+   
+   <import resource="oauth-authorization.xml" />
+   <import resource="oauth-common.xml" />
     
    <!--  <security:http auto-config="true" realm="OpenSRP" create-session="stateless" authentication-manager-ref="opensrpAuthenticationManager">
         <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
