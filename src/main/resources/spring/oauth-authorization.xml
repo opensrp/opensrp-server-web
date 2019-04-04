@@ -18,12 +18,13 @@
 		entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager">
 		<sec:anonymous enabled="false" />
-		<sec:intercept-url pattern="/**"
+		<sec:intercept-url pattern="/rest/**"
 			access="ROLE_OPENMRS" />
 		<sec:custom-filter ref="resourceServerFilter"
 			before="PRE_AUTH_FILTER" />
 		<sec:access-denied-handler
 			ref="oauthAccessDeniedHandler" />
+		<sec:http-basic />
 	</sec:http>
 
 	<!--//// Authorization Server //// -->
@@ -93,7 +94,7 @@
 
 	<bean id="tokenStore"
 		class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
-			
+
 
 	<!--Override the default mappings for approval and error pages -->
 	<bean id="accessConfirmationController"

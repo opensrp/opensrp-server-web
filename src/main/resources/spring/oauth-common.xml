@@ -14,13 +14,9 @@
 
 	<!--//////// Resource server //////// -->
 
-	<sec:http pattern="login**"
+	<sec:http
 		access-denied-page="/login.jsp?authorization_error=true"
 		disable-url-rewriting="true">
-		<sec:intercept-url pattern="/oauth/**"
-			access="ROLE_OPENMRS" />
-		<sec:intercept-url pattern="/**"
-			access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<sec:intercept-url pattern="/index.html"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<sec:intercept-url pattern="/"
@@ -35,6 +31,13 @@
 		<sec:intercept-url
 			pattern="/rest/viewconfiguration/**"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url
+			pattern="/login**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/oauth/**"
+			access="ROLE_OPENMRS" />
+		<sec:intercept-url pattern="/**"
+			access="ROLE_OPENMRS" />
 
 		<sec:form-login
 			authentication-failure-url="/login.jsp?authentication_error=true"
