@@ -78,10 +78,11 @@
 
 	<oauth:client-details-service
 		id="clientDetails">
-		<oauth:client client-id="opensrp-trusted-client"
-			authorized-grant-types="password,authorization_code,refresh_token,implicit"
-			authorities="ROLE_CLIENT" secret="secret" scope="read,write,trust"
-			access-token-validity="300" />
+		<oauth:client client-id="${ouath.default.client.id}"
+			authorized-grant-types="${ouath.default.grant.types}"
+			authorities="ROLE_CLIENT" secret="${ouath.default.secret}"
+			scope="${ouath.default.scope}"
+			access-token-validity="${ouath.default.token.validity}" />
 
 	</oauth:client-details-service>
 
