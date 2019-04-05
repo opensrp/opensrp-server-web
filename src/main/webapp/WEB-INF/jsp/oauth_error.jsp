@@ -1,4 +1,4 @@
-<%@page contentType="application/xhtml+xml" pageEncoding="UTF-8"%>
+<%@ page contentType="application/xhtml+xml; charset=UTF-8" pageEncoding="UTF-8" %>                    
 <%@ include file="/WEB-INF/jspf/taglibs.jspf" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 

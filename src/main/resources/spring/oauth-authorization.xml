@@ -78,7 +78,7 @@
 
 	<oauth:client-details-service
 		id="clientDetails">
-		<oauth:client client-id="my-trusted-client"
+		<oauth:client client-id="opensrp-trusted-client"
 			authorized-grant-types="password,authorization_code,refresh_token,implicit"
 			authorities="ROLE_CLIENT" secret="secret" scope="read,write,trust"
 			access-token-validity="300" />
