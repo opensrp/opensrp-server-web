@@ -14,7 +14,7 @@
     <c:if test="${not empty param.authorization_error}">
         <h1>Error!!</h1>
 
-        <p class="error">You are not permitted to access that resource.</p>
+        <p styleclass="error">You are not permitted to access that resource.</p>
     </c:if>
 
 
