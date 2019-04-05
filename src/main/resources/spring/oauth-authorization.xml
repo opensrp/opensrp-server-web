@@ -93,8 +93,9 @@
 	</bean>
 
 	<bean id="tokenStore"
-		class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
-
+		class="org.springframework.security.oauth2.provider.token.JdbcTokenStore">
+		<constructor-arg ref="openSRPDataSource" />
+	</bean>
 
 	<!--Override the default mappings for approval and error pages -->
 	<bean id="accessConfirmationController"
