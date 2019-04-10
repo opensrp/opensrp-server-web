@@ -78,11 +78,11 @@
 
 	<oauth:client-details-service
 		id="clientDetails">
-		<oauth:client client-id="${ouath.default.client.id}"
-			authorized-grant-types="${ouath.default.grant.types}"
-			authorities="ROLE_CLIENT" secret="${ouath.default.secret}"
-			scope="${ouath.default.scope}"
-			access-token-validity="${ouath.default.token.validity}" />
+		<oauth:client client-id="${oauth.default.client.id}"
+			authorized-grant-types="${oauth.default.grant.types}"
+			authorities="ROLE_CLIENT" secret="${oauth.default.secret}"
+			scope="${oauth.default.scope}"
+			access-token-validity="${oauth.default.token.validity}" />
 
 	</oauth:client-details-service>
 
