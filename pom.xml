@@ -549,6 +549,31 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>oauth2</id>
+			<activation>
+				<property>
+					<name>opensrp.auth.type</name>
+					<value>oauth2</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.security.profile>oauth2</opensrp.security.profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>basic_auth</id>
+			<activation>
+			<activeByDefault>true</activeByDefault>
+				<property>
+					<name>opensrp.auth.type</name>
+					<value>basic_auth</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.security.profile>basic_auth</opensrp.security.profile>
+			</properties>
+		</profile>
+		<profile>
 			<id>jedis</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
