@@ -69,11 +69,14 @@
 		class="org.opensrp.web.security.OauthAuthenticationProvider">
 	</bean>
 	
+	<bean id="accessConfirmationController" class="org.opensrp.web.security.AccessConfirmationController"/>
+
 	<sec:authentication-manager
 		alias="authenticationManager">
 		<sec:authentication-provider
 			ref="userAuthenticationProvider" />
 	</sec:authentication-manager>
+
 
 
 	<!--//////// Common beans for Resource and Authorization server //////// -->
