@@ -48,6 +48,7 @@
 			logout-success-url="/index.index" />
 
 		<sec:anonymous />
+		<sec:http-basic />
 	</sec:http>
 
 	<bean id="accessDecisionManager"
@@ -67,13 +68,12 @@
 	<bean id="userAuthenticationProvider"
 		class="org.opensrp.web.security.OauthAuthenticationProvider">
 	</bean>
-
+	
 	<sec:authentication-manager
 		alias="authenticationManager">
 		<sec:authentication-provider
 			ref="userAuthenticationProvider" />
 	</sec:authentication-manager>
-
 
 
 	<!--//////// Common beans for Resource and Authorization server //////// -->
