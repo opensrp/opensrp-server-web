@@ -20,6 +20,8 @@
 		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>3.1.1.RELEASE</spring.version>
+		<spring.security.version>3.1.2.RELEASE</spring.security.version>
+		<spring.security.oauth.version>1.0.5.RELEASE</spring.security.oauth.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<jackson.version>1.9.7</jackson.version>
@@ -222,6 +224,7 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-test-mvc -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -267,13 +270,27 @@
 			<artifactId>spring-data-redis</artifactId>
 			<version>1.3.6.RELEASE</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>1.5.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>commons-codec</groupId>
+		    <artifactId>commons-codec</artifactId>
+		    <version>1.9</version>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-taglibs</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+		 <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>${spring.security.oauth.version}</version>
+         </dependency>
 	</dependencies>
 
 	<build>
@@ -529,6 +546,31 @@
 			</activation>
 			<properties>
 				<opensrp.database.profile>postgres</opensrp.database.profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>oauth2</id>
+			<activation>
+				<property>
+					<name>opensrp.auth.type</name>
+					<value>oauth2</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.security.profile>oauth2</opensrp.security.profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>basic_auth</id>
+			<activation>
+			<activeByDefault>true</activeByDefault>
+				<property>
+					<name>opensrp.auth.type</name>
+					<value>basic_auth</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.security.profile>basic_auth</opensrp.security.profile>
 			</properties>
 		</profile>
 		<profile>

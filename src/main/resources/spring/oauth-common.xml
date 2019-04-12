@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+       http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+
+	<!--//////// Resource server //////// -->
+
+	<sec:http
+		access-denied-page="/login.jsp?authorization_error=true"
+		disable-url-rewriting="true">
+		<sec:intercept-url pattern="/index.html"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/multimedia/download/**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url
+			pattern="/multimedia/profileimage/**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/user-details"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url
+			pattern="/rest/viewconfiguration/**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url
+			pattern="/login**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/oauth/**"
+			access="ROLE_OPENMRS" />
+		<sec:intercept-url pattern="/**"
+			access="ROLE_OPENMRS" />
+
+		<sec:form-login
+			authentication-failure-url="/login.jsp?authentication_error=true"
+			default-target-url="/index.html" login-page="/login.jsp"
+			login-processing-url="/login.do" />
+
+		<sec:logout logout-url="/logout.do"
+			logout-success-url="/index.index" />
+
+		<sec:anonymous />
+		<sec:http-basic />
+	</sec:http>
+
+	<bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.UnanimousBased">
+		<constructor-arg>
+			<list>
+				<bean
+					class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+				<bean
+					class="org.springframework.security.access.vote.RoleVoter" />
+				<bean
+					class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="userAuthenticationProvider"
+		class="org.opensrp.web.security.OauthAuthenticationProvider">
+	</bean>
+	
+	<bean id="accessConfirmationController" class="org.opensrp.web.security.AccessConfirmationController"/>
+
+	<sec:authentication-manager
+		alias="authenticationManager">
+		<sec:authentication-provider
+			ref="userAuthenticationProvider" />
+	</sec:authentication-manager>
+
+
+
+	<!--//////// Common beans for Resource and Authorization server //////// -->
+
+	<oauth:resource-server id="resourceServerFilter"
+		resource-id="OpenSRP2" token-services-ref="tokenServices" />
+
+	<bean id="oauthAuthenticationEntryPoint"
+		class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="OpenSRP" />
+	</bean>
+
+	<bean id="oauthAccessDeniedHandler"
+		class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+
+
+	<sec:global-method-security
+		pre-post-annotations="enabled" proxy-target-class="true">
+		<!--you could also wire in the expression handler up at the layer of the 
+			http filters. See https://jira.springsource.org/browse/SEC-1452 -->
+		<sec:expression-handler
+			ref="oauthExpressionHandler" />
+	</sec:global-method-security>
+
+	<oauth:expression-handler
+		id="oauthExpressionHandler" />
+	<oauth:web-expression-handler
+		id="oauthWebExpressionHandler" />
+
+</beans>
