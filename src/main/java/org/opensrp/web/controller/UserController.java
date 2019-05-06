@@ -1,8 +1,17 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.nio.charset.Charset;
+import java.security.Principal;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +24,8 @@ import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,18 +39,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.mysql.jdbc.StringUtils;
 
 @Controller
 public class UserController {
+
+	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 
 	@Value("#{opensrp['opensrp.site.url']}")
 	private String opensrpSiteUrl;
@@ -54,7 +61,8 @@ public class UserController {
 	protected String OPENMRS_VERSION;
 
 	@Autowired
-	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService, DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
+	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService,
+			DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
 		this.openmrsLocationService = openmrsLocationService;
 		this.openmrsUserService = openmrsUserService;
 		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
@@ -93,10 +101,28 @@ public class UserController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
-	public ResponseEntity<UserDetail> userDetail(@RequestParam("anm-id") String anmIdentifier, HttpServletRequest request) {
-		Authentication a = getAuthenticationAdvisor(request);
-		User user = opensrpAuthenticationProvider.getDrishtiUser(a, anmIdentifier);
-		return new ResponseEntity<>(new UserDetail(user.getUsername(), user.getRoles()), allowOrigin(opensrpSiteUrl), OK);
+	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
+			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request) {
+		if (authentication == null) {
+			authentication = getAuthenticationAdvisor(request);
+		}
+		if (authentication != null) {
+			User user;
+			try {
+				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? authentication.getName()
+						: anmIdentifier;
+				user = openmrsUserService.getUser(userName);
+				return new ResponseEntity<>(new UserDetail(user.getUsername(), user.getRoles()),
+						allowOrigin(opensrpSiteUrl), OK);
+			} catch (JSONException e) {
+				logger.error("Error getting user details", e);
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+
+		} else {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
 	}
 
 	@RequestMapping("/security/authenticate")
@@ -113,8 +139,7 @@ public class UserController {
 			for (int i = 0; i < locs.length(); i++) {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.out.println("USER Location info not mapped in team management module. Now trying Person Attribute");
 		}
 		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
@@ -122,7 +147,8 @@ public class UserController {
 			if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
 				lid = (String) u.getAttribute("Locations");
 				if (lid == null) {
-					throw new RuntimeException("User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
+					throw new RuntimeException(
+							"User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
 				}
 
 			}
@@ -135,8 +161,7 @@ public class UserController {
 
 			}.getType());
 			map.put("team", tmap);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		map.put("locations", l);
