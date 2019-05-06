@@ -41,7 +41,7 @@ public class PlanResource {
 
     private PlanService planService;
 
-    private final String OPERATIONAL_AREA_ID = "operational_area_id";
+    public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 
     @Autowired
     public void setPlanService(PlanService planService) {
@@ -77,7 +77,7 @@ public class PlanResource {
             planService.addPlan(plan);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
-            logger.error("The request doesnt contain a valid plan representation" + entity);
+            logger.error("The request doesn't contain a valid plan representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -93,7 +93,7 @@ public class PlanResource {
             planService.updatePlan(plan);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
-            logger.error("The request doesnt contain a valid plan representation" + entity);
+            logger.error("The request doesn't contain a valid plan representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
