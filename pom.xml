@@ -31,6 +31,7 @@
 		<opensrp.core.version>1.1.2-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>1.0.2-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
+		<opensrp.common.version>1.0.2-SNAPSHOT</opensrp.common.version>
 
 	</properties>
 
@@ -169,6 +170,11 @@
 			<groupId>org.smartregister</groupId>
 			<artifactId>opensrp-server-connector</artifactId>
 			<version>${opensrp.connector.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.smartregister</groupId>
+			<artifactId>opensrp-server-common</artifactId>
+			<version>${opensrp.common.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

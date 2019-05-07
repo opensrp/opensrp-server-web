@@ -114,8 +114,9 @@ public class UserController {
 				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
 						: anmIdentifier;
 				user = openmrsUserService.getUser(userName);
-				return new ResponseEntity<>(new UserDetail(user.getUsername(), user.getRoles()),
-						allowOrigin(opensrpSiteUrl), OK);
+				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
+				userDetail.setPreferredName(user.getPreferredName());
+				return new ResponseEntity<>(userDetail, allowOrigin(opensrpSiteUrl), OK);
 			} catch (JSONException e) {
 				logger.error("Error getting user details", e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
