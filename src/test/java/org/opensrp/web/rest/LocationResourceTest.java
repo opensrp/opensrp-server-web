@@ -2,11 +2,15 @@ package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -16,7 +20,9 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.json.JSONArray;
 import org.junit.Before;
@@ -31,6 +37,7 @@ import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
+import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -144,19 +151,20 @@ public class LocationResourceTest {
 	@Test
 	public void testsSyncLocationsByNames() throws Exception {
 
-		String locationNames="01_5";
+		String locationNames = "01_5";
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-				.param(LocationResource.IS_JURISDICTION, "true")
-				.param(LocationResource.LOCATION_NAMES, locationNames)).andExpect(status().isOk()).andReturn();
-		verify(locationService).findLocationsByNames(locationNames,0l);
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
 
 		JSONArray jsonResponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonResponse.length());
-		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(), PhysicalLocation.class);
+		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(),
+				PhysicalLocation.class);
 
 		assertEquals("01_5", location.getProperties().getName());
 		assertEquals("Feature", location.getType());
@@ -164,14 +172,14 @@ public class LocationResourceTest {
 		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
 
 //		search with more than one name
-		locationNames="01_5,other_location_name";
+		locationNames = "01_5,other_location_name";
 		expected = new ArrayList<>();
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
 		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-				.param(LocationResource.IS_JURISDICTION, "true")
-				.param(LocationResource.LOCATION_NAMES, locationNames)).andExpect(status().isOk()).andReturn();
-		verify(locationService).findLocationsByNames(locationNames,0l);
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
 
 		jsonResponse = new JSONArray(result.getResponse().getContentAsString());
@@ -237,10 +245,6 @@ public class LocationResourceTest {
 		jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
-
-
-
-
 
 	}
 
@@ -404,6 +408,45 @@ public class LocationResourceTest {
 
 		verify(locationService).saveLocations(anyList(), anyBoolean());
 		verifyNoMoreInteractions(locationService);
+
+	}
+
+	@Test
+	public void testGetStructuresWithinCordinatesWithoutAllParamsReturns400() throws Exception {
+		Collection<StructureDetails> expectedDetails = new ArrayList<>();
+		StructureDetails structure = new StructureDetails(UUID.randomUUID().toString(), "3221", "Mosquito Point");
+		expectedDetails.add(structure);
+		double latitude = -14.1619809;
+		double longitude = 32.5978597;
+		when(locationService.findStructuresWithinRadius(latitude, longitude, 100)).thenReturn(expectedDetails);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "findWithCordinates").param(LocationResource.LATITUDE, latitude + "")
+						.param(LocationResource.LONGITUDE, longitude + "").body(structureJson.getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		verify(locationService, never()).findStructuresWithinRadius(latitude, longitude, 100);
+		assertNotNull(result);
+		assertTrue(result.getResponse().getContentAsString().isEmpty());
+
+	}
+
+	@Test
+	public void testGetStructuresWithinCordinates() throws Exception {
+		Collection<StructureDetails> expectedDetails = new ArrayList<>();
+		StructureDetails structure = new StructureDetails(UUID.randomUUID().toString(), "3221", "Mosquito Point");
+		expectedDetails.add(structure);
+		double latitude = -14.1619809;
+		double longitude = 32.5978597;
+		double radius = 100;
+		when(locationService.findStructuresWithinRadius(latitude, longitude, radius)).thenReturn(expectedDetails);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findWithCordinates").param(LocationResource.LATITUDE, latitude + "")
+						.param(LocationResource.LONGITUDE, longitude + "").param(LocationResource.RADIUS, radius + ""))
+				.andExpect(status().isOk()).andReturn();
+		assertEquals(LocationResource.gson.toJson(expectedDetails), result.getResponse().getContentAsString());
+		verify(locationService).findStructuresWithinRadius(latitude, longitude, radius);
 
 	}
 
