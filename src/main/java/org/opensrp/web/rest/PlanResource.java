@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -52,7 +53,9 @@ public class PlanResource {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier) {
         try {
-            return new ResponseEntity<>(gson.toJson(planService.getPlan(identifier)), HttpStatus.OK);
+            String result = gson.toJson(planService.getPlan(identifier));
+            result = result.equals("null") ? new JsonObject().toString() : result;
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
