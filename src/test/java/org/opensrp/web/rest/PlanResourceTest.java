@@ -28,6 +28,89 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     private final static String BASE_URL = "/rest/plans/";
 
+    private final String plansJson = "{\n" +
+            "  \"identifier\": \"plan_1\",\n" +
+            "  \"version\": \"\",\n" +
+            "  \"name\": \"\",\n" +
+            "  \"title\": \"\",\n" +
+            "  \"status\": \"\",\n" +
+            "  \"date\": \"2019-04-10\",\n" +
+            "  \"effectivePeriod\": {\n" +
+            "    \"start\": \"2019-04-10\",\n" +
+            "    \"end\": \"2019-04-10\"\n" +
+            "  },\n" +
+            "  \"useContext\": [\n" +
+            "    {\n" +
+            "      \"code\": \"\",\n" +
+            "      \"valueCodableConcept\": \"\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"code\": \"\",\n" +
+            "      \"valueCodableConcept\": \"\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"jurisdiction\": [\n" +
+            "    {\n" +
+            "      \"code\": \"operational_area_1\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"goal\": [\n" +
+            "    {\n" +
+            "      \"id\": \"\",\n" +
+            "      \"description\": \"\",\n" +
+            "      \"priority\": 1,\n" +
+            "      \"target\": [\n" +
+            "        {\n" +
+            "          \"measure\": \"\",\n" +
+            "          \"detail\": {\n" +
+            "            \"detailQuantity\": {\n" +
+            "              \"value\": 8,\n" +
+            "              \"comparator\": \"\",\n" +
+            "              \"unit\": \"\"\n" +
+            "            },\n" +
+            "            \"detailRange\": {\n" +
+            "              \"high\": {\n" +
+            "                \"value\": 0.2,\n" +
+            "                \"comparator\": \"\",\n" +
+            "                \"unit\": \"\"\n" +
+            "              },\n" +
+            "              \"low\": {\n" +
+            "                \"value\": 0.2,\n" +
+            "                \"comparator\": \"\",\n" +
+            "                \"unit\": \"\"\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"detailCodableConcept\": {\n" +
+            "              \"text\": \"\"\n" +
+            "            }\n" +
+            "          },\n" +
+            "          \"due\": \"2019-04-10\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"action\": [\n" +
+            "    {\n" +
+            "      \"identifier\": \"\",\n" +
+            "      \"prefix\": 1,\n" +
+            "      \"title\": \"\",\n" +
+            "      \"description\": \"\",\n" +
+            "      \"code\": \"\",\n" +
+            "      \"timingPeriod\": {\n" +
+            "        \"start\": \"2019-04-10\",\n" +
+            "        \"end\": \"2019-04-10\"\n" +
+            "      },\n" +
+            "      \"reason\": \"\",\n" +
+            "      \"goalId\": \"\",\n" +
+            "      \"subjectCodableConcept\": {\n" +
+            "        \"text\": \"\"\n" +
+            "      },\n" +
+            "      \"taskTemplate\": \"\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"serverVersion\": 0\n" +
+            "}";
+
     @Autowired
     private PlanRepository repository;
 
@@ -99,14 +182,13 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     public void testCreateShouldCreateNewPlanResource() throws Exception {
         List<Jurisdiction> operationalAreas = new ArrayList<>();
         Jurisdiction operationalArea = new Jurisdiction();
-        operationalArea.setCode("operational_area");
+        operationalArea.setCode("operational_area_1");
         operationalAreas.add(operationalArea);
 
         PlanDefinition expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>(){}.getType());
         postRequestWithJsonContent(BASE_URL, plansJson, MockMvcResultMatchers.status().isCreated());
 
         PlanDefinition actualPlan = repository.get("plan_1");
