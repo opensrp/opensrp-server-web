@@ -4,7 +4,6 @@ import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.nio.charset.Charset;
-import java.security.Principal;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,13 +102,16 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
 			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request) {
+		Authentication auth;
 		if (authentication == null) {
-			authentication = getAuthenticationAdvisor(request);
+			auth = getAuthenticationAdvisor(request);
+		} else {
+			auth = authentication;
 		}
-		if (authentication != null) {
+		if (auth != null) {
 			User user;
 			try {
-				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? authentication.getName()
+				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
 						: anmIdentifier;
 				user = openmrsUserService.getUser(userName);
 				return new ResponseEntity<>(new UserDetail(user.getUsername(), user.getRoles()),
@@ -147,7 +149,7 @@ public class UserController {
 			if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
 				lid = (String) u.getAttribute("Locations");
 				if (lid == null) {
-					throw new RuntimeException(
+					throw new IllegalStateException(
 							"User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
 				}
 
