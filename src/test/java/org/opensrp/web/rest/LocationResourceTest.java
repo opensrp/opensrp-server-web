@@ -67,9 +67,6 @@ public class LocationResourceTest {
 	@Captor
 	private ArgumentCaptor<PhysicalLocation> argumentCaptor;
 
-	@Captor
-	private ArgumentCaptor<Double> numberArgumentCaptor;
-
 	private MockMvc mockMvc;
 
 	@Mock
