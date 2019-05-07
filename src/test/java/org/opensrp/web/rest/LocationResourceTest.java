@@ -2,11 +2,15 @@ package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -62,6 +66,9 @@ public class LocationResourceTest {
 
 	@Captor
 	private ArgumentCaptor<PhysicalLocation> argumentCaptor;
+
+	@Captor
+	private ArgumentCaptor<Double> numberArgumentCaptor;
 
 	private MockMvc mockMvc;
 
@@ -416,9 +423,14 @@ public class LocationResourceTest {
 		double longitude = 32.5978597;
 		when(locationService.findStructuresWithinRadius(latitude, longitude, 100)).thenReturn(expectedDetails);
 
-		mockMvc.perform(get(BASE_URL + "findWithCordinates").param(LocationResource.LATITUDE, latitude + "")
-				.param(LocationResource.LONGITUDE, longitude + "").body(structureJson.getBytes()))
-				.andExpect(status().isBadRequest());
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "findWithCordinates").param(LocationResource.LATITUDE, latitude + "")
+						.param(LocationResource.LONGITUDE, longitude + "").body(structureJson.getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		verify(locationService, never()).findStructuresWithinRadius(latitude, longitude, 100);
+		assertNotNull(result);
+		assertTrue(result.getResponse().getContentAsString().isEmpty());
 
 	}
 
