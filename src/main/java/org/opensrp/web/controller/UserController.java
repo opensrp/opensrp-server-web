@@ -179,4 +179,13 @@ public class UserController {
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
 		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpSiteUrl), OK);
 	}
+
+	public void setOpenmrsUserService(OpenmrsUserService openmrsUserService) {
+		this.openmrsUserService = openmrsUserService;
+	}
+
+	public void setOpensrpAuthenticationProvider(DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
+		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
+	}
+
 }
