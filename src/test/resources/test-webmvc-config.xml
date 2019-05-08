@@ -18,6 +18,7 @@
 	<bean class="org.opensrp.web.rest.shadow.TaskResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.LocationResourseShadow" />
 	<bean class="org.opensrp.web.rest.shadow.SettingResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.UserControllerShadow" />
 
 
 </beans>
