@@ -26,6 +26,19 @@
 			ref="oauthAccessDeniedHandler" />
 		<sec:http-basic />
 	</sec:http>
+	
+	<sec:http pattern="/user-details" create-session="never"
+		entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager">
+		<sec:anonymous enabled="false" />
+		<sec:intercept-url pattern="/rest/**"
+			access="ROLE_OPENMRS" />
+		<sec:custom-filter ref="resourceServerFilter"
+			before="PRE_AUTH_FILTER" />
+		<sec:access-denied-handler
+			ref="oauthAccessDeniedHandler" />
+		<sec:http-basic />
+	</sec:http>
 
 	<!--//// Authorization Server //// -->
 
