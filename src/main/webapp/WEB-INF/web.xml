@@ -56,6 +56,11 @@
         <filter-name>GZipFilter</filter-name>
         <filter-class>org.opensrp.web.GZipCompressionFilter</filter-class>
     </filter>
+    
+     <filter>
+        <filter-name>CORSFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
 
     <filter-mapping>
         <filter-name>AuthenticationFilter</filter-name>
@@ -79,6 +84,11 @@
     
     <filter-mapping>
         <filter-name>GZipFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+     <filter-mapping>
+        <filter-name>CORSFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

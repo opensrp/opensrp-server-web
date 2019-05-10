@@ -18,7 +18,7 @@
 	<bean class="org.opensrp.web.rest.shadow.LocationResourseShadow" />
 	<bean class="org.opensrp.web.rest.shadow.SettingResourceShadow" />
 	<bean class="org.opensrp.web.rest.PlanResource" />
-
+	<bean class="org.opensrp.web.rest.shadow.UserControllerShadow" />
 
 	<context:property-placeholder
 			location="classpath:maven.properties,classpath:activemq.properties,classpath:opensrp.properties" />

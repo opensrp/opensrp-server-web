@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.PhysicalLocation;
+import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
@@ -43,10 +45,15 @@ public class LocationResource {
 
 	private static final String FALSE = "false";
 
-	private PhysicalLocationService locationService;
-
 	public static final String LOCATION_NAMES = "location_names";
 
+	public static final String LATITUDE = "latitude";
+
+	public static final String LONGITUDE = "longitude";
+
+	public static final String RADIUS = "radius";
+
+	private PhysicalLocationService locationService;
 
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
@@ -80,18 +87,21 @@ public class LocationResource {
 
 		try {
 			if (isJurisdiction) {
-				if(StringUtils.isBlank(locationNames)) {
-					return new ResponseEntity<>(gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)), HttpStatus.OK);
+				if (StringUtils.isBlank(locationNames)) {
+					return new ResponseEntity<>(
+							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
+							HttpStatus.OK);
 				}
-				return new ResponseEntity<>(gson.toJson(locationService.findLocationsByNames(locationNames,currentServerVersion)), HttpStatus.OK);
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+						HttpStatus.OK);
 
 			} else {
 				if (StringUtils.isBlank(parentIds)) {
 					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 				}
-				return new ResponseEntity<>(
-						gson.toJson(
-								locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
+				return new ResponseEntity<>(gson.toJson(
+						locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
 						HttpStatus.OK);
 			}
 		} catch (Exception e) {
@@ -158,6 +168,23 @@ public class LocationResource {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@RequestMapping(value = "/findWithCordinates", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getStructuresWithinCordinates(@RequestParam(value = LATITUDE) double latitude,
+			@RequestParam(value = LONGITUDE) double longitude, @RequestParam(value = RADIUS) double radius) {
+
+		try {
+			Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
+					radius);
+			return new ResponseEntity<>(gson.toJson(structures), HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 }
