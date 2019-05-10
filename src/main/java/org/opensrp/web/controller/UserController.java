@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -102,8 +101,7 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
-			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request,
-			HttpServletResponse response) {
+			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request) {
 		Authentication auth;
 		if (authentication == null) {
 			auth = getAuthenticationAdvisor(request);
