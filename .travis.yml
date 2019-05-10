@@ -1,5 +1,29 @@
 language: java
 sudo: required
+services:
+  - couchdb
+  - mysql
+install:
+  - echo "skip" # or anything that returns 0 status.
+  - sudo updatedb #Giving couchdb time to start.
+  - sudo netstat -tuplen # listing all the port for debug purpose.
+before_script:
+  - curl -X PUT http://localhost:5984/_config/admins/rootuser -d '"adminpass"'
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('VA1913wm') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - sudo /etc/init.d/postgresql stop
+  - chmod +x configs/assets/migrations/install_postgres.sh
+  - sudo ./configs/assets/migrations/install_postgres.sh
+  - sudo cp /etc/postgresql/{9.6,10}/main/pg_hba.conf
+  - sudo -u postgres /usr/lib/postgresql/10/bin/pg_ctl -D /var/lib/postgresql/10/main restart
+  - sudo netstat -tuplen # listing all the port for debug purpose.
+  - psql -p 5433 -c "CREATE ROLE opensrp_admin WITH LOGIN SUPERUSER PASSWORD 'admin';" -U postgres
+  - psql -p 5433 -c "CREATE DATABASE opensrp_test WITH OWNER = opensrp_admin;" -U postgres
+  - psql -p 5433 -c "create extension postgis" -U postgres -d opensrp_test
+  - chmod +x configs/assets/migrations/run_mybatis_migrations.sh
+  - sudo ./configs/assets/migrations/run_mybatis_migrations.sh
+  - sudo mkdir -p /opt/multimedia
+  - sudo chown -R travis:travis /opt/multimedia
+
 script:
   - javac -version
   - java -version
