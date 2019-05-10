@@ -37,33 +37,13 @@ public abstract class BaseResourceTest<T> {
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
-    @Autowired
-    @Qualifier("openSRPDataSource")
-    private DataSource opensrpDataSource;
-
     protected MockMvc mockMvc;
 
     protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 
-    protected static List<String> tableNames = new ArrayList<>();
-
     @Before
     public void bootStrap() {
         this.mockMvc = MockMvcBuilders.webApplicationContextSetup(this.webApplicationContext).build();
-    }
-
-    protected void truncateTables() {
-        Connection connection = null;
-        try {
-            for (String tableName : tableNames) {
-                connection = DataSourceUtils.getConnection(opensrpDataSource);
-                Statement statement = connection.createStatement();
-                statement.executeUpdate("TRUNCATE " + tableName);
-                connection.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {

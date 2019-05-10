@@ -2,16 +2,15 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
-import org.opensrp.repository.PlanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
-import sun.jvm.hotspot.utilities.AssertionFailure;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +19,8 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 
 /**
@@ -28,6 +29,8 @@ import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     private final static String BASE_URL = "/rest/plans/";
+
+    private PlanService planService;
 
     private final String plansJson = "{\n" +
             "  \"identifier\": \"plan_1\",\n" +
@@ -112,23 +115,26 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
             "  \"serverVersion\": 0\n" +
             "}";
 
-    @Autowired
-    private PlanRepository repository;
+    private ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
+
+    private Class<ArrayList<String>> listClass =
+            (Class<ArrayList<String>>)(Class)ArrayList.class;
+
+    @Captor
+    private ArgumentCaptor<ArrayList<String>> listArgumentCaptor = ArgumentCaptor.forClass(listClass);
+
+    @Captor
+    private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
     @Before
     public void setUp() {
-        tableNames.add("core.plan");
-        tableNames.add("core.plan_metadata");
-        truncateTables();
-    }
-
-    @After
-    public void tearDown() {
-        truncateTables();
+        planService = mock(PlanService.class);
+        PlanResource planResource = webApplicationContext.getBean(PlanResource.class);
+        planResource.setPlanService(planService);
     }
 
     @Test
-    public void testGetPlanshouldReturnAllPlans() throws Exception {
+    public void testGetPlansShouldReturnAllPlans() throws Exception {
         List<PlanDefinition> expectedPlans = new ArrayList<>();
 
         List<Jurisdiction> operationalAreas = new ArrayList<>();
@@ -140,15 +146,15 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        repository.add(expectedPlan);
         expectedPlans.add(expectedPlan);
 
         expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_2");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        repository.add(expectedPlan);
         expectedPlans.add(expectedPlan);
+
+        doReturn(expectedPlans).when(planService).getAllPlans();
 
         String actualPlansString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
@@ -169,7 +175,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        repository.add(expectedPlan);
+        doReturn(expectedPlan).when(planService).getPlan(eq("plan_1"));
         expectedPlans.add(expectedPlan);
 
         String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, MockMvcResultMatchers.status().isOk());
@@ -181,6 +187,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testCreateShouldCreateNewPlanResource() throws Exception {
+        doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class));
         List<Jurisdiction> operationalAreas = new ArrayList<>();
         Jurisdiction operationalArea = new Jurisdiction();
         operationalArea.setCode("operational_area_1");
@@ -192,10 +199,8 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         postRequestWithJsonContent(BASE_URL, plansJson, MockMvcResultMatchers.status().isCreated());
 
-        PlanDefinition actualPlan = repository.get("plan_1");
-
-        assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
-        assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
+        verify(planService).addPlan(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
@@ -209,8 +214,6 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        repository.add(expectedPlan);
-
         expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_1");
         operationalArea = new Jurisdiction();
@@ -222,10 +225,8 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>(){}.getType());
         putRequestWithJsonContent(BASE_URL, plansJson, MockMvcResultMatchers.status().isCreated());
 
-        PlanDefinition actualPlan = repository.get("plan_1");
-
-        assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
-        assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
+        verify(planService).updatePlan(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
@@ -241,14 +242,12 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
         expectedPlan.setServerVersion(1l);
-        repository.add(expectedPlan);
         expectedPlans.add(expectedPlan);
 
         expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_2");
         expectedPlan.setJurisdiction(operationalAreas);
         expectedPlan.setServerVersion(0l);
-        repository.add(expectedPlan);
 
         expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_3");
@@ -258,13 +257,16 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         operationalAreas.add(operationalArea);
         expectedPlan.setJurisdiction(operationalAreas);
         expectedPlan.setServerVersion(1l);
-        repository.add(expectedPlan);
         expectedPlans.add(expectedPlan);
+
+        doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
         String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", MockMvcResultMatchers.status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
-        assertListsAreSameIgnoringOrder(actualPlans, expectedPlans);
+        verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
+        assertEquals(longArgumentCaptor.getValue().longValue(), 1);
+        assertEquals(listArgumentCaptor.getValue().get(0), "operational_area" );
     }
 
     @Override
