@@ -3,8 +3,6 @@ package org.opensrp.web.rest;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
@@ -45,7 +42,7 @@ public class TaskResource {
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 			.serializeNulls().create();
 
-	public static final String CAMPAIGN = "campaign";
+	public static final String PLAN = "plan";
 
 	public static final String GROUP = "group";
 
@@ -68,8 +65,8 @@ public class TaskResource {
 	}
 
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getTasksByCampaignAndGroup(HttpServletRequest request) {
-		String campaign = getStringFilter(CAMPAIGN, request);
+	public ResponseEntity<String> getTasksByTaskAndGroup(HttpServletRequest request) {
+		String plan = getStringFilter(PLAN, request);
 		String group = getStringFilter(GROUP, request);
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		long currentServerVersion = 0;
@@ -78,12 +75,11 @@ public class TaskResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (StringUtils.isBlank(campaign) || StringUtils.isBlank(group))
+		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByCampaignAndGroup(campaign, group, currentServerVersion)),
-					HttpStatus.OK);
+					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -145,20 +141,19 @@ public class TaskResource {
 		}
 	}
 
-	@RequestMapping(value = "/update_status", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE })
+	@RequestMapping(value = "/update_status", method = RequestMethod.POST, consumes = {
+			MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> updateStatus(@RequestBody String entity) {
 		try {
 			Type listType = new TypeToken<List<TaskUpdate>>() {
 			}.getType();
 			List<TaskUpdate> taskUpdates = gson.fromJson(entity, listType);
-			List updateTasks= taskService.updateTaskStatus (taskUpdates);
-			if (updateTasks.size()>0) {
+			List<String> updateTasks = taskService.updateTaskStatus(taskUpdates);
+			if (updateTasks.size() > 0) {
 				JSONObject json = new JSONObject();
 				json.put("task_ids", updateTasks);
 				return new ResponseEntity<>(json.toString(), HttpStatus.CREATED);
-			}
-			else {
+			} else {
 				return new ResponseEntity<>("Tasks not Updated: ", HttpStatus.CREATED);
 			}
 		} catch (JsonSyntaxException e) {
