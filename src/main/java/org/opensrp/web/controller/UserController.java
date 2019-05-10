@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -101,7 +102,8 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
-			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request) {
+			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request,
+			HttpServletResponse response) {
 		Authentication auth;
 		if (authentication == null) {
 			auth = getAuthenticationAdvisor(request);
@@ -116,7 +118,7 @@ public class UserController {
 				user = openmrsUserService.getUser(userName);
 				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
 				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail, allowOrigin(opensrpAllowedSources), OK);
+				return new ResponseEntity<>(userDetail, OK);
 			} catch (JSONException e) {
 				logger.error("Error getting user details", e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
