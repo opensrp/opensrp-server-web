@@ -256,9 +256,11 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         operationalAreas.clear();
         operationalAreas.add(operationalArea);
         expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(1l);
         repository.add(expectedPlan);
+        expectedPlans.add(expectedPlan);
 
-        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area", MockMvcResultMatchers.status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", MockMvcResultMatchers.status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         assertListsAreSameIgnoringOrder(actualPlans, expectedPlans);

@@ -18,12 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
@@ -105,9 +104,9 @@ public class PlanResource {
     }
 
     @RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> syncByServerVersionAndOperationalArea(HttpServletRequest request) {
+    public ResponseEntity<String> syncByServerVersionAndOperationalArea(HttpServletRequest request,
+            @RequestParam(value=OPERATIONAL_AREA_ID, required=false) List<String> operationalAreaIds) {
         String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
-        String operationalArea = getStringFilter(OPERATIONAL_AREA_ID, request);
         long currentServerVersion = 0;
         try {
             currentServerVersion = Long.parseLong(serverVersion);
@@ -115,7 +114,7 @@ public class PlanResource {
             logger.error("server version not a number");
         }
         try {
-            return new ResponseEntity<>(gson.toJson(planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalArea)),
+            return new ResponseEntity<>(gson.toJson(planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
                     HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
