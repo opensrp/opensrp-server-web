@@ -47,8 +47,8 @@ public class UserController {
 
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 
-	@Value("#{opensrp['opensrp.site.url']}")
-	private String opensrpSiteUrl;
+	@Value("#{opensrp['opensrp.cors.allowed.source']}")
+	private String opensrpAllowedSources;
 
 	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
 
@@ -69,7 +69,7 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
 	public ResponseEntity<HttpStatus> authenticateUser() {
-		return new ResponseEntity<>(null, allowOrigin(opensrpSiteUrl), OK);
+		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 
 	public Authentication getAuthenticationAdvisor(HttpServletRequest request) {
@@ -116,7 +116,7 @@ public class UserController {
 				user = openmrsUserService.getUser(userName);
 				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
 				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail, allowOrigin(opensrpSiteUrl), OK);
+				return new ResponseEntity<>(userDetail, allowOrigin(opensrpAllowedSources), OK);
 			} catch (JSONException e) {
 				logger.error("Error getting user details", e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -170,7 +170,7 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpSiteUrl), OK);
+		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpAllowedSources), OK);
 	}
 
 	@RequestMapping("/security/configuration")
@@ -178,7 +178,7 @@ public class UserController {
 	public ResponseEntity<String> configuration() throws JSONException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
-		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpSiteUrl), OK);
+		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpAllowedSources), OK);
 	}
 
 	public void setOpenmrsUserService(OpenmrsUserService openmrsUserService) {
