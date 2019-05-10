@@ -107,7 +107,7 @@ public class TaskResourceTest {
 		tasks.add(getTask());
 		when(taskService.getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l)).thenReturn(tasks);
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/sync").param(TaskResource.CAMPAIGN, "IRS_2018_S1")
+				.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "IRS_2018_S1")
 						.param(TaskResource.GROUP, "2018_IRS-3734").param(BaseEntity.SERVER_VERSIOIN, "15421904649873"))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
@@ -123,7 +123,7 @@ public class TaskResourceTest {
 		tasks.add(getTask());
 		when(taskService.getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l)).thenReturn(tasks);
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/sync").param(TaskResource.CAMPAIGN, "IRS_2018_S1")
+				.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "IRS_2018_S1")
 						.param(TaskResource.GROUP, "2018_IRS-3734").param(BaseEntity.SERVER_VERSIOIN, ""))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l);
@@ -135,7 +135,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testGetTasksByCampaignAndGroupWithoutParamsShouldReturnBadRequest() throws Exception {
-		mockMvc.perform(get(BASE_URL + "/sync").param(TaskResource.CAMPAIGN, "").param(BaseEntity.SERVER_VERSIOIN, ""))
+		mockMvc.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "").param(BaseEntity.SERVER_VERSIOIN, ""))
 				.andExpect(status().isBadRequest());
 		verify(taskService, never()).getTasksByCampaignAndGroup(anyString(), anyString(), anyLong());
 		verifyNoMoreInteractions(taskService);
@@ -147,7 +147,7 @@ public class TaskResourceTest {
 		tasks.add(getTask());
 		when(taskService.getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l))
 				.thenThrow(new RuntimeException());
-		mockMvc.perform(get(BASE_URL + "/sync").param(TaskResource.CAMPAIGN, "IRS_2018_S1")
+		mockMvc.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "IRS_2018_S1")
 				.param(TaskResource.GROUP, "2018_IRS-3734").param(BaseEntity.SERVER_VERSIOIN, "15421904649873"))
 				.andExpect(status().isInternalServerError());
 		verify(taskService, times(1)).getTasksByCampaignAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
