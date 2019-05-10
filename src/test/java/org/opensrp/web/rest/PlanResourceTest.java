@@ -11,6 +11,7 @@ import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.repository.PlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
+import sun.jvm.hotspot.utilities.AssertionFailure;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -267,9 +268,9 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     }
 
     @Override
-    void assertListsAreSameIgnoringOrder(List<PlanDefinition> expectedList, List<PlanDefinition> actualList) {
+    protected void assertListsAreSameIgnoringOrder(List<PlanDefinition> expectedList, List<PlanDefinition> actualList) {
         if (expectedList == null || actualList == null) {
-            assertTrue(false);
+            throw new AssertionError("One of the lists is null");
         }
 
         assertEquals(expectedList.size(), actualList.size());

@@ -53,7 +53,7 @@ public class PlanResource {
     public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier) {
         try {
             String result = gson.toJson(planService.getPlan(identifier));
-            result = result.equals("null") ? new JsonObject().toString() : result;
+            result = "null".equals(result) ? new JsonObject().toString() : result;
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

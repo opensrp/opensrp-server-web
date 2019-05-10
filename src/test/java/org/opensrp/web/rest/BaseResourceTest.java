@@ -112,6 +112,6 @@ public abstract class BaseResourceTest<T> {
     }
 
     /** Objects in the list should have a unique uuid identifier field **/
-    abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
+    protected abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
 }
 
