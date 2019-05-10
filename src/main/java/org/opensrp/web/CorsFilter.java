@@ -8,9 +8,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opensrp.common.AllConstants.HTTP;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component(value = "CORSFilter")
 public class CorsFilter extends OncePerRequestFilter {
+
+	@Value("#{opensrp['opensrp.cors.allowed.source']}")
+	private String opensrpAllowedSources;
 
 	public static final String ACCESS_CONTROL_ALLOW_ORIGIN_METHODS = "Access-Control-Allow-Methods";
 	public static final String ACCESS_CONTROL_ALLOW_ORIGIN_HEADERS = "Access-Control-Allow-Headers";
@@ -20,7 +26,7 @@ public class CorsFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		// CORS "pre-flight" request
-		response.addHeader(HTTP.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+		response.addHeader(HTTP.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, opensrpAllowedSources);
 		response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_METHODS, "GET");
 		response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_HEADERS,
 				"origin, content-type, accept, x-requested-with, Authorization");
