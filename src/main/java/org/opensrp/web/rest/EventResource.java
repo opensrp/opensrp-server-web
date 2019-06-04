@@ -123,7 +123,7 @@ public class EventResource extends RestResource<Event> {
 				return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit)), HttpStatus.OK);
 			} else {
 				response.put("msg", "specify atleast one filter");
-				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
 			}
 
 		} catch (
@@ -147,7 +147,7 @@ public class EventResource extends RestResource<Event> {
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
 		if (!events.isEmpty()) {
 			for (Event event : events) {
-				if (event.getBaseEntityId() != null && !event.getBaseEntityId().isEmpty()
+				if (org.apache.commons.lang.StringUtils.isNotBlank(event.getBaseEntityId())
 						&& !clientIds.contains(event.getBaseEntityId())) {
 					clientIds.add(event.getBaseEntityId());
 				}
@@ -159,24 +159,7 @@ public class EventResource extends RestResource<Event> {
 			}
 			logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
 
-			if (searchMissingClients) {
-
-				List<String> foundClientIds = new ArrayList<>();
-				for (Client client : clients) {
-					foundClientIds.add(client.getBaseEntityId());
-				}
-
-				boolean removed = clientIds.removeAll(foundClientIds);
-				if (removed) {
-					for (String clientId : clientIds) {
-						Client client = clientService.getByBaseEntityId(clientId);
-						if (client != null) {
-							clients.add(client);
-						}
-					}
-				}
-				logger.info("fetching missing clients took: " + (System.currentTimeMillis() - startTime));
-			}
+			searchMissingClients(clientIds, clients, startTime);
 		}
 
 		JsonArray eventsArray = (JsonArray) gson.toJsonTree(events, new TypeToken<List<Event>>() {
@@ -189,6 +172,27 @@ public class EventResource extends RestResource<Event> {
 		response.put("clients", clientsArray);
 		response.put("no_of_events", events.size());
 		return response;
+	}
+
+	private void searchMissingClients(List<String> clientIds, List<Client> clients, long startTime) {
+		if (searchMissingClients) {
+
+			List<String> foundClientIds = new ArrayList<>();
+			for (Client client : clients) {
+				foundClientIds.add(client.getBaseEntityId());
+			}
+
+			boolean removed = clientIds.removeAll(foundClientIds);
+			if (removed) {
+				for (String clientId : clientIds) {
+					Client client = clientService.getByBaseEntityId(clientId);
+					if (client != null) {
+						clients.add(client);
+					}
+				}
+			}
+			logger.info("fetching missing clients took: " + (System.currentTimeMillis() - startTime));
+		}
 	}
 
 	/**
