@@ -211,7 +211,7 @@ public class EventResource extends RestResource<Event> {
 		try {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
-			eventSearchBean.setEntityType(eventType);
+			eventSearchBean.setEventType(eventType);
 			return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
 					HttpStatus.OK);
 
