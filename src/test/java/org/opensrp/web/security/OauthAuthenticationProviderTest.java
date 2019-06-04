@@ -1,7 +1,12 @@
 package org.opensrp.web.security;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -15,6 +20,7 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @RunWith(JUnit4.class)
 public class OauthAuthenticationProviderTest {
@@ -56,6 +62,20 @@ public class OauthAuthenticationProviderTest {
 		authenticationProvider.authenticate(authentication);
 		verify(openmrsUserService).getUser("user1");
 		verify(openmrsUserService).authenticate("user1", "myPassword");
+	}
+
+	@Test
+	public void testGetRolesAsAuthoritiesRuturnsAllRoles() throws JSONException {
+		User user = new User(UUID.randomUUID().toString());
+		user.setRoles(Arrays.asList("Provider", "OpenSRP: Get All Events"));
+		when(openmrsUserService.getUser("user1")).thenReturn(user);
+		when(openmrsUserService.authenticate("user1", "myPassword")).thenReturn(true);
+		Authentication auth = authenticationProvider.authenticate(authentication);
+		verify(openmrsUserService).getUser("user1");
+		verify(openmrsUserService).authenticate("user1", "myPassword");
+		assertEquals(2, auth.getAuthorities().size());
+		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ALL_EVENTS")));
+		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_OPENMRS")));
 	}
 
 }
