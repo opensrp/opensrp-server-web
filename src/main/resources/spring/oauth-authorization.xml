@@ -18,6 +18,8 @@
 		entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager">
 		<sec:anonymous enabled="false" />
+		<sec:intercept-url pattern="/rest/event/getAll"
+			access="ROLE_ALL_EVENTS" />
 		<sec:intercept-url pattern="/rest/**"
 			access="ROLE_OPENMRS" />
 		<sec:custom-filter ref="resourceServerFilter"
