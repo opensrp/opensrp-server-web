@@ -57,7 +57,8 @@ public class TaskResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -79,7 +80,8 @@ public class TaskResource {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)), HttpStatus.OK);
+					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
