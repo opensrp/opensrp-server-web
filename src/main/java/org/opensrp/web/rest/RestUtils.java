@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.springframework.http.HttpHeaders;
 
 import com.mysql.jdbc.StringUtils;
 
@@ -93,5 +94,11 @@ public class RestUtils {
 				}
 			}
 		}
+	}
+	
+	public static HttpHeaders getJSONUTF8Headers() {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
+		return responseHeaders;
 	}
 }
