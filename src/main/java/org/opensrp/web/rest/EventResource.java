@@ -120,7 +120,8 @@ public class EventResource extends RestResource<Event> {
 				eventSearchBean.setBaseEntityId(baseEntityId);
 				eventSearchBean.setServerVersion(lastSyncedServerVersion);
 
-				return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit)), HttpStatus.OK);
+				return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.put("msg", "specify atleast one filter");
 				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
@@ -213,7 +214,7 @@ public class EventResource extends RestResource<Event> {
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
 			return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
-					HttpStatus.OK);
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 		} catch (Exception e) {
 			Map<String, Object> response = new HashMap<String, Object>();

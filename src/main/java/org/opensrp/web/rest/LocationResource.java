@@ -66,7 +66,7 @@ public class LocationResource {
 		try {
 			return new ResponseEntity<>(
 					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
-					HttpStatus.OK);
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -90,11 +90,11 @@ public class LocationResource {
 				if (StringUtils.isBlank(locationNames)) {
 					return new ResponseEntity<>(
 							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-							HttpStatus.OK);
+							RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 				}
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
-						HttpStatus.OK);
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 			} else {
 				if (StringUtils.isBlank(parentIds)) {
@@ -178,7 +178,7 @@ public class LocationResource {
 		try {
 			Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
 					radius);
-			return new ResponseEntity<>(gson.toJson(structures), HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(structures), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());

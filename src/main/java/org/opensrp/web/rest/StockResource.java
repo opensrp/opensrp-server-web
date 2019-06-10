@@ -52,31 +52,31 @@ import com.mysql.jdbc.StringUtils;
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
-	
+
 	private static Logger logger = LoggerFactory.getLogger(StockResource.class.toString());
-	
+
 	private StockService stockService;
-	
+
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-	
+			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+
 	@Autowired
 	public StockResource(StockService stockService) {
 		this.stockService = stockService;
 	}
-	
+
 	@Override
 	public Stock getByUniqueId(String uniqueId) {
 		return stockService.find(uniqueId);
 	}
-	
+
 	/**
 	 * Fetch all the stocks
 	 * 
 	 * @param none
 	 * @return a map response with stocks, and optionally msg when an error occurs
 	 */
-	
+
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> getAll() {
@@ -84,17 +84,17 @@ public class StockResource extends RestResource<Stock> {
 		try {
 			List<Stock> stocks = new ArrayList<Stock>();
 			stocks = stockService.findAllStocks();
-			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {}.getType());
+			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+			}.getType());
 			response.put("stocks", stocksArray);
-			return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
-		}
-		catch (Exception e) {
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	private StockSearchBean populateSearchBean(HttpServletRequest request) {
 		StockSearchBean searchBean = new StockSearchBean();
 		searchBean.setIdentifier(getStringFilter(IDENTIFIER, request));
@@ -107,18 +107,19 @@ public class StockResource extends RestResource<Stock> {
 		searchBean.setDateUpdated(getStringFilter(DATE_UPDATED, request));
 		return searchBean;
 	}
-	
+
 	/**
 	 * Fetch stocks ordered by serverVersion ascending order
 	 * 
 	 * @param request
-	 * @return a map response with events, clients and optionally msg when an error occurs
+	 * @return a map response with events, clients and optionally msg when an error
+	 *         occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
-		
+
 		try {
 			StockSearchBean searchBean = populateSearchBean(request);
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
@@ -129,23 +130,23 @@ public class StockResource extends RestResource<Stock> {
 			if (limit == null || limit.intValue() == 0) {
 				limit = 25;
 			}
-			
+
 			List<Stock> stocks = new ArrayList<Stock>();
 			stocks = stockService.findStocks(searchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
-			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {}.getType());
-			
+			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+			}.getType());
+
 			response.put("stocks", stocksArray);
-			
-			return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
-			
-		}
-		catch (Exception e) {
+
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
@@ -155,28 +156,27 @@ public class StockResource extends RestResource<Stock> {
 				return new ResponseEntity<>(BAD_REQUEST);
 			}
 			ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getString("stocks"),
-			    new TypeToken<ArrayList<Stock>>() {}.getType());
+					new TypeToken<ArrayList<Stock>>() {
+					}.getType());
 			for (Stock stock : stocks) {
 				try {
 					stockService.addorUpdateStock(stock);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					logger.error("Stock" + stock.getId() + " failed to sync", e);
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(CREATED);
 	}
-	
+
 	@Override
 	public Stock create(Stock stock) {
 		return stockService.addStock(stock);
 	}
-	
+
 	@Override
 	public List<String> requiredProperties() {
 		List<String> p = new ArrayList<>();
@@ -184,22 +184,21 @@ public class StockResource extends RestResource<Stock> {
 		p.add(TIMESTAMP);
 		return p;
 	}
-	
+
 	@Override
 	public Stock update(Stock stock) {
 		return stockService.mergeStock(stock);
 	}
-	
+
 	@Override
 	public List<Stock> search(HttpServletRequest request) throws ParseException {
-		
+
 		StockSearchBean searchBean = populateSearchBean(request);
-		
+
 		String serverVersion = getStringFilter(TIMESTAMP, request);
-		if(serverVersion!=null)
-		searchBean.setServerVersion(Long.valueOf(serverVersion));
-		
-		
+		if (serverVersion != null)
+			searchBean.setServerVersion(Long.valueOf(serverVersion));
+
 		if (!StringUtils.isEmptyOrWhitespaceOnly(searchBean.getIdentifier())) {
 			Stock stock = stockService.find(searchBean.getIdentifier());
 			if (stock == null) {
@@ -208,10 +207,10 @@ public class StockResource extends RestResource<Stock> {
 		}
 		return stockService.findStocks(searchBean);
 	}
-	
+
 	@Override
 	public List<Stock> filter(String query) {
 		return stockService.findAllStocks();
 	}
-	
+
 }
