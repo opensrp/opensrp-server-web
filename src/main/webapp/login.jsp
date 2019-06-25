@@ -2,31 +2,48 @@
 <%@ include file="/WEB-INF/jspf/taglibs.jspf" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
+<!doctype html>
+<html lang="en">
 
-<h1>OpenSRP</h1>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="assets/img/favicons/favicon.ico">
 
-<div id="content">
-    <c:if test="${not empty param.authentication_error}">
-        <h1>Error!</h1>
+    <title>OpenSRP Oauth login page</title>
 
-        <p styleclass="error">Your login attempt was not successful.</p>
-    </c:if>
-    <c:if test="${not empty param.authorization_error}">
-        <h1>Error!!</h1>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
-        <p styleclass="error">You are not permitted to access that resource.</p>
-    </c:if>
+    <!-- Custom styles for this template -->
+    <link href="UserAuthorization.css" rel="stylesheet">
+</head>
 
+<body class="text-center">
+    <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
+        <img class="mb-4" src="https://avatars2.githubusercontent.com/u/7898027?s=200&v=4" alt="" width="72" height="72">
+        <section class="opensrp-header"><h1 id="first-part">OPEN</h1><h1 id="second-part">SRP</h1><hr></section>
 
-    <h2>Login</h2>
+        <c:if test="${not empty param.authentication_error}">
+                <h1>Error!</h1>
 
-    <form id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
-        <p><label>Username: <input type='text' name='j_username' /></label></p>
-        <p><label>Password: <input type='password' name='j_password' /></label></p>
+                <p styleclass="error">Your login attempt was not successful.</p>
+            </c:if>
+            <c:if test="${not empty param.authorization_error}">
+                <h1>Error!!</h1>
 
-        <p><input name="login" value="Login" type="submit" /></p>
+                <p styleclass="error">You are not permitted to access that resource.</p>
+            </c:if>
+
+        <label for="username" class="sr-only">Username</label>
+        <input type="text" id="username" name='j_username' class="form-control" placeholder="Username" required autofocus>
+        <label for="password" class="sr-only">Password</label>
+        <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required>
+        <input class="btn btn-lg btn-block" type="submit" value="Login">
     </form>
-</div>
+</body>
+
+</html>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
 
