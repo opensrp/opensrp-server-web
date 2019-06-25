@@ -2,24 +2,14 @@
 <%@ include file="/WEB-INF/jspf/taglibs.jspf" %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
-<!doctype html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" href="assets/img/favicons/favicon.ico">
-
-    <title>OpenSRP Oauth login page</title>
-
+<div class="body text-center">
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
     <!-- Custom styles for this template -->
-    <link href="UserAuthorization.css" rel="stylesheet">
-</head>
+    <link href="css/UserAuthorization.css" rel="stylesheet">
 
-<body class="text-center">
     <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
         <img class="mb-4" src="https://avatars2.githubusercontent.com/u/7898027?s=200&v=4" alt="" width="72" height="72">
         <section class="opensrp-header"><h1 id="first-part">OPEN</h1><h1 id="second-part">SRP</h1><hr></section>
@@ -41,9 +31,8 @@
         <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required>
         <input class="btn btn-lg btn-block" type="submit" value="Login">
     </form>
-</body>
+</div>
 
-</html>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf" %>
 
