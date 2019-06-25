@@ -1,0 +1,97 @@
+html,
+body {
+    height: 100%;
+}
+
+.body {
+    height: 100%;
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-align: center;
+    -ms-flex-pack: center;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    background-color: #8ec6410c;
+}
+
+.opensrp-header{
+    margin-bottom: 20px;
+}
+
+.oauth h1{
+    display: inline;
+    font-size: 31px;
+    font-weight: 600;
+}
+
+h1#second-part {
+    color: #2b475e;
+}
+
+h1#first-part{
+    color: #24b1df;
+}
+
+.oauth {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.oauth .checkbox {
+    font-weight: 400;
+}
+
+.oauth .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.oauth .form-control:focus {
+    z-index: 2;
+}
+
+.oauth input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.oauth input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.oauth [type="submit"] {
+    background: #24b1df;
+    width: 100%;
+    font-weight: 600;
+    color: #fff;
+    padding: 8px 25px;
+    border: none;
+}
+.oauth [type="submit"]:hover  {
+    background: #1995be;
+    color: #fff;
+}
+.oauth [type="submit"]:active {
+    background: #2b475e;
+    color: #fff;
+}
+
+@media screen and (max-width: 480px) {
+    .oauth h1 {
+        font-size: 26px;
+    }
+
+}
+
