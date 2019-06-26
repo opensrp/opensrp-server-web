@@ -44,10 +44,6 @@ h1#first-part{
     margin: 0 auto;
 }
 
-.oauth .checkbox {
-    font-weight: 400;
-}
-
 .oauth .form-control {
     position: relative;
     box-sizing: border-box;
