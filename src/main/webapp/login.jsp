@@ -4,11 +4,7 @@
 
 
 <div class="body text-center" id="content">
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
-    <!-- Custom styles for this template -->
-    <link href="css/OauthAuthorization.css" rel="stylesheet">
 
     <div class="oauth">
         <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">

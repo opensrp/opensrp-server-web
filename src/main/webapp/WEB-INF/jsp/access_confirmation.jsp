@@ -12,7 +12,6 @@
 <%
 	response.setHeader("Pragma", "No-cache");
 %>
-<h1>OpenSRP Authorization Server</h1>
 
 <div class="body text-center" id="content">
 	<div class="oauth">
