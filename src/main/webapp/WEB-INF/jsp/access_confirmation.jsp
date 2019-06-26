@@ -14,7 +14,15 @@
 %>
 <h1>OpenSRP Authorization Server</h1>
 
-<div id="content">
+<div class="body text-center" id="content">
+    <div class="oauth">
+    <img class="mb-4" src="https://avatars2.githubusercontent.com/u/7898027?s=200&v=4" alt="" width="72"
+                height="72"/>
+            <section class="opensrp-header">
+                <h1 id="first-part">OPEN</h1>
+                <h1 id="second-part">SRP</h1>
+            </section>
+            <hr>
 	<jsp:scriptlet>if (session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
 					&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
 	<div styleclass="error">
@@ -37,21 +45,21 @@
 			<c:out value="${client.clientId}" />
 			" to access your protected resources.
 		</p>
+		<br>
+        <form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
+                    <input name="user_oauth_approval" value="true" type="hidden" /> <label>
+                        <input name="authorize" class="btn btn-lg btn-block" type="submit" value="Authorize" />
+                    </label>
+                </form>
 
-		<form id="confirmationForm" name="confirmationForm"
-			action="<%=request.getContextPath()%>/oauth/authorize" method="post">
-			<input name="user_oauth_approval" value="true" type="hidden" /> <label>
-				<input name="authorize" value="Authorize" type="submit" />
-			</label>
-		</form>
+        <form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
+                    <input name="user_oauth_approval" value="false" type="hidden" /> <label>
+                        <input name="deny" class="btn btn-lg btn-block" type="submit" value="Deny" />
+                    </label>
+                </form>
 
-		<form id="denialForm" name="denialForm"
-			action="<%=request.getContextPath()%>/oauth/authorize" method="post">
-			<input name="user_oauth_approval" value="false" type="hidden" /> <label>
-				<input name="deny" value="Deny" type="submit" />
-			</label>
-		</form>
 	</authz:authorize>
+	</div>
 </div>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
