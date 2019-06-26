@@ -26,7 +26,7 @@
 			(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
 			&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)
 			instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
-		<div styleclass="error">
+		<div class="alert alert-danger" role="alert">
 			<h2>Error!</h2>
 
 			<p>
