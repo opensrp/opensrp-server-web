@@ -26,13 +26,20 @@
 
                 <p styleclass="error">You are not permitted to access that resource.</p>
             </c:if>
-
+            <div class="form-group">
             <label for="username" class="sr-only">Username</label>
             <input type="text" id="username" name='j_username' class="form-control" placeholder="Username" required
                 autofocus>
+            </div>
+
+            <div class="form-group">
             <label for="password" class="sr-only">Password</label>
             <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required>
+            </div>
+
+            <div class="form-group">
             <input class="btn btn-lg btn-block" type="submit" value="Login">
+            </div>
         </form>
     <div>
 </div>

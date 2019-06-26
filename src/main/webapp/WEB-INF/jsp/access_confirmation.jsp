@@ -49,16 +49,20 @@
 			<br>
 			<form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize"
 				method="post">
+				<div class="form-group">
 				<input name="user_oauth_approval" value="true" type="hidden" /> <label>
 					<input name="authorize" class="btn btn-lg btn-block" type="submit" value="Authorize" />
 				</label>
+				</div>
 			</form>
 
 			<form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize"
 				method="post">
+				<div class="form-group">
 				<input name="user_oauth_approval" value="false" type="hidden" /> <label>
 					<input name="deny" class="btn btn-lg btn-block" type="submit" value="Deny" />
 				</label>
+				</div>
 			</form>
 
 		</authz:authorize>
