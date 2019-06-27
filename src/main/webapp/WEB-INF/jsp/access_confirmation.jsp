@@ -13,60 +13,52 @@
 	response.setHeader("Pragma", "No-cache");
 %>
 
-<div class="body text-center" id="content">
-	<div class="oauth">
-		<img class="mb-4" src="https://avatars2.githubusercontent.com/u/7898027?s=200&v=4" alt="" width="72"
-			height="72" />
-		<section class="opensrp-header">
-			<h1 id="first-part">OPEN</h1>
-			<h1 id="second-part">SRP</h1>
-		</section>
-		<hr>
-		<jsp:scriptlet>if
-			(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
-			&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)
-			instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
-		<div class="alert alert-danger" role="alert">
-			<h2>Error!</h2>
+<div class="oauth-container-div text-center" id="content">
+	<img class="mb-4 opensrplogo" src="images/opensrplogo.png" alt="openSRP logo" />
+	<jsp:scriptlet>if
+		(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
+		&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)
+		instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
+	<div class="alert alert-danger" role="alert">
+		<h2 class="h3 mb-3 font-weight-normal" >Error!</h2>
 
-			<p>
-				Access could not be granted. (<%=((AuthenticationException) session
+		<p>
+			Access could not be granted. (<%=((AuthenticationException) session
 						.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY))
 								.getMessage()%>)
-			</p>
-		</div>
-		<jsp:scriptlet>}</jsp:scriptlet>
-		<c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION" />
-
-		<authz:authorize ifAllGranted="ROLE_OPENMRS">
-			<h2>Please Confirm</h2>
-
-			<p>
-				You hereby authorize "
-				<c:out value="${client.clientId}" />
-				" to access your protected resources.
-			</p>
-			<br>
-			<form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize"
-				method="post">
-				<div class="form-group">
-					<input name="user_oauth_approval" value="true" type="hidden" /> <label>
-						<input name="authorize" class="btn btn-lg btn-block" type="submit" value="Authorize" />
-					</label>
-				</div>
-			</form>
-
-			<form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize"
-				method="post">
-				<div class="form-group">
-					<input name="user_oauth_approval" value="false" type="hidden" /> <label>
-						<input name="deny" class="btn btn-lg btn-block" type="submit" value="Deny" />
-					</label>
-				</div>
-			</form>
-
-		</authz:authorize>
+		</p>
 	</div>
+	<jsp:scriptlet>}</jsp:scriptlet>
+	<c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION" />
+
+	<authz:authorize ifAllGranted="ROLE_OPENMRS">
+		<h1 class="h3 mb-3 font-weight-normal">Please Confirm</h1>
+
+		<p>
+			You hereby authorize "
+			<c:out value="${client.clientId}" />
+			" to access your protected resources.
+		</p>
+		<br>
+		<form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize"
+			method="post">
+			<div class="form-group">
+				<input name="user_oauth_approval" value="true" type="hidden" /> <label>
+					<input name="authorize" class="btn btn-primary btn-lg btn-block" type="submit" value="Authorize" />
+				</label>
+			</div>
+		</form>
+
+		<form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
+			<div class="form-group">
+				<input name="user_oauth_approval" value="false" type="hidden" /> <label>
+					<input name="deny" class="btn btn-primary btn-lg btn-block" type="submit" value="Deny" />
+				</label>
+			</div>
+		</form>
+
+	</authz:authorize>
+
 </div>
 
 <%@ include file="/WEB-INF/jspf/footer.jspf"%>
