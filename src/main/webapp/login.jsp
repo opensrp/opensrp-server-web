@@ -3,21 +3,21 @@
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 
-<div class="oauth-container-div text-center" id="content">
-  <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
-    <img class="mb-4 opensrplogo" src="images/opensrplogo.png" alt="opensrp logo" />
-    <h1 class="h3 mb-3 font-weight-normal">Please Log in</h1>
+<div styleClass="oauth-container-div text-center" id="content">
+  <form styleClass="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
+    <img styleClass="mb-4 opensrplogo" src="images/opensrplogo.png" alt="opensrp logo" />
+    <h1 styleClass="h3 mb-3 font-weight-normal">Please Log in</h1>
     <c:if test="${not empty param.authentication_error}">
-      <div class="alert alert-danger" role="alert">
-        <h2 class="h3 mb-3 font-weight-normal">Error!</h2>
+      <div styleClass="alert alert-danger" role="alert">
+        <h2 styleClass="h3 mb-3 font-weight-normal">Error!</h2>
 
         <p>Your login attempt was not successful.</p>
       </div>
 
     </c:if>
     <c:if test="${not empty param.authorization_error}">
-      <div class="alert alert-danger" role="alert">
-        <h2 class="h3 mb-3 font-weight-normal">Error!</h2>
+      <div styleClass="alert alert-danger" role="alert">
+        <h2 styleClass="h3 mb-3 font-weight-normal">Error!</h2>
 
         <p>You are not permitted to access that resource.</p>
       </div>
@@ -25,13 +25,13 @@
 
     </c:if>
 
-    <label for="username" class="sr-only">Username</label>
-    <input type="text" id="username" name='j_username' class="form-control" placeholder="Username" required autofocus />
+    <label for="username" styleClass="sr-only">Username</label>
+    <input type="text" id="username" name='j_username' styleClass="form-control" placeholder="Username" required autofocus />
 
-    <label for="password" class="sr-only">Password</label>
-    <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required />
+    <label for="password" styleClass="sr-only">Password</label>
+    <input type="password" name='j_password' id="password" styleClass="form-control" placeholder="Password" required />
 
-    <input class="btn btn-primary btn-lg btn-block" type="submit" value="Login" />
+    <input styleClass="btn btn-primary btn-lg btn-block" type="submit" value="Login" />
 
   </form>
 </div>
