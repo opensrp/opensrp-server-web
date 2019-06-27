@@ -3,52 +3,38 @@
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 
-<div class="body text-center" id="content">
+<div class="oauth-container-div text-center" id="content">
+  <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
+    <img class="mb-4 opensrplogo" src="images/opensrplogo.png" alt="opensrp logo" />
+    <h1 class="h3 mb-3 font-weight-normal">Please Log in</h1>
+    <c:if test="${not empty param.authentication_error}">
+      <div class="alert alert-danger" role="alert">
+        <h2 class="h3 mb-3 font-weight-normal">Error!</h2>
 
-
-  <div class="oauth">
-    <form class="oauth" id="loginForm" name="loginForm" action="<c:url value='/login.do'/>" method="post">
-      <img class="mb-4" src="https://avatars2.githubusercontent.com/u/7898027?s=200&v=4" alt="" width="72" height="72">
-      <section class="opensrp-header">
-        <h1 id="first-part">OPEN</h1>
-        <h1 id="second-part">SRP</h1>
-        <hr>
-      </section>
-
-      <c:if test="${not empty param.authentication_error}">
-        <div class="alert alert-danger" role="alert">
-          <h1>Error!</h1>
-
-          <p>Your login attempt was not successful.</p>
-        </div>
-
-      </c:if>
-      <c:if test="${not empty param.authorization_error}">
-        <div class="alert alert-danger" role="alert">
-          <h1>Error!</h1>
-
-          <p>You are not permitted to access that resource.</p>
-        </div>
-
-
-      </c:if>
-      <div class="form-group">
-        <label for="username" class="sr-only">Username</label>
-        <input type="text" id="username" name='j_username' class="form-control" placeholder="Username" required
-          autofocus>
+        <p>Your login attempt was not successful.</p>
       </div>
 
-      <div class="form-group">
-        <label for="password" class="sr-only">Password</label>
-        <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required>
+    </c:if>
+    <c:if test="${not empty param.authorization_error}">
+      <div class="alert alert-danger" role="alert">
+        <h2 class="h3 mb-3 font-weight-normal">Error!</h2>
+
+        <p>You are not permitted to access that resource.</p>
       </div>
 
-      <div class="form-group">
-        <input class="btn btn-lg btn-block" type="submit" value="Login">
-      </div>
-    </form>
-    <div>
-    </div>
+
+    </c:if>
+
+    <label for="username" class="sr-only">Username</label>
+    <input type="text" id="username" name='j_username' class="form-control" placeholder="Username" required autofocus />
+
+    <label for="password" class="sr-only">Password</label>
+    <input type="password" name='j_password' id="password" class="form-control" placeholder="Password" required />
+
+    <input class="btn btn-primary btn-lg btn-block" type="submit" value="Login" />
+
+  </form>
+</div>
 
 
-    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
