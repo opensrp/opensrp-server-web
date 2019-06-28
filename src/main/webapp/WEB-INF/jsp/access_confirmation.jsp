@@ -20,7 +20,7 @@
 		&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)
 		instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
 	<div styleClass="alert alert-danger" role="alert">
-		<h2 styleClass="h3 mb-3 font-weight-normal" >Error!</h2>
+		<p styleClass="h3 mb-3 font-weight-normal" >Error!</h2>
 
 		<p>
 			Access could not be granted. (<%=((AuthenticationException) session

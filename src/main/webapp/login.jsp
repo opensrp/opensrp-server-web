@@ -9,7 +9,7 @@
     <h1 styleClass="h3 mb-3 font-weight-normal">Please Log in</h1>
     <c:if test="${not empty param.authentication_error}">
       <div styleClass="alert alert-danger" role="alert">
-        <h2 styleClass="h3 mb-3 font-weight-normal">Error!</h2>
+        <p styleClass="h5 mb-3 font-weight-normal">Error!</p>
 
         <p>Your login attempt was not successful.</p>
       </div>
@@ -17,7 +17,7 @@
     </c:if>
     <c:if test="${not empty param.authorization_error}">
       <div styleClass="alert alert-danger" role="alert">
-        <h2 styleClass="h3 mb-3 font-weight-normal">Error!</h2>
+        <p styleClass="h5 mb-3 font-weight-normal">Error!</p>
 
         <p>You are not permitted to access that resource.</p>
       </div>
