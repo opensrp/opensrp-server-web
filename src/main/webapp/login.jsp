@@ -25,13 +25,19 @@
 
     </c:if>
 
+    <div styleClass="form-group">
     <label for="username" styleClass="sr-only">Username</label>
     <input type="text" id="username" name='j_username' styleClass="form-control" placeholder="Username" required autofocus />
+    </div>
 
+    <div styleClass="form-group"
     <label for="password" styleClass="sr-only">Password</label>
     <input type="password" name='j_password' id="password" styleClass="form-control" placeholder="Password" required />
+    </div>
 
+    <div styleClass="form-group">
     <input styleClass="btn btn-primary btn-lg btn-block" type="submit" value="Login" />
+    </div>
 
   </form>
 </div>
