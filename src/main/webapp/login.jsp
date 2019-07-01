@@ -36,7 +36,7 @@
     </div>
 
     <div styleClass="form-group">
-    <input styleClass="btn btn-primary btn-lg btn-block" type="submit" value="Login" />
+    <input styleClass="btn btn-primary btn-block" type="submit" value="Login" />
     </div>
 
   </form>

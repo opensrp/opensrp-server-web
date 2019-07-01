@@ -44,7 +44,7 @@
 			method="post">
 			<div styleClass="form-group">
 				<input name="user_oauth_approval" value="true" type="hidden" /> <label>
-					<input name="authorize" styleClass="btn btn-primary btn-lg btn-block" type="submit" value="Authorize" />
+					<input name="authorize" styleClass="btn btn-primary btn-block" type="submit" value="Authorize" />
 				</label>
 			</div>
 		</form>
@@ -52,7 +52,7 @@
 		<form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
 			<div styleClass="form-group">
 				<input name="user_oauth_approval" value="false" type="hidden" /> <label>
-					<input name="deny" styleClass="btn btn-primary btn-lg btn-block" type="submit" value="Deny" />
+					<input name="deny" styleClass="btn btn-primary btn-block" type="submit" value="Deny" />
 				</label>
 			</div>
 		</form>
