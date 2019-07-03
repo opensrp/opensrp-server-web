@@ -1,4 +1,4 @@
-package org.opensrp.web.utils;
+package org.opensrp.web.config;
 
 import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
 import com.mangofactory.swagger.plugin.EnableSwagger;
@@ -8,10 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-//@EnableWebMvc
-@EnableSwagger
-//@ComponentScan("org.opensrp.web")
-public class SwaggerConfig {
+@EnableSwagger //Loads the spring beans required by the framework
+public class MySwaggerConfig {
 
     private SpringSwaggerConfig springSwaggerConfig;
 
@@ -30,7 +28,7 @@ public class SwaggerConfig {
     @Bean
     public SwaggerSpringMvcPlugin customImplementation(){
         return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
-                .includePatterns(".*pet.*");
+                .includePatterns(".*");
     }
 
 }

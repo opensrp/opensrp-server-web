@@ -19,7 +19,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.1.1.RELEASE</spring.version>
+		<spring.version>3.2.3.RELEASE</spring.version>
 		<spring.security.version>3.1.2.RELEASE</spring.security.version>
 		<spring.security.oauth.version>1.0.5.RELEASE</spring.security.oauth.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
@@ -84,6 +84,11 @@
 			<url>http://maven.springframework.org/release</url>
 		</repository>
 		<repository>
+			<id>jcenter-release</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
+		</repository>
+		<repository>
 			<id>spring-maven-milestone</id>
 			<name>Spring Maven Milestone Repository</name>
 			<url>http://maven.springframework.org/milestone</url>
@@ -124,6 +129,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.mangofactory</groupId>
+			<artifactId>swagger-springmvc</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
