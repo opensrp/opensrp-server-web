@@ -30,7 +30,7 @@
     <input type="text" id="username" name='j_username' styleClass="form-control" placeholder="Username" required="required" autofocus="autofocus" />
     </div>
 
-    <div styleClass="form-group"
+    <div styleClass="form-group">
     <label for="password" styleClass="sr-only">Password</label>
     <input type="password" name='j_password' id="password" styleClass="form-control" placeholder="Password" required="required" />
     </div>
