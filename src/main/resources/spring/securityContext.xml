@@ -14,7 +14,11 @@
     <security:authentication-manager id="opensrpAuthenticationManager">
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
-    
+
+	<security:http pattern="/js/**" security="none" />
+	<security:http pattern="/css/**" security="none" />
+	<security:http pattern="/images/**" security="none" />
+      
 	<beans profile="oauth2">
 		<import resource="oauth-authorization.xml" />
 		<import resource="oauth-common.xml" />
