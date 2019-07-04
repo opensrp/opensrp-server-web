@@ -13,14 +13,14 @@
 	response.setHeader("Pragma", "No-cache");
 %>
 
-<div styleClass="oauth-container-div text-center" id="content">
-	<img styleClass="mb-4 opensrplogo" src="images/opensrplogo.png" alt="openSRP logo" />
+<div class="oauth-container-div text-center" id="content">
+	<img class="mb-4 opensrplogo" src="images/opensrplogo.png" alt="openSRP logo" />
 	<jsp:scriptlet>if
 		(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY) != null
 		&& !(session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)
 		instanceof UnapprovedClientAuthenticationException)) {</jsp:scriptlet>
-	<div styleClass="alert alert-danger" role="alert">
-		<p styleClass="h3 mb-3 font-weight-normal" >Error!</h2>
+	<div class="alert alert-danger" role="alert">
+		<p class="h3 mb-3 font-weight-normal" >Error!</h2>
 
 		<p>
 			Access could not be granted. (<%=((AuthenticationException) session
@@ -32,7 +32,7 @@
 	<c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION" />
 
 	<authz:authorize ifAllGranted="ROLE_OPENMRS">
-		<h1 styleClass="h3 mb-3 font-weight-normal">Please Confirm</h1>
+		<h1 class="h3 mb-3 font-weight-normal">Please Confirm</h1>
 
 		<p>
 			You hereby authorize "
@@ -42,17 +42,17 @@
 		<br>
 		<form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize"
 			method="post">
-			<div styleClass="form-group">
+			<div class="form-group">
 				<input name="user_oauth_approval" value="true" type="hidden" /> <label>
-					<input name="authorize" styleClass="btn btn-primary btn-block" type="submit" value="Authorize" />
+					<input name="authorize" class="btn btn-primary btn-block" type="submit" value="Authorize" />
 				</label>
 			</div>
 		</form>
 
 		<form id="denialForm" name="denialForm" action="<%=request.getContextPath()%>/oauth/authorize" method="post">
-			<div styleClass="form-group">
+			<div class="form-group">
 				<input name="user_oauth_approval" value="false" type="hidden" /> <label>
-					<input name="deny" styleClass="btn btn-primary btn-block" type="submit" value="Deny" />
+					<input name="deny" class="btn btn-primary btn-block" type="submit" value="Deny" />
 				</label>
 			</div>
 		</form>
