@@ -13,7 +13,7 @@
     http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <context:property-placeholder location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
-    
+
     <import resource="classpath:applicationContext-opensrp.xml"/>
     <import resource="classpath:applicationContext-opensrp-form.xml"/>
     <import resource="classpath:applicationContext-connector.xml"/>
