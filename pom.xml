@@ -1,7 +1,7 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.smartregister</groupId>
 
@@ -19,7 +19,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.1.1.RELEASE</spring.version>
+		<spring.version>3.2.3.RELEASE</spring.version>
 		<spring.security.version>3.1.2.RELEASE</spring.security.version>
 		<spring.security.oauth.version>1.0.5.RELEASE</spring.security.oauth.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
@@ -27,7 +27,7 @@
 		<jackson.version>1.9.7</jackson.version>
 		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>1.1.7-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>1.1.6-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>1.0.3-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.2-SNAPSHOT</opensrp.common.version>
@@ -84,6 +84,11 @@
 			<url>http://maven.springframework.org/release</url>
 		</repository>
 		<repository>
+			<id>jcenter-release</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
+		</repository>
+		<repository>
 			<id>spring-maven-milestone</id>
 			<name>Spring Maven Milestone Repository</name>
 			<url>http://maven.springframework.org/milestone</url>
@@ -124,6 +129,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.mangofactory</groupId>
+			<artifactId>swagger-springmvc</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
@@ -229,7 +239,7 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-test-mvc -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -282,20 +292,20 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>commons-codec</groupId>
-		    <artifactId>commons-codec</artifactId>
-		    <version>1.9</version>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.9</version>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-taglibs</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-		 <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>${spring.security.oauth.version}</version>
-         </dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>${spring.security.oauth.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -414,7 +424,7 @@
 							<port>${jetty.port}</port>
 						</connector>
 						<connector
-							implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+								implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
 							<port>8443</port>
 							<keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
 							<keyPassword>mouse monitor cube</keyPassword>
@@ -568,7 +578,7 @@
 		<profile>
 			<id>basic_auth</id>
 			<activation>
-			<activeByDefault>true</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>opensrp.auth.type</name>
 					<value>basic_auth</value>

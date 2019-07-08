@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	   xmlns:security="http://www.springframework.org/schema/security"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
           http://www.springframework.org/schema/security
-          http://www.springframework.org/schema/security/spring-security-3.1.xsd">
-          
-		<security:http auto-config="true" realm="OpenSRP" create-session="stateless" authentication-manager-ref="opensrpAuthenticationManager">
-	        <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-	        <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-	        <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-	        <security:intercept-url pattern="/multimedia/profileimage/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-	        <security:intercept-url pattern="/user-details" access="IS_AUTHENTICATED_ANONYMOUSLY"/>        
-	        <security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-	        <security:intercept-url pattern="/rest/event/getAll" access="ROLE_ALL_EVENTS"/>
-	        <security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
-	        <security:http-basic/>
-    	</security:http>
+          http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+	<security:http auto-config="true" realm="OpenSRP" create-session="stateless" authentication-manager-ref="opensrpAuthenticationManager">
+		<security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/multimedia/profileimage/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/user-details" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<security:intercept-url pattern="/rest/event/getAll" access="ROLE_ALL_EVENTS"/>
+		<security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
+		<security:http-basic/>
+	</security:http>
 
 </beans>
