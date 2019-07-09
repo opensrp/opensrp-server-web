@@ -39,7 +39,6 @@
 			<c:out value="${client.clientId}" />
 			" to access your protected resources.
 		</p>
-		<br>
 		<form id="confirmationForm" name="confirmationForm" action="<%=request.getContextPath()%>/oauth/authorize"
 			method="post">
 			<div class="form-group">
