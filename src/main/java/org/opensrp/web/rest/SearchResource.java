@@ -115,8 +115,10 @@ public class SearchResource extends RestResource<Client> {
 			String LAST_NAME = "last_name";
 			String BIRTH_DATE = "birth_date";
 			
+			//Attributes
 			String INACTIVE = "inactive";
 			String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
+			String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
 			
 			Integer limit = getIntegerFilter("limit", request);
 			if (limit == null || limit.intValue() == 0) {
@@ -130,6 +132,7 @@ public class SearchResource extends RestResource<Client> {
 			searchBean.setGender(getStringFilter(GENDER, request));
 			String inActive = getStringFilter(INACTIVE, request);
 			String lostToFollowUp = getStringFilter(LOST_TO_FOLLOW_UP, request);
+			String nfcCardIdentifier = getStringFilter(NFC_CARD_IDENTIFIER, request);
 			
 			DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 			DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
@@ -152,7 +155,8 @@ public class SearchResource extends RestResource<Client> {
 			}
 			
 			Map<String, String> attributes = new HashMap<String, String>();
-			if (!StringUtils.isEmptyOrWhitespaceOnly(inActive) || !StringUtils.isEmptyOrWhitespaceOnly(lostToFollowUp)) {
+			if (!StringUtils.isEmptyOrWhitespaceOnly(inActive) || !StringUtils.isEmptyOrWhitespaceOnly(lostToFollowUp)
+			        || !StringUtils.isEmptyOrWhitespaceOnly(nfcCardIdentifier)) {
 				
 				if (!StringUtils.isEmptyOrWhitespaceOnly(inActive)) {
 					attributes.put(INACTIVE, inActive);
@@ -160,6 +164,10 @@ public class SearchResource extends RestResource<Client> {
 				
 				if (!StringUtils.isEmptyOrWhitespaceOnly(lostToFollowUp)) {
 					attributes.put(LOST_TO_FOLLOW_UP, lostToFollowUp);
+				}
+				
+				if (!StringUtils.isEmptyOrWhitespaceOnly(nfcCardIdentifier)) {
+					attributes.put("NFC_Card_Identifier", nfcCardIdentifier);//Key different case than constant
 				}
 			}
 			
