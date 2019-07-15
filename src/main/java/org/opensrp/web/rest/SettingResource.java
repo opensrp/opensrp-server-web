@@ -1,16 +1,9 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -33,10 +26,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/settings")
