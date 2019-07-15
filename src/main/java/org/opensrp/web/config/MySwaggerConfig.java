@@ -1,6 +1,8 @@
 package org.opensrp.web.config;
 
 import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
+import com.mangofactory.swagger.models.dto.ApiInfo;
+import com.mangofactory.swagger.models.dto.builder.ApiInfoBuilder;
 import com.mangofactory.swagger.plugin.EnableSwagger;
 import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,20 @@ public class MySwaggerConfig {
     @Bean
     public SwaggerSpringMvcPlugin customImplementation(){
         return new SwaggerSpringMvcPlugin(this.springSwaggerConfig)
-                .includePatterns(".*");
+                .apiInfo(apiInfo())
+                .includePatterns(".*rest.*"); // assuming the API lives at something like http://myapp/rest
     }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("TITLE")
+                .description("OPENSRP DESCRIPTION")
+                //.version("VERSION")
+                .termsOfServiceUrl("http://terms-of-services.url")
+                .license("OPENSRP LICENSE")
+                .licenseUrl("http://url-to-license.com")
+                .build();
+    }
+
 
 }
