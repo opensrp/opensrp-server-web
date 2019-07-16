@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
-import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
