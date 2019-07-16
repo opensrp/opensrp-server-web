@@ -38,8 +38,8 @@ public class LocationResource {
 
 	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
 
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			 .registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();
+	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm")
+			.registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();
 
 	public static final String IS_JURISDICTION = "is_jurisdiction";
 
