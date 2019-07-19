@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
@@ -14,26 +13,28 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class MySwaggerConfig extends WebMvcConfigurerAdapter {
+public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public Docket api(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.regex("/rest/.*"))
+                /*uncomment the line below in order to filter urls.
+                 in this case only show urls that have "/rest/"
+                */
+                //.paths(PathSelectors.regex("/rest/.*"))
                 .build()
                 .apiInfo(apiInfo());
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("OPENSRP TITLE")
-                .description("OPENSRP DESCRIPTION")
-                .version("OPENSRP VERSION")
-                .termsOfServiceUrl("http://terms-of-services.url")
+                .title("OPENSRP API")
+                .description("Open Smart Register Platform (OpenSRP)")
+                .version("VERSION 1.0")
                 .license("OPENSRP LICENSE")
-                .licenseUrl("http://url-to-license.com")
+                .licenseUrl("https://github.com/OpenSRP/opensrp-server-web/blob/master/LICENSE")
                 .build();
     }
 

@@ -79,13 +79,9 @@
                   p:extractValueFromSingleKeyModel="true" />
         </property>
     </bean>
-
-    <!--<mvc:annotation-driven/>  Required so swagger-springmvc can access spring's RequestMappingHandlerMapping
-    <bean class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />-->
-
     <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
     <mvc:annotation-driven/>
 
-    <bean class="org.opensrp.web.config.MySwaggerConfig"/>
+    <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
 </beans>
