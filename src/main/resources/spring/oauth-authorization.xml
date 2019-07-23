@@ -17,7 +17,9 @@
 	<sec:http pattern="/rest/**" create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager">
-		<sec:anonymous enabled="false" />
+		<sec:anonymous enabled="true" />
+		<sec:intercept-url pattern="/rest/**"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />
 		<sec:intercept-url pattern="/rest/event/getAll"
 			access="ROLE_ALL_EVENTS" />
 		<sec:intercept-url pattern="/rest/**"
@@ -28,12 +30,14 @@
 			ref="oauthAccessDeniedHandler" />
 		<sec:http-basic />
 	</sec:http>
-	
+
 	<sec:http pattern="/user-details" create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager">
-		<sec:anonymous enabled="false" />
-		<sec:intercept-url pattern="/rest/**"
+		<sec:anonymous enabled="true" />
+		<sec:intercept-url pattern="/user-details"
+			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />
+		<sec:intercept-url pattern="/user-details"
 			access="ROLE_OPENMRS" />
 		<sec:custom-filter ref="resourceServerFilter"
 			before="PRE_AUTH_FILTER" />
@@ -92,7 +96,7 @@
 	</oauth:authorization-server>
 
 	<import resource="oauth_clients.xml" />
-	
+
 	<bean id="tokenServices"
 		class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
