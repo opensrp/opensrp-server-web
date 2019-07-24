@@ -144,7 +144,7 @@ public class MultimediaController {
 		
 		String contentType = file.getContentType();
 		
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId, providerId, contentType, null, fileCategory);
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId, providerId, contentType, null, fileCategory.trim());
 		
 		String status = multimediaService.saveMultimediaFile(multimediaDTO, file);
 		
