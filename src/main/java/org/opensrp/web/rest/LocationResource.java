@@ -194,6 +194,12 @@ public class LocationResource {
 	}
 
 	/**
+	 * This methods provides an API endpoint that searches for jurisdictions and structures with the properties including parentId. 
+	 * It returns the Geometry optionally if @param returnGeometry is set to true. 
+	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param propertiesFilters list of params with each param having name and value e.g name:House1
+	 * @return the structures or jurisdictions matching the params 
 	 */
 	@RequestMapping(value = "/findByProperties", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
