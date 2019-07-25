@@ -2,7 +2,9 @@ package org.opensrp.web.rest;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +54,10 @@ public class LocationResource {
 	public static final String LONGITUDE = "longitude";
 
 	public static final String RADIUS = "radius";
+
+	public static final String RETURN_GEOMETRY = "return_geometry";
+
+	public static final String PROPERTIES_FILTER = "properties_filter";
 
 	private PhysicalLocationService locationService;
 
@@ -179,6 +185,42 @@ public class LocationResource {
 			Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
 					radius);
 			return new ResponseEntity<>(gson.toJson(structures), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 */
+	@RequestMapping(value = "/findByProperties", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByLocationProperties(
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = PROPERTIES_FILTER, required = false) List<String> propertiesFilters) {
+
+		try {
+			String parentId = null;
+			Map<String, String> filters = null;
+			if (propertiesFilters != null) {
+				filters = new HashMap<>();
+				for (String filter : propertiesFilters) {
+					String[] filterArray = filter.split(":");
+					if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
+							|| "parentId".equalsIgnoreCase(filterArray[0]))) {
+						parentId = filterArray[1];
+
+					} else if (filterArray.length == 2) {
+						filters.put(filterArray[0], filterArray[1]);
+					}
+				}
+			}
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationByProperties(returnGeometry, parentId, filters)),
+					HttpStatus.OK);
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
