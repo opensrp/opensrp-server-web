@@ -218,9 +218,15 @@ public class LocationResource {
 					}
 				}
 			}
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationByProperties(returnGeometry, parentId, filters)),
-					HttpStatus.OK);
+			if (isJurisdiction) {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
+						HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
+						HttpStatus.OK);
+			}
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
