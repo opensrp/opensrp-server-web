@@ -73,8 +73,7 @@ public class MultimediaController {
 
 				downloadFile(file, response);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("", e);
 		}
 	}
@@ -96,8 +95,8 @@ public class MultimediaController {
 		downloadFile(baseEntityId, userName, password, request, response);
 	}
 
-	@RequestMapping(value = "/{entity-id}", method = RequestMethod.GET)
-	public ResponseEntity<String> downloadFiles(HttpServletResponse response,
+	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
+	public void downloadFiles(HttpServletResponse response,
 												HttpServletRequest request,
 												@PathVariable("entity-id") String entityId,
 												@RequestParam("content-type") String contentType,
@@ -105,13 +104,23 @@ public class MultimediaController {
 												@RequestHeader(value = "username") String userName,
 												@RequestHeader(value = "password") String password) {
 
-		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
-			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+		// todo: change this to a common repo constant
+		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
+		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
+			try {
+				List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+				for (Multimedia multiMedia : multimediaFiles) {
+					String filePath = multiMedia.getFilePath();
+					File file = new File(filePath);
+					downloadFile(file, response);
+				}
+			} catch (Exception e) {
+				logger.error("", e);
+			}
 		} else {
 			// default to profile image retrieval logic
 			downloadFile(entityId, userName, password, request, response);
 		}
-		return null;
 	}
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
@@ -185,13 +194,13 @@ public class MultimediaController {
 		}
 		
 		logger.info("mimetype : " + mimeType);
-		
+
 		response.setContentType(mimeType);
-		
+
 		/* "Content-Disposition : inline" will show viewable types [like images/text/pdf/anything viewable by browser] right on browser 
 		    while others(zip e.g) will be directly downloaded [may provide save as popup, based on your browser setting.]*/
 		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
-		
+
 		/* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
 		//response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
 		
