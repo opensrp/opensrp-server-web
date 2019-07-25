@@ -1,19 +1,7 @@
 package org.opensrp.web.controller;
 
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.gson.Gson;
+import org.apache.http.util.TextUtils;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
@@ -31,14 +19,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.util.List;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping("/multimedia")
@@ -71,16 +62,15 @@ public class MultimediaController {
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
 	public void downloadFile(HttpServletResponse response, @PathVariable("fileName") String fileName,
 	                         @RequestHeader(value = "username") String userName,
-	                         @RequestHeader(value = "password") String password, HttpServletRequest request)
-	    throws Exception {
-		
+	                         @RequestHeader(value = "password") String password, HttpServletRequest request) {
+
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + "images" + File.separator + fileName);
 				if (fileName.endsWith("mp4")) {
 					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName);
 				}
-				
+
 				downloadFile(file, response);
 			}
 		}
@@ -102,38 +92,26 @@ public class MultimediaController {
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
 	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
 	                                   @RequestHeader(value = "username") String userName,
-	                                   @RequestHeader(value = "password") String password, HttpServletRequest request)
-	    throws Exception {
-		
-		try {
-			if (authenticate(userName, password, request).isAuthenticated()) {
-				
-				Multimedia multiMedia = multimediaService.findByCaseId(baseEntityId);
-				if (multiMedia == null || multiMedia.getFilePath() == null) {
-					//see if the file exists in the disk with the assumption that it's .jpg otherwise return error msg
-					File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator
-					        + baseEntityId + ".jpg");
-					if (file.exists()) {
-						downloadFile(file, response);
-					} else {
-						String errorMessage = "Sorry. The file you are looking for does not exist";
-						logger.info(errorMessage);
-						OutputStream outputStream = response.getOutputStream();
-						outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-						outputStream.close();
-						return;
-					}
-				}
-				String filePath = multiMedia.getFilePath();
-				
-				File file = new File(filePath);
-				downloadFile(file, response);
-			}
+	                                   @RequestHeader(value = "password") String password, HttpServletRequest request) {
+		downloadFile(baseEntityId, userName, password, request, response);
+	}
+
+	@RequestMapping(value = "/{entity-id}", method = RequestMethod.GET)
+	public ResponseEntity<String> downloadFiles(HttpServletResponse response,
+												HttpServletRequest request,
+												@PathVariable("entity-id") String entityId,
+												@RequestParam("content-type") String contentType,
+												@RequestParam("file-category") String fileCategory,
+												@RequestHeader(value = "username") String userName,
+												@RequestHeader(value = "password") String password) {
+
+		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
+			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+		} else {
+			// default to profile image retrieval logic
+			downloadFile(entityId, userName, password, request, response);
 		}
-		catch (Exception e) {
-			logger.error("", e);
-		}
-		
+		return null;
 	}
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
@@ -150,6 +128,37 @@ public class MultimediaController {
 		
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
+
+	private void downloadFile(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
+		try {
+			if (authenticate(userName, password, request).isAuthenticated()) {
+
+				Multimedia multiMedia = multimediaService.findByCaseId(baseEntityId);
+				if (multiMedia == null || multiMedia.getFilePath() == null) {
+					//see if the file exists in the disk with the assumption that it's .jpg otherwise return error msg
+					File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator
+							+ baseEntityId + ".jpg");
+					if (file.exists()) {
+						downloadFile(file, response);
+					} else {
+						String errorMessage = "Sorry. The file you are looking for does not exist";
+						logger.info(errorMessage);
+						OutputStream outputStream = response.getOutputStream();
+						outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+						outputStream.close();
+						return;
+					}
+				}
+				String filePath = multiMedia.getFilePath();
+
+				File file = new File(filePath);
+				downloadFile(file, response);
+			}
+		}
+		catch (Exception e) {
+			logger.error("", e);
+		}
+	}
 	
 	private Authentication authenticate(String userName, String password, HttpServletRequest request) {
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userName, password);
@@ -157,7 +166,7 @@ public class MultimediaController {
 		auth.setDetails(details);
 		return provider.authenticate(auth);
 	}
-	
+
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 		
 		if (!file.exists()) {
@@ -193,5 +202,4 @@ public class MultimediaController {
 		//Copy bytes from source to destination(outputstream in this example), closes both streams.
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
 	}
-	
 }
