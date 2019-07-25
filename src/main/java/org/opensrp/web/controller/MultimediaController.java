@@ -107,14 +107,62 @@ public class MultimediaController {
 		// todo: change this to a common repo constant
 		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
+			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+			response.setContentType("multipart/x-mixed-replace;boundary=END");
+			String contentTypeHeader = "Content-type: " + contentType;
+			byte[] crlf = "\r\n".getBytes();
+
 			try {
-				List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+				OutputStream outputStream = response.getOutputStream();
+				// Print the boundary string
+				outputStream.write(crlf);
+				outputStream.write("--END".getBytes());
+				outputStream.write(crlf);
 				for (Multimedia multiMedia : multimediaFiles) {
-					String filePath = multiMedia.getFilePath();
-					File file = new File(filePath);
-					downloadFile(file, response);
+					// Get the file
+					FileInputStream fis = null;
+					File file = new File(multiMedia.getFilePath());
+					try {
+						fis = new FileInputStream(file);
+
+					} catch (FileNotFoundException fnfe) {
+						// If the file does not exists, continue with the next file
+						System.out.println("Couldfind file " + file.getAbsolutePath());
+						continue;
+					}
+
+					BufferedInputStream fif = new BufferedInputStream(fis);
+
+					// Print the content type
+					outputStream.write(contentTypeHeader.getBytes());
+					outputStream.write(crlf);
+					outputStream.write(("Content-Disposition: attachment; filename=" + file.getName()).getBytes());
+					outputStream.write(crlf);
+					outputStream.write(crlf);
+
+					System.out.println("Sending " + file.getName());
+
+					// Write the contents of the file
+					int data = 0;
+					while ((data = fif.read()) != -1) {
+						outputStream.write(data);
+					}
+					fif.close();
+
+					// Print the boundary string
+					outputStream.write(crlf);
+					outputStream.write("--END".getBytes());
+					outputStream.write(crlf);
+					outputStream.flush();
+					System.out.println("Finisheding file " + file.getName());
 				}
-			} catch (Exception e) {
+
+				// Print the ending boundary string
+				outputStream.write("--END--".getBytes());
+				outputStream.write(crlf);
+				outputStream.flush();
+				outputStream.close();
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 		} else {
