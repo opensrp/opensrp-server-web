@@ -99,8 +99,8 @@ public class MultimediaController {
 	public void downloadFiles(HttpServletResponse response,
 												HttpServletRequest request,
 												@PathVariable("entity-id") String entityId,
-												@RequestParam("content-type") String contentType,
-												@RequestParam("file-category") String fileCategory,
+												@RequestParam(value = "content-type", required = false) String contentType,
+												@RequestParam(value = "file-category", required = false) String fileCategory,
 												@RequestHeader(value = "username") String userName,
 												@RequestHeader(value = "password") String password) {
 
