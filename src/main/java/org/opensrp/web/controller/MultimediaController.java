@@ -28,6 +28,8 @@ import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -108,60 +110,33 @@ public class MultimediaController {
 		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
 			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
-			response.setContentType("multipart/x-mixed-replace;boundary=END");
-			String contentTypeHeader = "Content-type: " + contentType;
-			byte[] crlf = "\r\n".getBytes();
-
+			response.setContentType("image/jpeg/zip");
+			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
-				OutputStream outputStream = response.getOutputStream();
-				// Print the boundary string
-				outputStream.write(crlf);
-				outputStream.write("--END".getBytes());
-				outputStream.write(crlf);
+				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
 				for (Multimedia multiMedia : multimediaFiles) {
-					// Get the file
-					FileInputStream fis = null;
+					FileInputStream inputStream;
 					File file = new File(multiMedia.getFilePath());
+					logger.info("Adding " + file.getName());
+					zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
 					try {
-						fis = new FileInputStream(file);
-
-					} catch (FileNotFoundException fnfe) {
-						// If the file does not exists, continue with the next file
-						System.out.println("Couldfind file " + file.getAbsolutePath());
+						inputStream = new FileInputStream(file);
+					} catch (FileNotFoundException e) {
+						logger.info("Could not find file " + file.getAbsolutePath());
 						continue;
 					}
 
-					BufferedInputStream fif = new BufferedInputStream(fis);
-
-					// Print the content type
-					outputStream.write(contentTypeHeader.getBytes());
-					outputStream.write(crlf);
-					outputStream.write(("Content-Disposition: attachment; filename=" + file.getName()).getBytes());
-					outputStream.write(crlf);
-					outputStream.write(crlf);
-
-					System.out.println("Sending " + file.getName());
-
 					// Write the contents of the file
-					int data = 0;
-					while ((data = fif.read()) != -1) {
-						outputStream.write(data);
+					BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+					int data;
+					while ((data = bufferedInputStream.read()) != -1) {
+						zipOutputStream.write(data);
 					}
-					fif.close();
-
-					// Print the boundary string
-					outputStream.write(crlf);
-					outputStream.write("--END".getBytes());
-					outputStream.write(crlf);
-					outputStream.flush();
-					System.out.println("Finisheding file " + file.getName());
+					bufferedInputStream.close();
+					zipOutputStream.closeEntry();
+					logger.info("Done downloading file " + file.getName());
 				}
-
-				// Print the ending boundary string
-				outputStream.write("--END--".getBytes());
-				outputStream.write(crlf);
-				outputStream.flush();
-				outputStream.close();
+				zipOutputStream.close();
 			} catch (IOException e) {
 				logger.error("", e);
 			}
