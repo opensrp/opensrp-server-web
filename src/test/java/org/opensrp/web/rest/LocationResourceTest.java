@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -21,7 +22,9 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.json.JSONArray;
@@ -66,6 +69,15 @@ public class LocationResourceTest {
 
 	@Captor
 	private ArgumentCaptor<PhysicalLocation> argumentCaptor;
+
+	@Captor
+	private ArgumentCaptor<Map<String, String>> mapCaptor;
+
+	@Captor
+	private ArgumentCaptor<Boolean> booleanCaptor;
+
+	@Captor
+	private ArgumentCaptor<String> stringCaptor;
 
 	private MockMvc mockMvc;
 
@@ -447,6 +459,76 @@ public class LocationResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		assertEquals(LocationResource.gson.toJson(expectedDetails), result.getResponse().getContentAsString());
 		verify(locationService).findStructuresWithinRadius(latitude, longitude, radius);
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithoutParamsQueriesStructures() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		locations.get(0).setGeometry(null);
+		when(locationService.findStructuresByProperties(false, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByProperties(false, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithIsJuridictionsRetunsLocations() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		locations.get(0).setGeometry(null);
+		when(locationService.findLocationsByProperties(false, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(false, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesReturnsGeometry() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(true, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties")
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.RETURN_GEOMETRY, "true"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(true, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testFindByLocationPropertiesParamsPassedCorrectly() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(anyBoolean(), anyString(), any(Map.class)))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.PROPERTIES_FILTER, "name:H123,type:Residential,parentId:1234"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(),
+				mapCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertTrue(booleanCaptor.getValue());
+		assertEquals("1234", stringCaptor.getValue());
+		Map<String, String> properties = mapCaptor.getValue();
+		assertEquals(2, properties.size());
+		assertEquals("H123", properties.get("name"));
+		assertEquals("Residential", properties.get("type"));
+		assertNull(properties.get("parentId"));
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithError() throws Exception {
+		when(locationService.findStructuresByProperties(false, null, null)).thenThrow(new RuntimeException());
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties"))
+				.andExpect(status().isInternalServerError()).andReturn();
+		verify(locationService).findStructuresByProperties(false, null, null);
+		assertEquals("", result.getResponse().getContentAsString());
 
 	}
 
