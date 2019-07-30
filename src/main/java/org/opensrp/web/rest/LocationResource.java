@@ -6,13 +6,20 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.opensrp.util.PropertiesConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +43,8 @@ public class LocationResource {
 
 	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
 
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			.create();
+	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm")
+			.registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();
 
 	public static final String IS_JURISDICTION = "is_jurisdiction";
 
@@ -52,6 +59,10 @@ public class LocationResource {
 	public static final String LONGITUDE = "longitude";
 
 	public static final String RADIUS = "radius";
+
+	public static final String RETURN_GEOMETRY = "return_geometry";
+
+	public static final String PROPERTIES_FILTER = "properties_filter";
 
 	private PhysicalLocationService locationService;
 
@@ -180,6 +191,54 @@ public class LocationResource {
 			Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
 					radius);
 			return new ResponseEntity<>(gson.toJson(structures), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 * This methods provides an API endpoint that searches for jurisdictions and structures with the properties including parentId. 
+	 * It returns the Geometry optionally if @param returnGeometry is set to true. 
+	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param propertiesFilters list of params with each param having name and value e.g name:House1
+	 * @return the structures or jurisdictions matching the params 
+	 */
+	@RequestMapping(value = "/findByProperties", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByLocationProperties(
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = PROPERTIES_FILTER, required = false) List<String> propertiesFilters) {
+
+		try {
+			String parentId = null;
+			Map<String, String> filters = null;
+			if (propertiesFilters != null) {
+				filters = new HashMap<>();
+				for (String filter : propertiesFilters) {
+					String[] filterArray = filter.split(":");
+					if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
+							|| "parentId".equalsIgnoreCase(filterArray[0]))) {
+						parentId = filterArray[1];
+
+					} else if (filterArray.length == 2) {
+						filters.put(filterArray[0], filterArray[1]);
+					}
+				}
+			}
+			if (isJurisdiction) {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
+						HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
+						HttpStatus.OK);
+			}
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
