@@ -22,6 +22,7 @@ import org.opensrp.common.domain.UserDetail;
 import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,7 @@ public class UserController {
 				user = openmrsUserService.getUser(userName);
 				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
 				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail, OK);
+				return new ResponseEntity<>(userDetail,RestUtils.getJSONUTF8Headers(), OK);
 			} catch (JSONException e) {
 				logger.error("Error getting user details", e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -170,7 +171,7 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpAllowedSources), OK);
+		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
 	@RequestMapping("/security/configuration")
@@ -178,7 +179,7 @@ public class UserController {
 	public ResponseEntity<String> configuration() throws JSONException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
-		return new ResponseEntity<>(new Gson().toJson(map), allowOrigin(opensrpAllowedSources), OK);
+		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
 	public void setOpenmrsUserService(OpenmrsUserService openmrsUserService) {
