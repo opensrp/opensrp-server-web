@@ -75,7 +75,7 @@ public class OauthAuthenticationProviderTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testAuthenticateWithDetailsInvocatesUsesCachedDrishtiProvider() throws JSONException {
+	public void testAuthenticateWithDetailsCachesAuthentication() throws JSONException {
 		User user = new User(UUID.randomUUID().toString());
 		WebAuthenticationDetails authenticationDetails = mock(WebAuthenticationDetails.class);
 		when(authenticationDetails.getRemoteAddress()).thenReturn("::");
