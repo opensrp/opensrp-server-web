@@ -42,7 +42,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
 	public static final String INTERNAL_ERROR = "Failed to authenticate user due to internal server error. Please try again later.";
 
-	private static final String AUTH_HASH_KEY = "_auth";
+	protected static final String AUTH_HASH_KEY = "_auth";
 
 	private static final String GET_ALL_EVENTS_ROlE = "OpenSRP: Get All Events";
 
