@@ -18,12 +18,10 @@ import static org.mockito.Mockito.when;
 
 @RunWith(JUnit4.class)
 public class SwaggerConfigTest {
-    private ApiInfo apiInfo;
     private SwaggerConfig swaggerConfig;
 
     @Before
     public void setUp() {
-        apiInfo = mock(ApiInfo.class);
         swaggerConfig = mock(SwaggerConfig.class);
     }
 
