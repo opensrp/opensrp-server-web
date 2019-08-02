@@ -25,10 +25,10 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
                 */
                 //.paths(PathSelectors.regex("/rest/.*"))
                 .build()
-                .apiInfo(apiInfo());
+                .apiInfo(getApiInfo());
     }
 
-    private ApiInfo apiInfo() {
+    public ApiInfo getApiInfo() {
         return new ApiInfoBuilder()
                 .title("OPENSRP API")
                 .description("Open Smart Register Platform (OpenSRP)")
