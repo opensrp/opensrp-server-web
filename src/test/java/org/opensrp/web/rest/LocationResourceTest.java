@@ -1,32 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,6 +26,33 @@ import org.springframework.test.web.server.MockMvc;
 import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -85,6 +85,7 @@ public class LocationResourceTest {
 	private PhysicalLocationService locationService;
 
 	private String BASE_URL = "/rest/location/";
+	private boolean DEFAULT_RETURN_BOOLEAN = true;
 
 	public String structureJson = "{\"type\":\"Feature\",\"id\":\"90397\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[32.5978597,-14.1699446],[32.5978956,-14.1699609],[32.5978794,-14.1699947],[32.5978434,-14.1699784],[32.5978597,-14.1699446]]]},\"properties\":{\"uid\":\"41587456-b7c8-4c4e-b433-23a786f742fc\",\"code\":\"21384443\",\"type\":\"Residential Structure\",\"status\":\"Active\",\"parentId\":\"3734\",\"geographicLevel\":5,\"effectiveStartDate\":\"2017-01-10T0000\",\"version\":0}}";
 
@@ -100,12 +101,12 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueId() throws Exception {
-		when(locationService.getLocation("3734")).thenReturn(createLocation());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenReturn(createLocation());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getLocation("3734");
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(parentJson, result.getResponse().getContentAsString());
 
@@ -113,22 +114,22 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getLocation("3734")).thenThrow(new RuntimeException());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isInternalServerError());
-		verify(locationService).getLocation("3734");
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 
 	}
 
 	@Test
 	public void testGetStructureByUniqueId() throws Exception {
-		when(locationService.getStructure("90397")).thenReturn(createStructure());
+		when(locationService.getStructure("90397", DEFAULT_RETURN_BOOLEAN)).thenReturn(createStructure());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "90397").param(LocationResource.IS_JURISDICTION, "false"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getStructure("90397");
+		verify(locationService).getStructure("90397", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(structureJson, result.getResponse().getContentAsString());
 
@@ -136,10 +137,10 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetStructureByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getStructure("90397")).thenThrow(new RuntimeException());
+		when(locationService.getStructure("90397", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "90397").param(LocationResource.IS_JURISDICTION, "false"))
 				.andExpect(status().isInternalServerError()).andReturn();
-		verify(locationService).getStructure("90397");
+		verify(locationService).getStructure("90397", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 
 	}
