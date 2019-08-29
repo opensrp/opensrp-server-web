@@ -1,12 +1,9 @@
 package org.opensrp.web.rest;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
@@ -27,10 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -46,6 +45,8 @@ public class LocationResource {
 	public static final String PARENT_ID = "parent_id";
 
 	private static final String FALSE = "false";
+
+	private static final String TRUE = "true";
 
 	public static final String LOCATION_NAMES = "location_names";
 
@@ -68,10 +69,11 @@ public class LocationResource {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
+					gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
