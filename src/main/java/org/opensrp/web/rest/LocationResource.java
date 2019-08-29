@@ -260,7 +260,7 @@ public class LocationResource {
 
         try {
             return new ResponseEntity<>(
-                    gson.toJson(locationService.findLocationsById(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
