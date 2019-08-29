@@ -43,6 +43,10 @@ public class PlanResource {
 
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 
+	public static final String IDENTIFIERS = "identifiers";
+
+	public static final String FIELDS = "fields";
+
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
@@ -121,6 +125,25 @@ public class PlanResource {
 		try {
 			return new ResponseEntity<>(gson.toJson(
 					planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@RequestMapping(value = "/findByIdsWithOptionalFields", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByIdentifiersReturnOptionalFields(HttpServletRequest request,
+			@RequestParam(value = IDENTIFIERS) List<String> identifiers,
+			@RequestParam(value = FIELDS) List<String> fields){
+
+		if (identifiers == null || identifiers.isEmpty()) {
+			return new ResponseEntity<>("Plan Id(s) required", HttpStatus.BAD_REQUEST);
+		}
+
+		try {
+			return new ResponseEntity<>(gson.toJson(
+					planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
