@@ -5,6 +5,9 @@ import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
+import static org.opensrp.common.AllConstants.Client.PROVIDERID;
+import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
+
 import static org.opensrp.web.rest.RestUtils.*;
 
 import java.text.ParseException;
@@ -67,6 +70,8 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
+		searchBean.setClientType(getStringFilter(CLIENTTYPE, request));
+		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
 		if (birthdate != null) {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
@@ -91,7 +96,7 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		
-		return clientService.findByCriteria(searchBean, addressSearchBean,  lastEdit == null ? null : lastEdit[0],
+		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 		    lastEdit == null ? null : lastEdit[1]);
 	}
 	
