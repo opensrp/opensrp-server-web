@@ -46,6 +46,8 @@ public class LocationResource {
 
 	private static final String FALSE = "false";
 
+	private static final String TRUE = "true";
+
 	public static final String LOCATION_NAMES = "location_names";
 
 	public static final String LATITUDE = "latitude";
@@ -205,7 +207,7 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findByLocationProperties(
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry,
 			@RequestParam(value = PROPERTIES_FILTER, required = false) List<String> propertiesFilters) {
 
 		try {
