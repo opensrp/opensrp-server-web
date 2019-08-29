@@ -60,6 +60,8 @@ public class LocationResource {
 
 	public static final String PROPERTIES_FILTER = "properties_filter";
 
+    public static final String JURISDICTION_IDS = "jurisdiction_ids";
+
 	private PhysicalLocationService locationService;
 
 	@Autowired
@@ -242,5 +244,28 @@ public class LocationResource {
 		}
 
 	}
+
+    /**
+     * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
+     * It returns the Geometry optionally if @param returnGeometry is set to true.
+     * @param returnGeometry boolean which controls if geometry is returned
+     * @param jurisdictionIds list of jurisdiction ids
+     * @return jurisdictions whose ids match the provided params
+     */
+	@RequestMapping(value = "/findByJurisdictionIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByJurisdictionIds(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+
+        try {
+            return new ResponseEntity<>(
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
 }
