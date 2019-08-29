@@ -1,12 +1,9 @@
 package org.opensrp.web.rest;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
@@ -27,10 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -58,6 +57,8 @@ public class LocationResource {
 	public static final String RETURN_GEOMETRY = "return_geometry";
 
 	public static final String PROPERTIES_FILTER = "properties_filter";
+
+    public static final String JURISDICTION_IDS = "jurisdiction_ids";
 
 	private PhysicalLocationService locationService;
 
@@ -240,5 +241,28 @@ public class LocationResource {
 		}
 
 	}
+
+    /**
+     * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
+     * It returns the Geometry optionally if @param returnGeometry is set to true.
+     * @param returnGeometry boolean which controls if geometry is returned
+     * @param jurisdictionIds list of jurisdiction ids
+     * @return jurisdictions whose ids match the provided params
+     */
+	@RequestMapping(value = "/findByJurisdictionIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByJurisdictionIds(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+
+        try {
+            return new ResponseEntity<>(
+                    gson.toJson(locationService.findLocationsById(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
 }
