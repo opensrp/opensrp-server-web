@@ -46,6 +46,8 @@ public class LocationResource {
 
 	private static final String FALSE = "false";
 
+	private static final String TRUE = "true";
+
 	public static final String LOCATION_NAMES = "location_names";
 
 	public static final String LATITUDE = "latitude";
@@ -69,10 +71,11 @@ public class LocationResource {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
+					gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
