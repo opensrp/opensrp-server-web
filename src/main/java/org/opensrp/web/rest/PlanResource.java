@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -18,10 +17,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-
+import java.util.Collections;
 import java.util.List;
 
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -54,11 +57,16 @@ public class PlanResource {
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier) {
+	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
+			@RequestParam(value = FIELDS, required = false) List<String> fields) {
+		if (identifier == null) {
+			return new ResponseEntity<>("Plan Id is required", HttpStatus.BAD_REQUEST);
+		}
+
 		try {
-			String result = gson.toJson(planService.getPlan(identifier));
-			result = "null".equals(result) ? new JsonObject().toString() : result;
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(
+					planService.getPlansByIdsReturnOptionalFields(Collections.singletonList(identifier), fields)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -66,10 +74,11 @@ public class PlanResource {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans() {
+	public ResponseEntity<String> getPlans(@RequestParam(value = FIELDS, required = false) List<String> fields) {
 		try {
-			return new ResponseEntity<>(gson.toJson(planService.getAllPlans()), RestUtils.getJSONUTF8Headers(),
-					HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(
+					planService.getPlansByIdsReturnOptionalFields(null, fields)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,15 +141,19 @@ public class PlanResource {
 		}
 	}
 
+	/**
+	 * This method provides an API endpoint that searches for plans using a list of provided
+	 * plan identifiers and returns a subset of fields determined by the list of provided fields
+	 * If no plan identifier(s) are provided the method returns all available plans
+	 * If no fields are provided the method returns all the available fields
+	 * @param identifiers list of plan identifiers
+	 * @param fields list of fields to return
+	 * @return plan definitions whose identifiers match the provided params
+	 */
 	@RequestMapping(value = "/findByIdsWithOptionalFields", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findByIdentifiersReturnOptionalFields(HttpServletRequest request,
 			@RequestParam(value = IDENTIFIERS) List<String> identifiers,
-			@RequestParam(value = FIELDS) List<String> fields){
-
-		if (identifiers == null || identifiers.isEmpty()) {
-			return new ResponseEntity<>("Plan Id(s) required", HttpStatus.BAD_REQUEST);
-		}
-
+			@RequestParam(value = FIELDS, required = false) List<String> fields){
 		try {
 			return new ResponseEntity<>(gson.toJson(
 					planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
