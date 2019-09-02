@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
@@ -155,6 +156,14 @@ public class PlanResource {
 			@RequestParam(value = IDENTIFIERS) List<String> identifiers,
 			@RequestParam(value = FIELDS, required = false) List<String> fields){
 		try {
+
+			if (fields != null && !fields.isEmpty()) {
+				for (String fieldName : fields) {
+					if (!doesObjectContainField(new PlanDefinition(),fieldName)) {
+						return new ResponseEntity<>("One or more fields are invalid", HttpStatus.BAD_REQUEST);
+					}
+				}
+			}
 			return new ResponseEntity<>(gson.toJson(
 					planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
@@ -162,5 +171,15 @@ public class PlanResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	public boolean doesObjectContainField(Object object, String fieldName) {
+		Class<?> objectClass = object.getClass();
+		for (Field field : objectClass.getDeclaredFields()) {
+			if (field.getName().equals(fieldName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
