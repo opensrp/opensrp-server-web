@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.opensrp.web.config.SwaggerDocString.GET_LOCATION_TREE_BY_ID_ENDPOINT;
-import static org.opensrp.web.config.SwaggerDocString.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
-import static org.opensrp.web.config.SwaggerDocString.LOCATION_RESOURCE;
+import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
+import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
+import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
 
 
 @Controller

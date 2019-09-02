@@ -4,7 +4,7 @@ package org.opensrp.web.config;
  * Class containing descriptions for various resource endpoints and api operations
  * The text can stylized using markdown
  */
-public class SwaggerDocString {
+public class SwaggerDocStringHelper {
 
     public static final String LOCATION_RESOURCE = "Set of endpoints for fetching, creating and updating locations";
 
