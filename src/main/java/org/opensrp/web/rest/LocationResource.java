@@ -6,13 +6,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
@@ -27,9 +20,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import static org.opensrp.web.config.SwaggerDocStrings.*;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.opensrp.web.config.SwaggerDocStrings.GET_LOCATION_TREE_BY_ID_ENDPOINT;
+import static org.opensrp.web.config.SwaggerDocStrings.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
+import static org.opensrp.web.config.SwaggerDocStrings.LOCATION_RESOURCE;
+
 
 @Controller
 @RequestMapping(value = "/rest/location")
