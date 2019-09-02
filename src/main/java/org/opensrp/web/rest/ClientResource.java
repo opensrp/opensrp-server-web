@@ -7,17 +7,19 @@ import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
-
 import static org.opensrp.web.rest.RestUtils.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.opensrp.connector.openmrs.constants.OpenmrsHouseHold.HouseholdMember;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.postgres.HouseholdClient;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
@@ -70,7 +72,8 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
-		searchBean.setClientType(getStringFilter(CLIENTTYPE, request));
+		String clientType = getStringFilter(CLIENTTYPE, request);
+		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
 		if (birthdate != null) {
 			searchBean.setBirthdateFrom(birthdate[0]);
@@ -95,9 +98,28 @@ public class ClientResource extends RestResource<Client> {
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		List<String> ids = new ArrayList<String>();
 		
-		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
-		    lastEdit == null ? null : lastEdit[1]);
+		List<Client> clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null
+		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		for (Client client : clients) {
+			ids.add(client.getBaseEntityId());
+		}
+		Map<String, HouseholdClient> householdClients = clientService.getMemberCountHouseholdHeadProviderByClients(ids,
+		    clientType);
+		System.err.println("Total::::"
+		        + clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount());
+		List<Client> clientList = new ArrayList<Client>();
+		for (Client client : clients) {
+			HouseholdClient householdClient = householdClients.get(client.getBaseEntityId());
+			if (householdClient != null) {
+				client.addAttribute("memberCount", householdClient.getMemebrCount());
+				client.addAttribute("HHName", householdClient.getHouseholdHead());
+				client.addAttribute("ProvierId", householdClient.getProviderId());
+			}
+			clientList.add(client);
+		}
+		return clientList;
 	}
 	
 	@Override
