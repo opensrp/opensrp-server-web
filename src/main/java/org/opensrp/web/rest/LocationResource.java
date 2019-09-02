@@ -29,11 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import static org.opensrp.web.config.SwaggerDocStrings.*;
 
 @Controller
@@ -52,6 +47,8 @@ public class LocationResource {
 
 	private static final String FALSE = "false";
 
+	private static final String TRUE = "true";
+
 	public static final String LOCATION_NAMES = "location_names";
 
 	public static final String LATITUDE = "latitude";
@@ -64,6 +61,8 @@ public class LocationResource {
 
 	public static final String PROPERTIES_FILTER = "properties_filter";
 
+    public static final String JURISDICTION_IDS = "jurisdiction_ids";
+
 	private PhysicalLocationService locationService;
 
 	@Autowired
@@ -74,10 +73,11 @@ public class LocationResource {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ApiOperation(value = GET_LOCATION_TREE_BY_ID_ENDPOINT, notes = GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES)
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
+					gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -246,5 +246,28 @@ public class LocationResource {
 		}
 
 	}
+
+    /**
+     * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
+     * It returns the Geometry optionally if @param returnGeometry is set to true.
+     * @param returnGeometry boolean which controls if geometry is returned
+     * @param jurisdictionIds list of jurisdiction ids
+     * @return jurisdictions whose ids match the provided params
+     */
+	@RequestMapping(value = "/findByJurisdictionIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByJurisdictionIds(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+
+        try {
+            return new ResponseEntity<>(
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
 }
