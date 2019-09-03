@@ -11,6 +11,7 @@ import static org.opensrp.web.rest.RestUtils.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +25,16 @@ import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 
 @Controller
@@ -72,6 +80,46 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
+		if (birthdate != null) {
+			searchBean.setBirthdateFrom(birthdate[0]);
+			searchBean.setBirthdateTo(birthdate[1]);
+		}
+		if (deathdate != null) {
+			searchBean.setDeathdateFrom(deathdate[0]);
+			searchBean.setDeathdateTo(deathdate[1]);
+		}
+		
+		AddressSearchBean addressSearchBean = new AddressSearchBean();
+		addressSearchBean.setAddressType(getStringFilter(ADDRESS_TYPE, request));
+		addressSearchBean.setCountry(getStringFilter(COUNTRY, request));
+		addressSearchBean.setStateProvince(getStringFilter(STATE_PROVINCE, request));
+		addressSearchBean.setCityVillage(getStringFilter(CITY_VILLAGE, request));
+		addressSearchBean.setCountyDistrict(getStringFilter(COUNTY_DISTRICT, request));
+		addressSearchBean.setSubDistrict(getStringFilter(SUB_DISTRICT, request));
+		addressSearchBean.setTown(getStringFilter(TOWN, request));
+		addressSearchBean.setSubTown(getStringFilter(SUB_TOWN, request));
+		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
+		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+		String attributes = getStringFilter("attribute", request);
+		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
+		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		
+		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
+		    lastEdit == null ? null : lastEdit[1]);
+	}
+	
+	@Override
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonArray clientsArray = new JsonArray();
+		List<Client> clientList = new ArrayList<Client>();
+		List<Client> clients = new ArrayList<Client>();
+		int total = 0;
+		ClientSearchBean searchBean = new ClientSearchBean();
+		searchBean.setNameLike(getStringFilter("name", request));
+		searchBean.setGender(getStringFilter(GENDER, request));
+		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
@@ -100,26 +148,36 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		List<String> ids = new ArrayList<String>();
 		
-		List<Client> clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null
-		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
-		for (Client client : clients) {
-			ids.add(client.getBaseEntityId());
-		}
-		Map<String, HouseholdClient> householdClients = clientService.getMemberCountHouseholdHeadProviderByClients(ids,
-		    clientType);
-		System.err.println("Total::::"
-		        + clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount());
-		List<Client> clientList = new ArrayList<Client>();
-		for (Client client : clients) {
-			HouseholdClient householdClient = householdClients.get(client.getBaseEntityId());
-			if (householdClient != null) {
-				client.addAttribute("memberCount", householdClient.getMemebrCount());
-				client.addAttribute("HHName", householdClient.getHouseholdHead());
-				client.addAttribute("ProvierId", householdClient.getProviderId());
+		clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
+		    lastEdit == null ? null : lastEdit[1]);
+		if (clients.size() != 0) {
+			for (Client client : clients) {
+				ids.add(client.getBaseEntityId());
 			}
-			clientList.add(client);
+			Map<String, HouseholdClient> householdClients = clientService.getMemberCountHouseholdHeadProviderByClients(ids,
+			    clientType);
+			
+			total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
+			
+			for (Client client : clients) {
+				HouseholdClient householdClient = householdClients.get(client.getBaseEntityId());
+				if (householdClient != null) {
+					client.addAttribute("memberCount", householdClient.getMemebrCount());
+					client.addAttribute("HHHead", householdClient.getHouseholdHead());
+					client.addAttribute("ProvierId", householdClient.getProviderId());
+				} else {
+					client.addAttribute("memberCount", 0);
+					client.addAttribute("HHHead", "");
+					client.addAttribute("ProvierId", "");
+				}
+				clientList.add(client);
+			}
 		}
-		return clientList;
+		clientsArray = (JsonArray) EventResource.gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
+		response.put("clients", clientsArray);
+		response.put("total", total);
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		
 	}
 	
 	@Override

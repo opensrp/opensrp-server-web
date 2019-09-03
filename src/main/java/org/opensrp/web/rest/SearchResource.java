@@ -29,6 +29,7 @@ import org.opensrp.service.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -202,12 +203,12 @@ public class SearchResource extends RestResource<Client> {
 			}
 			
 			List<Client> mothers = new ArrayList<Client>();
-			if (!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName) || !StringUtils.isEmptyOrWhitespaceOnly(motherLastName)
-			        || !motherAttributes.isEmpty()) {
+			if (!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName)
+			        || !StringUtils.isEmptyOrWhitespaceOnly(motherLastName) || !motherAttributes.isEmpty()) {
 				
 				String nameLike = null;
-				if ((!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName)
-				        && !StringUtils.isEmptyOrWhitespaceOnly(motherLastName)) && motherFirstName.equals(motherLastName)) {
+				if ((!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName) && !StringUtils
+				        .isEmptyOrWhitespaceOnly(motherLastName)) && motherFirstName.equals(motherLastName)) {
 					if (org.apache.commons.lang3.StringUtils.containsWhitespace(motherFirstName.trim())) {
 						String[] arr = motherFirstName.split("\\s+");
 						motherFirstName = arr[0];
@@ -443,5 +444,11 @@ public class SearchResource extends RestResource<Client> {
 		}
 		
 		return list;
+	}
+	
+	@Override
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
