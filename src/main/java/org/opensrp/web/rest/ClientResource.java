@@ -7,6 +7,9 @@ import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
+import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
+import static org.opensrp.common.AllConstants.Client.PAGESIZE;
+
 import static org.opensrp.web.rest.RestUtils.*;
 
 import java.text.ParseException;
@@ -115,6 +118,16 @@ public class ClientResource extends RestResource<Client> {
 		List<Client> clientList = new ArrayList<Client>();
 		List<Client> clients = new ArrayList<Client>();
 		int total = 0;
+		Integer pageNumber = 0;
+		Integer pageSize = 0;
+		String pageNumberParam = getStringFilter(PAGENUMBER, request);
+		String pageSizeParam = getStringFilter(PAGESIZE, request);
+		if (pageNumberParam != null) {
+			pageNumber = Integer.parseInt(pageNumberParam);
+		}
+		if (pageSizeParam != null) {
+			pageSize = Integer.parseInt(pageSizeParam);
+		}
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		searchBean.setGender(getStringFilter(GENDER, request));
@@ -123,6 +136,8 @@ public class ClientResource extends RestResource<Client> {
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
+		searchBean.setPageNumber(pageNumber);
+		searchBean.setPageSize(pageSize);
 		if (birthdate != null) {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
