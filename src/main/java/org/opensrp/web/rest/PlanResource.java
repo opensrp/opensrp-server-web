@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
@@ -160,7 +161,7 @@ public class PlanResource {
 			if (fields != null && !fields.isEmpty()) {
 				for (String fieldName : fields) {
 					if (!doesObjectContainField(new PlanDefinition(),fieldName)) {
-						return new ResponseEntity<>("One or more fields are invalid", HttpStatus.BAD_REQUEST);
+						return new ResponseEntity<>(fieldName + " field is invalid", HttpStatus.BAD_REQUEST);
 					}
 				}
 			}
@@ -176,7 +177,10 @@ public class PlanResource {
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
 		for (Field field : objectClass.getDeclaredFields()) {
-			if (field.getName().equals(fieldName)) {
+			SerializedName sName = field.getAnnotation(SerializedName.class);
+			if (sName != null && sName.value().equals(fieldName))
+				return true;
+			else if (sName == null && field.getName().equals(fieldName)) {
 				return true;
 			}
 		}
