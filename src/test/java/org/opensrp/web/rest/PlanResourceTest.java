@@ -298,4 +298,37 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
             assertTrue(expectedIds.contains(plan.getIdentifier()));
         }
     }
+
+    @Test
+    public void testfindByIdentifiersReturnOptionalFieldsShouldReturnCorrectPlans() throws Exception {
+        List<PlanDefinition> expectedPlans = new ArrayList<>();
+
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+
+        List<String> planIdList = new ArrayList<>();
+        planIdList.add(expectedPlan.getIdentifier());
+
+        List<String> fieldNameList = new ArrayList<>();
+        fieldNameList.add("action");
+        fieldNameList.add("name");
+
+        doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(planIdList, fieldNameList);
+
+        String actualPlansString = getResponseAsString(BASE_URL + "findByIdsWithOptionalFields?identifiers=" + expectedPlan.getIdentifier() + "&fields=action,name", null, MockMvcResultMatchers.status().isOk());
+        List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+        assertNotNull(actualPlanList);
+        assertEquals(1, actualPlanList.size());
+        PlanDefinition actualPlan = actualPlanList.get(0);
+
+        assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
+        assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
+    }
 }
