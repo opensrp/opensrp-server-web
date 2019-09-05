@@ -13,14 +13,20 @@ import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 
 /**
@@ -154,7 +160,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         expectedPlans.add(expectedPlan);
 
-        doReturn(expectedPlans).when(planService).getAllPlans();
+        doReturn(expectedPlans).when(planService).getPlansByIdsReturnOptionalFields(anyList(), anyList());
 
         String actualPlansString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
@@ -175,11 +181,17 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        doReturn(expectedPlan).when(planService).getPlan(eq("plan_1"));
-        expectedPlans.add(expectedPlan);
+        List<String> planIdList = new ArrayList<>();
+        planIdList.add(expectedPlan.getIdentifier());
+
+        doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(anyList(), anyList());
 
         String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, MockMvcResultMatchers.status().isOk());
-        PlanDefinition actualPlan = new Gson().fromJson(actualPlansString, new TypeToken<PlanDefinition>(){}.getType());
+        List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+        assertNotNull(actualPlanList);
+        assertEquals(1, actualPlanList.size());
+        PlanDefinition actualPlan = actualPlanList.get(0);
 
         assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
         assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
@@ -285,5 +297,38 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         for (PlanDefinition plan : actualList) {
             assertTrue(expectedIds.contains(plan.getIdentifier()));
         }
+    }
+
+    @Test
+    public void testfindByIdentifiersReturnOptionalFieldsShouldReturnCorrectPlans() throws Exception {
+        List<PlanDefinition> expectedPlans = new ArrayList<>();
+
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+
+        List<String> planIdList = new ArrayList<>();
+        planIdList.add(expectedPlan.getIdentifier());
+
+        List<String> fieldNameList = new ArrayList<>();
+        fieldNameList.add("action");
+        fieldNameList.add("name");
+
+        doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(planIdList, fieldNameList);
+
+        String actualPlansString = getResponseAsString(BASE_URL + "findByIdsWithOptionalFields?identifiers=" + expectedPlan.getIdentifier() + "&fields=action,name", null, MockMvcResultMatchers.status().isOk());
+        List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+        assertNotNull(actualPlanList);
+        assertEquals(1, actualPlanList.size());
+        PlanDefinition actualPlan = actualPlanList.get(0);
+
+        assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
+        assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
     }
 }

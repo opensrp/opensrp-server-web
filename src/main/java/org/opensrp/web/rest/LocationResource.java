@@ -1,12 +1,11 @@
 package org.opensrp.web.rest;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
@@ -27,13 +26,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
+import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
+import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
+
 
 @Controller
 @RequestMapping(value = "/rest/location")
+@Api(value = LOCATION_RESOURCE, produces = LOCATION_RESOURCE)
 public class LocationResource {
 
 	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
@@ -47,6 +54,8 @@ public class LocationResource {
 
 	private static final String FALSE = "false";
 
+	private static final String TRUE = "true";
+
 	public static final String LOCATION_NAMES = "location_names";
 
 	public static final String LATITUDE = "latitude";
@@ -59,6 +68,14 @@ public class LocationResource {
 
 	public static final String PROPERTIES_FILTER = "properties_filter";
 
+    public static final String JURISDICTION_IDS = "jurisdiction_ids";
+
+	public static final String JURISDICTION_ID = "jurisdiction_id";
+
+	public static final String PAGE_SIZE = "page_size";
+
+	public static final String DEFAULT_PAGE_SIZE = "1000";
+
 	private PhysicalLocationService locationService;
 
 	@Autowired
@@ -67,11 +84,13 @@ public class LocationResource {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value = GET_LOCATION_TREE_BY_ID_ENDPOINT, notes = GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES)
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(isJurisdiction ? locationService.getLocation(id) : locationService.getStructure(id)),
+					gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -234,6 +253,54 @@ public class LocationResource {
 						HttpStatus.OK);
 			}
 
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+    /**
+     * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
+     * It returns the Geometry optionally if @param returnGeometry is set to true.
+     * @param returnGeometry boolean which controls if geometry is returned
+     * @param jurisdictionIds list of jurisdiction ids
+     * @return jurisdictions whose ids match the provided params
+     */
+	@RequestMapping(value = "/findByJurisdictionIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByJurisdictionIds(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+
+        try {
+            return new ResponseEntity<>(
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+	/**
+	 * This methods provides an API endpoint that searches for a location and it's children using the provided location id
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param jurisdictionId location id
+	 * @param pageSize number of records to be returned
+	 * @return location together with it's children whose id matches the provided param
+	 */
+	@RequestMapping(value = "/findByIdWithChildren", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByIdWithChildren(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = PAGE_SIZE, defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = JURISDICTION_ID, required = false) String jurisdictionId) {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
