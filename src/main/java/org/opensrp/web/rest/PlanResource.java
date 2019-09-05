@@ -76,10 +76,10 @@ public class PlanResource {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans(@RequestParam(value = FIELDS, required = false) List<String> fields) {
+	public ResponseEntity<String> getPlans() {
 		try {
 			return new ResponseEntity<>(gson.toJson(
-					planService.getPlansByIdsReturnOptionalFields(null, fields)),
+					planService.getAllPlans()),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
