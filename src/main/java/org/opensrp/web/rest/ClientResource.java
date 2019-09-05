@@ -9,6 +9,8 @@ import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
 import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
 import static org.opensrp.common.AllConstants.Client.PAGESIZE;
+import static org.opensrp.common.AllConstants.Client.ORDERBYFIELD;
+import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 
 import static org.opensrp.web.rest.RestUtils.*;
 
@@ -120,20 +122,17 @@ public class ClientResource extends RestResource<Client> {
 		int total = 0;
 		Integer pageNumber = 0;
 		Integer pageSize = 0;
+		
 		String pageNumberParam = getStringFilter(PAGENUMBER, request);
 		String pageSizeParam = getStringFilter(PAGESIZE, request);
-		if (pageNumberParam != null) {
-			pageNumber = Integer.parseInt(pageNumberParam);
-		}
-		if (pageSizeParam != null) {
-			pageSize = Integer.parseInt(pageSizeParam);
-		}
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
 		String clientType = getStringFilter(CLIENTTYPE, request);
+		searchBean.setOrderByField(getStringFilter(ORDERBYFIELD, request));
+		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
 		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
 		searchBean.setPageNumber(pageNumber);
@@ -145,6 +144,13 @@ public class ClientResource extends RestResource<Client> {
 		if (deathdate != null) {
 			searchBean.setDeathdateFrom(deathdate[0]);
 			searchBean.setDeathdateTo(deathdate[1]);
+		}
+		
+		if (pageNumberParam != null) {
+			pageNumber = Integer.parseInt(pageNumberParam);
+		}
+		if (pageSizeParam != null) {
+			pageSize = Integer.parseInt(pageSizeParam);
 		}
 		
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
@@ -178,11 +184,11 @@ public class ClientResource extends RestResource<Client> {
 				HouseholdClient householdClient = householdClients.get(client.getBaseEntityId());
 				if (householdClient != null) {
 					client.addAttribute("memberCount", householdClient.getMemebrCount());
-					client.addAttribute("HHHead", householdClient.getHouseholdHead());
+					client.addAttribute("HouseholdHead", householdClient.getHouseholdHead());
 					client.addAttribute("ProvierId", householdClient.getProviderId());
 				} else {
 					client.addAttribute("memberCount", 0);
-					client.addAttribute("HHHead", "");
+					client.addAttribute("HouseholdHead", "");
 					client.addAttribute("ProvierId", "");
 				}
 				clientList.add(client);
