@@ -62,6 +62,12 @@ public class LocationResource {
 
     public static final String JURISDICTION_IDS = "jurisdiction_ids";
 
+	public static final String JURISDICTION_ID = "jurisdiction_id";
+
+	public static final String PAGE_SIZE = "page_size";
+
+	public static final String DEFAULT_PAGE_SIZE = "1000";
+
 	private PhysicalLocationService locationService;
 
 	@Autowired
@@ -267,5 +273,30 @@ public class LocationResource {
         }
 
     }
+
+	/**
+	 * This methods provides an API endpoint that searches for a location and it's children using the provided location id
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param jurisdictionId location id
+	 * @param pageSize number of records to be returned
+	 * @return location together with it's children whose id matches the provided param
+	 */
+	@RequestMapping(value = "/findByIdWithChildren", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findByIdWithChildren(
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = PAGE_SIZE, defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = JURISDICTION_ID, required = false) String jurisdictionId) {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
 
 }

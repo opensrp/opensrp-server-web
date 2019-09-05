@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -78,6 +79,9 @@ public class LocationResourceTest {
 
 	@Captor
 	private ArgumentCaptor<String> stringCaptor;
+
+	@Captor
+	private ArgumentCaptor<Integer> integerCaptor;
 
 	private MockMvc mockMvc;
 
@@ -530,6 +534,26 @@ public class LocationResourceTest {
 				.andExpect(status().isInternalServerError()).andReturn();
 		verify(locationService).findStructuresByProperties(false, null, null);
 		assertEquals("", result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByIdWithChildren() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationByIdWithChildren(anyBoolean(), anyString(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByIdWithChildren")
+						.param(LocationResource.JURISDICTION_ID, "j_id")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.PAGE_SIZE, LocationResource.DEFAULT_PAGE_SIZE))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationByIdWithChildren(booleanCaptor.capture(), stringCaptor.capture(),
+				integerCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertTrue(booleanCaptor.getValue());
+		assertEquals("j_id", stringCaptor.getValue());
+		assertEquals(Integer.parseInt(LocationResource.DEFAULT_PAGE_SIZE), integerCaptor.getValue().intValue());
 
 	}
 
