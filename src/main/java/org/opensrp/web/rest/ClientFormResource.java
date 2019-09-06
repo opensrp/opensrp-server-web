@@ -41,7 +41,7 @@ public class ClientFormResource extends RestResource<ClientForm> {
         this.clientFormService = clientFormService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/search")
+    @RequestMapping(method = RequestMethod.GET, value = "/search_")
     @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier", required = true) String formIdentifier
             , @RequestParam(value = "form_version", required = true) String formVersion
