@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.domain.postgres.PractitionerRole;
+import org.opensrp.domain.PractitionerRoleDefinition;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
@@ -73,8 +73,8 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            PractitionerRoleDefinition practitionerRoleDefinition = gson.fromJson(entity, PractitionerRoleDefinition.class);
+            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRoleDefinition);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
@@ -89,8 +89,8 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            PractitionerRoleDefinition practitionerRoleDefinition = gson.fromJson(entity, PractitionerRoleDefinition.class);
+            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRoleDefinition);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
@@ -105,8 +105,8 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> delete(@RequestBody String entity) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.deletePractitionerRole(practitionerRole);
+            PractitionerRoleDefinition practitionerRoleDefinition = gson.fromJson(entity, PractitionerRoleDefinition.class);
+            practitionerRoleService.deletePractitionerRole(practitionerRoleDefinition);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
