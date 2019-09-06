@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.domain.postgres.Practitioner;
+import org.opensrp.domain.PractitionerDefinition;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
@@ -73,8 +73,8 @@ public class PractitionerResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
         try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
-            practitionerService.addOrUpdatePractitioner(practitioner);
+            PractitionerDefinition practitionerDefinition = gson.fromJson(entity, PractitionerDefinition.class);
+            practitionerService.addOrUpdatePractitioner(practitionerDefinition);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
@@ -89,8 +89,8 @@ public class PractitionerResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
         try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
-            practitionerService.addOrUpdatePractitioner(practitioner);
+            PractitionerDefinition practitionerDefinition = gson.fromJson(entity, PractitionerDefinition.class);
+            practitionerService.addOrUpdatePractitioner(practitionerDefinition);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
@@ -105,8 +105,8 @@ public class PractitionerResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<HttpStatus> delete(@RequestBody String entity) {
         try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
-            practitionerService.deletePractitioner(practitioner);
+            PractitionerDefinition practitionerDefinition = gson.fromJson(entity, PractitionerDefinition.class);
+            practitionerService.deletePractitioner(practitionerDefinition);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
