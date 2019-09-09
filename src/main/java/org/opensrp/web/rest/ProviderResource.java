@@ -14,7 +14,6 @@ import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

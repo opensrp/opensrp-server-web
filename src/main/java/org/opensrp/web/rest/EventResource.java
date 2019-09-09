@@ -66,7 +66,7 @@ public class EventResource extends RestResource<Event> {
 	
 	private ClientService clientService;
 	
-	static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")

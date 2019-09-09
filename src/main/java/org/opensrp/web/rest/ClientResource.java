@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
-import org.opensrp.domain.postgres.HouseholdClient;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
+import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
@@ -55,6 +56,9 @@ import com.mysql.jdbc.StringUtils;
 public class ClientResource extends RestResource<Client> {
 	
 	private ClientService clientService;
+	
+	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
 	public ClientResource(ClientService clientService) {
@@ -186,9 +190,9 @@ public class ClientResource extends RestResource<Client> {
 			}
 			
 			total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
-			clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
+			//clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
 		}
-		clientsArray = (JsonArray) EventResource.gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
+		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
 		response.put("total", total);
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
