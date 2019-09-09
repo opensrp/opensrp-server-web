@@ -1,18 +1,27 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.*;
+import static org.opensrp.common.AllConstants.BaseEntity.ADDRESS_TYPE;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
+import static org.opensrp.common.AllConstants.BaseEntity.COUNTRY;
+import static org.opensrp.common.AllConstants.BaseEntity.COUNTY_DISTRICT;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.BaseEntity.STATE_PROVINCE;
+import static org.opensrp.common.AllConstants.BaseEntity.SUB_DISTRICT;
+import static org.opensrp.common.AllConstants.BaseEntity.SUB_TOWN;
+import static org.opensrp.common.AllConstants.BaseEntity.TOWN;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
 import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.PROVIDERID;
-import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
-import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
-import static org.opensrp.common.AllConstants.Client.PAGESIZE;
 import static org.opensrp.common.AllConstants.Client.ORDERBYFIELD;
 import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
-
-import static org.opensrp.web.rest.RestUtils.*;
+import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
+import static org.opensrp.common.AllConstants.Client.PAGESIZE;
+import static org.opensrp.common.AllConstants.Client.PROVIDERID;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +32,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
-import org.opensrp.connector.openmrs.constants.OpenmrsHouseHold.HouseholdMember;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.postgres.HouseholdClient;
 import org.opensrp.search.AddressSearchBean;
@@ -113,8 +121,9 @@ public class ClientResource extends RestResource<Client> {
 		    lastEdit == null ? null : lastEdit[1]);
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
+	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria")
+	@ResponseBody
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clientList = new ArrayList<Client>();
@@ -128,7 +137,7 @@ public class ClientResource extends RestResource<Client> {
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		searchBean.setGender(getStringFilter(GENDER, request));
-		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setOrderByField(getStringFilter(ORDERBYFIELD, request));
@@ -175,24 +184,9 @@ public class ClientResource extends RestResource<Client> {
 			for (Client client : clients) {
 				ids.add(client.getBaseEntityId());
 			}
-			Map<String, HouseholdClient> householdClients = clientService.getMemberCountHouseholdHeadProviderByClients(ids,
-			    clientType);
 			
 			total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
-			
-			for (Client client : clients) {
-				HouseholdClient householdClient = householdClients.get(client.getBaseEntityId());
-				if (householdClient != null) {
-					client.addAttribute("memberCount", householdClient.getMemebrCount());
-					client.addAttribute("HouseholdHead", householdClient.getHouseholdHead());
-					client.addAttribute("ProvierId", householdClient.getProviderId());
-				} else {
-					client.addAttribute("memberCount", 0);
-					client.addAttribute("HouseholdHead", "");
-					client.addAttribute("ProvierId", "");
-				}
-				clientList.add(client);
-			}
+			clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
 		}
 		clientsArray = (JsonArray) EventResource.gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);

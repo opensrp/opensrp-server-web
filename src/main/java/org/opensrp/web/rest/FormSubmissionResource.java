@@ -78,10 +78,4 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }

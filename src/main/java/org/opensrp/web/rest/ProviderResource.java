@@ -118,10 +118,4 @@ public class ProviderResource extends RestResource<Provider> {
 		return null;
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }

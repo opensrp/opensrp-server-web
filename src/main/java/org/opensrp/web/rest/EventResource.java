@@ -348,10 +348,4 @@ public class EventResource extends RestResource<Event> {
 		return eventService.findEventsByDynamicQuery(query);
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }

@@ -446,9 +446,4 @@ public class SearchResource extends RestResource<Client> {
 		return list;
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

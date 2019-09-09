@@ -42,12 +42,6 @@ public abstract class RestResource<T> {
 		return search(request);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria")
-	@ResponseBody
-	private ResponseEntity<String> filterBy(HttpServletRequest request) throws ParseException {
-		return searchByCriteria(request);
-	}
-	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	private List<T> filterBy(@RequestParam(value = "q", required = true) String query) {
@@ -57,8 +51,6 @@ public abstract class RestResource<T> {
 	public abstract List<T> filter(String query);
 	
 	public abstract List<T> search(HttpServletRequest request) throws ParseException;
-	
-	public abstract ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException;
 	
 	public abstract T getByUniqueId(String uniqueId);
 	

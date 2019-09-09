@@ -213,10 +213,4 @@ public class StockResource extends RestResource<Stock> {
 		return stockService.findAllStocks();
 	}
 	
-	@Override
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 }
