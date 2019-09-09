@@ -39,6 +39,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +58,7 @@ public class ClientResource extends RestResource<Client> {
 	
 	private ClientService clientService;
 	
-	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
@@ -125,9 +126,9 @@ public class ClientResource extends RestResource<Client> {
 		    lastEdit == null ? null : lastEdit[1]);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria")
+	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws ParseException {
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clientList = new ArrayList<Client>();
@@ -141,8 +142,9 @@ public class ClientResource extends RestResource<Client> {
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		searchBean.setGender(getStringFilter(GENDER, request));
-		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);
-		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
+		
+		DateTime[] lastEdit = null;
+		
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setOrderByField(getStringFilter(ORDERBYFIELD, request));
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
@@ -150,14 +152,6 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
 		searchBean.setPageNumber(pageNumber);
 		searchBean.setPageSize(pageSize);
-		if (birthdate != null) {
-			searchBean.setBirthdateFrom(birthdate[0]);
-			searchBean.setBirthdateTo(birthdate[1]);
-		}
-		if (deathdate != null) {
-			searchBean.setDeathdateFrom(deathdate[0]);
-			searchBean.setDeathdateTo(deathdate[1]);
-		}
 		
 		if (pageNumberParam != null) {
 			pageNumber = Integer.parseInt(pageNumberParam);
@@ -175,8 +169,7 @@ public class ClientResource extends RestResource<Client> {
 		addressSearchBean.setSubDistrict(getStringFilter(SUB_DISTRICT, request));
 		addressSearchBean.setTown(getStringFilter(TOWN, request));
 		addressSearchBean.setSubTown(getStringFilter(SUB_TOWN, request));
-		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
-		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+		
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
@@ -190,7 +183,7 @@ public class ClientResource extends RestResource<Client> {
 			}
 			
 			total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
-			//clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
+			clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
 		}
 		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
