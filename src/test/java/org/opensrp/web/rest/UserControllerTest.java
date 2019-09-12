@@ -86,8 +86,8 @@ public class UserControllerTest {
 		verify(openmrsUserService).getUser("test_user1");
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
-		assertEquals("test_user1", userDetail.userName());
-		assertEquals(user.getRoles(), userDetail.roles());
+		assertEquals("test_user1", userDetail.getUserName());
+		assertEquals(user.getRoles(), userDetail.getRoles());
 
 	}
 
@@ -103,8 +103,8 @@ public class UserControllerTest {
 				usernameCaptor.capture());
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
-		assertEquals(user.getUsername(), userDetail.userName());
-		assertEquals(user.getRoles(), userDetail.roles());
+		assertEquals(user.getUsername(), userDetail.getUserName());
+		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 
 	@Test

@@ -160,7 +160,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         expectedPlans.add(expectedPlan);
 
-        doReturn(expectedPlans).when(planService).getPlansByIdsReturnOptionalFields(anyList(), anyList());
+        doReturn(expectedPlans).when(planService).getAllPlans();
 
         String actualPlansString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
