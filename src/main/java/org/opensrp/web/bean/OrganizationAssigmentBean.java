@@ -14,7 +14,7 @@ public class OrganizationAssigmentBean {
 
 	private String planIdentifier;
 
-	private String jusrisdictionIdentifier;
+	private String jurisdictionIdentifier;
 
 	private Date dateTo;
 
@@ -36,12 +36,12 @@ public class OrganizationAssigmentBean {
 		this.planIdentifier = planIdentifier;
 	}
 
-	public String getJusrisdictionIdentifier() {
-		return jusrisdictionIdentifier;
+	public String getJurisdictionIdentifier() {
+		return jurisdictionIdentifier;
 	}
 
-	public void setJusrisdictionIdentifier(String jusrisdictionIdentifier) {
-		this.jusrisdictionIdentifier = jusrisdictionIdentifier;
+	public void setJurisdictionIdentifier(String jurisdictionIdentifier) {
+		this.jurisdictionIdentifier = jurisdictionIdentifier;
 	}
 
 	public Date getDateTo() {

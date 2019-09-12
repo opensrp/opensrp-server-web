@@ -114,12 +114,14 @@ public class OrganizationResource {
 			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE,
 					MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> assignLocationAndPlan(
-			@RequestBody OrganizationAssigmentBean organizationAssigmentBean) {
+			@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
-			organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganizationId(),
-					organizationAssigmentBean.getJusrisdictionIdentifier(),
-					organizationAssigmentBean.getPlanIdentifier(), organizationAssigmentBean.getDateFrom(),
-					organizationAssigmentBean.getDateTo());
+			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
+				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganizationId(),
+						organizationAssigmentBean.getJurisdictionIdentifier(),
+						organizationAssigmentBean.getPlanIdentifier(), organizationAssigmentBean.getDateFrom(),
+						organizationAssigmentBean.getDateTo());
+			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
