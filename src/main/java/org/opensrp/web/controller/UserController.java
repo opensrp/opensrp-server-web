@@ -7,8 +7,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
@@ -227,17 +229,18 @@ public class UserController {
 		List<String> openMRSIds = new ArrayList<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
+		Set<String> locationIds = new HashSet<>();
 		try {
 			String userId = u.getAttribute("_PERSON_UUID").toString();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
-			List<String> locationIds = new ArrayList<>();
+			
 
 			for (AssignedLocations assignedLocation : organizationService
 					.findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 
-			jurisdictions = locationService.findLocationsByIds(false, locationIds);
+			jurisdictions = locationService.findLocationsByIds(false,new ArrayList<>(locationIds));
 
 			for (PhysicalLocation jurisdiction : jurisdictions) {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
@@ -272,14 +275,14 @@ public class UserController {
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
 		PhysicalLocation jurisdiction = jurisdictions.get(0);
-		teamLocation.put("uuid", jurisdiction.getId());
+		teamLocation.put("uuid",  openMRSIds.get(0));
 		teamLocation.put("name", jurisdiction.getProperties().getName());
 		teamLocation.put("display", jurisdiction.getProperties().getName());
 		teamJson.put("location", teamLocation);
 
 		JSONArray locations = new JSONArray();
 		locations.put(teamLocation);
-		teamMemberJson.put("locations", locations);
+		teamMemberJson.put("locations", locationIds);
 		teamMemberJson.put("team", teamJson);
 		
 		try {
@@ -293,6 +296,7 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
+		map.put("jurisdictions", locationIds);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
