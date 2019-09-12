@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -65,11 +66,11 @@ public class TaskResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getTasksByTaskAndGroup(HttpServletRequest request) {
-		String plan = getStringFilter(PLAN, request);
-		String group = getStringFilter(GROUP, request);
-		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<String> getTasksByTaskAndGroup(@RequestBody TaskSyncRequestWrapper taskSyncRequestWrapper) {
+		String plan = taskSyncRequestWrapper.getPlan();
+		String group = taskSyncRequestWrapper.getGroup();
+		String serverVersion = taskSyncRequestWrapper.getServerVersion();
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -164,6 +165,29 @@ public class TaskResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	static class TaskSyncRequestWrapper {
+		@JsonProperty
+		private String plan;
+
+		@JsonProperty
+		private String group;
+
+		@JsonProperty
+		private String serverVersion;
+
+		public String getPlan() {
+			return plan;
+		}
+
+		public String getGroup() {
+			return group;
+		}
+
+		public String getServerVersion() {
+			return serverVersion;
 		}
 	}
 
