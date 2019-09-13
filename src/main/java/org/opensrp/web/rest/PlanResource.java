@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -119,16 +121,18 @@ public class PlanResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> syncByServerVersionAndOperationalArea(HttpServletRequest request,
-			@RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
-		String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<String> syncByServerVersionAndOperationalArea(@RequestBody PlanSyncRequestWrapper planSyncRequestWrapper) {
+		String serverVersion = planSyncRequestWrapper.getServerVersion();
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
+
+		List<String> operationalAreaIds = Arrays.asList(planSyncRequestWrapper.getOperational_area_id().split(","));
 		if (operationalAreaIds.isEmpty()) {
 			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
 		}
@@ -186,4 +190,22 @@ public class PlanResource {
 		}
 		return false;
 	}
+
+
+	static class PlanSyncRequestWrapper {
+		@JsonProperty
+		private String operational_area_id;
+
+		@JsonProperty
+		private String serverVersion;
+
+		public String getOperational_area_id() {
+			return operational_area_id;
+		}
+
+		public String getServerVersion() {
+			return serverVersion;
+		}
+	}
+
 }
