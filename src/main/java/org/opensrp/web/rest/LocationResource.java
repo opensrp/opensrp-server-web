@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
@@ -98,17 +99,18 @@ public class LocationResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getLocations(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
-			@RequestParam(value = PARENT_ID, required = false) String parentIds) {
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getLocations(@RequestBody LocationSyncRequestWrapper locationSyncRequestWrapper) {
 		long currentServerVersion = 0;
 		try {
-			currentServerVersion = Long.parseLong(serverVersion);
+			currentServerVersion = Long.parseLong(locationSyncRequestWrapper.getServerVersion());
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
+
+		Boolean isJurisdiction = locationSyncRequestWrapper.getIs_jurisdiction();
+		String locationNames = locationSyncRequestWrapper.getLocation_names();
+		String parentIds = locationSyncRequestWrapper.getParent_id();
 
 		try {
 			if (isJurisdiction) {
@@ -134,6 +136,7 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
@@ -306,6 +309,36 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+
+	static class LocationSyncRequestWrapper {
+		@JsonProperty
+		private Boolean is_jurisdiction;
+
+		@JsonProperty
+		private String location_names;
+
+		@JsonProperty
+		private String parent_id;
+
+		@JsonProperty
+		private String serverVersion;
+
+		public Boolean getIs_jurisdiction() {
+			return is_jurisdiction;
+		}
+
+		public String getLocation_names() {
+			return location_names;
+		}
+
+		public String getParent_id() {
+			return parent_id;
+		}
+
+		public String getServerVersion() {
+			return serverVersion;
+		}
 	}
 
 }
