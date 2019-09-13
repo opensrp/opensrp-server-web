@@ -231,7 +231,7 @@ public class UserController {
 		Set<String> locationIds = new HashSet<>();
 		Set<String> jurisdictionNames = new HashSet<>();
 		try {
-			String userId = u.getAttribute("_PERSON_UUID").toString();
+			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
 			
 
