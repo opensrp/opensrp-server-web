@@ -230,6 +230,7 @@ public class UserController {
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
+		Set<String> jurisdictionNames = new HashSet<>();
 		try {
 			String userId = u.getAttribute("_PERSON_UUID").toString();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -247,6 +248,7 @@ public class UserController {
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
 					openMRSIds.add(openMRSId);
 				}
+				jurisdictionNames.add(jurisdiction.getProperties().getName());
 
 			}
 
@@ -282,7 +284,7 @@ public class UserController {
 
 		JSONArray locations = new JSONArray();
 		locations.put(teamLocation);
-		teamMemberJson.put("locations", locationIds);
+		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
 		
 		try {
@@ -296,7 +298,7 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		map.put("jurisdictions", locationIds);
+		map.put("jurisdictions", jurisdictionNames);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
