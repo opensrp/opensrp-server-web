@@ -191,7 +191,7 @@ public class UserController {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
 			}
 		} catch (Exception e) {
-			System.out.println("USER Location info not mapped in team management module. Now trying Person Attribute");
+			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute",e);
 		}
 		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
 			lid = (String) u.getAttribute("Location");
@@ -252,7 +252,7 @@ public class UserController {
 			}
 
 		} catch (Exception e) {
-			System.out.println("USER Location info not mapped in team management module. Now trying Person Attribute");
+			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute",e);
 		}
 		if (openMRSIds.isEmpty()) {
 			throw new IllegalStateException(
@@ -292,7 +292,7 @@ public class UserController {
 			}.getType());
 			map.put("team", tmap);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(),e);
 		}
 		map.put("locations", l);
 		Time t = getServerTime();
