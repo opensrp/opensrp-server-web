@@ -8,7 +8,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;

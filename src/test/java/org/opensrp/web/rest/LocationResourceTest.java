@@ -155,8 +155,9 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findLocationsByServerVersion(1542640316113l)).thenReturn(expected);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316113")
-				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isOk()).andReturn();
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\"}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByServerVersion(1542640316113l);
 		verifyNoMoreInteractions(locationService);
 
@@ -172,8 +173,8 @@ public class LocationResourceTest {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":\"" + locationNames +"\", \"parent_id\": \"\"}").getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
@@ -193,8 +194,8 @@ public class LocationResourceTest {
 		expected = new ArrayList<>();
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
-		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+		result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":\"" + locationNames + "\", \"parent_id\": \"\"}").getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
@@ -216,8 +217,8 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findLocationsByServerVersion(0l)).thenReturn(expected);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "dfgdf")
-				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isOk()).andReturn();
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body("{\"serverVersion\":\"dfgdf\", \"is_jurisdiction\":\"true\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByServerVersion(0l);
 		verifyNoMoreInteractions(locationService);
 
@@ -231,8 +232,8 @@ public class LocationResourceTest {
 
 		when(locationService.findLocationsByServerVersion(0l)).thenThrow(new RuntimeException());
 
-		mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isInternalServerError());
+		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
+				body("{\"serverVersion\":\"0\", \"is_jurisdiction\": \"true\"}".getBytes())).andExpect(status().isInternalServerError());
 		verify(locationService).findLocationsByServerVersion(0l);
 		verifyNoMoreInteractions(locationService);
 
@@ -244,8 +245,8 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(expected);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316")
-				.param(LocationResource.PARENT_ID, "3734")).andExpect(status().isOk()).andReturn();
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body("{\"serverVersion\":\"1542640316\",\"parent_id\":\"3734\", \"is_jurisdiction\":\"false\", \"location_names\":\"\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findStructuresByParentAndServerVersion("3734", 1542640316l);
 		verifyNoMoreInteractions(locationService);
 
@@ -254,8 +255,8 @@ public class LocationResourceTest {
 		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
 
 		when(locationService.findStructuresByParentAndServerVersion("3734,001", 1542640316l)).thenReturn(expected);
-		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316")
-				.param(LocationResource.PARENT_ID, "3734,001")).andExpect(status().isOk()).andReturn();
+		result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body("{\"serverVersion\":\"1542640316\",\"parent_id\":\"3734,001\", \"is_jurisdiction\":\"false\", \"location_names\":\"\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findStructuresByParentAndServerVersion("3734,001", 1542640316l);
 		verifyNoMoreInteractions(locationService);
 
@@ -271,7 +272,8 @@ public class LocationResourceTest {
 
 		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
 				.thenThrow(IllegalArgumentException.class);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316"))
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
+				body("{\"serverVersion\", \"1542640316\"}".getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
 		verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());
 		verifyNoMoreInteractions(locationService);
