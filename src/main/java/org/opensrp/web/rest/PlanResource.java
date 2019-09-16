@@ -132,7 +132,7 @@ public class PlanResource {
 			logger.error("server version not a number");
 		}
 
-		List<String> operationalAreaIds = Arrays.asList(planSyncRequestWrapper.getOperational_area_id().split(","));
+		List<String> operationalAreaIds = Arrays.asList(planSyncRequestWrapper.getOperationalAreaId().split(","));
 		if (operationalAreaIds.isEmpty()) {
 			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
 		}
@@ -199,7 +199,7 @@ public class PlanResource {
 		@JsonProperty
 		private String serverVersion;
 
-		public String getOperational_area_id() {
+		public String getOperationalAreaId() {
 			return operational_area_id;
 		}
 

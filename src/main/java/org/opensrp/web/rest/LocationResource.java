@@ -108,9 +108,9 @@ public class LocationResource {
 			logger.error("server version not a number");
 		}
 
-		Boolean isJurisdiction = locationSyncRequestWrapper.getIs_jurisdiction();
-		String locationNames = locationSyncRequestWrapper.getLocation_names();
-		String parentIds = locationSyncRequestWrapper.getParent_id();
+		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
+		String locationNames = locationSyncRequestWrapper.getLocationNames();
+		String parentIds = locationSyncRequestWrapper.getParentId();
 
 		try {
 			if (isJurisdiction) {
@@ -324,15 +324,15 @@ public class LocationResource {
 		@JsonProperty
 		private String serverVersion;
 
-		public Boolean getIs_jurisdiction() {
+		public Boolean getIsJurisdiction() {
 			return is_jurisdiction;
 		}
 
-		public String getLocation_names() {
+		public String getLocationNames() {
 			return location_names;
 		}
 
-		public String getParent_id() {
+		public String getParentId() {
 			return parent_id;
 		}
 
