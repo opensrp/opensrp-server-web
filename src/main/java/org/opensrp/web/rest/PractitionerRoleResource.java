@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@RequestMapping(value = "/rest/practitionerRoles")
+@RequestMapping(value = "/rest/practitionerRole")
 public class PractitionerRoleResource {
 
     private static Logger logger = LoggerFactory.getLogger(PractitionerRoleResource.class.toString());
