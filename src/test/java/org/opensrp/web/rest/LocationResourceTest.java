@@ -1,29 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -51,6 +27,34 @@ import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 public class LocationResourceTest {
@@ -67,12 +71,25 @@ public class LocationResourceTest {
 	@Captor
 	private ArgumentCaptor<PhysicalLocation> argumentCaptor;
 
+	@Captor
+	private ArgumentCaptor<Map<String, String>> mapCaptor;
+
+	@Captor
+	private ArgumentCaptor<Boolean> booleanCaptor;
+
+	@Captor
+	private ArgumentCaptor<String> stringCaptor;
+
+	@Captor
+	private ArgumentCaptor<Integer> integerCaptor;
+
 	private MockMvc mockMvc;
 
 	@Mock
 	private PhysicalLocationService locationService;
 
 	private String BASE_URL = "/rest/location/";
+	private boolean DEFAULT_RETURN_BOOLEAN = true;
 
 	public String structureJson = "{\"type\":\"Feature\",\"id\":\"90397\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[32.5978597,-14.1699446],[32.5978956,-14.1699609],[32.5978794,-14.1699947],[32.5978434,-14.1699784],[32.5978597,-14.1699446]]]},\"properties\":{\"uid\":\"41587456-b7c8-4c4e-b433-23a786f742fc\",\"code\":\"21384443\",\"type\":\"Residential Structure\",\"status\":\"Active\",\"parentId\":\"3734\",\"geographicLevel\":5,\"effectiveStartDate\":\"2017-01-10T0000\",\"version\":0}}";
 
@@ -88,12 +105,12 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueId() throws Exception {
-		when(locationService.getLocation("3734")).thenReturn(createLocation());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenReturn(createLocation());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getLocation("3734");
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(parentJson, result.getResponse().getContentAsString());
 
@@ -101,22 +118,22 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getLocation("3734")).thenThrow(new RuntimeException());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isInternalServerError());
-		verify(locationService).getLocation("3734");
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 
 	}
 
 	@Test
 	public void testGetStructureByUniqueId() throws Exception {
-		when(locationService.getStructure("90397")).thenReturn(createStructure());
+		when(locationService.getStructure("90397", DEFAULT_RETURN_BOOLEAN)).thenReturn(createStructure());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "90397").param(LocationResource.IS_JURISDICTION, "false"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getStructure("90397");
+		verify(locationService).getStructure("90397", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(structureJson, result.getResponse().getContentAsString());
 
@@ -124,10 +141,10 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetStructureByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getStructure("90397")).thenThrow(new RuntimeException());
+		when(locationService.getStructure("90397", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "90397").param(LocationResource.IS_JURISDICTION, "false"))
 				.andExpect(status().isInternalServerError()).andReturn();
-		verify(locationService).getStructure("90397");
+		verify(locationService).getStructure("90397", DEFAULT_RETURN_BOOLEAN);
 		verifyNoMoreInteractions(locationService);
 
 	}
@@ -447,6 +464,96 @@ public class LocationResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		assertEquals(LocationResource.gson.toJson(expectedDetails), result.getResponse().getContentAsString());
 		verify(locationService).findStructuresWithinRadius(latitude, longitude, radius);
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithoutParamsQueriesStructures() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		locations.get(0).setGeometry(null);
+		when(locationService.findStructuresByProperties(false, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByProperties(false, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithIsJuridictionsRetunsLocations() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		locations.get(0).setGeometry(null);
+		when(locationService.findLocationsByProperties(false, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(false, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesReturnsGeometry() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(true, null, null)).thenReturn(locations);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties")
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.RETURN_GEOMETRY, "true"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(true, null, null);
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testFindByLocationPropertiesParamsPassedCorrectly() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(anyBoolean(), anyString(), any(Map.class)))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.PROPERTIES_FILTER, "name:H123,type:Residential,parentId:1234"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(),
+				mapCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertTrue(booleanCaptor.getValue());
+		assertEquals("1234", stringCaptor.getValue());
+		Map<String, String> properties = mapCaptor.getValue();
+		assertEquals(2, properties.size());
+		assertEquals("H123", properties.get("name"));
+		assertEquals("Residential", properties.get("type"));
+		assertNull(properties.get("parentId"));
+
+	}
+
+	@Test
+	public void testFindByLocationPropertiesWithError() throws Exception {
+		when(locationService.findStructuresByProperties(false, null, null)).thenThrow(new RuntimeException());
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties"))
+				.andExpect(status().isInternalServerError()).andReturn();
+		verify(locationService).findStructuresByProperties(false, null, null);
+		assertEquals("", result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindByIdWithChildren() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationByIdWithChildren(anyBoolean(), anyString(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByIdWithChildren")
+						.param(LocationResource.JURISDICTION_ID, "j_id")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.PAGE_SIZE, LocationResource.DEFAULT_PAGE_SIZE))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationByIdWithChildren(booleanCaptor.capture(), stringCaptor.capture(),
+				integerCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertTrue(booleanCaptor.getValue());
+		assertEquals("j_id", stringCaptor.getValue());
+		assertEquals(Integer.parseInt(LocationResource.DEFAULT_PAGE_SIZE), integerCaptor.getValue().intValue());
 
 	}
 
