@@ -6,17 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +22,6 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -273,12 +267,15 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
-        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", MockMvcResultMatchers.status().isOk());
+        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":\"operational_area,operational_area_2\"}";
+        String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, MockMvcResultMatchers.status().isOk());
+
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
         assertEquals(longArgumentCaptor.getValue().longValue(), 1);
-        assertEquals(listArgumentCaptor.getValue().get(0), "operational_area" );
+        List<String> list  = listArgumentCaptor.getValue();
+        assertEquals(list.get(0), "operational_area");
     }
 
     @Override

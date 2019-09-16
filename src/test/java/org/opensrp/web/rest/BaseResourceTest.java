@@ -72,6 +72,19 @@ public abstract class BaseResourceTest<T> {
         return actualObj;
     }
 
+    protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {
+
+        MvcResult mvcResult = this.mockMvc.perform(
+                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
+
     protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
