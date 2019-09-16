@@ -141,7 +141,7 @@ public class MultimediaController {
 				logger.error("", e);
 			}
 		} else {
-			// default to profile image retrieval logic
+			// default to single profile image retrieval logic
 			downloadFile(entityId, userName, password, request, response);
 		}
 	}
@@ -164,30 +164,19 @@ public class MultimediaController {
 	private void downloadFile(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				Multimedia multiMedia = multimediaService.findByCaseId(baseEntityId.trim());
-				if (multiMedia == null || multiMedia.getFilePath() == null) {
-					//see if the file exists in the disk with the assumption that it's .jpg otherwise return error msg
-					File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator
-					        + baseEntityId.trim() + ".jpg");
-
-					if (file.exists()) {
-						downloadFile(file, response);
-					} else {
-						String errorMessage = "Sorry. The file you are looking for does not exist";
-						logger.info(errorMessage);
-						OutputStream outputStream = response.getOutputStream();
-						outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-						outputStream.close();
-						return;
-					}
+				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+				if (file.exists()) {
+					downloadFile(file, response);
+				} else {
+					String errorMessage = "Sorry. The file you are looking for does not exist";
+					logger.info(errorMessage);
+					OutputStream outputStream = response.getOutputStream();
+					outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+					outputStream.close();
+					return;
 				}
-				String filePath = multiMedia.getFilePath();
-
-				File file = new File(filePath);
-				downloadFile(file, response);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("", e);
 		}
 	}
