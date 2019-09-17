@@ -150,16 +150,7 @@ public class MultimediaController {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
-				if (file.exists()) {
-					downloadFile(file, response);
-				} else {
-					String errorMessage = "Sorry. The file you are looking for does not exist";
-					logger.info(errorMessage);
-					OutputStream outputStream = response.getOutputStream();
-					outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-					outputStream.close();
-					return;
-				}
+				downloadFile(file, response);
 			}
 		} catch (Exception e) {
 			logger.error("", e);
