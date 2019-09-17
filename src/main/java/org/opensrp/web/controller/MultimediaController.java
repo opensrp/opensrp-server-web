@@ -67,9 +67,9 @@ public class MultimediaController {
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
-	public void downloadFile(HttpServletResponse response, @PathVariable("fileName") String fileName,
-	                         @RequestHeader(value = "username") String userName,
-	                         @RequestHeader(value = "password") String password, HttpServletRequest request) {
+	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName,
+									 @RequestHeader(value = "username") String userName,
+									 @RequestHeader(value = "password") String password, HttpServletRequest request) {
 
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
@@ -86,7 +86,7 @@ public class MultimediaController {
 	}
 	
 	/**
-	 * This method downloads a file from the server given the client id. A search is made to the
+	 * Downloads a file from the server given the client id. A search is made to the
 	 * multimedia repo to see if any file exists mapped to the user whereby the filepath is recorded
 	 * 
 	 * @param response
@@ -99,9 +99,24 @@ public class MultimediaController {
 	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
 	                                   @RequestHeader(value = "username") String userName,
 	                                   @RequestHeader(value = "password") String password, HttpServletRequest request) {
-		downloadFile(baseEntityId, userName, password, request, response);
+		downloadFileWithAuth(baseEntityId, userName, password, request, response);
 	}
 
+
+	/**
+	 * Downloads all media files belonging to the specified {@param entityId} if {@param fileCategory} is multi_version
+	 *
+	 * If multi_version {@param fileCategory} is not specified, a single media file (belonging to {@param entityId})
+	 * is downloaded from the default multimedia directory
+	 *
+	 * @param response
+	 * @param request
+	 * @param entityId
+	 * @param contentType
+	 * @param fileCategory
+	 * @param userName
+	 * @param password
+	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
 	public void downloadFiles(HttpServletResponse response,
 												HttpServletRequest request,
@@ -126,7 +141,7 @@ public class MultimediaController {
 			}
 		} else {
 			// default to single profile image retrieval logic
-			downloadFile(entityId, userName, password, request, response);
+			downloadFileWithAuth(entityId, userName, password, request, response);
 		}
 	}
 
@@ -146,7 +161,16 @@ public class MultimediaController {
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
 
-	private void downloadFile(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
+	/**
+	 * Downloads file on successful authentication
+	 *
+	 * @param baseEntityId
+	 * @param userName
+	 * @param password
+	 * @param request
+	 * @param response
+	 */
+	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
@@ -164,6 +188,13 @@ public class MultimediaController {
 		return provider.authenticate(auth);
 	}
 
+	/**
+	 * Retrieves file and writes content to response (downloads file)
+	 *
+	 * @param file
+	 * @param response
+	 * @throws Exception
+	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 		
 		if (!file.exists()) {

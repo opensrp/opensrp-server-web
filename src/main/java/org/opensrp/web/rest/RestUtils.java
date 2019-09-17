@@ -110,6 +110,13 @@ public class RestUtils {
 		return responseHeaders;
 	}
 
+    /**
+     * Zips multimedia files and writes content to {@param zipOutputStream}
+     *
+     * @param zipOutputStream
+     * @param multimediaFiles
+     * @throws IOException
+     */
 	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles) throws IOException {
 		for (Multimedia multiMedia : multimediaFiles) {
 			FileInputStream inputStream;
