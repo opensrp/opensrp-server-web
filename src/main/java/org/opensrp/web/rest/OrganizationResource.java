@@ -115,7 +115,7 @@ public class OrganizationResource {
 
 	}
 
-	@RequestMapping(value = "/assignLocationAndPlans", method = RequestMethod.POST, produces = {
+	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE,
 					MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> assignLocationAndPlan(
@@ -137,7 +137,7 @@ public class OrganizationResource {
 		}
 	}
 
-	@RequestMapping(value = "/assignedLocationsAndPlan/{identifier}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
 			@PathVariable("identifier") String identifier) {

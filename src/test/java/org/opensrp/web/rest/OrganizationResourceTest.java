@@ -4,7 +4,7 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
@@ -174,7 +176,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testAssignLocationAndPlan() throws Exception {
-		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
 		for (OrganizationAssigmentBean bean : getOrganizationAssignment())
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
@@ -188,7 +190,7 @@ public class OrganizationResourceTest {
 		Mockito.doThrow(IllegalArgumentException.class).when(organizationService).assignLocationAndPlan(null, null,
 				null, null, null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
-		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
 		for (OrganizationAssigmentBean bean : beans)
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
@@ -202,12 +204,57 @@ public class OrganizationResourceTest {
 		Mockito.doThrow(SQLException.class).when(organizationService).assignLocationAndPlan(null, null, null, null,
 				null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
-		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
 		for (OrganizationAssigmentBean bean : beans)
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
 					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
 		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	@Test
+	public void testGetAssignedLocationAndPlan() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
+		when(organizationService.findAssignedLocationsAndPlans(identifier)).thenReturn(expected);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verifyNoMoreInteractions(organizationService);
+		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		Mockito.doThrow(IllegalArgumentException.class).when(organizationService)
+				.findAssignedLocationsAndPlans(identifier);
+
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verifyNoMoreInteractions(organizationService);
+		assertEquals("", result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		Mockito.doThrow(SQLException.class).when(organizationService).findAssignedLocationsAndPlans(identifier);
+
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
+				.andExpect(status().isInternalServerError()).andReturn();
+
+		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verifyNoMoreInteractions(organizationService);
+		assertEquals("", result.getResponse().getContentAsString());
 
 	}
 
@@ -230,6 +277,24 @@ public class OrganizationResourceTest {
 
 		}
 		return organizationAssigmentBeans.toArray(new OrganizationAssigmentBean[] {});
+
+	}
+
+	private List<AssignedLocations> getOrganizationLocationsAssigned() {
+		List<AssignedLocations> organizationAssigmentBeans = new ArrayList<>();
+		Random random = new Random();
+		for (int i = 0; i < 5; i++) {
+			OrganizationAssigmentBean bean = new OrganizationAssigmentBean();
+			bean.setOrganization("org" + i);
+			bean.setJurisdictionIdentifier("loc" + i);
+			bean.setPlanIdentifier("plan" + i);
+			if (random.nextBoolean())
+				bean.setDateFrom(new Date());
+			if (random.nextBoolean())
+				bean.setDateTo(new Date());
+
+		}
+		return organizationAssigmentBeans;
 
 	}
 
