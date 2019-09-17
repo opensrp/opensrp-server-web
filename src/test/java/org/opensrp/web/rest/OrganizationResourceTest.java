@@ -4,7 +4,7 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,10 +13,12 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,6 +32,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.Organization;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -169,12 +172,65 @@ public class OrganizationResourceTest {
 
 	}
 
-	private Organization getOrganization() {
-		try {
-			return objectMapper.readValue(organizationJSON, Organization.class);
-		} catch (IOException e) {
-			return null;
+	@Test
+	public void testAssignLocationAndPlan() throws Exception {
+		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+				.body(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
+		for (OrganizationAssigmentBean bean : getOrganizationAssignment())
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
+					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	@Test
+	public void testAssignLocationAndPlanWithMissingParams() throws Exception {
+		Mockito.doThrow(IllegalArgumentException.class).when(organizationService).assignLocationAndPlan(null, null,
+				null, null, null);
+		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
+		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
+		for (OrganizationAssigmentBean bean : beans)
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
+					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	@Test
+	public void testAssignLocationAndPlanWithInternalError() throws Exception {
+		Mockito.doThrow(SQLException.class).when(organizationService).assignLocationAndPlan(null, null, null, null,
+				null);
+		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
+		mockMvc.perform(post(BASE_URL + "/assignLocationAndPlans").contentType(MediaType.APPLICATION_JSON)
+				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
+		for (OrganizationAssigmentBean bean : beans)
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
+					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	private Organization getOrganization() throws Exception {
+		return objectMapper.readValue(organizationJSON, Organization.class);
+	}
+
+	private OrganizationAssigmentBean[] getOrganizationAssignment() {
+		List<OrganizationAssigmentBean> organizationAssigmentBeans = new ArrayList<>();
+		Random random = new Random();
+		for (int i = 0; i < 5; i++) {
+			OrganizationAssigmentBean bean = new OrganizationAssigmentBean();
+			bean.setOrganization("org" + i);
+			bean.setJurisdictionIdentifier("loc" + i);
+			bean.setPlanIdentifier("plan" + i);
+			if (random.nextBoolean())
+				bean.setDateFrom(new Date());
+			if (random.nextBoolean())
+				bean.setDateTo(new Date());
+
 		}
+		return organizationAssigmentBeans.toArray(new OrganizationAssigmentBean[] {});
+
 	}
 
 }
