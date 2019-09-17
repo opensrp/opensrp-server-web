@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public class OrganizationAssigmentBean {
 
-	private Long organizationId;
+	private String organization;
 
 	private String planIdentifier;
 
@@ -20,12 +20,12 @@ public class OrganizationAssigmentBean {
 
 	private Date dateFrom;
 
-	public Long getOrganizationId() {
-		return organizationId;
+	public String getOrganization() {
+		return organization;
 	}
 
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
+	public void setOrganization(String organization) {
+		this.organization = organization;
 	}
 
 	public String getPlanIdentifier() {

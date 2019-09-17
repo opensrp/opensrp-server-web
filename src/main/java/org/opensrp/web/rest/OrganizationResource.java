@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -117,7 +116,7 @@ public class OrganizationResource {
 			@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
-				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganizationId(),
+				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganization(),
 						organizationAssigmentBean.getJurisdictionIdentifier(),
 						organizationAssigmentBean.getPlanIdentifier(), organizationAssigmentBean.getDateFrom(),
 						organizationAssigmentBean.getDateTo());
@@ -129,14 +128,12 @@ public class OrganizationResource {
 		}
 	}
 
-	@RequestMapping(value = "/getAssignedLocationsAndPlans", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/assignedLocationsAndPlan/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
-			@RequestParam("organizationId") Long organizationId) {
+			@PathVariable("identifier") String identifier) {
 		try {
-			;
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(organizationId),
-					HttpStatus.OK);
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
