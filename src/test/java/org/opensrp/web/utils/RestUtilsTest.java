@@ -1,5 +1,11 @@
 package org.opensrp.web.utils;
 
+import org.junit.Test;
+import org.opensrp.common.AllConstants.Client;
+import org.opensrp.domain.Multimedia;
+import org.opensrp.web.rest.RestUtils;
+import org.springframework.mock.web.MockHttpServletRequest;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -8,15 +14,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.Test;
-import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.common.AllConstants.Client;
-import org.opensrp.domain.Multimedia;
-import org.opensrp.web.rest.RestUtils;
-import org.springframework.mock.web.MockHttpServletRequest;
-
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.byteThat;
 import static org.mockito.Mockito.*;
 
 public class RestUtilsTest {
