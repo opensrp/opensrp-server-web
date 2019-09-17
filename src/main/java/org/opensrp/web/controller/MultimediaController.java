@@ -28,9 +28,9 @@ import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.opensrp.web.rest.RestUtils.zipFiles;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
@@ -40,14 +40,19 @@ public class MultimediaController {
 	private static Logger logger = LoggerFactory.getLogger(MultimediaController.class.toString());
 	
 	@Value("#{opensrp['multimedia.directory.name']}")
-	String multiMediaDir;
+	private String multiMediaDir;
 	
 	@Autowired
 	@Qualifier("drishtiAuthenticationProvider")
-	DrishtiAuthenticationProvider provider;
-	
+	private DrishtiAuthenticationProvider provider;
+
+	private MultimediaService multimediaService;
+
+
 	@Autowired
-	MultimediaService multimediaService;
+	public void setMultimediaService(MultimediaService multimediaService) {
+		this.multimediaService = multimediaService;
+	}
 	
 	/**
 	 * Download a file from the multimedia directory. The method also assumes two file types mp4 and
@@ -114,28 +119,7 @@ public class MultimediaController {
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
 				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-				for (Multimedia multiMedia : multimediaFiles) {
-					FileInputStream inputStream;
-					File file = new File(multiMedia.getFilePath());
-					logger.info("Adding " + file.getName());
-					zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-					try {
-						inputStream = new FileInputStream(file);
-					} catch (FileNotFoundException e) {
-						logger.info("Could not find file " + file.getAbsolutePath());
-						continue;
-					}
-
-					// Write the contents of the file
-					BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-					int data;
-					while ((data = bufferedInputStream.read()) != -1) {
-						zipOutputStream.write(data);
-					}
-					bufferedInputStream.close();
-					zipOutputStream.closeEntry();
-					logger.info("Done downloading file " + file.getName());
-				}
+				zipFiles(zipOutputStream, multimediaFiles);
 				zipOutputStream.close();
 			} catch (IOException e) {
 				logger.error("", e);
@@ -145,6 +129,7 @@ public class MultimediaController {
 			downloadFile(entityId, userName, password, request, response);
 		}
 	}
+
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
 	public ResponseEntity<String> uploadFiles(@RequestParam("anm-id") String providerId,
