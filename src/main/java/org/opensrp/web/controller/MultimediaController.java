@@ -109,7 +109,7 @@ public class MultimediaController {
 		// todo: change this to a common repo constant
 		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
-			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId, contentType, fileCategory);
+			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId.trim(), contentType.trim(), fileCategory.trim());
 			response.setContentType("image/jpeg/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
