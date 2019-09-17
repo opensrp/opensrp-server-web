@@ -78,10 +78,13 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> createOrganization(@RequestBody Organization organization) {
+	public ResponseEntity<String> createOrganization(@RequestBody Organization organization) {
 		try {
 			organizationService.addOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -97,11 +100,14 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.PUT, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<HttpStatus> updateOrganization(@PathVariable("identifier") String identifier,
+	public ResponseEntity<String> updateOrganization(@PathVariable("identifier") String identifier,
 			@RequestBody Organization organization) {
 		try {
 			organizationService.updateOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -109,10 +115,10 @@ public class OrganizationResource {
 
 	}
 
-	@RequestMapping(value = "/assignLocationAndPlan", method = RequestMethod.POST, produces = {
+	@RequestMapping(value = "/assignLocationAndPlans", method = RequestMethod.POST, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE,
 					MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> assignLocationAndPlan(
+	public ResponseEntity<String> assignLocationAndPlan(
 			@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
@@ -122,6 +128,9 @@ public class OrganizationResource {
 						organizationAssigmentBean.getDateTo());
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -134,6 +143,9 @@ public class OrganizationResource {
 			@PathVariable("identifier") String identifier) {
 		try {
 			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier), HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
