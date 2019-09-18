@@ -31,7 +31,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
 
-    private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"userName\":\"Practioner1\"}";
+    private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
 
     @Before
     public void setUp() {
