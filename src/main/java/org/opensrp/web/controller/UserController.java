@@ -78,7 +78,8 @@ public class UserController {
 	@Value("#{opensrp['openmrs.version']}")
 	protected String OPENMRS_VERSION;
 
-	protected boolean useOpenSRPTeamModule = true;
+	@Value("#{opensrp['use.opensrp.team.module']}")
+	protected boolean useOpenSRPTeamModule = false;
 
 	@Autowired
 	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService,
