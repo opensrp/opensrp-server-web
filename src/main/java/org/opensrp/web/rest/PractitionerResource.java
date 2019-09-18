@@ -71,7 +71,7 @@ public class PractitionerResource {
 
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
+    public ResponseEntity<String> create(@RequestBody String entity) {
         try {
             Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
             practitionerService.addOrUpdatePractitioner(practitioner);
@@ -79,7 +79,10 @@ public class PractitionerResource {
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
+        }  catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }  catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -87,7 +90,7 @@ public class PractitionerResource {
 
     @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
+    public ResponseEntity<String> update(@RequestBody String entity) {
         try {
             Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
             practitionerService.addOrUpdatePractitioner(practitioner);
@@ -95,7 +98,10 @@ public class PractitionerResource {
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
+        }  catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }  catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -103,7 +109,7 @@ public class PractitionerResource {
 
     @RequestMapping(method = RequestMethod.DELETE, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<HttpStatus> delete(@RequestBody String entity) {
+    public ResponseEntity<String> delete(@RequestBody String entity) {
         try {
             Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
             practitionerService.deletePractitioner(practitioner);
@@ -111,7 +117,10 @@ public class PractitionerResource {
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
+        }  catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }   catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
