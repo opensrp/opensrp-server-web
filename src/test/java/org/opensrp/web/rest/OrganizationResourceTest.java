@@ -179,8 +179,8 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
 		for (OrganizationAssigmentBean bean : getOrganizationAssignment())
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
-					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
+					bean.getPlan(), bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -193,8 +193,8 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
 		for (OrganizationAssigmentBean bean : beans)
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
-					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
+					bean.getPlan(), bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -207,8 +207,8 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 				.body(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
 		for (OrganizationAssigmentBean bean : beans)
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdictionIdentifier(),
-					bean.getPlanIdentifier(), bean.getDateFrom(), bean.getDateTo());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
+					bean.getPlan(), bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -233,7 +233,6 @@ public class OrganizationResourceTest {
 		Mockito.doThrow(IllegalArgumentException.class).when(organizationService)
 				.findAssignedLocationsAndPlans(identifier);
 
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 				.andExpect(status().isBadRequest()).andReturn();
 
@@ -248,7 +247,6 @@ public class OrganizationResourceTest {
 		String identifier = UUID.randomUUID().toString();
 		Mockito.doThrow(SQLException.class).when(organizationService).findAssignedLocationsAndPlans(identifier);
 
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 				.andExpect(status().isInternalServerError()).andReturn();
 
@@ -268,12 +266,12 @@ public class OrganizationResourceTest {
 		for (int i = 0; i < 5; i++) {
 			OrganizationAssigmentBean bean = new OrganizationAssigmentBean();
 			bean.setOrganization("org" + i);
-			bean.setJurisdictionIdentifier("loc" + i);
-			bean.setPlanIdentifier("plan" + i);
+			bean.setJurisdiction("loc" + i);
+			bean.setPlan("plan" + i);
 			if (random.nextBoolean())
-				bean.setDateFrom(new Date());
+				bean.setFromDate(new Date());
 			if (random.nextBoolean())
-				bean.setDateTo(new Date());
+				bean.setToDate(new Date());
 
 		}
 		return organizationAssigmentBeans.toArray(new OrganizationAssigmentBean[] {});
@@ -286,12 +284,12 @@ public class OrganizationResourceTest {
 		for (int i = 0; i < 5; i++) {
 			OrganizationAssigmentBean bean = new OrganizationAssigmentBean();
 			bean.setOrganization("org" + i);
-			bean.setJurisdictionIdentifier("loc" + i);
-			bean.setPlanIdentifier("plan" + i);
+			bean.setJurisdiction("loc" + i);
+			bean.setPlan("plan" + i);
 			if (random.nextBoolean())
-				bean.setDateFrom(new Date());
+				bean.setFromDate(new Date());
 			if (random.nextBoolean())
-				bean.setDateTo(new Date());
+				bean.setToDate(new Date());
 
 		}
 		return organizationAssigmentBeans;
