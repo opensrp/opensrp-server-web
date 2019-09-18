@@ -12,13 +12,13 @@ public class OrganizationAssigmentBean {
 
 	private String organization;
 
-	private String planIdentifier;
+	private String plan;
 
-	private String jurisdictionIdentifier;
+	private String jurisdiction;
 
-	private Date dateTo;
+	private Date toDate;
 
-	private Date dateFrom;
+	private Date fromDate;
 
 	public String getOrganization() {
 		return organization;
@@ -28,36 +28,36 @@ public class OrganizationAssigmentBean {
 		this.organization = organization;
 	}
 
-	public String getPlanIdentifier() {
-		return planIdentifier;
+	public String getPlan() {
+		return plan;
 	}
 
-	public void setPlanIdentifier(String planIdentifier) {
-		this.planIdentifier = planIdentifier;
+	public void setPlan(String plan) {
+		this.plan = plan;
 	}
 
-	public String getJurisdictionIdentifier() {
-		return jurisdictionIdentifier;
+	public String getJurisdiction() {
+		return jurisdiction;
 	}
 
-	public void setJurisdictionIdentifier(String jurisdictionIdentifier) {
-		this.jurisdictionIdentifier = jurisdictionIdentifier;
+	public void setJurisdiction(String jurisdiction) {
+		this.jurisdiction = jurisdiction;
 	}
 
-	public Date getDateTo() {
-		return dateTo;
+	public Date getToDate() {
+		return toDate;
 	}
 
-	public void setDateTo(Date dateTo) {
-		this.dateTo = dateTo;
+	public void setToDate(Date toDate) {
+		this.toDate = toDate;
 	}
 
-	public Date getDateFrom() {
-		return dateFrom;
+	public Date getFromDate() {
+		return fromDate;
 	}
 
-	public void setDateFrom(Date dateFrom) {
-		this.dateFrom = dateFrom;
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
 	}
 
 }

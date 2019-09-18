@@ -123,9 +123,9 @@ public class OrganizationResource {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
 				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganization(),
-						organizationAssigmentBean.getJurisdictionIdentifier(),
-						organizationAssigmentBean.getPlanIdentifier(), organizationAssigmentBean.getDateFrom(),
-						organizationAssigmentBean.getDateTo());
+						organizationAssigmentBean.getJurisdiction(),
+						organizationAssigmentBean.getPlan(), organizationAssigmentBean.getFromDate(),
+						organizationAssigmentBean.getToDate());
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
