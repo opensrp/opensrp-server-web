@@ -178,7 +178,7 @@ public class UserController {
 	@ResponseBody
 	public ResponseEntity<String> authenticate(HttpServletRequest request) throws JSONException {
 		if (useOpenSRPTeamModule) {
-			return authenticateUsingorganization(request);
+			return authenticateUsingOrganization(request);
 		}
 		User u = currentUser(request);
 		System.out.println(u);
@@ -192,7 +192,7 @@ public class UserController {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
 			}
 		} catch (Exception e) {
-			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute",e);
+			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
 		}
 		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
 			lid = (String) u.getAttribute("Location");
@@ -222,7 +222,7 @@ public class UserController {
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
-	private ResponseEntity<String> authenticateUsingorganization(HttpServletRequest request) throws JSONException {
+	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request) throws JSONException {
 		User u = currentUser(request);
 		System.out.println(u);
 
@@ -234,14 +234,13 @@ public class UserController {
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
-			
 
 			for (AssignedLocations assignedLocation : organizationService
 					.findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 
-			jurisdictions = locationService.findLocationsByIds(false,new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
 
 			for (PhysicalLocation jurisdiction : jurisdictions) {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
@@ -249,20 +248,19 @@ public class UserController {
 					openMRSIds.add(openMRSId);
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
-
 			}
 
 		} catch (Exception e) {
-			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute",e);
+			logger.error("USER Location info not mapped to an organization", e);
 		}
 		if (openMRSIds.isEmpty()) {
 			throw new IllegalStateException(
-					"User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
+					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
 		}
 		LocationTree l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
-		
+
 		JSONObject teamMemberJson = new JSONObject();
 		teamMemberJson.put("identifier", practionerOrganizationIds.left.getIdentifier());
 		teamMemberJson.put("uuid", practionerOrganizationIds.left.getUserId());
@@ -277,7 +275,7 @@ public class UserController {
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
 		PhysicalLocation jurisdiction = jurisdictions.get(0);
-		teamLocation.put("uuid",  openMRSIds.get(0));
+		teamLocation.put("uuid", openMRSIds.get(0));
 		teamLocation.put("name", jurisdiction.getProperties().getName());
 		teamLocation.put("display", jurisdiction.getProperties().getName());
 		teamJson.put("location", teamLocation);
@@ -286,14 +284,15 @@ public class UserController {
 		locations.put(teamLocation);
 		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
-		
-		try {
-			Map<String, Object> tmap = new Gson().fromJson(teamMemberJson.toString(), new TypeToken<HashMap<String, Object>>() {
 
-			}.getType());
+		try {
+			Map<String, Object> tmap = new Gson().fromJson(teamMemberJson.toString(),
+					new TypeToken<HashMap<String, Object>>() {
+
+					}.getType());
 			map.put("team", tmap);
 		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage(), e);
 		}
 		map.put("locations", l);
 		Time t = getServerTime();
