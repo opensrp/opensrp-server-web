@@ -32,10 +32,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.opensrp.domain.Event;
 import org.opensrp.domain.Client;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
+import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,6 +51,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 
@@ -58,12 +61,15 @@ public class ClientResource extends RestResource<Client> {
 	
 	private ClientService clientService;
 	
+	private EventService eventService;
+	
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
-	public ClientResource(ClientService clientService) {
+	public ClientResource(ClientService clientService, EventService eventService) {
 		this.clientService = clientService;
+		this.eventService = eventService;
 	}
 	
 	@Override
@@ -188,6 +194,36 @@ public class ClientResource extends RestResource<Client> {
 		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
 		response.put("total", total);
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/get-client-and-events", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	public ResponseEntity<String> getClientAndEventsBybaseEntityId(HttpServletRequest request) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonObject clientsArray = new JsonObject();
+		JsonArray eventsArray = new JsonArray();
+		List<Event> events = new ArrayList<Event>();
+		
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+		if (org.apache.commons.lang3.StringUtils.isBlank(baseEntityId)) {
+			response.put("client", clientsArray);
+			response.put("events", eventsArray);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		}
+		
+		Client client = clientService.find(baseEntityId);
+		if (client != null) {
+			clientsArray = (JsonObject) gson.toJsonTree(client, new TypeToken<Client>() {}.getType());
+		}
+		events = eventService.findByBaseEntityId(baseEntityId);
+		if (events.size() != 0) {
+			eventsArray = (JsonArray) gson.toJsonTree(events, new TypeToken<List<Event>>() {}.getType());
+		}
+		
+		response.put("events", eventsArray);
+		response.put("clients", clientsArray);
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 		
 	}
