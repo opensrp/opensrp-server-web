@@ -4,13 +4,18 @@ import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +27,13 @@ import org.opensrp.common.domain.UserDetail;
 import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.domain.AssignedLocations;
+import org.opensrp.domain.Organization;
+import org.opensrp.domain.PhysicalLocation;
+import org.opensrp.domain.Practitioner;
+import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.slf4j.Logger;
@@ -57,8 +69,17 @@ public class UserController {
 
 	private OpenmrsUserService openmrsUserService;
 
+	private OrganizationService organizationService;
+
+	private PractitionerService practitionerService;
+
+	private PhysicalLocationService locationService;
+
 	@Value("#{opensrp['openmrs.version']}")
 	protected String OPENMRS_VERSION;
+
+	@Value("#{opensrp['use.opensrp.team.module']}")
+	protected boolean useOpenSRPTeamModule = false;
 
 	@Autowired
 	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService,
@@ -66,6 +87,30 @@ public class UserController {
 		this.openmrsLocationService = openmrsLocationService;
 		this.openmrsUserService = openmrsUserService;
 		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
+	}
+
+	/**
+	 * @param organizationService the organizationService to set
+	 */
+	@Autowired
+	public void setOrganizationService(OrganizationService organizationService) {
+		this.organizationService = organizationService;
+	}
+
+	/**
+	 * @param practitionerService the practitionerService to set
+	 */
+	@Autowired
+	public void setPractitionerService(PractitionerService practitionerService) {
+		this.practitionerService = practitionerService;
+	}
+
+	/**
+	 * @param locationService the locationService to set
+	 */
+	@Autowired
+	public void setLocationService(PhysicalLocationService locationService) {
+		this.locationService = locationService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
@@ -117,7 +162,7 @@ public class UserController {
 				user = openmrsUserService.getUser(userName);
 				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
 				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail,RestUtils.getJSONUTF8Headers(), OK);
+				return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 			} catch (JSONException e) {
 				logger.error("Error getting user details", e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,6 +177,9 @@ public class UserController {
 	@RequestMapping("/security/authenticate")
 	@ResponseBody
 	public ResponseEntity<String> authenticate(HttpServletRequest request) throws JSONException {
+		if (useOpenSRPTeamModule) {
+			return authenticateUsingOrganization(request);
+		}
 		User u = currentUser(request);
 		System.out.println(u);
 		String lid = "";
@@ -144,7 +192,7 @@ public class UserController {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
 			}
 		} catch (Exception e) {
-			System.out.println("USER Location info not mapped in team management module. Now trying Person Attribute");
+			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
 		}
 		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
 			lid = (String) u.getAttribute("Location");
@@ -171,6 +219,85 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
+		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
+	}
+
+	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request) throws JSONException {
+		User u = currentUser(request);
+		System.out.println(u);
+
+		List<String> openMRSIds = new ArrayList<>();
+		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
+		List<PhysicalLocation> jurisdictions = null;
+		Set<String> locationIds = new HashSet<>();
+		Set<String> jurisdictionNames = new HashSet<>();
+		try {
+			String userId = u.getBaseEntityId();
+			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
+
+			for (AssignedLocations assignedLocation : organizationService
+					.findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
+				locationIds.add(assignedLocation.getJurisdictionId());
+			}
+
+			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
+
+			for (PhysicalLocation jurisdiction : jurisdictions) {
+				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
+				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
+					openMRSIds.add(openMRSId);
+				}
+				jurisdictionNames.add(jurisdiction.getProperties().getName());
+			}
+
+		} catch (Exception e) {
+			logger.error("USER Location info not mapped to an organization", e);
+		}
+		if (openMRSIds.isEmpty()) {
+			throw new IllegalStateException(
+					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
+		}
+		LocationTree l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
+		Map<String, Object> map = new HashMap<>();
+		map.put("user", u);
+
+		JSONObject teamMemberJson = new JSONObject();
+		teamMemberJson.put("identifier", practionerOrganizationIds.left.getIdentifier());
+		teamMemberJson.put("uuid", practionerOrganizationIds.left.getUserId());
+
+		JSONObject teamJson = new JSONObject();
+		// TODO populate organizations if user has many organizations
+		Organization organization = organizationService.getOrganization(practionerOrganizationIds.right.get(0));
+		teamJson.put("teamName", organization.getName());
+		teamJson.put("display", organization.getName());
+		teamJson.put("uuid", organization.getIdentifier());
+
+		JSONObject teamLocation = new JSONObject();
+		// TODO populate jurisdictions if user has many jurisdictions
+		PhysicalLocation jurisdiction = jurisdictions.get(0);
+		teamLocation.put("uuid", openMRSIds.get(0));
+		teamLocation.put("name", jurisdiction.getProperties().getName());
+		teamLocation.put("display", jurisdiction.getProperties().getName());
+		teamJson.put("location", teamLocation);
+
+		JSONArray locations = new JSONArray();
+		locations.put(teamLocation);
+		teamMemberJson.put("locations", locations);
+		teamMemberJson.put("team", teamJson);
+
+		try {
+			Map<String, Object> tmap = new Gson().fromJson(teamMemberJson.toString(),
+					new TypeToken<HashMap<String, Object>>() {
+
+					}.getType());
+			map.put("team", tmap);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		map.put("locations", l);
+		Time t = getServerTime();
+		map.put("time", t);
+		map.put("jurisdictions", jurisdictionNames);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
