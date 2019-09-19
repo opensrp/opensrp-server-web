@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -66,14 +67,16 @@ public class TaskResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE})
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE},
+			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getTasksByTaskAndGroup(@RequestBody TaskSyncRequestWrapper taskSyncRequestWrapper) {
-		String plan = taskSyncRequestWrapper.getPlan();
-		String group = taskSyncRequestWrapper.getGroup();
-		String serverVersion = taskSyncRequestWrapper.getServerVersion();
+		String plan = StringUtils.join(taskSyncRequestWrapper.getPlan(), ",");
+		String group = StringUtils.join(taskSyncRequestWrapper.getGroup(), ",");
+		long serverVersion = taskSyncRequestWrapper.getServerVersion();
+
 		long currentServerVersion = 0;
 		try {
-			currentServerVersion = Long.parseLong(serverVersion);
+			currentServerVersion = serverVersion;
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
@@ -170,23 +173,22 @@ public class TaskResource {
 
 	static class TaskSyncRequestWrapper {
 		@JsonProperty
-		private String plan;
+		private List<String> plan = new ArrayList<>();
 
 		@JsonProperty
-		private String group;
+		private List<String> group = new ArrayList<>();
 
 		@JsonProperty
-		private String serverVersion;
+		private long serverVersion;
 
-		public String getPlan() {
+		public List<String> getPlan() {
 			return plan;
 		}
-
-		public String getGroup() {
+		public List<String> getGroup() {
 			return group;
 		}
 
-		public String getServerVersion() {
+		public long getServerVersion() {
 			return serverVersion;
 		}
 	}

@@ -122,17 +122,18 @@ public class PlanResource {
 	}
 
 
-	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE})
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE},
+			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndOperationalArea(@RequestBody PlanSyncRequestWrapper planSyncRequestWrapper) {
-		String serverVersion = planSyncRequestWrapper.getServerVersion();
+		long serverVersion = planSyncRequestWrapper.getServerVersion();
 		long currentServerVersion = 0;
 		try {
-			currentServerVersion = Long.parseLong(serverVersion);
+			currentServerVersion = serverVersion;
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
 
-		List<String> operationalAreaIds = Arrays.asList(planSyncRequestWrapper.getOperationalAreaId().split(","));
+		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
 		if (operationalAreaIds.isEmpty()) {
 			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
 		}
@@ -193,17 +194,16 @@ public class PlanResource {
 
 
 	static class PlanSyncRequestWrapper {
-		@JsonProperty
-		private String operational_area_id;
+		@JsonProperty("operational_area_id")
+		private List<String> operationalAreaId;
 
 		@JsonProperty
-		private String serverVersion;
+		private long serverVersion;
 
-		public String getOperationalAreaId() {
-			return operational_area_id;
+		public List<String> getOperationalAreaId() {
+			return operationalAreaId;
 		}
-
-		public String getServerVersion() {
+		public long getServerVersion() {
 			return serverVersion;
 		}
 	}

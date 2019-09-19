@@ -98,18 +98,19 @@ public class LocationResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE },
+			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocations(@RequestBody LocationSyncRequestWrapper locationSyncRequestWrapper) {
 		long currentServerVersion = 0;
 		try {
-			currentServerVersion = Long.parseLong(locationSyncRequestWrapper.getServerVersion());
+			currentServerVersion = locationSyncRequestWrapper.getServerVersion();
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
 
 		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
-		String locationNames = locationSyncRequestWrapper.getLocationNames();
-		String parentIds = locationSyncRequestWrapper.getParentId();
+		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
+		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
 
 		try {
 			if (isJurisdiction) {
@@ -311,31 +312,31 @@ public class LocationResource {
 	}
 
 	static class LocationSyncRequestWrapper {
-		@JsonProperty
-		private Boolean is_jurisdiction;
+		@JsonProperty("is_jurisdiction")
+		private Boolean isJurisdiction;
+
+		@JsonProperty("location_names")
+		private List<String> locationNames;
+
+		@JsonProperty("parent_id")
+		private List<String> parentId;
 
 		@JsonProperty
-		private String location_names;
-
-		@JsonProperty
-		private String parent_id;
-
-		@JsonProperty
-		private String serverVersion;
+		private long serverVersion;
 
 		public Boolean getIsJurisdiction() {
-			return is_jurisdiction;
+			return isJurisdiction;
 		}
 
-		public String getLocationNames() {
-			return location_names;
+		public List<String> getLocationNames() {
+			return locationNames;
 		}
 
-		public String getParentId() {
-			return parent_id;
+		public List<String> getParentId() {
+			return parentId;
 		}
 
-		public String getServerVersion() {
+		public long getServerVersion() {
 			return serverVersion;
 		}
 	}
