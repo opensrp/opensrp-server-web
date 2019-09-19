@@ -174,7 +174,7 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":\"" + locationNames +"\", \"parent_id\": \"\"}").getBytes()))
+				.body(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames +"\"]}").getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
@@ -195,7 +195,7 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
 		result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":\"" + locationNames + "\", \"parent_id\": \"\"}").getBytes()))
+				.body(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"]}").getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);
@@ -218,7 +218,7 @@ public class LocationResourceTest {
 		when(locationService.findLocationsByServerVersion(0l)).thenReturn(expected);
 
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body("{\"serverVersion\":\"dfgdf\", \"is_jurisdiction\":\"true\"}".getBytes())).andExpect(status().isOk()).andReturn();
+				.body("{\"serverVersion\": 0, \"is_jurisdiction\":\"true\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByServerVersion(0l);
 		verifyNoMoreInteractions(locationService);
 
@@ -246,7 +246,7 @@ public class LocationResourceTest {
 		when(locationService.findStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(expected);
 
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body("{\"serverVersion\":\"1542640316\",\"parent_id\":\"3734\", \"is_jurisdiction\":\"false\", \"location_names\":\"\"}".getBytes())).andExpect(status().isOk()).andReturn();
+				.body("{\"serverVersion\":1542640316,\"parent_id\":[\"3734\"], \"is_jurisdiction\":\"false\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findStructuresByParentAndServerVersion("3734", 1542640316l);
 		verifyNoMoreInteractions(locationService);
 
@@ -256,7 +256,7 @@ public class LocationResourceTest {
 
 		when(locationService.findStructuresByParentAndServerVersion("3734,001", 1542640316l)).thenReturn(expected);
 		result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body("{\"serverVersion\":\"1542640316\",\"parent_id\":\"3734,001\", \"is_jurisdiction\":\"false\", \"location_names\":\"\"}".getBytes())).andExpect(status().isOk()).andReturn();
+				.body("{\"serverVersion\":1542640316,\"parent_id\":[\"3734,001\"], \"is_jurisdiction\":\"false\"}".getBytes())).andExpect(status().isOk()).andReturn();
 		verify(locationService).findStructuresByParentAndServerVersion("3734,001", 1542640316l);
 		verifyNoMoreInteractions(locationService);
 

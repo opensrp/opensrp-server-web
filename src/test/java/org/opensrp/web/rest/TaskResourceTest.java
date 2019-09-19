@@ -108,7 +108,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-						.body("{\"plan\":\"IRS_2018_S1\",\"group\":\"2018_IRS-3734\", \"serverVersion\":\"15421904649873\"}".getBytes()))
+						.body("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
 		verifyNoMoreInteractions(taskService);
@@ -124,7 +124,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-						.body("{\"plan\":\"IRS_2018_S1\", \"group\":\"2018_IRS-3734\", \"serverVersion\":\"\"}".getBytes()))
+						.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":\"\"}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l);
 		verifyNoMoreInteractions(taskService);
@@ -148,7 +148,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l))
 				.thenThrow(new RuntimeException());
 		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body("{\"plan\":\"IRS_2018_S1\", \"group\":\"2018_IRS-3734\", \"serverVersion\":\"15421904649873\"}".getBytes()))
+				.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
 		verifyNoMoreInteractions(taskService);

@@ -267,7 +267,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
-        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":\"operational_area,operational_area_2\"}";
+        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
         String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, MockMvcResultMatchers.status().isOk());
 
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
