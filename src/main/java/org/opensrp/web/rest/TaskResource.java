@@ -30,6 +30,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
+import javax.servlet.http.HttpServletRequest;
+import org.opensrp.common.AllConstants.BaseEntity;
+
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
 @Controller
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
@@ -72,6 +77,30 @@ public class TaskResource {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = serverVersion;
+		} catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	// here for backward compatibility
+	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getTasksByTaskAndGroupTwo(HttpServletRequest request) {
+		String plan = getStringFilter(PLAN, request);
+		String group = getStringFilter(GROUP, request);
+		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = Long.parseLong(serverVersion);
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}

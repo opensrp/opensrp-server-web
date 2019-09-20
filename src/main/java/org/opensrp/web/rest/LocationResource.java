@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.opensrp.common.AllConstants.BaseEntity;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -137,6 +138,43 @@ public class LocationResource {
 		}
 	}
 
+	// here for backward compatibility
+	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getLocationsTwo(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
+											   @RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+											   @RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
+											   @RequestParam(value = PARENT_ID, required = false) String parentIds) {
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = Long.parseLong(serverVersion);
+		} catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+
+		try {
+			if (isJurisdiction) {
+				if (StringUtils.isBlank(locationNames)) {
+					return new ResponseEntity<>(
+							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
+							RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				}
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+			} else {
+				if (StringUtils.isBlank(parentIds)) {
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				}
+				return new ResponseEntity<>(gson.toJson(
+						locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
+						HttpStatus.OK);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })

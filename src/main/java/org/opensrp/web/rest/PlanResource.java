@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.opensrp.common.AllConstants;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
@@ -28,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * @author Vincent Karuri
@@ -143,6 +146,30 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+    //here for backward compatibility
+    @RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> syncByServerVersionAndOperationalAreaTwo(HttpServletRequest request,
+                                                                        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
+        String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+        long currentServerVersion = 0;
+        try {
+            currentServerVersion = Long.parseLong(serverVersion);
+        } catch (NumberFormatException e) {
+            logger.error("server version not a number");
+        }
+        if (operationalAreaIds.isEmpty()) {
+            return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return new ResponseEntity<>(gson.toJson(
+                    planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
+                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	/**
 	 * This method provides an API endpoint that searches for plans using a list of provided
