@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.opensrp.common.AllConstants;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PlanService;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -276,6 +278,45 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         assertEquals(longArgumentCaptor.getValue().longValue(), 1);
         List<String> list  = listArgumentCaptor.getValue();
         assertEquals(list.get(0), "operational_area");
+    }
+
+    public void testGetSyncByServerVersionAndOperationalAreaShouldSyncCorrectPlans() throws Exception {
+        List<PlanDefinition> expectedPlans = new ArrayList<>();
+
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(1l);
+        expectedPlans.add(expectedPlan);
+
+        expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_2");
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(0l);
+
+        expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_3");
+        operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area_2");
+        operationalAreas.clear();
+        operationalAreas.add(operationalArea);
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(1l);
+        expectedPlans.add(expectedPlan);
+
+        doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
+
+        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", MockMvcResultMatchers.status().isOk());
+        List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+        verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
+        assertEquals(longArgumentCaptor.getValue().longValue(), 1);
+        assertEquals(listArgumentCaptor.getValue().get(0), "operational_area" );
     }
 
     @Override

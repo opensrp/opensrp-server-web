@@ -10,6 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
@@ -166,6 +167,22 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testGetSyncLocationsByServerVersions() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByServerVersion(1542640316113l)).thenReturn(expected);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316113")
+				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByServerVersion(1542640316113l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
 	public void testsSyncLocationsByNames() throws Exception {
 
 		String locationNames = "01_5";
@@ -211,6 +228,50 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testsGetSyncLocationsByNames() throws Exception {
+
+		String locationNames = "01_5";
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(),
+				PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+
+//		search with more than one name
+		locationNames = "01_5,other_location_name";
+		expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+				.param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
+		verifyNoMoreInteractions(locationService);
+
+		jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(), PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+	}
+
+	@Test
 	public void testSyncLocationsByInvalidServerVersionsShouldReturnAllServerVersions() throws Exception {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createLocation());
@@ -227,12 +288,40 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testGetSyncLocationsByInvalidServerVersionsShouldReturnAllServerVersions() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByServerVersion(0l)).thenReturn(expected);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "dfgdf")
+				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByServerVersion(0l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
 	public void testSyncLocationsShouldReturmServerError() throws Exception {
 
 		when(locationService.findLocationsByServerVersion(0l)).thenThrow(new RuntimeException());
 
 		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
 				body("{\"serverVersion\":\"0\", \"is_jurisdiction\": \"true\"}".getBytes())).andExpect(status().isInternalServerError());
+		verify(locationService).findLocationsByServerVersion(0l);
+		verifyNoMoreInteractions(locationService);
+
+	}
+
+	@Test
+	public void testGetSyncLocationsShouldReturmServerError() throws Exception {
+
+		when(locationService.findLocationsByServerVersion(0l)).thenThrow(new RuntimeException());
+
+		mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
+				.param(LocationResource.IS_JURISDICTION, "true")).andExpect(status().isInternalServerError());
 		verify(locationService).findLocationsByServerVersion(0l);
 		verifyNoMoreInteractions(locationService);
 
@@ -265,6 +354,33 @@ public class LocationResourceTest {
 
 	}
 
+	@Test
+	public void testGetSyncStructuresByParentIdAndServerVersion() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(expected);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316")
+				.param(LocationResource.PARENT_ID, "3734")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByParentAndServerVersion("3734", 1542640316l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+		when(locationService.findStructuresByParentAndServerVersion("3734,001", 1542640316l)).thenReturn(expected);
+		result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316")
+				.param(LocationResource.PARENT_ID, "3734,001")).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByParentAndServerVersion("3734,001", 1542640316l);
+		verifyNoMoreInteractions(locationService);
+
+		jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
@@ -273,6 +389,21 @@ public class LocationResourceTest {
 				.thenThrow(IllegalArgumentException.class);
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
 				body("{\"serverVersion\", \"1542640316\"}".getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+		verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());
+		verifyNoMoreInteractions(locationService);
+
+		assertTrue(result.getResponse().getContentAsString().isEmpty());
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
+
+		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
+				.thenThrow(IllegalArgumentException.class);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316"))
 				.andExpect(status().isBadRequest()).andReturn();
 		verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());
 		verifyNoMoreInteractions(locationService);
