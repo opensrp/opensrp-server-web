@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
@@ -27,11 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * @author Vincent Karuri

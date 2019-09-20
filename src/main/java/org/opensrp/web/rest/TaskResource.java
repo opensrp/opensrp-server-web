@@ -1,19 +1,14 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
