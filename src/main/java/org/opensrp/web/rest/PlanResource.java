@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
@@ -119,16 +120,19 @@ public class PlanResource {
 		}
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> syncByServerVersionAndOperationalArea(HttpServletRequest request,
-			@RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
-		String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE},
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> syncByServerVersionAndOperationalArea(@RequestBody PlanSyncRequestWrapper planSyncRequestWrapper) {
+		long serverVersion = planSyncRequestWrapper.getServerVersion();
 		long currentServerVersion = 0;
 		try {
-			currentServerVersion = Long.parseLong(serverVersion);
+			currentServerVersion = serverVersion;
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
+
+		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
 		if (operationalAreaIds.isEmpty()) {
 			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
 		}
@@ -142,6 +146,30 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+    //here for backward compatibility
+    @RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> syncByServerVersionAndOperationalAreaTwo(HttpServletRequest request,
+                                                                        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
+        String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+        long currentServerVersion = 0;
+        try {
+            currentServerVersion = Long.parseLong(serverVersion);
+        } catch (NumberFormatException e) {
+            logger.error("server version not a number");
+        }
+        if (operationalAreaIds.isEmpty()) {
+            return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return new ResponseEntity<>(gson.toJson(
+                    planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
+                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	/**
 	 * This method provides an API endpoint that searches for plans using a list of provided
@@ -186,4 +214,21 @@ public class PlanResource {
 		}
 		return false;
 	}
+
+
+	static class PlanSyncRequestWrapper {
+		@JsonProperty("operational_area_id")
+		private List<String> operationalAreaId;
+
+		@JsonProperty
+		private long serverVersion;
+
+		public List<String> getOperationalAreaId() {
+			return operationalAreaId;
+		}
+		public long getServerVersion() {
+			return serverVersion;
+		}
+	}
+
 }

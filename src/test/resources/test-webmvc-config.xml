@@ -18,5 +18,8 @@
 	<bean class="org.opensrp.web.rest.shadow.SettingResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.UserControllerShadow" />
 	<bean class="org.opensrp.web.rest.shadow.PlanResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.OrganizationResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.PractitionerResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.PractitionerRoleResourceShadow" />
 
 </beans>
