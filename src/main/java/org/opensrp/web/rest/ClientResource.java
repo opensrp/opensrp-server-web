@@ -156,8 +156,6 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
 		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
-		searchBean.setPageNumber(pageNumber);
-		searchBean.setPageSize(pageSize);
 		
 		if (pageNumberParam != null) {
 			pageNumber = Integer.parseInt(pageNumberParam);
@@ -166,6 +164,8 @@ public class ClientResource extends RestResource<Client> {
 			pageSize = Integer.parseInt(pageSizeParam);
 		}
 		
+		searchBean.setPageNumber(pageNumber);
+		searchBean.setPageSize(pageSize);
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
 		addressSearchBean.setAddressType(getStringFilter(ADDRESS_TYPE, request));
 		addressSearchBean.setCountry(getStringFilter(COUNTRY, request));
@@ -226,6 +226,30 @@ public class ClientResource extends RestResource<Client> {
 		response.put("clients", clientsArray);
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/members", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	public ResponseEntity<String> getMembersByRelationshipIdAndType(HttpServletRequest request) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonArray clientsArray = new JsonArray();
+		JsonArray eventsArray = new JsonArray();
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+		String relationshipType = getStringFilter("relationshipType", request);
+		if (org.apache.commons.lang3.StringUtils.isBlank(baseEntityId)
+		        && org.apache.commons.lang3.StringUtils.isBlank(relationshipType)) {
+			response.put("client", clientsArray);
+			response.put("events", eventsArray);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		}
+		List<Client> clients = clientService.findByRelationshipIdAndType(relationshipType, baseEntityId);
+		if (!clients.isEmpty()) {
+			clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
+		}
+		
+		response.put("clients", clientsArray);
+		
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 	}
 	
 	@Override
