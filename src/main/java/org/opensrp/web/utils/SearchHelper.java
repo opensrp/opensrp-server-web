@@ -261,4 +261,48 @@ public class SearchHelper {
 		return motherGuardianPhoneNumber;
 	}
 	
+	public static List<ChildMother> processSearchResult(List<Client> children, List<Client> mothers,
+	                                                    String RELATIONSHIP_KEY) {
+		List<ChildMother> childMotherList = new ArrayList<ChildMother>();
+		for (Client child : children) {
+			for (Client mother : mothers) {
+				String relationalId = getRelationalId(child, RELATIONSHIP_KEY);
+				String motherEntityId = mother.getBaseEntityId();
+				if (relationalId != null && motherEntityId != null && relationalId.equalsIgnoreCase(motherEntityId)) {
+					childMotherList.add(new ChildMother(child, mother));
+				}
+			}
+		}
+		
+		return childMotherList;
+	}
+	
+	public static String getRelationalId(Client c, String relationshipKey) {
+		Map<String, List<String>> relationships = c.getRelationships();
+		if (relationships != null) {
+			for (Map.Entry<String, List<String>> entry : relationships.entrySet()) {
+				String key = entry.getKey();
+				if (key.equalsIgnoreCase(relationshipKey)) {
+					List<String> rList = entry.getValue();
+					if (!rList.isEmpty()) {
+						return rList.get(0);
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	public static String getChildIndentifier(Client m, String motherIdentifier, String relationshipKey) {
+		String identifier = m.getIdentifier(motherIdentifier);
+		if (!StringUtils.isEmptyOrWhitespaceOnly(identifier)) {
+			String[] arr = identifier.split("_");
+			if (arr != null && arr.length == 2 && arr[1].contains(relationshipKey)) {
+				return arr[0];
+			}
+		}
+		return null;
+	}
+	
 }

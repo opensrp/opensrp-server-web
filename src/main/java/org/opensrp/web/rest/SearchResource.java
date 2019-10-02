@@ -24,6 +24,7 @@ import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.SearchService;
+import org.opensrp.web.utils.ChildMother;
 import org.opensrp.web.utils.SearchEntityWrapper;
 import org.opensrp.web.utils.SearchHelper;
 import org.slf4j.Logger;
@@ -148,7 +149,7 @@ public class SearchResource extends RestResource<Client> {
 			if (!children.isEmpty()) {
 				List<String> clientIds = new ArrayList<String>();
 				for (Client c : children) {
-					String relationshipId = getRelationalId(c, RELATIONSHIP_KEY);
+					String relationshipId = SearchHelper.getRelationalId(c, RELATIONSHIP_KEY);
 					if (relationshipId != null && !clientIds.contains(relationshipId)) {
 						clientIds.add(relationshipId);
 					}
@@ -164,7 +165,7 @@ public class SearchResource extends RestResource<Client> {
 			if (!mothers.isEmpty()) {
 				List<String> cIndentifers = new ArrayList<String>();
 				for (Client m : mothers) {
-					String childIdentifier = getChildIndentifier(m, M_ZEIR_ID, RELATIONSHIP_KEY);
+					String childIdentifier = SearchHelper.getChildIndentifier(m, M_ZEIR_ID, RELATIONSHIP_KEY);
 					if (childIdentifier != null && !cIndentifers.contains(childIdentifier)) {
 						
 						linkedChildren.addAll(clientService.findAllByIdentifier(childIdentifier));
@@ -181,7 +182,7 @@ public class SearchResource extends RestResource<Client> {
 				}
 			}
 			
-			List<ChildMother> childMotherList = processSearchResult(children, mothers, RELATIONSHIP_KEY);
+			List<ChildMother> childMotherList = SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
 			return childMotherList;
 			
 		}
@@ -190,21 +191,6 @@ public class SearchResource extends RestResource<Client> {
 			logger.error("", e);
 			return new ArrayList<ChildMother>();
 		}
-	}
-	
-	private List<ChildMother> processSearchResult(List<Client> children, List<Client> mothers, String RELATIONSHIP_KEY) {
-		List<ChildMother> childMotherList = new ArrayList<ChildMother>();
-		for (Client child : children) {
-			for (Client mother : mothers) {
-				String relationalId = getRelationalId(child, RELATIONSHIP_KEY);
-				String motherEntityId = mother.getBaseEntityId();
-				if (relationalId != null && motherEntityId != null && relationalId.equalsIgnoreCase(motherEntityId)) {
-					childMotherList.add(new ChildMother(child, mother));
-				}
-			}
-		}
-		
-		return childMotherList;
 	}
 	
 	public List<String> getClientBaseEntityIdsByContactPhoneNumber(String motherGuardianPhoneNumber) {
@@ -257,53 +243,4 @@ public class SearchResource extends RestResource<Client> {
 		return null;
 	}
 	
-	private String getRelationalId(Client c, String relationshipKey) {
-		Map<String, List<String>> relationships = c.getRelationships();
-		if (relationships != null) {
-			for (Map.Entry<String, List<String>> entry : relationships.entrySet()) {
-				String key = entry.getKey();
-				if (key.equalsIgnoreCase(relationshipKey)) {
-					List<String> rList = entry.getValue();
-					if (!rList.isEmpty()) {
-						return rList.get(0);
-					}
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	private String getChildIndentifier(Client m, String motherIdentifier, String relationshipKey) {
-		String identifier = m.getIdentifier(motherIdentifier);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(identifier)) {
-			String[] arr = identifier.split("_");
-			if (arr != null && arr.length == 2 && arr[1].contains(relationshipKey)) {
-				return arr[0];
-			}
-		}
-		return null;
-	}
-	
-	private class ChildMother {
-		
-		private Client child;
-		
-		private Client mother;
-		
-		public ChildMother(Client child, Client mother) {
-			this.child = child;
-			this.mother = mother;
-		}
-		
-		@SuppressWarnings("unused")
-		public Client getMother() {
-			return mother;
-		}
-		
-		@SuppressWarnings("unused")
-		public Client getChild() {
-			return child;
-		}
-	}
 }
