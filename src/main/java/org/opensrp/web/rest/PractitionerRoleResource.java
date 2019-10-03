@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/rest/practitionerRole")
@@ -73,8 +77,14 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> create(@RequestBody String entity) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            Type listType = new TypeToken<List<PractitionerRole>>() {
+            }.getType();
+
+            List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
+
+            for (PractitionerRole practitionerRole: practitionerRoles) {
+                practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            }
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
@@ -92,8 +102,13 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> update(@RequestBody String entity) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            Type listType = new TypeToken<List<PractitionerRole>>() {
+            }.getType();
+
+            List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
+            for (PractitionerRole practitionerRole: practitionerRoles) {
+                practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            }
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
