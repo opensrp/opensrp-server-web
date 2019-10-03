@@ -3,11 +3,13 @@
  */
 package org.opensrp.web.rest;
 
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
+import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.List;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -35,6 +36,8 @@ public class OrganizationResource {
 
 	private OrganizationService organizationService;
 
+	private PractitionerService practitionerService;
+
 	public static Gson gson = new GsonBuilder().create();
 
 	/**
@@ -45,6 +48,15 @@ public class OrganizationResource {
 	@Autowired
 	public void setOrganizationService(OrganizationService organizationService) {
 		this.organizationService = organizationService;
+	}
+
+	/**
+	 *  set the practitionerService
+	 * @param practitionerService the practitionerService to set
+	 */
+	@Autowired
+	public void setPractitionerService(PractitionerService practitionerService) {
+		this.practitionerService = practitionerService;
 	}
 
 	/**
@@ -143,6 +155,21 @@ public class OrganizationResource {
 			@PathVariable("identifier") String identifier) {
 		try {
 			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier), HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@RequestMapping(value = "/practitioners/{identifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<Practitioner>> getOrgPractitioners(
+			@PathVariable("identifier") String identifier) {
+		try {
+			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
