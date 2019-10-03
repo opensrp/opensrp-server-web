@@ -20,6 +20,9 @@ import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
 import static org.opensrp.common.AllConstants.Client.PAGESIZE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
+import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
+import static org.opensrp.common.AllConstants.Client.HOUSEHOLD;
+import static org.opensrp.common.AllConstants.Client.HOUSEHOLDMEMEBR;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
@@ -104,6 +107,14 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
+		String clientId = getStringFilter("identifier", request);
+		if (!StringUtils.isEmptyOrWhitespaceOnly(clientId)) {
+			Client c = clientService.find(clientId);
+			List<Client> clients = new ArrayList<Client>();
+			clients.add(c);
+			return clients;
+		}
+		
 		if (birthdate != null) {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
@@ -142,11 +153,11 @@ public class ClientResource extends RestResource<Client> {
 		int total = 0;
 		Integer pageNumber = 0;
 		Integer pageSize = 0;
-		
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
 		String pageNumberParam = getStringFilter(PAGENUMBER, request);
 		String pageSizeParam = getStringFilter(PAGESIZE, request);
 		ClientSearchBean searchBean = new ClientSearchBean();
-		searchBean.setNameLike(getStringFilter("name", request));
+		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
 		
 		DateTime[] lastEdit = null;
@@ -176,16 +187,21 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		List<String> ids = new ArrayList<String>();
-		
-		clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
-		    lastEdit == null ? null : lastEdit[1]);
-		if (clients.size() != 0) {
-			for (Client client : clients) {
-				ids.add(client.getBaseEntityId());
+		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
+			
+			clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
+			    lastEdit == null ? null : lastEdit[1]);
+			if (clients.size() != 0) {
+				for (Client client : clients) {
+					ids.add(client.getBaseEntityId());
+				}
+				
+				total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
+				clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
 			}
 			
-			total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
-			clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
+		} else if (clientType.equalsIgnoreCase(HOUSEHOLDMEMEBR)) {
+			clientList = clientService.findMembersByRelationshipId(baseEntityId);
 		}
 		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
