@@ -240,7 +240,7 @@ public class UserController {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 
-			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
 
 			for (PhysicalLocation jurisdiction : jurisdictions) {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
