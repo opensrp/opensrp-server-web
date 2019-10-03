@@ -15,7 +15,7 @@ import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
 import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.ORDERBYFIELD;
+import static org.opensrp.common.AllConstants.Client.ORDERBYFIELDNAAME;
 import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
 import static org.opensrp.common.AllConstants.Client.PAGESIZE;
@@ -152,7 +152,7 @@ public class ClientResource extends RestResource<Client> {
 		DateTime[] lastEdit = null;
 		
 		String clientType = getStringFilter(CLIENTTYPE, request);
-		searchBean.setOrderByField(getStringFilter(ORDERBYFIELD, request));
+		searchBean.setOrderByField(getStringFilter(ORDERBYFIELDNAAME, request));
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
 		searchBean.setClientType(clientType);
 		searchBean.setProviderId(getStringFilter(PROVIDERID, request));
@@ -164,17 +164,13 @@ public class ClientResource extends RestResource<Client> {
 			pageSize = Integer.parseInt(pageSizeParam);
 		}
 		
+		List<String> locationUuids = new ArrayList<String>();
+		locationUuids.add("56b112d2-21ce-4818-b603-277bb57f5528");
+		locationUuids.add("1902417a-d9f4-44f5-adc4-49a55f0eab0d");
+		searchBean.setLocations(locationUuids);
 		searchBean.setPageNumber(pageNumber);
 		searchBean.setPageSize(pageSize);
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
-		addressSearchBean.setAddressType(getStringFilter(ADDRESS_TYPE, request));
-		addressSearchBean.setCountry(getStringFilter(COUNTRY, request));
-		addressSearchBean.setStateProvince(getStringFilter(STATE_PROVINCE, request));
-		addressSearchBean.setCityVillage(getStringFilter(CITY_VILLAGE, request));
-		addressSearchBean.setCountyDistrict(getStringFilter(COUNTY_DISTRICT, request));
-		addressSearchBean.setSubDistrict(getStringFilter(SUB_DISTRICT, request));
-		addressSearchBean.setTown(getStringFilter(TOWN, request));
-		addressSearchBean.setSubTown(getStringFilter(SUB_TOWN, request));
 		
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
