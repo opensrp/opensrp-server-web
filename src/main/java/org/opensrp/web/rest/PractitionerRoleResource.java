@@ -77,14 +77,8 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> create(@RequestBody String entity) {
         try {
-            Type listType = new TypeToken<List<PractitionerRole>>() {
-            }.getType();
-
-            List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
-
-            for (PractitionerRole practitionerRole: practitionerRoles) {
-                practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
-            }
+            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
+            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
@@ -102,10 +96,31 @@ public class PractitionerRoleResource {
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> update(@RequestBody String entity) {
         try {
+            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
+            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (JsonSyntaxException e) {
+            logger.error("The request doesn't contain a valid practitioner role representation" + entity);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }  catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }   catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @RequestMapping(value = "/addOrUpdateMany", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+            MediaType.TEXT_PLAIN_VALUE })
+    public ResponseEntity<String> createOrUpdateMany(@RequestBody String entity) {
+        try {
             Type listType = new TypeToken<List<PractitionerRole>>() {
             }.getType();
 
             List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
+
             for (PractitionerRole practitionerRole: practitionerRoles) {
                 practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
             }
