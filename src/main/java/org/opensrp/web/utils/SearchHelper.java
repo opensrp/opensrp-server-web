@@ -94,7 +94,8 @@ public class SearchHelper {
 		return new SearchEntityWrapper(isValid, searchBean, limit);
 	}
 	
-	public static Map<String, String> getZEIRIdentifierMap(String zeirId) {
+	public static Map<String, String> getZEIRIdentifierMap(String zeirId_) {
+		String zeirId = zeirId_;
 		Map<String, String> identifiers = new HashMap<String, String>();
 		if (!StringUtils.isEmptyOrWhitespaceOnly(zeirId)) {
 			zeirId = formatChildUniqueId(zeirId);
@@ -235,7 +236,8 @@ public class SearchHelper {
 		return list;
 	}
 	
-	public static List<Client> createClientListIfEmpty(List<Client> list) {
+	public static List<Client> createClientListIfEmpty(List<Client> list_) {
+		List<Client> list = list_;
 		
 		if (list == null) {
 			list = new ArrayList<Client>();
@@ -305,7 +307,8 @@ public class SearchHelper {
 		return null;
 	}
 	
-	public static String getChildIndentifierFromMotherClient(Client client, String motherIdentifier, String relationshipKey) {
+	public static String getChildIndentifierFromMotherClient(Client client, String motherIdentifier,
+	                                                         String relationshipKey) {
 		String identifier = client.getIdentifier(motherIdentifier);
 		if (!StringUtils.isEmptyOrWhitespaceOnly(identifier)) {
 			String[] arr = identifier.split("_");
