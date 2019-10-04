@@ -2,7 +2,6 @@ package org.opensrp.web.utils;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
 import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -115,10 +114,10 @@ public class SearchHelper {
 		String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
 		String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
 		
-		String motherGuardianNrc = getStringFilter(MOTHER_GUARDIAN_NRC_NUMBER, request);
+		String motherGuardianNrc = RestUtils.getStringFilter(MOTHER_GUARDIAN_NRC_NUMBER, request);
 		
-		motherSearchBean.setFirstName(getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, request));
-		motherSearchBean.setLastName(getStringFilter(MOTHER_GUARDIAN_LAST_NAME, request));
+		motherSearchBean.setFirstName(RestUtils.getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, request));
+		motherSearchBean.setLastName(RestUtils.getStringFilter(MOTHER_GUARDIAN_LAST_NAME, request));
 		
 		String NRC_NUMBER_KEY = "NRC_Number";
 		Map<String, String> motherAttributes = new HashMap<String, String>();
@@ -186,11 +185,12 @@ public class SearchHelper {
 		
 	}
 	
-	public static String formatChildUniqueId(String unformattedId) {
-		if (!StringUtils.isEmptyOrWhitespaceOnly(unformattedId)) {
-			if (unformattedId.contains("-")) {
-				unformattedId = unformattedId.split("-")[0];
-			}
+	public static String formatChildUniqueId(String unformattedId_) {
+		String unformattedId = unformattedId_;
+		if (!StringUtils.isEmptyOrWhitespaceOnly(unformattedId) && unformattedId.contains("-")) {
+			
+			unformattedId = unformattedId.split("-")[0];
+			
 		}
 		
 		return unformattedId;
@@ -203,14 +203,14 @@ public class SearchHelper {
 	 * @param list2
 	 * @return merged intersection list
 	 */
-	public static List<Client> intersection(List<Client> list1, List<Client> list2) {
-		if (list1 == null) {
-			list1 = new ArrayList<Client>();
-		}
+	public static List<Client> intersection(List<Client> list1_, List<Client> list2_) {
 		
-		if (list2 == null) {
-			list2 = new ArrayList<Client>();
-		}
+		List<Client> list1 = list1_;
+		List<Client> list2 = list2_;
+		
+		list1 = createClientListIfEmpty(list1);
+		
+		list2 = createClientListIfEmpty(list2);
 		
 		if (list1.isEmpty() && list2.isEmpty()) {
 			return new ArrayList<Client>();
@@ -235,15 +235,26 @@ public class SearchHelper {
 		return list;
 	}
 	
+	public static List<Client> createClientListIfEmpty(List<Client> list) {
+		
+		if (list == null) {
+			list = new ArrayList<Client>();
+		}
+		
+		return list;
+	}
+	
 	public static boolean contains(List<Client> clients, Client c) {
 		if (clients == null || clients.isEmpty() || c == null) {
 			return false;
 		}
 		for (Client client : clients) {
-			if (client != null && client.getBaseEntityId() != null && c.getBaseEntityId() != null) {
-				if (client.getBaseEntityId().equals(c.getBaseEntityId())) {
-					return true;
-				}
+			
+			if (client != null && client.getBaseEntityId() != null && c.getBaseEntityId() != null
+			        && client.getBaseEntityId().equals(c.getBaseEntityId())) {
+				
+				return true;
+				
 			}
 		}
 		return false;
@@ -253,9 +264,9 @@ public class SearchHelper {
 		//Search by mother contact number
 		String MOTHER_GUARDIAN_PHONE_NUMBER = "mother_contact_phone_number";
 		String CONTACT_PHONE_NUMBER = "contact_phone_number";
-		String motherGuardianPhoneNumber = getStringFilter(MOTHER_GUARDIAN_PHONE_NUMBER, request);
+		String motherGuardianPhoneNumber = RestUtils.getStringFilter(MOTHER_GUARDIAN_PHONE_NUMBER, request);
 		motherGuardianPhoneNumber = StringUtils.isEmptyOrWhitespaceOnly(motherGuardianPhoneNumber)
-		        ? getStringFilter(CONTACT_PHONE_NUMBER, request)
+		        ? RestUtils.getStringFilter(CONTACT_PHONE_NUMBER, request)
 		        : motherGuardianPhoneNumber;
 		
 		return motherGuardianPhoneNumber;
@@ -294,8 +305,8 @@ public class SearchHelper {
 		return null;
 	}
 	
-	public static String getChildIndentifier(Client m, String motherIdentifier, String relationshipKey) {
-		String identifier = m.getIdentifier(motherIdentifier);
+	public static String getChildIndentifierFromMotherClient(Client client, String motherIdentifier, String relationshipKey) {
+		String identifier = client.getIdentifier(motherIdentifier);
 		if (!StringUtils.isEmptyOrWhitespaceOnly(identifier)) {
 			String[] arr = identifier.split("_");
 			if (arr != null && arr.length == 2 && arr[1].contains(relationshipKey)) {

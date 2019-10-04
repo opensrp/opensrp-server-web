@@ -165,7 +165,7 @@ public class SearchResource extends RestResource<Client> {
 			if (!mothers.isEmpty()) {
 				List<String> cIndentifers = new ArrayList<String>();
 				for (Client m : mothers) {
-					String childIdentifier = SearchHelper.getChildIndentifier(m, M_ZEIR_ID, RELATIONSHIP_KEY);
+					String childIdentifier = SearchHelper.getChildIndentifierFromMotherClient(m, M_ZEIR_ID, RELATIONSHIP_KEY);
 					if (childIdentifier != null && !cIndentifers.contains(childIdentifier)) {
 						
 						linkedChildren.addAll(clientService.findAllByIdentifier(childIdentifier));
