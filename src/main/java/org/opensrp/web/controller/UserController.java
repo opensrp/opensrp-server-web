@@ -31,6 +31,7 @@ import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.domain.LocationProperty.PropertyStatus;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
@@ -240,9 +241,11 @@ public class UserController {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 
-			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
 
 			for (PhysicalLocation jurisdiction : jurisdictions) {
+				if(PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
+					continue;
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
 					openMRSIds.add(openMRSId);
