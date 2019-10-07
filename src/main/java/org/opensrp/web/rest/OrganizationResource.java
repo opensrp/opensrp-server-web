@@ -164,7 +164,7 @@ public class OrganizationResource {
 		}
 	}
 
-	@RequestMapping(value = "/practitioners/{identifier}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/practitioner/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<Practitioner>> getOrgPractitioners(
 			@PathVariable("identifier") String identifier) {
