@@ -70,9 +70,9 @@ public class SettingResourceTest {
 	        + "            \"description\": \"Does your facility use an automated blood pressure (BP) measurement tool?\"\n"
 	        + "        }\n" + "    ]\n" + "}";
 	
-	private String settingJsonUpdate = "{\n" + "    \"_id\": \"1\",\n" + "    \"_rev\": \"v1\",\n"
+	private String settingJsonUpdate = "{\n" + "    \"_id\": \"settings-document-id-2\",\n" + "    \"_rev\": \"v1\",\n"
 	        + "    \"type\": \"SettingConfiguration\",\n" + "    \"identifier\": \"site_characteristics\",\n"
-	        + "    \"documentId\": \"settings-document-id-2\",\n" + "    \"id\": \"settings-document-id-2\",\n"
+	        + "    \"documentId\": \"settings-document-id-2\",\n" 
 	        + "    \"locationId\": \"\",\n" + "    \"providerId\": \"\",\n" + "    \"teamId\": \"my-team-id\",\n"
 	        + "    \"dateCreated\": \"1970-10-04T10:17:09.993+03:00\",\n" + "    \"serverVersion\": 1,\n"
 	        + "    \"settings\": [\n" + "        {\n" + "            \"key\": \"site_ipv_assess\",\n"
@@ -153,10 +153,12 @@ public class SettingResourceTest {
 	
 	@Test
 	public void testSaveSetting() throws Exception {
+		String documentId = "1";
 		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
 		
 		Mockito.verify(settingRepository, Mockito.times(1)).add(settingConfigurationArgumentCaptor.capture());
+		Mockito.verify(settingRepository, Mockito.times(1)).get(documentId);
 		Mockito.verifyNoMoreInteractions(settingRepository);
 	}
 	
