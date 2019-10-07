@@ -104,9 +104,6 @@ public class EventResource extends RestResource<Event> {
 			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
 			Integer limit = getIntegerFilter("limit", request);
-			if (limit == null || limit.intValue() == 0) {
-				limit = 25;
-			}
 
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 				
@@ -143,10 +140,6 @@ public class EventResource extends RestResource<Event> {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
 
-			if (syncParam.getLimit() == null || syncParam.getLimit() == 0) {
-				syncParam.setLimit(25);
-			}
-
 			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
 					|| syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
 
@@ -173,6 +166,11 @@ public class EventResource extends RestResource<Event> {
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
 		}
+		
+		if (limit == null || limit.intValue() == 0) {
+			limit = 25;
+		}
+		
 		EventSearchBean eventSearchBean = new EventSearchBean();
 		eventSearchBean.setTeam(team);
 		eventSearchBean.setTeamId(teamId);
