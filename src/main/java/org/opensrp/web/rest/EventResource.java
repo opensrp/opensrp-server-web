@@ -102,25 +102,14 @@ public class EventResource extends RestResource<Event> {
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
-			Long lastSyncedServerVersion = null;
-			if (serverVersion != null) {
-				lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
-			}
 			Integer limit = getIntegerFilter("limit", request);
 			if (limit == null || limit.intValue() == 0) {
 				limit = 25;
 			}
 
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
-				EventSearchBean eventSearchBean = new EventSearchBean();
-				eventSearchBean.setTeam(team);
-				eventSearchBean.setTeamId(teamId);
-				eventSearchBean.setProviderId(providerId);
-				eventSearchBean.setLocationId(locationId);
-				eventSearchBean.setBaseEntityId(baseEntityId);
-				eventSearchBean.setServerVersion(lastSyncedServerVersion);
-
-				return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit)),
+				
+				return new ResponseEntity<>(gson.toJson(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.put("msg", "specify atleast one filter");
@@ -135,6 +124,23 @@ public class EventResource extends RestResource<Event> {
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private  Map<String, Object> sync(String providerId,String locationId,String baseEntityId ,String serverVersion ,String team,String teamId ,Integer limit ){
+		Long lastSyncedServerVersion = null;
+		if (serverVersion != null) {
+			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+		}
+		EventSearchBean eventSearchBean = new EventSearchBean();
+		eventSearchBean.setTeam(team);
+		eventSearchBean.setTeamId(teamId);
+		eventSearchBean.setProviderId(providerId);
+		eventSearchBean.setLocationId(locationId);
+		eventSearchBean.setBaseEntityId(baseEntityId);
+		eventSearchBean.setServerVersion(lastSyncedServerVersion);
+
+		return  getEventsAndClients(eventSearchBean, limit);
+			
 	}
 
 	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
