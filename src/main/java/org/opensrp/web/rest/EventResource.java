@@ -36,6 +36,7 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +120,47 @@ public class EventResource extends RestResource<Event> {
 		} catch (
 
 		Exception e) {
+
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
+	
+	/**
+	 * Fetch events ordered by serverVersion ascending order and return the clients
+	 * associated with the events
+	 * 
+	 * @param request
+	 * @return a map response with events, clients and optionally msg when an error
+	 *         occurs
+	 */
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	protected ResponseEntity<String> syncByPost(SyncParam syncParam) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		try {
+
+			if (syncParam.getLimit() == null || syncParam.getLimit() == 0) {
+				syncParam.setLimit(25);
+			}
+
+			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
+					|| syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
+
+				return new ResponseEntity<>(
+						gson.toJson(sync(syncParam.getProviderId(), syncParam.getLocationId(),
+								syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
+								syncParam.getTeamId(), syncParam.getLimit())),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else {
+				response.put("msg", "specify atleast one filter");
+				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+			}
+
+		} catch (Exception e) {
 
 			response.put("msg", "Error occurred");
 			logger.error("", e);
