@@ -112,9 +112,9 @@ public class PractitionerRoleResource {
     }
 
 
-    @RequestMapping(value = "/addOrUpdateMany", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> createOrUpdateMany(@RequestBody String entity) {
+    public ResponseEntity<String> batchSave(@RequestBody String entity) {
         try {
             Type listType = new TypeToken<List<PractitionerRole>>() {
             }.getType();
