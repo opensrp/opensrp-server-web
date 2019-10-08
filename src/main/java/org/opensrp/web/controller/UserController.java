@@ -229,7 +229,7 @@ public class UserController {
 		System.out.println(u);
 
 		Map<String, String> openMRSIdsMap = new HashMap<>();
-		List<String> openMRSIds = new ArrayList<>();
+		Set<String> openMRSIds = new HashSet<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
@@ -288,7 +288,7 @@ public class UserController {
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
 		PhysicalLocation jurisdiction = jurisdictions.get(0);
-		teamLocation.put("uuid", openMRSIds.get(0));
+		teamLocation.put("uuid", openMRSIds.iterator().next());
 		teamLocation.put("name", jurisdiction.getProperties().getName());
 		teamLocation.put("display", jurisdiction.getProperties().getName());
 		teamJson.put("location", teamLocation);
