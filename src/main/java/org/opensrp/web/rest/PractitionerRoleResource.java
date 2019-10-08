@@ -137,7 +137,7 @@ public class PractitionerRoleResource {
         }
     }
 
-    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
         try {
@@ -152,7 +152,7 @@ public class PractitionerRoleResource {
         }
     }
 
-    @RequestMapping(value = "/deleteByPractitioner", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/deleteByPractitioner", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> deleteByOrg(@RequestParam(value = "organization", required = true) String organizationIdentifier,
                                          @RequestParam(value = "practitioner", required = true) String practitionerIdentifier) {

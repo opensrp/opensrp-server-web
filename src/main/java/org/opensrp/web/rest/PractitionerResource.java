@@ -107,7 +107,7 @@ public class PractitionerResource {
         }
     }
 
-    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
         try {
