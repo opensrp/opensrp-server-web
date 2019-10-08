@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -28,10 +29,10 @@ import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.AssignedLocations;
+import org.opensrp.domain.LocationProperty.PropertyStatus;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
-import org.opensrp.domain.LocationProperty.PropertyStatus;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
@@ -227,11 +228,13 @@ public class UserController {
 		User u = currentUser(request);
 		System.out.println(u);
 
+		Map<String, String> openMRSIdsMap = new HashMap<>();
 		List<String> openMRSIds = new ArrayList<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
 		Set<String> jurisdictionNames = new HashSet<>();
+		Map<String, String> locationAndParent = new HashMap<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -244,13 +247,19 @@ public class UserController {
 			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
 
 			for (PhysicalLocation jurisdiction : jurisdictions) {
-				if(PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
+				if (PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
 					continue;
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
-					openMRSIds.add(openMRSId);
+					String parentId = jurisdiction.getProperties().getParentId();
+					openMRSIdsMap.put(parentId == null ? jurisdiction.getId() : parentId, openMRSId);
+					locationAndParent.put(jurisdiction.getId(), parentId);
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
+			}
+
+			for (String locationId : getRootLocation(locationAndParent)) {
+				openMRSIds.add(openMRSIdsMap.get(locationId));
 			}
 
 		} catch (Exception e) {
@@ -260,6 +269,7 @@ public class UserController {
 			throw new IllegalStateException(
 					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
 		}
+
 		LocationTree l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
@@ -302,6 +312,22 @@ public class UserController {
 		map.put("time", t);
 		map.put("jurisdictions", jurisdictionNames);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
+	}
+
+	private Set<String> getRootLocation(Map<String, String> locations) {
+		// get all parents
+		Set<String> parents = new HashSet<>(locations.values());
+		Set<String> ids = locations.keySet();
+		// remove parents that are also children
+		parents.removeAll(ids);
+
+		// add ids that dot have parents
+		for (Entry<String, String> entry : locations.entrySet()) {
+			if (entry.getValue() == null)
+				parents.add(entry.getKey());
+		}
+
+		return parents;
 	}
 
 	@RequestMapping("/security/configuration")
