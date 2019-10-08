@@ -134,7 +134,7 @@ public class EventResource extends RestResource<Event> {
 	 * @return a map response with events, clients and optionally msg when an error
 	 *         occurs
 	 */
-	@RequestMapping(value = "/sync", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	protected ResponseEntity<String> syncByPost(SyncParam syncParam) {
 		Map<String, Object> response = new HashMap<String, Object>();
@@ -161,16 +161,13 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 	
-	private  Map<String, Object> sync(String providerId,String locationId,String baseEntityId ,String serverVersion ,String team,String teamId ,Integer limit ){
+	private Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
+			String team, String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
 		}
-		
-		if (limit == null || limit.intValue() == 0) {
-			limit = 25;
-		}
-		
+
 		EventSearchBean eventSearchBean = new EventSearchBean();
 		eventSearchBean.setTeam(team);
 		eventSearchBean.setTeamId(teamId);
@@ -179,8 +176,8 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setBaseEntityId(baseEntityId);
 		eventSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return  getEventsAndClients(eventSearchBean, limit);
-			
+		return getEventsAndClients(eventSearchBean, limit == null || limit.intValue() == 0 ? 25 : limit);
+
 	}
 
 	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
