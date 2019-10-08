@@ -354,7 +354,7 @@ public class EventResource extends RestResource<Event> {
 	 * @return A list of event ids
 	 *
 	 */
-	@RequestMapping(value = "/getIdsByEventType", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	protected ResponseEntity<String> getAllIdsByEventType(@RequestParam(value = "eventType", required = false) String eventType) {
 
