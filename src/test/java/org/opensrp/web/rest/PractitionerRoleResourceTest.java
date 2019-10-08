@@ -124,6 +124,21 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     }
 
+    @Test
+    public void testBatchSaveShouldUpdateExistingPractitionerRole() throws Exception {
+        List<PractitionerRole> expectedPractitionerRoles = new ArrayList<>();
+        PractitionerRole expectedPractitionerRole = initTestPractitionerRole1();
+        expectedPractitionerRoles.add(expectedPractitionerRole);
+
+        String practitionerRolesJson = new Gson().toJson(expectedPractitionerRoles, new TypeToken<List<PractitionerRole>>() {
+        }.getType());
+
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
+
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitionerRole.getIdentifier());
+    }
+
     private static PractitionerRole initTestPractitionerRole1(){
         PractitionerRole practitionerRole = new PractitionerRole();
         practitionerRole.setIdentifier("pr1-identifier");
