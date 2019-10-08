@@ -107,17 +107,13 @@ public class PractitionerResource {
         }
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> delete(@RequestBody String entity) {
+    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
         try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
-            practitionerService.deletePractitioner(practitioner);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        } catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner representation" + entity);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  catch (IllegalArgumentException e) {
+            practitionerService.deletePractitioner(identifier);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }   catch (Exception e) {
