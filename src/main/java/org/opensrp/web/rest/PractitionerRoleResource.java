@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/rest/practitionerRole")
@@ -94,6 +98,32 @@ public class PractitionerRoleResource {
         try {
             PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
             practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (JsonSyntaxException e) {
+            logger.error("The request doesn't contain a valid practitioner role representation" + entity);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }  catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }   catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+            MediaType.TEXT_PLAIN_VALUE })
+    public ResponseEntity<String> batchSave(@RequestBody String entity) {
+        try {
+            Type listType = new TypeToken<List<PractitionerRole>>() {
+            }.getType();
+
+            List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
+
+            for (PractitionerRole practitionerRole: practitionerRoles) {
+                practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+            }
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
