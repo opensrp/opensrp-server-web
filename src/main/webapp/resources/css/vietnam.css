@@ -244,7 +244,7 @@ body {
         display: inline-block;
     }
     .image {
-        background: url("images/vietnam/child-hero.jpg") center no-repeat;
+        background: url("images/child-hero.jpg") center no-repeat;
         background-size: cover;
     }
     .row {
@@ -252,7 +252,7 @@ body {
     }
     .login-section {
         position: relative;
-        background: url("images/vietnam/unicef-logo-bg.svg") center no-repeat;
+        background: url("images/unicef-logo-bg.svg") center no-repeat;
         background-position: left 0px top 25%;
     }
     .form-section {
