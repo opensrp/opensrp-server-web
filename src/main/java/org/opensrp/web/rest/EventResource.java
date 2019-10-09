@@ -136,7 +136,7 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> syncByPost(SyncParam syncParam) {
+	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
 
