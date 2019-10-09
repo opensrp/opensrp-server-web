@@ -259,7 +259,12 @@ public class UserController {
 			}
 
 			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
-				openMRSIds.add(openMRSIdsMap.get(locationId));
+				if (openMRSIdsMap.containsKey(locationId)) {
+					openMRSIds.add(openMRSIdsMap.get(locationId));
+				} else {
+					openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
+							.get("OpenMRS_Id"));
+				}
 			}
 
 		} catch (Exception e) {
