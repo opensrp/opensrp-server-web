@@ -8,8 +8,8 @@ window.onload = function () {
 <div class="image col-lg col-xl"></div>
 <div class="login-section col-lg col-xl">
     <div class="logo">
-    <img src="images/vietnam/uni-vietnam.png" alt="">
-    <img src="images/vietnam/vietnam-moh.png" alt="">
+    <img src="images/vietnam/uni-vietnam.png" alt="" />
+    <img src="images/vietnam/vietnam-moh.png" alt="" />
     <div class="moh-logo">
     </div>
     </div>
