@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -22,9 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.lang.reflect.Type;
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(value = "/rest/practitionerRole")
@@ -137,17 +137,29 @@ public class PractitionerRoleResource {
         }
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> delete(@RequestBody String entity) {
+    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
         try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.deletePractitionerRole(practitionerRole);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        } catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner role representation" + entity);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  catch (IllegalArgumentException e) {
+            practitionerRoleService.deletePractitionerRole(identifier);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }   catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/deleteByPractitioner", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<String> deleteByPractitioner(@RequestParam(value = "organization", required = true) String organizationIdentifier,
+                                         @RequestParam(value = "practitioner", required = true) String practitionerIdentifier) {
+        try {
+            practitionerRoleService.deletePractitionerRole(organizationIdentifier, practitionerIdentifier);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }   catch (Exception e) {
