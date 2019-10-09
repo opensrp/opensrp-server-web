@@ -393,4 +393,27 @@ public class EventResource extends RestResource<Event> {
 		return eventService.findEventsByDynamicQuery(query);
 	}
 
+	/**
+	 * Fetch events ids filtered by eventType
+	 *
+	 * @param eventType
+	 * @return A list of event ids
+	 *
+	 */
+	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	protected ResponseEntity<String> getAllIdsByEventType(@RequestParam(value = "eventType", required = false) String eventType) {
+
+		try {
+
+			List<String> eventIds = eventService.findAllIdsByEventType(eventType);
+			return new ResponseEntity<>(gson.toJson(eventIds),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }
