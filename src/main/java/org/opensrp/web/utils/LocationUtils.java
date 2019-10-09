@@ -20,6 +20,7 @@ public class LocationUtils {
 		Set<String> ids = locations.keySet();
 		// remove parents that are also children
 		parents.removeAll(ids);
+		parents.remove(null);
 
 		// add ids that dot have parents
 		for (Entry<String, String> entry : locations.entrySet()) {
