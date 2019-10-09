@@ -154,7 +154,7 @@ public class PractitionerRoleResource {
 
     @RequestMapping(value = "/deleteByPractitioner", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> deleteByOrg(@RequestParam(value = "organization", required = true) String organizationIdentifier,
+    public ResponseEntity<String> deleteByPractitioner(@RequestParam(value = "organization", required = true) String organizationIdentifier,
                                          @RequestParam(value = "practitioner", required = true) String practitionerIdentifier) {
         try {
             practitionerRoleService.deletePractitionerRole(organizationIdentifier, practitionerIdentifier);

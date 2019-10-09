@@ -30,9 +30,15 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     private final static String BATCH_SAVE_ENDPOINT = "add";
 
+    private final static String DELETE_ENDPOINT = "delete/";
+
+    private final static String DELETE_BY_PRACTITIONER_ENDPOINT = "deleteByPractitioner";
+
     private PractitionerRoleService practitionerRoleService;
 
     private ArgumentCaptor<PractitionerRole> argumentCaptor = ArgumentCaptor.forClass(PractitionerRole.class);
+
+    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     private final String practitionerRoleJson = "{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}";
 
@@ -138,6 +144,26 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitionerRole.getIdentifier());
     }
+
+    @Test
+    public void testDeleteShouldDeleteExistingPractitionerRoleResource() throws Exception {
+
+        deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "practitioner-role-id", null, MockMvcResultMatchers.status().isNoContent());
+
+        verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture());
+        assertEquals(stringArgumentCaptor.getValue(), "practitioner-role-id");
+    }
+
+    @Test
+    public void testDeleteByOrgAndPractitionerShouldDeleteExistingPractitionerRoleResource() throws Exception {
+
+        deleteRequestWithJsonContent(BASE_URL + DELETE_BY_PRACTITIONER_ENDPOINT , "organization=org1&practitioner=pract1", MockMvcResultMatchers.status().isNoContent());
+
+        verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        assertEquals(stringArgumentCaptor.getAllValues().get(0), "org1");
+        assertEquals(stringArgumentCaptor.getAllValues().get(1), "pract1");
+    }
+
 
     private static PractitionerRole initTestPractitionerRole1(){
         PractitionerRole practitionerRole = new PractitionerRole();
