@@ -279,3 +279,11 @@ body {
         text-align: left;
     }
 }
+
+#footer {
+    display: none;
+}
+
+.oauth-container-div {
+    width: 100%;
+}
