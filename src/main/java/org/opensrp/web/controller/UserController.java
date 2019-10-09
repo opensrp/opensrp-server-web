@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -38,6 +37,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
+import org.opensrp.web.utils.LocationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -258,7 +258,7 @@ public class UserController {
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
 
-			for (String locationId : getRootLocation(locationAndParent)) {
+			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
 				openMRSIds.add(openMRSIdsMap.get(locationId));
 			}
 
@@ -312,22 +312,6 @@ public class UserController {
 		map.put("time", t);
 		map.put("jurisdictions", jurisdictionNames);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
-	}
-
-	private Set<String> getRootLocation(Map<String, String> locations) {
-		// get all parents
-		Set<String> parents = new HashSet<>(locations.values());
-		Set<String> ids = locations.keySet();
-		// remove parents that are also children
-		parents.removeAll(ids);
-
-		// add ids that dot have parents
-		for (Entry<String, String> entry : locations.entrySet()) {
-			if (entry.getValue() == null)
-				parents.add(entry.getKey());
-		}
-
-		return parents;
 	}
 
 	@RequestMapping("/security/configuration")
