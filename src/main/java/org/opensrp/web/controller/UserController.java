@@ -34,6 +34,7 @@ import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
+import org.opensrp.web.custome.OpenmrsUser;
 import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.slf4j.Logger;
@@ -180,13 +181,15 @@ public class UserController {
 		if (useOpenSRPTeamModule) {
 			return authenticateUsingOrganization(request);
 		}
+
 		User u = currentUser(request);
 		System.out.println(u);
-		String lid = "";
 		JSONObject tm = null;
+		String lid = "";
+
 		try {
 			tm = openmrsUserService.getTeamMember(u.getAttribute("_PERSON_UUID").toString());
-			JSONArray locs = tm.getJSONArray(OpenMRSCrossVariables.LOCATIONS_JSON_KEY.makeVariable(OPENMRS_VERSION));
+			JSONArray locs = tm.getJSONArray("location");
 
 			for (int i = 0; i < locs.length(); i++) {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
