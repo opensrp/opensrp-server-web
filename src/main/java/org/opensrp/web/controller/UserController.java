@@ -37,7 +37,6 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
-import org.opensrp.web.utils.LocationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,6 +250,7 @@ public class UserController {
 					continue;
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
+					openMRSIds.add(openMRSId);
 					String parentId = jurisdiction.getProperties().getParentId();
 					openMRSIdsMap.put(parentId == null ? jurisdiction.getId() : parentId, openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);
@@ -258,14 +258,14 @@ public class UserController {
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
 
-			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
+			/*for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
 				if (openMRSIdsMap.containsKey(locationId)) {
 					openMRSIds.add(openMRSIdsMap.get(locationId));
 				} else {
 					openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
 							.get("OpenMRS_Id"));
 				}
-			}
+			}*/
 
 		} catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
