@@ -8,7 +8,7 @@
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
 
-	<version>1.4.5-SNAPSHOT</version>
+	<version>1.4.6-SNAPSHOT</version>
 
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
@@ -28,7 +28,7 @@
 		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>1.2.3-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>1.0.3-SNAPSHOT</opensrp.connector.version>
+		<opensrp.connector.version>1.0.4-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.3-SNAPSHOT</opensrp.common.version>
 
