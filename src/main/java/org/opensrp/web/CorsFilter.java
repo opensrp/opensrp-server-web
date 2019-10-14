@@ -30,7 +30,7 @@ public class CorsFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// CORS "pre-flight" request
 		response.addHeader(HTTP.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, opensrpAllowedSources);
-		response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_METHODS, "GET, PUT, POST");
+		response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_METHODS, "GET, PUT, POST, DELETE");
 		response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_HEADERS,
 				"origin, content-type, accept, x-requested-with, Authorization");
 		response.addHeader(ACCESS_CONTROL_ALLOW_MAX_AGE, String.valueOf(corsMaxAge));// 1 min
