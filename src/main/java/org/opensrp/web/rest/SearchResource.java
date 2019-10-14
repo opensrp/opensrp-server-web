@@ -147,7 +147,7 @@ public class SearchResource extends RestResource<Client> {
 				searchBean.setLastEditTo(lastEdit[1]);
 			}
 			
-			String ZEIR_ID_KEY = "ZEIR_ID";
+			String ZEIR_ID_KEY = "OPENMRS_ID";
 			Map<String, String> identifiers = new HashMap<String, String>();
 			if (!StringUtils.isEmptyOrWhitespaceOnly(zeirId)) {
 				zeirId = formatChildUniqueId(zeirId);
@@ -266,7 +266,7 @@ public class SearchResource extends RestResource<Client> {
 			
 			List<Client> linkedChildren = new ArrayList<Client>();
 			
-			String M_ZEIR_ID = "M_ZEIR_ID";
+			String M_ZEIR_ID = "M_KIP_ID";
 			if (!mothers.isEmpty()) {
 				List<String> cIndentifers = new ArrayList<String>();
 				for (Client m : mothers) {
