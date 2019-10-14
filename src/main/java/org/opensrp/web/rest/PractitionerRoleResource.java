@@ -143,7 +143,7 @@ public class PractitionerRoleResource {
         try {
             PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
             practitionerRoleService.deletePractitionerRole(practitionerRole);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
