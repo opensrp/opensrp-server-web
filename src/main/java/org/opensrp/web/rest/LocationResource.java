@@ -349,6 +349,26 @@ public class LocationResource {
 
 	}
 
+	/**
+	 * This methods provides an API endpoint that searches for all structure ids
+	 *
+	 * @return A list of structure Ids
+	 */
+	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findIds() {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findAllStructureIds()), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+
 	static class LocationSyncRequestWrapper {
 		@JsonProperty("is_jurisdiction")
 		private Boolean isJurisdiction;
