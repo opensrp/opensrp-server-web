@@ -287,11 +287,11 @@ public class LocationResource {
 			if (isJurisdiction) {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
-						HttpStatus.OK);
+				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
-						HttpStatus.OK);
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			}
 
 		} catch (Exception e) {
@@ -316,7 +316,8 @@ public class LocationResource {
 
         try {
             return new ResponseEntity<>(
-                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)),
+                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -341,7 +342,8 @@ public class LocationResource {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)), HttpStatus.OK);
+					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -360,7 +362,7 @@ public class LocationResource {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructureIds()), HttpStatus.OK);
+					gson.toJson(locationService.findAllStructureIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
