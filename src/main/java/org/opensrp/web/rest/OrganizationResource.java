@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
+import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
@@ -168,10 +169,10 @@ public class OrganizationResource {
 
 	@RequestMapping(value = "/practitioner/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getOrgPractitioners(
+	public ResponseEntity<List<Practitioner>> getOrgPractitioners(
 			@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(gson.toJson(practitionerService.getPractitionersByOrgIdentifier(identifier)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -186,7 +187,7 @@ public class OrganizationResource {
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
 			@RequestParam(value = "plan") String planIdentifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier), HttpStatus.OK);
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
