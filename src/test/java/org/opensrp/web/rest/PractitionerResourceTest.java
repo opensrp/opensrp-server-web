@@ -27,9 +27,13 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private final static String BASE_URL = "/rest/practitioner/";
 
+    private final static String DELETE_ENDPOINT = "delete/";
+
     private PractitionerService practitionerService;
 
     private ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
+
+    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
 
@@ -104,6 +108,15 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
+    }
+
+    @Test
+    public void testDeleteShouldDeleteExistingPractitionerResource() throws Exception {
+
+        deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "practitioner-id", null, MockMvcResultMatchers.status().isNoContent());
+
+        verify(practitionerService).deletePractitioner(stringArgumentCaptor.capture());
+        assertEquals(stringArgumentCaptor.getValue(), "practitioner-id");
     }
 
     @Override

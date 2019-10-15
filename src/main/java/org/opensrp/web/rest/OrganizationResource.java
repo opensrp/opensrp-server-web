@@ -65,20 +65,21 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAllOrganizations() {
-		return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
+		        HttpStatus.OK);
 	}
 
 	/**
 	 * Gets an organization using the identifier
 	 * 
 	 * @param identifier the Organization Identifier
-	 * 
 	 * @return the organization
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(organizationService.getOrganization(identifier)), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizationService.getOrganization(identifier)),
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	/**
@@ -153,8 +154,10 @@ public class OrganizationResource {
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
 			@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier), HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
