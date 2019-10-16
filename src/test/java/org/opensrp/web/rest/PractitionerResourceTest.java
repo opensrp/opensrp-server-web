@@ -82,7 +82,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioner.getIdentifier(), expectedPractitioner.getIdentifier());
         assertEquals(actualPractitioner.getUserId(), expectedPractitioner.getUserId());
         assertEquals(actualPractitioner.getName(), expectedPractitioner.getName());
-        assertEquals(actualPractitioner.getUserName(), expectedPractitioner.getUserName());
+        assertEquals(actualPractitioner.getUsername(), expectedPractitioner.getUsername());
         assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
     }
 
@@ -142,7 +142,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         practitioner.setIdentifier("practitoner-1-identifier");
         practitioner.setActive(true);
         practitioner.setName("Practitioner");
-        practitioner.setUserName("Practioner1");
+        practitioner.setUsername("Practioner1");
         practitioner.setUserId("user1");
         return practitioner;
     }
@@ -152,7 +152,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         practitioner.setIdentifier("practitoner-2-identifier");
         practitioner.setActive(false);
         practitioner.setName("Second Practitioner");
-        practitioner.setUserName("Practioner2");
+        practitioner.setUsername("Practioner2");
         practitioner.setUserId("user2");
         return practitioner;
     }

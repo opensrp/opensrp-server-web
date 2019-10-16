@@ -5,6 +5,7 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.List;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
@@ -22,8 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -172,10 +172,23 @@ public class OrganizationResource {
 	public ResponseEntity<List<Practitioner>> getOrgPractitioners(
 			@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		catch (IllegalArgumentException e) {
+	}
+
+	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
+			@RequestParam(value = "plan") String planIdentifier) {
+		try {
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
