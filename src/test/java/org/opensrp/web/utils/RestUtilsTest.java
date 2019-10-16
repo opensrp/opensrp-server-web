@@ -3,12 +3,12 @@ package org.opensrp.web.utils;
 import java.text.ParseException;
 
 import org.junit.Test;
-import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.common.AllConstants.Client;
 import org.opensrp.web.rest.RestUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class RestUtilsTest {
+	
 	@Test
 	public void test() throws ParseException {
 		MockHttpServletRequest req = new MockHttpServletRequest();
