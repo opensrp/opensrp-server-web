@@ -17,6 +17,7 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -291,6 +292,16 @@ public class TaskResourceTest {
 				.body(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
+	}
+
+	@Test
+	public void testFindAllTaskIds() throws Exception {
+		when(taskService.findAllTaskIds()).thenReturn(Collections.singletonList("task-id-1"));
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds", "")).andExpect(status().isOk())
+				.andReturn();
+		verify(taskService, times(1)).findAllTaskIds();
+		verifyNoMoreInteractions(taskService);
+		assertEquals("[\"task-id-1\"]", result.getResponse().getContentAsString());
 	}
 
 	private Task getTask() {

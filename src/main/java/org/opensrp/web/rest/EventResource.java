@@ -1,32 +1,16 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
-import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.common.AllConstants.Event.TEAM_ID;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -36,6 +20,7 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +35,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
+import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
+import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
+import static org.opensrp.common.AllConstants.Event.TEAM_ID;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/event")
@@ -102,25 +100,11 @@ public class EventResource extends RestResource<Event> {
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
-			Long lastSyncedServerVersion = null;
-			if (serverVersion != null) {
-				lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
-			}
 			Integer limit = getIntegerFilter("limit", request);
-			if (limit == null || limit.intValue() == 0) {
-				limit = 25;
-			}
 
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
-				EventSearchBean eventSearchBean = new EventSearchBean();
-				eventSearchBean.setTeam(team);
-				eventSearchBean.setTeamId(teamId);
-				eventSearchBean.setProviderId(providerId);
-				eventSearchBean.setLocationId(locationId);
-				eventSearchBean.setBaseEntityId(baseEntityId);
-				eventSearchBean.setServerVersion(lastSyncedServerVersion);
-
-				return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit)),
+				
+				return new ResponseEntity<>(gson.toJson(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.put("msg", "specify atleast one filter");
@@ -135,6 +119,62 @@ public class EventResource extends RestResource<Event> {
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	
+	
+	/**
+	 * Fetch events ordered by serverVersion ascending order and return the clients
+	 * associated with the events
+	 * 
+	 * @param request
+	 * @return a map response with events, clients and optionally msg when an error
+	 *         occurs
+	 */
+	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		try {
+
+			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
+					|| syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
+
+				return new ResponseEntity<>(
+						gson.toJson(sync(syncParam.getProviderId(), syncParam.getLocationId(),
+								syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
+								syncParam.getTeamId(), syncParam.getLimit())),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else {
+				response.put("msg", "specify atleast one filter");
+				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+			}
+
+		} catch (Exception e) {
+
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	private Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
+			String team, String teamId, Integer limit) {
+		Long lastSyncedServerVersion = null;
+		if (serverVersion != null) {
+			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+		}
+
+		EventSearchBean eventSearchBean = new EventSearchBean();
+		eventSearchBean.setTeam(team);
+		eventSearchBean.setTeamId(teamId);
+		eventSearchBean.setProviderId(providerId);
+		eventSearchBean.setLocationId(locationId);
+		eventSearchBean.setBaseEntityId(baseEntityId);
+		eventSearchBean.setServerVersion(lastSyncedServerVersion);
+
+		return getEventsAndClients(eventSearchBean, limit == null || limit.intValue() == 0 ? 25 : limit);
+
 	}
 
 	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
@@ -348,6 +388,29 @@ public class EventResource extends RestResource<Event> {
 	@Override
 	public List<Event> filter(String query) {
 		return eventService.findEventsByDynamicQuery(query);
+	}
+
+	/**
+	 * Fetch events ids filtered by eventType
+	 *
+	 * @param eventType
+	 * @return A list of event ids
+	 *
+	 */
+	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	protected ResponseEntity<String> getAllIdsByEventType(@RequestParam(value = "eventType", required = false) String eventType) {
+
+		try {
+
+			List<String> eventIds = eventService.findAllIdsByEventType(eventType);
+			return new ResponseEntity<>(gson.toJson(eventIds),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }

@@ -27,9 +27,13 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private final static String BASE_URL = "/rest/practitioner/";
 
+    private final static String DELETE_ENDPOINT = "delete/";
+
     private PractitionerService practitionerService;
 
     private ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
+
+    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
 
@@ -78,7 +82,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioner.getIdentifier(), expectedPractitioner.getIdentifier());
         assertEquals(actualPractitioner.getUserId(), expectedPractitioner.getUserId());
         assertEquals(actualPractitioner.getName(), expectedPractitioner.getName());
-        assertEquals(actualPractitioner.getUserName(), expectedPractitioner.getUserName());
+        assertEquals(actualPractitioner.getUsername(), expectedPractitioner.getUsername());
         assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
     }
 
@@ -106,6 +110,15 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
     }
 
+    @Test
+    public void testDeleteShouldDeleteExistingPractitionerResource() throws Exception {
+
+        deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "practitioner-id", null, MockMvcResultMatchers.status().isNoContent());
+
+        verify(practitionerService).deletePractitioner(stringArgumentCaptor.capture());
+        assertEquals(stringArgumentCaptor.getValue(), "practitioner-id");
+    }
+
     @Override
     protected void assertListsAreSameIgnoringOrder(List<Practitioner> expectedList, List<Practitioner> actualList) {
         if (expectedList == null || actualList == null) {
@@ -129,7 +142,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         practitioner.setIdentifier("practitoner-1-identifier");
         practitioner.setActive(true);
         practitioner.setName("Practitioner");
-        practitioner.setUserName("Practioner1");
+        practitioner.setUsername("Practioner1");
         practitioner.setUserId("user1");
         return practitioner;
     }
@@ -139,7 +152,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         practitioner.setIdentifier("practitoner-2-identifier");
         practitioner.setActive(false);
         practitioner.setName("Second Practitioner");
-        practitioner.setUserName("Practioner2");
+        practitioner.setUsername("Practioner2");
         practitioner.setUserId("user2");
         return practitioner;
     }
