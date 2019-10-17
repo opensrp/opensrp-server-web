@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Geometry;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
@@ -697,6 +698,26 @@ public class LocationResourceTest {
 		verify(locationService).findAllStructureIds();
 		verifyNoMoreInteractions(locationService);
 		assertEquals("[\"structure-id-1\"]", result.getResponse().getContentAsString());
+	}
+
+
+	@Test
+	public void testFindLocationNamesByPlanId() throws Exception {
+		LocationDetail locationDetail = new LocationDetail();
+		locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-486b02f7b84d");
+		locationDetail.setName("location one");
+
+		List<LocationDetail> locationDetails = Collections.singletonList(locationDetail);
+		when(locationService.findLocationDetailsByPlanId(anyString()))
+				.thenReturn(locationDetails);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findLocationNamesByPlanId")
+						.param(LocationResource.PLAN_ID, "plan_id"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationDetailsByPlanId(stringCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locationDetails), result.getResponse().getContentAsString());
+		assertEquals("plan_id", stringCaptor.getValue());
+
 	}
 
 	private PhysicalLocation createLocation() {
