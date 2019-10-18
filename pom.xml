@@ -21,14 +21,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>3.1.1.RELEASE</spring.version>
 		<spring.security.version>3.1.2.RELEASE</spring.security.version>
-		<spring.security.oauth.version>1.0.6.RELEASE</spring.security.oauth.version>
+		<spring.security.oauth.version>1.0.5.RELEASE</spring.security.oauth.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<jackson.version>1.9.7</jackson.version>
 		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>1.2.7-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>1.0.5-SNAPSHOT</opensrp.connector.version>
+		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.3-SNAPSHOT</opensrp.common.version>
 
