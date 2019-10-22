@@ -256,6 +256,21 @@ public class OrganizationResourceTest {
 
 	}
 
+
+	@Test
+	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
+		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier)).thenReturn(expected);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier);
+		verifyNoMoreInteractions(organizationService);
+		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
+
+	}
+
 	private Organization getOrganization() throws Exception {
 		return objectMapper.readValue(organizationJSON, Organization.class);
 	}
