@@ -161,7 +161,7 @@ public class SearchResource extends RestResource<Client> {
 
 			List<Client> linkedChildren = new ArrayList<Client>();
 
-			String M_ZEIR_ID = "M_ZEIR_ID";
+			String M_ZEIR_ID = "M_KIP_ID";
 			if (!mothers.isEmpty()) {
 				List<String> cIndentifers = new ArrayList<String>();
 				for (Client m : mothers) {
