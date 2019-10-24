@@ -12,11 +12,7 @@ import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -243,6 +239,48 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testSyncByServerVersionAndOperationalAreaShouldSyncCorrectPlans() throws Exception {
+        List<PlanDefinition> expectedPlans = new ArrayList<>();
+
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(1l);
+        expectedPlans.add(expectedPlan);
+
+        expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_2");
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(0l);
+
+        expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_3");
+        operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area_2");
+        operationalAreas.clear();
+        operationalAreas.add(operationalArea);
+        expectedPlan.setJurisdiction(operationalAreas);
+        expectedPlan.setServerVersion(1l);
+        expectedPlans.add(expectedPlan);
+
+        doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
+
+        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
+        String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, MockMvcResultMatchers.status().isOk());
+
+        List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+        verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
+        assertEquals(longArgumentCaptor.getValue().longValue(), 1);
+        List<String> list  = listArgumentCaptor.getValue();
+        assertEquals(list.get(0), "operational_area");
+    }
+
+    public void testGetSyncByServerVersionAndOperationalAreaShouldSyncCorrectPlans() throws Exception {
         List<PlanDefinition> expectedPlans = new ArrayList<>();
 
         List<Jurisdiction> operationalAreas = new ArrayList<>();
