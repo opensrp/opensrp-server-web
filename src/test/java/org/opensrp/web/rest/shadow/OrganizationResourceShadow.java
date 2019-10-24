@@ -4,6 +4,7 @@
 package org.opensrp.web.rest.shadow;
 
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.OrganizationResource;
 
 /**
@@ -16,4 +17,8 @@ public class OrganizationResourceShadow extends OrganizationResource {
 		super.setOrganizationService(organizationService);
 	}
 
+	@Override
+	public void setPractitionerService(PractitionerService practitionerService) {
+		super.setPractitionerService(practitionerService);
+	}
 }
