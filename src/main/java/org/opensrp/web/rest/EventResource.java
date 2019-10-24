@@ -80,6 +80,17 @@ public class EventResource extends RestResource<Event> {
 	public Event getByUniqueId(String uniqueId) {
 		return eventService.find(uniqueId);
 	}
+	
+	/**
+	 * Get an event using the event id
+	 * 
+	 * @param eventId the event id
+	 * @return event with the event id
+	 */
+	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public Event getById(@RequestParam("id") String eventId) {
+		return eventService.findById(eventId);
+	}
 
 	/**
 	 * Fetch events ordered by serverVersion ascending order and return the clients
