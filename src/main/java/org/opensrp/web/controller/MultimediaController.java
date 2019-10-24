@@ -73,7 +73,7 @@ public class MultimediaController {
 
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = new File(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
 				if (file != null) {
 					if (fileName.endsWith("mp4")) {
 						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
@@ -176,7 +176,7 @@ public class MultimediaController {
 	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
 				if (file != null) {
 					downloadFile(file, response);
 				} else {
