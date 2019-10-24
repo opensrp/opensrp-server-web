@@ -74,11 +74,14 @@ public class MultimediaController {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-				if (fileName.endsWith("mp4")) {
-					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+				if (file != null) {
+					if (fileName.endsWith("mp4")) {
+						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+					}
+					downloadFile(file, response);
+				} else {
+					writeFileNotFound(response);
 				}
-
-				downloadFile(file, response);
 			}
 		} catch (Exception e) {
 			logger.error("", e);
@@ -174,7 +177,11 @@ public class MultimediaController {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
-				downloadFile(file, response);
+				if (file != null) {
+					downloadFile(file, response);
+				} else {
+					writeFileNotFound(response);
+				}
 			}
 		} catch (Exception e) {
 			logger.error("", e);
@@ -196,13 +203,9 @@ public class MultimediaController {
 	 * @throws Exception
 	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
-		
+
 		if (!file.exists()) {
-			String errorMessage = "Sorry. The file you are looking for does not exist";
-			logger.info(errorMessage);
-			OutputStream outputStream = response.getOutputStream();
-			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-			outputStream.close();
+			writeFileNotFound(response);
 			return;
 		}
 		
@@ -229,5 +232,13 @@ public class MultimediaController {
 		
 		//Copy bytes from source to destination(outputstream in this example), closes both streams.
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
+	}
+
+	private void writeFileNotFound(HttpServletResponse response) throws IOException {
+		String errorMessage = "Sorry. The file you are looking for does not exist";
+		logger.info(errorMessage);
+		OutputStream outputStream = response.getOutputStream();
+		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.close();
 	}
 }
