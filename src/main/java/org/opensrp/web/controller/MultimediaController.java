@@ -159,7 +159,7 @@ public class MultimediaController {
 		
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), contentType.trim(), null, fileCategory.trim());
 		
-		String status = multimediaService.saveMultimediaFile(multimediaDTO, file);
+		String status = multimediaService.saveFile(multimediaDTO, file);
 		
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
