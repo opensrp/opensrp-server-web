@@ -36,30 +36,29 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping("/multimedia")
 public class MultimediaController {
-	
+
 	private static Logger logger = LoggerFactory.getLogger(MultimediaController.class.toString());
-	
+
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
-	
+
 	@Autowired
 	@Qualifier("drishtiAuthenticationProvider")
 	private DrishtiAuthenticationProvider provider;
 
 	private MultimediaService multimediaService;
 
-
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
 		this.multimediaService = multimediaService;
 	}
-	
+
 	/**
 	 * Download a file from the multimedia directory. The method also assumes two file types mp4 and
 	 * images whereby all images are stored in the images folder and videos in mp4 in the multimedia
 	 * directory This method is set to bypass spring security config but authenticate through the
 	 * username/password passed at the headers
-	 * 
+	 *
 	 * @param response
 	 * @param fileName
 	 * @param userName
@@ -68,8 +67,8 @@ public class MultimediaController {
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
 	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName,
-									 @RequestHeader(value = "username") String userName,
-									 @RequestHeader(value = "password") String password, HttpServletRequest request) {
+			@RequestHeader(value = "username") String userName,
+			@RequestHeader(value = "password") String password, HttpServletRequest request) {
 
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
@@ -80,15 +79,16 @@ public class MultimediaController {
 
 				downloadFile(file, response);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.error("", e);
 		}
 	}
-	
+
 	/**
 	 * Downloads a file from the server given the client id. A search is made to the
 	 * multimedia repo to see if any file exists mapped to the user whereby the filepath is recorded
-	 * 
+	 *
 	 * @param response
 	 * @param baseEntityId
 	 * @param userName
@@ -97,15 +97,13 @@ public class MultimediaController {
 	 */
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
 	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
-	                                   @RequestHeader(value = "username") String userName,
-	                                   @RequestHeader(value = "password") String password, HttpServletRequest request) {
+			@RequestHeader(value = "username") String userName,
+			@RequestHeader(value = "password") String password, HttpServletRequest request) {
 		downloadFileWithAuth(baseEntityId, userName, password, request, response);
 	}
 
-
 	/**
 	 * Downloads all media files belonging to the specified {@param entityId} if {@param fileCategory} is multi_version
-	 *
 	 * If multi_version {@param fileCategory} is not specified, a single media file (belonging to {@param entityId})
 	 * is downloaded from the default multimedia directory
 	 *
@@ -119,24 +117,26 @@ public class MultimediaController {
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
 	public void downloadFiles(HttpServletResponse response,
-												HttpServletRequest request,
-												@PathVariable("entity-id") String entityId,
-												@RequestParam(value = "content-type", required = false) String contentType,
-												@RequestParam(value = "file-category", required = false) String fileCategory,
-												@RequestHeader(value = "username") String userName,
-												@RequestHeader(value = "password") String password) {
+			HttpServletRequest request,
+			@PathVariable("entity-id") String entityId,
+			@RequestParam(value = "content-type", required = false) String contentType,
+			@RequestParam(value = "file-category", required = false) String fileCategory,
+			@RequestHeader(value = "username") String userName,
+			@RequestHeader(value = "password") String password) {
 
 		// todo: change this to a common repo constant
 		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
-			List<Multimedia> multimediaFiles = multimediaService.getMultimediaFiles(entityId.trim(), contentType.trim(), fileCategory.trim());
+			List<Multimedia> multimediaFiles = multimediaService
+					.getMultimediaFiles(entityId.trim(), contentType.trim(), fileCategory.trim());
 			response.setContentType("image/jpeg/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
 				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
 				zipFiles(zipOutputStream, multimediaFiles);
 				zipOutputStream.close();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				logger.error("", e);
 			}
 		} else {
@@ -145,19 +145,19 @@ public class MultimediaController {
 		}
 	}
 
-	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
 	public ResponseEntity<String> uploadFiles(@RequestParam("anm-id") String providerId,
-	                                          @RequestParam("entity-id") String entityId,
-	                                          @RequestParam("file-category") String fileCategory,
-	                                          @RequestParam("file") MultipartFile file) {
-		
+			@RequestParam("entity-id") String entityId,
+			@RequestParam("file-category") String fileCategory,
+			@RequestParam("file") MultipartFile file) {
+
 		String contentType = file.getContentType();
-		
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), contentType.trim(), null, fileCategory.trim());
-		
+
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), contentType.trim(), null,
+				fileCategory.trim());
+
 		String status = multimediaService.saveMultimediaFile(multimediaDTO, file);
-		
+
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
 
@@ -170,17 +170,21 @@ public class MultimediaController {
 	 * @param request
 	 * @param response
 	 */
-	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request, HttpServletResponse response) {
+	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request,
+			HttpServletResponse response) {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = new File(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+				File file = new File(
+						multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim()
+								+ ".jpg");
 				downloadFile(file, response);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.error("", e);
 		}
 	}
-	
+
 	private Authentication authenticate(String userName, String password, HttpServletRequest request) {
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userName, password);
 		WebAuthenticationDetails details = new WebAuthenticationDetailsSource().buildDetails(request);
@@ -196,7 +200,7 @@ public class MultimediaController {
 	 * @throws Exception
 	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
-		
+
 		if (!file.exists()) {
 			String errorMessage = "Sorry. The file you are looking for does not exist";
 			logger.info(errorMessage);
@@ -205,13 +209,13 @@ public class MultimediaController {
 			outputStream.close();
 			return;
 		}
-		
+
 		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
 		if (mimeType == null) {
 			logger.info("mimetype is not detectable, will take default");
 			mimeType = "application/octet-stream";
 		}
-		
+
 		logger.info("mimetype : " + mimeType);
 
 		response.setContentType(mimeType);
@@ -222,11 +226,11 @@ public class MultimediaController {
 
 		/* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
 		//response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
-		
+
 		response.setContentLength((int) file.length());
-		
+
 		InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-		
+
 		//Copy bytes from source to destination(outputstream in this example), closes both streams.
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
 	}
