@@ -137,7 +137,7 @@ public class MultimediaController {
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
 				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-				zipFiles(zipOutputStream, multimediaFiles);
+				zipFiles(zipOutputStream, multimediaFiles, multimediaService.getFileManager());
 				zipOutputStream.close();
 			} catch (IOException e) {
 				logger.error("", e);

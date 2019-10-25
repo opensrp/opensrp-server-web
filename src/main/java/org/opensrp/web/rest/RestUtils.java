@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Multimedia;
+import org.opensrp.domain.contract.MultimediaFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -117,28 +118,31 @@ public class RestUtils {
      * @param multimediaFiles
      * @throws IOException
      */
-	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles) throws IOException {
+	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles, MultimediaFileManager fileManager) throws IOException {
 		for (Multimedia multiMedia : multimediaFiles) {
 			FileInputStream inputStream;
-			File file = new File(multiMedia.getFilePath());
-			logger.info("Adding " + file.getName());
-			zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-			try {
-				inputStream = new FileInputStream(file);
-			} catch (FileNotFoundException e) {
-				logger.info("Could not find file " + file.getAbsolutePath());
-				continue;
-			}
+			File file = fileManager.retrieveFile(multiMedia.getFilePath());
+			if (file != null) {
+				logger.info("Adding " + file.getName());
+				zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+				try {
+					inputStream = new FileInputStream(file);
+				}
+				catch (FileNotFoundException e) {
+					logger.info("Could not find file " + file.getAbsolutePath());
+					continue;
+				}
 
-			// Write the contents of the file
-			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-			int data;
-			while ((data = bufferedInputStream.read()) != -1) {
-				zipOutputStream.write(data);
+				// Write the contents of the file
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+				int data;
+				while ((data = bufferedInputStream.read()) != -1) {
+					zipOutputStream.write(data);
+				}
+				bufferedInputStream.close();
+				zipOutputStream.closeEntry();
+				logger.info("Done downloading file " + file.getName());
 			}
-			bufferedInputStream.close();
-			zipOutputStream.closeEntry();
-			logger.info("Done downloading file " + file.getName());
 		}
 	}
 }
