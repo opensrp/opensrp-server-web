@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Multimedia;
+import org.opensrp.domain.S3MultimediaFileManager;
 import org.opensrp.domain.contract.MultimediaFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,6 +143,11 @@ public class RestUtils {
 				bufferedInputStream.close();
 				zipOutputStream.closeEntry();
 				logger.info("Done downloading file " + file.getName());
+
+				// clean up temp files (may want to cache in future)
+				if (fileManager instanceof S3MultimediaFileManager) {
+					file.delete();
+				}
 			}
 		}
 	}
