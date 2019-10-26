@@ -99,7 +99,7 @@ public class SearchHelper {
 		Map<String, String> identifiers = new HashMap<String, String>();
 		if (!StringUtils.isEmptyOrWhitespaceOnly(zeirId)) {
 			zeirId = formatChildUniqueId(zeirId);
-			identifiers.put("ZEIR_ID", zeirId);
+			identifiers.put("OPENMRS_ID", zeirId);
 		}
 		return identifiers;
 	}
