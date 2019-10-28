@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,9 +13,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
-import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.PlanDefinition;
-import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
@@ -54,8 +51,6 @@ public class PlanResource {
 	
 	private PlanService planService;
 	
-	private OrganizationService organizationService;
-	
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -65,11 +60,6 @@ public class PlanResource {
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
-	}
-	
-	@Autowired
-	public void setOrganizationService(OrganizationService organizationService) {
-		this.organizationService = organizationService;
 	}
 	
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -141,36 +131,23 @@ public class PlanResource {
 	        MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndOperationalArea(
 	        @RequestBody PlanSyncRequestWrapper planSyncRequestWrapper, Authentication authentication) {
-		long serverVersion = planSyncRequestWrapper.getServerVersion();
-		long currentServerVersion = 0;
-		try {
-			currentServerVersion = serverVersion;
-		}
-		catch (NumberFormatException e) {
-			logger.error("server version not a number");
-		}
 		
 		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
 		String username = authentication.getName();
 		if (operationalAreaIds.isEmpty() && StringUtils.isBlank(username)) {
-			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Sync Params missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 		
 		try {
+			
+			List<PlanDefinition> plans;
 			if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
-				List<AssignedLocations> assignedPlansAndLocations = organizationService
-				        .findAssignedLocationsAndPlans(planSyncRequestWrapper.getOrganizations());
-				List<String> planIds = new ArrayList<>();
-				for (AssignedLocations assignedLocation : assignedPlansAndLocations) {
-					planIds.add(assignedLocation.getPlanId());
-				}
-				return new ResponseEntity<>(gson.toJson(planService.getPlansByIdsReturnOptionalFields(planIds, null)),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} // else
-			return new ResponseEntity<>(
-			        gson.toJson(
-			            planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
+				    planSyncRequestWrapper.getServerVersion());
+			} else {
+				plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
+			}
+			return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage(), e);
