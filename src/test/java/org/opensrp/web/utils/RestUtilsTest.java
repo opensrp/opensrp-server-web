@@ -3,9 +3,11 @@ package org.opensrp.web.utils;
 import org.junit.Test;
 import org.opensrp.common.AllConstants.Client;
 import org.opensrp.domain.Multimedia;
+import org.opensrp.domain.contract.MultimediaFileManager;
 import org.opensrp.web.rest.RestUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -44,7 +46,12 @@ public class RestUtilsTest {
 		multimediaFiles.add(multimedia);
 
 		ZipOutputStream zipOutputStream = mock(ZipOutputStream.class);
-		RestUtils.zipFiles(zipOutputStream, multimediaFiles);
+		MultimediaFileManager fileManager = mock(MultimediaFileManager.class);
+		doReturn(new File(ROOT_DIR + "test_file_1")).when(fileManager).retrieveFile(ROOT_DIR + "test_file_1");
+		doReturn(new File(ROOT_DIR + "test_file_2")).when(fileManager).retrieveFile(ROOT_DIR + "test_file_2");
+		doReturn(new File(ROOT_DIR + "test_file_3")).when(fileManager).retrieveFile(ROOT_DIR + "test_file_3");
+
+		RestUtils.zipFiles(zipOutputStream, multimediaFiles, fileManager);
 		verify(zipOutputStream, atLeastOnce()).putNextEntry(any(ZipEntry.class));
 		verify(zipOutputStream, atLeastOnce()).write(any(byte.class));
 		verify(zipOutputStream, atLeastOnce()).closeEntry();
