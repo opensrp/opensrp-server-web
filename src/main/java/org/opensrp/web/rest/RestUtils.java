@@ -128,8 +128,7 @@ public class RestUtils {
 				zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
 				try {
 					inputStream = new FileInputStream(file);
-				}
-				catch (FileNotFoundException e) {
+				} catch (FileNotFoundException e) {
 					logger.info("Could not find file " + file.getAbsolutePath());
 					continue;
 				}
