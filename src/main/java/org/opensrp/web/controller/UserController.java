@@ -258,12 +258,17 @@ public class UserController {
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
 
-			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
-				if (openMRSIdsMap.containsKey(locationId)) {
-					openMRSIds.add(openMRSIdsMap.get(locationId));
-				} else {
-					openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
-							.get("OpenMRS_Id"));
+			Set<String> parentLocations = LocationUtils.getRootLocation(locationAndParent);
+			if (parentLocations.size() == 1) {
+				openMRSIds.addAll(openMRSIdsMap.values());
+			} else {
+				for (String locationId : parentLocations) {
+					if (openMRSIdsMap.containsKey(locationId)) {
+						openMRSIds.add(openMRSIdsMap.get(locationId));
+					} else {
+						openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
+						        .get("OpenMRS_Id"));
+					}
 				}
 			}
 
