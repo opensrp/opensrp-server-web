@@ -73,8 +73,6 @@ public class LocationResource {
 
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
-	public static final String PLAN_ID = "plan_id";
-
 	public static final String PAGE_SIZE = "page_size";
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
