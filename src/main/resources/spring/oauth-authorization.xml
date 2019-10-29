@@ -51,9 +51,9 @@
 		entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager">
 		<sec:anonymous enabled="true" />
-		<sec:intercept-url pattern="/user-details"
+		<sec:intercept-url pattern="/security/**"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />
-		<sec:intercept-url pattern="/user-details"
+		<sec:intercept-url pattern="/security/**"
 			access="ROLE_OPENMRS" />
 		<sec:custom-filter ref="resourceServerFilter"
 			before="PRE_AUTH_FILTER" />
