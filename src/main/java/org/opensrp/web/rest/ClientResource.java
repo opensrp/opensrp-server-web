@@ -194,14 +194,14 @@ public class ClientResource extends RestResource<Client> {
 		List<String> ids = new ArrayList<String>();
 		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
 			
-			clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
-			    lastEdit == null ? null : lastEdit[1]);
+			clients = clientService.findHouseholdByCriteria(searchBean, addressSearchBean, lastEdit == null ? null
+			        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 			if (clients.size() != 0) {
 				for (Client client : clients) {
 					ids.add(client.getBaseEntityId());
 				}
 				
-				total = clientService.findTotalCountByCriteria(searchBean, addressSearchBean).getTotalCount();
+				total = clientService.findTotalCountHouseholdByCriteria(searchBean, addressSearchBean).getTotalCount();
 				clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
 			}
 			
@@ -276,8 +276,8 @@ public class ClientResource extends RestResource<Client> {
 		int total = 0;
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
-		List<Client> clients = clientService.findAllClients(clientSearchBean, addressSearchBean);
-		total = clientService.findTotalCountAllClients(clientSearchBean, addressSearchBean).getTotalCount();
+		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
+		total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
 		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
 		response.put("total", total);
