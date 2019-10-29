@@ -8,7 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.opensrp.domain.LocationDetail;
+import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.opensrp.common.AllConstants.BaseEntity;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -372,28 +371,6 @@ public class LocationResource {
 		}
 
 	}
-
-	/**
-	 * This method provides an endpoint that searches for location details i.e. identifier and name using a provided plan identifier
-	 *
-	 * @param planIdentifier plan identifier
-	 * @return
-	 */
-	@RequestMapping(value = "/findLocationNamesByPlanId", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
-			@RequestParam(value = PLAN_ID, required = false) String planIdentifier) {
-
-		try {
-			return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-	}
-
 
 	static class LocationSyncRequestWrapper {
 		@JsonProperty("is_jurisdiction")

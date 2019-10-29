@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import javax.servlet.http.HttpServletRequest;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
@@ -25,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +49,8 @@ public class PlanResource {
 
 	private PlanService planService;
 
+	private PhysicalLocationService locationService;
+
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 
 	public static final String IDENTIFIERS = "identifiers";
@@ -56,6 +60,11 @@ public class PlanResource {
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
+	}
+
+	@Autowired
+	public void setLocationService(PhysicalLocationService locationService) {
+		this.locationService = locationService;
 	}
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
@@ -200,6 +209,27 @@ public class PlanResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	/**
+	 * This method provides an endpoint that searches for location details i.e. identifier and name using a provided plan identifier
+	 *
+	 * @param planIdentifier plan identifier
+	 * @return A list of location names and identifiers
+	 */
+	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+			@PathVariable("planIdentifier") String planIdentifier) {
+
+		try {
+			return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 	public boolean doesObjectContainField(Object object, String fieldName) {
