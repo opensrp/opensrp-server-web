@@ -252,7 +252,7 @@ public class UserController {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
 					String parentId = jurisdiction.getProperties().getParentId();
-					openMRSIdsMap.put(parentId == null ? jurisdiction.getId() : parentId, openMRSId);
+					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
