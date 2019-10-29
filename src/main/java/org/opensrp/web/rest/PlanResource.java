@@ -13,7 +13,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
@@ -50,7 +52,9 @@ public class PlanResource {
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 	
 	private PlanService planService;
-	
+
+	private PhysicalLocationService locationService;
+
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -61,8 +65,14 @@ public class PlanResource {
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
 	}
-	
-	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+
+	@Autowired
+	public void setLocationService(PhysicalLocationService locationService) {
+		this.locationService = locationService;
+	}
+
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields) {
 		if (identifier == null) {
@@ -215,7 +225,29 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+
+	/**
+	 * This method provides an endpoint that searches for location details i.e. identifier and name using a provided plan identifier
+	 *
+	 * @param planIdentifier plan identifier
+	 * @return A list of location names and identifiers
+	 */
+	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+			@PathVariable("planIdentifier") String planIdentifier) {
+
+		try {
+			return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
 		for (Field field : objectClass.getDeclaredFields()) {

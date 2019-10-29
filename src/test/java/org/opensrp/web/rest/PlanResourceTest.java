@@ -7,23 +7,33 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
-import org.springframework.test.web.server.result.MockMvcResultMatchers;
+import org.springframework.test.web.server.MvcResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -33,6 +43,8 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     private final static String BASE_URL = "/rest/plans/";
 
     private PlanService planService;
+
+    private PhysicalLocationService locationService;
 
     private final String plansJson = "{\n" +
             "  \"identifier\": \"plan_1\",\n" +
@@ -131,8 +143,10 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     @Before
     public void setUp() {
         planService = mock(PlanService.class);
+        locationService = mock(PhysicalLocationService.class);
         PlanResource planResource = webApplicationContext.getBean(PlanResource.class);
         planResource.setPlanService(planService);
+        planResource.setLocationService(locationService);
     }
 
     @Test
@@ -158,7 +172,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getAllPlans();
 
-        String actualPlansString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL, null, status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         assertListsAreSameIgnoringOrder(actualPlans, expectedPlans);
@@ -182,7 +196,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(anyList(), anyList());
 
-        String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, MockMvcResultMatchers.status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, status().isOk());
         List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         assertNotNull(actualPlanList);
@@ -205,7 +219,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
 
-        postRequestWithJsonContent(BASE_URL, plansJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
         verify(planService).addPlan(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
@@ -231,7 +245,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setJurisdiction(operationalAreas);
 
         String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>(){}.getType());
-        putRequestWithJsonContent(BASE_URL, plansJson, MockMvcResultMatchers.status().isCreated());
+        putRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
         verify(planService).updatePlan(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
@@ -270,7 +284,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
         String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
-        String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, MockMvcResultMatchers.status().isOk());
+        String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isOk());
 
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
@@ -311,7 +325,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
-        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", MockMvcResultMatchers.status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
@@ -359,7 +373,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(planIdList, fieldNameList);
 
-        String actualPlansString = getResponseAsString(BASE_URL + "findByIdsWithOptionalFields?identifiers=" + expectedPlan.getIdentifier() + "&fields=action,name", null, MockMvcResultMatchers.status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "findByIdsWithOptionalFields?identifiers=" + expectedPlan.getIdentifier() + "&fields=action,name", null, status().isOk());
         List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         assertNotNull(actualPlanList);
@@ -368,5 +382,22 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         assertEquals(actualPlan.getIdentifier(), expectedPlan.getIdentifier());
         assertEquals(actualPlan.getJurisdiction().get(0).getCode(), expectedPlan.getJurisdiction().get(0).getCode());
+    }
+
+    @Test
+    public void testFindLocationNamesByPlanId() throws Exception {
+        LocationDetail locationDetail = new LocationDetail();
+        locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-486b02f7b84d");
+        locationDetail.setName("location one");
+
+        List<LocationDetail> locationDetails = Collections.singletonList(locationDetail);
+        when(locationService.findLocationDetailsByPlanId(anyString()))
+                .thenReturn(locationDetails);
+        MvcResult result = mockMvc
+                .perform(get(BASE_URL + "findLocationNames/{planIdentifier}", "plan_id"))
+                .andExpect(status().isOk()).andReturn();
+        verify(locationService).findLocationDetailsByPlanId(anyString());
+        assertEquals(LocationResource.gson.toJson(locationDetails), result.getResponse().getContentAsString());
+
     }
 }

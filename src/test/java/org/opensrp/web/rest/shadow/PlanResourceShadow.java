@@ -1,5 +1,6 @@
 package org.opensrp.web.rest.shadow;
 
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.web.rest.PlanResource;
 
@@ -11,5 +12,10 @@ public class PlanResourceShadow extends PlanResource {
     @Override
     public void setPlanService(PlanService planService) {
         super.setPlanService(planService);
+    }
+
+    @Override
+    public void setLocationService(PhysicalLocationService locationService) {
+        super.setLocationService(locationService);
     }
 }
