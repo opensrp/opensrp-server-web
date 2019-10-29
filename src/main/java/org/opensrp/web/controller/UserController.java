@@ -252,18 +252,23 @@ public class UserController {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
 					String parentId = jurisdiction.getProperties().getParentId();
-					openMRSIdsMap.put(parentId == null ? jurisdiction.getId() : parentId, openMRSId);
+					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
 
-			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
-				if (openMRSIdsMap.containsKey(locationId)) {
-					openMRSIds.add(openMRSIdsMap.get(locationId));
-				} else {
-					openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
-							.get("OpenMRS_Id"));
+			Set<String> parentLocations = LocationUtils.getRootLocation(locationAndParent);
+			if (parentLocations.size() == 1) {
+				openMRSIds.addAll(openMRSIdsMap.values());
+			} else {
+				for (String locationId : parentLocations) {
+					if (openMRSIdsMap.containsKey(locationId)) {
+						openMRSIds.add(openMRSIdsMap.get(locationId));
+					} else {
+						openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
+						        .get("OpenMRS_Id"));
+					}
 				}
 			}
 
