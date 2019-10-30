@@ -52,9 +52,9 @@ public class PlanResource {
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 	
 	private PlanService planService;
-
+	
 	private PhysicalLocationService locationService;
-
+	
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -65,14 +65,13 @@ public class PlanResource {
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
 	}
-
+	
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-
-	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
+	
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields) {
 		if (identifier == null) {
@@ -143,7 +142,9 @@ public class PlanResource {
 	        @RequestBody PlanSyncRequestWrapper planSyncRequestWrapper, Authentication authentication) {
 		
 		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
-		String username = authentication.getName();
+		String username = null;
+		if (authentication != null)
+			username = authentication.getName();
 		if (operationalAreaIds.isEmpty() && StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Sync Params missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
@@ -154,8 +155,10 @@ public class PlanResource {
 			if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
 				plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
 				    planSyncRequestWrapper.getServerVersion());
-			} else {
+			} else if (username != null) {
 				plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
+			} else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 			return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
@@ -225,29 +228,30 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-
+	
 	/**
-	 * This method provides an endpoint that searches for location details i.e. identifier and name using a provided plan identifier
+	 * This method provides an endpoint that searches for location details i.e. identifier and name
+	 * using a provided plan identifier
 	 *
 	 * @param planIdentifier plan identifier
 	 * @return A list of location names and identifiers
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
+	        MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
-			@PathVariable("planIdentifier") String planIdentifier) {
-
+	        @PathVariable("planIdentifier") String planIdentifier) {
+		
 		try {
 			return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
+		
 	}
-
+	
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
 		for (Field field : objectClass.getDeclaredFields()) {
