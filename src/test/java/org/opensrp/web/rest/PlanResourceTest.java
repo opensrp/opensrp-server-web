@@ -3,9 +3,12 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
@@ -39,6 +42,9 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
  * Created by Vincent Karuri on 06/05/2019
  */
 public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
+	
+	@Rule
+	public MockitoRule rule = MockitoJUnit.rule();
 
     private final static String BASE_URL = "/rest/plans/";
 
@@ -139,6 +145,9 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Captor
     private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+    
+    @Captor
+    private ArgumentCaptor<List<Long>> orgsArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -252,7 +261,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     }
 
     @Test
-    public void testSyncByServerVersionAndOperationalAreaShouldSyncCorrectPlans() throws Exception {
+    public void testSyncByServerVersionAndAssignedPlansOnOrganization() throws Exception {
         List<PlanDefinition> expectedPlans = new ArrayList<>();
 
         List<Jurisdiction> operationalAreas = new ArrayList<>();
@@ -270,6 +279,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_2");
         expectedPlan.setJurisdiction(operationalAreas);
         expectedPlan.setServerVersion(0l);
+        expectedPlans.add(expectedPlan);
 
         expectedPlan = new PlanDefinition();
         expectedPlan.setIdentifier("plan_3");
@@ -281,17 +291,28 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setServerVersion(1l);
         expectedPlans.add(expectedPlan);
 
-        doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
+        doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong());
 
-        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
+        String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"],\"organizations\":[2]}";
         String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isOk());
 
-        List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+        Gson gson =PlanResource.gson;
+        List<PlanDefinition> actualPlans = gson.fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
-        verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
+        verify(planService).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(), longArgumentCaptor.capture());
         assertEquals(longArgumentCaptor.getValue().longValue(), 1);
-        List<String> list  = listArgumentCaptor.getValue();
-        assertEquals(list.get(0), "operational_area");
+        List<Long> list  = orgsArgumentCaptor.getValue();
+        assertEquals(2l,list.get(0),0);
+        assertEquals(1,longArgumentCaptor.getValue(),0);
+        
+		assertEquals(3, actualPlans.size());
+		assertEquals("plan_1", actualPlans.get(0).getIdentifier());
+		assertEquals("plan_2", actualPlans.get(1).getIdentifier());
+		assertEquals("plan_3", actualPlans.get(2).getIdentifier());
+		
+		
+		assertEquals(gson.toJson(expectedPlans), gson.toJson(actualPlans));
+        
     }
 
     public void testGetSyncByServerVersionAndOperationalAreaShouldSyncCorrectPlans() throws Exception {

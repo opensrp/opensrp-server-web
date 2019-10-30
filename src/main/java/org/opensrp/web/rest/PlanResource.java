@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.osgi.web.deployer.internal.util.Utils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,14 +139,14 @@ public class PlanResource {
 	
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {
 	        MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> syncByServerVersionAndOperationalArea(
+	public ResponseEntity<String> syncByServerVersionAndAssignedPlansOnOrganization(
 	        @RequestBody PlanSyncRequestWrapper planSyncRequestWrapper, Authentication authentication) {
 		
 		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
 		String username = null;
 		if (authentication != null)
 			username = authentication.getName();
-		if (operationalAreaIds.isEmpty() && StringUtils.isBlank(username)) {
+		if ((operationalAreaIds==null || operationalAreaIds.isEmpty()) && StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Sync Params missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 		
