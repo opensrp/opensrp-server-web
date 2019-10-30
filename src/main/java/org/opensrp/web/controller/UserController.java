@@ -294,6 +294,7 @@ public class UserController {
 		teamJson.put("teamName", organization.getName());
 		teamJson.put("display", organization.getName());
 		teamJson.put("uuid", organization.getIdentifier());
+		teamJson.put("organizationIds", practionerOrganizationIds.right);
 
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
