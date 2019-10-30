@@ -699,6 +699,7 @@ public class LocationResourceTest {
 		assertEquals("[\"structure-id-1\"]", result.getResponse().getContentAsString());
 	}
 
+
 	private PhysicalLocation createLocation() {
 		PhysicalLocation parentLocation = LocationResource.gson.fromJson(parentJson, PhysicalLocation.class);
 		parentLocation.setJurisdiction(true);
