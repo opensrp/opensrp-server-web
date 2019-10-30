@@ -351,7 +351,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong());
 
         String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
-        String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isBadRequest());
+        postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isBadRequest());
 
         
         verify(planService,Mockito.never()).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(), longArgumentCaptor.capture());
