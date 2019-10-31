@@ -15,12 +15,8 @@ import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
 import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.HOUSEHOLD;
-import static org.opensrp.common.AllConstants.Client.HOUSEHOLDMEMEBR;
 import static org.opensrp.common.AllConstants.Client.ORDERBYFIELDNAAME;
 import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
-import static org.opensrp.common.AllConstants.Client.PAGENUMBER;
-import static org.opensrp.common.AllConstants.Client.PAGESIZE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
@@ -33,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
@@ -43,6 +40,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +63,27 @@ public class ClientResource extends RestResource<Client> {
 	private ClientService clientService;
 	
 	private EventService eventService;
+	
+	@Value("#{opensrp['opensrp.household']}")
+	private String household;
+	
+	@Value("#{opensrp['opensrp.householdMember']}")
+	private String householdMember;
+	
+	@Value("#{opensrp['opensrp.allClient']}")
+	private String allClient;
+	
+	@Value("#{opensrp['opensrp.child']}")
+	private String child;
+	
+	@Value("#{opensrp['opensrp.ANC']}")
+	private String ANC;
+	
+	@Value("#{opensrp['opensrp.pageSize']}")
+	private String pageSize;
+	
+	@Value("#{opensrp['opensrp.pageNumber']}")
+	private String pageNumber;
 	
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -150,23 +169,19 @@ public class ClientResource extends RestResource<Client> {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) {
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request, HttpSession session) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clientList = new ArrayList<Client>();
-		List<Client> clients = new ArrayList<Client>();
-		int total = 0;
-		Integer pageNumber = 0;
-		Integer pageSize = 0;
+		
 		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-		String pageNumberParam = getStringFilter(PAGENUMBER, request);
-		String pageSizeParam = getStringFilter(PAGESIZE, request);
+		String pageNumberParam = getStringFilter(pageNumber, request);
+		String pageSizeParam = getStringFilter(pageSize, request);
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
-		
-		DateTime[] lastEdit = null;
-		
+		Integer pageNumber = 0;
+		Integer pageSize = 0;
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setOrderByField(getStringFilter(ORDERBYFIELDNAAME, request));
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
@@ -191,29 +206,20 @@ public class ClientResource extends RestResource<Client> {
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
-		List<String> ids = new ArrayList<String>();
-		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
+		
+		if (clientType.equalsIgnoreCase(household)) {
+			return getHouseholds(searchBean, addressSearchBean, session, clientList);
+		} else if (clientType.equalsIgnoreCase(householdMember)) {
 			
-			clients = clientService.findHouseholdByCriteria(searchBean, addressSearchBean, lastEdit == null ? null
-			        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
-			if (clients.size() != 0) {
-				for (Client client : clients) {
-					ids.add(client.getBaseEntityId());
-				}
-				
-				total = clientService.findTotalCountHouseholdByCriteria(searchBean, addressSearchBean).getTotalCount();
-				clientList = clientService.getHouseholdList(ids, clientType, addressSearchBean, searchBean, clients);
-			}
-			
-		} else if (clientType.equalsIgnoreCase(HOUSEHOLDMEMEBR)) {
 			clientList = clientService.findMembersByRelationshipId(baseEntityId);
-		} else if (clientType.equalsIgnoreCase("clients")) {
-			searchBean.setClientType("ec_household");
-			return getAllClients(searchBean, addressSearchBean);
+			clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
+			response.put("clients", clientsArray);
+			
+		} else if (clientType.equalsIgnoreCase(allClient)) {
+			searchBean.setClientType(household);
+			return getAllClients(searchBean, addressSearchBean, session);
 		}
-		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
-		response.put("clients", clientsArray);
-		response.put("total", total);
+		
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 		
 	}
@@ -272,7 +278,8 @@ public class ClientResource extends RestResource<Client> {
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean,
+	                                            HttpSession session) {
 		int total = 0;
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
@@ -283,4 +290,34 @@ public class ClientResource extends RestResource<Client> {
 		response.put("total", total);
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 	}
+	
+	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean,
+	                                            HttpSession session, List<Client> clientList) {
+		int total = 0;
+		DateTime[] lastEdit = null;
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonArray clientsArray = new JsonArray();
+		List<Client> clients = new ArrayList<Client>();
+		List<String> ids = new ArrayList<String>();
+		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
+		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		if (clients.size() != 0) {
+			for (Client client : clients) {
+				ids.add(client.getBaseEntityId());
+			}
+			if (session.getAttribute("total") == null) {
+				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
+			} else {
+				total = (int) session.getAttribute("total");
+			}
+			session.setAttribute("total", total);
+			clientList = clientService.getHouseholdList(ids, clientSearchBean.getClientType(), addressSearchBean,
+			    clientSearchBean, clients);
+		}
+		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
+		response.put("clients", clientsArray);
+		response.put("total", total);
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+	}
+	
 }
