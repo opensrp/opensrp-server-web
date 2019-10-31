@@ -234,6 +234,13 @@ public class MultimediaController {
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
 	}
 
+	/**
+	 *
+	 * Writes a file not found error response
+	 *
+	 * @param response
+	 * @throws IOException
+	 */
 	private void writeFileNotFound(HttpServletResponse response) throws IOException {
 		String errorMessage = "Sorry. The file you are looking for does not exist";
 		logger.info(errorMessage);
