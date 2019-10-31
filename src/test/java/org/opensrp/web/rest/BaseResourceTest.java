@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -15,8 +16,7 @@ import org.springframework.test.web.server.ResultMatcher;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.List;
-
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
@@ -72,6 +72,19 @@ public abstract class BaseResourceTest<T> {
         return actualObj;
     }
 
+    protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {
+
+        MvcResult mvcResult = this.mockMvc.perform(
+                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
+
     protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
@@ -84,6 +97,23 @@ public abstract class BaseResourceTest<T> {
         }
         JsonNode actualObj = mapper.readTree(responseString);
         return actualObj;
+    }
+
+    protected String deleteRequestWithJsonContent(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
+
+        String finalUrl = url;
+        if (parameter != null &&!parameter.isEmpty()) {
+            finalUrl = finalUrl + "?" + parameter;
+        }
+
+        MvcResult mvcResult = this.mockMvc.perform(delete(finalUrl).accept(MediaType.APPLICATION_JSON))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return  responseString;
     }
 
     /** Objects in the list should have a unique uuid identifier field **/

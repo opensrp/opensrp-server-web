@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
@@ -98,11 +99,51 @@ public class LocationResource {
 		}
 	}
 
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE },
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getLocations(@RequestBody LocationSyncRequestWrapper locationSyncRequestWrapper) {
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = locationSyncRequestWrapper.getServerVersion();
+		} catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+
+		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
+		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
+		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
+
+		try {
+			if (isJurisdiction) {
+				if (StringUtils.isBlank(locationNames)) {
+					return new ResponseEntity<>(
+							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
+							RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				}
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+			} else {
+				if (StringUtils.isBlank(parentIds)) {
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				}
+				return new ResponseEntity<>(gson.toJson(
+						locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
+						HttpStatus.OK);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	// here for backward compatibility
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getLocations(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
-			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
-			@RequestParam(value = PARENT_ID, required = false) String parentIds) {
+	public ResponseEntity<String> getLocationsTwo(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
+											   @RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+											   @RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
+											   @RequestParam(value = PARENT_ID, required = false) String parentIds) {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -246,11 +287,11 @@ public class LocationResource {
 			if (isJurisdiction) {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
-						HttpStatus.OK);
+				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
-						HttpStatus.OK);
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			}
 
 		} catch (Exception e) {
@@ -275,7 +316,8 @@ public class LocationResource {
 
         try {
             return new ResponseEntity<>(
-                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)), HttpStatus.OK);
+                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)),
+                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -300,12 +342,62 @@ public class LocationResource {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)), HttpStatus.OK);
+					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+
+	/**
+	 * This methods provides an API endpoint that searches for all structure ids
+	 *
+	 * @return A list of structure Ids
+	 */
+	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findIds() {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findAllStructureIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	static class LocationSyncRequestWrapper {
+		@JsonProperty("is_jurisdiction")
+		private Boolean isJurisdiction;
+
+		@JsonProperty("location_names")
+		private List<String> locationNames;
+
+		@JsonProperty("parent_id")
+		private List<String> parentId;
+
+		@JsonProperty
+		private long serverVersion;
+
+		public Boolean getIsJurisdiction() {
+			return isJurisdiction;
+		}
+
+		public List<String> getLocationNames() {
+			return locationNames;
+		}
+
+		public List<String> getParentId() {
+			return parentId;
+		}
+
+		public long getServerVersion() {
+			return serverVersion;
+		}
 	}
 
 }

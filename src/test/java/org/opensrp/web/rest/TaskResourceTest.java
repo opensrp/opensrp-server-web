@@ -17,6 +17,7 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -107,10 +108,42 @@ public class TaskResourceTest {
 		tasks.add(getTask());
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l)).thenReturn(tasks);
 		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.body("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
+	public void testGetTasksByTaskAndGroupGetMethod() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l)).thenReturn(tasks);
+		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "IRS_2018_S1")
 						.param(TaskResource.GROUP, "2018_IRS-3734").param(BaseEntity.SERVER_VERSIOIN, "15421904649873"))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
+	public void testPostTasksByTaskAndGroupWithInvalidServerVersionShouldReturnAllServerVersions() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l)).thenReturn(tasks);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":\"\"}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l);
 		verifyNoMoreInteractions(taskService);
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
@@ -134,10 +167,31 @@ public class TaskResourceTest {
 	}
 
 	@Test
+	public void testPostTasksByTaskAndGroupWithoutParamsShouldReturnBadRequest() throws Exception {
+		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).body("{\"plan\":\"\", \"serverVersion\":\"\"}".getBytes()))
+				.andExpect(status().isBadRequest());
+		verify(taskService, never()).getTasksByTaskAndGroup(anyString(), anyString(), anyLong());
+		verifyNoMoreInteractions(taskService);
+	}
+
+	@Test
 	public void testGetTasksByTaskAndGroupWithoutParamsShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(get(BASE_URL + "/sync").param(TaskResource.PLAN, "").param(BaseEntity.SERVER_VERSIOIN, ""))
 				.andExpect(status().isBadRequest());
 		verify(taskService, never()).getTasksByTaskAndGroup(anyString(), anyString(), anyLong());
+		verifyNoMoreInteractions(taskService);
+	}
+
+	@Test
+	public void testPostTasksByTaskAndGroupShouldReturnServerError() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l))
+				.thenThrow(new RuntimeException());
+		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
+				.andExpect(status().isInternalServerError());
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
 		verifyNoMoreInteractions(taskService);
 	}
 
@@ -238,6 +292,16 @@ public class TaskResourceTest {
 				.body(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
+	}
+
+	@Test
+	public void testFindAllTaskIds() throws Exception {
+		when(taskService.findAllTaskIds()).thenReturn(Collections.singletonList("task-id-1"));
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds", "")).andExpect(status().isOk())
+				.andReturn();
+		verify(taskService, times(1)).findAllTaskIds();
+		verifyNoMoreInteractions(taskService);
+		assertEquals("[\"task-id-1\"]", result.getResponse().getContentAsString());
 	}
 
 	private Task getTask() {

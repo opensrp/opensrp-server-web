@@ -2,8 +2,6 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -11,6 +9,7 @@ import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.setting.SettingConfiguration;
+import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
@@ -83,12 +82,12 @@ public class SettingResource {
 			settingQueryBean.setServerVersion(lastSyncedServerVersion);
 			
 			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
-			
-			JsonArray settingConfigurationsArray = (JsonArray) gson.toJsonTree(SettingConfigurations,
-			    new TypeToken<List<SettingConfiguration>>() {}.getType());
-			
-			return new ResponseEntity<>(new JSONArray(settingConfigurationsArray.toString()).toString(), responseHeaders,
-			        HttpStatus.OK);
+
+			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
+			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
+
+			return new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,
+					HttpStatus.OK);
 			
 		}
 		catch (Exception e) {

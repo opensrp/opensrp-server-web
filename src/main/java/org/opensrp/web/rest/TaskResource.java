@@ -1,17 +1,14 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
@@ -32,6 +29,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
+import javax.servlet.http.HttpServletRequest;
+import org.opensrp.common.AllConstants.BaseEntity;
+
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -65,8 +67,34 @@ public class TaskResource {
 		}
 	}
 
+	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE},
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getTasksByTaskAndGroup(@RequestBody TaskSyncRequestWrapper taskSyncRequestWrapper) {
+		String plan = StringUtils.join(taskSyncRequestWrapper.getPlan(), ",");
+		String group = StringUtils.join(taskSyncRequestWrapper.getGroup(), ",");
+		long serverVersion = taskSyncRequestWrapper.getServerVersion();
+
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = serverVersion;
+		} catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	// here for backward compatibility
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getTasksByTaskAndGroup(HttpServletRequest request) {
+	public ResponseEntity<String> getTasksByTaskAndGroupTwo(HttpServletRequest request) {
 		String plan = getStringFilter(PLAN, request);
 		String group = getStringFilter(GROUP, request);
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
@@ -164,6 +192,47 @@ public class TaskResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * This methods provides an API endpoint that searches for all task Ids
+	 *
+	 * @return A list of task Ids
+	 */
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findIds() {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.findAllTaskIds()), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	static class TaskSyncRequestWrapper {
+		@JsonProperty
+		private List<String> plan = new ArrayList<>();
+
+		@JsonProperty
+		private List<String> group = new ArrayList<>();
+
+		@JsonProperty
+		private long serverVersion;
+
+		public List<String> getPlan() {
+			return plan;
+		}
+		public List<String> getGroup() {
+			return group;
+		}
+
+		public long getServerVersion() {
+			return serverVersion;
 		}
 	}
 
