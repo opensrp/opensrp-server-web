@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
@@ -22,6 +21,7 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.core.Authentication;
 
 import com.google.gson.Gson;
 
@@ -46,10 +46,16 @@ public class UserControllerTest {
 
 	private DrishtiAuthenticationProvider auth;
 
-	UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken;
+	private UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken;
 
 	@Mock
-	PasswordEncoder au;
+	private PasswordEncoder au;
+	
+	@Mock
+	private Authentication authentication;
+	
+	@Mock
+	private HttpServletRequest servletRequest;
 
 	@Before
 	public void setUp() throws Exception {
@@ -62,9 +68,9 @@ public class UserControllerTest {
 	public void test() throws JSONException {
 		User u = new User("test user 1");
 		u.withAttribute("Location", "cd4ed528-87cd-42ee-a175-5e7089521ebd");
-		when(controller.getAuthenticationAdvisor(Mockito.mock(HttpServletRequest.class)))
+		when(controller.getAuthenticationAdvisor(servletRequest))
 				.thenReturn(usernamePasswordAuthenticationToken);
-		when(controller.currentUser(any(HttpServletRequest.class))).thenReturn(u);
+		when(controller.currentUser(servletRequest,authentication)).thenReturn(u);
 		JSONObject to = new JSONObject(TEAM_MEMEBER_OBJECT);
 
 		doReturn(to).when(userservice).getTeamMember(any(String.class));
@@ -78,11 +84,11 @@ public class UserControllerTest {
 		u.withAttribute("Location", "cd4ed528-87cd-42ee-a175-5e7089521ebd");
 
 		when(userservice.authenticate("demook", "demook")).thenReturn(true);
-		when(controller.getAuthenticationAdvisor(Mockito.mock(HttpServletRequest.class)))
+		when(controller.getAuthenticationAdvisor(servletRequest))
 				.thenReturn(usernamePasswordAuthenticationToken);
 
 		when(auth.getDrishtiUser(usernamePasswordAuthenticationToken, "demook")).thenReturn(u);
 
-		controller.authenticate(Mockito.mock(HttpServletRequest.class));
+		controller.authenticate(servletRequest,authentication);
 	}
 }
