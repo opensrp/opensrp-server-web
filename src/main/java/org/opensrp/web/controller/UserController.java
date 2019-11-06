@@ -138,9 +138,8 @@ public class UserController {
 		return opensrpAuthenticationProvider;
 	}
 
-	public User currentUser(HttpServletRequest request) {
-		Authentication a = getAuthenticationAdvisor(request);
-		return getAuthenticationProvider().getDrishtiUser(a, a.getName());
+	public User currentUser(HttpServletRequest request,Authentication authentication) {
+		return getAuthenticationProvider().getDrishtiUser(authentication, authentication.getName());
 	}
 
 	public Time getServerTime() {
@@ -178,11 +177,11 @@ public class UserController {
 
 	@RequestMapping("/security/authenticate")
 	@ResponseBody
-	public ResponseEntity<String> authenticate(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication) throws JSONException {
 		if (useOpenSRPTeamModule) {
-			return authenticateUsingOrganization(request);
+			return authenticateUsingOrganization(request,authentication);
 		}
-		User u = currentUser(request);
+		User u = currentUser(request,authentication);
 		System.out.println(u);
 		String lid = "";
 		JSONObject tm = null;
@@ -224,8 +223,8 @@ public class UserController {
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
-	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request) throws JSONException {
-		User u = currentUser(request);
+	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request,Authentication authentication) throws JSONException {
+		User u = currentUser(request,authentication);
 		System.out.println(u);
 
 		Map<String, String> openMRSIdsMap = new HashMap<>();

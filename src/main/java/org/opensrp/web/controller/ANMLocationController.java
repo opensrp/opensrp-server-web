@@ -1,7 +1,12 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
+import java.text.MessageFormat;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.opensrp.common.util.HttpAgent;
 import org.opensrp.common.util.HttpResponse;
@@ -12,16 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.text.MessageFormat;
-
-import javax.servlet.http.HttpServletRequest;
-
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 public class ANMLocationController {
@@ -41,10 +43,10 @@ public class ANMLocationController {
 
     @RequestMapping(method = GET, value = "/anm-villages")
     @ResponseBody
-    public ResponseEntity<VillagesDTO> villagesForANM(HttpServletRequest req) {
+    public ResponseEntity<VillagesDTO> villagesForANM(HttpServletRequest req, Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {
-            String anmIdentifier = userController.currentUser(req).getUsername();
+            String anmIdentifier = userController.currentUser(req,authentication).getUsername();
             response = httpAgent.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier);
             VillagesDTO villagesDTOs = new Gson().fromJson(response.body(),
                     new TypeToken<VillagesDTO>() {

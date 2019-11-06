@@ -72,7 +72,7 @@
 	<bean id="accessConfirmationController" class="org.opensrp.web.security.AccessConfirmationController"/>
 
 	<sec:authentication-manager
-		alias="authenticationManager">
+		alias="authenticationManager" erase-credentials="false">
 		<sec:authentication-provider
 			ref="userAuthenticationProvider" />
 	</sec:authentication-manager>

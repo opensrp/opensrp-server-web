@@ -23,6 +23,7 @@ import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
@@ -119,7 +120,13 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
 	public User getDrishtiUser(Authentication authentication, String username) {
 		User user = null;
-		checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
+		if (authentication instanceof OAuth2Authentication) {
+			if (!((OAuth2Authentication) authentication).getUserAuthentication().isAuthenticated()) {
+				throw new BadCredentialsException(INVALID_CREDENTIALS);
+			}
+		} else {
+			checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
+		}
 
 		try {
 			boolean response = openmrsUserService.deleteSession(authentication.getName(),
