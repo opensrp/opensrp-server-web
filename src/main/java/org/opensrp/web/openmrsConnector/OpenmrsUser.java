@@ -1,4 +1,4 @@
-package org.opensrp.web.custome;
+package org.opensrp.web.openmrsConnector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
