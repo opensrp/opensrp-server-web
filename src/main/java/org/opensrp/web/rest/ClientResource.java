@@ -19,9 +19,6 @@ import static org.opensrp.common.AllConstants.Client.ORDERBYFIELDNAAME;
 import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
-import static org.opensrp.common.AllConstants.Client.HOUSEHOLD;
-
-import static org.opensrp.common.AllConstants.Client.HOUSEHOLDMEMEBR;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
@@ -41,7 +38,6 @@ import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +63,10 @@ public class ClientResource extends RestResource<Client> {
 	public static final String PAGE_NUMBER = "pageNumber";
 	
 	public static final String ALLCLIENTS = "clients";
+	
+	public static final String HOUSEHOLD = "ec_household";
+	
+	public static final String HOUSEHOLDMEMEBR = "householdMember";
 	
 	public static final int FIRST_PAGE = 0;
 	
@@ -164,13 +164,13 @@ public class ClientResource extends RestResource<Client> {
 		List<Client> clientList = new ArrayList<Client>();
 		
 		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-		String pageNumberParam = getStringFilter(PAGE_SIZE, request);
-		String pageSizeParam = getStringFilter(PAGE_NUMBER, request);
+		String pageNumberParam = getStringFilter(PAGE_NUMBER, request);
+		String pageSizeParam = getStringFilter(PAGE_SIZE, request);
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
-		Integer pageNumber = 1;
-		Integer pageSize = 1;
+		Integer pageNumber = 1; // default page number
+		Integer pageSize = 0; // default page size
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setOrderByField(getStringFilter(ORDERBYFIELDNAAME, request));
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
@@ -181,7 +181,7 @@ public class ClientResource extends RestResource<Client> {
 			pageNumber = Integer.parseInt(pageNumberParam) - 1;
 		}
 		if (pageSizeParam != null) {
-			pageSize = Integer.parseInt(pageSizeParam) - 1;
+			pageSize = Integer.parseInt(pageSizeParam);
 		}
 		
 		searchBean.setPageNumber(pageNumber);
@@ -233,6 +233,7 @@ public class ClientResource extends RestResource<Client> {
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clients = new ArrayList<Client>();
 		List<String> ids = new ArrayList<String>();
+		
 		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
 		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 		if (clients.size() != 0) {
