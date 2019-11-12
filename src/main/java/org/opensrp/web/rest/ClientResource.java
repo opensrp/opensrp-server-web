@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
@@ -158,7 +157,7 @@ public class ClientResource extends RestResource<Client> {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request, HttpSession session) {
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clientList = new ArrayList<Client>();
@@ -193,7 +192,7 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		
 		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
-			return getHouseholds(searchBean, addressSearchBean, session, clientList);
+			return getHouseholds(searchBean, addressSearchBean);
 		} else if (clientType.equalsIgnoreCase(HOUSEHOLDMEMEBR)) {
 			
 			clientList = clientService.findMembersByRelationshipId(baseEntityId);
@@ -202,15 +201,14 @@ public class ClientResource extends RestResource<Client> {
 			
 		} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			searchBean.setClientType(HOUSEHOLD);
-			return getAllClients(searchBean, addressSearchBean, session);
+			return getAllClients(searchBean, addressSearchBean);
 		}
 		
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 		
 	}
 	
-	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean,
-	                                            HttpSession session) {
+	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
 		
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
@@ -225,15 +223,14 @@ public class ClientResource extends RestResource<Client> {
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean,
-	                                            HttpSession session, List<Client> clientList) {
+	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
 		
 		DateTime[] lastEdit = null;
 		Map<String, Object> response = new HashMap<String, Object>();
 		JsonArray clientsArray = new JsonArray();
 		List<Client> clients = new ArrayList<Client>();
 		List<String> ids = new ArrayList<String>();
-		
+		List<Client> _clients = new ArrayList<Client>();
 		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
 		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 		if (clients.size() != 0) {
@@ -241,10 +238,10 @@ public class ClientResource extends RestResource<Client> {
 				ids.add(client.getBaseEntityId());
 			}
 			total = getTotal(clientSearchBean, addressSearchBean);
-			clientList = clientService.getHouseholdList(ids, clientSearchBean.getClientType(), addressSearchBean,
+			_clients = clientService.getHouseholdList(ids, clientSearchBean.getClientType(), addressSearchBean,
 			    clientSearchBean, clients);
 		}
-		clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
+		clientsArray = (JsonArray) gson.toJsonTree(_clients, new TypeToken<List<Client>>() {}.getType());
 		response.put("clients", clientsArray);
 		response.put("total", total);
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
