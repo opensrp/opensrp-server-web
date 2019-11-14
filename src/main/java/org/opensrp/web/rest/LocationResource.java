@@ -77,6 +77,10 @@ public class LocationResource {
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
+	public static final String SERVER_VERSION = "serverVersion";
+
+	public static final String LIMIT = "limit";
+
 	private PhysicalLocationService locationService;
 
 	@Autowired
@@ -363,6 +367,43 @@ public class LocationResource {
 		try {
 			return new ResponseEntity<>(
 					gson.toJson(locationService.findAllStructureIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 * Fetch structures or jurisdictions ordered by serverVersion ascending
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number os plas to fetch
+	 * @return the structures or jurisdictions matching the params
+	 */
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getAll(
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+
+		try {
+			limit = limit == null ? 25 : limit;
+
+			if (isJurisdiction) {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findAllLocationsPaginated(returnGeometry, serverVersion, SERVER_VERSION, "asc", limit)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(
+						gson.toJson(locationService.findAllStructuresPaginated(returnGeometry, serverVersion, SERVER_VERSION, "asc", limit)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			}
+
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
