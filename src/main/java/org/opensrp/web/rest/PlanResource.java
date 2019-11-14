@@ -1,13 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
@@ -33,10 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * @author Vincent Karuri
@@ -60,6 +58,10 @@ public class PlanResource {
 	public static final String IDENTIFIERS = "identifiers";
 	
 	public static final String FIELDS = "fields";
+
+	public static final String SERVER_VERSION = "serverVersion";
+
+	public static final String LIMIT = "limit";
 	
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -251,6 +253,32 @@ public class PlanResource {
 		}
 		
 	}
+
+	/**
+	 * Fetch plans ordered by serverVersion ascending
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number os plas to fetch
+	 * @return A list of plan definitions
+	 */
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<PlanDefinition>> getAll(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+
+		try {
+			limit = limit == null ? 25 : limit;
+			return new ResponseEntity<>(planService.getAllPlansPaginated(serverVersion, SERVER_VERSION, "asc", limit),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 	
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
