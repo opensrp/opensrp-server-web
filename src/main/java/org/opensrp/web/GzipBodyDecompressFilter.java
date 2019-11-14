@@ -43,8 +43,7 @@ public class GzipBodyDecompressFilter implements Filter {
 	private static Logger logger = LoggerFactory.getLogger(GzipBodyDecompressFilter.class.toString());
 	
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		
+	public void init(FilterConfig filterConfig) throws ServletException {//do nothing
 	}
 	
 	/**
@@ -82,7 +81,7 @@ public class GzipBodyDecompressFilter implements Filter {
 	 * @inheritDoc
 	 */
 	@Override
-	public final void destroy() {
+	public final void destroy() {//do nothing
 	}
 	
 	/**
