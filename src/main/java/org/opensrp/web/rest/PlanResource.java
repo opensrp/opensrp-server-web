@@ -269,7 +269,7 @@ public class PlanResource {
 
 		try {
 			limit = limit == null ? 25 : limit;
-			return new ResponseEntity<>(planService.getAllPlansPaginated(serverVersion, SERVER_VERSION, "asc", limit),
+			return new ResponseEntity<>(planService.getAllPlans(serverVersion, limit),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {

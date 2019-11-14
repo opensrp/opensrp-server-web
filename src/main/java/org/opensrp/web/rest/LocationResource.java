@@ -396,11 +396,11 @@ public class LocationResource {
 
 			if (isJurisdiction) {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllLocationsPaginated(returnGeometry, serverVersion, SERVER_VERSION, "asc", limit)),
+						gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, limit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllStructuresPaginated(returnGeometry, serverVersion, SERVER_VERSION, "asc", limit)),
+						gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, limit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			}
 

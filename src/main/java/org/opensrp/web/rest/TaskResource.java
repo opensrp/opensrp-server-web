@@ -232,7 +232,7 @@ public class TaskResource {
 
 		try {
 			limit = limit == null ? 25 : limit;
-			return new ResponseEntity<>(taskService.getAllTasksPaginated(serverVersion, SERVER_VERSION, "asc", limit),
+			return new ResponseEntity<>(taskService.getAllTasks(serverVersion, limit),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {
