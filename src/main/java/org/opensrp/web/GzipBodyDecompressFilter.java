@@ -93,7 +93,7 @@ public class GzipBodyDecompressFilter implements Filter {
 		/**
 		 * Default encoding that is used when post parameters are parsed.
 		 */
-		public static final String DEFAULT_ENCODING = "ISO-8859-1";
+		public static final String DEFAULT_ENCODING = "UTF-8";
 		
 		/**
 		 * Serialized bytes array that is a result of unzipping gzipped body.
