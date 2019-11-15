@@ -65,7 +65,8 @@ public class GzipBodyDecompressFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 		boolean isGzipped = request.getHeader(HttpHeaders.CONTENT_ENCODING) != null
 		        && request.getHeader(HttpHeaders.CONTENT_ENCODING).contains("gzip");
-		boolean requestTypeSupported = HttpMethods.POST.equals(request.getMethod());
+		boolean requestTypeSupported = HttpMethods.POST.equals(request.getMethod())
+		        || HttpMethods.PUT.equals(request.getMethod());
 		if (isGzipped && !requestTypeSupported) {
 			throw new IllegalStateException(request.getMethod() + " is not supports gzipped body of parameters."
 			        + " Only POST requests are currently supported.");
