@@ -19,7 +19,7 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.1.1.RELEASE</spring.version>
+		<spring.version>5.2.1.RELEASE</spring.version>
 		<spring.security.version>3.1.2.RELEASE</spring.security.version>
 		<spring.security.oauth.version>1.0.5.RELEASE</spring.security.oauth.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
