@@ -37,6 +37,8 @@ import java.util.Set;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
+import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.utils.Constants.LIMIT;
 
 
 @Controller
@@ -76,10 +78,6 @@ public class LocationResource {
 	public static final String PAGE_SIZE = "page_size";
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
-
-	public static final String SERVER_VERSION = "serverVersion";
-
-	public static final String LIMIT = "limit";
 
 	private PhysicalLocationService locationService;
 
@@ -388,11 +386,11 @@ public class LocationResource {
 	public ResponseEntity<String> getAll(
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			Integer pageLimit = limit == null ? 25 : limit;
+			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
 			if (isJurisdiction) {
 				return new ResponseEntity<>(

@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.service.PhysicalLocationService;
@@ -34,7 +33,10 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.utils.Constants.LIMIT;
 
 /**
  * @author Vincent Karuri
@@ -58,10 +60,6 @@ public class PlanResource {
 	public static final String IDENTIFIERS = "identifiers";
 	
 	public static final String FIELDS = "fields";
-
-	public static final String SERVER_VERSION = "serverVersion";
-
-	public static final String LIMIT = "limit";
 	
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -174,7 +172,7 @@ public class PlanResource {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndOperationalAreaTwo(HttpServletRequest request,
 	        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
-		String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+		String serverVersion = getStringFilter(SERVER_VERSIOIN, request);
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -264,11 +262,11 @@ public class PlanResource {
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAll(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			Integer pageLimit = limit == null ? 25 : limit;
+			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 			return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}

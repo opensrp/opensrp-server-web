@@ -32,7 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.utils.Constants.LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -48,10 +51,6 @@ public class TaskResource {
 	public static final String GROUP = "group";
 
 	private TaskService taskService;
-
-	public static final String SERVER_VERSION = "serverVersion";
-
-	public static final String LIMIT = "limit";
 
 	@Autowired
 	public void setTaskService(TaskService taskService) {
@@ -231,7 +230,7 @@ public class TaskResource {
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			Integer pageLimit = limit == null ? 25 : limit;
+			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
