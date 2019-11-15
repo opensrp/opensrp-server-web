@@ -268,8 +268,8 @@ public class PlanResource {
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			limit = limit == null ? 25 : limit;
-			return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, limit)),
+			Integer pageLimit = limit == null ? 25 : limit;
+			return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {

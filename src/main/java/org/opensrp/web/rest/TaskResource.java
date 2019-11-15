@@ -231,8 +231,8 @@ public class TaskResource {
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			limit = limit == null ? 25 : limit;
-			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, limit)),
+			Integer pageLimit = limit == null ? 25 : limit;
+			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {

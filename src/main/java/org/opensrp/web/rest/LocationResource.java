@@ -392,15 +392,15 @@ public class LocationResource {
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
-			limit = limit == null ? 25 : limit;
+			Integer pageLimit = limit == null ? 25 : limit;
 
 			if (isJurisdiction) {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, limit)),
+						gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, limit)),
+						gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			}
 
