@@ -226,13 +226,13 @@ public class TaskResource {
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<Task>> getAll(
+	public ResponseEntity<String> getAll(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion,
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
 		try {
 			limit = limit == null ? 25 : limit;
-			return new ResponseEntity<>(taskService.getAllTasks(serverVersion, limit),
+			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, limit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (Exception e) {
