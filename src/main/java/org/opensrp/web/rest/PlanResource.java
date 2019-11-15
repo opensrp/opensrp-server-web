@@ -1,18 +1,14 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.service.PhysicalLocationService;
@@ -33,10 +29,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 
 /**
  * @author Vincent Karuri
@@ -172,7 +172,7 @@ public class PlanResource {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndOperationalAreaTwo(HttpServletRequest request,
 	        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds) {
-		String serverVersion = getStringFilter(AllConstants.BaseEntity.SERVER_VERSIOIN, request);
+		String serverVersion = getStringFilter(SERVER_VERSIOIN, request);
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -251,6 +251,32 @@ public class PlanResource {
 		}
 		
 	}
+
+	/**
+	 * Fetch plans ordered by serverVersion ascending
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number os plas to fetch
+	 * @return A list of plan definitions
+	 */
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getAll(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+
+		try {
+			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+			return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 	
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
