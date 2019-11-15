@@ -35,8 +35,8 @@ import java.util.List;
 
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.utils.Constants.LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 
 /**
  * @author Vincent Karuri

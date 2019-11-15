@@ -34,8 +34,8 @@ import java.util.Set;
 
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.utils.Constants.LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/task")

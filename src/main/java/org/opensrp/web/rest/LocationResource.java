@@ -37,8 +37,8 @@ import java.util.Set;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-import static org.opensrp.web.utils.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.utils.Constants.LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 
 
 @Controller
