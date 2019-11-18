@@ -1,26 +1,7 @@
 package org.opensrp.web.rest;
 
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,8 +18,27 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.MvcResult;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -463,6 +463,28 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationDetailsByPlanId(anyString());
         assertEquals(LocationResource.gson.toJson(locationDetails), result.getResponse().getContentAsString());
+
+    }
+
+    @Test
+    public void testGetAll() throws Exception {
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+
+        List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
+        when(planService.getAllPlans(anyLong(), anyInt()))
+                .thenReturn(planDefinitions);
+        MvcResult result = mockMvc
+                .perform(get(BASE_URL + "/getAll?serverVersion=0&limit=25"))
+                .andExpect(status().isOk()).andReturn();
+        verify(planService).getAllPlans(anyLong(), anyInt());
+        assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
     }
 }
