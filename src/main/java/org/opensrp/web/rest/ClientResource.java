@@ -63,7 +63,7 @@ public class ClientResource extends RestResource<Client> {
 	
 	public static final String ALLCLIENTS = "clients";
 	
-	public static final String HOUSEHOLD = "ec_household";
+	public static final String HOUSEHOLD = "ec_family";
 	
 	public static final String HOUSEHOLDMEMEBR = "householdMember";
 	

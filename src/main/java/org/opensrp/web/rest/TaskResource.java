@@ -1,14 +1,15 @@
 package org.opensrp.web.rest;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
+import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
@@ -24,16 +25,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import org.opensrp.common.AllConstants.BaseEntity;
-
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -208,6 +210,31 @@ public class TaskResource {
 			return new ResponseEntity<>(
 					gson.toJson(taskService.findAllTaskIds()), HttpStatus.OK);
 		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 * Fetch tasks ordered by serverVersion ascending
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number of tasks to fetch
+	 * @return A list of tasks
+	 */
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getAll(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+
+		try {
+			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

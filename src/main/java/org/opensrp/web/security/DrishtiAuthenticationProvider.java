@@ -124,8 +124,12 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			if (!((OAuth2Authentication) authentication).getUserAuthentication().isAuthenticated()) {
 				throw new BadCredentialsException(INVALID_CREDENTIALS);
 			}
-		} else {
+		} else if(!authentication.isAuthenticated()) {
 			checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
+		}else {
+			String userAddress = ((WebAuthenticationDetails) authentication.getDetails()).getRemoteAddress();
+			String key = userAddress + authentication.getName();
+			authentication = hashOps.get(key, AUTH_HASH_KEY);
 		}
 
 		try {
