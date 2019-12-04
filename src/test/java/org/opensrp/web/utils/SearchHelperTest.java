@@ -27,19 +27,7 @@ public class SearchHelperTest {
 		motherClient.setIdentifiers(EasyMap.mapOf("M_ZEIR_ID", "673939_mother"));
 		testClient = motherClient;
 	}
-	
-	@Before
-	public void testGetZEIRIdentifierMapCreatesIdentifierMapCorrectly() {
-		
-		Map<String, String> identifierMap = SearchHelper.getZEIRIdentifierMap("849384");
-		
-		Assert.assertNotNull(identifierMap);
-		Assert.assertTrue(identifierMap.size() > 0);
-		Assert.assertTrue(identifierMap.containsKey("ZEIR_ID"));
-		Assert.assertEquals("849384", identifierMap.get("ZEIR_ID"));
-		
-	}
-	
+
 	@Test
 	public void testCreateClientListIfEmptyCreatesListOnNull() {
 		
@@ -91,7 +79,7 @@ public class SearchHelperTest {
 	@Test
 	public void testGetChildIndentifierFromMotherClient() {
 		
-		String childSystemId = SearchHelper.getChildIndentifierFromMotherClient(testClient, "M_ZEIR_ID", "mother");
+		String childSystemId = SearchHelper.getChildIdentifierFromMotherClient(testClient, "M_ZEIR_ID", "mother");
 		Assert.assertNotNull(childSystemId);
 		Assert.assertEquals("673939", childSystemId);
 	}
