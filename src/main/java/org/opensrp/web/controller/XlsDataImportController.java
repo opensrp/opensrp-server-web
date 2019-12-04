@@ -91,7 +91,7 @@ public class XlsDataImportController {
 
 			List<String> openmrsIds = this.openmrsIDService.downloadOpenmrsIds(openmrsIdsToBeDownloaded);
 			List<String> openmrsChildIds = openmrsIds.subList(0, openmrsIdsToBeDownloaded/2);
-			List<String> openmrsMotherIds = openmrsIds.subList(openmrsIdsToBeDownloaded/2, recordCount);
+			List<String> openmrsMotherIds = openmrsIds.subList(openmrsIdsToBeDownloaded/2, openmrsIdsToBeDownloaded);
 
 			int counter = 0;
 
