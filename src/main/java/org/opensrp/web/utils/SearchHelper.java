@@ -300,17 +300,4 @@ public class SearchHelper {
 		
 		return null;
 	}
-	
-	public static String getChildIdentifierFromMotherClient(Client client, String motherIdentifier,
-															String relationshipKey) {
-		String identifier = client.getIdentifier(motherIdentifier);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(identifier)) {
-			String[] arr = identifier.split("_");
-			if (arr != null && arr.length == 2 && arr[1].contains(relationshipKey)) {
-				return arr[0];
-			}
-		}
-		return null;
-	}
-	
 }
