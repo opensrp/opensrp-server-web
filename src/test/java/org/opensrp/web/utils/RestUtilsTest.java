@@ -3,7 +3,7 @@ package org.opensrp.web.utils;
 import org.junit.Test;
 import org.opensrp.common.AllConstants.Client;
 import org.opensrp.domain.Multimedia;
-import org.opensrp.domain.contract.MultimediaFileManager;
+import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.web.rest.RestUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -17,7 +17,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class RestUtilsTest {
 	
