@@ -56,7 +56,9 @@ public class XlsDataImportControllerTest {
 		List<String> openmrsIds = new ArrayList<String>();
 		openmrsIds.add("12345-1");
 		openmrsIds.add("12345-2");
-		
+		//mothers' id
+		openmrsIds.add("12345-3");
+		openmrsIds.add("12345-4");
 
 		when(this.openmrsIDService.downloadOpenmrsIds(anyInt())).thenReturn(openmrsIds);
 		
