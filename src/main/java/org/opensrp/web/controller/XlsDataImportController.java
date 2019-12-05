@@ -274,7 +274,7 @@ public class XlsDataImportController {
 	}
 	
 	private Event buildBirthRegistrationEvent(CSVRecord record, Client client) {
-		String eventType = "Birth Registration";
+		String eventType = "Child Enrollment";
         String entityType = "child";
 		String locationName = record.get("Childs_Particulars/Home_Facility");
 		String dateOfFacilityVisit = this.validateValue(record.get("Childs_Particulars/First_Health_Facility_Contact"));
