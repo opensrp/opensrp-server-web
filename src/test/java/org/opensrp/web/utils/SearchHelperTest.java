@@ -1,17 +1,20 @@
 package org.opensrp.web.utils;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opensrp.common.util.EasyMap;
 import org.opensrp.domain.Client;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import junit.framework.Assert;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class SearchHelperTest {
 	
@@ -27,19 +30,7 @@ public class SearchHelperTest {
 		motherClient.setIdentifiers(EasyMap.mapOf("M_ZEIR_ID", "673939_mother"));
 		testClient = motherClient;
 	}
-	
-	@Before
-	public void testGetZEIRIdentifierMapCreatesIdentifierMapCorrectly() {
-		
-		Map<String, String> identifierMap = SearchHelper.getZEIRIdentifierMap("849384");
-		
-		Assert.assertNotNull(identifierMap);
-		Assert.assertTrue(identifierMap.size() > 0);
-		Assert.assertTrue(identifierMap.containsKey("ZEIR_ID"));
-		Assert.assertEquals("849384", identifierMap.get("ZEIR_ID"));
-		
-	}
-	
+
 	@Test
 	public void testCreateClientListIfEmptyCreatesListOnNull() {
 		
@@ -86,14 +77,6 @@ public class SearchHelperTest {
 		
 		Assert.assertNotNull(motherGuardianNum);
 		Assert.assertEquals("+2547112233445", motherGuardianNum);
-	}
-	
-	@Test
-	public void testGetChildIndentifierFromMotherClient() {
-		
-		String childSystemId = SearchHelper.getChildIndentifierFromMotherClient(testClient, "M_ZEIR_ID", "mother");
-		Assert.assertNotNull(childSystemId);
-		Assert.assertEquals("673939", childSystemId);
 	}
 	
 	@Test
@@ -239,6 +222,16 @@ public class SearchHelperTest {
 		Assert.assertEquals("Johnny", resultList.get(0).getFirstName());
 		Assert.assertEquals("Jane", resultList.get(1).getFirstName());
 		
+	}
+
+	@Test
+	public void  childSearchParamProcessorShouldHaveCorrectIdentifierWhenCreatingBean() throws ParseException {
+		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(httpServletRequest.getParameter("limit")).thenReturn("20");
+		Mockito.when(httpServletRequest.getParameter("opensrp_id")).thenReturn("2093980");
+		SearchEntityWrapper searchEntityWrapper = SearchHelper.childSearchParamProcessor(httpServletRequest);
+		String result = searchEntityWrapper.getClientSearchBean().getIdentifiers().get("opensrp_id");
+		Assert.assertEquals("2093980", result);
 	}
 	
 }

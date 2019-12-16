@@ -1,14 +1,20 @@
 package org.opensrp.web.rest;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.opensrp.domain.Multimedia;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 
 import com.mysql.jdbc.StringUtils;
@@ -18,8 +24,10 @@ public class RestUtils {
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
 	public static final String DATETIME_FORMAT = "dd-MM-yyyy HH:mm";
 	public static final SimpleDateFormat SDTF = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-	
-	
+
+	private static Logger logger = LoggerFactory.getLogger(RestUtils.class.toString());
+
+
 	public static String getStringFilter(String filter, HttpServletRequest req)
 	{
 	  return StringUtils.isEmptyOrWhitespaceOnly(req.getParameter(filter)) ? null : req.getParameter(filter);
@@ -100,5 +108,37 @@ public class RestUtils {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		return responseHeaders;
+	}
+
+    /**
+     * Zips multimedia files and writes content to {@param zipOutputStream}
+     *
+     * @param zipOutputStream
+     * @param multimediaFiles
+     * @throws IOException
+     */
+	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles) throws IOException {
+		for (Multimedia multiMedia : multimediaFiles) {
+			FileInputStream inputStream;
+			File file = new File(multiMedia.getFilePath());
+			logger.info("Adding " + file.getName());
+			zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+			try {
+				inputStream = new FileInputStream(file);
+			} catch (FileNotFoundException e) {
+				logger.info("Could not find file " + file.getAbsolutePath());
+				continue;
+			}
+
+			// Write the contents of the file
+			BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+			int data;
+			while ((data = bufferedInputStream.read()) != -1) {
+				zipOutputStream.write(data);
+			}
+			bufferedInputStream.close();
+			zipOutputStream.closeEntry();
+			logger.info("Done downloading file " + file.getName());
+		}
 	}
 }
