@@ -1,25 +1,6 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,7 +27,26 @@ import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -329,6 +329,23 @@ public class TaskResourceTest {
 		assertEquals(1, taskUpdatelistArguments.getValue().size());
 		assertEquals(taskUpdate.getIdentifier(), taskUpdatelistArguments.getValue().get(0).getIdentifier());
 		assertEquals(ids.get(0), taskUpdatelistArguments.getValue().get(0).getIdentifier());
+	}
+
+
+	@Test
+	public void testGetAll() throws Exception {
+
+		Task expectedTask = getTask();
+
+		List<Task> planDefinitions = Collections.singletonList(expectedTask);
+		when(taskService.getAllTasks(anyLong(), anyInt()))
+				.thenReturn(planDefinitions);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=25"))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService).getAllTasks(anyLong(), anyInt());
+		assertEquals(TaskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
+
 	}
 
 }

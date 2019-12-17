@@ -137,9 +137,8 @@ public class UserController {
 		return opensrpAuthenticationProvider;
 	}
 
-	public User currentUser(HttpServletRequest request) {
-		Authentication a = getAuthenticationAdvisor(request);
-		return getAuthenticationProvider().getDrishtiUser(a, a.getName());
+	public User currentUser(HttpServletRequest request,Authentication authentication) {
+		return getAuthenticationProvider().getDrishtiUser(authentication, authentication.getName());
 	}
 
 	public Time getServerTime() {
@@ -177,12 +176,11 @@ public class UserController {
 
 	@RequestMapping("/security/authenticate")
 	@ResponseBody
-	public ResponseEntity<String> authenticate(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication) throws JSONException {
 		if (useOpenSRPTeamModule) {
-			return authenticateUsingOrganization(request);
+			return authenticateUsingOrganization(request,authentication);
 		}
-
-		User u = currentUser(request);
+		User u = currentUser(request,authentication);
 		System.out.println(u);
 		JSONObject tm = null;
 		String lid = "";
@@ -225,8 +223,8 @@ public class UserController {
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 
-	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request) throws JSONException {
-		User u = currentUser(request);
+	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request,Authentication authentication) throws JSONException {
+		User u = currentUser(request,authentication);
 		System.out.println(u);
 
 		Map<String, String> openMRSIdsMap = new HashMap<>();
@@ -253,18 +251,23 @@ public class UserController {
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
 					String parentId = jurisdiction.getProperties().getParentId();
-					openMRSIdsMap.put(parentId == null ? jurisdiction.getId() : parentId, openMRSId);
+					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
 
-			for (String locationId : LocationUtils.getRootLocation(locationAndParent)) {
-				if (openMRSIdsMap.containsKey(locationId)) {
-					openMRSIds.add(openMRSIdsMap.get(locationId));
-				} else {
-					openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
-							.get("OpenMRS_Id"));
+			Set<String> parentLocations = LocationUtils.getRootLocation(locationAndParent);
+			if (parentLocations.size() == 1) {
+				openMRSIds.addAll(openMRSIdsMap.values());
+			} else {
+				for (String locationId : parentLocations) {
+					if (openMRSIdsMap.containsKey(locationId)) {
+						openMRSIds.add(openMRSIdsMap.get(locationId));
+					} else {
+						openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
+						        .get("OpenMRS_Id"));
+					}
 				}
 			}
 
@@ -290,6 +293,7 @@ public class UserController {
 		teamJson.put("teamName", organization.getName());
 		teamJson.put("display", organization.getName());
 		teamJson.put("uuid", organization.getIdentifier());
+		teamJson.put("organizationIds", practionerOrganizationIds.right);
 
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions

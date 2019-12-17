@@ -699,6 +699,41 @@ public class LocationResourceTest {
 		assertEquals("[\"structure-id-1\"]", result.getResponse().getContentAsString());
 	}
 
+	@Test
+	public void testGetAllLocations() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll")
+						.param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllLocations(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testGetAllStructures() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll")
+						.param(LocationResource.IS_JURISDICTION, "false")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+
 	private PhysicalLocation createLocation() {
 		PhysicalLocation parentLocation = LocationResource.gson.fromJson(parentJson, PhysicalLocation.class);
 		parentLocation.setJurisdiction(true);

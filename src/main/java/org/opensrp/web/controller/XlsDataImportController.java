@@ -87,8 +87,12 @@ public class XlsDataImportController {
 			parser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 			List<CSVRecord> records = parser.getRecords();
 			int recordCount = records.size();
-			List<String> openmrsIds = this.openmrsIDService.downloadOpenmrsIds(recordCount);
-			
+			int openmrsIdsToBeDownloaded = recordCount * 2;
+
+			List<String> openmrsIds = this.openmrsIDService.downloadOpenmrsIds(openmrsIdsToBeDownloaded);
+			List<String> openmrsChildIds = openmrsIds.subList(0, openmrsIdsToBeDownloaded/2);
+			List<String> openmrsMotherIds = openmrsIds.subList(openmrsIdsToBeDownloaded/2, openmrsIdsToBeDownloaded);
+
 			int counter = 0;
 
 			for (CSVRecord record : records) {
@@ -102,8 +106,8 @@ public class XlsDataImportController {
 			    
 			    if(!openmrsIDService.checkIfClientExists(childClient)) {
 			    	// Assign zeir and m_zeir ids
-				    String zeirId = openmrsIds.get(counter);
-				    String motherZeirId = zeirId + "_mother";
+				    String zeirId = openmrsChildIds.get(counter);
+				    String motherZeirId = openmrsMotherIds.get(counter);
 
 				    // Create mother record
 				    Client motherClient = this.createMotherClient(record, addressList);

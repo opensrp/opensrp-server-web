@@ -161,17 +161,10 @@ public class SearchResource extends RestResource<Client> {
 
 			List<Client> linkedChildren = new ArrayList<Client>();
 
-			String M_ZEIR_ID = "M_KIP_ID";
 			if (!mothers.isEmpty()) {
-				List<String> cIndentifers = new ArrayList<String>();
-				for (Client m : mothers) {
-					String childIdentifier = SearchHelper.getChildIndentifierFromMotherClient(m, M_ZEIR_ID, RELATIONSHIP_KEY);
-					if (childIdentifier != null && !cIndentifers.contains(childIdentifier)) {
-
-						linkedChildren.addAll(clientService.findAllByIdentifier(childIdentifier));
-					}
+				for (Client client : mothers) {
+					linkedChildren.addAll(clientService.findByRelationship(client.getBaseEntityId()));
 				}
-
 			}
 
 			children = SearchHelper.intersection(children, linkedChildren);// Search conjunction is "AND" find intersection
@@ -182,8 +175,7 @@ public class SearchResource extends RestResource<Client> {
 				}
 			}
 
-			List<ChildMother> childMotherList = SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
-			return childMotherList;
+			return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
 
 		}
 		catch (Exception e) {
