@@ -131,7 +131,7 @@ public class RestUtils {
 				try {
 					inputStream = new FileInputStream(file);
 				} catch (FileNotFoundException e) {
-					logger.info("Could not find file " + file.getAbsolutePath());
+					logger.warn("Could not find file " + file.getAbsolutePath());
 					continue;
 				}
 
