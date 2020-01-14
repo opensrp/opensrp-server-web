@@ -31,7 +31,7 @@
 		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.3-SNAPSHOT</opensrp.common.version>
-
+		<opensrp.server.referral>1.0-SNAPSHOT</opensrp.server.referral>
 	</properties>
 
 	<distributionManagement>
@@ -314,6 +314,11 @@
             <artifactId>spring-security-oauth2</artifactId>
             <version>${spring.security.oauth.version}</version>
          </dependency>
+		<dependency>
+			<groupId>org.smartregister</groupId>
+			<artifactId>opensrp-server-referral</artifactId>
+			<version>${opensrp.server.referral}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
