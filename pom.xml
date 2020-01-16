@@ -8,7 +8,7 @@
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
 
-	<version>1.5.4-ALPHA-SNAPSHOT</version>
+	<version>1.5.4-ALPHA-3-SNAPSHOT</version>
 
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
@@ -31,7 +31,7 @@
 		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.3-SNAPSHOT</opensrp.common.version>
-		<opensrp.server.referral>1.0.2-SNAPSHOT</opensrp.server.referral>
+		<opensrp.server.referral>1.0.3-SNAPSHOT</opensrp.server.referral>
 	</properties>
 
 	<distributionManagement>
