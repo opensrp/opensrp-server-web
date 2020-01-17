@@ -106,7 +106,7 @@
 		<repository>
 			<id>motech.opensrp</id>
 			<name>Motech Snapshots Repository</name>
-			<url>https://nexus.motechproject.org/content/repositories/opensrp-server</url>
+			<url>http://nexus.motechproject.org/content/repositories/opensrp-server</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>${opensrp.updatePolicy}</updatePolicy>
@@ -115,7 +115,7 @@
 		<repository>
 			<id>motech.nexus</id>
 			<name>Motech Snapshots Repository</name>
-			<url>https://nexus.motechproject.org/content/repositories/snapshots</url>
+			<url>http://nexus.motechproject.org/content/repositories/snapshots</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>${opensrp.updatePolicy}</updatePolicy>
@@ -124,7 +124,7 @@
 		<repository>
 			<id>motech.nexus.release</id>
 			<name>Motech Snapshots Repository</name>
-			<url>https://nexus.motechproject.org/content/repositories/releases</url>
+			<url>http://nexus.motechproject.org/content/repositories/releases</url>
 		</repository>
 	</repositories>
 
