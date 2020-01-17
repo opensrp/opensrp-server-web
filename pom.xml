@@ -31,7 +31,7 @@
 		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.3-SNAPSHOT</opensrp.common.version>
-		<opensrp.server.referral>1.0.6-SNAPSHOT</opensrp.server.referral>
+		<opensrp.server.referral>1.0.7-SNAPSHOT</opensrp.server.referral>
 	</properties>
 
 	<distributionManagement>
