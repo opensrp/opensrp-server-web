@@ -72,12 +72,15 @@ public class MultimediaController {
 
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = new File(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-				if (fileName.endsWith("mp4")) {
-					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+				if (file != null) {
+					if (fileName.endsWith("mp4")) {
+						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+					}
+					downloadFile(file, response);
+				} else {
+					writeFileNotFound(response);
 				}
-
-				downloadFile(file, response);
 			}
 		}
 		catch (Exception e) {
@@ -133,7 +136,7 @@ public class MultimediaController {
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
 			try {
 				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-				zipFiles(zipOutputStream, multimediaFiles);
+				zipFiles(zipOutputStream, multimediaFiles, multimediaService.getFileManager());
 				zipOutputStream.close();
 			}
 			catch (IOException e) {
@@ -151,12 +154,8 @@ public class MultimediaController {
 			@RequestParam("file-category") String fileCategory,
 			@RequestParam("file") MultipartFile file) {
 
-		String contentType = file.getContentType();
-
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), contentType.trim(), null,
-				fileCategory.trim());
-
-		String status = multimediaService.saveMultimediaFile(multimediaDTO, file);
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
+		String status = multimediaService.saveFile(multimediaDTO, file);
 
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
@@ -174,10 +173,12 @@ public class MultimediaController {
 			HttpServletResponse response) {
 		try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = new File(
-						multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim()
-								+ ".jpg");
-				downloadFile(file, response);
+				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+				if (file != null) {
+					downloadFile(file, response);
+				} else {
+					writeFileNotFound(response);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -202,11 +203,7 @@ public class MultimediaController {
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 
 		if (!file.exists()) {
-			String errorMessage = "Sorry. The file you are looking for does not exist";
-			logger.info(errorMessage);
-			OutputStream outputStream = response.getOutputStream();
-			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-			outputStream.close();
+			writeFileNotFound(response);
 			return;
 		}
 
@@ -233,5 +230,20 @@ public class MultimediaController {
 
 		//Copy bytes from source to destination(outputstream in this example), closes both streams.
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
+	}
+
+	/**
+	 *
+	 * Writes a file not found error response
+	 *
+	 * @param response
+	 * @throws IOException
+	 */
+	private void writeFileNotFound(HttpServletResponse response) throws IOException {
+		String errorMessage = "Sorry. The file you are looking for does not exist";
+		logger.info(errorMessage);
+		OutputStream outputStream = response.getOutputStream();
+		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.close();
 	}
 }
