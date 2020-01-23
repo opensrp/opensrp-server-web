@@ -79,7 +79,7 @@ public class EventResource extends RestResource<Event> {
 		this.clientService = clientService;
 		this.eventService = eventService;
 	}
-	
+
 	@Override
 	public Event getByUniqueId(String uniqueId) {
 		return eventService.find(uniqueId);
@@ -425,6 +425,14 @@ public class EventResource extends RestResource<Event> {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	public void setEventService(EventService eventService) {
+		this.eventService = eventService;
+	}
+
+	public void setClientService(ClientService clientService) {
+		this.clientService = clientService;
 	}
 	
 }
