@@ -29,9 +29,9 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
     private final static String BASE_URL = "/rest/event";
 
-    String dateDeletedString = "2000-10-31T01:30:00.000-05:00";
+    private String dateDeletedString = "2000-10-31T01:30:00.000-05:00";
 
-    String eventType = "Spray";
+    private String eventType = "Spray";
 
     private EventService eventService;
 
