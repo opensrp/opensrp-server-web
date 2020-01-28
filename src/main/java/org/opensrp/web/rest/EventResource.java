@@ -413,7 +413,7 @@ public class EventResource extends RestResource<Event> {
 	@ResponseBody
 	protected ResponseEntity<String> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
-			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME ,pattern = "") Date dateDeleted) {
+			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
 			
