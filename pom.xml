@@ -79,6 +79,11 @@
 
 	<repositories>
 		<repository>
+			<id>spring-libs-release</id>
+			<name>Spring Libs Maven Release Repository</name>
+			<url>https://repo.spring.io/libs-release/</url>
+		</repository>
+		<repository>
 			<id>spring-maven-release</id>
 			<name>Spring Maven Release Repository</name>
 			<url>https://maven.springframework.org/release</url>
