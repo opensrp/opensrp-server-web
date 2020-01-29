@@ -85,4 +85,6 @@
 
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
+    <alias name="${multimedia_file_manager}" alias="multimedia_file_manager"/>
+
 </beans>
