@@ -104,6 +104,11 @@
 			</snapshots>
 		</repository>
 		<repository>
+			<id>spring-libs-release</id>
+			<name>Spring Libs Maven Release Repository</name>
+			<url>https://repo.spring.io/libs-release/</url>
+		</repository>
+		<repository>
 			<id>motech.opensrp</id>
 			<name>Motech Snapshots Repository</name>
 			<url>http://nexus.motechproject.org/content/repositories/opensrp-server</url>
