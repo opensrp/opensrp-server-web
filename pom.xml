@@ -649,15 +649,15 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>openmrs-dhis2-sync</id>
-			<activation>
-				<property>
-					<name>openmrs.dhis2.sync.enabled</name>
-					<value>openmrs-dhis2-sync</value>
-				</property>
-			</activation>
+			<id>openmrs-sync</id>
 			<properties>
-				<openmrs.dhis2.sync.enabled>openmrs-dhis2-sync</openmrs.dhis2.sync.enabled>
+				<openmrs.sync.enabled>openmrs-sync</openmrs.sync.enabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>dhis2-sync</id>
+			<properties>
+				<dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
 			</properties>
 		</profile>
 		<profile>

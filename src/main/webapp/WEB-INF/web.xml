@@ -109,7 +109,7 @@
 
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile},${openmrs.dhis2.sync.enabled}</param-value>
+		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile},${openmrs.sync.enabled},${dhis2.sync.enabled}</param-value>
 	</context-param>
 
     <!-- Handles Spring requests -->
