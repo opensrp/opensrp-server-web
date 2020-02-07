@@ -649,6 +649,18 @@
 			</dependencies>
 		</profile>
 		<profile>
+			<id>openmrs-sync</id>
+			<properties>
+				<openmrs.sync.enabled>openmrs-sync</openmrs.sync.enabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>dhis2-sync</id>
+			<properties>
+				<dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
+			</properties>
+		</profile>
+		<profile>
 			<id>skip-integration-tests</id>
 			<build>
 				<plugins>
