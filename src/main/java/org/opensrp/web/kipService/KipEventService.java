@@ -26,7 +26,8 @@ public class KipEventService extends EventService {
     @Override
     public synchronized Event processOutOfArea(Event event) {
         try {
-            String BIRTH_REGISTRATION_EVENT = "Child Enrollment";
+            String BIRTH_REGISTRATION_EVENT = "Birth Registration";
+            String CHILD_ENROLLMENT_EVENT = "Child Enrollment";
             String GROWTH_MONITORING_EVENT = "Growth Monitoring";
             String VACCINATION_EVENT = "Vaccination";
             String OUT_OF_AREA_SERVICE = "Out of Area Service";
@@ -42,14 +43,14 @@ public class KipEventService extends EventService {
                     boolean isCardId = identifier.startsWith(CARD_ID_PREFIX);
                     List<Client> clients = isCardId ? this.clientService.findAllByAttribute(NFC_CARD_IDENTIFIER, identifier.substring(CARD_ID_PREFIX.length())) : this.clientService.findAllByIdentifier("openmrs_id".toUpperCase(), identifier);
                     if (clients != null && !clients.isEmpty()) {
-                        Iterator var11 = clients.iterator();
+                        Iterator clientIterator = clients.iterator();
 
                         do {
-                            if (!var11.hasNext()) {
+                            if (!clientIterator.hasNext()) {
                                 return event;
                             }
 
-                            Client client = (Client)var11.next();
+                            Client client = (Client)clientIterator.next();
                             List<Event> existingEvents = this.findByBaseEntityAndType(client.getBaseEntityId(), BIRTH_REGISTRATION_EVENT);
                             if (existingEvents == null || existingEvents.isEmpty()) {
                                 return event;

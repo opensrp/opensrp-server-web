@@ -74,21 +74,21 @@ public class OpenmrsPatientService extends PatientService {
         ln = this.convertToOpenmrsString(ln);
         String address4UUID = null;
         List<Event> registrationEvents = this.eventService.findByBaseEntityId(be.getBaseEntityId());
-        Iterator var9 = registrationEvents.iterator();
+        Iterator eventIterator = registrationEvents.iterator();
 
-        label67:
-        while(var9.hasNext()) {
-            Event event = (Event)var9.next();
-            if (event.getEventType().equals("Birth Registration") || event.getEventType().equals("New Woman Registration")) {
+        eventService:
+        while(eventIterator.hasNext()) {
+            Event event = (Event)eventIterator.next();
+            if (event.getEventType().equals("Birth Registration") || event.getEventType().equals("Child Enrollment") || event.getEventType().equals("New Woman Registration")) {
                 List<Obs> obs = event.getObs();
-                Iterator var12 = obs.iterator();
+                Iterator obsIterator = obs.iterator();
 
                 while(true) {
-                    if (!var12.hasNext()) {
-                        break label67;
+                    if (!obsIterator.hasNext()) {
+                        break eventService;
                     }
 
-                    Obs obs2 = (Obs)var12.next();
+                    Obs obs2 = (Obs)obsIterator.next();
                     if (obs2 != null && obs2.getFieldType().equals("formsubmissionField") && obs2.getFormSubmissionField().equals("Home_Facility") && obs2.getValue() != null) {
                         address4UUID = obs2.getValue().toString();
                         String clientAddress4 = this.openmrsLocationService.getLocation(address4UUID).getName();
@@ -141,10 +141,10 @@ public class OpenmrsPatientService extends PatientService {
                 if (uuid == null) {
                     uuid = this.getPatientByIdentifierUUID(c.getBaseEntityId());
                     if (uuid == null) {
-                        Iterator var9 = c.getIdentifiers().entrySet().iterator();
+                        Iterator it = c.getIdentifiers().entrySet().iterator();
 
-                        while(var9.hasNext()) {
-                            Map.Entry<String, String> id = (Map.Entry)var9.next();
+                        while(it.hasNext()) {
+                            Map.Entry<String, String> id = (Map.Entry)it.next();
                             uuid = this.getPatientByIdentifierUUID((String)id.getValue());
                             if (uuid != null) {
                                 break;

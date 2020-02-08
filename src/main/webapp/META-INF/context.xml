@@ -15,9 +15,9 @@
 		testOnBorrow="true"
 		removeAbandoned="true"
 		removeAbandonedTimeout="233"
-		username="opensrp_admin"
-		password="admin"
+		username="postgres"
+		password="postgres"
 		driverClassName="org.postgresql.Driver"
-		url="jdbc:postgresql://localhost:5432/opensrp"
+		url="jdbc:postgresql://localhost:5432/opensrp_test"
      />
 </Context>
