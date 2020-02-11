@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+		namespace="org.opensrp.repository.postgres.mapper.custom.CustomEventMapper">
+
+	<resultMap id="BaseEventResultMap" type="org.opensrp.domain.postgres.Event">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="json" jdbcType="OTHER" property="json"
+				typeHandler="org.opensrp.repository.postgres.handler.EventTypeHandler" />
+	</resultMap>
+
+	<resultMap id="customQueryMap" type="org.opensrp.domain.postgres.CustomQuery">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+	</resultMap>
+
+	<resultMap id="healthIdMap" type="org.opensrp.domain.postgres.HealthId">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="hId" jdbcType="VARCHAR" property="hId"/>
+		<result column="type" jdbcType="VARCHAR" property="type"/>
+	</resultMap>
+
+
+	<sql id="Base_Event_Column_List">
+		id, json
+	</sql>
+
+	<select id="selectByDocumentId" parameterType="java.lang.String"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from core.event
+		WHERE json ->> 'id' = #{documentId,jdbcType=VARCHAR} and date_deleted is null
+	</select>
+
+	<select id="getLocations" parameterType="int"
+			resultMap="customQueryMap">
+		select team_member.id as id ,core.location.name as name from core.team_member
+		left join core.team_member_location on team_member.id =  team_member_location.team_member_id
+		left join core.location on  team_member_location.location_id = location.id
+		WHERE team_member.person_id = #{userId}
+	</select>
+
+	<select id="getUser" parameterType="java.lang.String" resultMap="customQueryMap">
+		select id as id, username as name, enable_sim_print as enable,enabled as status from core.users
+		WHERE username = #{userName,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getTeamMemberId" parameterType="int" resultMap="customQueryMap">
+		select id from core.team_member where person_id = #{userId}
+	</select>
+
+	<insert id="insertSelectiveAndSetId" parameterType="org.opensrp.domain.postgres.Event"
+			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into core.event
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="json != null">
+				json,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="json != null">
+				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.EventTypeHandler},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="selectByIdentifier" parameterType="java.lang.String"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from core.event
+		join jsonb_each_text(core.event.json ->
+		'identifiers') j
+		on true
+		where j.value = #{identifier,jdbcType=VARCHAR} and date_deleted is null
+	</select>
+
+	<select id="selectByIdentifierOfType" parameterType="map"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from core.event
+		where json -> 'identifiers' ->>
+		#{identifierType,jdbcType=VARCHAR} =
+		#{identifier,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+	<select id="selectByBaseEntityIdConceptAndDate" parameterType="map"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from (	select  id id_, json,jsonb_array_elements(json->'obs') as obs_object,
+		jsonb_array_elements_text(jsonb_array_elements(json->'obs')->'values') as obs_value
+		from core.event ) j
+		join core.event_metadata e on e.event_id=j.id_
+		where e.base_entity_id= #{baseEntityId,jdbcType=VARCHAR}
+		<if test="dateFrom != null and dateTo != null">
+			and e.date_created between #{dateFrom,jdbcType=DATE} and #{dateTo,jdbcType=DATE}
+		</if>
+		and obs_object->>'fieldCode'=#{concept,jdbcType=VARCHAR}
+		and obs_value=#{conceptValue,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+	<select id="selectByBaseEntityIdAndConceptParentCode" parameterType="map"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from (	select  id id_, json,jsonb_array_elements(json->'obs') as obs_object
+		from core.event ) j
+		join core.event_metadata e on e.event_id=j.id_
+		where e.base_entity_id= #{baseEntityId,jdbcType=VARCHAR}
+		and obs_object->>'fieldCode'=#{concept,jdbcType=VARCHAR}
+		and obs_object->>'parentCode'=#{parentCode,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+	<select id="selectByConceptAndValue" parameterType="map"
+			resultMap="BaseEventResultMap">
+		select
+		<include refid="Base_Event_Column_List" />
+		from (	select  id, json,date_deleted,jsonb_array_elements(json->'obs') as obs_object,
+		jsonb_array_elements_text(jsonb_array_elements(json->'obs')->'values') as obs_value
+		from core.event ) j
+		where obs_object->>'fieldCode'=#{concept,jdbcType=VARCHAR}
+		and obs_value=#{conceptValue,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+	<select id="gethealthIds" parameterType="map" resultMap="healthIdMap">
+		select id as id, h_id as hId, type  from core.health_id
+		WHERE status = false order by id desc limit 10
+	</select>
+
+	<update id="updateHealthId" parameterType="org.opensrp.domain.postgres.HealthId">
+		update core.health_id set status = false WHERE id = #{id}
+	</update>
+
+
+</mapper>

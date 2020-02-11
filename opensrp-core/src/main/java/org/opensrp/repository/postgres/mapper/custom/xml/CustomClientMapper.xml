@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.opensrp.repository.postgres.mapper.custom.CustomClientMapper">
+
+	<resultMap id="customQueryMap" type="org.opensrp.domain.postgres.CustomQuery">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+		<result column="uuid" jdbcType="VARCHAR" property="uuid"/>
+	</resultMap>
+
+	<resultMap id="customQueryLocationTreeMap" type="org.opensrp.domain.postgres.CustomQuery">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="leaf_loc_id" jdbcType="BIGINT" property="leafLocationId"/>
+		<result column="member_id" jdbcType="BIGINT" property="memberId"/>
+		<result column="first_name" jdbcType="VARCHAR" property="firstName"/>
+		<result column="last_name" jdbcType="VARCHAR" property="lastName"/>
+		<result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
+	</resultMap>
+
+	<insert id="insertSelectiveAndSetId" parameterType="org.opensrp.domain.postgres.Client"
+			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into core.client
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="json != null">
+				json,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="json != null">
+				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.ClientTypeHandler},
+			</if>
+		</trim>
+	</insert>
+
+
+	<select id="selectByDocumentId" parameterType="java.lang.String"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		WHERE json ->> 'id' = #{documentId,jdbcType=VARCHAR} and date_deleted is null
+	</select>
+
+
+	<select id="selectByIdentifier" parameterType="java.lang.String"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		join jsonb_each_text(core.client.json -> 'identifiers') j on true
+		where j.value = #{identifier,jdbcType=VARCHAR} and date_deleted is null
+	</select>
+
+
+	<select id="selectByIdentifierOfType" parameterType="map"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		where json -> 'identifiers' ->> #{identifierType,jdbcType=VARCHAR} = #{identifier,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+
+	<select id="selectByAttributeOfType" parameterType="map"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		where json -> 'attributes' ->> #{attributeType,jdbcType=VARCHAR} = #{attribute,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+
+	<select id="selectByRelationshipIdAndDateCreated" parameterType="map"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		join jsonb_each(json -> 'relationships') j on true
+		where j.value  ?? #{relationalId,jdbcType=VARCHAR}  and date_deleted is null
+		and (json ->> 'dateCreated')::date between #{dateFrom,jdbcType=DATE} and #{dateTo,jdbcType=DATE}
+	</select>
+
+	<select id="getClientByUpazila" parameterType="java.lang.String"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select * from core.client
+		where json->'addresses'->0->'addressFields'->>'cityVillage' = #{name}
+	</select>
+
+	<select id="getTeamInfo" parameterType="java.lang.String"
+			resultMap="customQueryMap">
+		select t.name as name, t.uuid as uuid from core.users u join core.team_member tm on u.id = tm.person_id
+		join core.team t on t.id = tm.team_id where u.username = #{username};
+	</select>
+
+	<select id="getProviderLocationTreeByChildRole" parameterType="map"
+			resultMap="customQueryLocationTreeMap">
+		select * from core.get_location_tree(#{memberId}, #{childRoleId});
+	</select>
+
+	<select id="getProviderLocationIdByChildRole" parameterType="map"
+			resultMap="customQueryLocationTreeMap">
+		select * from core.get_location_tree_id(#{memberId}, #{childRoleId}, #{locationTagId});
+	</select>
+
+	<select id="selectByRelationshipIdOfType" parameterType="map"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		where json -> 'relationships'->#{relationshipType,jdbcType=VARCHAR} ?? #{relationshipId,jdbcType=VARCHAR}
+		and date_deleted is null
+	</select>
+
+
+	<select id="selectByRelationShip" parameterType="java.lang.String"
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select
+		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
+		from core.client
+		join jsonb_each(json -> 'relationships') j on true
+		where j.value ??  #{relationshipId,jdbcType=VARCHAR}  and date_deleted is null
+	</select>
+	
+	<select id="selectUserStatus" parameterType="java.lang.String"
+			resultMap="customQueryMap">
+		select u.enabled as enable from core.users as u where u.username =  #{username,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updateAppVersion" parameterType="map">
+    	update core.users set app_version = #{version} where username = #{username}    
+    </update>
+
+</mapper>
