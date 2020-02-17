@@ -1,12 +1,17 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
@@ -15,6 +20,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.opensrp.web.bean.PlanSyncRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * @author Vincent Karuri
@@ -153,7 +155,7 @@ public class PlanResource {
 			
 			List<PlanDefinition> plans;
 			if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
-				plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
+				plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.getOrganizations(),
 				    planSyncRequestWrapper.getServerVersion());
 			} else if (username != null) {
 				plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
@@ -289,30 +291,6 @@ public class PlanResource {
 			}
 		}
 		return false;
-	}
-	
-	static class PlanSyncRequestWrapper {
-		
-		@JsonProperty("operational_area_id")
-		private List<String> operationalAreaId;
-		
-		@JsonProperty
-		private long serverVersion;
-		
-		@JsonProperty
-		private List<Long> organizations;
-		
-		public List<String> getOperationalAreaId() {
-			return operationalAreaId;
-		}
-		
-		public long getServerVersion() {
-			return serverVersion;
-		}
-		
-		public List<Long> getOrganizations() {
-			return organizations;
-		}
 	}
 	
 }

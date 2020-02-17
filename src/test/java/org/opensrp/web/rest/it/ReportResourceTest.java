@@ -8,12 +8,14 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.Hia2Indicator;
 import org.opensrp.domain.Report;
 import org.opensrp.repository.couch.AllReports;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class ReportResourceTest extends BaseResourceTest {
 
 	public static final String ADD_URL = "add";

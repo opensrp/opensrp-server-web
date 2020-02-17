@@ -6,13 +6,6 @@
 
     <description>OpenSRP Web Application</description>
 
-	<resource-ref>
-		<description>Postgress DB Connection</description>
-		<res-ref-name>jdbc/openSRPDB</res-ref-name>
-		<res-type>javax.sql.DataSource</res-type>
-		<res-auth>Container</res-auth>
-	</resource-ref>
-
     <!-- Enable escaping of form submission contents -->
     <context-param>
         <param-name>defaultHtmlEscape</param-name>
@@ -109,7 +102,7 @@
 
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile},${openmrs.sync.enabled},${dhis2.sync.enabled}</param-value>
+		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile}</param-value>
 	</context-param>
 
     <!-- Handles Spring requests -->

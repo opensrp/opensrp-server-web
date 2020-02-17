@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.codehaus.jackson.JsonNode;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.FormSubmissionDTO;
@@ -24,6 +25,7 @@ import org.opensrp.web.rest.it.BaseResourceTest;
 import org.opensrp.web.utils.TestResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class FormSubmissionIntegrationTest extends BaseResourceTest {
 
 	@Autowired

@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
@@ -18,6 +19,7 @@ import org.opensrp.repository.couch.AllEvents;
 import org.opensrp.web.rest.SearchResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class SearchResourceTest extends BaseResourceTest {
 
 	private final static String BASE_URL = "/rest/search/";

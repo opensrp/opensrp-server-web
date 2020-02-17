@@ -1,6 +1,7 @@
 package org.opensrp.web.controller.it;
 
 import org.codehaus.jackson.JsonNode;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.opensrp.web.utils.TestResourceLoader;
@@ -12,6 +13,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class FormDownloadIntegrationTest extends BaseResourceTest {
 
 	private String BASE_URL = "/form/";

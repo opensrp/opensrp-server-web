@@ -3,16 +3,21 @@
 	   xmlns:security="http://www.springframework.org/schema/security"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+          http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
           http://www.springframework.org/schema/security
-          http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+          http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
   	<security:authentication-manager id="opensrpAuthenticationManager" >
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
 
 	<security:http auto-config="true" realm="OpenSRP" create-session="stateless"
-				   authentication-manager-ref="opensrpAuthenticationManager">
+				   authentication-manager-ref="opensrpAuthenticationManager"
+				   use-expressions="false">
+		<security:csrf disabled="true" request-matcher-ref="/rest/**"/>
+		<security:csrf disabled="true" request-matcher-ref="/security/**"/>
+		<security:csrf disabled="true" request-matcher-ref="/user-details"/>
+		<security:csrf disabled="true" request-matcher-ref="/multimedia/**"/>
 		<security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
@@ -22,7 +27,7 @@
 		<security:intercept-url pattern="/rest/viewconfiguration/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/rest/*/getAll" access="ROLE_ALL_EVENTS"/>
 		<security:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS"/>
-		<security:intercept-url pattern="/**" access="ROLE_OPENMRS"/>
+		<!-- <security:intercept-url pattern="/**" access="ROLE_OPENMRS"/> -->
 		<security:http-basic/>
 	</security:http>
 

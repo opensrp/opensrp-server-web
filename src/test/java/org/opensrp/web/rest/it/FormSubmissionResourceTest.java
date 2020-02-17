@@ -4,6 +4,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.domain.Event;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class FormSubmissionResourceTest extends BaseResourceTest {
 
 	public static final String ANM_ID = "anmId";

@@ -14,6 +14,7 @@ import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
+import org.opensrp.web.bean.LocationSyncRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -409,34 +410,6 @@ public class LocationResource {
 
 	}
 
-	static class LocationSyncRequestWrapper {
-		@JsonProperty("is_jurisdiction")
-		private Boolean isJurisdiction;
-
-		@JsonProperty("location_names")
-		private List<String> locationNames;
-
-		@JsonProperty("parent_id")
-		private List<String> parentId;
-
-		@JsonProperty
-		private long serverVersion;
-
-		public Boolean getIsJurisdiction() {
-			return isJurisdiction;
-		}
-
-		public List<String> getLocationNames() {
-			return locationNames;
-		}
-
-		public List<String> getParentId() {
-			return parentId;
-		}
-
-		public long getServerVersion() {
-			return serverVersion;
-		}
-	}
+	
 
 }
