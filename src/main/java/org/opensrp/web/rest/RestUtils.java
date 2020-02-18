@@ -1,15 +1,5 @@
 package org.opensrp.web.rest;
 
-import com.mysql.jdbc.StringUtils;
-import org.joda.time.DateTime;
-import org.opensrp.domain.Multimedia;
-import org.opensrp.service.multimedia.MultimediaFileManager;
-import org.opensrp.service.multimedia.S3MultimediaFileManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +12,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.joda.time.DateTime;
+import org.opensrp.domain.Multimedia;
+import org.opensrp.domain.PhysicalLocation;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.multimedia.MultimediaFileManager;
+import org.opensrp.service.multimedia.S3MultimediaFileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+
+import com.mysql.jdbc.StringUtils;
 
 public class RestUtils {
 	public static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -152,4 +156,28 @@ public class RestUtils {
 			}
 		}
 	}
+	
+	public static String getLocationHierarchy(String id, String result, PhysicalLocationService locationService) {
+		PhysicalLocation location = locationService.getLocation(id, false);
+
+		if (location == null) {			
+			result = result.substring(0, result.length() - 1);			
+			return result;
+		}
+		
+		result += location.getProperties().getUid() + ",";
+		return getLocationHierarchy(location.getProperties().getParentId(), result, locationService);
+
+	} 
+	
+	public static PhysicalLocation getJurisdiction(String assignedLocation, List<PhysicalLocation> jurisdictions) {
+		for (int i = 0; i < jurisdictions.size(); i++) {
+			if(jurisdictions.get(i).getId().equals(assignedLocation)) {
+				return jurisdictions.get(i);
+			}			
+		}
+		
+		return null;
+	}
+
 }

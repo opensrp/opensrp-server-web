@@ -6,9 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.junit.Before;
@@ -17,8 +16,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.util.reflection.Whitebox;
-import org.opensrp.api.domain.User;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.domain.custom.Role;
+import org.opensrp.domain.custom.User;
+import org.opensrp.web.custom.service.CustomUserService;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,7 +34,7 @@ public class OauthAuthenticationProviderTest {
 
 	private Authentication authentication;
 
-	private OpenmrsUserService openmrsUserService;
+	private CustomUserService userService;
 
 	private ArgumentCaptor<Authentication> authCaptor = ArgumentCaptor.forClass(Authentication.class);
 
@@ -42,8 +42,8 @@ public class OauthAuthenticationProviderTest {
 
 	@Before
 	public void setUp() {
-		openmrsUserService = mock(OpenmrsUserService.class);
-		authenticationProvider = new OauthAuthenticationProvider(openmrsUserService, mock(PasswordEncoder.class));
+		userService = mock(CustomUserService.class);
+		authenticationProvider = new OauthAuthenticationProvider(userService);
 		authentication = mock(Authentication.class);
 		when(authentication.getName()).thenReturn("user1");
 		when(authentication.getCredentials()).thenReturn("myPassword");
@@ -51,43 +51,43 @@ public class OauthAuthenticationProviderTest {
 
 	@Test(expected = BadCredentialsException.class)
 	public void testAuthenticateWithNonExistentUserShouldFail() throws JSONException {
-		when(openmrsUserService.getUser("user1")).thenReturn(null);
+		when(userService.findByUserName("user1")).thenReturn(null);
 		authenticationProvider.authenticate(authentication);
 	}
 
 	@Test(expected = BadCredentialsException.class)
 	public void testAuthenticateWithDeletedUserShouldFail() throws JSONException {
-		User user = new User(UUID.randomUUID().toString());
-		user.setDateVoided(new Date());
-		when(openmrsUserService.getUser("user1")).thenReturn(user);
+		User user = new User("user1", "abc", "abc@g.com", null);
+
+		when(userService.findByUserName("user1")).thenReturn(user);
 		authenticationProvider.authenticate(authentication);
 	}
 
 	@Test
 	public void testAuthenticateWithValidUserShouldAuthorize() throws JSONException {
-		User user = new User(UUID.randomUUID().toString());
-		when(openmrsUserService.getUser("user1")).thenReturn(user);
-		when(openmrsUserService.authenticate("user1", "myPassword")).thenReturn(true);
+		User user = new User("user1", "abc", "abc@g.com", null);
+		when(userService.findByUserName("user1")).thenReturn(user);
+		when(userService.authenticate("user1", "myPassword")).thenReturn(user);
 		authenticationProvider.authenticate(authentication);
-		verify(openmrsUserService).getUser("user1");
-		verify(openmrsUserService).authenticate("user1", "myPassword");
+		verify(userService).findByUserName("user1");
+		verify(userService).authenticate("user1", "myPassword");
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testAuthenticateWithDetailsCachesAuthentication() throws JSONException {
-		User user = new User(UUID.randomUUID().toString());
+		User user = new User("user1", "abc", "abc@g.com", null);
 		WebAuthenticationDetails authenticationDetails = mock(WebAuthenticationDetails.class);
 		when(authenticationDetails.getRemoteAddress()).thenReturn("::");
 		when(authentication.getDetails()).thenReturn(authenticationDetails);
-		when(openmrsUserService.getUser("user1")).thenReturn(user);
-		when(openmrsUserService.authenticate("user1", "myPassword")).thenReturn(true);
+		when(userService.findByUserName("user1")).thenReturn(user);
+		when(userService.authenticate("user1", "myPassword")).thenReturn(user);
 		HashOperations<String, String, Authentication> hashOperations = mock(HashOperations.class);
 		Whitebox.setInternalState(authenticationProvider, "hashOps", hashOperations);
 		Whitebox.setInternalState(authenticationProvider, "redisTemplate", mock(RedisTemplate.class));
 		authenticationProvider.authenticate(authentication);
-		verify(openmrsUserService).getUser("user1");
-		verify(openmrsUserService).authenticate("user1", "myPassword");
+		verify(userService).findByUserName("user1");
+		verify(userService).authenticate("user1", "myPassword");
 		verify(hashOperations).hasKey("::user1", DrishtiAuthenticationProvider.AUTH_HASH_KEY);
 		verify(hashOperations).put(stringCaptor.capture(), stringCaptor.capture(), authCaptor.capture());
 		assertEquals(2, stringCaptor.getAllValues().size());
@@ -99,13 +99,18 @@ public class OauthAuthenticationProviderTest {
 
 	@Test
 	public void testGetRolesAsAuthoritiesRuturnsAllRoles() throws JSONException {
-		User user = new User(UUID.randomUUID().toString());
-		user.setRoles(Arrays.asList("Provider", "OpenSRP: Get All Events"));
-		when(openmrsUserService.getUser("user1")).thenReturn(user);
-		when(openmrsUserService.authenticate("user1", "myPassword")).thenReturn(true);
+		User user = new User("user1", "abc", "abc@g.com", null);
+		
+		Set<Role> roles = new HashSet<>();
+		roles.add(new Role("Provider"));
+		roles.add(new Role("OpenSRP: Get All Events"));
+		
+		user.setRoles(roles);
+		when(userService.findByUserName("user1")).thenReturn(user);
+		when(userService.authenticate("user1", "myPassword")).thenReturn(user);
 		Authentication auth = authenticationProvider.authenticate(authentication);
-		verify(openmrsUserService).getUser("user1");
-		verify(openmrsUserService).authenticate("user1", "myPassword");
+		verify(userService).findByUserName("user1");
+		verify(userService).authenticate("user1", "myPassword");
 		assertEquals(2, auth.getAuthorities().size());
 		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ALL_EVENTS")));
 		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_OPENMRS")));

@@ -15,21 +15,41 @@
     <context:property-placeholder location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
     
     <import resource="classpath:applicationContext-opensrp.xml"/>
+    <!-- 
     <import resource="classpath:applicationContext-opensrp-form.xml"/>
-    <import resource="classpath:applicationContext-connector.xml"/>
+    <import resource="classpath:applicationContext-connector.xml"/> 
+    -->
     <import resource="securityContext.xml"/>
 
-    <mvc:default-servlet-handler/>
 <!--     <tx:annotation-driven proxy-target-class="true" />
     <aop:aspectj-autoproxy proxy-target-class="true"/>--> 
     
     <context:annotation-config/>
-    
-    <context:component-scan base-package="org.opensrp.web"/>
-    <context:component-scan base-package="org.opensrp.connector"/>
-    
-    
     <mvc:annotation-driven/>
+    
+    <context:component-scan base-package="org.opensrp.web">
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.fake.*"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.rapid.*"/>
+		
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ANMLocationController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ActionController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.CampController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.DHIS2Controller"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ErrorTraceController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.FormSubmissionController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.LocationController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.XlsDataImportController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ReportController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.listener.DHIS2ConnectorListener"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.listener.RapidproMessageListener"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.FormSubmissionResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.ProviderResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.UserResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.connector.*"/>
+	</context:component-scan>	
+    <context:component-scan base-package="org.opensrp.vital"/>
+    <!-- <context:component-scan base-package="org.opensrp.connector"/> -->
+    
     <bean id="multipartResolver"
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- max upload size in bytes -->
@@ -57,33 +77,15 @@
         <!-- spring based scanning for entity classes-->
         <property name="packagesToScan" value="org.opensrp.domain"/>
     </bean>
+    
+	<bean id="sessionFactory" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+	    <property name="entityManagerFactory" ref="jpaEntityManagerFactory" />
+	</bean>
 
    <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
     <property name="dataSource" ref="jpaDataSource"/>
    </bean>
-   
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-        <property name="mediaTypes">
-            <map>
-                <entry key="json" value="application/json" />
-            </map>
-        </property>
-        <property name="viewResolvers">
-            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-                  p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp" />
-        </property>
-        <property name="defaultViews">
-            <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
-                  p:extractValueFromSingleKeyModel="true" />
-        </property>
-    </bean>
-    <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
-    <mvc:annotation-driven/>
-
-    <bean class="org.opensrp.web.config.SwaggerConfig"/>
-
     <alias name="${multimedia_file_manager}" alias="multimedia_file_manager"/>
 
 </beans>

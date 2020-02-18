@@ -2,24 +2,20 @@ package org.opensrp.web.security;
 
 import static java.text.MessageFormat.format;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
-
-import org.opensrp.api.domain.User;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.domain.custom.Role;
+import org.opensrp.domain.custom.User;
+import org.opensrp.web.custom.service.CustomUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -47,32 +43,32 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
 	private static final String GET_ALL_EVENTS_ROlE = "OpenSRP: Get All Events";
 
-	// private AllOpenSRPUsers allOpenSRPUsers;
-	private PasswordEncoder passwordEncoder;
+	//private OpenmrsUserService openmrsUserService;
+	
+	//@Autowired
+	private CustomUserService customUserService;
 
-	private OpenmrsUserService openmrsUserService;
-
-	@Resource(name = "redisTemplate")
+	/*@Resource(name = "redisTemplate")
 	private HashOperations<String, String, Authentication> hashOps;
 
 	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
+	private RedisTemplate<String, String> redisTemplate;*/
 
 	@Value("#{opensrp['opensrp.authencation.cache.ttl']}")
 	private int cacheTTL;
 
 	@Autowired
-	public DrishtiAuthenticationProvider(OpenmrsUserService openmrsUserService,
-			@Qualifier("shaPasswordEncoder") PasswordEncoder passwordEncoder) {
-		this.openmrsUserService = openmrsUserService;
-		this.passwordEncoder = passwordEncoder;
+	public DrishtiAuthenticationProvider(CustomUserService customUserService) {
+		//this.openmrsUserService = openmrsUserService;
+		//this.passwordEncoder = passwordEncoder;
+		this.customUserService = customUserService;		
 	}
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String userAddress = ((WebAuthenticationDetails) authentication.getDetails()).getRemoteAddress();
 		String key = userAddress + authentication.getName();
-		if (hashOps.hasKey(key, AUTH_HASH_KEY)) {
+		/*if (hashOps.hasKey(key, AUTH_HASH_KEY)) {
 			Authentication auth = hashOps.get(key, AUTH_HASH_KEY);
 			// if credentials is same as cached returned cached else eject cached
 			// authentication
@@ -81,21 +77,22 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			else
 				hashOps.delete(key, AUTH_HASH_KEY);
 
-		}
+		}*/
 		User user = getDrishtiUser(authentication, authentication.getName());
 		// get user after authentication
 		if (user == null) {
 			throw new BadCredentialsException(USER_NOT_FOUND);
 		}
 
-		if (user.getVoided() != null && user.getVoided()) {
+		/*if (user.getVoided() != null && user.getVoided()) {
 			throw new BadCredentialsException(USER_NOT_ACTIVATED);
-		}
+		}*/
 
 		Authentication auth = new UsernamePasswordAuthenticationToken(authentication.getName(),
 				authentication.getCredentials(), getRolesAsAuthorities(user));
-		hashOps.put(key, AUTH_HASH_KEY, auth);
-		redisTemplate.expire(key, cacheTTL, TimeUnit.SECONDS);
+		/*hashOps.put(key, AUTH_HASH_KEY, auth);
+		redisTemplate.expire(key, cacheTTL, TimeUnit.SECONDS);*/
+		
 		return auth;
 
 	}
@@ -107,7 +104,13 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
-		return Lambda.convert(user.getRoles(), new Converter<String, SimpleGrantedAuthority>() {
+		List<String> roles = new ArrayList<String>();
+				
+		for(Role role : user.getRoles()){
+			roles.add(role.getName());
+		}		
+		
+		return Lambda.convert(roles, new Converter<String, SimpleGrantedAuthority>() {
 
 			@Override
 			public SimpleGrantedAuthority convert(String role) {
@@ -124,43 +127,44 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			if (!((OAuth2Authentication) authentication).getUserAuthentication().isAuthenticated()) {
 				throw new BadCredentialsException(INVALID_CREDENTIALS);
 			}
-		} else if(!authentication.isAuthenticated()) {
-			checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
-		}else {
-			String userAddress = ((WebAuthenticationDetails) authentication.getDetails()).getRemoteAddress();
-			String key = userAddress + authentication.getName();
-			authentication = hashOps.get(key, AUTH_HASH_KEY);
+		} else {
+			user = (User) checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
 		}
 
 		try {
-			boolean response = openmrsUserService.deleteSession(authentication.getName(),
-					authentication.getCredentials().toString());
-			user = openmrsUserService.getUser(username);
-			if (!response) {
-				logger.error(format("{0}. Exception: {1}", INTERNAL_ERROR, "Unable to clear session"));
+			/*boolean response = openmrsUserService.deleteSession(authentication.getName(),
+					authentication.getCredentials().toString());*/
 
+			//user = openmrsUserService.getUser(username);
+			//user = new User("12345");
+			if (user == null) {
+				logger.error(format("{0}. Exception: {1}", INTERNAL_ERROR, "Unable to clear session"));
 			}
 		} catch (Exception e) {
 			logger.error(format("{0}. Exception: {1}", INTERNAL_ERROR, e));
 			e.printStackTrace();
-			throw new BadCredentialsException(INTERNAL_ERROR);
+			//throw new BadCredentialsException(INTERNAL_ERROR);
 		}
+		/*Set<Role> r = new HashSet<>();
+		r.add(new Role("ROLE_OPENMRS"));		
+		user.setRoles(r);*/
 		return user;
 	}
 
-	private void checkIsAuthenticated(String username, String password) {
+	private User checkIsAuthenticated(String username, String password) {
+		User result = null;
+		
 		try {
-			Boolean isAuthenticated = openmrsUserService.authenticate(username, password);
-			if (isAuthenticated == null) {
+			result = customUserService.authenticate(username, password);
+			//Boolean isAuthenticated = openmrsUserService.authenticate(username, password);
+			if (result == null) {
 				throw new BadCredentialsException(INTERNAL_ERROR);
-			} else if (!isAuthenticated) {
-				throw new BadCredentialsException(INVALID_CREDENTIALS);
-			}
+			} 
 		} catch (Exception e) {
 			logger.error(format("{0}. Exception: {1}", INTERNAL_ERROR, e));
 			e.printStackTrace();
 			throw new BadCredentialsException(INTERNAL_ERROR);
 		}
-
+		return result;
 	}
 }

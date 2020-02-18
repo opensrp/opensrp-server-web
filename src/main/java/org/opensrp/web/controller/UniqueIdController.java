@@ -2,11 +2,6 @@ package org.opensrp.web.controller;
 
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,24 +12,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.opensrp.api.domain.User;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
-import org.opensrp.service.OpenmrsIDService;
-import org.opensrp.web.utils.PdfUtil;
+import org.opensrp.web.custom.service.UniqueIdentifierService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
-import com.ibm.icu.text.SimpleDateFormat;
 
 @Controller
 @RequestMapping("/uniqueids")
@@ -45,14 +35,17 @@ public class UniqueIdController {
 	@Value("#{opensrp['qrcodes.directory.name']}")
 	private String qrCodesDir;
 
-	@Autowired
-	private OpenmrsIDService openmrsIdService;
+	/*@Autowired
+	private OpenmrsIDService openmrsIdService;*/
 
 	@Autowired
 	private UserController userController;
 
 	@Autowired
-	private OpenmrsUserService openmrsUserService;
+	private UniqueIdentifierService uniqueIdentifierService;
+	
+	/*@Autowired
+	private OpenmrsUserService openmrsUserService;*/
 
 	/**
 	 * Download extra ids from openmrs if less than the specified batch size, convert the ids to qr
@@ -70,7 +63,7 @@ public class UniqueIdController {
 		String message;
 		User user;
 		try {
-			Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
+			/*Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
 
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String currentPrincipalName = authentication.getName();
@@ -103,7 +96,7 @@ public class UniqueIdController {
 				byteArrayOutputStream.writeTo(os);
 				os.flush();
 				os.close();
-			}
+			}*/
 			message = "Successfully generated the ID QR codes";
 
 		}
@@ -131,13 +124,16 @@ public class UniqueIdController {
 	@ResponseBody
 	protected ResponseEntity<String> get(HttpServletRequest request) throws JSONException {
 
-		String numberToGenerate = getStringFilter("numberToGenerate", request);
+		int numberToGenerate = Integer.parseInt(getStringFilter("numberToGenerate", request));
+		String usedBy = getStringFilter("usedBy", request);
 		String source = getStringFilter("source", request);
 		Map<String, Object> map = new HashMap<>();
 
-		map.put("identifiers", openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate,
+		map.put("identifiers", uniqueIdentifierService.generateIdentifiers(usedBy, numberToGenerate));
+		
+		/*map.put("identifiers", null openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate,
 				SecurityContextHolder.getContext().getAuthentication().getName(),
-				userController.getAuthenticationAdvisor(request).getCredentials().toString()));
+				userController.getAuthenticationAdvisor(request).getCredentials().toString()));*/
 
 		return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
 	}

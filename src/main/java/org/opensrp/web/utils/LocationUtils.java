@@ -13,6 +13,8 @@ import java.util.Map.Entry;
  */
 public class LocationUtils {
 	
+	public static final String LOCATION_TYPES_SETTING_KEY = "location_types";
+	
 	
 	public static Set<String> getRootLocation(Map<String, String> locations) {
 		// get all parents

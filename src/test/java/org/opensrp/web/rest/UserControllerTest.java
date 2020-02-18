@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,10 +21,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.opensrp.api.domain.User;
 import org.opensrp.common.domain.UserDetail;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.domain.custom.Role;
+import org.opensrp.domain.custom.User;
 import org.opensrp.web.controller.UserController;
+import org.opensrp.web.custom.service.CustomUserService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class UserControllerTest {
 	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
 
 	@Mock
-	private OpenmrsUserService openmrsUserService;
+	private CustomUserService userService;
 
 	@Captor
 	private ArgumentCaptor<Authentication> authenticationCaptor;
@@ -68,22 +69,25 @@ public class UserControllerTest {
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
 		userController = webApplicationContext.getBean(UserController.class);
-		userController.setOpenmrsUserService(openmrsUserService);
+		userController.setCustomUserService(userService);
 		userController.setOpensrpAuthenticationProvider(opensrpAuthenticationProvider);
 	}
 
 	@Test
 	public void testGetUserDetailsShouldUseParam() throws Exception {
 
-		User user = new User(UUID.randomUUID().toString()).withRoles(Collections.singletonList("ROLE_USER"))
-				.withUsername("test_user1");
+		User user = new User("test_user1", "abc", "abc@g.com", null);
+		
+		Set<Role> roles = new HashSet<>();
+		roles.add(new Role("ROLE_USER"));
+		user.setRoles(roles);
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken("test_user1", "");
-		when(openmrsUserService.getUser("test_user1")).thenReturn(user);
+		when(userService.findByUserName("test_user1")).thenReturn(user);
 		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication, "test_user1", null);
 		verify(opensrpAuthenticationProvider, never()).getDrishtiUser(authenticationCaptor.capture(),
 				usernameCaptor.capture());
-		verify(openmrsUserService).getUser("test_user1");
+		verify(userService).findByUserName("test_user1");
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
 		assertEquals("test_user1", userDetail.getUserName());
@@ -93,17 +97,20 @@ public class UserControllerTest {
 
 	@Test
 	public void testGetUserDetailsShouldUseLoggedInUser() throws Exception {
-		User user = new User(UUID.randomUUID().toString()).withRoles(Collections.singletonList("ROLE_USER"))
-				.withUsername("loggenIn_user");
+		User user = new User("loggenIn_user", "abc", "abc@g.com", null);
+		
+		Set<Role> roles = new HashSet<>();
+		roles.add(new Role("ROLE_USER"));
+		user.setRoles(roles);
 		Authentication authentication = new UsernamePasswordAuthenticationToken("loggenIn_user", "");
 		when(opensrpAuthenticationProvider.getDrishtiUser(any(Authentication.class), anyString())).thenReturn(user);
-		when(openmrsUserService.getUser(user.getUsername())).thenReturn(user);
+		when(userService.findByUserName(user.getUserName())).thenReturn(user);
 		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication, null, null);
 		verify(opensrpAuthenticationProvider, never()).getDrishtiUser(authenticationCaptor.capture(),
 				usernameCaptor.capture());
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
-		assertEquals(user.getUsername(), userDetail.getUserName());
+		assertEquals(user.getUserName(), userDetail.getUserName());
 		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 

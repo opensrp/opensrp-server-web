@@ -17,6 +17,16 @@
         <param-value>classpath*:spring/applicationContext-opensrp-web.xml</param-value>
     </context-param>
 
+    <!-- Creates the Spring Container shared by all Servlets and Filters -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+	<context-param>
+		<param-name>spring.profiles.active</param-name>
+		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile}</param-value>
+	</context-param>
+	
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -95,23 +105,13 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- Creates the Spring Container shared by all Servlets and Filters -->
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-
-	<context-param>
-		<param-name>spring.profiles.active</param-name>
-		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile}</param-value>
-	</context-param>
-
     <!-- Handles Spring requests -->
     <servlet>
         <servlet-name>opensrp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/spring/webmvc-config.xml</param-value>
+            <param-value>classpath*:spring/webmvc-config.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
