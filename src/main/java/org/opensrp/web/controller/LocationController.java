@@ -47,7 +47,7 @@ public class LocationController {
 	 *              locationUUID ,string of any location within the hierarchy level within the a hierarchy,
 	 *              locationTopLevel, string of the tag name of top location hierarchy level to query locations from,
 	 *              locationTagsQueried, a jsonArray of containing tags of locations to be returned
-	 * @return List of all facilities within the same hierarchy level.
+	 * @return List of a list of all other location within the location hierarchy level matching the requested tags.
 	 */
 
 	@RequestMapping(headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/getLocationsByLevelAndTags")
