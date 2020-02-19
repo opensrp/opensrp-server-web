@@ -38,7 +38,8 @@ public class LocationController {
 	}
 
 	/**
-	 * This method receives the uuid of a location within the location hierarchy level
+	 * This method receives
+	 * the uuid of a location within the location hierarchy level
 	 * the tag name of top location hierarchy level to query locations from
 	 * and a list of location tags to be returned
 	 *  return a list of all other location within the location hierarchy level matching the requested tags
