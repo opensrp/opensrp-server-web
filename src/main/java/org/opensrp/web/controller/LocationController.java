@@ -52,7 +52,7 @@ public class LocationController {
 	 * @return List of a list of all other location within the location hierarchy level matching the requested tags.
 	 */
 
-	@RequestMapping(value = "/getLocationsByLevelAndTags", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/getLocationsByLevelAndTags", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE },produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationsWithinALevelAndTags(@RequestBody JSONObject jsonObject) throws JSONException {
 		return new ResponseEntity<>(new Gson().toJson(
 				openmrsLocationService.getLocationsByLevelAndTags(
