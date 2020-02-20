@@ -19,9 +19,8 @@ import static org.opensrp.common.AllConstants.Client.ORDERBYFIELDNAAME;
 import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
