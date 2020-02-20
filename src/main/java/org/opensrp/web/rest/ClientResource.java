@@ -22,7 +22,6 @@ import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
@@ -39,6 +38,8 @@ import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,6 +58,8 @@ import com.mysql.jdbc.StringUtils;
 @Controller
 @RequestMapping(value = "/rest/client")
 public class ClientResource extends RestResource<Client> {
+	
+	private static Logger logger = LoggerFactory.getLogger(ClientResource.class.toString());
 	
 	private ClientService clientService;
 	
@@ -202,7 +205,7 @@ public class ClientResource extends RestResource<Client> {
 			searchBean.setEndDate(endDate);
 		}
 		catch (ParseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		if (pageNumberParam != null) {
 			pageNumber = Integer.parseInt(pageNumberParam) - 1;
@@ -305,15 +308,15 @@ public class ClientResource extends RestResource<Client> {
 	private int getTotal(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
 		
 		String clientType = clientSearchBean.getClientType();
-		int pazeNumber = clientSearchBean.getPageNumber();
-		if (pazeNumber == FIRST_PAGE && clientType.equalsIgnoreCase(HOUSEHOLD)) {
+		int pageNumber = clientSearchBean.getPageNumber();
+		if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(HOUSEHOLD)) {
 			total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-		} else if (pazeNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ALLCLIENTS)) {
+		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-		} else if (clientType.equalsIgnoreCase(ANC)) {
+		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ANC)) {
 			clientSearchBean.setClientType(null);
 			total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
-		} else if (clientType.equalsIgnoreCase(CHILD)) {
+		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(CHILD)) {
 			clientSearchBean.setClientType(null);
 			total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
 		} else {

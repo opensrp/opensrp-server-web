@@ -7,7 +7,7 @@
 
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
-	<version>1.5.3-SNAPSHOT</version>
+	<version>1.6.5-SNAPSHOT</version>
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>http://github.com/OpenSRP/opensrp-server-web</url>
@@ -100,6 +100,11 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-libs-release</id>
+			<name>Spring Libs Maven Release Repository</name>
+			<url>https://repo.spring.io/libs-release/</url>
 		</repository>
 		<repository>
 			<id>motech.opensrp</id>
@@ -640,6 +645,18 @@
 				</dependency>
 
 			</dependencies>
+		</profile>
+		<profile>
+			<id>openmrs-sync</id>
+			<properties>
+				<openmrs.sync.enabled>openmrs-sync</openmrs.sync.enabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>dhis2-sync</id>
+			<properties>
+				<dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
+			</properties>
 		</profile>
 		<profile>
 			<id>skip-integration-tests</id>

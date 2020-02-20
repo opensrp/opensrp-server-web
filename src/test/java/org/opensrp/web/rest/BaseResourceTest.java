@@ -2,6 +2,10 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -35,6 +39,8 @@ public abstract class BaseResourceTest<T> {
     protected MockMvc mockMvc;
 
     protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+
+    protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     @Before
     public void bootStrap() {
@@ -118,5 +124,16 @@ public abstract class BaseResourceTest<T> {
 
     /** Objects in the list should have a unique uuid identifier field **/
     protected abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
+
+    protected Date convertDate(String dateString, String dateFormat) {
+        DateFormat format = new SimpleDateFormat(dateFormat);
+        Date date = null;
+        try {
+            date = format.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
 }
 
