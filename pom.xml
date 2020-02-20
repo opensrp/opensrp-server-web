@@ -311,6 +311,12 @@
             <artifactId>spring-security-oauth2</artifactId>
             <version>${spring.security.oauth.version}</version>
          </dependency>
+         <!-- TODO remove once uniqueId repository is moved to postgres and jpaEntityManagerFactory removed -->
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.1-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
 	</dependencies>
 
 	<build>
