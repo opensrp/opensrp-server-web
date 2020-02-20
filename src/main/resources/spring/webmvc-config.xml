@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+<context:component-scan base-package="org.opensrp.web">
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.fake.*"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.rapid.*"/>
+		
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ANMLocationController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ActionController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.CampController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.DHIS2Controller"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ErrorTraceController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.FormSubmissionController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.LocationController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.XlsDataImportController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.controller.ReportController"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.listener.DHIS2ConnectorListener"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.listener.RapidproMessageListener"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.FormSubmissionResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.ProviderResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.UserResource"/>
+    	<context:exclude-filter type="regex" expression="org.opensrp.connector.*"/>
+	</context:component-scan>	
+	
+	<mvc:annotation-driven />
+
+	<mvc:resources mapping="/resources/**" location="/resources/" /><!-- 
+	<mvc:resources mapping="/css/**" location="/resources/css/" />
+	<mvc:resources mapping="/images/**" location="/resources/images/" /> -->
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+	    <property name="prefix" value="/WEB-INF/views/" />
+	    <property name="suffix" value=".jsp" />
+	</bean>
+	
+	<bean id="messageSource"
+         class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="i18n/message" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+<!-- 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="/i18n/message" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean> -->
+<!-- 	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+		<property name="defaultLocale" value="en" />
+	</bean> -->
+
+<!-- 	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<property name="paramName" value="lang" />
+		</bean>
+		<mvc:interceptor>
+			<mvc:mapping path="/resources/**"/>
+			<bean id="webContentInterceptor"
+				  class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+				<property name="cacheSeconds" value="2678400"/>
+				<property name="alwaysMustRevalidate" value="true"/>
+				<property name="useExpiresHeader" value="true"/>
+				<property name="useCacheControlHeader" value="true"/>
+				<property name="useCacheControlNoStore" value="true"/>
+			</bean>
+		</mvc:interceptor>
+	</mvc:interceptors> -->
+     
+</beans>

@@ -23,6 +23,7 @@ import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class ErrorTraceControllerIntegrationTest extends BaseResourceTest {
 
 	private final static String BASE_URL = "/errorhandler";

@@ -190,7 +190,7 @@ public class LocationResourceTest {
 		expected.add(createLocation());
 		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames +"\"]}").getBytes()))
+				.body(("{\"serverVersion\":0,\"is_jurisdiction\":true, \"location_names\":[\"" + locationNames +"\"]}").getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByNames(locationNames, 0l);
 		verifyNoMoreInteractions(locationService);

@@ -27,6 +27,8 @@ import org.springframework.web.util.NestedServletException;
 
 import ch.lambdaj.function.convert.Converter;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
+
 /**
  * TODO: Solve bug at source {@link StockResource} and refactor like {@link EventResourceTest}
  */

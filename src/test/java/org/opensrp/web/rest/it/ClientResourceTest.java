@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
@@ -28,6 +29,7 @@ import org.opensrp.web.rest.ClientResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.NestedServletException;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class ClientResourceTest extends BaseResourceTest {
 
 	private final static String BASE_URL = "/rest/client/";

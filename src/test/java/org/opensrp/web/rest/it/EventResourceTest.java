@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.util.NestedServletException;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class EventResourceTest extends BaseResourceTest {
 
 	String baseEntityId = "1";

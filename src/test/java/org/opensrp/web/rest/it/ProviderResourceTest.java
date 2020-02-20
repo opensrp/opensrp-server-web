@@ -9,11 +9,13 @@ import java.util.Map;
 import org.codehaus.jackson.JsonNode;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.User;
 import org.opensrp.repository.couch.AllUsers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
 public class ProviderResourceTest extends BaseResourceTest {
 
 	private final static String BASE_URL = "/rest/provider/";

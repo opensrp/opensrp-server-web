@@ -1,4 +1,0 @@
-[submodule "configs"]
-	path = configs
-	url = https://github.com/OpenSRP/opensrp-server-configs
-	branch = master

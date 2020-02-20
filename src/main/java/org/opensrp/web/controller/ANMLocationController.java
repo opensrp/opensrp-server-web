@@ -46,7 +46,7 @@ public class ANMLocationController {
     public ResponseEntity<VillagesDTO> villagesForANM(HttpServletRequest req, Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {
-            String anmIdentifier = userController.currentUser(req,authentication).getUsername();
+            String anmIdentifier = userController.currentUser(req,authentication).getUserName();
             response = httpAgent.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier);
             VillagesDTO villagesDTOs = new Gson().fromJson(response.body(),
                     new TypeToken<VillagesDTO>() {

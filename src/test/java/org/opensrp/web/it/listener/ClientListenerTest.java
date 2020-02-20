@@ -26,6 +26,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author proshanto
  */
 
+@Ignore("Excluding couchdb specific test cases. These should pick repo from db that is being used")
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/applicationContext-opensrp-web.xml" })
 public class ClientListenerTest {
