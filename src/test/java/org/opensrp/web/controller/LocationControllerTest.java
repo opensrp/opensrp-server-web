@@ -16,16 +16,14 @@ import java.io.IOException;
 public class LocationControllerTest extends TestResourceLoader {
 
     private LocationController locationController;
-    private OpenmrsLocationService openmrsLocationService;
 
     public LocationControllerTest() throws IOException {
         super();
     }
 
     @Before
-    public void setup() {
-        openmrsLocationService = new OpenmrsLocationService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword);
-        locationController = new LocationController(openmrsLocationService);
+    public void setUp() {
+        locationController = new LocationController(new OpenmrsLocationService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword));
     }
 
     @Test(expected = JSONException.class)
