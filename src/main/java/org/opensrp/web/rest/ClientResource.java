@@ -223,6 +223,8 @@ public class ClientResource extends RestResource<Client> {
 		} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			searchBean.setClientType(HOUSEHOLD);
 			return getAllClients(searchBean, addressSearchBean);
+		} else {
+			logger.info("no matched client type");
 		}
 		
 		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
