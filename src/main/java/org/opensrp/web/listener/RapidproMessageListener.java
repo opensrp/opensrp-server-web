@@ -9,8 +9,7 @@ import org.opensrp.connector.rapidpro.MessageService;
 import org.opensrp.connector.rapidpro.MessageType;
 import org.opensrp.domain.Camp;
 import org.opensrp.domain.Event;
-import org.opensrp.repository.AllCamp;
-import org.opensrp.scheduler.service.ActionService;
+import org.opensrp.repository.couch.AllCamp;
 import org.opensrp.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +20,6 @@ import org.springframework.stereotype.Service;
 @Service
 @EnableScheduling
 public class RapidproMessageListener {
-	
-	private ActionService actionService;
 	
 	private MessageService messageService;
 	
@@ -39,8 +36,7 @@ public class RapidproMessageListener {
 	}
 	
 	@Autowired
-	public RapidproMessageListener(ActionService actionService, MessageService messageService) {
-		this.actionService = actionService;
+	public RapidproMessageListener( MessageService messageService) {
 		this.messageService = messageService;
 		
 	}

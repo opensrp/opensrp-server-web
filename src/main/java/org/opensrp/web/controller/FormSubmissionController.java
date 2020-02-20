@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.json.JSONException;
-import org.opensrp.common.AllConstants;
 import org.opensrp.connector.openmrs.constants.OpenmrsHouseHold;
 import org.opensrp.connector.openmrs.service.EncounterService;
 import org.opensrp.connector.openmrs.service.HouseholdService;
@@ -28,8 +27,6 @@ import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.form.domain.FormSubmission;
 import org.opensrp.form.service.FormSubmissionConverter;
 import org.opensrp.form.service.FormSubmissionService;
-import org.opensrp.scheduler.SystemEvent;
-import org.opensrp.scheduler.TaskSchedulerService;
 import org.opensrp.service.ErrorTraceService;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.formSubmission.FormEntityConverter;
@@ -56,8 +53,6 @@ public class FormSubmissionController {
 	
 	private FormSubmissionService formSubmissionService;
 	
-	private TaskSchedulerService scheduler;
-	
 	private EncounterService encounterService;
 	
 	private FormEntityConverter formEntityConverter;
@@ -71,11 +66,10 @@ public class FormSubmissionController {
 	private MultimediaService multimediaService;
 	
 	@Autowired
-	public FormSubmissionController(FormSubmissionService formSubmissionService, TaskSchedulerService scheduler,
+	public FormSubmissionController(FormSubmissionService formSubmissionService, 
 	    EncounterService encounterService, FormEntityConverter formEntityConverter, PatientService patientService,
 	    HouseholdService householdService, MultimediaService multimediaService, ErrorTraceService errorTraceService) {
 		this.formSubmissionService = formSubmissionService;
-		this.scheduler = scheduler;
 		this.errorTraceService = errorTraceService;
 		this.encounterService = encounterService;
 		this.formEntityConverter = formEntityConverter;
@@ -121,7 +115,7 @@ public class FormSubmissionController {
 				return new ResponseEntity<>(BAD_REQUEST);
 			}
 			
-			scheduler.notifyEvent(new SystemEvent<>(AllConstants.OpenSRPEvent.FORM_SUBMISSION, formSubmissionsDTO));
+			//scheduler.notifyEvent(new SystemEvent<>(AllConstants.OpenSRPEvent.FORM_SUBMISSION, formSubmissionsDTO));
 			
 			try {
 				
