@@ -65,19 +65,28 @@
     	<property name="dataSource" ref="jpaDataSource"/>
    </bean>
    
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+   <bean id="contentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="true" />
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="defaultContentType" value="text/html" />
+
         <property name="mediaTypes">
             <map>
-                <entry key="json" value="application/json" />
-            </map>
+               <entry key="html" value="text/html"/>
+               <entry key="json" value="application/json"/>
+           </map>
         </property>
+    </bean>
+   
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+      	<property name="contentNegotiationManager" ref="contentNegotiationManager"/>
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
                   p:prefix="/WEB-INF/jsp/"
                   p:suffix=".jsp" />
         </property>
         <property name="defaultViews">
-            <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
+            <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"
                   p:extractValueFromSingleKeyModel="true" />
         </property>
     </bean>
