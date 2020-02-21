@@ -62,7 +62,7 @@
 
    <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-    <property name="dataSource" ref="jpaDataSource"/>
+    	<property name="dataSource" ref="jpaDataSource"/>
    </bean>
    
     <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">

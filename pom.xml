@@ -15,7 +15,7 @@
 	<properties>
 		<jetty.port>9979</jetty.port>
 		<main.basedir>${project.basedir}</main.basedir>
-		<hibernate-entitymanager.version>4.2.8.Final</hibernate-entitymanager.version>
+		<hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>5.2.3.RELEASE</spring.version>
 		<spring.security.version>5.2.2.RELEASE</spring.security.version>
@@ -28,7 +28,7 @@
 		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.0.0-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>2.0.0-alpha1-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.4-SNAPSHOT</opensrp.common.version>
@@ -311,12 +311,6 @@
             <artifactId>spring-security-oauth2</artifactId>
             <version>${spring.security.oauth.version}</version>
          </dependency>
-         <!-- TODO remove once uniqueId repository is moved to postgres and jpaEntityManagerFactory removed -->
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.1-api</artifactId>
-			<version>1.0.0.Final</version>
-		</dependency>
 	</dependencies>
 
 	<build>
