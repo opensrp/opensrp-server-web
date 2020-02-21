@@ -12,7 +12,8 @@
        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/data/jpa
     http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <context:property-placeholder location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
+    <context:property-placeholder
+            location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
 
     <import resource="classpath:applicationContext-opensrp.xml"/>
     <import resource="classpath:applicationContext-opensrp-form.xml"/>
@@ -21,8 +22,8 @@
     <import resource="securityContext.xml"/>
 
     <mvc:default-servlet-handler/>
-<!--     <tx:annotation-driven proxy-target-class="true" />
-    <aop:aspectj-autoproxy proxy-target-class="true"/>-->
+    <!--     <tx:annotation-driven proxy-target-class="true" />
+        <aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
     <context:annotation-config/>
 
@@ -32,13 +33,13 @@
 
     <mvc:annotation-driven/>
     <bean id="multipartResolver"
-        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- max upload size in bytes -->
-        <property name="maxUploadSize" value="${file.maxUploadSize}" /> <!-- 20MB -->
+        <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
     </bean>
 
-<!--    <jpa:repositories base-package="org.opensrp.web" entity-manager-factory-ref="jpaEntityManagerFactory" transaction-manager-ref="jpaTransactionManager"/>
- -->
+    <!--    <jpa:repositories base-package="org.opensrp.web" entity-manager-factory-ref="jpaEntityManagerFactory" transaction-manager-ref="jpaTransactionManager"/>
+     -->
     <bean id="jpaDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>
         <property name="url" value="${jdbc.url}"/>
@@ -59,25 +60,25 @@
         <property name="packagesToScan" value="org.opensrp.domain"/>
     </bean>
 
-   <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
-   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-    <property name="dataSource" ref="jpaDataSource"/>
-   </bean>
+    <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="jpaDataSource"/>
+    </bean>
 
     <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
         <property name="mediaTypes">
             <map>
-                <entry key="json" value="application/json" />
+                <entry key="json" value="application/json"/>
             </map>
         </property>
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
                   p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp" />
+                  p:suffix=".jsp"/>
         </property>
         <property name="defaultViews">
             <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
-                  p:extractValueFromSingleKeyModel="true" />
+                  p:extractValueFromSingleKeyModel="true"/>
         </property>
     </bean>
     <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
