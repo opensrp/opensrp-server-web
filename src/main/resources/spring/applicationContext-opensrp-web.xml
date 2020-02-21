@@ -20,10 +20,6 @@
 
     <import resource="securityContext.xml"/>
 
-    <beans profile="chw_referral_module">
-        <import resource="classpath:applicationContext-opensrp-referral.xml"/>
-    </beans>
-
     <mvc:default-servlet-handler/>
 <!--     <tx:annotation-driven proxy-target-class="true" />
     <aop:aspectj-autoproxy proxy-target-class="true"/>-->
@@ -91,4 +87,7 @@
 
     <alias name="${multimedia_file_manager}" alias="multimedia_file_manager"/>
 
+    <beans profile="chw_referral_module">
+        <import resource="classpath:applicationContext-opensrp-referral.xml"/>
+    </beans>
 </beans>
