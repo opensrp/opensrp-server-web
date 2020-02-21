@@ -16,7 +16,7 @@
 		mandatory, but it makes it easier to control the behaviour. -->
 	<sec:http pattern="/rest/**" create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint"
-		access-decision-manager-ref="accessDecisionManager">
+		access-decision-manager-ref="accessDecisionManager" use-expressions="false">
 		<sec:anonymous enabled="true" />
 		<sec:intercept-url pattern="/rest/**"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />
@@ -33,7 +33,7 @@
 
 	<sec:http pattern="/user-details" create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint"
-		access-decision-manager-ref="accessDecisionManager">
+		access-decision-manager-ref="accessDecisionManager" use-expressions="false">
 		<sec:anonymous enabled="true" />
 		<sec:intercept-url pattern="/user-details"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />
@@ -49,7 +49,7 @@
 	
 	<sec:http pattern="/security/**" create-session="never"
 		entry-point-ref="oauthAuthenticationEntryPoint"
-		access-decision-manager-ref="accessDecisionManager">
+		access-decision-manager-ref="accessDecisionManager" use-expressions="false">
 		<sec:anonymous enabled="true" />
 		<sec:intercept-url pattern="/security/**"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" method="OPTIONS" />

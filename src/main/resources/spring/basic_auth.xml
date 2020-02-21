@@ -10,7 +10,7 @@
     </security:authentication-manager>
 
 	<security:http auto-config="true" realm="OpenSRP" create-session="stateless"
-				   authentication-manager-ref="opensrpAuthenticationManager">
+				   authentication-manager-ref="opensrpAuthenticationManager" use-expressions="false">
 		<security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
 		<security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
