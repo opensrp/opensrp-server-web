@@ -26,7 +26,6 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<mysql.connector.version>5.1.36</mysql.connector.version>
-		<motech.version>0.11</motech.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>2.0.0-alpha1-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.0-alpha1-SNAPSHOT</opensrp.connector.version>
@@ -108,29 +107,6 @@
 			<name>Spring Libs Maven Release Repository</name>
 			<url>https://repo.spring.io/libs-release/</url>
 		</repository>
-		<repository>
-			<id>motech.opensrp</id>
-			<name>Motech Snapshots Repository</name>
-			<url>http://nexus.motechproject.org/content/repositories/opensrp-server</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>${opensrp.updatePolicy}</updatePolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>motech.nexus</id>
-			<name>Motech Snapshots Repository</name>
-			<url>http://nexus.motechproject.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>${opensrp.updatePolicy}</updatePolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>motech.nexus.release</id>
-			<name>Motech Snapshots Repository</name>
-			<url>http://nexus.motechproject.org/content/repositories/releases</url>
-		</repository>
 	</repositories>
 
 	<dependencies>
@@ -187,18 +163,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.motechproject</groupId>
-			<artifactId>motech-testing-utils</artifactId>
-			<version>${motech.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.motechproject</groupId>
-			<artifactId>motech-schedule-testing</artifactId>
-			<version>0.12-DRISTHI-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
