@@ -2,7 +2,6 @@ package org.opensrp.web.controller.it;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.motechproject.delivery.schedule.util.SameItems.hasSameItemsAs;
 import static org.opensrp.web.rest.it.ResourceTestUtility.createErrorTraces;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
@@ -56,10 +55,9 @@ public class ErrorTraceControllerIntegrationTest extends BaseResourceTest {
 		Map<String, Object> actualModel = modelAndView.getModelMap();
 		List<String> actualStatusOptions = mapper
 				.treeToValue(mapper.readTree((String) actualModel.get("statusOptions")), List.class);
-
 		assertEquals("home_error", modelAndView.getViewName());
 		assertEquals("all", actualModel.get("type"));
-		assertEquals(errorTraceForm.getStatusOptions(), hasSameItemsAs(actualStatusOptions));
+		assertEquals(errorTraceForm.getStatusOptions(), actualStatusOptions);
 
 	}
 
