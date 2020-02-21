@@ -22,7 +22,6 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -43,7 +42,7 @@ public class OauthAuthenticationProviderTest {
 	@Before
 	public void setUp() {
 		openmrsUserService = mock(OpenmrsUserService.class);
-		authenticationProvider = new OauthAuthenticationProvider(openmrsUserService, mock(PasswordEncoder.class));
+		authenticationProvider = new OauthAuthenticationProvider(openmrsUserService);
 		authentication = mock(Authentication.class);
 		when(authentication.getName()).thenReturn("user1");
 		when(authentication.getCredentials()).thenReturn("myPassword");

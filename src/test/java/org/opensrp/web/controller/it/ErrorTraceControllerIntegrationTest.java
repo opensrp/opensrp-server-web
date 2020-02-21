@@ -9,7 +9,6 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonNode;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -22,6 +21,8 @@ import org.opensrp.repository.couch.AllErrorTrace;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ErrorTraceControllerIntegrationTest extends BaseResourceTest {
 
