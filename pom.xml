@@ -30,7 +30,6 @@
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>2.0.0-alpha1-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>1.0.6-SNAPSHOT</opensrp.connector.version>
-		<opensrp.register.version>1.0.0-SNAPSHOT</opensrp.register.version>
 		<opensrp.common.version>1.0.4-SNAPSHOT</opensrp.common.version>
 
 	</properties>
@@ -176,11 +175,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.smartregister</groupId>
-			<artifactId>opensrp-server-register</artifactId>
-			<version>${opensrp.register.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.smartregister</groupId>
 			<artifactId>opensrp-server-connector</artifactId>
 			<version>${opensrp.connector.version}</version>
 		</dependency>
@@ -238,12 +232,6 @@
 			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-test-mvc -->
 		<dependency>
 			<groupId>org.springframework</groupId>
