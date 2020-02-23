@@ -20,11 +20,13 @@ import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,9 +193,9 @@ public class ClientResource extends RestResource<Client> {
 		String locationId = getStringFilter(LOCATION_ID, request);
 		
 		if (locationId != null) {
-			List<String> locations = new ArrayList<>();
-			locations.add(locationId);
-			searchBean.setLocations(locations);
+			String[] locationIds = locationId.split(",");
+			List<String> locationIdList = Arrays.asList(locationIds);
+			searchBean.setLocations(locationIdList);
 		}
 		
 		if (pageNumberParam != null) {
@@ -211,6 +213,18 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		
+		DateTime startDate = null;
+		DateTime endDate = null;
+		try {
+			startDate = getDateFilter(STARTDATE, request);
+			searchBean.setStartDate(startDate);
+			endDate = getDateFilter(ENDDATE, request);
+			searchBean.setEndDate(endDate);
+		}
+		catch (ParseException e) {
+			logger.error(e.getMessage());
+		}
+		
 		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
 			return getHouseholds(searchBean, addressSearchBean);
 		} else if (clientType.equalsIgnoreCase(HOUSEHOLDMEMEBR)) {
@@ -222,6 +236,15 @@ public class ClientResource extends RestResource<Client> {
 		} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			searchBean.setClientType(HOUSEHOLD);
 			return getAllClients(searchBean, addressSearchBean);
+		}
+		
+		else if (clientType.equalsIgnoreCase(ANC)) {
+			
+			return getAllANC(searchBean, addressSearchBean);
+		}
+		
+		else if (clientType.equalsIgnoreCase(CHILD)) {
+			return getAllChild(searchBean, addressSearchBean);
 		} else {
 			logger.info("no matched client type");
 		}
@@ -269,10 +292,44 @@ public class ClientResource extends RestResource<Client> {
 			total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
 		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
+		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ANC)) {
+			clientSearchBean.setClientType(null);
+			total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
+		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(CHILD)) {
+			clientSearchBean.setClientType(null);
+			total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
 		} else {
 			total = NO_TOTAL_COUNT;
 		}
 		return total;
+	}
+	
+	public ResponseEntity<String> getAllANC(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+		
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonArray clientsArray = new JsonArray();
+		clientSearchBean.setClientType(null);
+		List<Client> clients = clientService.findAllANCByCriteria(clientSearchBean, addressSearchBean);
+		clientSearchBean.setClientType(ANC);
+		total = getTotal(clientSearchBean, addressSearchBean);
+		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
+		response.put("clients", clientsArray);
+		response.put("total", total);
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<String> getAllChild(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+		
+		Map<String, Object> response = new HashMap<String, Object>();
+		JsonArray clientsArray = new JsonArray();
+		clientSearchBean.setClientType(null);
+		List<Client> clients = clientService.findAllChildByCriteria(clientSearchBean, addressSearchBean);
+		clientSearchBean.setClientType(CHILD);
+		total = getTotal(clientSearchBean, addressSearchBean);
+		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
+		response.put("clients", clientsArray);
+		response.put("total", total);
+		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 	}
 	
 }
