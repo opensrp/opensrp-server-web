@@ -2,7 +2,11 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.junit.Assert;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,12 +22,6 @@ import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.MvcResult;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -497,7 +495,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
                 .andReturn();
         verify(planService).findAllIds();
         verifyNoMoreInteractions(planService);
-        Assert.assertEquals("[\"plan-id-1\"]", result.getResponse().getContentAsString());
+        assertEquals("[\"plan-id-1\"]", result.getResponse().getContentAsString());
     }
 
 }
