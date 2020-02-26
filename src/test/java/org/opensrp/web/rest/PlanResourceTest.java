@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
@@ -487,4 +489,15 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
     }
+
+    @Test
+    public void testFindAllIds() throws Exception {
+        when(planService.findAllIds()).thenReturn(Collections.singletonList("plan-id-1"));
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds", "")).andExpect(status().isOk())
+                .andReturn();
+        verify(planService).findAllIds();
+        verifyNoMoreInteractions(planService);
+        Assert.assertEquals("[\"plan-id-1\"]", result.getResponse().getContentAsString());
+    }
+
 }

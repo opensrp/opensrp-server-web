@@ -277,6 +277,25 @@ public class PlanResource {
 
 	}
 
+	/**
+	 * This methods provides an API endpoint that searches for all plan Identifiers
+	 *
+	 * @return A list of plan Identifiers
+	 */
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findIds() {
+
+		try {
+			return new ResponseEntity<>(
+					gson.toJson(planService.findAllIds()), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 	
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();

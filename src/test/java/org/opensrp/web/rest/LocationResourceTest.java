@@ -733,6 +733,15 @@ public class LocationResourceTest {
 
 	}
 
+	@Test
+	public void testFindLocationIds() throws Exception {
+		when(locationService.findAllLocationIds()).thenReturn(Collections.singletonList("location-id-1"));
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds", "")).andExpect(status().isOk())
+				.andReturn();
+		verify(locationService).findAllLocationIds();
+		verifyNoMoreInteractions(locationService);
+		assertEquals("[\"location-id-1\"]", result.getResponse().getContentAsString());
+	}
 
 	private PhysicalLocation createLocation() {
 		PhysicalLocation parentLocation = LocationResource.gson.fromJson(parentJson, PhysicalLocation.class);
