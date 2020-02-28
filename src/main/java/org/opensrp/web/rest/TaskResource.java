@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
@@ -199,16 +200,19 @@ public class TaskResource {
 
 	/**
 	 * This methods provides an API endpoint that searches for all task Ids
+	 * ordered by server version ascending
 	 *
+	 * @param serverVersion serverVersion using to filter by
 	 * @return A list of task Ids
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds() {
+	public ResponseEntity<String> findIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(taskService.findAllTaskIds()), HttpStatus.OK);
+					gson.toJson(taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

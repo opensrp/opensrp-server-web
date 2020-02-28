@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.AllIdsModel;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
@@ -490,12 +492,23 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testFindAllIds() throws Exception {
-        when(planService.findAllIds()).thenReturn(Collections.singletonList("plan-id-1"));
-        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds", "")).andExpect(status().isOk())
+        AllIdsModel idsModel = new AllIdsModel();
+        idsModel.setIdentifiers(Collections.singletonList("plan-id-1"));
+        idsModel.setLastServerVersion(12345l);
+        when(planService.findAllIds(anyLong(), anyInt(), (Date) any())).thenReturn(idsModel);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
                 .andReturn();
-        verify(planService).findAllIds();
+
+        String actualTaskIdString = result.getResponse().getContentAsString();
+        AllIdsModel actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<AllIdsModel>(){}.getType());
+        List<String> actualTaskIdList = actualIdModels.getIdentifiers();
+
+
+        verify(planService).findAllIds(anyLong(), anyInt(), (Date) any());
         verifyNoMoreInteractions(planService);
-        assertEquals("[\"plan-id-1\"]", result.getResponse().getContentAsString());
+        assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+        assertEquals(idsModel.getIdentifiers().get(0), actualTaskIdList.get(0));
+        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
     }
 
 }

@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
@@ -355,16 +357,20 @@ public class LocationResource {
 
 	/**
 	 * This methods provides an API endpoint that searches for all structure ids
+	 * sorted by server version ascending
 	 *
-	 * @return A list of structure Ids
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of structure Ids and last server version
 	 */
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds() {
+	public ResponseEntity<String> findIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion
+	) {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructureIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					gson.toJson(locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT)), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -411,16 +417,18 @@ public class LocationResource {
 
 	/**
 	 * This methods provides an API endpoint that searches for all location ids
+	 * sorted by server  version ascending
 	 *
-	 * @return A list of location Ids
+	 * @return A list of location Ids and last server version
 	 */
 	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findLocationIds() {
+	public ResponseEntity<String> findLocationIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllLocationIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					gson.toJson(locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT)), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

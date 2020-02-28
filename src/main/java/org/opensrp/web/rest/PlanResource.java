@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -18,6 +22,7 @@ import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +34,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.rest.EventResource.DATE_DELETED;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * @author Vincent Karuri
@@ -284,11 +287,13 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds() {
+	public ResponseEntity<String> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
+										  @RequestParam(value = DATE_DELETED, required = false )
+											  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(planService.findAllIds()), HttpStatus.OK);
+					gson.toJson(planService.findAllIds(0l, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

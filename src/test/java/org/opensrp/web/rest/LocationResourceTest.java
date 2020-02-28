@@ -1,5 +1,13 @@
 package org.opensrp.web.rest;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.AllIdsModel;
 import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
@@ -26,13 +35,6 @@ import org.springframework.test.web.server.MockMvc;
 import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -691,12 +693,22 @@ public class LocationResourceTest {
 
 	@Test
 	public void testFindStructureIds() throws Exception {
-		when(locationService.findAllStructureIds()).thenReturn(Collections.singletonList("structure-id-1"));
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds", "")).andExpect(status().isOk())
+		AllIdsModel idsModel = new AllIdsModel();
+		idsModel.setIdentifiers(Collections.singletonList("structure-id-1"));
+		idsModel.setLastServerVersion(12345l);
+		when(locationService.findAllStructureIds(anyLong(), anyInt())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
-		verify(locationService).findAllStructureIds();
+
+		String actualStructureIdString = result.getResponse().getContentAsString();
+		AllIdsModel actualIdModels = new Gson().fromJson(actualStructureIdString, new TypeToken<AllIdsModel>(){}.getType());
+		List<String> actualStructureIdList = actualIdModels.getIdentifiers();
+
+		verify(locationService).findAllStructureIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(locationService);
-		assertEquals("[\"structure-id-1\"]", result.getResponse().getContentAsString());
+		assertEquals("{\"identifiers\":[\"structure-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals(idsModel.getIdentifiers().get(0), actualStructureIdList.get(0));
+		assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
 	}
 
 	@Test
@@ -735,12 +747,22 @@ public class LocationResourceTest {
 
 	@Test
 	public void testFindLocationIds() throws Exception {
-		when(locationService.findAllLocationIds()).thenReturn(Collections.singletonList("location-id-1"));
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds", "")).andExpect(status().isOk())
+		AllIdsModel idsModel = new AllIdsModel();
+		idsModel.setIdentifiers(Collections.singletonList("location-id-1"));
+		idsModel.setLastServerVersion(12345l);
+		when(locationService.findAllLocationIds(anyLong(), anyInt())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
-		verify(locationService).findAllLocationIds();
+
+		String actualLocationIdString = result.getResponse().getContentAsString();
+		AllIdsModel actualIdModels = new Gson().fromJson(actualLocationIdString, new TypeToken<AllIdsModel>(){}.getType());
+		List<String> actualLocationIdList = actualIdModels.getIdentifiers();
+
+		verify(locationService).findAllLocationIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(locationService);
-		assertEquals("[\"location-id-1\"]", result.getResponse().getContentAsString());
+		assertEquals("{\"identifiers\":[\"location-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals(idsModel.getIdentifiers().get(0), actualLocationIdList.get(0));
+		assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
 	}
 
 	private PhysicalLocation createLocation() {
