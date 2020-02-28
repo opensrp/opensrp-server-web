@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-import org.codehaus.jackson.JsonNode;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -17,6 +16,8 @@ import org.opensrp.repository.couch.AllClients;
 import org.opensrp.repository.couch.AllEvents;
 import org.opensrp.web.rest.SearchResource;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class SearchResourceTest extends BaseResourceTest {
 

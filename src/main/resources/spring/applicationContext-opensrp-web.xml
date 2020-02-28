@@ -7,10 +7,12 @@
        xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/data/jpa
-    http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
+       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
     <context:property-placeholder location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
     
@@ -60,22 +62,31 @@
 
    <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-    <property name="dataSource" ref="jpaDataSource"/>
+    	<property name="dataSource" ref="jpaDataSource"/>
    </bean>
    
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+   <bean id="contentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="true" />
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="defaultContentType" value="text/html" />
+
         <property name="mediaTypes">
             <map>
-                <entry key="json" value="application/json" />
-            </map>
+               <entry key="html" value="text/html"/>
+               <entry key="json" value="application/json"/>
+           </map>
         </property>
+    </bean>
+   
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+      	<property name="contentNegotiationManager" ref="contentNegotiationManager"/>
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
                   p:prefix="/WEB-INF/jsp/"
                   p:suffix=".jsp" />
         </property>
         <property name="defaultViews">
-            <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
+            <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"
                   p:extractValueFromSingleKeyModel="true" />
         </property>
     </bean>

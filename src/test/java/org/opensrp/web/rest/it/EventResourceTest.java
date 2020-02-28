@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -30,6 +29,8 @@ import org.opensrp.web.rest.EventResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.util.NestedServletException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class EventResourceTest extends BaseResourceTest {
 

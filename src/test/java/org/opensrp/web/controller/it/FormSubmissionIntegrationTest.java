@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.jackson.JsonNode;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +22,8 @@ import org.opensrp.repository.couch.MultimediaRepositoryImpl;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.opensrp.web.utils.TestResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class FormSubmissionIntegrationTest extends BaseResourceTest {
 

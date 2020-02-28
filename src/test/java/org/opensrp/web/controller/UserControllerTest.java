@@ -56,7 +56,7 @@ public class UserControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		initMocks(this);
-		auth = new DrishtiAuthenticationProvider(userservice, null);
+		auth = new DrishtiAuthenticationProvider(userservice);
 		usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken("demook", "demook");
 	}
 	

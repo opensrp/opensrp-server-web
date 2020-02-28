@@ -14,7 +14,6 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -27,6 +26,8 @@ import org.opensrp.service.ClientService;
 import org.opensrp.web.rest.ClientResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.NestedServletException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ClientResourceTest extends BaseResourceTest {
 

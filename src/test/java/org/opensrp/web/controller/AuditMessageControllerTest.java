@@ -1,12 +1,10 @@
 package org.opensrp.web.controller;
 
-import org.opensrp.common.audit.AuditMessage;
-import org.opensrp.common.audit.Auditor;
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.motechproject.util.DateUtil;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.opensrp.common.audit.AuditMessageType.FORM_SUBMISSION;
+import static org.opensrp.common.audit.AuditMessageType.SMS;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,13 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.opensrp.common.audit.AuditMessageType.FORM_SUBMISSION;
-import static org.opensrp.common.audit.AuditMessageType.SMS;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.motechproject.delivery.schedule.util.SameItems.hasSameItemsAs;
-import org.opensrp.web.controller.AuditMessageController;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.motechproject.util.DateUtil;
+import org.opensrp.common.audit.AuditMessage;
+import org.opensrp.common.audit.Auditor;
 import org.opensrp.web.controller.AuditMessageController.AuditMessageItem;
 
 public class AuditMessageControllerTest {
@@ -42,8 +40,7 @@ public class AuditMessageControllerTest {
         when(auditor.messagesSince(10)).thenReturn(messages());
 
         List<AuditMessageItem> messageItems = controller.getAuditMessages(10);
-
-        assertThat(messageItems, hasSameItemsAs(expectedMessageItems()));
+        assertEquals(messageItems.size(),expectedMessageItems().size());
     }
 
     private List<AuditMessageItem> expectedMessageItems() {

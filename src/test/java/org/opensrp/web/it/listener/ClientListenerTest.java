@@ -14,7 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.domain.Camp;
-import org.opensrp.repository.AllCamp;
+import org.opensrp.repository.couch.AllCamp;
 import org.opensrp.repository.couch.AllClients;
 import org.opensrp.scheduler.repository.couch.AllActions;
 import org.opensrp.web.listener.RapidproMessageListener;

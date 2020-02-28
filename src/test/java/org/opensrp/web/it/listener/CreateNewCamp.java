@@ -14,7 +14,7 @@ import org.ektorp.impl.StdObjectMapperFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensrp.domain.Camp;
-import org.opensrp.repository.AllCamp;
+import org.opensrp.repository.couch.AllCamp;
 
 public class CreateNewCamp {
 	
