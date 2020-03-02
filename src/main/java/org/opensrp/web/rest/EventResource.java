@@ -179,7 +179,7 @@ public class EventResource extends RestResource<Event> {
 	 * @param baseEntityIds
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
-	@RequestMapping(value = "/syncClientEventsByBaseEntityIds", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/sync-by-base-entity-ids", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String baseEntityIds) {
 		Map<String, Object> response = new HashMap<>();
