@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.*;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
