@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
@@ -191,8 +192,7 @@ public class EventResource extends RestResource<Event> {
 						"0", null, null, null);
 
 				if(clientEventsMap.containsKey("clients")){
-					List<Client> clients = gson.fromJson(clientEventsMap.get("clients").toString(),new TypeToken<List<Client>>() {}.getType());
-
+					List<Client> clients = gson.fromJson(gson.toJson(clientEventsMap.get("clients")),new TypeToken<List<Client>>() {}.getType());
 					//Obtaining family registration events for client's family
 					if(clients.size()==1 && clients.get(0).getRelationships().containsKey("family")){
 						List<String> clientRelationships = clients.get(0).getRelationships().get("family");
