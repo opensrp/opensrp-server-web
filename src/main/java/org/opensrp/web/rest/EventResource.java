@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
@@ -165,6 +166,45 @@ public class EventResource extends RestResource<Event> {
 		}
 		catch (Exception e) {
 			
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+
+	/**
+	 * Fetch events ordered by serverVersion ascending order and return the clients associated with
+	 * the events
+	 *
+	 * @param baseEntityIds
+	 * @return a map response with events, clients and optionally msg when an error occurs
+	 */
+	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	protected ResponseEntity<String> syncByPost(@RequestBody String baseEntityIds) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		List<String> baseEntityIdsList = gson.fromJson(baseEntityIds,new TypeToken<ArrayList<String>>() {}.getType());
+		List<Object> clientsEventsList = new ArrayList<>();
+		try {
+			for(String baseEntityId:baseEntityIdsList){
+				Map<String, Object> clientEventsMap = sync(null, null, baseEntityId,
+						"0", null, null, null);
+
+				if(clientEventsMap.containsKey("clients")){
+					List<Client> clients = gson.fromJson(clientEventsMap.get("clients").toString(),new TypeToken<List<Client>>() {}.getType());
+					clientsEventsList.add(clientEventsMap);
+				}
+			}
+
+			return new ResponseEntity<>(
+					gson.toJson(clientsEventsList),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+
+		}
+		catch (Exception e) {
+
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
