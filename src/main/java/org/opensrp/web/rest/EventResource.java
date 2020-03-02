@@ -193,6 +193,22 @@ public class EventResource extends RestResource<Event> {
 
 				if(clientEventsMap.containsKey("clients")){
 					List<Client> clients = gson.fromJson(clientEventsMap.get("clients").toString(),new TypeToken<List<Client>>() {}.getType());
+
+					//Obtaining family registration events for client's family
+					if(clients.size()==1 && clients.get(0).getRelationships().containsKey("family")){
+						List<String> clientRelationships = clients.get(0).getRelationships().get("family");
+						for(String familyRelationship:clientRelationships){
+							Map<String, Object> familyEvents = sync(null, null, familyRelationship,
+									"0", null, null, null);
+
+							JsonArray events =  (JsonArray) gson.toJsonTree(clientEventsMap.get("events"));
+							events.addAll((JsonArray) gson.toJsonTree(familyEvents.get("events")));
+
+							//adding the family registration events to the client's events list
+							clientEventsMap.put("events",events);
+						}
+
+					}
 					clientsEventsList.add(clientEventsMap);
 				}
 			}
