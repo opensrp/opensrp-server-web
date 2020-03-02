@@ -182,8 +182,8 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> syncByPost(@RequestBody String baseEntityIds) {
-		Map<String, Object> response = new HashMap<String, Object>();
+	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String baseEntityIds) {
+		Map<String, Object> response = new HashMap<>();
 		List<String> baseEntityIdsList = gson.fromJson(baseEntityIds,new TypeToken<ArrayList<String>>() {}.getType());
 		List<Object> clientsEventsList = new ArrayList<>();
 		try {
@@ -220,14 +220,13 @@ public class EventResource extends RestResource<Event> {
 
 		}
 		catch (Exception e) {
-
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
-	private Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
+	protected Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
 	        String team, String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
