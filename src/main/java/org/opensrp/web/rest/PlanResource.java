@@ -293,7 +293,7 @@ public class PlanResource {
 
 		try {
 			return new ResponseEntity<>(
-					gson.toJson(planService.findAllIds(0l, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted)), HttpStatus.OK);
+					gson.toJson(planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

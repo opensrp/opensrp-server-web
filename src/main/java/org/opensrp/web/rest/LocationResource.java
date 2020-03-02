@@ -365,8 +365,7 @@ public class LocationResource {
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion
-	) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
 			return new ResponseEntity<>(
