@@ -28,7 +28,7 @@ public class LocationControllerTest extends TestResourceLoader {
 
     @Test(expected = JSONException.class)
     public void testLocationControllerWithEmptyParameter() throws JSONException {
-        locationController.getLocationsWithinALevelAndTags(new JSONObject());
+        locationController.getLocationsWithinALevelAndTags(new JSONObject().toString());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class LocationControllerTest extends TestResourceLoader {
                 "  ],\n" +
                 "  \"locationTopLevel\": \"Council\",\n" +
                 "  \"locationUUID\": \"bcf5a36d-fb53-4de9-9813-01f1d480e3fe\"\n" +
-                "}"));
+                "}").toString());
 
         Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
