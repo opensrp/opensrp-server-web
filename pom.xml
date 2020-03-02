@@ -27,7 +27,7 @@
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.0.0-alpha1-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>2.0.0-alpha2-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.0-alpha1-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>1.0.4-SNAPSHOT</opensrp.common.version>
 
