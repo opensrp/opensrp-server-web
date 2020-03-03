@@ -12,10 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.AllIdsModel;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -23,6 +23,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.Constants;
+import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -421,8 +422,11 @@ public class EventResource extends RestResource<Event> {
 
 		try {
 			
-			AllIdsModel eventIds = eventService.findAllIdsByEventType(eventType, dateDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
-			return new ResponseEntity<>(gson.toJson(eventIds), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			Pair eventIdsPair = eventService.findAllIdsByEventType(eventType, dateDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers((List<String>)eventIdsPair.getLeft());
+			identifiers.setLastServerVersion((Long) eventIdsPair.getRight());
+			return new ResponseEntity<>(gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
 		catch (Exception e) {

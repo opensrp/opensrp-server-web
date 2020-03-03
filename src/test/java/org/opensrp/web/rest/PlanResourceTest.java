@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,12 +18,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants;
-import org.opensrp.domain.AllIdsModel;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
+import org.opensrp.web.bean.Identifier;
 import org.springframework.test.web.server.MvcResult;
 
 import static junit.framework.Assert.assertEquals;
@@ -492,23 +493,21 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testFindAllIds() throws Exception {
-        AllIdsModel idsModel = new AllIdsModel();
-        idsModel.setIdentifiers(Collections.singletonList("plan-id-1"));
-        idsModel.setLastServerVersion(12345l);
+        Pair idsModel = Pair.of(Collections.singletonList("plan-id-1"), 12345l);
         when(planService.findAllIds(anyLong(), anyInt(), (Date) any())).thenReturn(idsModel);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
                 .andReturn();
 
         String actualTaskIdString = result.getResponse().getContentAsString();
-        AllIdsModel actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<AllIdsModel>(){}.getType());
+        Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
         verify(planService).findAllIds(anyLong(), anyInt(), (Date) any());
         verifyNoMoreInteractions(planService);
         assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
-        assertEquals(idsModel.getIdentifiers().get(0), actualTaskIdList.get(0));
-        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
+        assertEquals(((List<String>)idsModel.getLeft()).get(0), actualTaskIdList.get(0));
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
     }
 
 }

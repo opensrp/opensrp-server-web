@@ -8,14 +8,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.opensrp.common.AllConstants;
-import org.opensrp.domain.AllIdsModel;
 import org.opensrp.domain.Event;
 import org.opensrp.service.EventService;
+import org.opensrp.web.bean.Identifier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,14 +67,12 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
 
-        AllIdsModel idsModel = new AllIdsModel();
-        idsModel.setIdentifiers(expectedEventIdList);
-        idsModel.setLastServerVersion(1234l);
+        Pair idsModel = Pair.of(expectedEventIdList, 1234l);
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(null, null, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType?serverVersion=0", null, status().isOk());
-        AllIdsModel actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<AllIdsModel>(){}.getType());
+        Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
         verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), dateArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
@@ -86,7 +85,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         assertEquals(2, actualEventIdList.size());
         assertEquals(expectedEventIdList.get(0), actualEventIdList.get(0));
         assertEquals(expectedEventIdList.get(1), actualEventIdList.get(1));
-        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 
     }
 
@@ -95,7 +94,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         List<String> expectedEventIdList = new ArrayList<>();
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
-        AllIdsModel idsModel = new AllIdsModel();
+        Identifier idsModel = new Identifier();
         idsModel.setIdentifiers(expectedEventIdList);
         idsModel.setLastServerVersion(1234l);
 
@@ -103,7 +102,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
-        AllIdsModel actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<AllIdsModel>(){}.getType());
+        Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
         verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), dateArgumentCaptor.capture(), longArgumentCaptor.capture() ,integerArgumentCaptor.capture());
@@ -126,7 +125,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
 
-        AllIdsModel idsModel = new AllIdsModel();
+        Identifier idsModel = new Identifier();
         idsModel.setIdentifiers(expectedEventIdList);
         idsModel.setLastServerVersion(1234l);
 
@@ -136,7 +135,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "&" + EventResource.DATE_DELETED + "=" + dateDeletedString + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
-        AllIdsModel actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<AllIdsModel>(){}.getType());
+        Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
         verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), dateArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
@@ -158,9 +157,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         List<String> expectedEventIdList = new ArrayList<>();
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
-        AllIdsModel idsModel = new AllIdsModel();
-        idsModel.setIdentifiers(expectedEventIdList);
-        idsModel.setLastServerVersion(1234l);
+        Pair idsModel = Pair.of(expectedEventIdList, 1234l);
 
         Date dateDeleted = convertDate(dateDeletedString, ISO_DATE_TIME_FORMAT);
 
@@ -168,7 +165,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         String parameter = EventResource.DATE_DELETED + "=" + dateDeletedString + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
-        AllIdsModel actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<AllIdsModel>(){}.getType());
+        Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
         verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), dateArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
@@ -181,7 +178,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         assertEquals(2, actualEventIdList.size());
         assertEquals(expectedEventIdList.get(0), actualEventIdList.get(0));
         assertEquals(expectedEventIdList.get(1), actualEventIdList.get(1));
-        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 
     }
 

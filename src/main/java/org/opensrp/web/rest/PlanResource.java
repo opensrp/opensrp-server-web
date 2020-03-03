@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -19,6 +20,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,8 +294,13 @@ public class PlanResource {
 											  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
+			Pair planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers((List<String>)planIdsPair.getLeft());
+			identifiers.setLastServerVersion((Long) planIdsPair.getRight());
+
 			return new ResponseEntity<>(
-					gson.toJson(planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted)), HttpStatus.OK);
+					gson.toJson(identifiers), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

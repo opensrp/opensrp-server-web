@@ -6,7 +6,14 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
@@ -14,6 +21,7 @@ import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,20 +35,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
 
 
 @Controller
@@ -368,8 +369,13 @@ public class LocationResource {
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
+
+			Pair structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers((List<String>)structureIdsPair.getLeft());
+			identifiers.setLastServerVersion((Long) structureIdsPair.getRight());
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT)), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -426,8 +432,13 @@ public class LocationResource {
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
+			Pair locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers((List<String>)locationIdsPair.getLeft());
+			identifiers.setLastServerVersion((Long) locationIdsPair.getRight());
+			
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT)), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
