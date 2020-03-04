@@ -178,7 +178,9 @@ public class EventResource extends RestResource<Event> {
 	 * Fetch clients and associated events allongside family registration events for the family that they attached to
 	 * for the list of base entity ids passed
 	 *
-	 * @param jsonObject Json Object containing a jsonArray baseEntityIds, and an optional boolean withFamilyEvents for obtaining family events.
+	 * @param jsonObject Json Object containing
+	 *                      a jsonArray with baseEntityIds,
+	 *                      and an optional boolean named withFamilyEvents for obtaining family events if the value passed is true.
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync-by-base-entity-ids", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
