@@ -4,7 +4,7 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,7 +13,6 @@ import static org.springframework.test.web.server.request.MockMvcRequestBuilders
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -120,8 +119,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testCreateOrganizationWithoutIdentifier() throws Exception {
-		Mockito.doThrow(new IllegalArgumentException()).when(organizationService)
-				.addOrganization(any(Organization.class));
+		Mockito.doThrow(IllegalArgumentException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(organizationJSON.getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
@@ -131,9 +129,9 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testCreateOrganizationWithError() throws Exception {
-		Mockito.doThrow(new SQLException()).when(organizationService).addOrganization(any(Organization.class));
+		Mockito.doThrow(IllegalStateException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(organizationJSON.getBytes()))
-				.andExpect(status().isInternalServerError());
+		        .andExpect(status().isInternalServerError());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
@@ -165,7 +163,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testUpdateOrganizationWithError() throws Exception {
-		Mockito.doThrow(new SQLException()).when(organizationService).updateOrganization(any(Organization.class));
+		Mockito.doThrow(new IllegalStateException()).when(organizationService).updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
 				.contentType(MediaType.APPLICATION_JSON).body(organizationJSON.getBytes()))
 				.andExpect(status().isInternalServerError());
@@ -201,7 +199,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testAssignLocationAndPlanWithInternalError() throws Exception {
-		Mockito.doThrow(new SQLException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
+		Mockito.doThrow(new IllegalStateException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
 				null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
@@ -245,7 +243,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		Mockito.doThrow(new SQLException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
+		Mockito.doThrow(new IllegalStateException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 				.andExpect(status().isInternalServerError()).andReturn();
