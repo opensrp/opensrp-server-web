@@ -94,9 +94,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         List<String> expectedEventIdList = new ArrayList<>();
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
-        Identifier idsModel = new Identifier();
-        idsModel.setIdentifiers(expectedEventIdList);
-        idsModel.setLastServerVersion(1234l);
+        Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, null, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
@@ -115,7 +113,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         assertEquals(2, actualEventIdList.size());
         assertEquals(expectedEventIdList.get(0), actualEventIdList.get(0));
         assertEquals(expectedEventIdList.get(1), actualEventIdList.get(1));
-        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 
     }
 
@@ -124,10 +122,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         List<String> expectedEventIdList = new ArrayList<>();
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
-
-        Identifier idsModel = new Identifier();
-        idsModel.setIdentifiers(expectedEventIdList);
-        idsModel.setLastServerVersion(1234l);
+        Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
         Date dateDeleted = convertDate(dateDeletedString, ISO_DATE_TIME_FORMAT);
 
@@ -148,7 +143,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         assertEquals(2, actualEventIdList.size());
         assertEquals(expectedEventIdList.get(0), actualEventIdList.get(0));
         assertEquals(expectedEventIdList.get(1), actualEventIdList.get(1));
-        assertEquals(idsModel.getLastServerVersion(), actualIdModels.getLastServerVersion());
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 
     }
 
@@ -157,7 +152,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         List<String> expectedEventIdList = new ArrayList<>();
         expectedEventIdList.add("event_1");
         expectedEventIdList.add("event_2");
-        Pair idsModel = Pair.of(expectedEventIdList, 1234l);
+        Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
         Date dateDeleted = convertDate(dateDeletedString, ISO_DATE_TIME_FORMAT);
 

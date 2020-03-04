@@ -370,10 +370,10 @@ public class LocationResource {
 
 		try {
 
-			Pair structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers((List<String>)structureIdsPair.getLeft());
-			identifiers.setLastServerVersion((Long) structureIdsPair.getRight());
+			identifiers.setIdentifiers(structureIdsPair.getLeft());
+			identifiers.setLastServerVersion(structureIdsPair.getRight());
 			return new ResponseEntity<>(
 					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
@@ -432,10 +432,10 @@ public class LocationResource {
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
-			Pair locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers((List<String>)locationIdsPair.getLeft());
-			identifiers.setLastServerVersion((Long) locationIdsPair.getRight());
+			identifiers.setIdentifiers(locationIdsPair.getLeft());
+			identifiers.setLastServerVersion(locationIdsPair.getRight());
 			
 			return new ResponseEntity<>(
 					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);

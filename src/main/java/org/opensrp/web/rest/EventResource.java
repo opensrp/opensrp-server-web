@@ -421,11 +421,11 @@ public class EventResource extends RestResource<Event> {
 			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
-			
-			Pair eventIdsPair = eventService.findAllIdsByEventType(eventType, dateDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+
+			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, dateDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers((List<String>)eventIdsPair.getLeft());
-			identifiers.setLastServerVersion((Long) eventIdsPair.getRight());
+			identifiers.setIdentifiers(eventIdsPair.getLeft());
+			identifiers.setLastServerVersion(eventIdsPair.getRight());
 			return new ResponseEntity<>(gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}

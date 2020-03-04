@@ -212,10 +212,10 @@ public class TaskResource {
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
-			Pair taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers((List<String>)taskIdsPair.getLeft());
-			identifiers.setLastServerVersion((Long) taskIdsPair.getRight());
+			identifiers.setIdentifiers(taskIdsPair.getLeft());
+			identifiers.setLastServerVersion(taskIdsPair.getRight());
 
 			return new ResponseEntity<>(
 					gson.toJson(identifiers), HttpStatus.OK);

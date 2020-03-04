@@ -694,7 +694,7 @@ public class LocationResourceTest {
 
 	@Test
 	public void testFindStructureIds() throws Exception {
-		Pair idsModel = Pair.of(Collections.singletonList("structure-id-1"), 12345l);
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("structure-id-1"), 12345l);
 		when(locationService.findAllStructureIds(anyLong(), anyInt())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
@@ -706,7 +706,7 @@ public class LocationResourceTest {
 		verify(locationService).findAllStructureIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"structure-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
-		assertEquals(((List<String>)idsModel.getLeft()).get(0), actualStructureIdList.get(0));
+		assertEquals((idsModel.getLeft()).get(0), actualStructureIdList.get(0));
 		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 	}
 
@@ -746,7 +746,7 @@ public class LocationResourceTest {
 
 	@Test
 	public void testFindLocationIds() throws Exception {
-		Pair idsModel = Pair.of(Collections.singletonList("location-id-1"), 12345l);
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("location-id-1"), 12345l);
 		when(locationService.findAllLocationIds(anyLong(), anyInt())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
@@ -758,7 +758,7 @@ public class LocationResourceTest {
 		verify(locationService).findAllLocationIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"location-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
-		assertEquals(((List<String>)idsModel.getLeft()).get(0), actualLocationIdList.get(0));
+		assertEquals((idsModel.getLeft()).get(0), actualLocationIdList.get(0));
 		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 	}
 

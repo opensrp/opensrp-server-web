@@ -294,10 +294,10 @@ public class PlanResource {
 											  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
-			Pair planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted);
+			Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted);
 			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers((List<String>)planIdsPair.getLeft());
-			identifiers.setLastServerVersion((Long) planIdsPair.getRight());
+			identifiers.setIdentifiers(planIdsPair.getLeft());
+			identifiers.setLastServerVersion(planIdsPair.getRight());
 
 			return new ResponseEntity<>(
 					gson.toJson(identifiers), HttpStatus.OK);

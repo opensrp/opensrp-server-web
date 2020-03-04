@@ -298,7 +298,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testFindAllTaskIds() throws Exception {
-		Pair idsModel = Pair.of(Collections.singletonList("task-id-1"), 12345l);
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("task-id-1"), 12345l);
 		when(taskService.findAllTaskIds(anyLong(), anyInt())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
@@ -310,7 +310,7 @@ public class TaskResourceTest {
 		verify(taskService, times(1)).findAllTaskIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(taskService);
 		assertEquals("{\"identifiers\":[\"task-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
-		assertEquals(((List<String>)idsModel.getLeft()).get(0), actualTaskIdList.get(0));
+		assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
 		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 	}
 
