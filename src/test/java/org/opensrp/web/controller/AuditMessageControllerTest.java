@@ -16,7 +16,6 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.motechproject.util.DateUtil;
 import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.Auditor;
 import org.opensrp.web.controller.AuditMessageController.AuditMessageItem;
@@ -30,8 +29,8 @@ public class AuditMessageControllerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        now = DateUtil.now();
-        yesterday = DateUtil.now().minusDays(1);
+        now = DateTime.now();
+        yesterday =DateTime.now().minusDays(1);
     }
 
     @Test
