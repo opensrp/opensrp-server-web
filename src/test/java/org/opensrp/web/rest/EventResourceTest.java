@@ -162,14 +162,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         Map<String, Object> expectedFamilyMap = new Gson().fromJson(expectedFamilyClientEventObject,new TypeToken<Map<String, Object>>() {}.getType());
 
 
-        String baseEntityIdList = "[\"5dd43b2e-a873-444b-b527-95c4b040a5bb\"]";
+        String jsonObjectPayload = "{\"baseEntityIds\":[\"5dd43b2e-a873-444b-b527-95c4b040a5bb\"],\"withFamilyEvents\":true}";
 
         doReturn(expectedMap).when(eventResource).sync(null, null, "5dd43b2e-a873-444b-b527-95c4b040a5bb", "0", null, null, null);
         doReturn(expectedFamilyMap).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4", "0", null, null, null);
 
-        ResponseEntity<String> clientEventsResponseEntity =  eventResource.syncClientsAndEventsByBaseEntityIds(baseEntityIdList);
+        ResponseEntity<String> clientEventsResponseEntity =  eventResource.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
         verify(eventResource).syncClientsAndEventsByBaseEntityIds(stringArgumentCaptor.capture());
-        assertEquals(stringArgumentCaptor.getValue(), baseEntityIdList);
+        assertEquals(stringArgumentCaptor.getValue(), jsonObjectPayload);
 
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
         assertEquals(1, array.length());
