@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+
+import com.oracle.javafx.jmx.json.JSONException;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -176,24 +178,34 @@ public class EventResource extends RestResource<Event> {
 	 * Fetch clients and associated events allongside family registration events for the family that they attached to
 	 * for the list of base entity ids passed
 	 *
-	 * @param baseEntityIds
+	 * @param jsonObject Json Object containing a jsonArray baseEntityIds, and an optional boolean withFamilyEvents for obtaining family events.
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync-by-base-entity-ids", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String baseEntityIds) {
+	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String jsonObject) {
 		Map<String, Object> response = new HashMap<>();
-		List<String> baseEntityIdsList = gson.fromJson(baseEntityIds,new TypeToken<ArrayList<String>>() {}.getType());
 		List<Object> clientsEventsList = new ArrayList<>();
+
 		try {
+			JSONObject object = new JSONObject(jsonObject);
+			boolean withFamilyEvents = false;
+			try {
+				withFamilyEvents = object.getBoolean("withFamilyEvents");
+			}catch (JSONException e){
+				logger.error("", e);
+			}
+
+			List<String> baseEntityIdsList = gson.fromJson(object.getJSONArray("baseEntityIds").toString(),new TypeToken<ArrayList<String>>() {}.getType());
 			for(String baseEntityId:baseEntityIdsList){
 				Map<String, Object> clientEventsMap = sync(null, null, baseEntityId,
 						"0", null, null, null);
 
 				if(clientEventsMap.containsKey("clients")){
 					List<Client> clients = gson.fromJson(gson.toJson(clientEventsMap.get("clients")),new TypeToken<List<Client>>() {}.getType());
-					//Obtaining family registration events for client's family
-					if(clients.size()==1 && clients.get(0).getRelationships().containsKey("family")){
+
+					//Obtaining family registration events for client's family if withFamilyEvents is true.
+					if(clients.size()==1 && clients.get(0).getRelationships().containsKey("family") && withFamilyEvents){
 						List<String> clientRelationships = clients.get(0).getRelationships().get("family");
 						for(String familyRelationship:clientRelationships){
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship,
