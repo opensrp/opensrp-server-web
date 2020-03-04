@@ -128,7 +128,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
-        String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "& is_Deleted=" + true + "&serverVersion=0";
+        String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "&is_deleted=" + true + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
@@ -156,7 +156,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(null, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
-        String parameter = "is_Deleted=" + true + "&serverVersion=0";
+        String parameter = "is_deleted=" + true + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();

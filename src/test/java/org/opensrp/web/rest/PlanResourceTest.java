@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +29,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
@@ -494,7 +494,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("plan-id-1"), 12345l);
-        when(planService.findAllIds(anyLong(), anyInt(), (Date) any())).thenReturn(idsModel);
+        when(planService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
                 .andReturn();
 
@@ -503,7 +503,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(planService).findAllIds(anyLong(), anyInt(), (Date) any());
+        verify(planService).findAllIds(anyLong(), anyInt(), anyBoolean());
         verifyNoMoreInteractions(planService);
         assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));

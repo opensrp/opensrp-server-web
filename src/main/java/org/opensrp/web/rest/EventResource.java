@@ -414,7 +414,7 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> getAllIdsByEventType(
+	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 			@RequestParam(value = SERVER_VERSION)  long serverVersion,
 			@RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
@@ -425,11 +425,11 @@ public class EventResource extends RestResource<Event> {
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
-			return new ResponseEntity<>(gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
 		catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.warn(e.getMessage(), e);
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 	}

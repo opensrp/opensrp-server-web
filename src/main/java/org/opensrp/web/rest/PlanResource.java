@@ -290,7 +290,7 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
+	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
 										  @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
 
 		try {
@@ -299,10 +299,9 @@ public class PlanResource {
 			identifiers.setIdentifiers(planIdsPair.getLeft());
 			identifiers.setLastServerVersion(planIdsPair.getRight());
 
-			return new ResponseEntity<>(
-					gson.toJson(identifiers), HttpStatus.OK);
+			return new ResponseEntity<>(identifiers, HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

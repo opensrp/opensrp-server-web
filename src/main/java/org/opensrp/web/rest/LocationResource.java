@@ -365,7 +365,7 @@ public class LocationResource {
 	 */
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds(
+	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
@@ -374,10 +374,9 @@ public class LocationResource {
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(structureIdsPair.getLeft());
 			identifiers.setLastServerVersion(structureIdsPair.getRight());
-			return new ResponseEntity<>(
-					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -428,7 +427,7 @@ public class LocationResource {
 	 */
 	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findLocationIds(
+	public ResponseEntity<Identifier> findLocationIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
@@ -437,10 +436,9 @@ public class LocationResource {
 			identifiers.setIdentifiers(locationIdsPair.getLeft());
 			identifiers.setLastServerVersion(locationIdsPair.getRight());
 			
-			return new ResponseEntity<>(
-					gson.toJson(identifiers), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
