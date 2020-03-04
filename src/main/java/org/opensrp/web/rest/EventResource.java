@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +74,8 @@ public class EventResource extends RestResource<Event> {
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
 
-	public static final String DATE_DELETED = "dateDeleted";
+	private static final String IS_DELETED = "is_deleted";
+	private static final String FALSE = "false";
 
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
@@ -418,11 +417,11 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<String> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 			@RequestParam(value = SERVER_VERSION)  long serverVersion,
-			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
+			@RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
 
 		try {
 
-			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, dateDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());

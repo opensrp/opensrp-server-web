@@ -6,7 +6,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,6 @@ import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +38,6 @@ import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.rest.EventResource.DATE_DELETED;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
@@ -59,7 +56,11 @@ public class PlanResource {
 	private PlanService planService;
 	
 	private PhysicalLocationService locationService;
-	
+
+	private static final String IS_DELETED = "is_deleted";
+
+	private static final String FALSE = "false";
+
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -290,11 +291,10 @@ public class PlanResource {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
-										  @RequestParam(value = DATE_DELETED, required = false )
-											  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
+										  @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
 
 		try {
-			Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, dateDeleted);
+			Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(planIdsPair.getLeft());
 			identifiers.setLastServerVersion(planIdsPair.getRight());
