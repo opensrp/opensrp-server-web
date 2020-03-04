@@ -18,6 +18,7 @@
     
     <import resource="classpath:applicationContext-opensrp.xml"/>
     <import resource="classpath:applicationContext-connector.xml"/>
+     <import resource="couchDbContext.xml"/>
     <import resource="securityContext.xml"/>
 
     <mvc:default-servlet-handler/>
