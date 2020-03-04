@@ -1,7 +1,7 @@
 package org.opensrp.web.security;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,10 +39,10 @@ public class AccessConfirmationControllerTest {
 	public void testGetAccessConfirmation() throws Exception {
 		AuthorizationRequest clientAuth = mock(AuthorizationRequest.class);
 		ClientDetails client = mock(ClientDetails.class);
-		when(clientDetailsService.loadClientByClientId(anyString())).thenReturn(client);
+		when(clientDetailsService.loadClientByClientId(null)).thenReturn(client);
 		model.put("authorizationRequest", clientAuth);
 		ModelAndView modelAndView = controller.getAccessConfirmation(model);
-		verify(clientDetailsService).loadClientByClientId(anyString());
+		verify(clientDetailsService).loadClientByClientId(eq(null));
 		assertEquals(clientAuth, modelAndView.getModel().get("auth_request"));
 		assertEquals(client, modelAndView.getModel().get("client"));
 		assertEquals("access_confirmation", modelAndView.getViewName());
