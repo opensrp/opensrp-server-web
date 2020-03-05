@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
-import com.oracle.javafx.jmx.json.JSONException;
 import org.joda.time.DateTime;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
