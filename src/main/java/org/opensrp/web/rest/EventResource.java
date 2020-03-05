@@ -7,11 +7,11 @@ import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -21,12 +21,13 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.Constants;
+import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +49,7 @@ import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
+import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -72,7 +74,8 @@ public class EventResource extends RestResource<Event> {
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
 
-	public static final String DATE_DELETED = "dateDeleted";
+	private static final String IS_DELETED = "is_deleted";
+	private static final String FALSE = "false";
 
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
@@ -403,26 +406,30 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	/**
-	 * Fetch events ids filtered by eventType
+	 * Fetch events ids filtered by eventType sorted by server version ascending
 	 *
 	 * @param eventType
-	 * @return A list of event ids
+	 * @return A list of event ids and last server version
 	 */
 	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> getAllIdsByEventType(
+	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
-			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
 
 		try {
-			
-			List<String> eventIds = eventService.findAllIdsByEventType(eventType, dateDeleted);
-			return new ResponseEntity<>(gson.toJson(eventIds), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers(eventIdsPair.getLeft());
+			identifiers.setLastServerVersion(eventIdsPair.getRight());
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
 		catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.warn(e.getMessage(), e);
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 	}
