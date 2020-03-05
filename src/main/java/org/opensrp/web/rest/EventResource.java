@@ -211,10 +211,14 @@ public class EventResource extends RestResource<Event> {
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
 							
 							JsonArray events = (JsonArray) gson.toJsonTree(clientEventsMap.get(Constants.EVENTS));
+							int numberOfEvents = ((Double) clientEventsMap.get(Constants.NO_OF_EVENTS)).intValue();
+							numberOfEvents += events.size();
+							
 							events.addAll((JsonArray) gson.toJsonTree(familyEvents.get(Constants.EVENTS)));
 							
 							//adding the family registration events to the client's events list
 							clientEventsMap.put(Constants.EVENTS, events);
+							clientEventsMap.put(Constants.NO_OF_EVENTS, numberOfEvents);
 						}
 						
 					}

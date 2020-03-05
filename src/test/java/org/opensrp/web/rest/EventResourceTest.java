@@ -190,6 +190,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
 		assertEquals(1, array.length());
 		assertEquals(2, array.getJSONObject(0).getJSONArray("events").length());
+		assertEquals(2, array.getJSONObject(0).getInt("no_of_events"));
 	}
 	
 	@Override
