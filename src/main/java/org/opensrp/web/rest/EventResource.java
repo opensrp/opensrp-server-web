@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import org.joda.time.DateTime;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
@@ -176,14 +175,7 @@ public class EventResource extends RestResource<Event> {
 		
 		try {
 			JSONObject object = new JSONObject(jsonObject);
-			boolean withFamilyEvents = false;
-			try {
-				withFamilyEvents = object.getBoolean(Constants.WITH_FAMILY_EVENTS);
-			}
-			catch (JSONException e) {
-				logger.error("", e);
-			}
-			
+			boolean withFamilyEvents = object.optBoolean(Constants.WITH_FAMILY_EVENTS, false);
 			List<String> baseEntityIdsList = gson.fromJson(object.getJSONArray(Constants.BASE_ENTITY_IDS).toString(),
 			    new TypeToken<ArrayList<String>>() {}.getType());
 			for (String baseEntityId : baseEntityIdsList) {
@@ -344,7 +336,7 @@ public class EventResource extends RestResource<Event> {
 			
 			if (syncData.has(Constants.CLIENTS)) {
 				
-				ArrayList<Client> clients = (ArrayList<Client>) gson.fromJson(syncData.getString(Constants.CLIENTS),
+				ArrayList<Client> clients = gson.fromJson(syncData.getString(Constants.CLIENTS),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				for (Client client : clients) {
 					try {
@@ -359,7 +351,7 @@ public class EventResource extends RestResource<Event> {
 				
 			}
 			if (syncData.has(Constants.EVENTS)) {
-				ArrayList<Event> events = (ArrayList<Event>) gson.fromJson(syncData.getString(Constants.EVENTS),
+				ArrayList<Event> events = gson.fromJson(syncData.getString(Constants.EVENTS),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
