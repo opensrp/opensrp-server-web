@@ -6,6 +6,8 @@ public interface Constants {
 
     int DEFAULT_LIMIT = 25;
 
+    int DEFAULT_GET_ALL_IDS_LIMIT = 5000;
+
     String WITH_FAMILY_EVENTS = "withFamilyEvents";
     String BASE_ENTITY_IDS = "baseEntityIds";
     String CLIENTS = "clients";
