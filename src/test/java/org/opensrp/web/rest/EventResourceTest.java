@@ -195,18 +195,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         doReturn(expectedFamilyMap).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4", "0", null,
                 null, null);
 
-        ResponseEntity<String> clientEventsResponseEntity = eventResource
-                .syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
+        ResponseEntity<String> clientEventsResponseEntity = eventResource.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
         verify(eventResource).syncClientsAndEventsByBaseEntityIds(stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getValue(), jsonObjectPayload);
 
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
         assertEquals(2, array.length());
 
-
-
-        ResponseEntity<String> emptyClientEventsResponseEntity = eventResource
-                .syncClientsAndEventsByBaseEntityIds("");
+        ResponseEntity<String> emptyClientEventsResponseEntity = eventResource.syncClientsAndEventsByBaseEntityIds("");
 
         JSONObject errorObject = new JSONObject(emptyClientEventsResponseEntity.getBody());
         assertTrue(errorObject.has("msg"));

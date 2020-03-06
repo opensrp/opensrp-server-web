@@ -109,7 +109,7 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 		try {
 			String providerId = getStringFilter(PROVIDER_ID, request);
 			String locationId = getStringFilter(LOCATION_ID, request);
@@ -133,8 +133,7 @@ public class EventResource extends RestResource<Event> {
 		catch (
 
 		Exception e) {
-
-			response.put(Constants.MSG, "Error occurred");
+			response.put(Constants.MSG, org.opensrp.web.Constants.ERROR_OCCURRED);
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -150,7 +149,7 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) {
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 		try {
 
 			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
@@ -208,9 +207,7 @@ public class EventResource extends RestResource<Event> {
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
 							clientsEventsList.add(familyEvents);
 						}
-
 					}
-
 				}
 			}
 
@@ -228,7 +225,7 @@ public class EventResource extends RestResource<Event> {
 	        String team, String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
-			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
 		}
 
 		EventSearchBean eventSearchBean = new EventSearchBean();
@@ -239,15 +236,15 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setBaseEntityId(baseEntityId);
 		eventSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return getEventsAndClients(eventSearchBean, limit == null || limit.intValue() == 0 ? 25 : limit);
+		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit);
 
 	}
 
 	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
-		Map<String, Object> response = new HashMap<String, Object>();
-		List<Event> events = new ArrayList<Event>();
-		List<String> clientIds = new ArrayList<String>();
-		List<Client> clients = new ArrayList<Client>();
+		Map<String, Object> response = new HashMap<>();
+		List<Event> events;
+		List<String> clientIds = new ArrayList<>();
+		List<Client> clients = new ArrayList<>();
 		long startTime = System.currentTimeMillis();
 		events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
@@ -259,7 +256,7 @@ public class EventResource extends RestResource<Event> {
 				}
 			}
 			for (int i = 0; i < clientIds.size(); i = i + CLIENTS_FETCH_BATCH_SIZE) {
-				int end = i + CLIENTS_FETCH_BATCH_SIZE < clientIds.size() ? i + CLIENTS_FETCH_BATCH_SIZE : clientIds.size();
+				int end = Math.min(i + CLIENTS_FETCH_BATCH_SIZE, clientIds.size());
 				clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
 			}
 			logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
@@ -377,15 +374,6 @@ public class EventResource extends RestResource<Event> {
 		return new ResponseEntity<>(CREATED);
 	}
 
-	/*
-	 * @RequestMapping(method=RequestMethod.GET)
-	 *
-	 * @ResponseBody public Event getByBaseEntityAndFormSubmissionId(@RequestParam
-	 * String baseEntityId, @RequestParam String formSubmissionId) { return
-	 * eventService.getByBaseEntityAndFormSubmissionId(baseEntityId,
-	 * formSubmissionId); }
-	 */
-
 	@Override
 	public Event create(Event o) {
 		return eventService.addEvent(o);
@@ -395,12 +383,8 @@ public class EventResource extends RestResource<Event> {
 	public List<String> requiredProperties() {
 		List<String> p = new ArrayList<>();
 		p.add(BASE_ENTITY_ID);
-		// p.add(FORM_SUBMISSION_ID);
 		p.add(EVENT_TYPE);
-		// p.add(LOCATION_ID);
-		// p.add(EVENT_DATE);
 		p.add(PROVIDER_ID);
-		// p.add(ENTITY_TYPE);
 		return p;
 	}
 
@@ -409,14 +393,10 @@ public class EventResource extends RestResource<Event> {
 		return eventService.mergeEvent(entity);
 	}
 
-	public static void main(String[] args) {
-
-	}
-
 	@Override
 	public List<Event> search(HttpServletRequest request) throws ParseException {
 		String clientId = getStringFilter("identifier", request);
-		DateTime[] eventDate = getDateRangeFilter(EVENT_DATE, request);// TODO
+		DateTime[] eventDate = getDateRangeFilter(EVENT_DATE, request);
 		String eventType = getStringFilter(EVENT_TYPE, request);
 		String location = getStringFilter(LOCATION_ID, request);
 		String provider = getStringFilter(PROVIDER_ID, request);
