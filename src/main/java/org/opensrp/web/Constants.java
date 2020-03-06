@@ -15,4 +15,5 @@ public interface Constants {
     String MSG = "msg";
     String EVENTS = "events";
     String NO_OF_EVENTS = "no_of_events";
+    String ERROR_OCCURRED = "Error occurred";
 }

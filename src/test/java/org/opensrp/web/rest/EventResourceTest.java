@@ -17,6 +17,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -194,15 +195,19 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         doReturn(expectedFamilyMap).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4", "0", null,
                 null, null);
 
-        ResponseEntity<String> clientEventsResponseEntity = eventResource
-                .syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
+        ResponseEntity<String> clientEventsResponseEntity = eventResource.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
         verify(eventResource).syncClientsAndEventsByBaseEntityIds(stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getValue(), jsonObjectPayload);
 
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
-        assertEquals(1, array.length());
-        assertEquals(2, array.getJSONObject(0).getJSONArray("events").length());
-        assertEquals(2, array.getJSONObject(0).getInt("no_of_events"));
+        assertEquals(2, array.length());
+
+        ResponseEntity<String> emptyClientEventsResponseEntity = eventResource.syncClientsAndEventsByBaseEntityIds("");
+
+        JSONObject errorObject = new JSONObject(emptyClientEventsResponseEntity.getBody());
+        assertTrue(errorObject.has("msg"));
+        assertTrue(errorObject.getString("msg").contains("Error occurred"));
+
     }
 
 
