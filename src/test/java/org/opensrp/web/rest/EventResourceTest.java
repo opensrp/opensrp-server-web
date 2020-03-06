@@ -17,6 +17,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -201,6 +202,16 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
         assertEquals(2, array.length());
+
+
+
+        ResponseEntity<String> emptyClientEventsResponseEntity = eventResource
+                .syncClientsAndEventsByBaseEntityIds("");
+
+        JSONObject errorObject = new JSONObject(emptyClientEventsResponseEntity.getBody());
+        assertTrue(errorObject.has("msg"));
+        assertTrue(errorObject.getString("msg").contains("Error occurred"));
+
     }
 
 
