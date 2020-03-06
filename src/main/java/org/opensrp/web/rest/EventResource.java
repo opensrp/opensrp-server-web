@@ -60,20 +60,21 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 @RequestMapping(value = "/rest/event")
 public class EventResource extends RestResource<Event> {
-	
+
 	private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
-	
+
 	private EventService eventService;
-	
+
 	private ClientService clientService;
-	
+
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-	
+
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
 
 	private static final String IS_DELETED = "is_deleted";
+
 	private static final String FALSE = "false";
 
 	@Autowired
@@ -99,8 +100,8 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	/**
-	 * Fetch events ordered by serverVersion ascending order and return the clients associated with
-	 * the events
+	 * Fetch events ordered by serverVersion ascending order and return the clients associated with the
+	 * events
 	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error occurs
@@ -140,10 +141,10 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	/**
-	 * Fetch events ordered by serverVersion ascending order and return the clients associated with
-	 * the events
+	 * Fetch events ordered by serverVersion ascending order and return the clients associated with the
+	 * events
 	 *
-	 * @param request
+	 * @param syncParam Parameters passed for sync
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -207,8 +208,14 @@ public class EventResource extends RestResource<Event> {
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
 
 							JsonArray events = (JsonArray) gson.toJsonTree(clientEventsMap.get(Constants.EVENTS));
-							int numberOfEvents = ((Double) clientEventsMap.get(Constants.NO_OF_EVENTS)).intValue();
-							numberOfEvents += events.size();
+
+							int numberOfEvents = events.size();
+
+							if (clientEventsMap.get(Constants.NO_OF_EVENTS) instanceof Integer)
+								numberOfEvents += (Integer) clientEventsMap.get(Constants.NO_OF_EVENTS);
+							else if (clientEventsMap.get(Constants.NO_OF_EVENTS) instanceof Double) {
+								numberOfEvents += ((Double) clientEventsMap.get(Constants.NO_OF_EVENTS)).intValue();
+							}
 
 							events.addAll((JsonArray) gson.toJsonTree(familyEvents.get(Constants.EVENTS)));
 
@@ -226,7 +233,7 @@ public class EventResource extends RestResource<Event> {
 
 		}
 		catch (Exception e) {
-			response.put(Constants.MSG, "Error occurred");
+			response.put(Constants.MSG, "Error occurred: " + e.getLocalizedMessage());
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -307,10 +314,9 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	/**
-	 * Fetch events ordered by serverVersion ascending order and return the clients associated with
-	 * the events
+	 * Fetch events ordered by serverVersion ascending order and return the clients associated with the
+	 * events
 	 *
-	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -345,7 +351,7 @@ public class EventResource extends RestResource<Event> {
 
 			if (syncData.has("clients")) {
 
-				ArrayList<Client> clients = (ArrayList<Client>) gson.fromJson(syncData.getString("clients"),
+				ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				for (Client client : clients) {
 					try {
@@ -360,7 +366,7 @@ public class EventResource extends RestResource<Event> {
 
 			}
 			if (syncData.has("events")) {
-				ArrayList<Event> events = (ArrayList<Event>) gson.fromJson(syncData.getString("events"),
+				ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
@@ -474,12 +480,13 @@ public class EventResource extends RestResource<Event> {
 	@ResponseBody
 	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
-			@RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
+	        @RequestParam(value = SERVER_VERSION) long serverVersion,
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
 
 		try {
 
-			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion, Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
+			    Constants.DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
@@ -499,5 +506,5 @@ public class EventResource extends RestResource<Event> {
 	public void setClientService(ClientService clientService) {
 		this.clientService = clientService;
 	}
-	
+
 }
