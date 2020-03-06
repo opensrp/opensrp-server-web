@@ -206,22 +206,7 @@ public class EventResource extends RestResource<Event> {
 						List<String> clientRelationships = clients.get(0).getRelationships().get(Constants.FAMILY);
 						for (String familyRelationship : clientRelationships) {
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
-
-							JsonArray events = (JsonArray) gson.toJsonTree(clientEventsMap.get(Constants.EVENTS));
-
-							int numberOfEvents = events.size();
-
-							if (clientEventsMap.get(Constants.NO_OF_EVENTS) instanceof Integer)
-								numberOfEvents += (Integer) clientEventsMap.get(Constants.NO_OF_EVENTS);
-							else if (clientEventsMap.get(Constants.NO_OF_EVENTS) instanceof Double) {
-								numberOfEvents += ((Double) clientEventsMap.get(Constants.NO_OF_EVENTS)).intValue();
-							}
-
-							events.addAll((JsonArray) gson.toJsonTree(familyEvents.get(Constants.EVENTS)));
-
-							//adding the family registration events to the client's events list
-							clientEventsMap.put(Constants.EVENTS, events);
-							clientEventsMap.put(Constants.NO_OF_EVENTS, numberOfEvents);
+							clientEventsMap.putAll(familyEvents);
 						}
 
 					}

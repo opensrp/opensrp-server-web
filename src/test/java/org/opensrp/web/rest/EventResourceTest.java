@@ -200,9 +200,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         assertEquals(stringArgumentCaptor.getValue(), jsonObjectPayload);
 
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
-        assertEquals(1, array.length());
-        assertEquals(2, array.getJSONObject(0).getJSONArray("events").length());
-        assertEquals(2, array.getJSONObject(0).getInt("no_of_events"));
+        assertEquals(2, array.length());
     }
 
 
