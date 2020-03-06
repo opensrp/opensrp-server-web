@@ -2,13 +2,6 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.junit.Before;
@@ -21,15 +14,12 @@ import org.opensrp.service.EventService;
 import org.opensrp.web.bean.Identifier;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
+import java.util.*;
+
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
@@ -43,9 +33,6 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
-    @Captor
-    private ArgumentCaptor<Date> dateArgumentCaptor = ArgumentCaptor.forClass(Date.class);
 
     @Captor
     private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
@@ -208,6 +195,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         JSONArray array = new JSONArray(clientEventsResponseEntity.getBody());
         assertEquals(1, array.length());
         assertEquals(2, array.getJSONObject(0).getJSONArray("events").length());
+        assertEquals(2, array.getJSONObject(0).getInt("no_of_events"));
     }
 
 
