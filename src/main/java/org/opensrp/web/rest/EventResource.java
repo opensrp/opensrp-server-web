@@ -133,7 +133,7 @@ public class EventResource extends RestResource<Event> {
 		catch (
 
 		Exception e) {
-			response.put(Constants.MSG, org.opensrp.web.Constants.ERROR_OCCURRED);
+			response.put(Constants.MSG, Constants.ERROR_OCCURRED);
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
