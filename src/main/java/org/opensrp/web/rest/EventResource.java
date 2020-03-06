@@ -195,7 +195,7 @@ public class EventResource extends RestResource<Event> {
 			    new TypeToken<ArrayList<String>>() {}.getType());
 			for (String baseEntityId : baseEntityIdsList) {
 				Map<String, Object> clientEventsMap = sync(null, null, baseEntityId, "0", null, null, null);
-
+				clientsEventsList.add(clientEventsMap);
 				if (clientEventsMap.containsKey(Constants.CLIENTS)) {
 					List<Client> clients = gson.fromJson(gson.toJson(clientEventsMap.get(Constants.CLIENTS)),
 					    new TypeToken<List<Client>>() {}.getType());
@@ -206,11 +206,11 @@ public class EventResource extends RestResource<Event> {
 						List<String> clientRelationships = clients.get(0).getRelationships().get(Constants.FAMILY);
 						for (String familyRelationship : clientRelationships) {
 							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
-							clientEventsMap.putAll(familyEvents);
+							clientsEventsList.add(familyEvents);
 						}
 
 					}
-					clientsEventsList.add(clientEventsMap);
+
 				}
 			}
 
