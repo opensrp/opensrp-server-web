@@ -11,10 +11,11 @@
 	<security:http pattern="/css/**" security="none" />
 	<security:http pattern="/images/**" security="none" />
       
+	<!-- //TODO  to remove 
 	<beans profile="oauth2">
 		<import resource="oauth-authorization.xml" />
 		<import resource="oauth-common.xml" />
-	</beans>
+	</beans> -->
 
 	<beans profile="basic_auth">
 		<import resource="basic_auth.xml" />
