@@ -1,7 +1,28 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,27 +39,8 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.springframework.test.web.server.MvcResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -205,7 +207,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         List<String> planIdList = new ArrayList<>();
         planIdList.add(expectedPlan.getIdentifier());
 
-        doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(anyList(), anyList());
+        doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(anyList(), eq(null) );
 
         String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, status().isOk());
         List<PlanDefinition>  actualPlanList = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
