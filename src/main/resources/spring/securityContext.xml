@@ -5,9 +5,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
 
 	<bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider"/>
-	
-	<beans profile="basic_auth">
-		<import resource="basic_auth.xml" />
-	</beans>
 
 </beans>

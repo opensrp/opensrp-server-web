@@ -1,16 +1,14 @@
 /**
  * 
  */
-package org.opensrp.web.config.oauth;
+package org.opensrp.web.config.security;
 
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.web.config.Role;
-import org.opensrp.web.security.OauthAuthenticationProvider;
+import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -25,11 +23,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @EnableWebSecurity
 @Configuration
-@Profile("oauth2")
-public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
+@Profile("basic_auth")
+public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
-	private OpenmrsUserService openmrsUserService;
+	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -42,7 +40,7 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(authenticationProvider());
+		auth.authenticationProvider(opensrpAuthenticationProvider);
 	}
 	
 	@Override
@@ -56,12 +54,5 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
 	public BCryptPasswordEncoder passwordEncoder() {
 	    return new BCryptPasswordEncoder();
 	}
-	
-	
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-	    return new OauthAuthenticationProvider(openmrsUserService);
-	}
-	
 	
 }
