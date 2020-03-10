@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * @author Samuel Githengi created on 03/10/20
@@ -40,7 +41,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.failureUrl("/login.jsp?authentication_error=true")
 		        .and()
 		        	.logout()
-		        	.logoutUrl("/logout.do")
+		        	.logoutRequestMatcher(new AntPathRequestMatcher("/logout.do") )
 		        	.logoutSuccessUrl("/index.html")
 		        .and()
 		        	.httpBasic()
