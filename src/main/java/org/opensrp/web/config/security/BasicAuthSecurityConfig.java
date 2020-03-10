@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -36,7 +37,13 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
+		configureOpenSRPBasicSecurity(http).mvcMatchers("/**").hasRole(Role.OPENMRS);
+		applyBasicAndStateless(http);
+	}
+	
+	
+	protected ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureOpenSRPBasicSecurity(HttpSecurity http) throws Exception {
+		return http.authorizeRequests()
 		.mvcMatchers("/index.html").anonymous()
 		.mvcMatchers("/").anonymous()
 		.mvcMatchers("/multimedia/download/**").anonymous()
@@ -45,13 +52,15 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
 		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
-		.mvcMatchers(HttpMethod.OPTIONS,"/**").anonymous()
-		.mvcMatchers("/**").hasRole(Role.OPENMRS)
-		.anyRequest().authenticated()
-		.and().httpBasic()
-		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		.mvcMatchers(HttpMethod.OPTIONS,"/**").anonymous();
+		
 	}
 	
+	protected HttpSecurity applyBasicAndStateless(HttpSecurity http) throws Exception {
+		return http.httpBasic().and()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
+		
+	}
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(opensrpAuthenticationProvider);
@@ -60,8 +69,8 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().mvcMatchers("/js/**")
-		.and().ignoring().mvcMatchers("/css/**")
-		.and().ignoring().mvcMatchers("/images/**");
+			.and().ignoring().mvcMatchers("/css/**")
+			.and().ignoring().mvcMatchers("/images/**");
 	}
 	
 	@Bean
