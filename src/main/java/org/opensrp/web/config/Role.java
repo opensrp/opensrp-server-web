@@ -9,4 +9,6 @@ package org.opensrp.web.config;
  */
 public interface Role {
 	 String OPENMRS ="OPENMRS";
+	 
+	 String ALL_EVENTS ="ALL_EVENTS";
 }

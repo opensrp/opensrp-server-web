@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -36,7 +37,16 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-		.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
+		.mvcMatchers("/index.html").anonymous()
+		.mvcMatchers("/").anonymous()
+		.mvcMatchers("/multimedia/download/**").anonymous()
+		.mvcMatchers("/multimedia/profileimage/**").anonymous()
+		.mvcMatchers("/multimedia/media/**").anonymous()
+		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
+		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
+		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
+		.mvcMatchers(HttpMethod.OPTIONS,"/**").anonymous()
+		.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		.anyRequest().authenticated()
 		.and().httpBasic()
 		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
