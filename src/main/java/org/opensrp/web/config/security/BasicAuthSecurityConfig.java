@@ -44,15 +44,15 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	protected ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureOpenSRPBasicSecurity(HttpSecurity http) throws Exception {
 		return http.authorizeRequests()
-		.mvcMatchers("/index.html").anonymous()
-		.mvcMatchers("/").anonymous()
-		.mvcMatchers("/multimedia/download/**").anonymous()
-		.mvcMatchers("/multimedia/profileimage/**").anonymous()
-		.mvcMatchers("/multimedia/media/**").anonymous()
-		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
-		.mvcMatchers("/rest/viewconfiguration/**").anonymous()
+		.mvcMatchers("/index.html").permitAll()
+		.mvcMatchers("/").permitAll()
+		.mvcMatchers("/multimedia/download/**").permitAll()
+		.mvcMatchers("/multimedia/profileimage/**").permitAll()
+		.mvcMatchers("/multimedia/media/**").permitAll()
+		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
+		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
-		.mvcMatchers(HttpMethod.OPTIONS,"/**").anonymous();
+		.mvcMatchers(HttpMethod.OPTIONS,"/**").permitAll();
 		
 	}
 	

@@ -28,7 +28,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		configureOpenSRPBasicSecurity(http)
-				.antMatchers("/login**").anonymous()
+				.mvcMatchers("/login**").permitAll()
 				.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		        .and()
 		        	.formLogin()
