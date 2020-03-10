@@ -36,7 +36,7 @@
     </div>
 
     <div class="form-group">
-     <authz:csrfInput />  
+    <authz:csrfInput />  
     <input class="btn btn-primary btn-block" type="submit" value="Login" />
     </div>
 
