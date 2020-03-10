@@ -2,15 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:security="http://www.springframework.org/schema/security"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
 
 	<bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider"/>
 	
-	<security:http pattern="/js/**" security="none" />
-	<security:http pattern="/css/**" security="none" />
-	<security:http pattern="/images/**" security="none" />
-      
 	<beans profile="basic_auth">
 		<import resource="basic_auth.xml" />
 	</beans>
