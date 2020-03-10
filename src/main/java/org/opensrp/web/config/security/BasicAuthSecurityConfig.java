@@ -26,8 +26,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Profile("basic_auth")
 public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	@Autowired
 	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
+	
+	@Autowired
+	public void setOpensrpAuthenticationProvider(DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
+		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
+	}
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
