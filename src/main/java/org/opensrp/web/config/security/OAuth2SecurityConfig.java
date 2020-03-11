@@ -50,7 +50,10 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
 		        	.enableSessionUrlRewriting(true)
 		        .and()
-		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true");
+		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
+		        .and()
+		        	.csrf()
+		        	.ignoringAntMatchers("/rest/**");
 	}
 	
 }
