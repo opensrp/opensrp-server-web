@@ -1,8 +1,7 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,9 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -53,9 +51,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
 
 @Controller
 public class UserController {
@@ -195,9 +192,9 @@ public class UserController {
 		} catch (Exception e) {
 			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
 		}
-		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
+		if (StringUtils.isBlank(lid)) {
 			lid = (String) u.getAttribute("Location");
-			if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
+			if (StringUtils.isBlank(lid)) {
 				lid = (String) u.getAttribute("Locations");
 				if (lid == null) {
 					throw new IllegalStateException(

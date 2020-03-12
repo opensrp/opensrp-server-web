@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
 import org.json.JSONException;
@@ -27,8 +28,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.mysql.jdbc.StringUtils;
 
 @Controller
 @RequestMapping ("/rest/rapid/client")
@@ -68,9 +67,9 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 		String birthdate = req.getParameter("birthdate");
 		String identifier = req.getParameter("identifier");
 		
-		if(StringUtils.isEmptyOrWhitespaceOnly(identifier)
-				|| StringUtils.isEmptyOrWhitespaceOnly(firstName)||StringUtils.isEmptyOrWhitespaceOnly(lastName)
-				||StringUtils.isEmptyOrWhitespaceOnly(gender)||StringUtils.isEmptyOrWhitespaceOnly(birthdate)){
+		if(StringUtils.isBlank(identifier)
+				|| StringUtils.isBlank(firstName)||StringUtils.isBlank(lastName)
+				||StringUtils.isBlank(gender)||StringUtils.isBlank(birthdate)){
 			res.put("ERROR", "Request MUST have parameters identifier, firstName, lastName, gender, birthdate with valid values");
 			return res;
 		}
@@ -152,15 +151,15 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 		String vaccine = req.getParameter("vaccine");
 		
 		try {
-			if(StringUtils.isEmptyOrWhitespaceOnly(vaccine)){
+			if(StringUtils.isBlank(vaccine)){
 				resp.put("ERROR", "vaccine MUST be specified.");
 				return resp;
 			}
-			if(StringUtils.isEmptyOrWhitespaceOnly(date)){
+			if(StringUtils.isBlank(date)){
 				resp.put("ERROR", "date MUST be specified.");
 				return resp;
 			}
-			if(StringUtils.isEmptyOrWhitespaceOnly(id)){
+			if(StringUtils.isBlank(id)){
 				resp.put("ERROR", "clientId MUST be specified.");
 				return resp;
 			}
