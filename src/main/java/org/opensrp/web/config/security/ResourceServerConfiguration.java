@@ -34,9 +34,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	private JdbcTokenStore jdbcTokenStore;
 	
 	@Autowired
-	private AccessDecisionManager accessDecisionManager;
-	
-	@Autowired
 	private OAuth2AuthenticationEntryPoint oauthAuthenticationEntryPoint;
 	
 	@Autowired
@@ -62,7 +59,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		.requestMatchers().mvcMatchers("/rest/**")
 		.and()
 			.authorizeRequests()
-			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS).accessDecisionManager(accessDecisionManager)
+			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
 		.and()
 			.exceptionHandling().accessDeniedHandler(oauthAccessDeniedHandler)
 		.and()

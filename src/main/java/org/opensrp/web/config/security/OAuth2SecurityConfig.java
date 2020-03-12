@@ -28,10 +28,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
-	
-	@Autowired
-	private AccessDecisionManager accessDecisionManager;
-	
 	/*@Autowired
 	private AuthenticationEntryPoint authenticationEntryPoint;*/
 	
@@ -50,7 +46,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		http.authorizeRequests().antMatchers("/oauth/token").permitAll();
 		configureOpenSRPBasicSecurity(http)
 				.mvcMatchers("/login**").permitAll()
-				.antMatchers("/oauth/token").permitAll().accessDecisionManager(accessDecisionManager)
+				.antMatchers("/oauth/token").permitAll()
 				.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		        .and()
 		        	.formLogin()

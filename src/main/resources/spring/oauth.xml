@@ -28,25 +28,6 @@
 		<property name="realmName" value="OpenSRP" />
 	</bean>
 
-	<bean id="accessDecisionManager"
-		class="org.springframework.security.access.vote.UnanimousBased">
-		<constructor-arg>
-			<list>
-				<bean
-					class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
-			<!-- 	<bean
-					class="org.springframework.security.access.vote.RoleVoter" /> -->
-				<bean
-					class="org.springframework.security.access.vote.AuthenticatedVoter" />
-
-				<bean
-					class="org.springframework.security.web.access.expression.WebExpressionVoter" >
-					<property name="expressionHandler" ref="oauthWebExpressionHandler" />
-				</bean>
-			</list>
-		</constructor-arg>
-	</bean>
-
 	<sec:authentication-manager
 		alias="authenticationManager" erase-credentials="false">
 		<sec:authentication-provider
