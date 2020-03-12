@@ -78,4 +78,12 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	    return new BCryptPasswordEncoder();
 	}
 	
+	
+	/**
+	 * @return the opensrpAuthenticationProvider
+	 */
+	public DrishtiAuthenticationProvider getOpensrpAuthenticationProvider() {
+		return opensrpAuthenticationProvider;
+	}
+	
 }

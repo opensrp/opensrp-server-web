@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+       http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
+
+
+	<bean id="tokenStore"
+		class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
+		<constructor-arg ref="openSRPDataSource" />
+	</bean>
+
+
+	<bean id="userAuthenticationProvider"
+		class="org.opensrp.web.security.OauthAuthenticationProvider">
+	</bean>
+
+	<bean id="oauthAccessDeniedHandler"
+		class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+
+	<bean id="oauthAuthenticationEntryPoint"
+		class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="OpenSRP" />
+	</bean>
+
+	<bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.UnanimousBased">
+		<constructor-arg>
+			<list>
+				<bean
+					class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+			<!-- 	<bean
+					class="org.springframework.security.access.vote.RoleVoter" /> -->
+				<bean
+					class="org.springframework.security.access.vote.AuthenticatedVoter" />
+
+				<bean
+					class="org.springframework.security.web.access.expression.WebExpressionVoter" >
+					<property name="expressionHandler" ref="oauthWebExpressionHandler" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<sec:authentication-manager
+		alias="authenticationManager" erase-credentials="false">
+		<sec:authentication-provider
+			ref="userAuthenticationProvider" />
+	</sec:authentication-manager>
+
+
+	<sec:global-method-security
+		pre-post-annotations="enabled" proxy-target-class="true">
+		<sec:expression-handler
+			ref="oauthExpressionHandler" />
+	</sec:global-method-security>
+
+	<oauth:expression-handler
+		id="oauthExpressionHandler" />
+	<oauth:web-expression-handler
+		id="oauthWebExpressionHandler" />
+
+</beans>
