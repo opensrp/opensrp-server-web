@@ -25,7 +25,6 @@
 		<redis.jedis.version>3.2.0</redis.jedis.version>
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
-		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>2.0.0-alpha3-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.0-alpha2-SNAPSHOT</opensrp.connector.version>
@@ -164,11 +163,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.connector.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
