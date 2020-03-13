@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.config.security;
 
+import java.util.Arrays;
+
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +13,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
+import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
@@ -30,6 +39,16 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	@Autowired
 	@Qualifier("userAuthenticationProvider")
 	private OauthAuthenticationProvider opensrpAuthenticationProvider;
+	
+	@Autowired
+	private ClientDetailsService clientDetailsService;
+	
+	@Autowired
+	private JdbcTokenStore tokenStore;
+	
+	@Autowired
+	private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
+	
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -52,28 +71,51 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.logoutSuccessUrl("/index.html")
 		        .and()
 		        	.httpBasic()
-		        .and()
-		          	.sessionManagement()
-		          	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-		          	.enableSessionUrlRewriting(true)
+		        .authenticationEntryPoint(authenticationEntryPoint)
+		        /*  .and()
+		            	.sessionManagement()
+		            	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+		            	.enableSessionUrlRewriting(true)*/
 		        .and()
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
 		        	.csrf()
-		        	.ignoringAntMatchers("/rest/**");
+		        	.ignoringAntMatchers("/rest/**")
+		        	
+		     ;
 	}
 	
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(opensrpAuthenticationProvider);
+		auth.authenticationProvider(opensrpAuthenticationProvider).eraseCredentials(false);
 	}
 	
 	
 	@Bean(name = "authenticationManagerBean")
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
+		OAuth2AuthenticationManager authenticationManager=new OAuth2AuthenticationManager();
+		authenticationManager.setClientDetailsService(clientDetailsService);
+		authenticationManager.setResourceId(ResourceServerConfiguration.RESOURCE_ID);
+		authenticationManager.setTokenServices(tokenServices());
+		PreAuthenticatedAuthenticationProvider  preAuthenticatedAuthenticationProvider= new PreAuthenticatedAuthenticationProvider();
+		ProviderManager providerManager= new ProviderManager(Arrays.asList(opensrpAuthenticationProvider),authenticationManager);
+		return providerManager;
+	}
+	
+	
+	//@Bean
+	public ClientDetailsUserDetailsService clientDetailsUserService() {
+		return new ClientDetailsUserDetailsService(clientDetailsService);
+	}
+	
+	public DefaultTokenServices tokenServices() {
+		DefaultTokenServices tokenServices= new DefaultTokenServices();
+		tokenServices.setTokenStore(tokenStore);
+		tokenServices.setSupportRefreshToken(true);
+		tokenServices.setClientDetailsService(clientDetailsService);
+		return tokenServices;
 	}
 	
 }

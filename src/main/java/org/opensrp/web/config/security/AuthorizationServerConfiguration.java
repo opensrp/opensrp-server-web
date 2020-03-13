@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.provider.approval.InMemoryApprovalSto
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
  * @author Samuel Githengi created on 03/11/20
@@ -58,6 +60,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 		oauthServer.realm(REALM);
+		oauthServer.addTokenEndpointAuthenticationFilter(new BasicAuthenticationFilter(authenticationManager, new BasicAuthenticationEntryPoint()));;
 	}
 	
 	@Bean

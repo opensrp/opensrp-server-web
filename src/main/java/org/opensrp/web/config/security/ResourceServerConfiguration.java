@@ -25,7 +25,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 @EnableResourceServer
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 	
-	private static final String RESOURCE_ID = "OpenSRP2";
+	public static final String RESOURCE_ID = "OpenSRP2";
 	
 	@Autowired
 	private OAuth2AccessDeniedHandler oauthAccessDeniedHandler;
