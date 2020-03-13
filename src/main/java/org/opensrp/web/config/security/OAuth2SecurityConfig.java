@@ -27,13 +27,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
-	/*@Autowired
-	private AuthenticationEntryPoint authenticationEntryPoint;*/
-	
-	/*@Autowired
-	@Qualifier("authenticationManager")
-	private AuthenticationManager authenticationManager;*/
-	
 	@Autowired
 	@Qualifier("userAuthenticationProvider")
 	private OauthAuthenticationProvider opensrpAuthenticationProvider;
@@ -58,7 +51,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.logoutRequestMatcher(new AntPathRequestMatcher("/logout.do") )
 		        	.logoutSuccessUrl("/index.html")
 		        .and()
-		        	.httpBasic()//.authenticationEntryPoint(authenticationEntryPoint)
+		        	.httpBasic()
 		        .and()
 		          	.sessionManagement()
 		          	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
