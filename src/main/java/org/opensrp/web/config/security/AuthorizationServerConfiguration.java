@@ -39,7 +39,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	
 	
 	@Autowired
-	@Qualifier("authenticationManager")
+	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
 	
 	@Override

@@ -37,7 +37,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	private OAuth2AuthenticationEntryPoint oauthAuthenticationEntryPoint;
 	
 	@Autowired
-	@Qualifier("authenticationManager")
+	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
 
 	@Override

@@ -27,11 +27,4 @@
 		<property name="realmName" value="OpenSRP" />
 	</bean>
 
-	<sec:authentication-manager
-		alias="authenticationManager" erase-credentials="false">
-		<sec:authentication-provider
-			ref="userAuthenticationProvider" />
-	</sec:authentication-manager>
-
-
 </beans>

@@ -79,12 +79,4 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	    return  NoOpPasswordEncoder.getInstance();
 	}
 	
-	
-	/**
-	 * @return the opensrpAuthenticationProvider
-	 */
-	public DrishtiAuthenticationProvider getOpensrpAuthenticationProvider() {
-		return opensrpAuthenticationProvider;
-	}
-	
 }
