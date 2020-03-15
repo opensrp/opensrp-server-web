@@ -288,18 +288,21 @@ public class ClientResource extends RestResource<Client> {
 		
 		String clientType = clientSearchBean.getClientType();
 		int pageNumber = clientSearchBean.getPageNumber();
-		if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(HOUSEHOLD)) {
-			total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ALLCLIENTS)) {
-			total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(ANC)) {
-			clientSearchBean.setClientType(null);
-			total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
-		} else if (pageNumber == FIRST_PAGE && clientType.equalsIgnoreCase(CHILD)) {
-			clientSearchBean.setClientType(null);
-			total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
-		} else {
-			total = NO_TOTAL_COUNT;
+		if (pageNumber == FIRST_PAGE) {
+			if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
+				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
+			} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
+				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean)
+				        .getTotalCount();
+			} else if (clientType.equalsIgnoreCase(ANC)) {
+				clientSearchBean.setClientType(null);
+				total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
+			} else if (clientType.equalsIgnoreCase(CHILD)) {
+				clientSearchBean.setClientType(null);
+				total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
+			} else {
+				total = NO_TOTAL_COUNT;
+			}
 		}
 		return total;
 	}
