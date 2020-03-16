@@ -48,10 +48,8 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/oauth/token").permitAll();
 		configureOpenSRPBasicSecurity(http)
 				.mvcMatchers("/login**").permitAll()
-				.antMatchers("/oauth/token").permitAll()
 				.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		        .and()
 		        	.formLogin()
@@ -71,9 +69,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
 		        	.csrf()
-		        	.ignoringAntMatchers("/rest/**")
-		        	
-		     ;
+		        	.ignoringAntMatchers("/rest/**");
 	}
 	
 	
@@ -95,8 +91,6 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		return providerManager;
 	}
 	
-	
-	//@Bean
 	public ClientDetailsUserDetailsService clientDetailsUserService() {
 		return new ClientDetailsUserDetailsService(clientDetailsService);
 	}
