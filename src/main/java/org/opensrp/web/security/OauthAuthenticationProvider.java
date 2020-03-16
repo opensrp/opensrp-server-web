@@ -21,10 +21,12 @@ public class OauthAuthenticationProvider extends DrishtiAuthenticationProvider i
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		WebAuthenticationDetails authDetails = ((WebAuthenticationDetails) authentication.getDetails());
-		//send requests for basic auth request or requests that dont have session to cache on redis 
-		if (authDetails != null && authDetails.getSessionId() == null) {
-			return super.authenticate(authentication);
+		if (authentication.getDetails() instanceof WebAuthenticationDetails) {
+			WebAuthenticationDetails authDetails = ((WebAuthenticationDetails) authentication.getDetails());
+			//send requests for basic auth request or requests that dont have session to cache on redis 
+			if (authDetails != null && authDetails.getSessionId() == null) {
+				return super.authenticate(authentication);
+			}
 		}
 		User user = getDrishtiUser(authentication, authentication.getName());
 		// get user after authentication
