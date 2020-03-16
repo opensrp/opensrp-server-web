@@ -5,6 +5,8 @@ package org.opensrp.web.config.security;
 
 import java.util.Arrays;
 
+import javax.sql.DataSource;
+
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +34,17 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity(debug = true)
 @Configuration
 @Profile("oauth2")
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
 public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Autowired
-	@Qualifier("userAuthenticationProvider")
 	private OauthAuthenticationProvider opensrpAuthenticationProvider;
 	
 	@Autowired
 	private ClientDetailsService clientDetailsService;
-	
+
+	@Qualifier( value = "openSRPDataSource")
 	@Autowired
-	private JdbcTokenStore tokenStore;
+	private DataSource dataSource;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -102,10 +103,15 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	public DefaultTokenServices tokenServices() {
 		DefaultTokenServices tokenServices= new DefaultTokenServices();
-		tokenServices.setTokenStore(tokenStore);
+		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 		tokenServices.setClientDetailsService(clientDetailsService);
 		return tokenServices;
+	}
+	
+	@Bean
+	public JdbcTokenStore tokenStore() {
+		return new JdbcTokenStore(dataSource);
 	}
 	
 }

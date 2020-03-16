@@ -5,10 +5,9 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider" />
-
-	<import resource="oauth.xml" />
-	<import resource="oauth_clients.xml" />
 	
-	<!-- <import resource="oauth-common.xml" />
-	<import resource="oauth-authorization.xml" /> -->
+	<beans profile="oauth2">
+		<import resource="oauth_clients.xml" />
+	</beans>
+		
 </beans>

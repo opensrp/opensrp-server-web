@@ -6,8 +6,8 @@ package org.opensrp.web.config.security;
 import org.opensrp.web.config.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -28,14 +28,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	public static final String RESOURCE_ID = "OpenSRP2";
 	
 	@Autowired
-	private OAuth2AccessDeniedHandler oauthAccessDeniedHandler;
-	
-	@Autowired
 	private JdbcTokenStore jdbcTokenStore;
-	
-	@Autowired
-	private OAuth2AuthenticationEntryPoint oauthAuthenticationEntryPoint;
-	
+		
 	@Autowired
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
@@ -46,7 +40,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.resourceId(RESOURCE_ID)
 			.tokenStore(jdbcTokenStore)
 			.stateless(false)
-			.authenticationEntryPoint(oauthAuthenticationEntryPoint)
+			.authenticationEntryPoint(auth2AuthenticationEntryPoint())
 			.authenticationManager(authenticationManager);
 	}
 	
@@ -61,8 +55,21 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.authorizeRequests()
 			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
 		.and()
-			.exceptionHandling().accessDeniedHandler(oauthAccessDeniedHandler)
+			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
 		.httpBasic();
+	}
+	
+	
+	@Bean
+	public OAuth2AccessDeniedHandler accessDeniedHandler() {
+		return new OAuth2AccessDeniedHandler();
+	}
+	
+	@Bean
+	public OAuth2AuthenticationEntryPoint auth2AuthenticationEntryPoint() {
+		OAuth2AuthenticationEntryPoint entryPoint= new OAuth2AuthenticationEntryPoint();
+		entryPoint.setRealmName(RESOURCE_ID);
+		return entryPoint;
 	}
 }

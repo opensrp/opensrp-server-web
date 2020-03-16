@@ -37,7 +37,6 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Autowired
 	private JdbcTokenStore jdbcTokenStore;
 	
-	
 	@Autowired
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
