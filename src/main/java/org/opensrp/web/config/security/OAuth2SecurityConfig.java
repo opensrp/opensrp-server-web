@@ -21,7 +21,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
-import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
@@ -46,10 +45,6 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	@Autowired
 	private JdbcTokenStore tokenStore;
 	
-	@Autowired
-	private OAuth2AuthenticationEntryPoint authenticationEntryPoint;
-	
-	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers("/oauth/token").permitAll();
@@ -71,11 +66,6 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.logoutSuccessUrl("/index.html")
 		        .and()
 		        	.httpBasic()
-		        .authenticationEntryPoint(authenticationEntryPoint)
-		        /*  .and()
-		            	.sessionManagement()
-		            	.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-		            	.enableSessionUrlRewriting(true)*/
 		        .and()
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
