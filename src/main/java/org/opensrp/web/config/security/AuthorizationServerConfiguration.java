@@ -4,6 +4,8 @@
 package org.opensrp.web.config.security;
 
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +20,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
-import org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore;
+import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
@@ -42,6 +44,10 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Autowired
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
+	
+	@Qualifier( value = "openSRPDataSource")
+	@Autowired
+	private DataSource dataSource;
 	
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -72,7 +78,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	
 	@Bean
 	public ApprovalStore approvalStore() {
-		return new InMemoryApprovalStore();
+		return new JdbcApprovalStore(dataSource);
 	}
 	
 	
