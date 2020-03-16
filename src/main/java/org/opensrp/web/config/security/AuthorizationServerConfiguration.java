@@ -45,7 +45,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
 	
-	@Qualifier( value = "openSRPDataSource")
+	@Qualifier(value = "openSRPDataSource")
 	@Autowired
 	private DataSource dataSource;
 	
@@ -80,6 +80,5 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	public ApprovalStore approvalStore() {
 		return new JdbcApprovalStore(dataSource);
 	}
-	
-	
+
 }

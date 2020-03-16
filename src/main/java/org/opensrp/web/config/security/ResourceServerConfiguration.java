@@ -49,9 +49,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		http
-		.anonymous()
-        .disable()
+		http.anonymous().disable()
 		.requestMatchers().mvcMatchers("/rest/**")
 		.and()
 			.authorizeRequests()
@@ -59,7 +57,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
-		.httpBasic();
+			.httpBasic();
 	}
 	
 	

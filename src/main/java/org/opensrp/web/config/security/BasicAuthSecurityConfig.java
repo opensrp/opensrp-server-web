@@ -60,8 +60,8 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected HttpSecurity applyBasicAndStateless(HttpSecurity http) throws Exception {
 		return http.httpBasic().and()
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
-		
 	}
+	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(opensrpAuthenticationProvider);
