@@ -323,14 +323,6 @@
 				<directory>configs/assets/config</directory>
 			</resource>
 			<resource>
-				<directory>configs/assets/schedules</directory>
-				<targetPath>schedules</targetPath>
-			</resource>
-			<resource>
-				<directory>configs/assets/form</directory>
-				<targetPath>form</targetPath>
-			</resource>
-			<resource>
 				<directory>configs/build</directory>
 				<filtering>true</filtering>
 				<includes>
@@ -561,6 +553,8 @@
 			</activation>
 			<properties>
 				<opensrp.database.profile>postgres</opensrp.database.profile>
+				<openmrs.sync.enabled>default</openmrs.sync.enabled>
+				<dhis2.sync.enabled>default</dhis2.sync.enabled>
 			</properties>
 		</profile>
 		<profile>
