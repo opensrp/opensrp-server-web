@@ -1,21 +1,12 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.LAST_NAME;
-import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
@@ -35,7 +26,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.mysql.jdbc.StringUtils;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
+import static org.opensrp.common.AllConstants.Client.GENDER;
+import static org.opensrp.common.AllConstants.Client.LAST_NAME;
+import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping(value = "/rest/search")
@@ -80,9 +77,9 @@ public class SearchResource extends RestResource<Client> {
 		}
 		Map<String, String> attributeMap = null;
 		String attributes = getStringFilter("attribute", request);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(attributes)) {
-			String attributeType = StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0];
-			String attributeValue = StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1];
+		if (!StringUtils.isBlank(attributes)) {
+			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
+			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
 			
 			attributeMap = new HashMap<String, String>();
 			attributeMap.put(attributeType, attributeValue);
@@ -91,9 +88,9 @@ public class SearchResource extends RestResource<Client> {
 		
 		Map<String, String> identifierMap = null;
 		String identifiers = getStringFilter("identifier", request);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(identifiers)) {
-			String identifierType = StringUtils.isEmptyOrWhitespaceOnly(identifiers) ? null : identifiers.split(":", -1)[0];
-			String identifierValue = StringUtils.isEmptyOrWhitespaceOnly(identifiers) ? null : identifiers.split(":", -1)[1];
+		if (!StringUtils.isBlank(identifiers)) {
+			String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
+			String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
 			
 			identifierMap = new HashMap<String, String>();
 			identifierMap.put(identifierType, identifierValue);
@@ -188,7 +185,7 @@ public class SearchResource extends RestResource<Client> {
 	public List<String> getClientBaseEntityIdsByContactPhoneNumber(String motherGuardianPhoneNumber) {
 		List<String> clientBaseEntityIds = new ArrayList<String>();
 		
-		if (!StringUtils.isEmptyOrWhitespaceOnly(motherGuardianPhoneNumber)) {
+		if (!StringUtils.isBlank(motherGuardianPhoneNumber)) {
 			
 			List<Event> events = eventService.findEventsByConceptAndValue("159635AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 			    motherGuardianPhoneNumber);

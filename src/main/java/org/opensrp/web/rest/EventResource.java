@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -373,7 +373,7 @@ public class EventResource extends RestResource<Event> {
 		String team = getStringFilter(TEAM, request);
 		String teamId = getStringFilter(TEAM_ID, request);
 		
-		if (!StringUtils.isEmptyOrWhitespaceOnly(clientId)) {
+		if (!StringUtils.isBlank(clientId)) {
 			Client c = clientService.find(clientId);
 			if (c == null) {
 				return new ArrayList<>();
