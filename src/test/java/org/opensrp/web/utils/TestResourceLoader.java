@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensrp.connector.openmrs.service.EncounterService;
 import org.opensrp.connector.openmrs.service.PatientService;
 import org.springframework.core.io.ClassPathResource;
@@ -16,8 +17,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-
-import com.mysql.jdbc.StringUtils;
 
 public class TestResourceLoader {
 
@@ -46,7 +45,7 @@ public class TestResourceLoader {
 		formDirPath = props.getProperty("form.directory.name");
 		formToDownload = props.getProperty("form.download.files").replace(" ", "");
 		String rc = props.getProperty("openmrs.test.make-rest-call");
-		pushToOpenmrsForTest = StringUtils.isEmptyOrWhitespaceOnly(rc) ? false : Boolean.parseBoolean(rc);
+		pushToOpenmrsForTest = StringUtils.isBlank(rc) ? false : Boolean.parseBoolean(rc);
 
 		this.patientService = new PatientService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword);
 		this.encounterService = new EncounterService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword);
