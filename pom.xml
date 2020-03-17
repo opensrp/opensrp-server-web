@@ -567,6 +567,8 @@
 			</activation>
 			<properties>
 				<opensrp.database.profile>postgres</opensrp.database.profile>
+				<openmrs.sync.enabled>default</openmrs.sync.enabled>
+				<dhis2.sync.enabled>default</dhis2.sync.enabled>
 			</properties>
 		</profile>
 		<profile>
