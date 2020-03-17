@@ -37,34 +37,7 @@
         <!-- max upload size in bytes -->
         <property name="maxUploadSize" value="${file.maxUploadSize}" /> <!-- 20MB -->
     </bean>
-    
-<!--    <jpa:repositories base-package="org.opensrp.web" entity-manager-factory-ref="jpaEntityManagerFactory" transaction-manager-ref="jpaTransactionManager"/>
- -->
-    <bean id="jpaDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${jdbc.driverClassName}"/>
-        <property name="url" value="${jdbc.url}"/>
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
-    </bean>
-
-    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-        <property name="showSql" value="true"/>
-        <property name="generateDdl" value="true"/>
-        <property name="database" value="${jdbc.backend}"/>
-    </bean>
-
-    <bean id="jpaEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="jpaDataSource"/>
-        <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
-        <!-- spring based scanning for entity classes-->
-        <property name="packagesToScan" value="org.opensrp.domain"/>
-    </bean>
-
-   <bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"/>
-   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-    	<property name="dataSource" ref="jpaDataSource"/>
-   </bean>
-   
+       
    <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <property name="favorPathExtension" value="true" />
         <property name="ignoreAcceptHeader" value="true"/>
