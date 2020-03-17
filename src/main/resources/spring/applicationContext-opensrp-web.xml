@@ -65,7 +65,7 @@
     	<property name="dataSource" ref="jpaDataSource"/>
    </bean>
    
-   <bean id="contentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+   <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <property name="favorPathExtension" value="true" />
         <property name="ignoreAcceptHeader" value="true"/>
         <property name="defaultContentType" value="text/html" />
@@ -79,7 +79,7 @@
     </bean>
    
     <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-      	<property name="contentNegotiationManager" ref="contentNegotiationManager"/>
+      	<property name="contentNegotiationManager" ref="mvcContentNegotiationManager"/>
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
                   p:prefix="/WEB-INF/jsp/"
