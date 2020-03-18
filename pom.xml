@@ -29,6 +29,7 @@
 		<opensrp.core.version>2.0.0-alpha7-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.0-alpha3-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.0-alpha2-SNAPSHOT</opensrp.common.version>
+		<opensrp.interface.version>2.0.0-alpha1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
 	</properties>
@@ -148,13 +149,11 @@
 			<groupId>org.smartregister</groupId>
 			<artifactId>opensrp-server-core</artifactId>
 			<version>${opensrp.core.version}</version>
-			<!--TODO Remove exclusions when https://github.com/OpenSRP/opensrp-server-interface/pull/3 is merged -->
-			<exclusions>
-				<exclusion>
-					<groupId>org.codehaus.jackson</groupId>
-					<artifactId>jackson-core-asl</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.smartregister</groupId>
+			<artifactId>opensrp-server-interface</artifactId>
+			<version>${opensrp.interface.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.smartregister</groupId>
