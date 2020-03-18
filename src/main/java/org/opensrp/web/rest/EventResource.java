@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
@@ -213,8 +214,12 @@ public class EventResource extends RestResource<Event> {
 			searchMissingClients(clientIds, clients, startTime);
 		}
 
-		response.put("events", events);
-		response.put("clients", clients);
+		JSONArray eventsArray = new JSONArray(events);
+
+		JSONArray clientsArray =  new JSONArray(clients);
+
+		response.put("events", eventsArray);
+		response.put("clients", clientsArray);
 		response.put("no_of_events", events.size());
 		return response;
 	}
