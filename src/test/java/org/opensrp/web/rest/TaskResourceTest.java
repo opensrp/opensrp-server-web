@@ -1,6 +1,11 @@
 package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,6 +20,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
+import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -26,10 +32,6 @@ import org.springframework.test.web.server.MockMvc;
 import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -296,12 +298,20 @@ public class TaskResourceTest {
 
 	@Test
 	public void testFindAllTaskIds() throws Exception {
-		when(taskService.findAllTaskIds()).thenReturn(Collections.singletonList("task-id-1"));
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds", "")).andExpect(status().isOk())
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("task-id-1"), 12345l);
+		when(taskService.findAllTaskIds(anyLong(), anyInt())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
-		verify(taskService, times(1)).findAllTaskIds();
+
+		String actualTaskIdString = result.getResponse().getContentAsString();
+		Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
+		List<String> actualTaskIdList = actualIdModels.getIdentifiers();
+
+		verify(taskService, times(1)).findAllTaskIds(anyLong(), anyInt());
 		verifyNoMoreInteractions(taskService);
-		assertEquals("[\"task-id-1\"]", result.getResponse().getContentAsString());
+		assertEquals("{\"identifiers\":[\"task-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
+		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 	}
 
 	private Task getTask() {
