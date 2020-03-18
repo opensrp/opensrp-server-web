@@ -59,12 +59,11 @@
                   p:suffix=".jsp" />
         </property>
         <property name="defaultViews">
-            <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"
-                  p:extractValueFromSingleKeyModel="true" />
+                   <ref bean="mappingJackson2JsonView"/>
         </property>
     </bean>
     <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
-    <mvc:annotation-driven/>
+	<mvc:annotation-driven/>
 
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
