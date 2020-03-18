@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
@@ -21,6 +20,7 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,8 +105,8 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> sync(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<String, Object>();
+	protected ResponseEntity<EventSyncBean> sync(HttpServletRequest request) {
+		EventSyncBean response = new EventSyncBean();
 		try {
 			String providerId = getStringFilter(PROVIDER_ID, request);
 			String locationId = getStringFilter(LOCATION_ID, request);
@@ -119,21 +119,21 @@ public class EventResource extends RestResource<Event> {
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 				
 				return new ResponseEntity<>(
-				        gson.toJson(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
+				        sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
-				response.put("msg", "specify atleast one filter");
-				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+				response.setMsg("specify atleast one filter");
+				return new ResponseEntity<>(response, BAD_REQUEST);
 			}
 			
 		}
 		catch (
 		
 		Exception e) {
-			
-			response.put("msg", "Error occurred");
+
+			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -146,8 +146,8 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<Map<String, Object>> syncByPost(@RequestBody SyncParam syncParam) {
-		Map<String, Object> response = new HashMap<String, Object>();
+	protected ResponseEntity<EventSyncBean> syncByPost(@RequestBody SyncParam syncParam) {
+		EventSyncBean response = new EventSyncBean();
 		try {
 			
 			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
@@ -158,20 +158,20 @@ public class EventResource extends RestResource<Event> {
 				            syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit()),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
-				response.put("msg", "specify atleast one filter");
+				response.setMsg("specify atleast one filter");
 				return new ResponseEntity<>(response, BAD_REQUEST);
 			}
 			
 		}
 		catch (Exception e) {
 			
-			response.put("msg", "Error occurred");
+			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
-	private Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
+	private EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion,
 	        String team, String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
@@ -190,7 +190,7 @@ public class EventResource extends RestResource<Event> {
 		
 	}
 	
-	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
+	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		List<Event> events = new ArrayList<Event>();
 		List<String> clientIds = new ArrayList<String>();
@@ -214,14 +214,11 @@ public class EventResource extends RestResource<Event> {
 			searchMissingClients(clientIds, clients, startTime);
 		}
 
-		JSONArray eventsArray = new JSONArray(events);
-
-		JSONArray clientsArray =  new JSONArray(clients);
-
-		response.put("events", eventsArray);
-		response.put("clients", clientsArray);
-		response.put("no_of_events", events.size());
-		return response;
+		EventSyncBean eventSyncBean = new EventSyncBean();
+		eventSyncBean.setClients(clients);
+		eventSyncBean.setEvents(events);
+		eventSyncBean.setNoOfEvents(events.size());
+		return eventSyncBean;
 	}
 	
 	private void searchMissingClients(List<String> clientIds, List<Client> clients, long startTime) {
@@ -254,7 +251,7 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<Map<String, Object>> getAll(@RequestParam long serverVersion,
+	protected ResponseEntity<EventSyncBean> getAll(@RequestParam long serverVersion,
 	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit) {
 		
 		try {
@@ -266,8 +263,8 @@ public class EventResource extends RestResource<Event> {
 			
 		}
 		catch (Exception e) {
-			Map<String, Object> response = new HashMap<String, Object>();
-			response.put("msg", "Error occurred");
+			EventSyncBean response = new EventSyncBean();
+			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
