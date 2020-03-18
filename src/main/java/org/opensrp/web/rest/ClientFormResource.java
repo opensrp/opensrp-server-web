@@ -4,6 +4,7 @@ import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
@@ -43,13 +44,16 @@ public class ClientFormResource extends RestResource<ClientForm> {
 
     @RequestMapping(method = RequestMethod.GET, value = "/search_")
     @ResponseBody
-    private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier", required = true) String formIdentifier
-            , @RequestParam(value = "form_version", required = true) String formVersion
+    private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
+            , @RequestParam(value = "form_version") String formVersion
             , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) {
         Version formVersionRequired = Version.valueOf(formVersion);
-        Version currentFormVersionV = Version.valueOf(currentFormVersion);
+        Version currentFormVersionV = null;
+        if (!TextUtils.isEmpty(currentFormVersion)) {
+            currentFormVersionV = Version.valueOf(currentFormVersion);
+        }
 
-        if (currentFormVersionV.greaterThan(formVersionRequired)) {
+        if (currentFormVersionV != null && currentFormVersionV.greaterThan(formVersionRequired)) {
             return new ResponseEntity<>((String) null, HttpStatus.BAD_REQUEST);
         }
 
