@@ -380,7 +380,7 @@ public class LocationResource {
 			identifiers.setIdentifiers(structureIdsPair.getLeft());
 			identifiers.setLastServerVersion(structureIdsPair.getRight());
 			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
+		} catch (Exception e) {//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
 			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -442,7 +442,7 @@ public class LocationResource {
 			identifiers.setLastServerVersion(locationIdsPair.getRight());
 			
 			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
+		} catch (Exception e) {//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
 			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
