@@ -71,15 +71,15 @@ public class EventResource extends RestResource<Event> {
 	
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
-
+	
 	public static final String DATE_DELETED = "dateDeleted";
-
+	
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
 		this.clientService = clientService;
 		this.eventService = eventService;
 	}
-
+	
 	@Override
 	public Event getByUniqueId(String uniqueId) {
 		return eventService.find(uniqueId);
@@ -118,8 +118,7 @@ public class EventResource extends RestResource<Event> {
 			
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 				
-				return new ResponseEntity<>(
-				        sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit),
+				return new ResponseEntity<>(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.setMsg("specify atleast one filter");
@@ -130,7 +129,7 @@ public class EventResource extends RestResource<Event> {
 		catch (
 		
 		Exception e) {
-
+			
 			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -171,8 +170,8 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 	
-	private EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion,
-	        String team, String teamId, Integer limit) {
+	private EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion, String team,
+	        String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
@@ -213,7 +212,7 @@ public class EventResource extends RestResource<Event> {
 			
 			searchMissingClients(clientIds, clients, startTime);
 		}
-
+		
 		EventSyncBean eventSyncBean = new EventSyncBean();
 		eventSyncBean.setClients(clients);
 		eventSyncBean.setEvents(events);
@@ -410,8 +409,8 @@ public class EventResource extends RestResource<Event> {
 	@ResponseBody
 	protected ResponseEntity<List<String>> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
-			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
-
+	        @RequestParam(value = DATE_DELETED, required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
+		
 		try {
 			
 			List<String> eventIds = eventService.findAllIdsByEventType(eventType, dateDeleted);
@@ -423,11 +422,11 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
 	public void setEventService(EventService eventService) {
 		this.eventService = eventService;
 	}
-
+	
 	public void setClientService(ClientService clientService) {
 		this.clientService = clientService;
 	}
