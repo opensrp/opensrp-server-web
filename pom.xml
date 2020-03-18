@@ -148,6 +148,7 @@
 			<groupId>org.smartregister</groupId>
 			<artifactId>opensrp-server-core</artifactId>
 			<version>${opensrp.core.version}</version>
+			<!--TODO Remove exclusions when https://github.com/OpenSRP/opensrp-server-interface/pull/3 is merged -->
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.jackson</groupId>
