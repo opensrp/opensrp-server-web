@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import java.text.ParseException;
@@ -146,7 +145,7 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) {
+	protected ResponseEntity<Map<String, Object>> syncByPost(@RequestBody SyncParam syncParam) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
 			
@@ -154,12 +153,12 @@ public class EventResource extends RestResource<Event> {
 			        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
 				
 				return new ResponseEntity<>(
-				        gson.toJson(sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
-				            syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
+				        sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
+				            syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit()),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.put("msg", "specify atleast one filter");
-				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+				return new ResponseEntity<>(response, BAD_REQUEST);
 			}
 			
 		}
@@ -167,7 +166,7 @@ public class EventResource extends RestResource<Event> {
 			
 			response.put("msg", "Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -213,13 +212,9 @@ public class EventResource extends RestResource<Event> {
 			
 			searchMissingClients(clientIds, clients, startTime);
 		}
-		
-		JsonArray eventsArray = (JsonArray) gson.toJsonTree(events, new TypeToken<List<Event>>() {}.getType());
-		
-		JsonArray clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-		
-		response.put("events", eventsArray);
-		response.put("clients", clientsArray);
+
+		response.put("events", events);
+		response.put("clients", clients);
 		response.put("no_of_events", events.size());
 		return response;
 	}
@@ -254,14 +249,14 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> getAll(@RequestParam long serverVersion,
+	protected ResponseEntity<Map<String, Object>> getAll(@RequestParam long serverVersion,
 	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit) {
 		
 		try {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
-			return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
+			return new ResponseEntity<>(getEventsAndClients(eventSearchBean, limit == null ? 2 : limit),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
@@ -269,7 +264,7 @@ public class EventResource extends RestResource<Event> {
 			Map<String, Object> response = new HashMap<String, Object>();
 			response.put("msg", "Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -411,14 +406,14 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> getAllIdsByEventType(
+	protected ResponseEntity<List<String>> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 			@RequestParam(value = DATE_DELETED, required = false ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date dateDeleted) {
 
 		try {
 			
 			List<String> eventIds = eventService.findAllIdsByEventType(eventType, dateDeleted);
-			return new ResponseEntity<>(gson.toJson(eventIds), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(eventIds, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
 		catch (Exception e) {
