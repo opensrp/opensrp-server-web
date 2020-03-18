@@ -148,6 +148,12 @@
 			<groupId>org.smartregister</groupId>
 			<artifactId>opensrp-server-core</artifactId>
 			<version>${opensrp.core.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.codehaus.jackson</groupId>
+					<artifactId>jackson-core-asl</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.smartregister</groupId>
