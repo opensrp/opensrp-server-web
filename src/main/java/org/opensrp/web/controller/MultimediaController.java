@@ -155,7 +155,12 @@ public class MultimediaController {
 			@RequestParam("file") MultipartFile file) {
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
-		String status = multimediaService.saveFile(multimediaDTO, file);
+		String status = null;
+		try {
+			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		} catch (IOException e) {
+			logger.error("", e);
+		}
 
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
