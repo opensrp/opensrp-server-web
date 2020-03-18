@@ -1,5 +1,7 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -65,6 +67,9 @@ public class EventResource extends RestResource<Event> {
 	private EventService eventService;
 	
 	private ClientService clientService;
+
+	@Autowired
+	public ObjectMapper objectMapper;
 	
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -105,7 +110,7 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<EventSyncBean> sync(HttpServletRequest request) {
+	protected ResponseEntity<String> sync(HttpServletRequest request) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 		try {
 			String providerId = getStringFilter(PROVIDER_ID, request);
@@ -118,11 +123,11 @@ public class EventResource extends RestResource<Event> {
 			
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 				
-				return new ResponseEntity<>(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit),
+				return new ResponseEntity<>(objectMapper.writeValueAsString(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(response, BAD_REQUEST);
+				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 			}
 			
 		}
@@ -132,7 +137,7 @@ public class EventResource extends RestResource<Event> {
 			
 			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
