@@ -256,7 +256,7 @@ public class EventResource extends RestResource<Event> {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
-			return new ResponseEntity<>(getEventsAndClients(eventSearchBean, limit == null ? 2 : limit),
+			return new ResponseEntity<>(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
