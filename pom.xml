@@ -25,9 +25,8 @@
 		<redis.jedis.version>3.2.0</redis.jedis.version>
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
-		<mysql.connector.version>5.1.36</mysql.connector.version>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.0.0-alpha3-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>2.0.0-alpha6-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.0-alpha2-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.0-alpha2-SNAPSHOT</opensrp.common.version>
 		<powermock.version>2.0.5</powermock.version>
@@ -166,11 +165,6 @@
 			<version>1.6.0</version>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.connector.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring.security.version}</version>
@@ -252,6 +246,11 @@
             <artifactId>spring-security-taglibs</artifactId>
             <version>${spring.security.version}</version>
         </dependency>
+        <dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-oauth2-resource-server</artifactId>
+		    <version>${spring.security.version}</version>
+		</dependency>
 		 <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
@@ -322,14 +321,6 @@
 			</resource>
 			<resource>
 				<directory>configs/assets/config</directory>
-			</resource>
-			<resource>
-				<directory>configs/assets/schedules</directory>
-				<targetPath>schedules</targetPath>
-			</resource>
-			<resource>
-				<directory>configs/assets/form</directory>
-				<targetPath>form</targetPath>
 			</resource>
 			<resource>
 				<directory>configs/build</directory>
@@ -539,6 +530,13 @@
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.3.1</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -555,6 +553,8 @@
 			</activation>
 			<properties>
 				<opensrp.database.profile>postgres</opensrp.database.profile>
+				<openmrs.sync.enabled>default</openmrs.sync.enabled>
+				<dhis2.sync.enabled>default</dhis2.sync.enabled>
 			</properties>
 		</profile>
 		<profile>

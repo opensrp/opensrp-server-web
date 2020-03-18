@@ -1,5 +1,33 @@
 package org.opensrp.web.rest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.opensrp.domain.Client;
+import org.opensrp.search.AddressSearchBean;
+import org.opensrp.search.ClientSearchBean;
+import org.opensrp.service.ClientService;
+import org.opensrp.util.DateTimeTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import static org.opensrp.common.AllConstants.BaseEntity.ADDRESS_TYPE;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
@@ -22,37 +50,6 @@ import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.joda.time.DateTime;
-import org.opensrp.domain.Client;
-import org.opensrp.search.AddressSearchBean;
-import org.opensrp.search.ClientSearchBean;
-import org.opensrp.service.ClientService;
-import org.opensrp.util.DateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -137,7 +134,7 @@ public class ClientResource extends RestResource<Client> {
 		}
 		
 		String clientId = getStringFilter("identifier", request);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(clientId)) {
+		if (!StringUtils.isBlank(clientId)) {
 			Client c = clientService.find(clientId);
 			List<Client> clients = new ArrayList<Client>();
 			clients.add(c);
@@ -156,8 +153,8 @@ public class ClientResource extends RestResource<Client> {
 		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
 		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
 		String attributes = getStringFilter("attribute", request);
-		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
-		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
+		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 		
 		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 		    lastEdit == null ? null : lastEdit[1]);
@@ -208,8 +205,8 @@ public class ClientResource extends RestResource<Client> {
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
 		
 		String attributes = getStringFilter("attribute", request);
-		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
-		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
+		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 		
 		if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
 			return getHouseholds(searchBean, addressSearchBean);
