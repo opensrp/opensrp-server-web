@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;

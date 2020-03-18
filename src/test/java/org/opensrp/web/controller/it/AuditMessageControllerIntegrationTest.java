@@ -1,24 +1,9 @@
 package org.opensrp.web.controller.it;
 
-import org.codehaus.jackson.JsonNode;
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.opensrp.common.audit.AuditMessage;
-import org.opensrp.common.audit.AuditMessageType;
 import org.opensrp.common.audit.Auditor;
-import org.opensrp.domain.Client;
-import org.opensrp.web.controller.AuditMessageController;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.server.MvcResult;
-import org.springframework.test.web.server.setup.MockMvcBuilders;
-
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 @Ignore
 public class AuditMessageControllerIntegrationTest extends BaseResourceTest {
