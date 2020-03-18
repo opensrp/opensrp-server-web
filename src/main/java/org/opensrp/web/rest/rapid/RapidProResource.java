@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -146,7 +146,7 @@ public class RapidProResource {
 			String baseEntityId = gson.fromJson(syncData.getString("baseEntityId"), new TypeToken<String>() {
 
 			}.getType());
-			if (!StringUtils.isEmptyOrWhitespaceOnly(mvacc_uuid) && mvacc_uuid != null && !StringUtils.isEmptyOrWhitespaceOnly(baseEntityId) && baseEntityId != null) {
+			if (!StringUtils.isBlank(mvacc_uuid) && mvacc_uuid != null && !StringUtils.isBlank(baseEntityId) && baseEntityId != null) {
 
 				Client client = clientService.getByBaseEntityId(baseEntityId);
 				if (client != null) {
@@ -185,7 +185,7 @@ public class RapidProResource {
 					rapidProContact.setHomeFacility(getLocationNameIfId(obs2.getValue().toString()));
 				}
 			}
-			if ((rapidProContact.getMotherTel() == null || StringUtils.isEmptyOrWhitespaceOnly(rapidProContact.getMotherTel())) && rapidProContact.getMvaccUuid() == null || !StringUtils.isEmptyOrWhitespaceOnly(rapidProContact.getMvaccUuid())) {
+			if ((rapidProContact.getMotherTel() == null || StringUtils.isBlank(rapidProContact.getMotherTel())) && rapidProContact.getMvaccUuid() == null || !StringUtils.isBlank(rapidProContact.getMvaccUuid())) {
 				rapidProContacts.add(rapidProContact);
 				return;
 			}
