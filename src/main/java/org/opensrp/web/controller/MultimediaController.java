@@ -159,7 +159,7 @@ public class MultimediaController {
 		try {
 			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
