@@ -21,6 +21,7 @@ public class MultimediaControllerTest {
 		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
 		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
+		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
 
 		controller.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
 

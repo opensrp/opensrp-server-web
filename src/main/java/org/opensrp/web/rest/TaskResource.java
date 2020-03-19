@@ -1,6 +1,8 @@
 package org.opensrp.web.rest;
 
+
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -13,6 +15,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -20,6 +23,7 @@ import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
 import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +42,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -201,18 +206,26 @@ public class TaskResource {
 
 	/**
 	 * This methods provides an API endpoint that searches for all task Ids
+	 * ordered by server version ascending
 	 *
+	 * @param serverVersion serverVersion using to filter by
 	 * @return A list of task Ids
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds() {
+	public ResponseEntity<Identifier> findIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
-			return new ResponseEntity<>(
-					gson.toJson(taskService.findAllTaskIds()), HttpStatus.OK);
+			Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers(taskIdsPair.getLeft());
+			identifiers.setLastServerVersion(taskIdsPair.getRight());
+
+			return new ResponseEntity<>(identifiers, HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

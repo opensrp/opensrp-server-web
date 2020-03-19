@@ -1,5 +1,8 @@
 package org.opensrp.web.rest;
 
+
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
@@ -14,12 +17,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +46,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
 
 
 @Controller
@@ -357,18 +363,26 @@ public class LocationResource {
 
 	/**
 	 * This methods provides an API endpoint that searches for all structure ids
+	 * sorted by server version ascending
 	 *
-	 * @return A list of structure Ids
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of structure Ids and last server version
 	 */
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findIds() {
+	public ResponseEntity<Identifier> findIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
 		try {
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructureIds()), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+			Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers(structureIdsPair.getLeft());
+			identifiers.setLastServerVersion(structureIdsPair.getRight());
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -406,6 +420,32 @@ public class LocationResource {
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 * This methods provides an API endpoint that searches for all location ids
+	 * sorted by server  version ascending
+	 *
+	 * @return A list of location Ids and last server version
+	 */
+	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findLocationIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
+
+		try {
+			Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers(locationIdsPair.getLeft());
+			identifiers.setLastServerVersion(locationIdsPair.getRight());
+			
+			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} catch (Exception e) {
+			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
