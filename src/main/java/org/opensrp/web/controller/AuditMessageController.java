@@ -1,21 +1,20 @@
 package org.opensrp.web.controller;
 
 import ch.lambdaj.function.convert.Converter;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import org.joda.time.DateTime;
 import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.AuditMessageType;
 import org.opensrp.common.audit.Auditor;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import static ch.lambdaj.collection.LambdaCollections.with;
 

@@ -1,6 +1,8 @@
 package org.opensrp.web.rest;
 
+
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -12,6 +14,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
@@ -20,6 +23,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +60,11 @@ public class PlanResource {
 	private PlanService planService;
 	
 	private PhysicalLocationService locationService;
-	
+
+	private static final String IS_DELETED = "is_deleted";
+
+	private static final String FALSE = "false";
+
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -274,6 +282,31 @@ public class PlanResource {
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	/**
+	 * This methods provides an API endpoint that searches for all plan Identifiers
+	 *
+	 * @return A list of plan Identifiers
+	 */
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
+										  @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
+
+		try {
+			Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+			Identifier identifiers = new Identifier();
+			identifiers.setIdentifiers(planIdsPair.getLeft());
+			identifiers.setLastServerVersion(planIdsPair.getRight());
+
+			return new ResponseEntity<>(identifiers, HttpStatus.OK);
+		} catch (Exception e) {
+			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
+			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

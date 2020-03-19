@@ -13,29 +13,31 @@
        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+    <context:property-placeholder
+            location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
 
-    <context:property-placeholder location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
-    
     <import resource="classpath:applicationContext-opensrp.xml"/>
     <import resource="classpath:applicationContext-connector.xml"/>
-     <import resource="couchDbContext.xml"/>
+
+    <import resource="couchDbContext.xml"/>
+
     <import resource="securityContext.xml"/>
 
     <mvc:default-servlet-handler/>
-<!--     <tx:annotation-driven proxy-target-class="true" />
-    <aop:aspectj-autoproxy proxy-target-class="true"/>--> 
-    
+    <!--     <tx:annotation-driven proxy-target-class="true" />
+        <aop:aspectj-autoproxy proxy-target-class="true"/>-->
+
     <context:annotation-config/>
-    
+
     <context:component-scan base-package="org.opensrp.web"/>
     <context:component-scan base-package="org.opensrp.connector"/>
-    
-    
+
+
     <mvc:annotation-driven/>
     <bean id="multipartResolver"
-        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- max upload size in bytes -->
-        <property name="maxUploadSize" value="${file.maxUploadSize}" /> <!-- 20MB -->
+        <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
     </bean>
        
    <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
@@ -56,7 +58,7 @@
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
                   p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp" />
+                  p:suffix=".jsp"/>
         </property>
         <property name="defaultViews">
                    <ref bean="mappingJackson2JsonView"/>
@@ -69,4 +71,7 @@
 
     <alias name="${multimedia_file_manager}" alias="multimedia_file_manager"/>
 
+    <beans profile="chw_referral_module">
+        <import resource="classpath:applicationContext-opensrp-referral.xml"/>
+    </beans>
 </beans>
