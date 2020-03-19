@@ -1,7 +1,6 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -67,9 +66,6 @@ public class EventResource extends RestResource<Event> {
 	private EventService eventService;
 	
 	private ClientService clientService;
-
-	@Autowired
-	public ObjectMapper objectMapper;
 	
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -123,7 +119,9 @@ public class EventResource extends RestResource<Event> {
 			
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 				
-				return new ResponseEntity<>(objectMapper.writeValueAsString(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
+				return new ResponseEntity<>(
+				        objectMapper.writeValueAsString(
+				            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.setMsg("specify atleast one filter");
@@ -150,20 +148,20 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<EventSyncBean> syncByPost(@RequestBody SyncParam syncParam) {
+	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 		try {
 			
 			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
 			        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
 				
-				return new ResponseEntity<>(
-				        sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
-				            syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit()),
+				return new ResponseEntity<>(objectMapper.writeValueAsString(
+				    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
+				        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
 				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(response, BAD_REQUEST);
+				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 			}
 			
 		}
@@ -171,7 +169,7 @@ public class EventResource extends RestResource<Event> {
 			
 			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -255,14 +253,16 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<EventSyncBean> getAll(@RequestParam long serverVersion,
-	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit) {
+	protected ResponseEntity<String> getAll(@RequestParam long serverVersion,
+	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit)
+	        throws JsonProcessingException {
 		
 		try {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
-			return new ResponseEntity<>(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit),
+			return new ResponseEntity<>(
+			        objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		}
@@ -270,7 +270,7 @@ public class EventResource extends RestResource<Event> {
 			EventSyncBean response = new EventSyncBean();
 			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
