@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
 import java.util.List;
@@ -36,15 +37,15 @@ public abstract class RestResource <T>{
 	
 	@RequestMapping(value="/{uniqueId}", method=RequestMethod.GET)
 	@ResponseBody
-	private T getById(@PathVariable("uniqueId") String uniqueId){
-		return getByUniqueId(uniqueId);
+	private String getById(@PathVariable("uniqueId") String uniqueId) throws JsonProcessingException{
+		return objectMapper.writeValueAsString(getByUniqueId(uniqueId));
 	}
 	
 	
 	@RequestMapping(method=RequestMethod.GET, value="/search")
 	@ResponseBody
-	private List<T> searchBy(HttpServletRequest request) throws ParseException{
-		return search(request);
+	private String searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException{
+		return objectMapper.writeValueAsString(search(request));
 	}
 	
 	@RequestMapping(method=RequestMethod.GET)
