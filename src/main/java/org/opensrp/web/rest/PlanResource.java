@@ -304,7 +304,8 @@ public class PlanResource {
 			identifiers.setLastServerVersion(planIdsPair.getRight());
 
 			return new ResponseEntity<>(identifiers, HttpStatus.OK);
-		} catch (Exception e) {//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
+		} catch (Exception e) {
+			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
 			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
