@@ -254,7 +254,6 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
-		Map<String, Object> response = new HashMap<String, Object>();
 		List<Event> events = new ArrayList<Event>();
 		List<String> clientIds = new ArrayList<String>();
 		List<Client> clients = new ArrayList<Client>();
@@ -330,7 +329,7 @@ public class EventResource extends RestResource<Event> {
 			EventSyncBean response = new EventSyncBean();
 			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
 		}
 	}
 	
