@@ -16,32 +16,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
-public class ClientFormResource extends RestResource<ClientForm> {
+public class ClientFormResource {
 
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
 
     private ClientFormService clientFormService;
-
-    Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     @Autowired
-    public ClientFormResource(ClientFormService clientFormService) {
+    public void setClientFormService(ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/search_")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
@@ -100,34 +100,9 @@ public class ClientFormResource extends RestResource<ClientForm> {
 
         return new ResponseEntity<>(gson.toJson(completeClientForm), HttpStatus.OK);
     }
-
-    @Override
-    public List<ClientForm> filter(String query) {
-        return null;
-    }
-
-
-    @Override
-    public List<ClientForm> search(HttpServletRequest request) throws ParseException {
-        return null;
-    }
-
-    @Override
-    public ClientForm getByUniqueId(String uniqueId) {
-        return null;
-    }
-
-    @Override
-    public List<String> requiredProperties() {
-        return null;
-    }
-
-    @Override
-    public ClientForm create(ClientForm entity) {
-        return null;
-    }
     
-    @RequestMapping(headers = { "Accept=multipart/form-data" }, method = RequestMethod.POST, value = "/add")
+    //@RequestMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
+    @RequestMapping(headers = { "Accept=multipart/form-data" }, method = RequestMethod.POST)
     @ResponseBody
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
                                                  @RequestParam("form_identifier") String formIdentifier,
@@ -177,12 +152,6 @@ public class ClientFormResource extends RestResource<ClientForm> {
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-
-    @Override
-    public ClientForm update(ClientForm entity) {
-        return null;
     }
 
 }
