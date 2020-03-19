@@ -16,54 +16,57 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-public abstract class RestResource <T>{
-
+public abstract class RestResource<T> {
+	
+	protected ObjectMapper objectMapper;
+	
 	@Autowired
-	public ObjectMapper objectMapper;
-
-	@RequestMapping(method=RequestMethod.POST, consumes={MediaType.APPLICATION_JSON_VALUE})
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	};
+	
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	private T createNew(@RequestBody T entity) {
 		RestUtils.verifyRequiredProperties(requiredProperties(), entity);
 		return create(entity);
 	}
 	
-	@RequestMapping(value="/{uniqueId}", method=RequestMethod.POST, consumes={MediaType.APPLICATION_JSON_VALUE})
+	@RequestMapping(value = "/{uniqueId}", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	private T updateExisting(@PathVariable("uniqueId") String uniqueId, @RequestBody T entity) {
 		RestUtils.verifyRequiredProperties(requiredProperties(), entity);
 		return update(entity);//TODO
 	}
 	
-	@RequestMapping(value="/{uniqueId}", method=RequestMethod.GET)
+	@RequestMapping(value = "/{uniqueId}", method = RequestMethod.GET)
 	@ResponseBody
-	private String getById(@PathVariable("uniqueId") String uniqueId) throws JsonProcessingException{
+	private String getById(@PathVariable("uniqueId") String uniqueId) throws JsonProcessingException {
 		return objectMapper.writeValueAsString(getByUniqueId(uniqueId));
 	}
 	
-	
-	@RequestMapping(method=RequestMethod.GET, value="/search")
+	@RequestMapping(method = RequestMethod.GET, value = "/search")
 	@ResponseBody
-	private String searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException{
+	private String searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException {
 		return objectMapper.writeValueAsString(search(request));
 	}
 	
-	@RequestMapping(method=RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	private String filterBy(@RequestParam(value="q", required=true) String query) throws JsonProcessingException{
+	private String filterBy(@RequestParam(value = "q", required = true) String query) throws JsonProcessingException {
 		return objectMapper.writeValueAsString(filter(query));
 	}
 	
-	public abstract List<T> filter(String query) ;
-
+	public abstract List<T> filter(String query);
+	
 	public abstract List<T> search(HttpServletRequest request) throws ParseException;
 	
 	public abstract T getByUniqueId(String uniqueId);
 	
 	public abstract List<String> requiredProperties();
-
-	public abstract T create(T entity) ;
-
-	public abstract T update(T entity) ;
-
+	
+	public abstract T create(T entity);
+	
+	public abstract T update(T entity);
+	
 }
