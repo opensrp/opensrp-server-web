@@ -15,6 +15,7 @@ public class EventResourceShadow extends EventResource {
         super(null, null);
     }
 
+    @Override
     public void setObjectMapper(ObjectMapper objectMapper) {
         super.setObjectMapper(objectMapper);
     }
