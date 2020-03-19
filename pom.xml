@@ -77,16 +77,6 @@
 
 	<repositories>
 		<repository>
-			<id>ekigamba-snapshots-repo</id>
-			<url>file:///home/ona-kigamba/.m2/repository/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<id>spring-maven-release</id>
 			<name>Spring Maven Release Repository</name>
 			<url>https://maven.springframework.org/release</url>

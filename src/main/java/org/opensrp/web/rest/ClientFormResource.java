@@ -61,7 +61,7 @@ public class ClientFormResource {
         }
 
         // Check if the form identifier with that version exists
-        ClientFormMetadata clientFormMetadata = clientFormService.getClientFormMetatdataByIdentifierAndVersion(formIdentifier, formVersion);
+        ClientFormMetadata clientFormMetadata = clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion);
         ClientFormService.CompleteClientForm completeClientForm = null;
 
         int formId;
