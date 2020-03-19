@@ -52,6 +52,8 @@ public class TaskResource {
 
 	public static final String GROUP = "group";
 
+	public static final String OWNER= "owner";
+
 	private TaskService taskService;
 
 	@Autowired
@@ -76,6 +78,7 @@ public class TaskResource {
 	public ResponseEntity<String> getTasksByTaskAndGroup(@RequestBody TaskSyncRequestWrapper taskSyncRequestWrapper) {
 		String plan = StringUtils.join(taskSyncRequestWrapper.getPlan(), ",");
 		String group = StringUtils.join(taskSyncRequestWrapper.getGroup(), ",");
+		String owner = taskSyncRequestWrapper.getOwner();
 		long serverVersion = taskSyncRequestWrapper.getServerVersion();
 
 		long currentServerVersion = 0;
@@ -84,16 +87,7 @@ public class TaskResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		try {
-			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
 	}
 
 	// here for backward compatibility
@@ -102,18 +96,35 @@ public class TaskResource {
 		String plan = getStringFilter(PLAN, request);
 		String group = getStringFilter(GROUP, request);
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String owner = getStringFilter(OWNER, request);
+
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
+	}
+
+	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion) {
+		if (StringUtils.isBlank(plan)) {
+			logger.error("Plan Identifier is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 		try {
-			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			if (!StringUtils.isBlank(group)) {
+				return new ResponseEntity<>(
+						gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else if (!StringUtils.isBlank(owner)){
+				return new ResponseEntity<>(
+						gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else {
+				logger.error("Either owner or group identifier field is missing");
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -260,6 +271,9 @@ public class TaskResource {
 		@JsonProperty
 		private long serverVersion;
 
+		@JsonProperty
+		private String owner;
+
 		public List<String> getPlan() {
 			return plan;
 		}
@@ -269,6 +283,10 @@ public class TaskResource {
 
 		public long getServerVersion() {
 			return serverVersion;
+		}
+
+		public String getOwner() {
+			return owner;
 		}
 	}
 
