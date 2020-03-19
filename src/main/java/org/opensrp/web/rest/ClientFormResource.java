@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.IdVersionTuple;
@@ -17,13 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -63,7 +62,7 @@ public class ClientFormResource extends RestResource<ClientForm> {
 
         // Check if the form identifier with that version exists
         ClientFormMetadata clientFormMetadata = clientFormService.getClientFormMetatdataByIdentifierAndVersion(formIdentifier, formVersion);
-        CompleteClientForm completeClientForm = null;
+        ClientFormService.CompleteClientForm completeClientForm = null;
 
         int formId;
 
@@ -97,7 +96,7 @@ public class ClientFormResource extends RestResource<ClientForm> {
             return new ResponseEntity<>((String) null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        completeClientForm = new CompleteClientForm(clientForm, clientFormMetadata);
+        completeClientForm = new ClientFormService.CompleteClientForm(clientForm, clientFormMetadata);
 
         return new ResponseEntity<>(gson.toJson(completeClientForm), HttpStatus.OK);
     }
@@ -127,21 +126,63 @@ public class ClientFormResource extends RestResource<ClientForm> {
     public ClientForm create(ClientForm entity) {
         return null;
     }
+    
+    @RequestMapping(headers = { "Accept=multipart/form-data" }, method = RequestMethod.POST, value = "/add")
+    @ResponseBody
+    private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
+                                                 @RequestParam("form_identifier") String formIdentifier,
+                                                 @RequestParam("form_name") String formName,
+                                                 @RequestParam("form") MultipartFile jsonFile,
+                                                 @RequestParam(required = false) String module) {
+        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formIdentifier) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+            return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
+        }
+
+        // TOOD: Check the string is a valid version
+        Version formVersionV = Version.valueOf(formVersion);
+        if (!jsonFile.getOriginalFilename().contains(".json")) {
+            return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
+        }
+
+        if (jsonFile.isEmpty()) {
+            return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
+        }
+
+        ClientForm clientForm = new ClientForm();
+
+        byte[] bytes;
+        try {
+            bytes = jsonFile.getBytes();
+        } catch (IOException e) {
+            logger.error("Error occurred trying to read uploaded json file", e);
+            return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
+        }
+
+        String jsonString = new String(bytes);
+        logger.info(jsonString);
+        clientForm.setJson(jsonString);
+        clientForm.setCreatedAt(new Date());
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setVersion(formVersion);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setLabel(formName);
+        clientFormMetadata.setCreatedAt(new Date());
+        clientFormMetadata.setModule(module);
+
+        ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
+
+        if (completeClientForm == null) {
+            return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
 
     @Override
     public ClientForm update(ClientForm entity) {
         return null;
-    }
-
-    public static class CompleteClientForm {
-
-        public ClientForm clientForm;
-        public ClientFormMetadata clientFormMetadata;
-
-        public CompleteClientForm(@NonNull ClientForm clientForm, @NonNull ClientFormMetadata clientFormMetadata) {
-            this.clientForm = clientForm;
-            this.clientFormMetadata = clientFormMetadata;
-        }
     }
 
 }
