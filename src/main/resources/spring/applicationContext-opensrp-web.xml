@@ -19,8 +19,6 @@
     <import resource="classpath:applicationContext-opensrp.xml"/>
     <import resource="classpath:applicationContext-connector.xml"/>
 
-    <import resource="couchDbContext.xml"/>
-
     <import resource="securityContext.xml"/>
 
     <mvc:default-servlet-handler/>
@@ -74,5 +72,9 @@
 
     <beans profile="chw_referral_module">
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>
+    </beans>
+    
+    <beans profile="dhis2-sync,rapidpro">
+    	 <!-- <import resource="couchDbContext.xml"/> -->
     </beans>
 </beans>
