@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.opensrp.common.util.DateUtil;
+import org.opensrp.connector.domain.Camp;
 import org.opensrp.connector.rapidpro.MessageFactory;
 import org.opensrp.connector.rapidpro.MessageService;
 import org.opensrp.connector.rapidpro.MessageType;
 import org.opensrp.connector.repository.couch.AllCamp;
-import org.opensrp.domain.Camp;
 import org.opensrp.domain.Event;
 import org.opensrp.service.EventService;
 import org.slf4j.Logger;
