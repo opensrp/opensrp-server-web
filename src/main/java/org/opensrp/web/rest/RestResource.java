@@ -50,8 +50,8 @@ public abstract class RestResource <T>{
 	
 	@RequestMapping(method=RequestMethod.GET)
 	@ResponseBody
-	private List<T> filterBy(@RequestParam(value="q", required=true) String query){
-		return filter(query);
+	private String filterBy(@RequestParam(value="q", required=true) String query) throws JsonProcessingException{
+		return objectMapper.writeValueAsString(filter(query));
 	}
 	
 	public abstract List<T> filter(String query) ;
