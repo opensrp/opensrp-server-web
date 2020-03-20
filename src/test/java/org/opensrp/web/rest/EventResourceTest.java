@@ -227,10 +227,10 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		int noOfEvents = (int) clientEventsResponseObject.get("no_of_events");
 		assertEquals(2, noOfEvents);
 
-		JSONArray eventsArray = new JSONArray(clientEventsResponseObject.get("events"));
+		JSONArray eventsArray = clientEventsResponseObject.getJSONArray("events");
 		assertEquals(2, eventsArray.length());
 
-		JSONArray clientsArray = new JSONArray(clientEventsResponseObject.get("clients"));
+		JSONArray clientsArray = clientEventsResponseObject.getJSONArray("clients");
 		assertEquals(2, clientsArray.length());
 
 		ResponseEntity<String> emptyClientEventsResponseEntity = eventResource.syncClientsAndEventsByBaseEntityIds("");
