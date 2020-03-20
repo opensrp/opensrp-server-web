@@ -37,7 +37,7 @@ public class TestResourceLoader {
 	protected EncounterService encounterService;
 
 	public TestResourceLoader() throws IOException {
-		Resource resource = new ClassPathResource("/opensrp.properties");
+		Resource resource = new ClassPathResource("opensrp.properties");
 		Properties props = PropertiesLoaderUtils.loadProperties(resource);
 		openmrsOpenmrsUrl = props.getProperty("openmrs.url");
 		openmrsUsername = props.getProperty("openmrs.username");
