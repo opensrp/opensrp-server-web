@@ -1,14 +1,20 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.opensrp.util.DateTimeDeserializer;
+import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -45,6 +51,15 @@ public abstract class BaseResourceTest<T> {
     @Before
     public void bootStrap() {
         this.mockMvc = MockMvcBuilders.webApplicationContextSetup(this.webApplicationContext).build();
+
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
+        SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
+        dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
+        dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
+        mapper.registerModule(dateTimeModule);
     }
 
     protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
