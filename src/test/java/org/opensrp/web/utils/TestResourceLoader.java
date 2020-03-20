@@ -42,8 +42,8 @@ public class TestResourceLoader {
 		openmrsOpenmrsUrl = props.getProperty("openmrs.url");
 		openmrsUsername = props.getProperty("openmrs.username");
 		openmrsPassword = props.getProperty("openmrs.password");
-		formDirPath = props.getProperty("form.directory.name");
-		formToDownload = props.getProperty("form.download.files").replace(" ", "");
+		formDirPath = props.getProperty("form.directory.name","/form");
+		formToDownload = props.getProperty("form.download.files","form.xml, model.xml, form_definition.json").replace(" ", "");
 		String rc = props.getProperty("openmrs.test.make-rest-call");
 		pushToOpenmrsForTest = StringUtils.isBlank(rc) ? false : Boolean.parseBoolean(rc);
 
