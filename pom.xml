@@ -567,6 +567,8 @@
 				<opensrp.database.profile>postgres</opensrp.database.profile>
 				<openmrs.sync.enabled>default</openmrs.sync.enabled>
 				<dhis2.sync.enabled>default</dhis2.sync.enabled>
+				<atomfeed.enabled>default</atomfeed.enabled>
+				<rapidpro.enabled>default</rapidpro.enabled>
 			</properties>
 		</profile>
 		<profile>
@@ -651,6 +653,18 @@
 			<id>dhis2-sync</id>
 			<properties>
 				<dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>atomfeed</id>
+			<properties>
+				<atomfeed.enabled>atomfeed</atomfeed.enabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>rapidpro</id>
+			<properties>
+				<rapidpro.enabled>dhis2-sync</rapidpro.enabled>
 			</properties>
 		</profile>
 		<profile>
