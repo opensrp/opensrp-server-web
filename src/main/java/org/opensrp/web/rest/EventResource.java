@@ -1,14 +1,12 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,6 +20,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.Constants;
+import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
 import org.slf4j.Logger;
@@ -37,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import static java.text.MessageFormat.format;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
@@ -108,8 +108,8 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> sync(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<>();
+	protected ResponseEntity<String> sync(HttpServletRequest request) throws JsonProcessingException {
+		EventSyncBean response = new EventSyncBean();
 		try {
 			String providerId = getStringFilter(PROVIDER_ID, request);
 			String locationId = getStringFilter(LOCATION_ID, request);
@@ -122,20 +122,22 @@ public class EventResource extends RestResource<Event> {
 			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
 				return new ResponseEntity<>(
-				        gson.toJson(sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
+				        objectMapper.writeValueAsString(
+				            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
-				response.put(Constants.MSG, "specify atleast one filter");
-				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+				response.setMsg("specify atleast one filter");
+				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 			}
 
 		}
 		catch (
-
+		
 		Exception e) {
-			response.put(Constants.MSG, Constants.ERROR_OCCURRED);
+			
+			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -148,26 +150,26 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) {
-		Map<String, Object> response = new HashMap<>();
+	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
+		EventSyncBean response = new EventSyncBean();
 		try {
 
 			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
 			        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
-
-				return new ResponseEntity<>(
-				        gson.toJson(sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
-				            syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
+				
+				return new ResponseEntity<>(objectMapper.writeValueAsString(
+				    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
+				        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
 				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			} else {
-				response.put(Constants.MSG, "specify atleast one filter");
-				return new ResponseEntity<>(new Gson().toJson(response), BAD_REQUEST);
+				response.setMsg("specify atleast one filter");
+				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 			}
 
 		}
 		catch (Exception e) {
-
-			response.put(Constants.MSG, "Error occurred");
+			
+			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -183,46 +185,54 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/sync-by-base-entity-ids", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String jsonObject) {
-		Map<String, Object> response = new HashMap<>();
-		List<Object> clientsEventsList = new ArrayList<>();
-
+	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String jsonObject)
+	        throws JsonProcessingException {
+		EventSyncBean combinedEventClients = new EventSyncBean();
+		List<Event> combinedEvents = new ArrayList<>();
+		List<Client> combinedClients = new ArrayList<>();
+		
 		try {
 			JSONObject object = new JSONObject(jsonObject);
 			boolean withFamilyEvents = object.optBoolean(Constants.WITH_FAMILY_EVENTS, false);
 			List<String> baseEntityIdsList = gson.fromJson(object.getJSONArray(Constants.BASE_ENTITY_IDS).toString(),
 			    new TypeToken<ArrayList<String>>() {}.getType());
 			for (String baseEntityId : baseEntityIdsList) {
-				Map<String, Object> clientEventsMap = sync(null, null, baseEntityId, "0", null, null, null);
-				clientsEventsList.add(clientEventsMap);
-				if (clientEventsMap.containsKey(Constants.CLIENTS)) {
-					List<Client> clients = gson.fromJson(gson.toJson(clientEventsMap.get(Constants.CLIENTS)),
-					    new TypeToken<List<Client>>() {}.getType());
-
+				EventSyncBean eventSyncBean = sync(null, null, baseEntityId, "0", null, null, null);
+				combinedEvents.addAll(eventSyncBean.getEvents());
+				combinedClients.addAll(eventSyncBean.getClients());
+				if (eventSyncBean != null && eventSyncBean.getClients() != null && !eventSyncBean.getClients().isEmpty()) {
+					List<Client> clients = eventSyncBean.getClients();
+					
 					//Obtaining family registration events for client's family if withFamilyEvents is true.
 					if (clients.size() == 1 && clients.get(0).getRelationships().containsKey(Constants.FAMILY)
 					        && withFamilyEvents) {
 						List<String> clientRelationships = clients.get(0).getRelationships().get(Constants.FAMILY);
 						for (String familyRelationship : clientRelationships) {
-							Map<String, Object> familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
-							clientsEventsList.add(familyEvents);
+							EventSyncBean familyEvents = sync(null, null, familyRelationship, "0", null, null, null);
+							combinedEvents.addAll(familyEvents.getEvents());
+							combinedClients.addAll(familyEvents.getClients());
 						}
 					}
 				}
 			}
-
-			return new ResponseEntity<>(gson.toJson(clientsEventsList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
+			combinedEventClients.setEvents(combinedEvents);
+			combinedEventClients.setClients(combinedClients);
+			combinedEventClients.setNoOfEvents(combinedEventClients.getEvents().size());
+			
+			return new ResponseEntity<>(objectMapper.writeValueAsString(combinedEventClients),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			
 		}
 		catch (Exception e) {
-			response.put(Constants.MSG, "Error occurred: " + e.getLocalizedMessage());
+			EventSyncBean response = new EventSyncBean();
+			response.setMsg("Error occurred: " + e.getLocalizedMessage());
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	protected Map<String, Object> sync(String providerId, String locationId, String baseEntityId, String serverVersion,
-	        String team, String teamId, Integer limit) {
+	
+	public EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion, String team,
+	        String teamId, Integer limit) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
@@ -239,12 +249,11 @@ public class EventResource extends RestResource<Event> {
 		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit);
 
 	}
-
-	private Map<String, Object> getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
-		Map<String, Object> response = new HashMap<>();
-		List<Event> events;
-		List<String> clientIds = new ArrayList<>();
-		List<Client> clients = new ArrayList<>();
+	
+	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit) {
+		List<Event> events = new ArrayList<Event>();
+		List<String> clientIds = new ArrayList<String>();
+		List<Client> clients = new ArrayList<Client>();
 		long startTime = System.currentTimeMillis();
 		events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
@@ -260,18 +269,15 @@ public class EventResource extends RestResource<Event> {
 				clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
 			}
 			logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
-
+			
 			searchMissingClients(clientIds, clients, startTime);
 		}
-
-		JsonArray eventsArray = (JsonArray) gson.toJsonTree(events, new TypeToken<List<Event>>() {}.getType());
-
-		JsonArray clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-
-		response.put("events", eventsArray);
-		response.put("clients", clientsArray);
-		response.put("no_of_events", events.size());
-		return response;
+		
+		EventSyncBean eventSyncBean = new EventSyncBean();
+		eventSyncBean.setClients(clients);
+		eventSyncBean.setEvents(events);
+		eventSyncBean.setNoOfEvents(events.size());
+		return eventSyncBean;
 	}
 
 	private void searchMissingClients(List<String> clientIds, List<Client> clients, long startTime) {
@@ -304,21 +310,23 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	protected ResponseEntity<String> getAll(@RequestParam long serverVersion,
-	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit) {
-
+	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit)
+	        throws JsonProcessingException {
+		
 		try {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
-			return new ResponseEntity<>(gson.toJson(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
+			return new ResponseEntity<>(
+			        objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit)),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 		}
 		catch (Exception e) {
-			Map<String, Object> response = new HashMap<String, Object>();
-			response.put("msg", "Error occurred");
+			EventSyncBean response = new EventSyncBean();
+			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
 		}
 	}
 
