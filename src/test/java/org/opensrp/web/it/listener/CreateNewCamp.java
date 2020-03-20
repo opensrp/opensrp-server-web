@@ -13,8 +13,8 @@ import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdObjectMapperFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensrp.domain.Camp;
-import org.opensrp.repository.couch.AllCamp;
+import org.opensrp.connector.domain.Camp;
+import org.opensrp.connector.repository.couch.AllCamp;
 
 public class CreateNewCamp {
 	

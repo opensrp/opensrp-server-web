@@ -20,11 +20,11 @@ import org.junit.Test;
 import org.opensrp.domain.Client;
 import org.opensrp.dto.ActionData;
 import org.opensrp.dto.AlertStatus;
-import org.opensrp.repository.couch.AllClients;
+import org.opensrp.repository.postgres.ActionRepositoryImpl;
+import org.opensrp.repository.postgres.AlertsRepositoryImpl;
+import org.opensrp.repository.postgres.ClientsRepositoryImpl;
 import org.opensrp.scheduler.Action;
 import org.opensrp.scheduler.Alert;
-import org.opensrp.scheduler.repository.couch.AllActions;
-import org.opensrp.scheduler.repository.couch.AllAlerts;
 import org.opensrp.web.controller.ActionConvertor;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,26 +35,26 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ActionControllerTest extends BaseResourceTest {
 
 	@Autowired
-	private AllActions allActions;
+	private ActionRepositoryImpl allActions;
 
 	@Autowired
-	private AllClients allClients;
+	private ClientsRepositoryImpl allClients;
 
 	@Autowired
-	private AllAlerts allAlerts;
+	private AlertsRepositoryImpl allAlerts;
 
 	@Before
 	public void setUp() {
 		allClients.removeAll();
-		allActions.removeAll();
-		allAlerts.removeAll();
+		allActions.getAll().stream().forEach(a -> allActions.safeRemove(a));
+		allAlerts.getAll().stream().forEach(a -> allAlerts.safeRemove(a));
 	}
 
 	@After
 	public void cleanUp() {
 		allClients.removeAll();
-		allActions.removeAll();
-		allAlerts.removeAll();
+		allActions.getAll().stream().forEach(a -> allActions.safeRemove(a));
+		allAlerts.getAll().stream().forEach(a -> allAlerts.safeRemove(a));
 	}
 
 	@Test

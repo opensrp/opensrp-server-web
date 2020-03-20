@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.ErrorTraceForm;
-import org.opensrp.repository.couch.AllErrorTrace;
+import org.opensrp.repository.postgres.ErrorTraceRepositoryImpl;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,7 +28,7 @@ public class ErrorTraceControllerIntegrationTest extends BaseResourceTest {
 	private final static String BASE_URL = "/errorhandler";
 
 	@Autowired
-	AllErrorTrace allErrorTrace;
+	ErrorTraceRepositoryImpl allErrorTrace;
 
 	ErrorTraceForm errorTraceForm;
 

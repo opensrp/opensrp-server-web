@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
-import org.opensrp.repository.couch.AllClients;
+import org.opensrp.repository.postgres.ClientsRepositoryImpl;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.rest.ClientResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ClientResourceTest extends BaseResourceTest {
 	private final static String BASE_URL = "/rest/client/";
 
 	@Autowired
-	private AllClients allClients;
+	private ClientsRepositoryImpl allClients;
 
 	@Autowired
 	private ClientService clientService;

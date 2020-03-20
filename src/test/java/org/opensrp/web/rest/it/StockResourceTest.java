@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.domain.Stock;
-import org.opensrp.repository.couch.AllStocks;
+import org.opensrp.repository.postgres.StocksRepositoryImpl;
 import org.opensrp.web.rest.StockResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.NestedServletException;
@@ -36,19 +36,19 @@ public class StockResourceTest extends BaseResourceTest {
 	private static final String BASE_URL = "/rest/stockresource";
 
 	@Autowired
-	private AllStocks allStocks;
+	private StocksRepositoryImpl allStocks;
 
 	@Autowired
 	private StockResource stockResource;
 
 	@Before
 	public void setUp() {
-		allStocks.removeAll();
+		allStocks.getAll().stream().forEach(s -> allStocks.safeRemove(s));
 	}
 
 	@After
 	public void cleanUp() {
-		allStocks.removeAll();
+		allStocks.getAll().stream().forEach(s -> allStocks.safeRemove(s));
 	}
 
 	@Test
