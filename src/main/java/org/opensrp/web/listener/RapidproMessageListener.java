@@ -4,19 +4,21 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.opensrp.common.util.DateUtil;
+import org.opensrp.connector.domain.Camp;
 import org.opensrp.connector.rapidpro.MessageFactory;
 import org.opensrp.connector.rapidpro.MessageService;
 import org.opensrp.connector.rapidpro.MessageType;
-import org.opensrp.domain.Camp;
+import org.opensrp.connector.repository.couch.AllCamp;
 import org.opensrp.domain.Event;
-import org.opensrp.repository.couch.AllCamp;
 import org.opensrp.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
+@Profile("rapidpro")
 @Service
 @EnableScheduling
 public class RapidproMessageListener {

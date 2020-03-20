@@ -26,8 +26,8 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.0.0-alpha8-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.0.0-alpha3-SNAPSHOT</opensrp.connector.version>
+		<opensrp.core.version>2.0.0-alpha9-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.0.0-alpha4-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.0-alpha2-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.0-alpha1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
@@ -561,6 +561,8 @@
 				<opensrp.database.profile>postgres</opensrp.database.profile>
 				<openmrs.sync.enabled>default</openmrs.sync.enabled>
 				<dhis2.sync.enabled>default</dhis2.sync.enabled>
+				<atomfeed.enabled>default</atomfeed.enabled>
+				<rapidpro.enabled>default</rapidpro.enabled>
 			</properties>
 		</profile>
 		<profile>
@@ -646,6 +648,39 @@
 			<properties>
 				<dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
 			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.ektorp</groupId>
+					<artifactId>org.ektorp.spring</artifactId>
+					<version>1.5.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>atomfeed</id>
+			<properties>
+				<atomfeed.enabled>atomfeed</atomfeed.enabled>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.ektorp</groupId>
+					<artifactId>org.ektorp.spring</artifactId>
+					<version>1.5.0</version>
+				</dependency>
+			</dependencies>			
+		</profile>
+		<profile>
+			<id>rapidpro</id>
+			<properties>
+				<rapidpro.enabled>dhis2-sync</rapidpro.enabled>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.ektorp</groupId>
+					<artifactId>org.ektorp.spring</artifactId>
+					<version>1.5.0</version>
+				</dependency>
+			</dependencies>			
 		</profile>
 		<profile>
 			<id>skip-integration-tests</id>

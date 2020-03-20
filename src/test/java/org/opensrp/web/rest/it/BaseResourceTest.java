@@ -17,7 +17,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.opensrp.repository.couch.BaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.codec.Base64;
@@ -122,7 +121,7 @@ public abstract class BaseResourceTest {
 		return actualObj;
 	}
 
-	protected static <T, R extends BaseRepository> void addObjectToRepository(List<T> objectList, R repository) {
+	protected static <T, R extends org.opensrp.repository.BaseRepository<T>> void addObjectToRepository(List<T> objectList, R repository) {
 		for (T object : objectList) {
 			repository.add(object);
 		}

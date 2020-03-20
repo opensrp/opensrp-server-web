@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
-import org.opensrp.repository.couch.AllClients;
-import org.opensrp.repository.couch.AllEvents;
+import org.opensrp.repository.postgres.ClientsRepositoryImpl;
+import org.opensrp.repository.postgres.EventsRepositoryImpl;
 import org.opensrp.web.rest.SearchResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,10 +43,10 @@ public class SearchResourceTest extends BaseResourceTest {
 	private SearchResource searchResource;
 
 	@Autowired
-	private AllClients allClients;
+	private ClientsRepositoryImpl allClients;
 
 	@Autowired
-	private AllEvents allEvents;
+	private EventsRepositoryImpl allEvents;
 
 	String addressType = "addressType";
 

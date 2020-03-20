@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
-import org.opensrp.repository.couch.AllClients;
-import org.opensrp.repository.couch.AllEvents;
+import org.opensrp.repository.postgres.ClientsRepositoryImpl;
+import org.opensrp.repository.postgres.EventsRepositoryImpl;
 import org.opensrp.web.rest.EventResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
@@ -65,10 +65,10 @@ public class EventResourceTest extends BaseResourceTest {
 	private final static String BASE_URL = "/rest/event/";
 
 	@Autowired
-	private AllEvents allEvents;
+	private EventsRepositoryImpl allEvents;
 
 	@Autowired
-	private AllClients allClients;
+	private ClientsRepositoryImpl allClients;
 
 	@Autowired
 	private EventResource eventResource;
