@@ -14,7 +14,7 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
     <context:property-placeholder
-            location="classpath*:maven.properties,classpath*:activemq.properties,classpath*:opensrp.properties"/>
+            location="classpath*:maven.properties,classpath*:opensrp.properties"/>
 
     <import resource="classpath:applicationContext-opensrp.xml"/>
 	<import resource="classpath:applicationContext-connector.xml"/>
