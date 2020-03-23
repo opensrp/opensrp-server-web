@@ -1,5 +1,14 @@
 package org.opensrp.web.rest;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,6 +24,7 @@ import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -26,13 +36,6 @@ import org.springframework.test.web.server.MockMvc;
 import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -381,12 +384,11 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
 
 		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
-				.thenThrow(IllegalArgumentException.class);
+				.thenThrow(new IllegalArgumentException());
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
 				body("{\"serverVersion\", \"1542640316\"}".getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
@@ -397,12 +399,11 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
 
 		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
-				.thenThrow(IllegalArgumentException.class);
+				.thenThrow(new IllegalArgumentException());
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316"))
 				.andExpect(status().isBadRequest()).andReturn();
 		verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());
@@ -687,6 +688,76 @@ public class LocationResourceTest {
 		assertEquals("j_id", stringCaptor.getValue());
 		assertEquals(Integer.parseInt(LocationResource.DEFAULT_PAGE_SIZE), integerCaptor.getValue().intValue());
 
+	}
+
+	@Test
+	public void testFindStructureIds() throws Exception {
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("structure-id-1"), 12345l);
+		when(locationService.findAllStructureIds(anyLong(), anyInt())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0", "")).andExpect(status().isOk())
+				.andReturn();
+
+		String actualStructureIdString = result.getResponse().getContentAsString();
+		Identifier actualIdModels = new Gson().fromJson(actualStructureIdString, new TypeToken<Identifier>(){}.getType());
+		List<String> actualStructureIdList = actualIdModels.getIdentifiers();
+
+		verify(locationService).findAllStructureIds(anyLong(), anyInt());
+		verifyNoMoreInteractions(locationService);
+		assertEquals("{\"identifiers\":[\"structure-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals((idsModel.getLeft()).get(0), actualStructureIdList.get(0));
+		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
+	}
+
+	@Test
+	public void testGetAllLocations() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll")
+						.param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllLocations(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testGetAllStructures() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll")
+						.param(LocationResource.IS_JURISDICTION, "false")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+
+	}
+
+	@Test
+	public void testFindLocationIds() throws Exception {
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("location-id-1"), 12345l);
+		when(locationService.findAllLocationIds(anyLong(), anyInt())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0", "")).andExpect(status().isOk())
+				.andReturn();
+
+		String actualLocationIdString = result.getResponse().getContentAsString();
+		Identifier actualIdModels = new Gson().fromJson(actualLocationIdString, new TypeToken<Identifier>(){}.getType());
+		List<String> actualLocationIdList = actualIdModels.getIdentifiers();
+
+		verify(locationService).findAllLocationIds(anyLong(), anyInt());
+		verifyNoMoreInteractions(locationService);
+		assertEquals("{\"identifiers\":[\"location-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals((idsModel.getLeft()).get(0), actualLocationIdList.get(0));
+		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
 	}
 
 	private PhysicalLocation createLocation() {

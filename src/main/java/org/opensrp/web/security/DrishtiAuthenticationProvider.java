@@ -12,17 +12,16 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +44,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	protected static final String AUTH_HASH_KEY = "_auth";
 
 	private static final String GET_ALL_EVENTS_ROlE = "OpenSRP: Get All Events";
-
-	// private AllOpenSRPUsers allOpenSRPUsers;
-	private PasswordEncoder passwordEncoder;
-
+	
 	private OpenmrsUserService openmrsUserService;
 
 	@Resource(name = "redisTemplate")
@@ -61,10 +57,8 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	private int cacheTTL;
 
 	@Autowired
-	public DrishtiAuthenticationProvider(OpenmrsUserService openmrsUserService,
-			@Qualifier("shaPasswordEncoder") PasswordEncoder passwordEncoder) {
+	public DrishtiAuthenticationProvider(OpenmrsUserService openmrsUserService) {
 		this.openmrsUserService = openmrsUserService;
-		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -119,7 +113,17 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
 	public User getDrishtiUser(Authentication authentication, String username) {
 		User user = null;
-		checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
+		if (authentication instanceof OAuth2Authentication) {
+			if (!((OAuth2Authentication) authentication).getUserAuthentication().isAuthenticated()) {
+				throw new BadCredentialsException(INVALID_CREDENTIALS);
+			}
+		} else if(!authentication.isAuthenticated()) {
+			checkIsAuthenticated(authentication.getName(), authentication.getCredentials().toString());
+		}else {
+			String userAddress = ((WebAuthenticationDetails) authentication.getDetails()).getRemoteAddress();
+			String key = userAddress + authentication.getName();
+			authentication = hashOps.get(key, AUTH_HASH_KEY);
+		}
 
 		try {
 			boolean response = openmrsUserService.deleteSession(authentication.getName(),

@@ -1,3 +1,4 @@
+
 package org.opensrp.web.rest;
 
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.SearchService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.opensrp.web.utils.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -62,10 +64,9 @@ public class SearchResourceTest {
 	@Test
 	public void testIntersectionMethodReturnsCorrectResult() throws Exception {
 		
-		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
 		Client clientA = Mockito.mock(Client.class);
 		List<Client> listA = Arrays.asList(new Client[] { clientA });
-		List<Client> result = searchResource.intersection(null, listA);
+		List<Client> result = SearchHelper.intersection(null, listA);
 		
 		Assert.assertNotNull(result);
 		Assert.assertEquals(listA, result);

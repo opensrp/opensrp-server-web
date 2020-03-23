@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4.0"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_4_0.xsd">
 
     <display-name>opensrp-server</display-name>
 
@@ -58,6 +58,11 @@
     </filter>
     
      <filter>
+        <filter-name>GzipBodyDecompressFilter</filter-name>
+        <filter-class>org.opensrp.web.GzipBodyDecompressFilter</filter-class>
+    </filter>
+    
+     <filter>
         <filter-name>CORSFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
@@ -86,6 +91,11 @@
         <filter-name>GZipFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+	<filter-mapping>
+		<filter-name>GzipBodyDecompressFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
     
      <filter-mapping>
         <filter-name>CORSFilter</filter-name>
@@ -99,7 +109,8 @@
 
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile}</param-value>
+		<param-value>${opensrp.database.profile},${opensrp.redis.client.profile},${opensrp.security.profile},
+		${openmrs.sync.enabled},${dhis2.sync.enabled},${atomfeed.enabled},${rapidpro.enabled}</param-value>
 	</context-param>
 
     <!-- Handles Spring requests -->

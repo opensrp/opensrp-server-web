@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-          http://www.springframework.org/schema/security
-          http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
- 	<bean id="shaPasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
-	<bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider"/>
+	<bean id="opensrpAuthenticationProvider" class="org.opensrp.web.security.DrishtiAuthenticationProvider" />
 	
-    <security:authentication-manager id="opensrpAuthenticationManager">
-        <security:authentication-provider ref="opensrpAuthenticationProvider"/>
-    </security:authentication-manager>
-
-	<security:http pattern="/js/**" security="none" />
-	<security:http pattern="/css/**" security="none" />
-	<security:http pattern="/images/**" security="none" />
-      
 	<beans profile="oauth2">
-		<import resource="oauth-authorization.xml" />
-		<import resource="oauth-common.xml" />
+		<import resource="oauth_clients.xml" />
 	</beans>
-
-	<beans profile="basic_auth">
-		<import resource="basic_auth.xml" />
-	</beans>
-
+		
 </beans>
