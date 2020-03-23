@@ -246,7 +246,7 @@ public class UserController {
 				if (PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
 					continue;
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
-				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
+				if (StringUtils.isNotBlank(openMRSId)) {
 					String parentId = jurisdiction.getProperties().getParentId();
 					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);

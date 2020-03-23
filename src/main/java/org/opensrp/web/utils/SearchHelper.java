@@ -135,7 +135,7 @@ public class SearchHelper {
 		String nameLike = null;
 		
 		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
-		        && org.apache.commons.lang3.StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
+		        && StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
 		        && StringUtils.isBlank(motherSearchBean.getLastName())) {
 			String[] arr = motherSearchBean.getFirstName().split("\\s+");
 			nameLike = arr[0];
