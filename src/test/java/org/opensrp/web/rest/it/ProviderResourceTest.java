@@ -6,13 +6,9 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 
 import java.util.Map;
 
-import org.codehaus.jackson.JsonNode;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.opensrp.domain.User;
-import org.opensrp.repository.couch.AllUsers;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ProviderResourceTest extends BaseResourceTest {
 
@@ -27,20 +23,6 @@ public class ProviderResourceTest extends BaseResourceTest {
 	public static final String USER_NAME = "userName";
 
 	public static final String BASE_ENTITY_ID = "1";
-
-	@Autowired
-	AllUsers allUsers;
-
-	@Before
-	public void setUp() {
-		User user = new User(BASE_ENTITY_ID, USER_NAME, PASSWORD, SALT);
-		allUsers.add(user);
-	}
-
-	@After
-	public void cleanUp() {
-		allUsers.removeAll();
-	}
 
 	@Test
 	public void shouldReturnErrorMessageWithOutTeamIdAndUserName() throws Exception {

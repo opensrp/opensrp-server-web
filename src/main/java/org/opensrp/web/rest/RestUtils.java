@@ -1,15 +1,5 @@
 package org.opensrp.web.rest;
 
-import com.mysql.jdbc.StringUtils;
-import org.joda.time.DateTime;
-import org.opensrp.domain.Multimedia;
-import org.opensrp.service.multimedia.MultimediaFileManager;
-import org.opensrp.service.multimedia.S3MultimediaFileManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +12,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.opensrp.domain.Multimedia;
+import org.opensrp.service.multimedia.MultimediaFileManager;
+import org.opensrp.service.multimedia.S3MultimediaFileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 
 public class RestUtils {
 	public static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -34,7 +33,7 @@ public class RestUtils {
 
 	public static String getStringFilter(String filter, HttpServletRequest req)
 	{
-	  return StringUtils.isEmptyOrWhitespaceOnly(req.getParameter(filter)) ? null : req.getParameter(filter);
+	  return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
