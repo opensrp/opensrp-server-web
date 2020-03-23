@@ -1,14 +1,26 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -26,18 +38,9 @@ import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
 import org.springframework.http.ResponseEntity;
 
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 public class EventResourceTest extends BaseResourceTest<Event> {
 
     private final static String BASE_URL = "/rest/event";
@@ -59,6 +62,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
 
 	private EventResource eventResource;
+
 
     public EventResourceTest() throws IOException {
         super();

@@ -1,15 +1,18 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -33,11 +36,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -51,7 +54,9 @@ public class TaskResource {
 	public static final String PLAN = "plan";
 	
 	public static final String GROUP = "group";
-	
+
+	public static final String OWNER= "owner";
+
 	private TaskService taskService;
 	
 	@Autowired
@@ -76,6 +81,7 @@ public class TaskResource {
 	public ResponseEntity<String> getTasksByTaskAndGroup(@RequestBody TaskSyncRequestWrapper taskSyncRequestWrapper) {
 		String plan = StringUtils.join(taskSyncRequestWrapper.getPlan(), ",");
 		String group = StringUtils.join(taskSyncRequestWrapper.getGroup(), ",");
+		String owner = taskSyncRequestWrapper.getOwner();
 		long serverVersion = taskSyncRequestWrapper.getServerVersion();
 		
 		long currentServerVersion = 0;
@@ -85,16 +91,7 @@ public class TaskResource {
 		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		try {
-			return new ResponseEntity<>(gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
 	}
 	
 	// here for backward compatibility
@@ -103,6 +100,8 @@ public class TaskResource {
 		String plan = getStringFilter(PLAN, request);
 		String group = getStringFilter(GROUP, request);
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String owner = getStringFilter(OWNER, request);
+
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -110,13 +109,28 @@ public class TaskResource {
 		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		if (StringUtils.isBlank(plan) || StringUtils.isBlank(group))
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
+	}
+
+	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion) {
+		if (StringUtils.isBlank(plan)) {
+			logger.error("Plan Identifier is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		try {
-			return new ResponseEntity<>(gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
-		catch (Exception e) {
+		try {
+			if (!StringUtils.isBlank(group)) {
+				return new ResponseEntity<>(
+						gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else if (!StringUtils.isBlank(owner)){
+				return new ResponseEntity<>(
+						gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)),
+						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			} else {
+				logger.error("Either owner or group identifier field is missing");
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -205,24 +219,23 @@ public class TaskResource {
 	}
 	
 	/**
-	 * This methods provides an API endpoint that searches for all task Ids ordered by server
-	 * version ascending
+	 * This methods provides an API endpoint that searches for all task Ids
+	 * ordered by server version ascending
 	 *
 	 * @param serverVersion serverVersion using to filter by
 	 * @return A list of task Ids
 	 */
-	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSION) long serverVersion) {
-		
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(
+			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 		try {
 			Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(taskIdsPair.getLeft());
 			identifiers.setLastServerVersion(taskIdsPair.getRight());
-			
 			return new ResponseEntity<>(identifiers, HttpStatus.OK);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
 			logger.warn(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -263,7 +276,10 @@ public class TaskResource {
 		
 		@JsonProperty
 		private long serverVersion;
-		
+
+		@JsonProperty
+		private String owner;
+
 		public List<String> getPlan() {
 			return plan;
 		}
@@ -274,6 +290,10 @@ public class TaskResource {
 		
 		public long getServerVersion() {
 			return serverVersion;
+		}
+
+		public String getOwner() {
+			return owner;
 		}
 	}
 	

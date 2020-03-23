@@ -1,13 +1,31 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
+import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
+import static org.opensrp.common.AllConstants.Event.TEAM_ID;
+import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -37,25 +55,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
-import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
-import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.common.AllConstants.Event.TEAM_ID;
-import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/event")
@@ -131,10 +134,7 @@ public class EventResource extends RestResource<Event> {
 			}
 
 		}
-		catch (
-		
-		Exception e) {
-			
+		catch (Exception e) {
 			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
@@ -167,11 +167,10 @@ public class EventResource extends RestResource<Event> {
 			}
 
 		}
-		catch (Exception e) {
-			
+		catch (Exception e) {			
 			response.setMsg("Error occurred");
 			logger.error("", e);
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -190,7 +189,6 @@ public class EventResource extends RestResource<Event> {
 		EventSyncBean combinedEventClients = new EventSyncBean();
 		List<Event> combinedEvents = new ArrayList<>();
 		List<Client> combinedClients = new ArrayList<>();
-		
 		try {
 			JSONObject object = new JSONObject(jsonObject);
 			boolean withFamilyEvents = object.optBoolean(Constants.WITH_FAMILY_EVENTS, false);
@@ -202,7 +200,6 @@ public class EventResource extends RestResource<Event> {
 				combinedClients.addAll(eventSyncBean.getClients());
 				if (eventSyncBean != null && eventSyncBean.getClients() != null && !eventSyncBean.getClients().isEmpty()) {
 					List<Client> clients = eventSyncBean.getClients();
-					
 					//Obtaining family registration events for client's family if withFamilyEvents is true.
 					if (clients.size() == 1 && clients.get(0).getRelationships().containsKey(Constants.FAMILY)
 					        && withFamilyEvents) {
@@ -269,9 +266,10 @@ public class EventResource extends RestResource<Event> {
 				clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
 			}
 			logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
-			
+
 			searchMissingClients(clientIds, clients, startTime);
 		}
+
 		
 		EventSyncBean eventSyncBean = new EventSyncBean();
 		eventSyncBean.setClients(clients);
@@ -330,7 +328,6 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
 		try {

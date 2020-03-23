@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +47,6 @@ import org.springframework.test.web.server.MvcResult;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 
 /**
  * Created by Vincent Karuri on 06/05/2019

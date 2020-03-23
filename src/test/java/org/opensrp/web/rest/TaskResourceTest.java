@@ -1,10 +1,26 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.junit.Before;
@@ -33,22 +49,8 @@ import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -105,15 +107,31 @@ public class TaskResourceTest {
 	}
 
 	@Test
-	public void testGetTasksByTaskAndGroup() throws Exception {
+	public void testGetTasksByPlanAndGroup() throws Exception {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
-		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l)).thenReturn(tasks);
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
 						.body("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
-		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+	}
+
+	@Test
+	public void testGetTasksByPlanAndOwner() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		when(taskService.getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(tasks);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.body("{\"plan\":[\"IRS_2018_S1\"],\"owner\":\"demouser\", \"serverVersion\":15421904649873}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
 		verifyNoMoreInteractions(taskService);
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());

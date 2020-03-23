@@ -29,7 +29,6 @@
 
     <context:component-scan base-package="org.opensrp.web"/>
 
-
     <mvc:annotation-driven/>
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
@@ -41,7 +40,6 @@
         <property name="favorPathExtension" value="true" />
         <property name="ignoreAcceptHeader" value="true"/>
         <property name="defaultContentType" value="text/html" />
-
         <property name="mediaTypes">
             <map>
                <entry key="html" value="text/html"/>

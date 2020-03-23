@@ -1,29 +1,5 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.opensrp.domain.Client;
-import org.opensrp.search.AddressSearchBean;
-import org.opensrp.search.ClientSearchBean;
-import org.opensrp.service.ClientService;
-import org.opensrp.web.bean.ClientSyncBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import static org.opensrp.common.AllConstants.BaseEntity.ADDRESS_TYPE;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
@@ -47,6 +23,33 @@ import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
 import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.opensrp.domain.Client;
+import org.opensrp.search.AddressSearchBean;
+import org.opensrp.search.ClientSearchBean;
+import org.opensrp.service.ClientService;
+import org.opensrp.web.bean.ClientSyncBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Controller
 @RequestMapping(value = "/rest/client")
