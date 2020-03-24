@@ -4,6 +4,7 @@ sudo: required
 services:
   - couchdb
   - mysql
+jdk: openjdk11
 install:
   - echo "skip" # or anything that returns 0 status.
   - sudo updatedb #Giving couchdb time to start.
@@ -29,8 +30,9 @@ script:
   - javac -version
   - java -version
   - mvn --version
+  - mvn -B -e clean test jacoco:report
 notifications:
   slack:
     secure: Ueku2w/RdSfh1zEDErTbHi+hRx154fH10ykGcfrXPXhTVtWopG73BGDRKfVgU1MCokEo+2jtkRAuJB29R1PV8E3845wWJFs9ZPGcl0rjfx3qP2G/bCuARRHmBJ33YStROvaVF3ppNjJau7VinIF3giem+4WgtQ8KPmqqviDg8Tw=
 after_success:
-  - mvn -B -e clean test jacoco:report coveralls:report
+  - mvn coveralls:report
