@@ -1,9 +1,9 @@
 package org.opensrp.web.rest;
 
-import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.http.util.TextUtils;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.joda.time.DateTime;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
@@ -46,13 +46,13 @@ public class ClientFormResource {
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
             , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) {
-        Version formVersionRequired = Version.valueOf(formVersion);
-        Version currentFormVersionV = null;
+        DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
+        DefaultArtifactVersion currentFormVersionV = null;
         if (!TextUtils.isEmpty(currentFormVersion)) {
-            currentFormVersionV = Version.valueOf(currentFormVersion);
+            currentFormVersionV = new DefaultArtifactVersion(currentFormVersion);
         }
 
-        if (currentFormVersionV != null && currentFormVersionV.greaterThan(formVersionRequired)) {
+        if (currentFormVersionV != null && currentFormVersionV.compareTo(formVersionRequired) > 0) {
             return new ResponseEntity<>((String) null, HttpStatus.BAD_REQUEST);
         }
 
@@ -69,13 +69,13 @@ public class ClientFormResource {
         if (clientFormMetadata == null) {
             // Get an older form version
             List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier);
-            Version highestVersion = null;
+            DefaultArtifactVersion highestVersion = null;
             IdVersionTuple highestIdVersionTuple = null;
 
             for (IdVersionTuple availableFormVersion: availableFormVersions) {
-                Version semanticFormVersion = Version.valueOf(availableFormVersion.getVersion());
+                DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
 
-                if (highestVersion == null || semanticFormVersion.greaterThan(highestVersion)) {
+                if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
                     highestVersion = semanticFormVersion;
                     highestIdVersionTuple = availableFormVersion;
                 }
@@ -114,7 +114,7 @@ public class ClientFormResource {
         }
 
         // TOOD: Check the string is a valid version
-        Version formVersionV = Version.valueOf(formVersion);
+        DefaultArtifactVersion formVersionV = new DefaultArtifactVersion(formVersion);
         if (!jsonFile.getOriginalFilename().contains(".json")) {
             return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
         }

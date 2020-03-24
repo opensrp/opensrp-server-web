@@ -61,7 +61,7 @@ public class ClientFormResourceTest {
 
         ClientForm clientForm = new ClientForm();
         clientForm.setJson("{}");
-        clientForm.setId(3);
+        clientForm.setId(3L);
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setIdentifier(formIdentifier);
@@ -70,8 +70,8 @@ public class ClientFormResourceTest {
         when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
         when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
         when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
-        when(clientFormService.getClientFormById(3)).thenReturn(clientForm);
-        when(clientFormService.getClientFormMetadataById(3)).thenReturn(clientFormMetadata);
+        when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
                 .param("form_identifier", formIdentifier)
