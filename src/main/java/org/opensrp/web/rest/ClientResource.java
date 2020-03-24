@@ -27,18 +27,17 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
-import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.bean.ClientSyncBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -87,9 +82,6 @@ public class ClientResource extends RestResource<Client> {
 	public static final String STARTDATE = "startDate";
 	
 	public static final String ENDDATE = "endDate";
-	
-	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
 	public ClientResource(ClientService clientService) {
@@ -139,7 +131,7 @@ public class ClientResource extends RestResource<Client> {
 		}
 		
 		String clientId = getStringFilter("identifier", request);
-		if (!StringUtils.isEmptyOrWhitespaceOnly(clientId)) {
+		if (!StringUtils.isBlank(clientId)) {
 			Client c = clientService.find(clientId);
 			List<Client> clients = new ArrayList<Client>();
 			clients.add(c);
@@ -158,8 +150,8 @@ public class ClientResource extends RestResource<Client> {
 		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
 		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
 		String attributes = getStringFilter("attribute", request);
-		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
-		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
+		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 		
 		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 		    lastEdit == null ? null : lastEdit[1]);
@@ -172,10 +164,9 @@ public class ClientResource extends RestResource<Client> {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<String, Object>();
-		JsonArray clientsArray = new JsonArray();
-		List<Client> clientList = new ArrayList<Client>();
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws JsonProcessingException {
+		ClientSyncBean response = new ClientSyncBean();
+		List<Client> clientList;
 		
 		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
 		String pageNumberParam = getStringFilter(PAGE_NUMBER, request);
@@ -210,8 +201,8 @@ public class ClientResource extends RestResource<Client> {
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
 		
 		String attributes = getStringFilter("attribute", request);
-		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
-		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
+		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
+		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 		
 		DateTime startDate = null;
 		DateTime endDate = null;
@@ -230,8 +221,7 @@ public class ClientResource extends RestResource<Client> {
 		} else if (clientType.equalsIgnoreCase(HOUSEHOLDMEMEBR)) {
 			
 			clientList = clientService.findMembersByRelationshipId(baseEntityId);
-			clientsArray = (JsonArray) gson.toJsonTree(clientList, new TypeToken<List<Client>>() {}.getType());
-			response.put("clients", clientsArray);
+			response.setClients(clientList);
 			
 		} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
 			searchBean.setClientType(HOUSEHOLD);
@@ -249,39 +239,36 @@ public class ClientResource extends RestResource<Client> {
 			logger.info("no matched client type");
 		}
 		
-		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
 		
 	}
 	
-	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
+	        throws JsonProcessingException {
 		
-		Map<String, Object> response = new HashMap<String, Object>();
-		JsonArray clientsArray = new JsonArray();
+		ClientSyncBean response = new ClientSyncBean();
 		
 		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
 		
 		total = getTotal(clientSearchBean, addressSearchBean);
-		
-		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-		response.put("clients", clientsArray);
-		response.put("total", total);
-		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		response.setClients(clients);
+		response.setTotal(total);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
+	        throws JsonProcessingException {
 		
 		DateTime[] lastEdit = null;
-		Map<String, Object> response = new HashMap<String, Object>();
-		JsonArray clientsArray = new JsonArray();
-		List<Client> clients = new ArrayList<Client>();
+		ClientSyncBean response = new ClientSyncBean();
+		List<Client> clients;
 		
-		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
-		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
+		    lastEdit == null ? null : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 		total = getTotal(clientSearchBean, addressSearchBean);
-		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-		response.put("clients", clientsArray);
-		response.put("total", total);
-		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		response.setClients(clients);
+		response.setTotal(total);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
 	}
 	
 	private int getTotal(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
@@ -307,32 +294,30 @@ public class ClientResource extends RestResource<Client> {
 		return total;
 	}
 	
-	public ResponseEntity<String> getAllANC(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+	public ResponseEntity<String> getAllANC(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
+	        throws JsonProcessingException {
 		
-		Map<String, Object> response = new HashMap<String, Object>();
-		JsonArray clientsArray = new JsonArray();
+		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);
 		List<Client> clients = clientService.findAllANCByCriteria(clientSearchBean, addressSearchBean);
 		clientSearchBean.setClientType(ANC);
 		total = getTotal(clientSearchBean, addressSearchBean);
-		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-		response.put("clients", clientsArray);
-		response.put("total", total);
-		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		response.setClients(clients);
+		response.setTotal(total);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> getAllChild(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
+	public ResponseEntity<String> getAllChild(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
+	        throws JsonProcessingException {
 		
-		Map<String, Object> response = new HashMap<String, Object>();
-		JsonArray clientsArray = new JsonArray();
+		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);
 		List<Client> clients = clientService.findAllChildByCriteria(clientSearchBean, addressSearchBean);
 		clientSearchBean.setClientType(CHILD);
 		total = getTotal(clientSearchBean, addressSearchBean);
-		clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
-		response.put("clients", clientsArray);
-		response.put("total", total);
-		return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
+		response.setClients(clients);
+		response.setTotal(total);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
 	}
 	
 }

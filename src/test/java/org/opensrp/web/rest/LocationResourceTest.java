@@ -384,12 +384,11 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
 
 		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
-				.thenThrow(IllegalArgumentException.class);
+				.thenThrow(new IllegalArgumentException());
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
 				body("{\"serverVersion\", \"1542640316\"}".getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
@@ -400,12 +399,11 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetSyncStructuresByServerVersionsWithoutServerVersion() throws Exception {
 
 		when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
-				.thenThrow(IllegalArgumentException.class);
+				.thenThrow(new IllegalArgumentException());
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "1542640316"))
 				.andExpect(status().isBadRequest()).andReturn();
 		verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());

@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opensrp.domain.Hia2Indicator;
 import org.opensrp.domain.Report;
-import org.opensrp.repository.couch.AllReports;
+import org.opensrp.repository.postgres.ReportsRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ReportResourceTest extends BaseResourceTest {
@@ -23,7 +23,7 @@ public class ReportResourceTest extends BaseResourceTest {
 	public String BASE_URL = "/rest/report/";
 
 	@Autowired
-	public AllReports allReports;
+	public ReportsRepositoryImpl allReports;
 
 	@Before
 	public void setUp() {

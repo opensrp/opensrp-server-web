@@ -1,11 +1,11 @@
 package org.opensrp.web.controller;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -26,12 +25,8 @@ import org.opensrp.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
-import org.opensrp.web.controller.XlsDataImportController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 public class XlsDataImportControllerTest {
 	@Mock
@@ -60,7 +55,7 @@ public class XlsDataImportControllerTest {
 		openmrsIds.add("12345-3");
 		openmrsIds.add("12345-4");
 
-		when(this.openmrsIDService.downloadOpenmrsIds(anyInt())).thenReturn(openmrsIds);
+		when(openmrsIDService.downloadOpenmrsIds(openmrsIds.size())).thenReturn(openmrsIds);
 		
 		XlsDataImportController controller = new XlsDataImportController(clientService, eventService, openmrsIDService);
 		ResponseEntity<String> response = controller.importXlsData(file);
