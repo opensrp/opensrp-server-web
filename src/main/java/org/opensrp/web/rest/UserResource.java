@@ -39,14 +39,9 @@ public class UserResource {
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	private ResponseEntity<String> getAllUsers(@RequestParam("page_size") int limit,
 	        @RequestParam("start_index") int offset) {
-		try {
-			JSONObject users = userService.getUsers(limit, offset);
-			return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
-		}
-		catch (JSONException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		JSONObject users = userService.getUsers(limit, offset);
+		return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
 		
 	}
 	

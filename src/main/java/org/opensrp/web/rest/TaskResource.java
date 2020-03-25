@@ -66,14 +66,8 @@ public class TaskResource {
 	
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
-		try {
-			return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), RestUtils.getJSONUTF8Headers(),
-			        HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), RestUtils.getJSONUTF8Headers(),
+				HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {
@@ -117,22 +111,18 @@ public class TaskResource {
 			logger.error("Plan Identifier is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		try {
-			if (!StringUtils.isBlank(group)) {
-				return new ResponseEntity<>(
-						gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else if (!StringUtils.isBlank(owner)){
-				return new ResponseEntity<>(
-						gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				logger.error("Either owner or group identifier field is missing");
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+		if (!StringUtils.isBlank(group)) {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else if (!StringUtils.isBlank(owner)) {
+			return new ResponseEntity<>(
+					gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			logger.error("Either owner or group identifier field is missing");
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -229,18 +219,12 @@ public class TaskResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
-		try {
-			Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
-			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers(taskIdsPair.getLeft());
-			identifiers.setLastServerVersion(taskIdsPair.getRight());
-			return new ResponseEntity<>(identifiers, HttpStatus.OK);
-		} catch (Exception e) {
-			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
-			logger.warn(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
+
+		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Identifier identifiers = new Identifier();
+		identifiers.setIdentifiers(taskIdsPair.getLeft());
+		identifiers.setLastServerVersion(taskIdsPair.getRight());
+		return new ResponseEntity<>(identifiers, HttpStatus.OK);
 	}
 	
 	/**
@@ -253,16 +237,10 @@ public class TaskResource {
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAll(@RequestParam(value = SERVER_VERSION) long serverVersion,
 	        @RequestParam(value = LIMIT, required = false) Integer limit) {
-		
-		try {
-			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-			return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+		return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
 	}
 	

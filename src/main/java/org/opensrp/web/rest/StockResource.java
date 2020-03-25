@@ -147,7 +147,6 @@ public class StockResource extends RestResource<Stock> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-		try {
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("stocks")) {
 				return new ResponseEntity<>(BAD_REQUEST);
@@ -162,10 +161,6 @@ public class StockResource extends RestResource<Stock> {
 					logger.error("Stock" + stock.getId() + " failed to sync", e);
 				}
 			}
-		} catch (Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
 		return new ResponseEntity<>(CREATED);
 	}
 

@@ -154,17 +154,12 @@ public class UserController {
 		}
 		if (auth != null) {
 			User user;
-			try {
-				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
-						: anmIdentifier;
-				user = openmrsUserService.getUser(userName);
-				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
-				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
-			} catch (JSONException e) {
-				logger.error("Error getting user details", e);
-				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
+					: anmIdentifier;
+			user = openmrsUserService.getUser(userName);
+			UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
+			userDetail.setPreferredName(user.getPreferredName());
+			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 
 		} else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

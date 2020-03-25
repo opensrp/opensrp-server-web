@@ -99,14 +99,10 @@ public class LocationResource {
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
-		try {
-			return new ResponseEntity<>(
-					gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		return new ResponseEntity<>(
+				gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE },
@@ -123,28 +119,23 @@ public class LocationResource {
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
 
-		try {
-			if (isJurisdiction) {
-				if (StringUtils.isBlank(locationNames)) {
-					return new ResponseEntity<>(
-							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-							RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-				}
+	if (isJurisdiction) {
+			if (StringUtils.isBlank(locationNames)) {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
-			} else {
-				if (StringUtils.isBlank(parentIds)) {
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-				}
-				return new ResponseEntity<>(gson.toJson(
-						locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
-						HttpStatus.OK);
 			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} else {
+			if (StringUtils.isBlank(parentIds)) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+			return new ResponseEntity<>(gson.toJson(
+					locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
+					HttpStatus.OK);
 		}
 	}
 
@@ -161,28 +152,23 @@ public class LocationResource {
 			logger.error("server version not a number");
 		}
 
-		try {
-			if (isJurisdiction) {
-				if (StringUtils.isBlank(locationNames)) {
-					return new ResponseEntity<>(
-							gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-							RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-				}
+		if (isJurisdiction) {
+			if (StringUtils.isBlank(locationNames)) {
 				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
 						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
-			} else {
-				if (StringUtils.isBlank(parentIds)) {
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-				}
-				return new ResponseEntity<>(gson.toJson(
-						locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
-						HttpStatus.OK);
 			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		} else {
+			if (StringUtils.isBlank(parentIds)) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+			return new ResponseEntity<>(gson.toJson(
+					locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
+					HttpStatus.OK);
 		}
 	}
 
@@ -251,15 +237,9 @@ public class LocationResource {
 	public ResponseEntity<String> getStructuresWithinCordinates(@RequestParam(value = LATITUDE) double latitude,
 			@RequestParam(value = LONGITUDE) double longitude, @RequestParam(value = RADIUS) double radius) {
 
-		try {
-			Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
-					radius);
-			return new ResponseEntity<>(gson.toJson(structures), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		Collection<StructureDetails> structures = locationService.findStructuresWithinRadius(latitude, longitude,
+				radius);
+		return new ResponseEntity<>(gson.toJson(structures), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 
@@ -278,36 +258,31 @@ public class LocationResource {
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
 			@RequestParam(value = PROPERTIES_FILTER, required = false) List<String> propertiesFilters) {
 
-		try {
-			String parentId = null;
-			Map<String, String> filters = null;
-			if (propertiesFilters != null) {
-				filters = new HashMap<>();
-				for (String filter : propertiesFilters) {
-					String[] filterArray = filter.split(":");
-					if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
-							|| "parentId".equalsIgnoreCase(filterArray[0]))) {
-						parentId = filterArray[1];
+		String parentId = null;
+		Map<String, String> filters = null;
+		if (propertiesFilters != null) {
+			filters = new HashMap<>();
+			for (String filter : propertiesFilters) {
+				String[] filterArray = filter.split(":");
+				if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
+						|| "parentId".equalsIgnoreCase(filterArray[0]))) {
+					parentId = filterArray[1];
 
-					} else if (filterArray.length == 2) {
-						filters.put(filterArray[0], filterArray[1]);
-					}
+				} else if (filterArray.length == 2) {
+					filters.put(filterArray[0], filterArray[1]);
 				}
 			}
-			if (isJurisdiction) {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			}
-
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		if (isJurisdiction) {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findLocationsByProperties(returnGeometry, parentId, filters)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findStructuresByProperties(returnGeometry, parentId, filters)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+
 
 	}
 
@@ -324,14 +299,9 @@ public class LocationResource {
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
 			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
 
-        try {
-            return new ResponseEntity<>(
-                    gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)),
-                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+		return new ResponseEntity<>(
+				gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
     }
 
@@ -350,14 +320,9 @@ public class LocationResource {
 			@RequestParam(value = PAGE_SIZE, defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = JURISDICTION_ID, required = false) String jurisdictionId) {
 
-		try {
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(
+				gson.toJson(locationService.findLocationByIdWithChildren(returnGeometry, jurisdictionId, pageSize)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 
@@ -373,18 +338,11 @@ public class LocationResource {
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
-		try {
-
-			Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
-			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers(structureIdsPair.getLeft());
-			identifiers.setLastServerVersion(structureIdsPair.getRight());
-			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
-			logger.warn(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Identifier identifiers = new Identifier();
+		identifiers.setIdentifiers(structureIdsPair.getLeft());
+		identifiers.setLastServerVersion(structureIdsPair.getRight());
+		return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 
@@ -405,22 +363,16 @@ public class LocationResource {
 			@RequestParam(value = BaseEntity.SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
-		try {
-			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
-			if (isJurisdiction) {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			}
-
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		if (isJurisdiction) {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(
+					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 
 	}
@@ -436,18 +388,12 @@ public class LocationResource {
 	public ResponseEntity<Identifier> findLocationIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
 
-		try {
-			Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
-			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers(locationIdsPair.getLeft());
-			identifiers.setLastServerVersion(locationIdsPair.getRight());
-			
-			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
-			//TODO remove after https://github.com/OpenSRP/opensrp-server-web/issues/245 is completed
-			logger.warn(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Identifier identifiers = new Identifier();
+		identifiers.setIdentifiers(locationIdsPair.getLeft());
+		identifiers.setLastServerVersion(locationIdsPair.getRight());
+
+		return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 

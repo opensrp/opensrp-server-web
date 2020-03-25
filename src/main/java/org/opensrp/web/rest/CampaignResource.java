@@ -45,22 +45,12 @@ public class CampaignResource {
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
-		try {
-			return new ResponseEntity<>(gson.toJson(campaignService.getCampaign(identifier)), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(campaignService.getCampaign(identifier)), HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getCampaigns() {
-		try {
-			return new ResponseEntity<>(gson.toJson(campaignService.getAllCampaigns()), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(campaignService.getAllCampaigns()), HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -105,13 +95,8 @@ public class CampaignResource {
 		} catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		try {
-			return new ResponseEntity<>(gson.toJson(campaignService.getCampaignsByServerVersion(currentServerVersion)),
-					HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(campaignService.getCampaignsByServerVersion(currentServerVersion)),
+				HttpStatus.OK);
 	}
 
 }
