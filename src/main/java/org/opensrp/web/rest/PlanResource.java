@@ -114,10 +114,7 @@ public class PlanResource {
 			logger.error("The request doesn't contain a valid plan representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -131,10 +128,7 @@ public class PlanResource {
 			logger.error("The request doesn't contain a valid plan representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {

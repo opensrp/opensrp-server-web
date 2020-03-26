@@ -63,9 +63,6 @@ public class CampaignResource {
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid campaign representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
@@ -80,9 +77,6 @@ public class CampaignResource {
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid campaign representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

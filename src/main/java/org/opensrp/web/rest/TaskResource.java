@@ -137,10 +137,7 @@ public class TaskResource {
 			logger.error("The request doesnt contain a valid task representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -154,10 +151,7 @@ public class TaskResource {
 			logger.error("The request doesnt contain a valid task representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -177,10 +171,7 @@ public class TaskResource {
 			logger.error("The request doesnt contain a valid task representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(value = "/update_status", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -202,10 +193,7 @@ public class TaskResource {
 			logger.error("The request doesnt contain a valid task update representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	/**
