@@ -8,6 +8,7 @@ import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 @Controller
-@RequestMapping(value = "/rest/location_tag")
+@RequestMapping(value = "/rest/locationTag")
 public class LocationTagResource {
 	
 	private static Logger logger = LoggerFactory.getLogger(LocationTagResource.class.toString());
@@ -34,6 +35,7 @@ public class LocationTagResource {
 	
 	public static final String IDENTIFIER = "identifier";
 	
+	@Autowired
 	public void setLocationTagService(LocationTagService locationTagService) {
 		this.locationTagService = locationTagService;
 	}
@@ -54,6 +56,7 @@ public class LocationTagResource {
 	public ResponseEntity<String> create(@RequestBody String entity) {
 		try {
 			LocationTag locationTag = gson.fromJson(entity, LocationTag.class);
+			
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
@@ -65,9 +68,10 @@ public class LocationTagResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
+		
 		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
