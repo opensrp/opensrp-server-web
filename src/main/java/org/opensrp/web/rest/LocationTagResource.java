@@ -9,6 +9,7 @@ import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,15 +63,18 @@ public class LocationTagResource {
 		}
 		catch (JsonSyntaxException e) {
 			logger.error("The request doesn't contain a valid location tag representation" + entity);
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation",
+			        HttpStatus.BAD_REQUEST);
 		}
 		catch (IllegalArgumentException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-		
-		catch (Exception e) {
 			
+			return new ResponseEntity<String>("The request contain illegal argument ", HttpStatus.BAD_REQUEST);
+		}
+		catch (DuplicateKeyException e) {
+			
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.OK);
+		}
+		catch (Exception e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -84,11 +88,15 @@ public class LocationTagResource {
 		}
 		catch (JsonSyntaxException e) {
 			logger.error("The request doesn't contain a valid location tag representation" + entity);
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation",
+			        HttpStatus.BAD_REQUEST);
 		}
 		catch (IllegalArgumentException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("The request contain illegal argument ", HttpStatus.BAD_REQUEST);
+		}
+		catch (DuplicateKeyException e) {
+			
+			return new ResponseEntity<String>("Location tag name already exists", HttpStatus.OK);
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage(), e);
