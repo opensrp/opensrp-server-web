@@ -36,8 +36,6 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	@Captor
 	private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 	
-	private ArgumentCaptor<Long> longdArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-	
 	private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
 	
 	@Before
