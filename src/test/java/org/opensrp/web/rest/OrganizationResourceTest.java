@@ -110,7 +110,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testCreateOrganizationWithoutIdentifier() throws Exception {
-		Mockito.doThrow(IllegalArgumentException.class).when(organizationService).addOrganization(any(Organization.class));
+		doThrow(IllegalArgumentException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
@@ -120,7 +120,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testCreateOrganizationWithError() throws Exception {
-		Mockito.doThrow(IllegalStateException.class).when(organizationService).addOrganization(any(Organization.class));
+		doThrow(IllegalStateException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isInternalServerError());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
@@ -154,7 +154,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testUpdateOrganizationWithError() throws Exception {
-		Mockito.doThrow(new IllegalStateException()).when(organizationService).updateOrganization(any(Organization.class));
+		doThrow(new IllegalStateException()).when(organizationService).updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
 				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 				.andExpect(status().isInternalServerError());
@@ -176,7 +176,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testAssignLocationAndPlanWithMissingParams() throws Exception {
-		Mockito.doThrow(new IllegalArgumentException()).when(organizationService).assignLocationAndPlan(null, null,
+		doThrow(new IllegalArgumentException()).when(organizationService).assignLocationAndPlan(null, null,
 				null, null, null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
@@ -190,7 +190,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testAssignLocationAndPlanWithInternalError() throws Exception {
-		Mockito.doThrow(new IllegalStateException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
+		doThrow(new IllegalStateException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
 				null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
@@ -219,7 +219,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		Mockito.doThrow(new IllegalArgumentException()).when(organizationService)
+		doThrow(new IllegalArgumentException()).when(organizationService)
 				.findAssignedLocationsAndPlans(identifier);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
@@ -234,7 +234,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		Mockito.doThrow(new IllegalStateException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
+		doThrow(new IllegalStateException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 				.andExpect(status().isInternalServerError()).andReturn();
