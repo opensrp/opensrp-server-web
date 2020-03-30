@@ -142,7 +142,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testUpdateOrganizationWithoutIdentifier() throws Exception {
-		Mockito.doThrow(new IllegalArgumentException()).when(organizationService)
+		doThrow(new IllegalArgumentException()).when(organizationService)
 				.updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
 				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))

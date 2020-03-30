@@ -73,7 +73,7 @@ public class LocationResourceTest {
 	private ArgumentCaptor<Integer> integerCaptor;
 
 	@InjectMocks
-	LocationResource locationResource;
+	private LocationResource locationResource;
 
 	private MockMvc mockMvc;
 
