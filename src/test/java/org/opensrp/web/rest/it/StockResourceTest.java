@@ -9,6 +9,7 @@ import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -169,14 +170,12 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
-		List<Stock> actualStocks = with(allStocks.getAll()).convert(new Converter<Stock, Stock>() {
-
-			@Override
-			public Stock convert(Stock stock) {
-				stock.setDateCreated(null);
-				return stock;
-			}
-		});
+		List<Stock> actualStocks = new ArrayList<>();
+		if (allStocks != null && allStocks.getAll() != null) {
+			allStocks.getAll().forEach(stock -> {
+				actualStocks.add(convert(stock));
+			});
+		}
 
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
@@ -202,16 +201,18 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
-		List<Stock> actualStocks = with(allStocks.getAll()).convert(new Converter<Stock, Stock>() {
 
-			@Override
-			public Stock convert(Stock stock) {
-				stock.setDateCreated(null);
-				return stock;
-			}
-		});
-
+		List<Stock> actualStocks = new ArrayList<>();
+		if (allStocks != null && allStocks.getAll() != null) {
+			allStocks.getAll().forEach(stock -> {
+				actualStocks.add(convert(stock));
+			});
+		}
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
 
+	private Stock convert(Stock stock) {
+		stock.setDateCreated(null);
+		return stock;
+	}
 }

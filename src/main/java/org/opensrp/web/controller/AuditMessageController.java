@@ -1,8 +1,9 @@
 package org.opensrp.web.controller;
 
-import ch.lambdaj.function.convert.Converter;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static ch.lambdaj.collection.LambdaCollections.with;
 
 @Controller
 public class AuditMessageController {
@@ -33,14 +33,13 @@ public class AuditMessageController {
 	public List<AuditMessageItem> getAuditMessages(
 	        @RequestParam(value = "previousAuditMessageIndex", defaultValue = "0") long previousIndex) throws IOException {
 		List<AuditMessage> messages = auditor.messagesSince(previousIndex);
-		
-		return with(messages).convert(new Converter<AuditMessage, AuditMessageItem>() {
-			
-			@Override
-			public AuditMessageItem convert(AuditMessage auditMessage) {
-				return AuditMessageItem.from(auditMessage);
-			}
-		});
+		List<AuditMessageItem> auditMessageItems = new ArrayList<>();
+		if (messages != null) {
+			messages.forEach(auditMessage -> {
+				auditMessageItems.add(AuditMessageItem.from(auditMessage));
+			});
+		}
+		return auditMessageItems;
 	}
 	
 	protected static class AuditMessageItem {

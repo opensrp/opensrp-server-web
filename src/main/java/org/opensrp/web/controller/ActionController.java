@@ -1,6 +1,5 @@
 package org.opensrp.web.controller;
 
-import static ch.lambdaj.collection.LambdaCollections.with;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 
-import ch.lambdaj.function.convert.Converter;
 
 @Controller
 public class ActionController {
@@ -53,24 +51,24 @@ public class ActionController {
     @ResponseBody
     public List<Action> getNewActionForANM(@RequestParam("anmIdentifier") String anmIdentifier, @RequestParam("timeStamp") Long timeStamp){
         List<org.opensrp.scheduler.Action> actions = actionService.getNewAlertsForANM(anmIdentifier, timeStamp);
-        return with(actions).convert(new Converter<org.opensrp.scheduler.Action, Action>() {
-            @Override
-            public Action convert(org.opensrp.scheduler.Action action) {
-                return ActionConvertor.from(action);
-            }
-        });
+        List<Action> actionList = new ArrayList<>();
+	    actions.forEach(action -> {
+		    actionList.add(ActionConvertor.from(action));
+	    });
+	    return actionList;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/useractions")
     @ResponseBody
     public List<Action> getNewActionForClient(@RequestParam("baseEntityId") String baseEntityId, @RequestParam("timeStamp") Long timeStamp){
         List<org.opensrp.scheduler.Action> actions = actionService.findByCaseIdAndTimeStamp(baseEntityId, timeStamp);
-        return with(actions).convert(new Converter<org.opensrp.scheduler.Action, Action>() {
-            @Override
-            public Action convert(org.opensrp.scheduler.Action action) {
-                return ActionConvertor.from(action);
-            }
-        });
+	    List<Action> actionList = new ArrayList<>();
+	    if (actions != null) {
+		    actions.forEach(action -> {
+			    actionList.add(ActionConvertor.from(action));
+		    });
+	    }
+	    return actionList;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/alert_delete")
