@@ -26,7 +26,7 @@ public class PlanIdentifierResourceTest extends BaseResourceTest<String> {
 	@Rule
 	public MockitoRule rule = MockitoJUnit.rule();
 
-	private final static String BASE_URL = "/rest/planIdentifiers";
+	private final static String BASE_URL = "/rest/planIdentifiers/";
 
 	private PlanService planService;
 
@@ -45,7 +45,7 @@ public class PlanIdentifierResourceTest extends BaseResourceTest<String> {
 
 		doReturn(expectedPlanIdentifiers).when(planService).getPlanIdentifiersByUsername("mwasi");
 
-		String actualIdentifierString = getResponseAsString(BASE_URL, "mwasi", status().isOk());
+		String actualIdentifierString = getResponseAsString(BASE_URL + "getByUserName/mwasi", null, status().isOk());
 		List<String> actualPlanIdentifiers = new Gson().fromJson(actualIdentifierString, new TypeToken<List<String>>(){}.getType());
 
 		assertListsAreSameIgnoringOrder(actualPlanIdentifiers, expectedPlanIdentifiers);

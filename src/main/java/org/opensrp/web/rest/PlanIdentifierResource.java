@@ -39,7 +39,7 @@ public class PlanIdentifierResource {
 		this.planService = planService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/getByUserName/{userName}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanIdentifiersByUserName(@PathVariable("userName") String userName) {
 		try {
 			return new ResponseEntity<>(gson.toJson(planService.getPlanIdentifiersByUsername(userName)),
