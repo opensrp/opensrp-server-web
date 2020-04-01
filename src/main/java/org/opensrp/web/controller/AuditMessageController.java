@@ -3,9 +3,10 @@ package org.opensrp.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.joda.time.DateTime;
 import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.AuditMessageType;
@@ -33,13 +34,10 @@ public class AuditMessageController {
 	public List<AuditMessageItem> getAuditMessages(
 	        @RequestParam(value = "previousAuditMessageIndex", defaultValue = "0") long previousIndex) throws IOException {
 		List<AuditMessage> messages = auditor.messagesSince(previousIndex);
-		List<AuditMessageItem> auditMessageItems = new ArrayList<>();
-		if (messages != null) {
-			messages.forEach(auditMessage -> {
-				auditMessageItems.add(AuditMessageItem.from(auditMessage));
-			});
-		}
-		return auditMessageItems;
+		return messages.stream()
+				.map(auditMessage -> AuditMessageItem.from(auditMessage))
+				.collect(Collectors.toList());
+
 	}
 	
 	protected static class AuditMessageItem {

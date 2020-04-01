@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,24 +52,18 @@ public class ActionController {
     @ResponseBody
     public List<Action> getNewActionForANM(@RequestParam("anmIdentifier") String anmIdentifier, @RequestParam("timeStamp") Long timeStamp){
         List<org.opensrp.scheduler.Action> actions = actionService.getNewAlertsForANM(anmIdentifier, timeStamp);
-        List<Action> actionList = new ArrayList<>();
-	    actions.forEach(action -> {
-		    actionList.add(ActionConvertor.from(action));
-	    });
-	    return actionList;
+	    return actions.stream()
+			    .map(action -> ActionConvertor.from(action))
+			    .collect(Collectors.toList());
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/useractions")
     @ResponseBody
     public List<Action> getNewActionForClient(@RequestParam("baseEntityId") String baseEntityId, @RequestParam("timeStamp") Long timeStamp){
         List<org.opensrp.scheduler.Action> actions = actionService.findByCaseIdAndTimeStamp(baseEntityId, timeStamp);
-	    List<Action> actionList = new ArrayList<>();
-	    if (actions != null) {
-		    actions.forEach(action -> {
-			    actionList.add(ActionConvertor.from(action));
-		    });
-	    }
-	    return actionList;
+	    return actions.stream()
+			    .map(action -> ActionConvertor.from(action))
+			    .collect(Collectors.toList());
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/alert_delete")

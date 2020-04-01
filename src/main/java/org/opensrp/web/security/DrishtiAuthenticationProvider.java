@@ -2,9 +2,9 @@ package org.opensrp.web.security;
 
 import static java.text.MessageFormat.format;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -99,13 +99,9 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
-		List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
-		if(user != null && user.getRoles()!=null) {
-			user.getRoles().forEach(role -> {
-				simpleGrantedAuthorities.add(getSimpleGrantedAuthorityFromRole(role));
-			});
-		}
-		return simpleGrantedAuthorities;
+		return user != null && user.getRoles() != null ? user.getRoles().stream()
+				.map(role -> getSimpleGrantedAuthorityFromRole(role))
+				.collect(Collectors.toList()) : null;
 	}
 
 	public User getDrishtiUser(Authentication authentication, String username) {

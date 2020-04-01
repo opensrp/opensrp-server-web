@@ -1,6 +1,5 @@
 package org.opensrp.web.rest.it;
 
-import static ch.lambdaj.collection.LambdaCollections.with;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -9,9 +8,9 @@ import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -27,7 +26,6 @@ import org.springframework.web.util.NestedServletException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import ch.lambdaj.function.convert.Converter;
 
 /**
  * TODO: Solve bug at source {@link StockResource} and refactor like {@link EventResourceTest}
@@ -170,12 +168,9 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
-		List<Stock> actualStocks = new ArrayList<>();
-		if (allStocks != null && allStocks.getAll() != null) {
-			allStocks.getAll().forEach(stock -> {
-				actualStocks.add(convert(stock));
-			});
-		}
+		List<Stock> actualStocks = allStocks.getAll().stream()
+				.map(stock -> convert(stock))
+				.collect(Collectors.toList());
 
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
@@ -201,13 +196,10 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
+		List<Stock> actualStocks = allStocks.getAll().stream()
+				.map(stock -> convert(stock))
+				.collect(Collectors.toList());
 
-		List<Stock> actualStocks = new ArrayList<>();
-		if (allStocks != null && allStocks.getAll() != null) {
-			allStocks.getAll().forEach(stock -> {
-				actualStocks.add(convert(stock));
-			});
-		}
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
 
