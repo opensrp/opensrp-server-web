@@ -51,26 +51,16 @@ public class PractitionerRoleResource {
             return new ResponseEntity<>("Practitioner Role Id is required", HttpStatus.BAD_REQUEST);
         }
 
-        try {
-            return new ResponseEntity<>(gson.toJson(
-                    practitionerRoleService.getPractitionerRole(identifier)),
-                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(gson.toJson(
+                practitionerRoleService.getPractitionerRole(identifier)),
+                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> getPractitionerRoles() {
-        try {
-            return new ResponseEntity<>(gson.toJson(
-                    practitionerRoleService.getAllPractitionerRoles()),
-                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(gson.toJson(
+                practitionerRoleService.getAllPractitionerRoles()),
+                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -86,9 +76,6 @@ public class PractitionerRoleResource {
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -105,9 +92,6 @@ public class PractitionerRoleResource {
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -131,9 +115,6 @@ public class PractitionerRoleResource {
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -146,9 +127,6 @@ public class PractitionerRoleResource {
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -162,9 +140,6 @@ public class PractitionerRoleResource {
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
