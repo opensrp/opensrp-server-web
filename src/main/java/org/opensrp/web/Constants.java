@@ -16,4 +16,6 @@ public interface Constants {
     String EVENTS = "events";
     String NO_OF_EVENTS = "no_of_events";
     String ERROR_OCCURRED = "Error occurred";
+    String FAILURE = "Failure occurred";
+    String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
 }
