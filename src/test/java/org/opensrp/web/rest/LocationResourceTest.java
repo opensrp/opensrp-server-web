@@ -55,6 +55,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -404,7 +405,7 @@ public class LocationResourceTest {
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
-			System.out.println("Test case failed");
+			fail("Test case failed");
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertTrue(actualObj.get("message").asText().isEmpty());
@@ -592,7 +593,7 @@ public class LocationResourceTest {
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
-			System.out.println("Test case failed");
+			fail("Test case failed");
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertTrue(actualObj.get("message").asText().isEmpty());
@@ -687,7 +688,7 @@ public class LocationResourceTest {
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
-			System.out.println("Test case failed");
+			fail("Test case failed");
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertEquals(actualObj.get("message").asText(), MESSAGE);

@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,7 +62,7 @@ public class GlobalExceptionHandlerTest {
 
         String responseString = mvcResult.getResponse().getContentAsString();
         if (responseString.isEmpty()) {
-            System.out.println("Test case failed");
+            fail("Test case failed");
         }
         JsonNode actualObj = mapper.readTree(responseString);
         assertEquals(actualObj.get("message").asText(), MESSAGE);
