@@ -1,13 +1,19 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.util.DateTimeDeserializer;
+import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -18,13 +24,14 @@ import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -42,13 +49,25 @@ public class ClientFormResourceTest {
     private String BASE_URL = "/rest/clientForm/";
     private String JSON_FORM_FILE = "{\"count\":\"1\",\"encounter_type\":\"AEFI\",\"entity_id\":\"\",\"metadata\":{\"start\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"start\",\"openmrs_entity_id\":\"163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"end\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"end\",\"openmrs_entity_id\":\"163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"today\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"encounter\",\"openmrs_entity_id\":\"encounter_date\"},\"deviceid\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"deviceid\",\"openmrs_entity_id\":\"163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"subscriberid\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"subscriberid\",\"openmrs_entity_id\":\"163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"simserial\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"simserial\",\"openmrs_entity_id\":\"163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"phonenumber\":{\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_data_type\":\"phonenumber\",\"openmrs_entity_id\":\"163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"encounter_location\":\"\"},\"step1\":{\"title\":\"Adverse Event Reporting\",\"fields\":[{\"key\":\"Reaction_Vaccine\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"6042AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"openmrs_data_type\":\"select one\",\"type\":\"spinner\",\"hint\":\"Vaccine that caused the reaction\",\"values\":[\"BCG\",\"HepB\",\"OPV\",\"Penta\",\"PCV\",\"Rota\",\"Measles\",\"MR\",\"Yellow Fever\"],\"openmrs_choice_ids\":{\"BCG\":\"149310AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"HepB\":\"162269AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"OPV\":\"129578AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"Penta\":\"162265AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"PCV\":\"162266AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"Rota\":\"162272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"Measles\":\"149286AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"MR\":\"149286AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"Yellow Fever\":\"149253AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},\"v_required\":{\"value\":true,\"err\":\"Please enter the vaccine that caused the reaction\"}},{\"key\":\"aefi_start_date\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\",\"type\":\"date_picker\",\"hint\":\"Date the adverse effects began\",\"expanded\":false,\"v_required\":{\"value\":true,\"err\":\"Please enter the date the adverse effects began\"}},{\"key\":\"reaction\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\",\"openmrs_data_type\":\"\",\"type\":\"check_box\",\"label\":\"Select the reaction\",\"hint\":\"Select the reaction\",\"label_text_style\":\"bold\",\"options\":[{\"key\":\"bacteria_abscesses\",\"text\":\"Minor AEFI Bacteria abscesses\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"lymphadenitis\",\"text\":\"Minor AEFI Lymphadenitis\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"sepsis\",\"text\":\"Minor AEFI Sepsis\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"local_reaction\",\"text\":\"Minor AEFI Severe local reaction\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"birth_defect\",\"text\":\"Serious AEFI Birth Defect\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"death\",\"text\":\"Serious AEFI Death\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"encephalopathy\",\"text\":\"Serious AEFI Encephalopathy\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"high_fever \",\"text\":\"Serious AEFI High fever > 38 Degrees Celcius\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"paralysis\",\"text\":\"Serious AEFI Paralysis\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"seizures\",\"text\":\"Serious AEFI Seizures\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"birth_defect\",\"text\":\"Serious AEFI Significant Disability\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"toxic_shock_syndrome\",\"text\":\"Serious AEFI Toxic shock syndrome\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"},{\"key\":\"other\",\"text\":\"Other (specify)\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\"}],\"v_required\":{\"value\":false,\"err\":\"Please select at least one reaction\"}},{\"key\":\"other_reaction\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"\",\"openmrs_entity_id\":\"\",\"openmrs_data_type\":\"text\",\"type\":\"edit_text\",\"hint\":\"Other Reaction\",\"relevance\":{\"step1:reaction\":{\"ex-checkbox\":[{\"or\":[\"other\"]}]}}},{\"key\":\"child_referred\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"163340AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"openmrs_data_type\":\"select one\",\"type\":\"native_radio\",\"label\":\"Child Referred?\",\"label_text_style\":\"bold\",\"options\":[{\"key\":\"Yes\",\"text\":\"Yes\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"1267AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"key\":\"No\",\"text\":\"No\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"163339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}]},{\"key\":\"aefi_form\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"163340AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"openmrs_data_type\":\"select one\",\"type\":\"native_radio\",\"label\":\"Was the AEFI form completed?\",\"label_text_style\":\"bold\",\"options\":[{\"key\":\"Yes\",\"text\":\"Yes\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"1267AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"key\":\"No\",\"text\":\"No\",\"openmrs_entity_parent\":\"\",\"openmrs_entity\":\"concept\",\"openmrs_entity_id\":\"163339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}]}]}}";
 
+    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+
     @Before
     public void setUp() {
         clientFormService = mock(ClientFormService.class);
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         clientFormResource.setClientFormService(clientFormService);
+        clientFormResource.setObjectMapper(mapper);
 
         mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
+        SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
+        dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
+        dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
+        mapper.registerModule(dateTimeModule);
     }
 
     @Test
@@ -66,6 +85,7 @@ public class ClientFormResourceTest {
         clientForm.setId(3L);
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setVersion("0.0.3");
 

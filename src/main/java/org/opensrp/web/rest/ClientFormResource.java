@@ -125,7 +125,7 @@ public class ClientFormResource {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
-        if (!jsonFile.getContentType().equals(ContentType.APPLICATION_JSON)) {
+        if (!jsonFile.getContentType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
             return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
         }
 
