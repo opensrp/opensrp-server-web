@@ -1,41 +1,21 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mockito;
+
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
+import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -44,13 +24,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.server.MockMvc;
-import org.springframework.test.web.server.MvcResult;
-import org.springframework.test.web.server.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.doThrow;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import org.mockito.MockitoAnnotations;
+
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -64,6 +68,10 @@ public class TaskResourceTest {
 
 	private MockMvc mockMvc;
 
+	@InjectMocks
+	private TaskResource taskResource;
+
+	@Mock
 	private TaskService taskService;
 
 	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"planIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionStartDate\":\"2018-11-10T2200\",\"executionEndDate\":null,\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879,\"reasonReference\":\"reasonreferenceuuid\",\"location\":null,\"requester\":null}";
@@ -80,10 +88,9 @@ public class TaskResourceTest {
 
 	@Before
 	public void setUp() {
-		taskService = Mockito.mock(TaskService.class);
-		TaskResource taskResource = webApplicationContext.getBean(TaskResource.class);
-		taskResource.setTaskService(taskService);
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		MockitoAnnotations.initMocks(this);
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(taskResource)
+				.setControllerAdvice(new GlobalExceptionHandler()).build();
 	}
 
 	@Test
@@ -113,7 +120,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-						.body("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
 		verifyNoMoreInteractions(taskService);
@@ -129,7 +136,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-						.body("{\"plan\":[\"IRS_2018_S1\"],\"owner\":\"demouser\", \"serverVersion\":15421904649873}".getBytes()))
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"owner\":\"demouser\", \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
 		verifyNoMoreInteractions(taskService);
@@ -161,7 +168,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l)).thenReturn(tasks);
 		MvcResult result = mockMvc
 				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-						.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":\"\"}".getBytes()))
+						.content("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":\"\"}".getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 0l);
 		verifyNoMoreInteractions(taskService);
@@ -188,7 +195,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testPostTasksByTaskAndGroupWithoutParamsShouldReturnBadRequest() throws Exception {
-		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).body("{\"plan\":\"\", \"serverVersion\":\"\"}".getBytes()))
+		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content("{\"plan\":\"\", \"serverVersion\":\"\"}".getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(taskService, never()).getTasksByTaskAndGroup(anyString(), anyString(), anyLong());
 		verifyNoMoreInteractions(taskService);
@@ -209,7 +216,7 @@ public class TaskResourceTest {
 		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l))
 				.thenThrow(new RuntimeException());
 		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-				.body("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
+				.content("{\"plan\":[\"IRS_2018_S1\"], \"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873}".getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873l);
 		verifyNoMoreInteractions(taskService);
@@ -230,7 +237,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testCreate() throws Exception {
-		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(taskService, times(1)).addTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -239,7 +246,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testCreateWithInvalidJsonShouldReturnBadRequest() throws Exception {
-		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.substring(3).getBytes()))
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.substring(3).getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(taskService, never()).addTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -248,7 +255,7 @@ public class TaskResourceTest {
 	@Test
 	public void testCreateShouldReturnServerError() throws Exception {
 		when(taskService.addTask(any(Task.class))).thenThrow(new RuntimeException());
-		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(taskService).addTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -256,7 +263,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testUpdate() throws Exception {
-		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(taskService, times(1)).updateTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -265,7 +272,7 @@ public class TaskResourceTest {
 
 	@Test
 	public void testUpdateWithInvalidJsonShouldReturnBadRequest() throws Exception {
-		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.substring(1).getBytes()))
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.substring(1).getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(taskService, never()).updateTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -274,7 +281,7 @@ public class TaskResourceTest {
 	@Test
 	public void testUpdateShouldReturnServerError() throws Exception {
 		when(taskService.updateTask(any(Task.class))).thenThrow(new RuntimeException());
-		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(taskJson.getBytes()))
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(taskJson.getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(taskService).updateTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
@@ -285,7 +292,7 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.body(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isCreated());
+				.content(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isCreated());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 		assertEquals(1, listArgumentCaptor.getValue().size());
@@ -297,7 +304,7 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.body(TaskResource.gson.toJson(tasks).substring(1).getBytes())).andExpect(status().isBadRequest());
+				.content(TaskResource.gson.toJson(tasks).substring(1).getBytes())).andExpect(status().isBadRequest());
 		verify(taskService, never()).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 	}
@@ -309,7 +316,7 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.body(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
+				.content(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 	}
@@ -350,7 +357,7 @@ public class TaskResourceTest {
 		taskUpdates.add(taskUpdate);
 
 		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON)
-				.body(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
+				.content(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
 		verify(taskService).updateTaskStatus(taskUpdatelistArguments.capture());
 
 		verifyNoMoreInteractions(taskService);
