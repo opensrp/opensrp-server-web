@@ -57,7 +57,7 @@ public class LocationTagResource {
 	public ResponseEntity<String> create(@RequestBody String entity) {
 		try {
 			LocationTag locationTag = gson.fromJson(entity, LocationTag.class);
-			
+			locationTag.setId(0l);
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
