@@ -57,7 +57,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
-    private SecurityContext securityContext() {
+    public SecurityContext securityContext() {
         return SecurityContext.builder()
                 .securityReferences(Collections.singletonList(
                         new SecurityReference(AUTHORIZATION, new AuthorizationScope[0])))
