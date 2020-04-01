@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -42,7 +44,7 @@ public class ClientFormResourceTest {
 
     @Before
     public void setUp() {
-        clientFormService = Mockito.mock(ClientFormService.class);
+        clientFormService = mock(ClientFormService.class);
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         clientFormResource.setClientFormService(clientFormService);
 
@@ -100,7 +102,6 @@ public class ClientFormResourceTest {
                         .param("form_name", "REGISTRATION FORM"))
                 .andExpect(status().isCreated())
                 .andReturn();
-
     }
 
 }

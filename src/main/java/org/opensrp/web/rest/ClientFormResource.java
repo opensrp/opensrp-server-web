@@ -1,20 +1,20 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.joda.time.DateTime;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
-import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,21 +31,24 @@ import java.util.List;
 public class ClientFormResource {
 
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
-
+    protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-            .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     @Autowired
     public void setClientFormService(ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
     }
 
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
-            , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) {
+            , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) throws JsonProcessingException {
         DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
         DefaultArtifactVersion currentFormVersionV = null;
         if (!TextUtils.isEmpty(currentFormVersion)) {
@@ -57,7 +60,7 @@ public class ClientFormResource {
         }
 
         if (!clientFormService.isClientFormExists(formIdentifier)) {
-            return new ResponseEntity<>((String) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
         }
 
         // Check if the form identifier with that version exists
@@ -68,41 +71,50 @@ public class ClientFormResource {
 
         if (clientFormMetadata == null) {
             // Get an older form version
-            List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier);
-            DefaultArtifactVersion highestVersion = null;
-            IdVersionTuple highestIdVersionTuple = null;
-
-            for (IdVersionTuple availableFormVersion: availableFormVersions) {
-                DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
-
-                if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
-                    highestVersion = semanticFormVersion;
-                    highestIdVersionTuple = availableFormVersion;
-                }
-            }
-
-            if (highestVersion == null) {
-                return new ResponseEntity<>((String) null, HttpStatus.INTERNAL_SERVER_ERROR);
+            clientFormMetadata = getMostRecentVersion(formIdentifier);
+            if (clientFormMetadata == null) {
+                return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
             } else {
-                formId = highestIdVersionTuple.getId();
-                clientFormMetadata = clientFormService.getClientFormMetadataById(formId);
+                formId = clientFormMetadata.getId();
             }
+
         } else {
             formId = clientFormMetadata.getId();
         }
 
         ClientForm clientForm = clientFormService.getClientFormById(formId);
         if (clientForm == null) {
-            return new ResponseEntity<>((String) null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
         }
 
         completeClientForm = new ClientFormService.CompleteClientForm(clientForm, clientFormMetadata);
 
-        return new ResponseEntity<>(gson.toJson(completeClientForm), HttpStatus.OK);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
-    
-    //@RequestMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
-    @RequestMapping(headers = { "Accept=multipart/form-data" }, method = RequestMethod.POST)
+
+    private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier) {
+        List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier);
+        DefaultArtifactVersion highestVersion = null;
+        IdVersionTuple highestIdVersionTuple = null;
+
+        for (IdVersionTuple availableFormVersion : availableFormVersions) {
+            DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
+
+            if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
+                highestVersion = semanticFormVersion;
+                highestIdVersionTuple = availableFormVersion;
+            }
+        }
+
+        if (highestVersion == null) {
+            return null;
+        } else {
+            long formId = highestIdVersionTuple.getId();
+            return clientFormService.getClientFormMetadataById(formId);
+        }
+    }
+
+    @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     @ResponseBody
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
                                                  @RequestParam("form_identifier") String formIdentifier,
@@ -113,9 +125,7 @@ public class ClientFormResource {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
-        // TOOD: Check the string is a valid version
-        DefaultArtifactVersion formVersionV = new DefaultArtifactVersion(formVersion);
-        if (!jsonFile.getOriginalFilename().contains(".json")) {
+        if (!jsonFile.getContentType().equals(ContentType.APPLICATION_JSON)) {
             return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
         }
 
@@ -148,7 +158,7 @@ public class ClientFormResource {
         ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
 
         if (completeClientForm == null) {
-            return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
