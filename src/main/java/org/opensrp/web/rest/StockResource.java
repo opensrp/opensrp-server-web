@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static java.text.MessageFormat.format;
 import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
 import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
 import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
@@ -43,7 +42,6 @@ import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
@@ -147,7 +145,6 @@ public class StockResource extends RestResource<Stock> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-		try {
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("stocks")) {
 				return new ResponseEntity<>(BAD_REQUEST);
@@ -162,10 +159,6 @@ public class StockResource extends RestResource<Stock> {
 					logger.error("Stock" + stock.getId() + " failed to sync", e);
 				}
 			}
-		} catch (Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
 		return new ResponseEntity<>(CREATED);
 	}
 
