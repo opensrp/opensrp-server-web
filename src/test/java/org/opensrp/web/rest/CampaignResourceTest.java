@@ -1,29 +1,17 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
+import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -31,10 +19,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.server.MockMvc;
-import org.springframework.test.web.server.MvcResult;
-import org.springframework.test.web.server.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -45,7 +48,11 @@ public class CampaignResourceTest {
 
 	private MockMvc mockMvc;
 
+	@Mock
 	private CampaignService campaignService;
+
+	@InjectMocks
+	private CampaignResource campaignResource;
 
 	private String campaignJson = "{\"identifier\":\"IRS_2018_S1\",\"title\":\"2019 IRS Season 1\",\"description\":\"This is the 2010 IRS Spray Campaign for Zambia for the first spray season dated 1 Jan 2019 - 31 Mar 2019.\",\"status\":\"In Progress\",\"executionPeriod\":{\"start\":\"2019-01-01\",\"end\":\"2019-03-31\"},\"authoredOn\":\"2018-10-01T0900\",\"lastModified\":\"2018-10-01T0900\",\"owner\":\"jdoe\",\"serverVersion\":15421904649876}";
 
@@ -54,18 +61,17 @@ public class CampaignResourceTest {
 	private ArgumentCaptor<Campaign> argumentCaptor = ArgumentCaptor.forClass(Campaign.class);
 
 	@Before
-	public void setUp() {
-		campaignService = Mockito.mock(CampaignService.class);
-		CampaignResource campaignResource = webApplicationContext.getBean(CampaignResource.class);
-		campaignResource.setCampaignService(campaignService);
-
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(campaignResource)
+				.setControllerAdvice(new GlobalExceptionHandler()).build();
 	}
 
 	@Test
 	public void testGetByUniqueId() throws Exception {
 		when(campaignService.getCampaign("IRS_2018_S1")).thenReturn(getCampaign());
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/{identifier}", "IRS_2018_S1")).andExpect(status().isOk())
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/{identifier}", "IRS_2018_S1"))
+				.andExpect(status().isOk())
 				.andReturn();
 		verify(campaignService, times(1)).getCampaign("IRS_2018_S1");
 		verifyNoMoreInteractions(campaignService);
@@ -105,7 +111,7 @@ public class CampaignResourceTest {
 
 	@Test
 	public void testCreate() throws Exception {
-		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(campaignService, times(1)).addCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
@@ -115,7 +121,7 @@ public class CampaignResourceTest {
 	@Test
 	public void testCreateWithInvalidJsonShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(
-				post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(1).getBytes()))
+				post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.substring(1).getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
@@ -124,7 +130,7 @@ public class CampaignResourceTest {
 	@Test
 	public void testCreateShouldReturnServerError() throws Exception {
 		when(campaignService.addCampaign(any(Campaign.class))).thenThrow(new RuntimeException());
-		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(campaignService).addCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
@@ -132,7 +138,7 @@ public class CampaignResourceTest {
 
 	@Test
 	public void testUpdate() throws Exception {
-		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.getBytes()))
 				.andExpect(status().isCreated());
 		verify(campaignService, times(1)).updateCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
@@ -142,7 +148,7 @@ public class CampaignResourceTest {
 	@Test
 	public void testUpdateWithInvalidJsonShouldReturnBadRequest() throws Exception {
 		mockMvc.perform(
-				put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.substring(2).getBytes()))
+				put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.substring(2).getBytes()))
 				.andExpect(status().isBadRequest());
 		verify(campaignService, never()).addCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
@@ -151,7 +157,7 @@ public class CampaignResourceTest {
 	@Test
 	public void testUpdateShouldReturnServerError() throws Exception {
 		when(campaignService.updateCampaign(any(Campaign.class))).thenThrow(new RuntimeException());
-		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).body(campaignJson.getBytes()))
+		mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(campaignJson.getBytes()))
 				.andExpect(status().isInternalServerError());
 		verify(campaignService).updateCampaign(argumentCaptor.capture());
 		verifyNoMoreInteractions(campaignService);
