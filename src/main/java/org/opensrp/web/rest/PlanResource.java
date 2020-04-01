@@ -112,6 +112,18 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getPlanIdentifiersByUserName(@PathVariable("userName") String userName) {
+		try {
+			return new ResponseEntity<>(gson.toJson(planService.getPlanIdentifiersByUsername(userName)), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
