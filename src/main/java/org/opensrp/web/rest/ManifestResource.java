@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
 import org.slf4j.Logger;
