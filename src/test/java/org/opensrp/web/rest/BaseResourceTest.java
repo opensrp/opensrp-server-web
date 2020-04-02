@@ -47,7 +47,7 @@ public abstract class BaseResourceTest<T> {
 
     protected MockMvc mockMvc;
 
-    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    protected ObjectMapper mapper = new ObjectMapper();
 
     protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 

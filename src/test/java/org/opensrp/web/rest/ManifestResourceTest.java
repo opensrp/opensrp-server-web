@@ -1,7 +1,6 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,16 +27,17 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private final static String BASE_URL = "/rest/manifest";
     private ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
 
-    private final static String manifestJson =  "{\"identifier\":\"mani1234\",\"json\":\"{}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
+    private final static String manifestJson = "{\"identifier\":\"mani1234\",\"json\":\"{}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
 
     @Before
     public void setUp() {
         manifestService = mock(ManifestService.class);
         ManifestResource manifestResource = webApplicationContext.getBean(ManifestResource.class);
         manifestResource.setManifestService(manifestService);
+        manifestResource.setObjectMapper(mapper);
     }
 
-    private static Manifest initTestManifest(){
+    private static Manifest initTestManifest() {
         Manifest manifest = new Manifest();
         String identifier = "mani1234";
         String appVersion = "1234234";
@@ -52,8 +52,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         return manifest;
     }
 
-
-    private static Manifest initTestManifest2(){
+    private static Manifest initTestManifest2() {
         Manifest manifest = new Manifest();
         String identifier = "mani123434";
         String appVersion = "1234234234";
@@ -68,10 +67,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         return manifest;
     }
 
-
     @Test
     public void testAllGetManifest() throws Exception {
-        List<Manifest> expectedManifests =  new ArrayList<>();
+        List<Manifest> expectedManifests = new ArrayList<>();
 
         Manifest expectedManifest = initTestManifest();
         expectedManifests.add(expectedManifest);
@@ -82,27 +80,26 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         doReturn(expectedManifests).when(manifestService).getAllManifest();
 
         String actualManifestsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-        List<Manifest> actualManifests = new Gson().fromJson(actualManifestsString, new TypeToken<List<Manifest>>(){}.getType());
+        List<Manifest> actualManifests = mapper.readValue(actualManifestsString, new TypeReference<List<Manifest>>() {});
 
         assertListsAreSameIgnoringOrder(actualManifests, expectedManifests);
     }
 
     @Test
     public void testGetManifestByUniqueIdShouldReturnCorrectManifests() throws Exception {
-        List<Manifest> expectedManifests =  new ArrayList<>();
+        List<Manifest> expectedManifests = new ArrayList<>();
 
         Manifest expectedManifest = initTestManifest();
         expectedManifests.add(expectedManifest);
 
-
-        List<String> expectedIdManifests =  new ArrayList<>();
+        List<String> expectedIdManifests = new ArrayList<>();
         expectedIdManifests.add(expectedManifest.getIdentifier());
 
         doReturn(expectedManifest).when(manifestService).getManifest(anyString());
 
         String actualManifestsString = getResponseAsString(BASE_URL + "/mani1234", null,
                 MockMvcResultMatchers.status().isOk());
-        Manifest actualManifest = new Gson().fromJson(actualManifestsString, new TypeToken<Manifest>(){}.getType());
+        Manifest actualManifest = mapper.readValue(actualManifestsString, new TypeReference<Manifest>() {});
 
         assertNotNull(actualManifest);
         assertEquals(actualManifest.getIdentifier(), expectedManifest.getIdentifier());
@@ -110,6 +107,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         assertEquals(actualManifest.getAppVersion(), expectedManifest.getAppVersion());
         assertEquals(actualManifest.getJson(), expectedManifest.getJson());
     }
+
     @Override
     protected void assertListsAreSameIgnoringOrder(List<Manifest> expectedList, List<Manifest> actualList) {
         if (expectedList == null || actualList == null) {
@@ -131,9 +129,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     @Test
     public void testCreateNewManifestResource() throws Exception {
         doReturn(new Manifest()).when(manifestService).addManifest((Manifest) any());
-
         Manifest expectedManifest = initTestManifest();
-
 
         postRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
 
@@ -146,7 +142,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     public void testUpdateManifestResource() throws Exception {
         Manifest expectedManifest = initTestManifest();
 
-        String manifestJson = new Gson().toJson(expectedManifest, new TypeToken<Manifest>(){}.getType());
+        String manifestJson = mapper.writeValueAsString(expectedManifest);
         putRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
 
         verify(manifestService).updateManifest(argumentCaptor.capture());

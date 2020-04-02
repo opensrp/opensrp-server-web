@@ -1,13 +1,11 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import org.joda.time.DateTime;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
-import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
@@ -28,26 +25,25 @@ import java.util.Set;
 @RequestMapping(value = "/rest/manifest")
 public class ManifestResource {
 
-    public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-            .serializeNulls().create();
     private static Logger logger = LoggerFactory.getLogger(ManifestResource.class.toString());
     private ManifestService manifestService;
-    public static final String IDENTIFIER ="identifier";
+    public static final String IDENTIFIER = "identifier";
+    protected ObjectMapper objectMapper;
 
-  /*  @Autowired
-    public ManifestResource(ManifestService manifestService) {
-        this.manifestService = manifestService;
-    }*/
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Autowired
     public void setManifestService(ManifestService manifestService) {
         this.manifestService = manifestService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> get() {
         try {
-            return new ResponseEntity<>(gson.toJson(
+            return new ResponseEntity<>(objectMapper.writeValueAsString(
                     manifestService.getAllManifest()),
                     RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
         } catch (Exception e) {
@@ -56,23 +52,25 @@ public class ManifestResource {
         }
     }
 
-  @RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getManifestByUniqueId(@PathVariable(IDENTIFIER) String identifier) {
         try {
-            return new ResponseEntity<>(gson.toJson(manifestService.getManifest(identifier)), RestUtils.getJSONUTF8Headers(),
+            return new ResponseEntity<>(objectMapper.writeValueAsString(
+                    manifestService.getManifest(identifier)),
+                    RestUtils.getJSONUTF8Headers(),
                     HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-   }
+    }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
         try {
-            Manifest manifest = gson.fromJson(entity, Manifest.class);
+            Manifest manifest = objectMapper.readValue(entity, Manifest.class);
             System.out.println("Manifest version " + manifest.getAppVersion());
             manifestService.addManifest(manifest);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -89,7 +87,7 @@ public class ManifestResource {
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
         try {
-            Manifest manifest = gson.fromJson(entity, Manifest.class);
+            Manifest manifest = objectMapper.readValue(entity, Manifest.class);
             manifestService.updateManifest(manifest);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
@@ -105,9 +103,7 @@ public class ManifestResource {
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<String> batchSave(@RequestBody String entity) {
         try {
-            Type listType = new TypeToken<List<Manifest>>() {
-            }.getType();
-            List<Manifest> manifests = gson.fromJson(entity, listType);
+            List<Manifest> manifests = objectMapper.readValue(entity, new TypeReference<List<Manifest>>() {});
             Set<String> tasksWithErrors = manifestService.saveManifests(manifests);
             if (tasksWithErrors.isEmpty())
                 return new ResponseEntity<>("All Tasks  processed", HttpStatus.CREATED);
@@ -124,20 +120,20 @@ public class ManifestResource {
         }
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
+    @RequestMapping(method = RequestMethod.DELETE, consumes = {MediaType.APPLICATION_JSON_VALUE,
+            MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<String> delete(@RequestBody String entity) {
         try {
-            Manifest manifest = gson.fromJson(entity, Manifest.class);
+            Manifest manifest = objectMapper.readValue(entity, Manifest.class);
             manifestService.deleteManifest(manifest);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid manifest representation" + entity);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }   catch (Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -147,7 +143,7 @@ public class ManifestResource {
             MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getManifestByAppId(@PathVariable("appId") String appId) {
         try {
-            return new ResponseEntity<>(gson.toJson(manifestService.getManifestByAppId(appId)), RestUtils.getJSONUTF8Headers(),
+            return new ResponseEntity<>(objectMapper.writeValueAsString(manifestService.getManifestByAppId(appId)), RestUtils.getJSONUTF8Headers(),
                     HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
