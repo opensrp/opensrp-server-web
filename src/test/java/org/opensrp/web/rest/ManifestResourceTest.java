@@ -3,13 +3,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-
 import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
@@ -20,6 +13,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -132,7 +132,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
     @Test
     public void testCreateNewManifestResource() throws Exception {
-        doReturn(new Manifest()).when(manifestService).addManifest((Manifest) any());
+        doReturn(new Manifest()).when(manifestService).addManifest(any());
         Manifest expectedManifest = initTestManifest();
 
         postRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
@@ -151,5 +151,70 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         verify(manifestService).updateManifest(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
+    }
+
+    @Test
+    public void testBatchSaveShouldBaseSaveManifests() throws Exception {
+        ArgumentCaptor<List<Manifest>> manifestListArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        doReturn(new HashSet<String>()).when(manifestService).saveManifests(any());
+
+        ArrayList<Manifest> manifests = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Manifest manifest = new Manifest();
+            manifest.setAppId("org.smartregister.giz");
+            manifest.setAppVersion("0.0.1");
+            manifest.setIdentifier("opd/registration.json");
+            manifest.setJson("{}");
+
+            manifests.add(manifest);
+        }
+
+        String manifestsJson = mapper.writeValueAsString(manifests);
+
+        postRequestWithJsonContentAndReturnString(BASE_URL + "/add", manifestsJson, MockMvcResultMatchers.status().isCreated());
+
+        verify(manifestService).saveManifests(manifestListArgumentCaptor.capture());
+        List<Manifest> capturedManifests = manifestListArgumentCaptor.getValue();
+        assertEquals(10, capturedManifests.size());
+
+        for (Manifest manifest: capturedManifests) {
+            assertEquals("org.smartregister.giz", manifest.getAppId());
+            assertEquals("0.0.1", manifest.getAppVersion());
+            assertEquals("opd/registration.json", manifest.getIdentifier());
+            assertEquals("{}", manifest.getJson());
+        }
+    }
+
+    @Test
+    public void testDeleteShouldReturnAccepted() throws Exception {
+        doNothing().when(manifestService).deleteManifest(argumentCaptor.capture());
+        deleteRequestWithJsonContent(BASE_URL, "{\"identifier\":\"opd/registration.json\",\"json\":\"{}\",\"appId\":\"org.smartregister.giz\",\"appVersion\":\"0.0.1\"}"
+                , MockMvcResultMatchers.status().isAccepted());
+
+        verify(manifestService).deleteManifest(argumentCaptor.capture());
+
+        Manifest manifest = argumentCaptor.getValue();
+        assertEquals("0.0.1", manifest.getAppVersion());
+        assertEquals("org.smartregister.giz", manifest.getAppId());
+    }
+
+    @Test
+    public void testGetManifestByAppId() throws Exception {
+        Manifest manifest = new Manifest();
+        manifest.setAppId("org.smartregister.giz");
+        manifest.setAppVersion("0.0.1");
+        manifest.setIdentifier("opd/registration.json");
+        manifest.setJson("{}");
+
+        doReturn(manifest).when(manifestService).getManifestByAppId(eq("org.smartregister.giz"));
+
+        String responseString = getResponseAsString(BASE_URL + "/appId/org.smartregister.giz",  null, MockMvcResultMatchers.status().isOk());
+
+        verify(manifestService).getManifestByAppId(eq("org.smartregister.giz"));
+        Manifest returned = mapper.readValue(responseString, Manifest.class);
+
+        assertEquals("0.0.1", returned.getAppVersion());
+        assertEquals("org.smartregister.giz", returned.getAppId());
+
     }
 }
