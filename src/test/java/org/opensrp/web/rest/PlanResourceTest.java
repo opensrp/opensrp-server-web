@@ -159,6 +159,9 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     @Captor
     private ArgumentCaptor<List<Long>> orgsArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<String> userNameArgumentCaptor;
+
     @Before
     public void setUp() {
         planService = mock(PlanService.class);
@@ -513,6 +516,27 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
         assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
+    }
+
+    @Test
+    public void testGetPlanIdentifiersByUserNameShouldReturnListOfIdentifiersPlans() throws Exception {
+        List<String> expectedPlanIdentifiers = new ArrayList<>();
+        expectedPlanIdentifiers.add("plan_1");
+        expectedPlanIdentifiers.add("plan_2");
+
+        doReturn(expectedPlanIdentifiers).when(planService).getPlanIdentifiersByUsername(anyString());
+
+        String actualIdentifierString = getResponseAsString(BASE_URL + "getPlanIdentifier/"+userNameArgumentCaptor, null, status().isOk());
+        List<String> actualPlanIdentifiers = new Gson().fromJson(actualIdentifierString, new TypeToken<List<String>>(){}.getType());
+
+        assertIdentifierListsAreSameIgnoringOrder(actualPlanIdentifiers, expectedPlanIdentifiers);
+    }
+
+    protected void assertIdentifierListsAreSameIgnoringOrder(List<String> expectedList, List<String> actualList) {
+        if (expectedList == null || actualList == null) {
+            throw new AssertionError("One of the lists is null");
+        }
+        assertEquals(expectedList.size(), actualList.size());
     }
 
 }
