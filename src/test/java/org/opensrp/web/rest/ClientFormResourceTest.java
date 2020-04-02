@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -8,6 +9,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
@@ -28,9 +30,11 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
@@ -101,13 +105,18 @@ public class ClientFormResourceTest {
                 .param("current_form_version", currentFormVersion))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertTrue(result.getResponse().getContentAsString().length() > 1);
+        String responseString = result.getResponse().getContentAsString();
+        JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals("{}", jsonNode.get("clientForm").get("json").textValue());
+        assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
+        assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
     }
 
     @Test
     public void testAddClientForm() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", JSON_FORM_FILE.getBytes());
@@ -119,9 +128,20 @@ public class ClientFormResourceTest {
                         .file(file)
                         .param("form_identifier", formIdentifier)
                         .param("form_version", formVersion)
-                        .param("form_name", "REGISTRATION FORM"))
+                        .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+
+        assertEquals(JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
     }
 
 }
