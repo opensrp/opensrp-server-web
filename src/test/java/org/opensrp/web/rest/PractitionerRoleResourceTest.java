@@ -148,7 +148,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     @Test
     public void testDeleteShouldDeleteExistingPractitionerRoleResource() throws Exception {
 
-        deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "practitioner-role-id", null, MockMvcResultMatchers.status().isNoContent());
+        deleteRequestWithParams(BASE_URL + DELETE_ENDPOINT + "practitioner-role-id", null, MockMvcResultMatchers.status().isNoContent());
 
         verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getValue(), "practitioner-role-id");
@@ -157,7 +157,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     @Test
     public void testDeleteByOrgAndPractitionerShouldDeleteExistingPractitionerRoleResource() throws Exception {
 
-        deleteRequestWithJsonContent(BASE_URL + DELETE_BY_PRACTITIONER_ENDPOINT , "organization=org1&practitioner=pract1", MockMvcResultMatchers.status().isNoContent());
+        deleteRequestWithParams(BASE_URL + DELETE_BY_PRACTITIONER_ENDPOINT , "organization=org1&practitioner=pract1", MockMvcResultMatchers.status().isNoContent());
 
         verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getAllValues().get(0), "org1");
