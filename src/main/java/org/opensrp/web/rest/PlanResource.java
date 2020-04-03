@@ -103,8 +103,11 @@ public class PlanResource {
 
 	}
 
-	@RequestMapping(value = "/getPlanIdentifier/{userName}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlanIdentifiersByUserName(@PathVariable("userName") String userName) {
+	@RequestMapping(value = "/getPlanIdentifier", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getPlanIdentifiersByUserName(Authentication authentication) {
+		String userName = null;
+		if (authentication != null)
+			userName = authentication.getName();
 		return new ResponseEntity<>(gson.toJson(planService.getPlanIdentifiersByUsername(userName)),
 				RestUtils.getJSONUTF8Headers(),
 				HttpStatus.OK);
