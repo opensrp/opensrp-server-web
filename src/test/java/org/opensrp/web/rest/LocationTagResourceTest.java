@@ -91,8 +91,7 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	@Test
 	public void testShouldDeleteExistingLocationTagResource() throws Exception {
 		
-		deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "/" + 1, null, MockMvcResultMatchers.status()
-		        .isNoContent());
+		deleteRequestWithParams(BASE_URL + DELETE_ENDPOINT + 1, null, MockMvcResultMatchers.status().isNoContent());
 		
 		verify(locationTagService).deleteLocationTag(longArgumentCaptor.capture());
 		assertEquals(longArgumentCaptor.getValue().longValue(), 1);
