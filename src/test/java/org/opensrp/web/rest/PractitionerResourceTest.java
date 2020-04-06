@@ -113,7 +113,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     @Test
     public void testDeleteShouldDeleteExistingPractitionerResource() throws Exception {
 
-        deleteRequestWithJsonContent(BASE_URL + DELETE_ENDPOINT + "practitioner-id", null, MockMvcResultMatchers.status().isNoContent());
+        deleteRequestWithParams(BASE_URL + DELETE_ENDPOINT + "practitioner-id", null, MockMvcResultMatchers.status().isNoContent());
 
         verify(practitionerService).deletePractitioner(stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getValue(), "practitioner-id");
