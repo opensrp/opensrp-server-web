@@ -44,17 +44,13 @@ public class CrossSiteScriptingPreventionTest {
 
 	private SettingService settingService;
 
-	private SettingRepository settingRepository;
-
-	private List<SettingConfiguration> listSettingConfigurations;
-
-	@InjectMocks
-	private CrossSiteScriptingPreventionFilter crossSiteScriptingPreventionFilter;
 
 	private String BASE_URL = "/rest/settings/";
 
 	@Before
 	public void setUp() throws Exception {
+		SettingRepository settingRepository;
+		List<SettingConfiguration> listSettingConfigurations;
 		settingService = Mockito.spy(new SettingService());
 		settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
