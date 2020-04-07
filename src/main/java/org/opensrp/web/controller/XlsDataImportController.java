@@ -68,7 +68,6 @@ public class XlsDataImportController {
 	private OpenmrsIDService openmrsIDService;
 	 
 	private DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
-	private static Logger logger = LoggerFactory.getLogger(XlsDataImportController.class.toString());
 
 
 	@Autowired
