@@ -86,9 +86,7 @@ public class XlsDataImportController {
 		int eventCount = 0;
 		int clientCount = 0;
 		CSVParser parser;
-		Reader reader = null;
-		try {
-			reader = new InputStreamReader(file.getInputStream());
+		try(Reader reader = new InputStreamReader(file.getInputStream())) {
 			parser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 			List<CSVRecord> records = parser.getRecords();
 			int recordCount = records.size();
@@ -186,16 +184,6 @@ public class XlsDataImportController {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			}
-			catch (IOException e) {
-				logger.error("Exception occurred during reader.close()", e);
-			}
 		}
 		// Retrieve xls file details
 		// Read xls file to retrieve birth registration data
