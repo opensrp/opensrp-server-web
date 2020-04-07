@@ -26,9 +26,9 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		logger.info("Inlter CrossScriptingFilter  ...............");
+		logger.debug("Inside CrossSiteScriptingPreventionFilter  ...............");
 		chain.doFilter(new XssPreventionRequestWrapper((HttpServletRequest) request), response);
-		logger.info("Outlter CrossScriptingFilter ...............");
+		logger.debug("Outside CrossSiteScriptingPreventionFilter ...............");
 	}
 
 	public void destroy() {
