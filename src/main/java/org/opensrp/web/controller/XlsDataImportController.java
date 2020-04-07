@@ -26,6 +26,8 @@ import org.opensrp.domain.Obs;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +68,9 @@ public class XlsDataImportController {
 	private OpenmrsIDService openmrsIDService;
 	 
 	private DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
-	
+	private static Logger logger = LoggerFactory.getLogger(XlsDataImportController.class.toString());
+
+
 	@Autowired
 	public XlsDataImportController(ClientService clientService, EventService eventService, OpenmrsIDService openmrsIDService) {
 		this.clientService = clientService;
@@ -82,8 +86,9 @@ public class XlsDataImportController {
 		int eventCount = 0;
 		int clientCount = 0;
 		CSVParser parser;
+		Reader reader = null;
 		try {
-			Reader reader = new InputStreamReader(file.getInputStream());
+			reader = new InputStreamReader(file.getInputStream());
 			parser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 			List<CSVRecord> records = parser.getRecords();
 			int recordCount = records.size();
@@ -181,6 +186,16 @@ public class XlsDataImportController {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			}
+			catch (IOException e) {
+				logger.error("Exception occurred during reader.close()", e);
+			}
 		}
 		// Retrieve xls file details
 		// Read xls file to retrieve birth registration data

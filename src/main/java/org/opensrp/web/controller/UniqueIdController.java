@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +72,9 @@ public class UniqueIdController {
 
 		String message;
 		User user;
+		ByteArrayOutputStream byteArrayOutputStream = null;
+		FileOutputStream fileOutputStream = null;
+		OutputStream os = null;
 		try {
 			Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
 
@@ -87,10 +91,10 @@ public class UniqueIdController {
 
 			String fileName = "QRCodes_".concat(df.format(new Date())).concat("_").concat(currentPrincipalName)
 					.concat("_" + numberToGenerate + ".pdf");
-			ByteArrayOutputStream byteArrayOutputStream = PdfUtil.generatePdf(idsToPrint, 140, 140, 1, 5);
+			byteArrayOutputStream = PdfUtil.generatePdf(idsToPrint, 140, 140, 1, 5);
 			if (byteArrayOutputStream.size() > 0) {
 				//mark ids as used
-				FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
+				fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
 				fileOutputStream.write(byteArrayOutputStream.toByteArray());
 				fileOutputStream.close();
 				openmrsIdService.markIdsAsUsed(idsToPrint);
@@ -101,7 +105,7 @@ public class UniqueIdController {
 				response.setContentType("application/pdf");
 				response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-				OutputStream os = response.getOutputStream();
+				os = response.getOutputStream();
 				byteArrayOutputStream.writeTo(os);
 				os.flush();
 				os.close();
@@ -112,6 +116,22 @@ public class UniqueIdController {
 		catch (Exception e) {
 			logger.error("", e);
 			message = "Sorry, an error occured when generating the qr code pdf";
+		}
+		finally {
+				try {
+					if (byteArrayOutputStream != null) {
+						byteArrayOutputStream.close();
+					}
+					if (fileOutputStream != null) {
+						fileOutputStream.close();
+					}
+					if (os != null) {
+						os.close();
+					}
+				}
+				catch (IOException e) {
+					logger.error("Exception occured during closing streams", e);
+				}
 		}
 
 		return new ResponseEntity<>(new Gson().toJson("" + message), HttpStatus.OK);
