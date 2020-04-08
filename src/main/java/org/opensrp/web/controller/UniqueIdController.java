@@ -96,11 +96,8 @@ public class UniqueIdController {
 			if (byteArrayOutputStream.size() > 0) {
 				//mark ids as used
 				fileOutputStream.write(byteArrayOutputStream.toByteArray());
-				fileOutputStream.close();
 				openmrsIdService.markIdsAsUsed(idsToPrint);
 				byteArrayOutputStream.writeTo(os);
-				os.flush();
-				os.close();
 			}
 			message = "Successfully generated the ID QR codes";
 
