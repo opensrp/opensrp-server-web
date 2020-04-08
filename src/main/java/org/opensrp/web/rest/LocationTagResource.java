@@ -28,7 +28,7 @@ public class LocationTagResource {
 	
 	private LocationTagService locationTagService;
 	
-	ObjectMapper mapper = new ObjectMapper();
+	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Autowired
 	public void setLocationTagService(LocationTagService locationTagService) {
@@ -37,15 +37,15 @@ public class LocationTagResource {
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationTags() {
-		String jsonInString = "";
+		String response = "";
 		List<LocationTag> locationTags = locationTagService.getAllLocationTags();
 		try {
-			jsonInString = mapper.writeValueAsString(locationTags);
+			response = mapper.writeValueAsString(locationTags);
 		}
 		catch (JsonProcessingException e) {
 			return new ResponseEntity<String>("Json Processing Exception ", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(jsonInString.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
 	}
 	

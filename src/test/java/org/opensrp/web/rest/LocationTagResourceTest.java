@@ -20,8 +20,7 @@ import org.opensrp.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	
@@ -37,6 +36,8 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 	
 	private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
+	
+	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Before
 	public void setUp() {
@@ -58,8 +59,9 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		doReturn(expectedLocationTags).when(locationTagService).getAllLocationTags();
 		
 		String actualLocationTagsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
-		    new TypeToken<List<LocationTag>>() {}.getType());
+		@SuppressWarnings("unchecked")
+		List<LocationTag> actualLocationTags = (List<LocationTag>) mapper.readValue(actualLocationTagsString,
+		    LocationTag.class);
 		
 		assertListsAreSameIgnoringOrder(actualLocationTags, expectedLocationTags);
 	}
@@ -81,7 +83,8 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	public void testShouldUpdateExistingLocationTagResource() throws Exception {
 		LocationTag expectedLocationTag = initTestLocationTag1();
 		
-		String locationTagJson = new Gson().toJson(expectedLocationTag, new TypeToken<LocationTag>() {}.getType());
+		String locationTagJson = mapper.writeValueAsString(expectedLocationTag);
+		
 		putRequestWithJsonContent(BASE_URL, locationTagJson, MockMvcResultMatchers.status().isCreated());
 		
 		verify(locationTagService).addOrUpdateLocationTag(argumentCaptor.capture());
