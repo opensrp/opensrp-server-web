@@ -20,11 +20,12 @@ import org.opensrp.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	
-	private final static String BASE_URL = "/rest/locationTag/";
+	private final static String BASE_URL = "/rest/location-tag/";
 	
 	private final static String DELETE_ENDPOINT = "delete/";
 	
@@ -36,8 +37,6 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 	
 	private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
-	
-	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Before
 	public void setUp() {
@@ -59,9 +58,8 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		doReturn(expectedLocationTags).when(locationTagService).getAllLocationTags();
 		
 		String actualLocationTagsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-		@SuppressWarnings("unchecked")
-		List<LocationTag> actualLocationTags = (List<LocationTag>) mapper.readValue(actualLocationTagsString,
-		    LocationTag.class);
+		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
+		    new TypeToken<List<LocationTag>>() {}.getType());
 		
 		assertListsAreSameIgnoringOrder(actualLocationTags, expectedLocationTags);
 	}
@@ -83,8 +81,7 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	public void testShouldUpdateExistingLocationTagResource() throws Exception {
 		LocationTag expectedLocationTag = initTestLocationTag1();
 		
-		String locationTagJson = mapper.writeValueAsString(expectedLocationTag);
-		
+		String locationTagJson = new Gson().toJson(expectedLocationTag, new TypeToken<LocationTag>() {}.getType());
 		putRequestWithJsonContent(BASE_URL, locationTagJson, MockMvcResultMatchers.status().isCreated());
 		
 		verify(locationTagService).addOrUpdateLocationTag(argumentCaptor.capture());
