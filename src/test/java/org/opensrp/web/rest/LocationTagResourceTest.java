@@ -63,8 +63,9 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		doReturn(expectedLocationTags).when(locationTagService).getAllLocationTags();
 		
 		String actualLocationTagsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
-		    new TypeToken<List<LocationTag>>() {}.getType());
+		@SuppressWarnings("unchecked")
+		List<LocationTag> actualLocationTags = (List<LocationTag>) mapper.readValue(actualLocationTagsString,
+		    LocationTag.class);
 		
 		assertListsAreSameIgnoringOrder(actualLocationTags, expectedLocationTags);
 	}
