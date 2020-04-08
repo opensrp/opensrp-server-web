@@ -28,7 +28,12 @@ public class LocationTagResource {
 	
 	private LocationTagService locationTagService;
 	
-	private ObjectMapper mapper = new ObjectMapper();
+	protected ObjectMapper objectMapper;
+	
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 	
 	@Autowired
 	public void setLocationTagService(LocationTagService locationTagService) {
@@ -36,16 +41,10 @@ public class LocationTagResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getLocationTags() {
-		String response = "";
+	public ResponseEntity<String> getLocationTags() throws JsonProcessingException {
 		List<LocationTag> locationTags = locationTagService.getAllLocationTags();
-		try {
-			response = mapper.writeValueAsString(locationTags);
-		}
-		catch (JsonProcessingException e) {
-			return new ResponseEntity<String>("Json Processing Exception ", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(objectMapper.writeValueAsString(locationTags), RestUtils.getJSONUTF8Headers(),
+		        HttpStatus.OK);
 		
 	}
 	
@@ -53,7 +52,7 @@ public class LocationTagResource {
 	public ResponseEntity<String> create(@RequestBody String entity) {
 		try {
 			LocationTag locationTag;
-			locationTag = mapper.readValue(entity, LocationTag.class);
+			locationTag = objectMapper.readValue(entity, LocationTag.class);
 			locationTag.setId(0l);
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -76,7 +75,7 @@ public class LocationTagResource {
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> update(@RequestBody String entity) {
 		try {
-			LocationTag locationTag = mapper.readValue(entity, LocationTag.class);
+			LocationTag locationTag = objectMapper.readValue(entity, LocationTag.class);
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}

@@ -31,8 +31,7 @@
 		<opensrp.common.version>2.0.0-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.0-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
-		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
-		<jackson.version>2.10.3</jackson.version>
+		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>		
 	</properties>
 
 	<distributionManagement>
@@ -315,14 +314,7 @@
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-artifact</artifactId>
 			<version>3.0.3</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
-		    <version>${jackson.version}</version>
-		</dependency>
-
+		</dependency>		
 	</dependencies>
 
 	<build>
