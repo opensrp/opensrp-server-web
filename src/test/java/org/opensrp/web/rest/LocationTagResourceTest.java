@@ -20,7 +20,6 @@ import org.opensrp.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,9 +37,6 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 	
 	private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
-	
-	@SuppressWarnings("deprecation")
-	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 	
 	@Before
 	public void setUp() {
@@ -63,9 +59,8 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		doReturn(expectedLocationTags).when(locationTagService).getAllLocationTags();
 		
 		String actualLocationTagsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-		@SuppressWarnings("unchecked")
-		List<LocationTag> actualLocationTags = (List<LocationTag>) mapper.readValue(actualLocationTagsString,
-		    LocationTag.class);
+		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
+		    new TypeToken<List<LocationTag>>() {}.getType());
 		
 		assertListsAreSameIgnoringOrder(actualLocationTags, expectedLocationTags);
 	}
