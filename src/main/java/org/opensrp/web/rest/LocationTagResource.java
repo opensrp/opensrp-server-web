@@ -1,11 +1,9 @@
 package org.opensrp.web.rest;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
+import java.util.List;
+
 import org.opensrp.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
-import org.opensrp.util.DateTypeConverter;
-import org.opensrp.util.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +17,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
-@RequestMapping(value = "/rest/locationTag")
+@RequestMapping(value = "/rest/location-tag")
 public class LocationTagResource {
 	
 	private static Logger logger = LoggerFactory.getLogger(LocationTagResource.class.toString());
 	
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
-	
 	private LocationTagService locationTagService;
 	
-	public static final String IDENTIFIER = "identifier";
+	ObjectMapper mapper = new ObjectMapper();
 	
 	@Autowired
 	public void setLocationTagService(LocationTagService locationTagService) {
@@ -43,27 +37,30 @@ public class LocationTagResource {
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationTags() {
+		String jsonInString = "";
+		List<LocationTag> locationTags = locationTagService.getAllLocationTags();
 		try {
-			return new ResponseEntity<>(gson.toJson(locationTagService.getAllLocationTags()),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			jsonInString = mapper.writeValueAsString(locationTags);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		catch (JsonProcessingException e) {
+			return new ResponseEntity<String>("Json Processing Exception ", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		return new ResponseEntity<>(jsonInString.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> create(@RequestBody String entity) {
 		try {
-			LocationTag locationTag = gson.fromJson(entity, LocationTag.class);
+			LocationTag locationTag;
+			locationTag = mapper.readValue(entity, LocationTag.class);
 			locationTag.setId(0l);
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
+			
 		}
-		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid location tag representation" + entity);
-			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation",
+		catch (JsonProcessingException e) {
+			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation ",
 			        HttpStatus.BAD_REQUEST);
 		}
 		catch (IllegalArgumentException e) {
@@ -72,23 +69,19 @@ public class LocationTagResource {
 		}
 		catch (DuplicateKeyException e) {
 			
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.CONFLICT);
 		}
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> update(@RequestBody String entity) {
 		try {
-			LocationTag locationTag = gson.fromJson(entity, LocationTag.class);
+			LocationTag locationTag = mapper.readValue(entity, LocationTag.class);
 			locationTagService.addOrUpdateLocationTag(locationTag);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
-		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid location tag representation" + entity);
-			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation",
+		catch (JsonProcessingException e) {
+			return new ResponseEntity<String>("The request doesn't contain a valid location tag representation ",
 			        HttpStatus.BAD_REQUEST);
 		}
 		catch (IllegalArgumentException e) {
@@ -96,11 +89,7 @@ public class LocationTagResource {
 		}
 		catch (DuplicateKeyException e) {
 			
-			return new ResponseEntity<String>("Location tag name already exists", HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Location tag name already exists", HttpStatus.CONFLICT);
 		}
 	}
 	
@@ -114,10 +103,7 @@ public class LocationTagResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		
 	}
 	
 }
