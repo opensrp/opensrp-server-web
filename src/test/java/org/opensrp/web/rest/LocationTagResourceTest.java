@@ -20,6 +20,7 @@ import org.opensrp.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,11 +39,15 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 	
 	private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
 	
+	@SuppressWarnings("deprecation")
+	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+	
 	@Before
 	public void setUp() {
 		locationTagService = mock(LocationTagService.class);
 		LocationTagResource locationTagResource = webApplicationContext.getBean(LocationTagResource.class);
 		locationTagResource.setLocationTagService(locationTagService);
+		locationTagResource.setObjectMapper(mapper);
 	}
 	
 	@Test
