@@ -160,7 +160,8 @@ public class RapidProResource {
 	private List<RapidProContact> addNewContacts(Event event) {
 		List<RapidProContact> rapidProContacts = new ArrayList<>();
 		RapidProContact rapidProContact = new RapidProContact();
-		Client contactMother, contactChild;
+		Client contactMother;
+		Client contactChild;
 		List<Obs> obs;
 		if (event.getBaseEntityId() != null && !event.getBaseEntityId().isEmpty() && event.getEventType() != null && event.getEventType().equals(BIRTH_REGISTRATION)) {
 			rapidProContact = new RapidProContact();
