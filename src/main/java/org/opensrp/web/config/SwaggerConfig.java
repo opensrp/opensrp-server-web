@@ -18,7 +18,7 @@ import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableSwagger2
@@ -27,6 +27,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String BASIC = "Basic";
+    private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
 
     @Bean
@@ -38,7 +39,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
                 .build()
                 .apiInfo(getApiInfo())
                 .securityContexts(Lists.newArrayList(securityContext()))
-                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER)));
+                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER), new ApiKey(BEARER,AUTHORIZATION,HEADER)));
     }
 
     public ApiInfo getApiInfo() {
@@ -59,9 +60,17 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     public SecurityContext securityContext() {
         return SecurityContext.builder()
-                .securityReferences(Collections.singletonList(
-                        new SecurityReference(AUTHORIZATION, new AuthorizationScope[0])))
+                .securityReferences(defaultAuth())
                 .forPaths(PathSelectors.regex("/rest/.*"))
                 .build();
+    }
+
+    List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope
+                = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return Lists.newArrayList(
+                new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
     }
 }

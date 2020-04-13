@@ -16,7 +16,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,6 +30,7 @@ public class SwaggerConfigTest {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String BASIC = "Basic";
+    private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
 
     @Before
@@ -68,8 +69,10 @@ public class SwaggerConfigTest {
         when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
         SecurityContext securityContext= swaggerConfig.securityContext();
         assertNotNull(securityContext);
-        assertEquals(securityContext.getSecurityReferences().get(0).getReference(), AUTHORIZATION);
-        assertEquals(securityContext.getSecurityReferences().get(0).getScopes().size(), 0);
+        assertEquals(securityContext.getSecurityReferences().get(0).getReference(), BASIC);
+        assertEquals(securityContext.getSecurityReferences().get(0).getScopes().size(), 1);
+        assertEquals(securityContext.getSecurityReferences().get(1).getReference(), BEARER);
+        assertEquals(securityContext.getSecurityReferences().get(1).getScopes().size(), 1);
     }
 
     private Docket createTestDocket() {
@@ -79,7 +82,7 @@ public class SwaggerConfigTest {
                 .build()
                 .apiInfo(createTestApiInfo())
                 .securityContexts(Lists.newArrayList(createTestSecurityContext()))
-                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER)));
+                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER), new ApiKey(BEARER, AUTHORIZATION, HEADER)));
     }
 
     private ApiInfo createTestApiInfo() {
@@ -94,9 +97,17 @@ public class SwaggerConfigTest {
 
     private SecurityContext createTestSecurityContext() {
         return SecurityContext.builder()
-                .securityReferences(Collections.singletonList(
-                        new SecurityReference(AUTHORIZATION, new AuthorizationScope[0])))
+                .securityReferences(getDefaultAuth())
                 .forPaths(PathSelectors.regex("/rest/.*"))
                 .build();
     }
+
+	private List<SecurityReference> getDefaultAuth() {
+		AuthorizationScope authorizationScope
+				= new AuthorizationScope("global", "accessEverything");
+		AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+		authorizationScopes[0] = authorizationScope;
+		return Lists.newArrayList(
+				new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
+	}
 }
