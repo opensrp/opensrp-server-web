@@ -24,6 +24,8 @@ import org.opensrp.domain.CustomPhysicalLocation;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
+import org.opensrp.search.LocationSearchBean;
+import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
@@ -391,19 +393,37 @@ public class LocationResource {
 	                                                        @RequestParam(value = "name", required = false) String name,
 	                                                        @RequestParam(value = "parentId", required = false) Long parentId,
 	                                                        @RequestParam(value = "status", required = false) String status,
-	                                                        @RequestParam(value = "pageSize", required = true) int pageSize,
-	                                                        @RequestParam(value = "pageNumber", required = true) int pageNumber)
+	                                                        @RequestParam(value = "orderByFieldName", required = false) String orderByFieldName,
+	                                                        @RequestParam(value = "orderByType", required = false) String orderByType,
+	                                                        @RequestParam(value = "pageSize", required = false) Integer pageSize,
+	                                                        @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
 	    throws JsonProcessingException {
-		List<CustomPhysicalLocation> locations = locationService.searchLocations(name, locationTagId, parentId, status,
-		    pageSize, pageNumber);
-		
 		LocationSyncBean locationSyncBean = new LocationSyncBean();
-		locationSyncBean.setCustomLocations(locations);
-		int total = 0;
-		if (pageNumber == 1) {
-			total = locationService.countSearchLocations(name, locationTagId, parentId, status);
+		LocationSearchBean locationSearchBean = new LocationSearchBean();
+		
+		try {
+			locationSearchBean.setName(name);
+			locationSearchBean.setLocationTagId(locationTagId);
+			locationSearchBean.setOrderByFieldName(orderByFieldName);
+			if (orderByType != null) {
+				locationSearchBean.setOrderByType(OrderByType.valueOf(orderByType));
+			}
+			locationSearchBean.setPageNumber(pageNumber);
+			locationSearchBean.setPageSize(pageSize);
+			locationSearchBean.setStatus(status);
+			locationSearchBean.setParentId(parentId);
+			List<CustomPhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
+			
+			locationSyncBean.setCustomLocations(locations);
+			int total = 0;
+			if (pageNumber != null && pageNumber == 1) {
+				total = locationService.countSearchLocations(locationSearchBean);
+			}
+			locationSyncBean.setTotal(total);
 		}
-		locationSyncBean.setTotal(total);
+		catch (IllegalArgumentException e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 		return new ResponseEntity<>(objectMapper.writeValueAsString(locationSyncBean), RestUtils.getJSONUTF8Headers(),
 		        HttpStatus.OK);
 		
