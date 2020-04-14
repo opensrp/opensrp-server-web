@@ -1,4 +1,4 @@
-package org.opensrp.web.rest;
+package org.opensrp.web.rest.it;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -24,7 +24,6 @@ import org.opensrp.domain.Client;
 import org.opensrp.repository.postgres.ClientsRepositoryImpl;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.rest.ClientResource;
-import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.NestedServletException;
 

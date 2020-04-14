@@ -1,4 +1,4 @@
-package org.opensrp.web.rest;
+package org.opensrp.web.rest.it;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,7 +9,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.opensrp.web.rest.it.BaseResourceTest;
 
 public class ProviderResourceTest extends BaseResourceTest {
 
