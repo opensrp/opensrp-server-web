@@ -1,4 +1,4 @@
-package org.opensrp.web.rest.it;
+package org.opensrp.web.rest;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.opensrp.domain.Hia2Indicator;
 import org.opensrp.domain.Report;
 import org.opensrp.repository.postgres.ReportsRepositoryImpl;
+import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ReportResourceTest extends BaseResourceTest {
