@@ -4,6 +4,7 @@ import static java.text.MessageFormat.format;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -25,8 +26,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
-import ch.lambdaj.Lambda;
-import ch.lambdaj.function.convert.Converter;
 
 @Component
 public class DrishtiAuthenticationProvider implements AuthenticationProvider {
@@ -100,15 +99,9 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
-		return Lambda.convert(user.getRoles(), new Converter<String, SimpleGrantedAuthority>() {
-
-			@Override
-			public SimpleGrantedAuthority convert(String role) {
-				if (GET_ALL_EVENTS_ROlE.equals(role))
-					return new SimpleGrantedAuthority("ROLE_ALL_EVENTS");
-				return new SimpleGrantedAuthority("ROLE_OPENMRS");
-			}
-		});
+		return user != null && user.getRoles() != null ? user.getRoles().stream()
+				.map(role -> getSimpleGrantedAuthorityFromRole(role))
+				.collect(Collectors.toList()) : null;
 	}
 
 	public User getDrishtiUser(Authentication authentication, String username) {
@@ -155,5 +148,10 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			throw new BadCredentialsException(INTERNAL_ERROR);
 		}
 
+	}
+	private SimpleGrantedAuthority getSimpleGrantedAuthorityFromRole(String role) {
+		if (GET_ALL_EVENTS_ROlE.equals(role))
+			return new SimpleGrantedAuthority("ROLE_ALL_EVENTS");
+		return new SimpleGrantedAuthority("ROLE_OPENMRS");
 	}
 }

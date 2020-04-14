@@ -47,7 +47,7 @@ public abstract class BaseResourceTest<T> {
 
     protected MockMvc mockMvc;
 
-    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    protected ObjectMapper mapper = new ObjectMapper();
 
     protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
@@ -123,7 +123,7 @@ public abstract class BaseResourceTest<T> {
         return actualObj;
     }
 
-    protected String deleteRequestWithJsonContent(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
+    protected String deleteRequestWithParams(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
         String finalUrl = url;
         if (parameter != null &&!parameter.isEmpty()) {
@@ -131,6 +131,17 @@ public abstract class BaseResourceTest<T> {
         }
 
         MvcResult mvcResult = this.mockMvc.perform(delete(finalUrl).accept(MediaType.APPLICATION_JSON))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return  responseString;
+    }
+
+    protected String deleteRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(delete(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();

@@ -23,9 +23,7 @@
 		<p class="h3 mb-3 font-weight-normal" >Error!</h2>
 
 		<p>
-			Access could not be granted. (<%=((AuthenticationException) session
-						.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY))
-								.getMessage()%>)
+			Access could not be granted. Please try again!
 		</p>
 	</div>
 	<jsp:scriptlet>}</jsp:scriptlet>
