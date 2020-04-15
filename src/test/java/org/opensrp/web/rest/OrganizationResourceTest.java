@@ -15,7 +15,9 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
+import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -64,6 +66,9 @@ public class OrganizationResourceTest {
 
 	@Mock
 	private OrganizationService organizationService;
+
+	@Mock
+	private PractitionerService practitionerService;
 
 	@Captor
 	private ArgumentCaptor<Organization> organizationArgumentCaptor;
@@ -277,6 +282,43 @@ public class OrganizationResourceTest {
 
 	}
 
+	@Test
+	public void testGetOrgPractitioners() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		List<Practitioner> expected = new ArrayList<>();
+		expected.add(getPractioner());
+		when(practitionerService.getPractitionersByOrgIdentifier(any(String.class))).thenReturn(expected);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/practitioner/{identifier}", identifier))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = objectMapper.readTree(responseString);
+		assertEquals(actualObj.get(0).get("identifier").asText(), expected.get(0).getIdentifier());
+		assertEquals(actualObj.get(0).get("active").asBoolean(), expected.get(0).getActive());
+		assertEquals(actualObj.size(),expected.size());
+	}
+
+	@Test
+	public void testGetOrgPractitionersWithInternalError() throws Exception {
+		String identifier = UUID.randomUUID().toString();
+		doThrow(new IllegalStateException()).when(practitionerService).getPractitionersByOrgIdentifier(any(String.class));
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/practitioner/{identifier}", identifier))
+				.andExpect(status().isInternalServerError()).andReturn();
+
+		verify(practitionerService).getPractitionersByOrgIdentifier(identifier);
+		verifyNoMoreInteractions(practitionerService);
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = objectMapper.readTree(responseString);
+		assertEquals(actualObj.get("message").asText(), MESSAGE);
+	}
+
 	private Organization getOrganization() throws Exception {
 		return objectMapper.readValue(organizationJSON, Organization.class);
 	}
@@ -314,6 +356,14 @@ public class OrganizationResourceTest {
 
 		}
 		return organizationAssigmentBeans;
+
+	}
+
+	private Practitioner getPractioner() {
+		Practitioner practitioner = new Practitioner();
+		practitioner.setIdentifier("ID-123");
+		practitioner.setActive(Boolean.TRUE);
+		return practitioner;
 
 	}
 
