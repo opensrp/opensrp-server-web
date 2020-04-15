@@ -244,12 +244,12 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		
 		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
-		
+		clientSearchBean.setClientType(ALLCLIENTS);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -257,14 +257,14 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		DateTime[] lastEdit = null;
 		ClientSyncBean response = new ClientSyncBean();
 		List<Client> clients;
 		
-		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
-		    lastEdit == null ? null : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
+		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -295,7 +295,7 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllANC(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);
@@ -308,7 +308,7 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllChild(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);

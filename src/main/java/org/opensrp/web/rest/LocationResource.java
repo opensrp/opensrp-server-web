@@ -389,14 +389,14 @@ public class LocationResource {
 	
 	@RequestMapping(value = "/search-location", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchLocationByTagOrName(@RequestParam(value = "locationTagId", required = false) Long locationTagId,
-	                                                        @RequestParam(value = "name", required = false) String name,
-	                                                        @RequestParam(value = "parentId", required = false) Long parentId,
-	                                                        @RequestParam(value = "status", required = false) String status,
-	                                                        @RequestParam(value = "orderByFieldName", required = false) String orderByFieldName,
-	                                                        @RequestParam(value = "orderByType", required = false) String orderByType,
-	                                                        @RequestParam(value = "pageSize", required = false) Integer pageSize,
-	                                                        @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
+	public ResponseEntity<String> searchLocations(@RequestParam(value = "locationTagId", required = false) Long locationTagId,
+	                                              @RequestParam(value = "name", required = false) String name,
+	                                              @RequestParam(value = "parentId", required = false) Long parentId,
+	                                              @RequestParam(value = "status", required = false) String status,
+	                                              @RequestParam(value = "orderByFieldName", required = false) String orderByFieldName,
+	                                              @RequestParam(value = "orderByType", required = false) String orderByType,
+	                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
+	                                              @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
 	    throws JsonProcessingException {
 		LocationSyncBean locationSyncBean = new LocationSyncBean();
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
