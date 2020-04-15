@@ -39,10 +39,10 @@ public class ViewConfigurationResourceTest {
 	private MockMvc mockMvc;
 
 	@Mock
-	ViewConfigurationService viewConfigurationService;
+	private ViewConfigurationService viewConfigurationService;
 
 	@InjectMocks
-	ViewConfigurationResource viewConfigurationResource;
+	private ViewConfigurationResource viewConfigurationResource;
 
 	protected ObjectMapper mapper = new ObjectMapper();
 
