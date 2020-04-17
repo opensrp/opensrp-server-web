@@ -3,15 +3,21 @@
  */
 package org.opensrp.web.config.security;
 
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+
 import java.util.Arrays;
 
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -25,6 +31,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.amazonaws.services.greengrass.model.Logger;
+
 /**
  * @author Samuel Githengi created on 03/09/20
  */
@@ -35,6 +43,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
+	
+	@Value("#{opensrp['opensrp.cors.allowed.source']}")
+	private String opensrpAllowedSources;
+	
+	@Value("#{opensrp['opensrp.cors.max.age']}")
+	private long corsMaxAge;
+	
+	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
 	
 	@Autowired
 	public void setOpensrpAuthenticationProvider(DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
@@ -60,7 +76,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
-		.mvcMatchers(HttpMethod.OPTIONS,"/**").permitAll();
+		.mvcMatchers(OPTIONS,"/**").permitAll();
 		/* @formatter:on */
 		
 	}
@@ -94,9 +110,10 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("*"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("authorization"));
+		configuration.setAllowedOrigins(Arrays.asList(opensrpAllowedSources.split(",")));
+		configuration.setAllowedMethods(Arrays.asList(GET.name(), POST.name(), PUT.name(), DELETE.name()));
+		configuration.setAllowedHeaders(Arrays.asList(CORS_ALLOWED_HEADERS.split(",")));
+		configuration.setMaxAge(corsMaxAge);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
