@@ -1,6 +1,5 @@
 package org.opensrp.web.rest.it;
 
-import static ch.lambdaj.collection.LambdaCollections.with;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -11,6 +10,7 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -26,7 +26,6 @@ import org.springframework.web.util.NestedServletException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import ch.lambdaj.function.convert.Converter;
 
 /**
  * TODO: Solve bug at source {@link StockResource} and refactor like {@link EventResourceTest}
@@ -169,14 +168,9 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
-		List<Stock> actualStocks = with(allStocks.getAll()).convert(new Converter<Stock, Stock>() {
-
-			@Override
-			public Stock convert(Stock stock) {
-				stock.setDateCreated(null);
-				return stock;
-			}
-		});
+		List<Stock> actualStocks = allStocks.getAll().stream()
+				.map(stock -> convert(stock))
+				.collect(Collectors.toList());
 
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
@@ -202,16 +196,15 @@ public class StockResourceTest extends BaseResourceTest {
 
 		postCallWithJsonContent(BASE_URL + "/add", postData, status().isCreated());
 
-		List<Stock> actualStocks = with(allStocks.getAll()).convert(new Converter<Stock, Stock>() {
-
-			@Override
-			public Stock convert(Stock stock) {
-				stock.setDateCreated(null);
-				return stock;
-			}
-		});
+		List<Stock> actualStocks = allStocks.getAll().stream()
+				.map(stock -> convert(stock))
+				.collect(Collectors.toList());
 
 		assertTwoListAreSameIgnoringOrder(expectedStocks, actualStocks);
 	}
 
+	private Stock convert(Stock stock) {
+		stock.setDateCreated(null);
+		return stock;
+	}
 }

@@ -51,6 +51,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	public void configure(HttpSecurity http) throws Exception {
 		http.anonymous().disable()
 		.requestMatchers().mvcMatchers("/rest/**")
+		.requestMatchers().mvcMatchers("/user-details")
+		.requestMatchers().mvcMatchers("/security/**")
 		.and()
 			.authorizeRequests()
 			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
