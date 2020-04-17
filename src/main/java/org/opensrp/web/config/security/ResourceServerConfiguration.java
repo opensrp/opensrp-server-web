@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -54,12 +55,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		http.cors()
 		.and()
 			.anonymous().disable()
-		.requestMatchers().mvcMatchers("/rest/**")
-		.requestMatchers().mvcMatchers("/user-details")
-		.requestMatchers().mvcMatchers("/security/**")
+		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**")
 		.and()
 			.authorizeRequests()
-			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
+				.anyRequest().hasRole(Role.OPENMRS)
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
