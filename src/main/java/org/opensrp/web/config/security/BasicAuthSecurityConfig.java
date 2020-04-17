@@ -31,8 +31,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.amazonaws.services.greengrass.model.Logger;
-
 /**
  * @author Samuel Githengi created on 03/09/20
  */
