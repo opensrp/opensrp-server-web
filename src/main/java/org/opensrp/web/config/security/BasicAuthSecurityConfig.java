@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.config.security;
 
+import java.util.Arrays;
+
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * @author Samuel Githengi created on 03/09/20
@@ -38,6 +43,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		http.cors();
 		configureOpenSRPBasicSecurity(http).mvcMatchers("/**").hasRole(Role.OPENMRS);
 		applyBasicAndStateless(http);
 	}
@@ -83,6 +89,17 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
+	}
+	
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("authorization"));
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 	
 }
