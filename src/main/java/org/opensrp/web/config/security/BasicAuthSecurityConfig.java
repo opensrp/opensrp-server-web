@@ -42,8 +42,9 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		applyBasicAndStateless(http);
 	}
 	
-	
-	protected ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureOpenSRPBasicSecurity(HttpSecurity http) throws Exception {
+	protected ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureOpenSRPBasicSecurity(
+	        HttpSecurity http) throws Exception {
+		/* @formatter:off */
 		return http.authorizeRequests()
 		.mvcMatchers("/index.html").permitAll()
 		.mvcMatchers("/").permitAll()
@@ -54,12 +55,15 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 		.mvcMatchers(HttpMethod.OPTIONS,"/**").permitAll();
+		/* @formatter:on */
 		
 	}
 	
 	protected HttpSecurity applyBasicAndStateless(HttpSecurity http) throws Exception {
+		/* @formatter:off */
 		return http.httpBasic().and()
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
+		/* @formatter:on */
 	}
 	
 	@Override
@@ -69,14 +73,16 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
+		/* @formatter:off */
 		web.ignoring().mvcMatchers("/js/**")
 			.and().ignoring().mvcMatchers("/css/**")
 			.and().ignoring().mvcMatchers("/images/**");
+		/* @formatter:on */
 	}
 	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-	    return  NoOpPasswordEncoder.getInstance();
+		return NoOpPasswordEncoder.getInstance();
 	}
 	
 }

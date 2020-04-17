@@ -31,24 +31,26 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	
 	@Autowired
 	private JdbcTokenStore jdbcTokenStore;
-		
+	
 	@Autowired
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
-
+	
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
+		/* @formatter:off */
 		security
 			.resourceId(RESOURCE_ID)
 			.tokenStore(jdbcTokenStore)
 			.stateless(false)
 			.authenticationEntryPoint(auth2AuthenticationEntryPoint())
 			.authenticationManager(authenticationManager);
+		/* @formatter:on */
 	}
-	
 	
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		/* @formatter:off */
 		http.anonymous().disable()
 		.requestMatchers().mvcMatchers("/rest/**")
 		.requestMatchers().mvcMatchers("/user-details")
@@ -60,8 +62,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
 			.httpBasic();
+		/* @formatter:on */
 	}
-	
 	
 	@Bean
 	public OAuth2AccessDeniedHandler accessDeniedHandler() {
@@ -70,7 +72,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	
 	@Bean
 	public OAuth2AuthenticationEntryPoint auth2AuthenticationEntryPoint() {
-		OAuth2AuthenticationEntryPoint entryPoint= new OAuth2AuthenticationEntryPoint();
+		OAuth2AuthenticationEntryPoint entryPoint = new OAuth2AuthenticationEntryPoint();
 		entryPoint.setRealmName(RESOURCE_ID);
 		return entryPoint;
 	}
