@@ -86,6 +86,13 @@ public class StockResourceTest {
 	}
 
 	@Test
+	public void testGetAllWithException() throws Exception {
+		when(stockService.findAllStocks()).thenReturn(null);
+		mockMvc.perform(get(BASE_URL + "getall"))
+				.andExpect(status().isInternalServerError()).andReturn();
+	}
+
+	@Test
 	public void testSync() throws Exception {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
@@ -104,6 +111,16 @@ public class StockResourceTest {
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertEquals(actualObj.get("stocks").size(), 1);
+	}
+
+	@Test
+	public void testSyncThrowsException() throws Exception {
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenThrow(new Exception());
+
+		mockMvc.perform(get(BASE_URL + "/sync").param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
+				.param("limit", "1"))
+				.andExpect(status().isInternalServerError()).andReturn();
 	}
 
 	@Test
