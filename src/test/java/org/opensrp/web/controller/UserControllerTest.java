@@ -13,6 +13,9 @@ import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,6 +61,15 @@ public class UserControllerTest {
 	protected WebApplicationContext webApplicationContext;
 
 	private MockMvc mockMvc;
+
+	@Mock
+	private OrganizationService organizationService;
+
+	@Mock
+	private PractitionerService practitionerService;
+
+	@Mock
+	private PhysicalLocationService physicalLocationService;
 	
 	private DrishtiAuthenticationProvider auth;
 	
@@ -86,6 +98,9 @@ public class UserControllerTest {
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController)
 				.build();
 		userController.setOpensrpAuthenticationProvider(auth);
+		userController.setOrganizationService(organizationService);
+		userController.setPractitionerService(practitionerService);
+		userController.setLocationService(physicalLocationService);
 		ReflectionTestUtils.setField(userController, "opensrpAllowedSources", "");
 		ReflectionTestUtils.setField(userController, "OPENMRS_VERSION", "2.1.3");
 
@@ -155,6 +170,12 @@ public class UserControllerTest {
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertEquals(result.getStatusCode(), HttpStatus.OK);
 		assertEquals(actualObj.get("user").get("username").asText(), "admin");
+	}
+
+	@Test
+	public void testConfiguration() throws Exception {
+		MvcResult result = mockMvc.perform(get("/security/configuration"))
+				.andExpect(status().isOk()).andReturn();
 	}
 
 	private Authentication getMockedAuthentication() {
