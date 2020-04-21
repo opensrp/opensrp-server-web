@@ -6,11 +6,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.api.domain.User;
+import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.powermock.api.mockito.PowerMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,11 +21,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,14 +58,20 @@ public class UniqueIdControllerTest {
 	@Mock
 	private UserController userController;
 
+	@Mock
+	private OpenmrsUserService openmrsUserService;
+
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/uniqueids";
+	private final String ERROR_MESSAGE = "\"Sorry, an error occured when generating the qr code pdf\"";
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(uniqueIdController).build();
+		ReflectionTestUtils.setField(uniqueIdController, "qrCodesDir", "");
+
 	}
 
 	@Test
@@ -94,6 +105,27 @@ public class UniqueIdControllerTest {
 
 		assertEquals(actualObj.get("identifiers").get(0).asText(), "1");
 		assertEquals(actualObj.get("identifiers").size(), 1);
+	}
+
+	@Test
+	public void testThisMonthDataSendTODHIS2ThrowsException() throws Exception {
+		List<String> mocked_expected_ids = new ArrayList<>();
+		mocked_expected_ids.add("1");
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		when(openmrsIdService.getNotUsedIdsAsString(1)).thenReturn(mocked_expected_ids);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/print").param("batchSize", "10"))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		assertEquals(responseString,ERROR_MESSAGE);
 	}
 
 	private Authentication getMockedAuthentication() {

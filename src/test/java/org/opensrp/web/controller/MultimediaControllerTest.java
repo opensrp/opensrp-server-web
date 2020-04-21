@@ -6,8 +6,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 
 public class MultimediaControllerTest {
 
@@ -33,6 +44,66 @@ public class MultimediaControllerTest {
 
 		// verify call arguments
 		Assert.assertEquals(stringArgumentCaptor.getValue(), "originalName");
+	}
+
+	@Test
+	public void testDownloadWithAuth() {
+		MultimediaController controller = Mockito.spy(new MultimediaController());
+
+		MultimediaService multimediaService = Mockito.mock(MultimediaService.class);
+		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
+		HttpServletResponse httpServletResponse = Mockito.mock(HttpServletResponse.class);
+		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
+		Whitebox.setInternalState(controller, "provider", provider);
+		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
+
+		controller.downloadFileWithAuth(httpServletResponse, "fileName", "testUser", "password", httpServletRequest);
+
+		// verify call to the service
+		Mockito.verify(multimediaService).retrieveFile(anyString());
+	}
+
+	private Authentication getMockedAuthentication() {
+		Authentication authentication = new Authentication() {
+
+			@Override
+			public Collection<? extends GrantedAuthority> getAuthorities() {
+				return null;
+			}
+
+			@Override
+			public Object getCredentials() {
+				return "";
+			}
+
+			@Override
+			public Object getDetails() {
+				return null;
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return "Test User";
+			}
+
+			@Override
+			public boolean isAuthenticated() {
+				return true;
+			}
+
+			@Override
+			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+			}
+
+			@Override
+			public String getName() {
+				return "admin";
+			}
+		};
+
+		return authentication;
 	}
 
 }
