@@ -115,8 +115,7 @@ public class StockResourceTest {
 
 	@Test
 	public void testSyncThrowsException() throws Exception {
-		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
-				.thenThrow(new Exception());
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class))).thenReturn(null);
 
 		mockMvc.perform(get(BASE_URL + "/sync").param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
 				.param("limit", "1"))
