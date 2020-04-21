@@ -56,45 +56,40 @@ public class SettingResource {
 	@RequestMapping(method = RequestMethod.GET, value = "/sync")
 	public @ResponseBody ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
+		ResponseEntity responseEntity;
 		
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		try {
-			
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String providerId = getStringFilter(PROVIDER_ID, request);
 			String locationId = getStringFilter(LOCATION_ID, request);
 			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
-			
-			if ((TextUtils.isBlank(team) && TextUtils.isBlank(providerId) && TextUtils.isBlank(locationId)
-			        && TextUtils.isBlank(teamId) && TextUtils.isBlank(teamId)) || TextUtils.isBlank(serverVersion)) {
+
+			if (TextUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
-			
-			Long lastSyncedServerVersion = serverVersion != null ? Long.valueOf(serverVersion) + 1 : 0;
-			
+
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
 			settingQueryBean.setTeamId(teamId);
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
-			settingQueryBean.setServerVersion(lastSyncedServerVersion);
-			
+			settingQueryBean.setServerVersion(Long.valueOf(serverVersion) + 1);
+
 			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
 
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
-			return new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,
-					HttpStatus.OK);
-			
-		}
-		catch (Exception e) {
+			responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders, HttpStatus.OK); // todo: why is this conversion to json array necessary?
+		} catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+			responseEntity = new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
+		return responseEntity;
 	}
 	
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/sync")
