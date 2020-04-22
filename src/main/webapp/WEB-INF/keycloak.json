@@ -3,5 +3,6 @@
   "realm-public-key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhrdePN8HnNje+wZ3gVnTpcSmppUcrSJUSRRDYi35E40przIm+nBhuPE0al0RZpAOvOvHrRPaCLm2utwtcGU/01zV+CTCwe71q14jkV+YcYy1TPNNT24ADny8bm9XXtzo4qC3Ut84tod0Ohwczvvj5jmBTkMJ0YKY++7Z3a0a9YxRjcqxu2nWHMOAV4dweLomuPlWnQ244oJg1qoWeB8IAjgykTXP8ZdMIgiHfmme+oRDTj5Ojyvnh3eWrP5Vt65zpFtJyTDAF/Soor922HNTOhzR7h1byFirJ9xDeexA8UtHjQBmtEeGKRN31ANjvWvSm6U6SWR9m5Q3h+AHIILDqQIDAQAB",
   "auth-server-url": "http://localhost:8080/auth",
   "ssl-required": "external",
-  "resource": "opensrp-service"
+  "resource": "opensrp-service",
+  "public-client": true
 }
