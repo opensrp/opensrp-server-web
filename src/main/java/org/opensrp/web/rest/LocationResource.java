@@ -9,6 +9,8 @@ import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -20,12 +22,16 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.CustomPhysicalLocation;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
+import org.opensrp.search.LocationSearchBean;
+import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.LocationSyncBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +44,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 
 @Controller
@@ -88,7 +94,13 @@ public class LocationResource {
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
 	private PhysicalLocationService locationService;
-
+	
+	protected ObjectMapper objectMapper;
+	
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -386,6 +398,48 @@ public class LocationResource {
 
 		return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
+	}
+	
+	@RequestMapping(value = "/search-location", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	public ResponseEntity<String> searchLocations(@RequestParam(value = "locationTagId", required = false) Long locationTagId,
+	                                              @RequestParam(value = "name", required = false) String name,
+	                                              @RequestParam(value = "parentId", required = false) Long parentId,
+	                                              @RequestParam(value = "status", required = false) String status,
+	                                              @RequestParam(value = "orderByFieldName", required = false) String orderByFieldName,
+	                                              @RequestParam(value = "orderByType", required = false) String orderByType,
+	                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
+	                                              @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
+	    throws JsonProcessingException {
+		LocationSyncBean locationSyncBean = new LocationSyncBean();
+		LocationSearchBean locationSearchBean = new LocationSearchBean();
+		
+		try {
+			locationSearchBean.setName(name);
+			locationSearchBean.setLocationTagId(locationTagId);
+			locationSearchBean.setOrderByFieldName(orderByFieldName);
+			if (orderByType != null) {
+				locationSearchBean.setOrderByType(OrderByType.valueOf(orderByType));
+			}
+			locationSearchBean.setPageNumber(pageNumber);
+			locationSearchBean.setPageSize(pageSize);
+			locationSearchBean.setStatus(status);
+			locationSearchBean.setParentId(parentId);
+			List<CustomPhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
+			
+			locationSyncBean.setCustomLocations(locations);
+			int total = 0;
+			if (pageNumber != null && pageNumber == 1) {
+				total = locationService.countSearchLocations(locationSearchBean);
+			}
+			locationSyncBean.setTotal(total);
+		}
+		catch (IllegalArgumentException e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(objectMapper.writeValueAsString(locationSyncBean), RestUtils.getJSONUTF8Headers(),
+		        HttpStatus.OK);
+		
 	}
 
 	static class LocationSyncRequestWrapper {
