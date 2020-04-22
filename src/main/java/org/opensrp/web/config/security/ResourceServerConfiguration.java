@@ -22,9 +22,9 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
  * @author Samuel Githengi created on 03/11/20
  */
 
-@Profile("oauth2")
+/*@Profile("oauth2")
 @Configuration
-@EnableResourceServer
+@EnableResourceServer*/
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 	
 	public static final String RESOURCE_ID = "OpenSRP2";

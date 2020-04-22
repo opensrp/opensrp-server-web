@@ -28,9 +28,9 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 /**
  * @author Samuel Githengi created on 03/11/20
  */
-@Profile("oauth2")
+/*@Profile("oauth2")
 @Configuration
-@EnableAuthorizationServer
+@EnableAuthorizationServer*/
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 	
 	private static String REALM = "OpenSRP";

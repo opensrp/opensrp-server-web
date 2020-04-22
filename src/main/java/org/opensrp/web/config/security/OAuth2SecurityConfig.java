@@ -29,9 +29,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 /**
  * @author Samuel Githengi created on 03/10/20
  */
-@EnableWebSecurity
+/*@EnableWebSecurity
 @Configuration
-@Profile("oauth2")
+@Profile("oauth21")*/
 public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Autowired

@@ -14,9 +14,9 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 /**
  * @author Samuel Githengi created on 03/12/20
  */
-@Profile("oauth2")
+/*@Profile("oauth2")
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)*/
 public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 	
 	@Autowired
