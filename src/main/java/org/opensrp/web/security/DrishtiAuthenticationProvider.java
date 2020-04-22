@@ -4,6 +4,7 @@ import static java.text.MessageFormat.format;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -12,14 +13,12 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,8 +26,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
-import ch.lambdaj.Lambda;
-import ch.lambdaj.function.convert.Converter;
 
 @Component
 public class DrishtiAuthenticationProvider implements AuthenticationProvider {
@@ -46,10 +43,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	protected static final String AUTH_HASH_KEY = "_auth";
 
 	private static final String GET_ALL_EVENTS_ROlE = "OpenSRP: Get All Events";
-
-	// private AllOpenSRPUsers allOpenSRPUsers;
-	private PasswordEncoder passwordEncoder;
-
+	
 	private OpenmrsUserService openmrsUserService;
 
 	@Resource(name = "redisTemplate")
@@ -62,10 +56,8 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	private int cacheTTL;
 
 	@Autowired
-	public DrishtiAuthenticationProvider(OpenmrsUserService openmrsUserService,
-			@Qualifier("shaPasswordEncoder") PasswordEncoder passwordEncoder) {
+	public DrishtiAuthenticationProvider(OpenmrsUserService openmrsUserService) {
 		this.openmrsUserService = openmrsUserService;
-		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -107,15 +99,9 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
-		return Lambda.convert(user.getRoles(), new Converter<String, SimpleGrantedAuthority>() {
-
-			@Override
-			public SimpleGrantedAuthority convert(String role) {
-				if (GET_ALL_EVENTS_ROlE.equals(role))
-					return new SimpleGrantedAuthority("ROLE_ALL_EVENTS");
-				return new SimpleGrantedAuthority("ROLE_OPENMRS");
-			}
-		});
+		return user != null && user.getRoles() != null ? user.getRoles().stream()
+				.map(role -> getSimpleGrantedAuthorityFromRole(role))
+				.collect(Collectors.toList()) : null;
 	}
 
 	public User getDrishtiUser(Authentication authentication, String username) {
@@ -162,5 +148,10 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			throw new BadCredentialsException(INTERNAL_ERROR);
 		}
 
+	}
+	private SimpleGrantedAuthority getSimpleGrantedAuthorityFromRole(String role) {
+		if (GET_ALL_EVENTS_ROlE.equals(role))
+			return new SimpleGrantedAuthority("ROLE_ALL_EVENTS");
+		return new SimpleGrantedAuthority("ROLE_OPENMRS");
 	}
 }

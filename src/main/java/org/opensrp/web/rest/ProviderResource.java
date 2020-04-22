@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.api.domain.User;
@@ -18,8 +19,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.mysql.jdbc.StringUtils;
 
 @Controller
 @RequestMapping("/rest/provider")
@@ -37,8 +36,8 @@ public class ProviderResource extends RestResource<Provider> {
 		String id = request.getParameter("id");
 
 		try {
-			if (StringUtils.isEmptyOrWhitespaceOnly(id)) {
-				if (StringUtils.isEmptyOrWhitespaceOnly(u) || StringUtils.isEmptyOrWhitespaceOnly(p)) {
+			if (StringUtils.isBlank(id)) {
+				if (StringUtils.isBlank(u) || StringUtils.isBlank(p)) {
 					resp.put("ERROR", "Username and Password not provided.");
 				} else {
 					if (userService.authenticate(u, p)) {

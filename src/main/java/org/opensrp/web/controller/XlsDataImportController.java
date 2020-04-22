@@ -66,7 +66,8 @@ public class XlsDataImportController {
 	private OpenmrsIDService openmrsIDService;
 	 
 	private DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
-	
+
+
 	@Autowired
 	public XlsDataImportController(ClientService clientService, EventService eventService, OpenmrsIDService openmrsIDService) {
 		this.clientService = clientService;
@@ -82,8 +83,7 @@ public class XlsDataImportController {
 		int eventCount = 0;
 		int clientCount = 0;
 		CSVParser parser;
-		try {
-			Reader reader = new InputStreamReader(file.getInputStream());
+		try(Reader reader = new InputStreamReader(file.getInputStream())) {
 			parser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 			List<CSVRecord> records = parser.getRecords();
 			int recordCount = records.size();

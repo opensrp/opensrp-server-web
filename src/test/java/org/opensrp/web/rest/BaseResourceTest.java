@@ -1,14 +1,22 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.opensrp.util.DateTimeDeserializer;
+import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -20,10 +28,11 @@ import org.springframework.test.web.server.ResultMatcher;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -38,13 +47,22 @@ public abstract class BaseResourceTest<T> {
 
     protected MockMvc mockMvc;
 
-    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    protected ObjectMapper mapper = new ObjectMapper();
 
     protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     @Before
     public void bootStrap() {
         this.mockMvc = MockMvcBuilders.webApplicationContextSetup(this.webApplicationContext).build();
+
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
+        SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
+        dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
+        dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
+        mapper.registerModule(dateTimeModule);
     }
 
     protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
@@ -105,7 +123,7 @@ public abstract class BaseResourceTest<T> {
         return actualObj;
     }
 
-    protected String deleteRequestWithJsonContent(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
+    protected String deleteRequestWithParams(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
         String finalUrl = url;
         if (parameter != null &&!parameter.isEmpty()) {
@@ -113,6 +131,17 @@ public abstract class BaseResourceTest<T> {
         }
 
         MvcResult mvcResult = this.mockMvc.perform(delete(finalUrl).accept(MediaType.APPLICATION_JSON))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return  responseString;
+    }
+
+    protected String deleteRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(delete(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();

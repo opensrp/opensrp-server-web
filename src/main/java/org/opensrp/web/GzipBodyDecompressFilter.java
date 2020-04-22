@@ -23,9 +23,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
@@ -65,8 +65,9 @@ public class GzipBodyDecompressFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 		boolean isGzipped = request.getHeader(HttpHeaders.CONTENT_ENCODING) != null
 		        && request.getHeader(HttpHeaders.CONTENT_ENCODING).contains("gzip");
-		boolean requestTypeSupported = HttpMethods.POST.equals(request.getMethod())
-		        || HttpMethods.PUT.equals(request.getMethod());
+		HttpMethod httpMethod=HttpMethod.resolve(request.getMethod());
+		boolean requestTypeSupported = HttpMethod.POST.equals(httpMethod)
+		        || HttpMethod.PUT.equals(httpMethod);
 		if (isGzipped && !requestTypeSupported) {
 			throw new IllegalStateException(request.getMethod() + " is not supports gzipped body of parameters."
 			        + " Only POST requests are currently supported.");

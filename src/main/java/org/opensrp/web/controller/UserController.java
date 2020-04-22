@@ -1,8 +1,7 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,9 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -53,9 +51,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
 
 @Controller
 public class UserController {
@@ -157,17 +154,12 @@ public class UserController {
 		}
 		if (auth != null) {
 			User user;
-			try {
-				String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
-						: anmIdentifier;
-				user = openmrsUserService.getUser(userName);
-				UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
-				userDetail.setPreferredName(user.getPreferredName());
-				return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
-			} catch (JSONException e) {
-				logger.error("Error getting user details", e);
-				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
+					: anmIdentifier;
+			user = openmrsUserService.getUser(userName);
+			UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
+			userDetail.setPreferredName(user.getPreferredName());
+			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 
 		} else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -195,9 +187,9 @@ public class UserController {
 		} catch (Exception e) {
 			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
 		}
-		if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
+		if (StringUtils.isBlank(lid)) {
 			lid = (String) u.getAttribute("Location");
-			if (StringUtils.isEmptyOrWhitespaceOnly(lid)) {
+			if (StringUtils.isBlank(lid)) {
 				lid = (String) u.getAttribute("Locations");
 				if (lid == null) {
 					throw new IllegalStateException(
@@ -249,7 +241,7 @@ public class UserController {
 				if (PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
 					continue;
 				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
-				if (org.apache.commons.lang3.StringUtils.isNotBlank(openMRSId)) {
+				if (StringUtils.isNotBlank(openMRSId)) {
 					String parentId = jurisdiction.getProperties().getParentId();
 					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
 					locationAndParent.put(jurisdiction.getId(), parentId);

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
-import com.ibm.icu.text.SimpleDateFormat;
+
+import org.opensrp.web.controller.UserController;
 
 @Controller
 @RequestMapping("/uniqueids")
@@ -69,40 +71,33 @@ public class UniqueIdController {
 
 		String message;
 		User user;
-		try {
-			Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
+		Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
+		List<String> idsToPrint = openmrsIdService.getNotUsedIdsAsString(numberToGenerate);
+		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy-HHmmss");
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String currentPrincipalName = authentication.getName();
+		String fileName = "QRCodes_".concat(df.format(new Date())).concat("_").concat(currentPrincipalName)
+				.concat("_" + numberToGenerate + ".pdf");
+		response.setHeader("Expires", "0");
+		response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+		response.setHeader("Pragma", "public");
+		response.setContentType("application/pdf");
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String currentPrincipalName = authentication.getName();
+		try (ByteArrayOutputStream byteArrayOutputStream = PdfUtil.generatePdf(idsToPrint, 140, 140, 1, 5);
+		     FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
+		     OutputStream os = response.getOutputStream();) {
 			user = openmrsUserService.getUser(currentPrincipalName);
 			if (!checkRoleIfRoleExitst(user.getRoles(), "opensrp-generate-qr-code")) {
 				return new ResponseEntity<>("Sorry, insufficient privileges to generate ID QR codes", HttpStatus.OK);
 			}
 
 			openmrsIdService.downloadAndSaveIds(numberToGenerate, currentPrincipalName);
-			List<String> idsToPrint = openmrsIdService.getNotUsedIdsAsString(numberToGenerate);
-			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy-HHmmss");
-
-			String fileName = "QRCodes_".concat(df.format(new Date())).concat("_").concat(currentPrincipalName)
-					.concat("_" + numberToGenerate + ".pdf");
-			ByteArrayOutputStream byteArrayOutputStream = PdfUtil.generatePdf(idsToPrint, 140, 140, 1, 5);
 			if (byteArrayOutputStream.size() > 0) {
 				//mark ids as used
-				FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
 				fileOutputStream.write(byteArrayOutputStream.toByteArray());
-				fileOutputStream.close();
 				openmrsIdService.markIdsAsUsed(idsToPrint);
-
-				response.setHeader("Expires", "0");
-				response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
-				response.setHeader("Pragma", "public");
-				response.setContentType("application/pdf");
-				response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
-				OutputStream os = response.getOutputStream();
 				byteArrayOutputStream.writeTo(os);
-				os.flush();
-				os.close();
 			}
 			message = "Successfully generated the ID QR codes";
 

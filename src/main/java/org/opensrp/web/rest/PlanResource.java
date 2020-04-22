@@ -1,16 +1,21 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
+
+
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
@@ -34,11 +39,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * @author Vincent Karuri
@@ -83,29 +88,19 @@ public class PlanResource {
 		if (identifier == null) {
 			return new ResponseEntity<>("Plan Id is required", HttpStatus.BAD_REQUEST);
 		}
-		
-		try {
-			return new ResponseEntity<>(
-			        gson.toJson(
-			            planService.getPlansByIdsReturnOptionalFields(Collections.singletonList(identifier), fields)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		return new ResponseEntity<>(
+				gson.toJson(
+						planService.getPlansByIdsReturnOptionalFields(Collections.singletonList(identifier), fields)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlans() {
-		try {
-			return new ResponseEntity<>(gson.toJson(planService.getAllPlans()), RestUtils.getJSONUTF8Headers(),
-			        HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans()), RestUtils.getJSONUTF8Headers(),
+				HttpStatus.OK);
+
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -119,10 +114,7 @@ public class PlanResource {
 			logger.error("The request doesn't contain a valid plan representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -136,10 +128,7 @@ public class PlanResource {
 			logger.error("The request doesn't contain a valid plan representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 	
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {
@@ -154,24 +143,18 @@ public class PlanResource {
 		if ((operationalAreaIds==null || operationalAreaIds.isEmpty()) && StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Sync Params missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
-		
-		try {
-			
-			List<PlanDefinition> plans;
-			if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
-				plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
-				    planSyncRequestWrapper.getServerVersion());
-			} else if (username != null) {
-				plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
-			} else {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}
-			return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		List<PlanDefinition> plans;
+		if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
+			plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
+					planSyncRequestWrapper.getServerVersion());
+		} else if (username != null) {
+			plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
+		} else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 	
 	// here for backward compatibility
@@ -189,17 +172,11 @@ public class PlanResource {
 		if (operationalAreaIds.isEmpty()) {
 			return new ResponseEntity<>("Juridiction Ids required", HttpStatus.BAD_REQUEST);
 		}
-		
-		try {
-			return new ResponseEntity<>(
-			        gson.toJson(
-			            planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		return new ResponseEntity<>(
+				gson.toJson(
+						planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	/**
@@ -217,22 +194,16 @@ public class PlanResource {
 	public ResponseEntity<String> findByIdentifiersReturnOptionalFields(HttpServletRequest request,
 	        @RequestParam(value = IDENTIFIERS) List<String> identifiers,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields) {
-		try {
-			
-			if (fields != null && !fields.isEmpty()) {
-				for (String fieldName : fields) {
-					if (!doesObjectContainField(new PlanDefinition(), fieldName)) {
-						return new ResponseEntity<>(fieldName + " field is invalid", HttpStatus.BAD_REQUEST);
-					}
+
+		if (fields != null && !fields.isEmpty()) {
+			for (String fieldName : fields) {
+				if (!doesObjectContainField(new PlanDefinition(), fieldName)) {
+					return new ResponseEntity<>(fieldName + " field is invalid", HttpStatus.BAD_REQUEST);
 				}
 			}
-			return new ResponseEntity<>(gson.toJson(planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
-		catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(gson.toJson(planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	/**
@@ -246,16 +217,9 @@ public class PlanResource {
 	        MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
 	        @PathVariable("planIdentifier") String planIdentifier) {
-		
-		try {
-			return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
+
+		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	/**
@@ -271,15 +235,9 @@ public class PlanResource {
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = LIMIT, required = false)  Integer limit) {
 
-		try {
-			Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-			return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 
@@ -293,17 +251,12 @@ public class PlanResource {
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
 										  @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
 
-		try {
-			Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
-			Identifier identifiers = new Identifier();
-			identifiers.setIdentifiers(planIdsPair.getLeft());
-			identifiers.setLastServerVersion(planIdsPair.getRight());
+		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+		Identifier identifiers = new Identifier();
+		identifiers.setIdentifiers(planIdsPair.getLeft());
+		identifiers.setLastServerVersion(planIdsPair.getRight());
 
-			return new ResponseEntity<>(identifiers, HttpStatus.OK);
-		} catch (Exception e) {
-			logger.warn(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		return new ResponseEntity<>(identifiers, HttpStatus.OK);
 
 	}
 

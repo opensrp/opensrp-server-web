@@ -97,34 +97,26 @@ public class SettingResource {
 		JSONObject response = new JSONObject();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-		
-		try {
-			JSONObject syncData = new JSONObject(data);
-			
-			if (!syncData.has("settingConfigurations")) {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			} else {
-				
-				JSONArray clientSettings = syncData.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
-				JSONArray dbSettingsArray = new JSONArray();
-				
-				for (int i = 0; i < clientSettings.length(); i++) {
-					
-					dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
-					
-				}
-				
-				response.put("validated_records", dbSettingsArray);
-				
+
+		JSONObject syncData = new JSONObject(data);
+
+		if (!syncData.has("settingConfigurations")) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+
+			JSONArray clientSettings = syncData.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
+			JSONArray dbSettingsArray = new JSONArray();
+
+			for (int i = 0; i < clientSettings.length(); i++) {
+
+				dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
+
 			}
-			
+
+			response.put("validated_records", dbSettingsArray);
+
 		}
-		
-		catch (Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
+
 		return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.OK);
 	}
 }

@@ -1,22 +1,19 @@
 package org.opensrp.web.utils;
 
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.web.rest.RestUtils;
 
-import com.mysql.jdbc.StringUtils;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.GENDER;
 
 public class SearchHelper {
 	
@@ -75,32 +72,32 @@ public class SearchHelper {
 		}
 		Map<String, String> identifiers = new HashMap<String, String>();
 		//
-		if (!StringUtils.isEmptyOrWhitespaceOnly(zeirId)) {
+		if (!StringUtils.isBlank(zeirId)) {
 			identifiers.put(ZEIR_ID, zeirId);
 			identifiers.put("ZEIR_ID", zeirId); //Maintains backward compatibility with upper case key
 		}
 
-		if (!StringUtils.isEmptyOrWhitespaceOnly(opensrpId)) {
+		if (!StringUtils.isBlank(opensrpId)) {
 			identifiers.put(OPENSRP_ID, opensrpId);
 		}
-		if (!StringUtils.isEmptyOrWhitespaceOnly(simprintsGuid)) {
+		if (!StringUtils.isBlank(simprintsGuid)) {
 			identifiers.put(SIM_PRINT_GUID, simprintsGuid);
 		}
 
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		if (!StringUtils.isEmptyOrWhitespaceOnly(inActive) || !StringUtils.isEmptyOrWhitespaceOnly(lostToFollowUp)
-		        || !StringUtils.isEmptyOrWhitespaceOnly(nfcCardIdentifier)) {
+		if (!StringUtils.isBlank(inActive) || !StringUtils.isBlank(lostToFollowUp)
+		        || !StringUtils.isBlank(nfcCardIdentifier)) {
 			
-			if (!StringUtils.isEmptyOrWhitespaceOnly(inActive)) {
+			if (!StringUtils.isBlank(inActive)) {
 				attributes.put(INACTIVE, inActive);
 			}
 			
-			if (!StringUtils.isEmptyOrWhitespaceOnly(lostToFollowUp)) {
+			if (!StringUtils.isBlank(lostToFollowUp)) {
 				attributes.put(LOST_TO_FOLLOW_UP, lostToFollowUp);
 			}
 			
-			if (!StringUtils.isEmptyOrWhitespaceOnly(nfcCardIdentifier)) {
+			if (!StringUtils.isBlank(nfcCardIdentifier)) {
 				attributes.put("NFC_Card_Identifier", nfcCardIdentifier);//Key different case than constant
 			}
 		}
@@ -131,15 +128,15 @@ public class SearchHelper {
 		
 		String NRC_NUMBER_KEY = "NRC_Number";
 		Map<String, String> motherAttributes = new HashMap<String, String>();
-		if (!StringUtils.isEmptyOrWhitespaceOnly(motherGuardianNrc)) {
+		if (!StringUtils.isBlank(motherGuardianNrc)) {
 			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
 		}
 		
 		String nameLike = null;
 		
-		if (!StringUtils.isEmptyOrWhitespaceOnly(motherSearchBean.getFirstName())
-		        && org.apache.commons.lang3.StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
-		        && StringUtils.isEmptyOrWhitespaceOnly(motherSearchBean.getLastName())) {
+		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
+		        && StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
+		        && StringUtils.isBlank(motherSearchBean.getLastName())) {
 			String[] arr = motherSearchBean.getFirstName().split("\\s+");
 			nameLike = arr[0];
 			motherSearchBean.setFirstName(null);
@@ -179,15 +176,15 @@ public class SearchHelper {
 	
 	public static boolean isSearchValid(ClientSearchBean searchBean) {
 		
-		return !StringUtils.isEmptyOrWhitespaceOnly(searchBean.getFirstName())
-		        || !StringUtils.isEmptyOrWhitespaceOnly(searchBean.getMiddleName())
-		        || !StringUtils.isEmptyOrWhitespaceOnly(searchBean.getLastName())
-		        || !StringUtils.isEmptyOrWhitespaceOnly(searchBean.getGender())
+		return !StringUtils.isBlank(searchBean.getFirstName())
+		        || !StringUtils.isBlank(searchBean.getMiddleName())
+		        || !StringUtils.isBlank(searchBean.getLastName())
+		        || !StringUtils.isBlank(searchBean.getGender())
 		        || (searchBean.getAttributes() != null && !searchBean.getAttributes().isEmpty())
 		        || searchBean.getBirthdateFrom() != null || searchBean.getBirthdateTo() != null
 		        || searchBean.getLastEditFrom() != null || searchBean.getLastEditTo() != null
 		        || (searchBean.getIdentifiers() != null && !searchBean.getIdentifiers().isEmpty())
-		        || !StringUtils.isEmptyOrWhitespaceOnly(searchBean.getNameLike());
+		        || !StringUtils.isBlank(searchBean.getNameLike());
 		
 	}
 	
@@ -261,7 +258,7 @@ public class SearchHelper {
 		String MOTHER_GUARDIAN_PHONE_NUMBER = "mother_contact_phone_number";
 		String CONTACT_PHONE_NUMBER = "contact_phone_number";
 		String motherGuardianPhoneNumber = RestUtils.getStringFilter(MOTHER_GUARDIAN_PHONE_NUMBER, request);
-		motherGuardianPhoneNumber = StringUtils.isEmptyOrWhitespaceOnly(motherGuardianPhoneNumber)
+		motherGuardianPhoneNumber = StringUtils.isBlank(motherGuardianPhoneNumber)
 		        ? RestUtils.getStringFilter(CONTACT_PHONE_NUMBER, request)
 		        : motherGuardianPhoneNumber;
 		

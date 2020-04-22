@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -52,16 +52,6 @@ public class RapidProResource {
 
 	private PatientService patientService;
 
-	private List<Event> events;
-
-	private List<RapidProContact> rapidProContacts;
-
-	private RapidProContact rapidProContact;
-
-	private Client contactMother, contactChild;
-
-	private List<Obs> obs;
-
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
 	@Autowired
@@ -74,8 +64,9 @@ public class RapidProResource {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> getNewContacts(HttpServletRequest request) {
+		List<Event> events;
+		List<RapidProContact> rapidProContacts = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
-		rapidProContacts = new ArrayList<>();
 		try {
 			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String eventType = getStringFilter(EVENT_TYPE, request);
@@ -98,7 +89,7 @@ public class RapidProResource {
 				if (!events.isEmpty() && events != null) {
 					for (Event event : events) {
 						try {
-							addNewContacts(event);
+							rapidProContacts = addNewContacts(event);
 						}
 						catch (Exception e) {
 							e.printStackTrace();
@@ -146,7 +137,7 @@ public class RapidProResource {
 			String baseEntityId = gson.fromJson(syncData.getString("baseEntityId"), new TypeToken<String>() {
 
 			}.getType());
-			if (!StringUtils.isEmptyOrWhitespaceOnly(mvacc_uuid) && mvacc_uuid != null && !StringUtils.isEmptyOrWhitespaceOnly(baseEntityId) && baseEntityId != null) {
+			if (!StringUtils.isBlank(mvacc_uuid) && mvacc_uuid != null && !StringUtils.isBlank(baseEntityId) && baseEntityId != null) {
 
 				Client client = clientService.getByBaseEntityId(baseEntityId);
 				if (client != null) {
@@ -166,7 +157,12 @@ public class RapidProResource {
 		return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
 	}
 
-	private void addNewContacts(Event event) {
+	private List<RapidProContact> addNewContacts(Event event) {
+		List<RapidProContact> rapidProContacts = new ArrayList<>();
+		RapidProContact rapidProContact = new RapidProContact();
+		Client contactMother;
+		Client contactChild;
+		List<Obs> obs;
 		if (event.getBaseEntityId() != null && !event.getBaseEntityId().isEmpty() && event.getEventType() != null && event.getEventType().equals(BIRTH_REGISTRATION)) {
 			rapidProContact = new RapidProContact();
 			contactChild = clientService.getByBaseEntityId(event.getBaseEntityId());
@@ -185,9 +181,9 @@ public class RapidProResource {
 					rapidProContact.setHomeFacility(getLocationNameIfId(obs2.getValue().toString()));
 				}
 			}
-			if ((rapidProContact.getMotherTel() == null || StringUtils.isEmptyOrWhitespaceOnly(rapidProContact.getMotherTel())) && rapidProContact.getMvaccUuid() == null || !StringUtils.isEmptyOrWhitespaceOnly(rapidProContact.getMvaccUuid())) {
+			if ((rapidProContact.getMotherTel() == null || StringUtils.isBlank(rapidProContact.getMotherTel())) && rapidProContact.getMvaccUuid() == null || !StringUtils.isBlank(rapidProContact.getMvaccUuid())) {
 				rapidProContacts.add(rapidProContact);
-				return;
+				return rapidProContacts;
 			}
 
 			List<Client> clients = clientService.findByRelationship(contactMother.getBaseEntityId());
@@ -229,6 +225,7 @@ public class RapidProResource {
 
 		}
 		rapidProContacts.add(rapidProContact);
+		return rapidProContacts;
 	}
 
 	private static Comparator<Client> COMPARATOR = new Comparator<Client>() {
