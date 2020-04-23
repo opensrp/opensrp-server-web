@@ -130,10 +130,14 @@ public class SettingResourceTest {
 		        .param(Event.TEAM_ID, "my-team-id").param(Event.PROVIDER_ID, "demo")).andExpect(status().isOk()).andReturn();
 		
 		Mockito.verify(settingService, Mockito.times(1)).findSettings(settingQueryBean);
-		
-		//Mockito.verifyNoMoreInteractions(settingService);
+
 		assertEquals(new ArrayList<>().toString(), result.getResponse().getContentAsString());
-		
+	}
+
+	@Test
+	public void findSettingsByVersionShouldReturn500IfServerVersionIsNotSpecified() throws Exception {
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync")).andExpect(status().isBadRequest()).andReturn();
+		assertEquals("{}", result.getResponse().getContentAsString());
 	}
 	
 	@Test
