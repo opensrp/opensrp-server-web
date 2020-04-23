@@ -3,24 +3,47 @@
  */
 package org.opensrp.web.config.security;
 
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+
+import java.util.Arrays;
+
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.opensrp.web.config.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * @author Samuel Githengi created on 04/20/20
  */
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+	
+	
+	
+	@Value("#{opensrp['opensrp.cors.allowed.source']}")
+	private String opensrpAllowedSources;
+	
+	@Value("#{opensrp['opensrp.cors.max.age']}")
+	private long corsMaxAge;
+	
+	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
 	
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
@@ -47,7 +70,49 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		http.authorizeRequests().antMatchers("/rest/**").hasRole(Role.ALL_EVENTS).anyRequest().permitAll();
+		/* @formatter:off */
+		http.cors()
+		.and()
+			.authorizeRequests()
+			.mvcMatchers("/index.html").permitAll()
+			.mvcMatchers("/").permitAll()
+			.mvcMatchers("/multimedia/download/**").permitAll()
+			.mvcMatchers("/multimedia/profileimage/**").permitAll()
+			.mvcMatchers("/multimedia/media/**").permitAll()
+			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
+			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
+			.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
+			.mvcMatchers(OPTIONS,"/**").permitAll()
+			.mvcMatchers("/**").hasRole(Role.OPENMRS)
+		.and()
+    		.csrf()
+    		.ignoringAntMatchers("/rest/**")
+    	.and()
+    		.httpBasic();/*
+    	.and()
+    		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();;*/
+		/* @formatter:on */
+	}
+	
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		/* @formatter:off */
+		web.ignoring().mvcMatchers("/js/**")
+			.and().ignoring().mvcMatchers("/css/**")
+			.and().ignoring().mvcMatchers("/images/**");
+		/* @formatter:on */
+	}
+	
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList(opensrpAllowedSources.split(",")));
+		configuration.setAllowedMethods(Arrays.asList(GET.name(), POST.name(), PUT.name(), DELETE.name()));
+		configuration.setAllowedHeaders(Arrays.asList(CORS_ALLOWED_HEADERS.split(",")));
+		configuration.setMaxAge(corsMaxAge);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 	
 }
