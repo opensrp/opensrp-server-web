@@ -22,7 +22,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.CustomPhysicalLocation;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
@@ -31,7 +30,7 @@ import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
-import org.opensrp.web.bean.LocationSyncBean;
+import org.opensrp.web.bean.LocationSearchcBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -95,12 +93,6 @@ public class LocationResource {
 
 	private PhysicalLocationService locationService;
 	
-	protected ObjectMapper objectMapper;
-	
-	@Autowired
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -411,7 +403,7 @@ public class LocationResource {
 	                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
 	                                              @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
 	    throws JsonProcessingException {
-		LocationSyncBean locationSyncBean = new LocationSyncBean();
+		LocationSearchcBean locationSyncBean = new LocationSearchcBean();
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
 		
 		try {
@@ -425,9 +417,9 @@ public class LocationResource {
 			locationSearchBean.setPageSize(pageSize);
 			locationSearchBean.setStatus(status);
 			locationSearchBean.setParentId(parentId);
-			List<CustomPhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
+			List<PhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
 			
-			locationSyncBean.setCustomLocations(locations);
+			locationSyncBean.setLocations(locations);
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
 				total = locationService.countSearchLocations(locationSearchBean);
@@ -437,7 +429,7 @@ public class LocationResource {
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(objectMapper.writeValueAsString(locationSyncBean), RestUtils.getJSONUTF8Headers(),
+		return new ResponseEntity<>(gson.toJson(locationSyncBean), RestUtils.getJSONUTF8Headers(),
 		        HttpStatus.OK);
 		
 	}

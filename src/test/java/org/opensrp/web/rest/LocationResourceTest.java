@@ -100,8 +100,6 @@ public class LocationResourceTest {
 
 	private MockMvc mockMvc;
 	
-	@InjectMocks
-	protected ObjectMapper objectMapper;
 	@Mock
 	private PhysicalLocationService locationService;
 
@@ -806,7 +804,7 @@ public class LocationResourceTest {
 	
 	@Test
 	public void testGetSearchLocations() throws Exception {
-		List<CustomPhysicalLocation> expected = new ArrayList<>();
+		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createSearchLocation());
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
 		locationSearchBean.setPageNumber(1);
