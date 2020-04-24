@@ -6,14 +6,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.joda.time.DateTime;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.common.AllConstants.Event;
 import org.opensrp.domain.setting.SettingConfiguration;
@@ -26,13 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.server.MockMvc;
-import org.springframework.test.web.server.MvcResult;
-import org.springframework.test.web.server.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
-import org.mockito.Mock;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,24 +32,20 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 public class SettingResourceTest {
-	
-	@Autowired
-	protected WebApplicationContext webApplicationContext;
 
 	@Mock
 	private SettingService settingService;
-	
-	@Mock
-	private SettingRepository settingRepository;
 
 	@InjectMocks
 	private SettingResource settingResource;
@@ -114,25 +102,19 @@ public class SettingResourceTest {
 	
 	private MockMvc mockMvc;
 
-	private String EXPECTED_RESPONSE_SAVE_SETTING = "{\"validated_records\":[]}";
+	private String EXPECTED_RESPONSE_SAVE_SETTING = "{\"validated_records\":[\"ID-12345\"]}";
 	private String EXPECTED_IDENTFIER = "ID-123";
 	private String EXPECTED_TEAM_ID = "TEAM-ID-123";
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		settingService.setSettingRepository(settingRepository);
-		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService);
-		
 		listSettingConfigurations = new ArrayList<>();
-		
 		SettingConfiguration settingConfiguration = new SettingConfiguration();
 		settingConfiguration.setIdentifier("site_characteristics");
 		settingConfiguration.setTeamId("my-team-id");
 		listSettingConfigurations.add(settingConfiguration);
-		
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(settingResource).build();
 	}
 	
 	@Test
@@ -148,6 +130,8 @@ public class SettingResourceTest {
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
 				.param(Event.TEAM_ID, "my-team-id").param(Event.PROVIDER_ID, "demo")).andExpect(status().isOk()).andReturn();
 
+		verify(settingService).findSettings(any(SettingSearchBean.class));
+		verifyNoMoreInteractions(settingService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
@@ -168,13 +152,14 @@ public class SettingResourceTest {
 
 	@Test
 	public void testPostSaveSetting() throws Exception {
-		String SETTINGS_JSON = "{\"settingConfigurations\":[]}";
+		String SETTINGS_JSON = "{\"settingConfigurations\":[\"Client1\"]}";
 
 		when(settingService.saveSetting(Matchers.any(String.class))).thenReturn("ID-12345");
 		MvcResult mvcResult = this.mockMvc.perform(
-				post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).body(SETTINGS_JSON.getBytes()).accept(MediaType.APPLICATION_JSON))
+				post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(SETTINGS_JSON.getBytes()).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andReturn();
-
+		verify(settingService, times(1)).saveSetting(anyString());
+		verifyNoMoreInteractions(settingService);
 		assertEquals(mvcResult.getResponse().getContentAsString(), EXPECTED_RESPONSE_SAVE_SETTING);
 	}
 
