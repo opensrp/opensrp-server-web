@@ -814,13 +814,23 @@ public class LocationResourceTest {
 		                    .param("orderByFieldName", "id")
 		                    .param("orderByType", "ASC").param("parentId", "1").param("status", "PENDING_REVIEW"))
 		        .andExpect(status().isOk()).andReturn();
-		LocationSearchcBean searchBean = new LocationSearchcBean();
-		searchBean.setLocations(expected);
-		searchBean.setTotal(0);
+
+		LocationSearchcBean expectedLocations = new LocationSearchcBean();
+		expectedLocations.setLocations(expected);
+		expectedLocations.setTotal(0);
+		when(locationService.countSearchLocations((LocationSearchBean) any())).thenReturn(1);
+		MvcResult countResult = mockMvc
+		        .perform(
+		            get(BASE_URL + "search-by-tag/").param("locationTagId", "2").param("name", "a")
+		                    .param("orderByFieldName", "id").param("orderByType", "ASC").param("parentId", "1")
+		                    .param("status", "PENDING_REVIEW")).andExpect(status().isOk()).andReturn();
+		
+		assertEquals("1", countResult.getResponse().getContentAsString());
 		verify(locationService).searchLocations((LocationSearchBean) any());
 		verify(locationService).countSearchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
-		assertEquals(LocationResource.gson.toJson(searchBean), result.getResponse().getContentAsString());
+		assertEquals(LocationResource.gson.toJson(expectedLocations), result.getResponse().getContentAsString());
+
 	}
 	
 	private PhysicalLocation createSearchLocation() {
