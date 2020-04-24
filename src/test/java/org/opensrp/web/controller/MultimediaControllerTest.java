@@ -1,13 +1,20 @@
 package org.opensrp.web.controller;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,19 +29,31 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 public class MultimediaControllerTest {
 
+	@InjectMocks
+	private MultimediaController multimediaController;
+
+	@Mock
+	private MultimediaService multimediaService;
+
+	private MockMvc mockMvc;
+
+	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
+
+	@Before
+	public void setUp() {
+		MockitoAnnotations.initMocks(this);
+		mockMvc = MockMvcBuilders.standaloneSetup(multimediaController).build();
+		ReflectionTestUtils.setField(multimediaController, "allowedMimeTypes", allowedMimeTypes);
+	}
+
 	@Test
 	public void testUploadShouldUploadFileWithCorrectName() throws Exception {
-		MultimediaController controller = Mockito.spy(new MultimediaController());
-
-		MultimediaService multimediaService = Mockito.mock(MultimediaService.class);
-		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
-
 		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
 		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
 
-		controller.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
+		multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
 
 		ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
