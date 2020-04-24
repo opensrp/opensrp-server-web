@@ -806,16 +806,13 @@ public class LocationResourceTest {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createSearchLocation());
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
-		locationSearchBean.setPageNumber(1);
-		locationSearchBean.setPageSize(10);
+		locationSearchBean.setName("a");
 		when(locationService.searchLocations(locationSearchBean)).thenReturn(expected);
 		
-		MvcResult result = mockMvc
-		        .perform(get(BASE_URL + "search-location/").param("pageSize", "10").param("pageNumber", "1"))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "search-location/").param("name", "a"))
 		        .andExpect(status().isOk()).andReturn();
 		verify(locationService).searchLocations(locationSearchBean);
-		verifyNoMoreInteractions(locationService);
-		
+
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(searchResponseJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
