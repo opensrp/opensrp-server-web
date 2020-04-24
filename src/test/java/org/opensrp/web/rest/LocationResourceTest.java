@@ -47,6 +47,7 @@ import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
+import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
@@ -806,13 +807,26 @@ public class LocationResourceTest {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createSearchLocation());
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
+		locationSearchBean.setPageNumber(1);
+		locationSearchBean.setPageSize(10);
+		locationSearchBean.setLocationTagId(2l);
 		locationSearchBean.setName("a");
+		locationSearchBean.setOrderByFieldName("id");
+		locationSearchBean.setOrderByType(OrderByType.ASC);
+		locationSearchBean.setParentId(1l);
+		locationSearchBean.setStatus("PENDING_REVIEW");
+
 		when(locationService.searchLocations(locationSearchBean)).thenReturn(expected);
 		
-		MvcResult result = mockMvc.perform(get(BASE_URL + "search-location/").param("name", "a"))
+		MvcResult result = mockMvc
+		        .perform(
+		            get(BASE_URL + "search-by-tag/").param("pageSize", "10").param("pageNumber", "1")
+		                    .param("locationTagId", "2").param("name", "a").param("orderByFieldName", "id")
+		                    .param("orderByType", "ASC").param("parentId", "1").param("status", "PENDING_REVIEW"))
 		        .andExpect(status().isOk()).andReturn();
 		verify(locationService).searchLocations(locationSearchBean);
-
+		verifyNoMoreInteractions(locationService);
+		
 		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
 		assertEquals(1, jsonreponse.length());
 		JSONAssert.assertEquals(searchResponseJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);

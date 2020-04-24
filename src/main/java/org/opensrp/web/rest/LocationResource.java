@@ -392,7 +392,7 @@ public class LocationResource {
 
 	}
 	
-	@RequestMapping(value = "/search-location", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/search-by-tag", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
 	public ResponseEntity<String> searchLocations(LocationSearchBean locationSearchBean)
 	    throws JsonProcessingException {
