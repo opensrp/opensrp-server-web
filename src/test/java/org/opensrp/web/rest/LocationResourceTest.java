@@ -43,7 +43,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.CustomPhysicalLocation;
 import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
@@ -822,9 +821,8 @@ public class LocationResourceTest {
 		JSONAssert.assertEquals(searchResponseJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
 	}
 	
-	private CustomPhysicalLocation createSearchLocation() {
-		CustomPhysicalLocation searchLocation = LocationResource.gson.fromJson(searchResponseJson,
-		    CustomPhysicalLocation.class);
+	private PhysicalLocation createSearchLocation() {
+		PhysicalLocation searchLocation = LocationResource.gson.fromJson(searchResponseJson, PhysicalLocation.class);
 		
 		return searchLocation;
 	}
