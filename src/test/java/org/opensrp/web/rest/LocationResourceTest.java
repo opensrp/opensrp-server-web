@@ -818,7 +818,7 @@ public class LocationResourceTest {
 		searchBean.setLocations(expected);
 		searchBean.setTotal(0);
 		verify(locationService).searchLocations((LocationSearchBean) any());
-		verify(locationService, never()).countSearchLocations((LocationSearchBean) any());
+		verify(locationService).countSearchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
 		assertEquals(LocationResource.gson.toJson(searchBean), result.getResponse().getContentAsString());
 	}
