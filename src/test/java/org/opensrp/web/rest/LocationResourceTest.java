@@ -50,6 +50,7 @@ import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.LocationSearchcBean;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -813,10 +814,13 @@ public class LocationResourceTest {
 		                    .param("orderByFieldName", "id")
 		                    .param("orderByType", "ASC").param("parentId", "1").param("status", "PENDING_REVIEW"))
 		        .andExpect(status().isOk()).andReturn();
+		LocationSearchcBean searchBean = new LocationSearchcBean();
+		searchBean.setLocations(expected);
+		searchBean.setTotal(0);
 		verify(locationService).searchLocations((LocationSearchBean) any());
 		verify(locationService, never()).countSearchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
-		assertEquals(LocationResource.gson.toJson(expected), result.getResponse().getContentAsString());
+		assertEquals(LocationResource.gson.toJson(searchBean), result.getResponse().getContentAsString());
 	}
 	
 	private PhysicalLocation createSearchLocation() {
