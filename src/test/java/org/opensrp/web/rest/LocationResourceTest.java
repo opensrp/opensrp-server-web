@@ -805,15 +805,6 @@ public class LocationResourceTest {
 	public void testGetSearchLocationsWithParams() throws Exception {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createSearchLocation());
-		/*LocationSearchBean locationSearchBean = new LocationSearchBean();
-
-		locationSearchBean.setLocationTagId(2l);
-		locationSearchBean.setName("a");
-		locationSearchBean.setOrderByFieldName("id");
-		locationSearchBean.setOrderByType(OrderByType.ASC);
-		locationSearchBean.setParentId(1l);
-		locationSearchBean.setStatus("PENDING_REVIEW");*/
-
 		when(locationService.searchLocations((LocationSearchBean) any())).thenReturn(expected);
 		
 		MvcResult result = mockMvc
@@ -825,10 +816,7 @@ public class LocationResourceTest {
 		verify(locationService).searchLocations((LocationSearchBean) any());
 		verify(locationService, never()).countSearchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
-		
-		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
-		assertEquals(1, jsonreponse.length());
-		JSONAssert.assertEquals(searchResponseJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		assertEquals(LocationResource.gson.toJson(expected), result.getResponse().getContentAsString());
 	}
 	
 	private PhysicalLocation createSearchLocation() {
