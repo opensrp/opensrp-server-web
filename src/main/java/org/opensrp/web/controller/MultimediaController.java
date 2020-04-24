@@ -42,6 +42,9 @@ public class MultimediaController {
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
 
+	@Value("#{opensrp['multimedia.allowed.file.types']}")
+	private String allowedMimeTypes;
+
 	@Autowired
 	@Qualifier("drishtiAuthenticationProvider")
 	private DrishtiAuthenticationProvider provider;
@@ -153,6 +156,11 @@ public class MultimediaController {
 			@RequestParam("entity-id") String entityId,
 			@RequestParam("file-category") String fileCategory,
 			@RequestParam("file") MultipartFile file) {
+
+		String mimeType = file.getContentType();
+		if (!allowedMimeTypes.contains(mimeType)) {
+			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
+		}
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		String status = null;
