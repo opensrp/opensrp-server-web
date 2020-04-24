@@ -9,9 +9,6 @@ import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getLongFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -21,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -399,23 +394,30 @@ public class LocationResource {
 	
 	@RequestMapping(value = "/search-location", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchLocations(HttpServletRequest request)
+	public ResponseEntity<String> searchLocations(LocationSearchBean locationSearchBean)
 	    throws JsonProcessingException {
 		LocationSearchcBean response = new LocationSearchcBean();
-		LocationSearchBean locationSearchBean = new LocationSearchBean();
-		String orderByType = getStringFilter("orderByType", request);
-		Integer pageNumber = getIntegerFilter("pageNumber", request);
+		
+
+		String orderByFieldName = locationSearchBean.getOrderByFieldName();
+		Integer pageNumber = locationSearchBean.getPageNumber();
+		Integer pageSize = locationSearchBean.getPageSize();
+		String name = locationSearchBean.getName();
+		Long locationTagId = locationSearchBean.getLocationTagId();
+		String status = locationSearchBean.getStatus();
+		Long parentId = locationSearchBean.getParentId();
+
 		try {
-			locationSearchBean.setName(getStringFilter("name", request));
-			locationSearchBean.setLocationTagId(getLongFilter("locationTagId", request));
-			locationSearchBean.setOrderByFieldName(getStringFilter("orderByFieldName", request));
-			if (orderByType != null) {
-				locationSearchBean.setOrderByType(OrderByType.valueOf(orderByType));
+			locationSearchBean.setName(name);
+			locationSearchBean.setLocationTagId(locationTagId);
+			locationSearchBean.setOrderByFieldName(orderByFieldName);
+			if (locationSearchBean.getOrderByType() != null) {
+				locationSearchBean.setOrderByType(OrderByType.valueOf(locationSearchBean.getOrderByType().name()));
 			}
 			locationSearchBean.setPageNumber(pageNumber);
-			locationSearchBean.setPageSize(getIntegerFilter("pageSize", request));
-			locationSearchBean.setStatus(getStringFilter("status", request));
-			locationSearchBean.setParentId(getLongFilter("parentId", request));
+			locationSearchBean.setPageSize(pageSize);
+			locationSearchBean.setStatus(status);
+			locationSearchBean.setParentId(parentId);
 			List<PhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
 			
 			response.setLocations(locations);
