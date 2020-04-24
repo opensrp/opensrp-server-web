@@ -54,11 +54,6 @@ public class RestUtils {
 	  return strval == null ? null : Integer.parseInt(strval);
 	}
 	
-	public static Long getLongFilter(String filter, HttpServletRequest req) {
-		String strval = getStringFilter(filter, req);
-		return strval == null ? null : Long.parseLong(strval);
-	}
-	
 	public static Float getFloatFilter(String filter, HttpServletRequest req)
 	{
 	  String strval = getStringFilter(filter, req);

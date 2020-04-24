@@ -47,10 +47,10 @@ import org.opensrp.domain.Geometry;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
-import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.LocationSearchcBean;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -806,30 +806,19 @@ public class LocationResourceTest {
 	public void testGetSearchLocationsWithParams() throws Exception {
 		List<PhysicalLocation> expected = new ArrayList<>();
 		expected.add(createSearchLocation());
-		LocationSearchBean locationSearchBean = new LocationSearchBean();
-		locationSearchBean.setPageNumber(1);
-		locationSearchBean.setPageSize(10);
-		locationSearchBean.setLocationTagId(2l);
-		locationSearchBean.setName("a");
-		locationSearchBean.setOrderByFieldName("id");
-		locationSearchBean.setOrderByType(OrderByType.ASC);
-		locationSearchBean.setParentId(1l);
-		locationSearchBean.setStatus("PENDING_REVIEW");
-
-		when(locationService.searchLocations(locationSearchBean)).thenReturn(expected);
-		
+		when(locationService.searchLocations((LocationSearchBean) any())).thenReturn(expected);
 		MvcResult result = mockMvc
 		        .perform(
-		            get(BASE_URL + "search-by-tag/").param("pageSize", "10").param("pageNumber", "1")
-		                    .param("locationTagId", "2").param("name", "a").param("orderByFieldName", "id")
+		            get(BASE_URL + "search-by-tag/").param("locationTagId", "2").param("name", "a")
+		                    .param("orderByFieldName", "id")
 		                    .param("orderByType", "ASC").param("parentId", "1").param("status", "PENDING_REVIEW"))
 		        .andExpect(status().isOk()).andReturn();
-		verify(locationService).searchLocations(locationSearchBean);
+		LocationSearchcBean expectedLocations = new LocationSearchcBean();
+		expectedLocations.setLocations(expected);
+		expectedLocations.setTotal(0);
+		verify(locationService).searchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
-		
-		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
-		assertEquals(1, jsonreponse.length());
-		JSONAssert.assertEquals(searchResponseJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		assertEquals(LocationResource.gson.toJson(expectedLocations), result.getResponse().getContentAsString());
 	}
 	
 	private PhysicalLocation createSearchLocation() {

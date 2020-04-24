@@ -26,7 +26,6 @@ import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
-import org.opensrp.search.LocationSearchBean.OrderByType;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.util.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
@@ -397,29 +396,9 @@ public class LocationResource {
 	public ResponseEntity<String> searchLocations(LocationSearchBean locationSearchBean)
 	    throws JsonProcessingException {
 		LocationSearchcBean response = new LocationSearchcBean();
-		
-
-		String orderByFieldName = locationSearchBean.getOrderByFieldName();
 		Integer pageNumber = locationSearchBean.getPageNumber();
-		Integer pageSize = locationSearchBean.getPageSize();
-		String name = locationSearchBean.getName();
-		Long locationTagId = locationSearchBean.getLocationTagId();
-		String status = locationSearchBean.getStatus();
-		Long parentId = locationSearchBean.getParentId();
-
 		try {
-			locationSearchBean.setName(name);
-			locationSearchBean.setLocationTagId(locationTagId);
-			locationSearchBean.setOrderByFieldName(orderByFieldName);
-			if (locationSearchBean.getOrderByType() != null) {
-				locationSearchBean.setOrderByType(OrderByType.valueOf(locationSearchBean.getOrderByType().name()));
-			}
-			locationSearchBean.setPageNumber(pageNumber);
-			locationSearchBean.setPageSize(pageSize);
-			locationSearchBean.setStatus(status);
-			locationSearchBean.setParentId(parentId);
 			List<PhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
-			
 			response.setLocations(locations);
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
