@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,14 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerRole>{
 
@@ -162,6 +159,54 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getAllValues().get(0), "org1");
         assertEquals(stringArgumentCaptor.getAllValues().get(1), "pract1");
+    }
+
+    @Test
+    public void testCreateWithInternalError() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        postRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
+    }
+
+    @Test
+    public void testCreateWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        postRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
+    }
+
+    @Test
+    public void testUpdateWithInternalError() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        putRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
+    }
+
+    @Test
+    public void testUpdateWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        putRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
+    }
+
+    @Test
+    public void testBatchSaveWithInternalError() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
+    }
+
+    @Test
+    public void testBatchSaveWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerRoleService);
     }
 
 
