@@ -9,6 +9,9 @@ import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getLongFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -18,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -394,42 +399,36 @@ public class LocationResource {
 	
 	@RequestMapping(value = "/search-location", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@ResponseBody
-	public ResponseEntity<String> searchLocations(@RequestParam(value = "locationTagId", required = false) Long locationTagId,
-	                                              @RequestParam(value = "name", required = false) String name,
-	                                              @RequestParam(value = "parentId", required = false) Long parentId,
-	                                              @RequestParam(value = "status", required = false) String status,
-	                                              @RequestParam(value = "orderByFieldName", required = false) String orderByFieldName,
-	                                              @RequestParam(value = "orderByType", required = false) String orderByType,
-	                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
-	                                              @RequestParam(value = "pageNumber", required = false) Integer pageNumber)
+	public ResponseEntity<String> searchLocations(HttpServletRequest request)
 	    throws JsonProcessingException {
-		LocationSearchcBean locationSyncBean = new LocationSearchcBean();
+		LocationSearchcBean response = new LocationSearchcBean();
 		LocationSearchBean locationSearchBean = new LocationSearchBean();
-		
+		String orderByType = getStringFilter("orderByType", request);
+		Integer pageNumber = getIntegerFilter("pageNumber", request);
 		try {
-			locationSearchBean.setName(name);
-			locationSearchBean.setLocationTagId(locationTagId);
-			locationSearchBean.setOrderByFieldName(orderByFieldName);
+			locationSearchBean.setName(getStringFilter("name", request));
+			locationSearchBean.setLocationTagId(getLongFilter("locationTagId", request));
+			locationSearchBean.setOrderByFieldName(getStringFilter("orderByFieldName", request));
 			if (orderByType != null) {
 				locationSearchBean.setOrderByType(OrderByType.valueOf(orderByType));
 			}
 			locationSearchBean.setPageNumber(pageNumber);
-			locationSearchBean.setPageSize(pageSize);
-			locationSearchBean.setStatus(status);
-			locationSearchBean.setParentId(parentId);
+			locationSearchBean.setPageSize(getIntegerFilter("pageSize", request));
+			locationSearchBean.setStatus(getStringFilter("status", request));
+			locationSearchBean.setParentId(getLongFilter("parentId", request));
 			List<PhysicalLocation> locations = locationService.searchLocations(locationSearchBean);
 			
-			locationSyncBean.setLocations(locations);
+			response.setLocations(locations);
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
 				total = locationService.countSearchLocations(locationSearchBean);
 			}
-			locationSyncBean.setTotal(total);
+			response.setTotal(total);
 		}
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(locationSyncBean), RestUtils.getJSONUTF8Headers(),
+		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(),
 		        HttpStatus.OK);
 		
 	}

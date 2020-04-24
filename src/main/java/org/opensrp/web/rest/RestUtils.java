@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.Multimedia;
@@ -50,6 +52,11 @@ public class RestUtils {
 	{
 	  String strval = getStringFilter(filter, req);
 	  return strval == null ? null : Integer.parseInt(strval);
+	}
+	
+	public static Long getLongFilter(String filter, HttpServletRequest req) {
+		String strval = getStringFilter(filter, req);
+		return strval == null ? null : Long.parseLong(strval);
 	}
 	
 	public static Float getFloatFilter(String filter, HttpServletRequest req)
