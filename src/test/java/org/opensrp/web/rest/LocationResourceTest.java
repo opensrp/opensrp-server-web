@@ -825,10 +825,11 @@ public class LocationResourceTest {
 		                    .param("orderByFieldName", "id").param("orderByType", "ASC").param("parentId", "1")
 		                    .param("status", "PENDING_REVIEW")).andExpect(status().isOk()).andReturn();
 		
-		assertEquals("1", countResult.getResponse().getContentAsString());
+
 		verify(locationService).searchLocations((LocationSearchBean) any());
 		verify(locationService).countSearchLocations((LocationSearchBean) any());
 		verifyNoMoreInteractions(locationService);
+		assertEquals("1", countResult.getResponse().getContentAsString());
 		assertEquals(LocationResource.gson.toJson(expectedLocations), result.getResponse().getContentAsString());
 
 	}
