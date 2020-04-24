@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
@@ -27,6 +28,9 @@ import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 public class XlsDataImportControllerTest {
 	@Mock
@@ -37,17 +41,26 @@ public class XlsDataImportControllerTest {
 	
 	@Mock
 	OpenmrsIDService openmrsIDService;
+
+	@InjectMocks
+	private XlsDataImportController xlsDataImportController;
+
+	private MockMvc mockMvc;
+
+	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
 	
 	@Before
 	public void setUp() {
 		initMocks(this);
+		mockMvc = MockMvcBuilders.standaloneSetup(xlsDataImportController).build();
+		ReflectionTestUtils.setField(xlsDataImportController, "allowedMimeTypes", allowedMimeTypes);
 	}
 
 	@Test
 	public void shouldCreateClientsFromCSVFile() throws IOException, SQLException, JSONException {
 		File csvFile = new File("src/test/java/org/opensrp/fixtures/csv_to_import.csv");
 		FileInputStream fileInputStream = new FileInputStream(csvFile);
-		MockMultipartFile file = new MockMultipartFile("file", IOUtils.toByteArray(fileInputStream));
+		MockMultipartFile file = new MockMultipartFile("file", "originalFileName", "image/png", IOUtils.toByteArray(fileInputStream));
 		List<String> openmrsIds = new ArrayList<String>();
 		openmrsIds.add("12345-1");
 		openmrsIds.add("12345-2");
@@ -56,9 +69,8 @@ public class XlsDataImportControllerTest {
 		openmrsIds.add("12345-4");
 
 		when(openmrsIDService.downloadOpenmrsIds(openmrsIds.size())).thenReturn(openmrsIds);
-		
-		XlsDataImportController controller = new XlsDataImportController(clientService, eventService, openmrsIDService);
-		ResponseEntity<String> response = controller.importXlsData(file);
+
+		ResponseEntity<String> response = xlsDataImportController.importXlsData(file);
 		String responseBody = response.getBody();
 		JSONObject responseJson = new JSONObject(responseBody);
 		
