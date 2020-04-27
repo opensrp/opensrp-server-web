@@ -9,8 +9,12 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -18,6 +22,7 @@ import org.opensrp.web.config.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -42,6 +47,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	
 	@Value("#{opensrp['opensrp.cors.max.age']}")
 	private long corsMaxAge;
+	
+	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
+	private Resource keycloakConfigFileResource;
 	
 	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
 	
@@ -114,6 +122,16 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+	
+	@Bean
+	public KeycloakDeployment keycloakDeployment() throws IOException {
+		if (!keycloakConfigFileResource.isReadable()) {
+			throw new FileNotFoundException(String.format("Unable to locate Keycloak configuration file: %s",
+			    keycloakConfigFileResource.getFilename()));
+		}
+		
+		return KeycloakDeploymentBuilder.build(keycloakConfigFileResource.getInputStream());
 	}
 	
 }
