@@ -1,8 +1,12 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.nio.charset.Charset;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -11,17 +15,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.spi.KeycloakAccount;
+import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
-import org.opensrp.common.domain.UserDetail;
 import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
@@ -42,17 +51,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 @Controller
 public class UserController {
@@ -79,6 +90,15 @@ public class UserController {
 
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
+	
+	@Value("#{opensrp['keycloak.configuration.endpoint']}")
+	protected String keyCloakConfigurationURL;
+	
+	@Autowired
+	private KeycloakDeployment keycloakDeployment;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Autowired
 	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService,
@@ -117,20 +137,6 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 
-	public Authentication getAuthenticationAdvisor(HttpServletRequest request) {
-		final String authorization = request.getHeader("Authorization");
-		if (authorization != null && authorization.startsWith("Basic")) {
-			// Authorization: Basic base64credentials
-			String base64Credentials = authorization.substring("Basic".length()).trim();
-			String credentials = new String(Base64.decode(base64Credentials.getBytes()), Charset.forName("UTF-8"));
-			// credentials = username:password
-			final String[] values = credentials.split(":", 2);
-
-			return new UsernamePasswordAuthenticationToken(values[0], values[1]);
-		}
-		return null;
-	}
-
 	public DrishtiAuthenticationProvider getAuthenticationProvider() {
 		return opensrpAuthenticationProvider;
 	}
@@ -144,22 +150,20 @@ public class UserController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
-	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
-			@RequestParam(value = "anm-id", required = false) String anmIdentifier, HttpServletRequest request) {
-		Authentication auth;
-		if (authentication == null) {
-			auth = getAuthenticationAdvisor(request);
-		} else {
-			auth = authentication;
-		}
-		if (auth != null) {
-			User user;
-			String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
-					: anmIdentifier;
-			user = openmrsUserService.getUser(userName);
-			UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
-			userDetail.setPreferredName(user.getPreferredName());
-			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
+	public ResponseEntity<String> getUserDetails(Authentication authentication,
+			@RequestParam(value = "anm-id", required = false) String anmIdentifier) throws MalformedURLException, IOException {
+		if (authentication != null) {
+			String userInfoUrl=MessageFormat.format( keyCloakConfigurationURL,keycloakDeployment.getAuthServerBaseUrl(),keycloakDeployment.getRealm());
+			Map<String,Object> map = objectMapper.readValue(new URL(userInfoUrl), Map.class);
+			OkHttpClient client = new OkHttpClient();
+			SimpleKeycloakAccount account= (SimpleKeycloakAccount) authentication.getDetails();
+			Request request = new Request.Builder()
+					.header("Authorization", "Bearer "+account.getKeycloakSecurityContext().getTokenString())
+                    .url(map.get("userinfo_endpoint").toString())
+                    .build();
+			Response response = client.newCall(request).execute();
+			String responseBody=response.body().string();
+			return new ResponseEntity<>(responseBody, RestUtils.getJSONUTF8Headers(), OK);
 
 		} else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
