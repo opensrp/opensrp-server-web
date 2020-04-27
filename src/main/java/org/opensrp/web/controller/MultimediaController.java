@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import static org.opensrp.web.rest.RestUtils.zipFiles;
+import static org.opensrp.web.utils.MultimediaUtil.restrictSpecialCharacters;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
@@ -75,7 +76,7 @@ public class MultimediaController {
 				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
 				if (file != null) {
 					if (fileName.endsWith("mp4")) {
-						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+						file = new File(multiMediaDir + File.separator + "videos" + File.separator + restrictSpecialCharacters(fileName).trim());
 					}
 					downloadFile(file, response);
 				} else {
@@ -157,7 +158,7 @@ public class MultimediaController {
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		String status = null;
 		try {
-			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), restrictSpecialCharacters(file.getOriginalFilename()));
 		} catch (IOException e) {
 			logger.error("", e);
 		}
@@ -212,7 +213,7 @@ public class MultimediaController {
 			return;
 		}
 
-		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+		String mimeType = URLConnection.guessContentTypeFromName(restrictSpecialCharacters(file.getName()));
 		if (mimeType == null) {
 			logger.info("mimetype is not detectable, will take default");
 			mimeType = "application/octet-stream";
@@ -224,7 +225,7 @@ public class MultimediaController {
 
 		/* "Content-Disposition : inline" will show viewable types [like images/text/pdf/anything viewable by browser] right on browser 
 		    while others(zip e.g) will be directly downloaded [may provide save as popup, based on your browser setting.]*/
-		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
+		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + restrictSpecialCharacters(file.getName()) + "\""));
 
 		/* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
 		//response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
