@@ -12,6 +12,8 @@ import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -38,6 +41,8 @@ public class MultimediaControllerTest {
 	private MockMvc mockMvc;
 
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
+	private final String FILE_NAME_ERROR = "File Name with special characters is not allowed!";
+	private final String ENTITY_ID_ERROR = "Entity Id should not contain any special character!";
 
 	@Before
 	public void setUp() {
@@ -83,6 +88,31 @@ public class MultimediaControllerTest {
 		Mockito.verify(multimediaService).retrieveFile(anyString());
 	}
 
+	@Test
+	public void testUploadShouldReturnBadRequestWithInvalidEntityId() throws Exception {
+		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
+		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
+		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id"+"\r", "file-category", multipartFile);
+		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getBody(),ENTITY_ID_ERROR);
+	}
+
+	@Test
+	public void testUploadShouldReturnBadRequestWithSpecialCharacterFileName() throws Exception {
+		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		Mockito.doReturn("originalName" + "\t").when(multipartFile).getOriginalFilename();
+		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
+		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id"+"\r", "file-category", multipartFile);
+		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getBody(),FILE_NAME_ERROR);
+	}
+
+
 	private Authentication getMockedAuthentication() {
 		Authentication authentication = new Authentication() {
 
@@ -125,28 +155,5 @@ public class MultimediaControllerTest {
 		return authentication;
 	}
 
-	@Test
-	public void testUploadWithSpecialCharacterFileName() throws Exception {
-		MultimediaController controller = Mockito.spy(new MultimediaController());
-
-		MultimediaService multimediaService = Mockito.mock(MultimediaService.class);
-		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
-
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
-		Mockito.doReturn("originalName" + "\r").when(multipartFile).getOriginalFilename();
-		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
-		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
-
-		controller.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
-
-		ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
-		// verify call
-		Mockito.verify(multimediaService)
-				.saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class), stringArgumentCaptor.capture());
-
-		// verify call arguments
-		Assert.assertEquals(stringArgumentCaptor.getValue(), "originalName_");
-	}
 
 }

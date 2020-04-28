@@ -1,9 +1,14 @@
 package org.opensrp.web.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MultimediaUtil {
 
-	public static String restrictSpecialCharacters(String fileName) {
-		return fileName.replaceAll("[^a-zA-Z0-9\\.-_]+", "_");
+	public static Boolean hasSpecialCharacters(String fileName) {
+		Pattern special = Pattern.compile("[:\"\\\\?|/'<>*/\r\t\f\n\0]");
+		Matcher hasSpecialCharacters = special.matcher(fileName);
+		return hasSpecialCharacters.find();
 	}
 
 }

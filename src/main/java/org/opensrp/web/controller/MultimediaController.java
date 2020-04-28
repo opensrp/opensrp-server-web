@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import static org.opensrp.web.rest.RestUtils.zipFiles;
-import static org.opensrp.web.utils.MultimediaUtil.restrictSpecialCharacters;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
@@ -75,11 +75,16 @@ public class MultimediaController {
 			@RequestHeader(value = "password") String password, HttpServletRequest request) {
 
 		try {
+			if (hasSpecialCharacters(fileName)) {
+				fileWithSpecialCharactersError(response);
+				return;
+			}
+
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
 				if (file != null) {
 					if (fileName.endsWith("mp4")) {
-						file = new File(multiMediaDir + File.separator + "videos" + File.separator + restrictSpecialCharacters(fileName).trim());
+						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
 					}
 					downloadFile(file, response);
 				} else {
@@ -158,6 +163,14 @@ public class MultimediaController {
 			@RequestParam("file-category") String fileCategory,
 			@RequestParam("file") MultipartFile file) {
 
+		if(hasSpecialCharacters(file.getOriginalFilename()))
+		{
+			return new ResponseEntity<String>("File Name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
+		}
+		if(hasSpecialCharacters(entityId)) {
+			return new ResponseEntity<String>("Entity Id should not contain any special character!", HttpStatus.BAD_REQUEST);
+		}
+
 		String mimeType = file.getContentType();
 		if (!allowedMimeTypes.contains(mimeType)) {
 			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
@@ -166,7 +179,7 @@ public class MultimediaController {
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		String status = null;
 		try {
-			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), restrictSpecialCharacters(file.getOriginalFilename()));
+			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 		} catch (IOException e) {
 			logger.error("", e);
 		}
@@ -216,12 +229,17 @@ public class MultimediaController {
 	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 
+		if(hasSpecialCharacters(file.getName())) {
+			fileWithSpecialCharactersError(response);
+			return;
+		}
+
 		if (!file.exists()) {
 			writeFileNotFound(response);
 			return;
 		}
 
-		String mimeType = URLConnection.guessContentTypeFromName(restrictSpecialCharacters(file.getName()));
+		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
 		if (mimeType == null) {
 			logger.info("mimetype is not detectable, will take default");
 			mimeType = "application/octet-stream";
@@ -233,7 +251,7 @@ public class MultimediaController {
 
 		/* "Content-Disposition : inline" will show viewable types [like images/text/pdf/anything viewable by browser] right on browser 
 		    while others(zip e.g) will be directly downloaded [may provide save as popup, based on your browser setting.]*/
-		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + restrictSpecialCharacters(file.getName()) + "\""));
+		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
 
 		/* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
 		//response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
@@ -257,6 +275,15 @@ public class MultimediaController {
 		String errorMessage = "Sorry. The file you are looking for does not exist";
 		logger.info(errorMessage);
 		OutputStream outputStream = response.getOutputStream();
+		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.close();
+	}
+
+	private void fileWithSpecialCharactersError(HttpServletResponse response) throws IOException {
+		String errorMessage = "Sorry. File Name should not contain any special character";
+		logger.info(errorMessage);
+		OutputStream outputStream = response.getOutputStream();
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
 		outputStream.close();
 	}
