@@ -44,6 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 public class SettingResourceTest {
 
+	@Autowired
+	protected WebApplicationContext webApplicationContext;
+
 	@Mock
 	private SettingService settingService;
 
@@ -161,6 +164,73 @@ public class SettingResourceTest {
 		verify(settingService, times(1)).saveSetting(anyString());
 		verifyNoMoreInteractions(settingService);
 		assertEquals(mvcResult.getResponse().getContentAsString(), EXPECTED_RESPONSE_SAVE_SETTING);
+	}
+
+	@Test
+	public void testFindSettingsByVersionAndTeamId() throws Exception {
+		SettingService settingService  = Mockito.spy(new SettingService());
+		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
+		settingService.setSettingRepository(settingRepository);
+		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
+		settingResource.setSettingService(settingService);
+		SettingSearchBean sQB = new SettingSearchBean();
+		sQB.setTeamId("my-team-id");
+		sQB.setTeam(null);
+		sQB.setLocationId(null);
+		sQB.setProviderId(null);
+		sQB.setServerVersion(1000L);
+
+		settingService.findSettings(sQB);
+		Mockito.verify(settingRepository, Mockito.times(1)).findSettings(sQB);
+		Mockito.verifyNoMoreInteractions(settingRepository);
+
+	}
+
+	@Test
+	public void testSaveSetting() throws Exception {
+		SettingService settingService  = Mockito.spy(new SettingService());
+		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
+		settingService.setSettingRepository(settingRepository);
+		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
+		settingResource.setSettingService(settingService);
+		String documentId = "1";
+		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
+		settingService.saveSetting(settingJson);
+
+		Mockito.verify(settingRepository, Mockito.times(1)).add(settingConfigurationArgumentCaptor.capture());
+		Mockito.verify(settingRepository, Mockito.times(1)).get(documentId);
+		Mockito.verifyNoMoreInteractions(settingRepository);
+	}
+
+	@Test
+	public void testUpdateSetting() throws Exception {
+		SettingService settingService  = Mockito.spy(new SettingService());
+		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
+		settingService.setSettingRepository(settingRepository);
+		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
+		settingResource.setSettingService(settingService);
+		String documentId = "settings-document-id-2";
+		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(new SettingConfiguration());
+		Mockito.doNothing().when(settingRepository).update(Matchers.any(SettingConfiguration.class));
+
+		settingService.saveSetting(settingJsonUpdate);
+
+		Mockito.verify(settingRepository, Mockito.times(1)).get(documentId);
+		Mockito.verify(settingRepository, Mockito.times(1)).update(settingConfigurationArgumentCaptor.capture());
+		Mockito.verifyNoMoreInteractions(settingRepository);
+	}
+
+	@Test
+	public void testAddServerVersion() throws Exception {
+
+		SettingService settingService  = Mockito.spy(new SettingService());
+		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
+		settingService.setSettingRepository(settingRepository);
+		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
+		settingResource.setSettingService(settingService);
+		settingService.addServerVersion();
+		Mockito.verify(settingRepository, Mockito.times(1)).findByEmptyServerVersion();
+		Mockito.verifyNoMoreInteractions(settingRepository);
 	}
 
 	private SettingConfiguration getSettingConfigurationObject() {
