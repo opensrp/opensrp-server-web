@@ -5,7 +5,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,10 +89,7 @@ public class UserController {
 	private KeycloakDeployment keycloakDeployment;
 	
 	@Autowired
-	private ObjectMapper objectMapper;
-	
-	@Autowired
-	private KeycloakRestTemplate template;
+	private KeycloakRestTemplate restTemplate;
 	
 	@Autowired
 	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService) {
@@ -145,12 +141,11 @@ public class UserController {
 	        @RequestParam(value = "anm-id", required = false) String anmIdentifier)
 	        throws MalformedURLException, IOException {
 		if (authentication != null) {
-			String userInfoUrl = MessageFormat.format(keyCloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
+			String realmDetailsUrl = MessageFormat.format(keyCloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
 			    keycloakDeployment.getRealm());
-			Map<String, Object> map = objectMapper.readValue(new URL(userInfoUrl), Map.class);
-			
+			Map<?, ?> map =  restTemplate.getForEntity(realmDetailsUrl, Map.class).getBody();
 			String endpoint = map.get("userinfo_endpoint").toString();
-			ResponseEntity<String> response = template.getForEntity(endpoint, String.class);
+			ResponseEntity<String> response = restTemplate.getForEntity(endpoint, String.class);
 			return new ResponseEntity<>(response.getBody(), RestUtils.getJSONUTF8Headers(), OK);
 			
 		} else {
