@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,6 +29,7 @@ import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
+import org.opensrp.common.domain.UserDetail;
 import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
@@ -54,7 +56,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -137,16 +138,19 @@ public class UserController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
-	public ResponseEntity<String> getUserDetails(Authentication authentication,
+	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
 	        @RequestParam(value = "anm-id", required = false) String anmIdentifier)
 	        throws MalformedURLException, IOException {
 		if (authentication != null) {
-			String realmDetailsUrl = MessageFormat.format(keyCloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
-			    keycloakDeployment.getRealm());
-			Map<?, ?> map =  restTemplate.getForEntity(realmDetailsUrl, Map.class).getBody();
+			String realmDetailsUrl = MessageFormat.format(keyCloakConfigurationURL,
+			    keycloakDeployment.getAuthServerBaseUrl(), keycloakDeployment.getRealm());
+			Map<?, ?> map = restTemplate.getForEntity(realmDetailsUrl, Map.class).getBody();
 			String endpoint = map.get("userinfo_endpoint").toString();
-			ResponseEntity<String> response = restTemplate.getForEntity(endpoint, String.class);
-			return new ResponseEntity<>(response.getBody(), RestUtils.getJSONUTF8Headers(), OK);
+			ResponseEntity<UserDetail> response = restTemplate.getForEntity(endpoint, UserDetail.class);
+			UserDetail userDetail = response.getBody();
+			userDetail.setRoles(
+			    authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()));
+			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 			
 		} else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
