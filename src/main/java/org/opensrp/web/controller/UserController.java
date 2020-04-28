@@ -5,7 +5,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,8 +23,9 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
@@ -83,15 +83,6 @@ public class UserController {
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
 	
-	@Value("#{opensrp['keycloak.configuration.endpoint']}")
-	protected String keyCloakConfigurationURL;
-	
-	@Autowired
-	private KeycloakDeployment keycloakDeployment;
-	
-	@Autowired
-	private KeycloakRestTemplate restTemplate;
-	
 	@Autowired
 	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService) {
 		this.openmrsLocationService = openmrsLocationService;
@@ -141,13 +132,19 @@ public class UserController {
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
 	        @RequestParam(value = "anm-id", required = false) String anmIdentifier)
 	        throws MalformedURLException, IOException {
-		if (authentication != null) {
-			String realmDetailsUrl = MessageFormat.format(keyCloakConfigurationURL,
-			    keycloakDeployment.getAuthServerBaseUrl(), keycloakDeployment.getRealm());
-			Map<?, ?> map = restTemplate.getForEntity(realmDetailsUrl, Map.class).getBody();
-			String endpoint = map.get("userinfo_endpoint").toString();
-			ResponseEntity<UserDetail> response = restTemplate.getForEntity(endpoint, UserDetail.class);
-			UserDetail userDetail = response.getBody();
+		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
+			        .getPrincipal();
+			AccessToken token = kp.getKeycloakSecurityContext().getToken();
+			Map<String, Object> otherClaims = token.getOtherClaims();
+			UserDetail userDetail = new UserDetail();
+			userDetail.setIdentifier(token.getId());
+			userDetail.setUserName(token.getPreferredUsername());
+			userDetail.setPreferredName(token.getName());
+			userDetail.setFamilyName(token.getFamilyName());
+			userDetail.setGivenName(token.getGivenName());
+			userDetail.setEmail(token.getEmail());
+			userDetail.setEmailVerified(token.getEmailVerified());
 			userDetail.setRoles(
 			    authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()));
 			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
