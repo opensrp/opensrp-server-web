@@ -13,16 +13,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.json.JSONObject;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
+import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.opensrp.web.config.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,8 +44,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	
-	
-	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
 	
@@ -51,6 +52,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	
 	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
 	private Resource keycloakConfigFileResource;
+	
+	@Autowired
+	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
 	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
 	
@@ -123,6 +127,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+	
+	@Bean
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public KeycloakRestTemplate keycloakRestTemplate() {
+		return new KeycloakRestTemplate(keycloakClientRequestFactory);
 	}
 	
 	@Bean

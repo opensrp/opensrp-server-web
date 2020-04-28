@@ -20,14 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.spi.KeycloakAccount;
-import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
@@ -43,7 +41,6 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
-import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.opensrp.web.utils.LocationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,33 +58,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 @Controller
 public class UserController {
-
+	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
-
+	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
-
-	private DrishtiAuthenticationProvider opensrpAuthenticationProvider;
-
+	
 	private OpenmrsLocationService openmrsLocationService;
-
+	
 	private OpenmrsUserService openmrsUserService;
-
+	
 	private OrganizationService organizationService;
-
+	
 	private PractitionerService practitionerService;
-
+	
 	private PhysicalLocationService locationService;
-
+	
 	@Value("#{opensrp['openmrs.version']}")
 	protected String OPENMRS_VERSION;
-
+	
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
 	
@@ -99,15 +91,16 @@ public class UserController {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
-
+	
 	@Autowired
-	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService,
-			DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
+	private KeycloakRestTemplate template;
+	
+	@Autowired
+	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService) {
 		this.openmrsLocationService = openmrsLocationService;
 		this.openmrsUserService = openmrsUserService;
-		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
 	}
-
+	
 	/**
 	 * @param organizationService the organizationService to set
 	 */
@@ -115,7 +108,7 @@ public class UserController {
 	public void setOrganizationService(OrganizationService organizationService) {
 		this.organizationService = organizationService;
 	}
-
+	
 	/**
 	 * @param practitionerService the practitionerService to set
 	 */
@@ -123,7 +116,7 @@ public class UserController {
 	public void setPractitionerService(PractitionerService practitionerService) {
 		this.practitionerService = practitionerService;
 	}
-
+	
 	/**
 	 * @param locationService the locationService to set
 	 */
@@ -131,64 +124,61 @@ public class UserController {
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
 	public ResponseEntity<HttpStatus> authenticateUser() {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
-
-	public DrishtiAuthenticationProvider getAuthenticationProvider() {
-		return opensrpAuthenticationProvider;
+	
+	public User currentUser(HttpServletRequest request, Authentication authentication) {
+		//return getAuthenticationProvider().getDrishtiUser(authentication, authentication.getName());
+		//TODO implement this method
+		throw new UnsupportedOperationException();
 	}
-
-	public User currentUser(HttpServletRequest request,Authentication authentication) {
-		return getAuthenticationProvider().getDrishtiUser(authentication, authentication.getName());
-	}
-
+	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
 	}
-
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
 	public ResponseEntity<String> getUserDetails(Authentication authentication,
-			@RequestParam(value = "anm-id", required = false) String anmIdentifier) throws MalformedURLException, IOException {
+	        @RequestParam(value = "anm-id", required = false) String anmIdentifier)
+	        throws MalformedURLException, IOException {
 		if (authentication != null) {
-			String userInfoUrl=MessageFormat.format( keyCloakConfigurationURL,keycloakDeployment.getAuthServerBaseUrl(),keycloakDeployment.getRealm());
-			Map<String,Object> map = objectMapper.readValue(new URL(userInfoUrl), Map.class);
-			OkHttpClient client = new OkHttpClient();
-			SimpleKeycloakAccount account= (SimpleKeycloakAccount) authentication.getDetails();
-			Request request = new Request.Builder()
-					.header("Authorization", "Bearer "+account.getKeycloakSecurityContext().getTokenString())
-                    .url(map.get("userinfo_endpoint").toString())
-                    .build();
-			Response response = client.newCall(request).execute();
-			String responseBody=response.body().string();
-			return new ResponseEntity<>(responseBody, RestUtils.getJSONUTF8Headers(), OK);
-
+			String userInfoUrl = MessageFormat.format(keyCloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
+			    keycloakDeployment.getRealm());
+			Map<String, Object> map = objectMapper.readValue(new URL(userInfoUrl), Map.class);
+			
+			String endpoint = map.get("userinfo_endpoint").toString();
+			ResponseEntity<String> response = template.getForEntity(endpoint, String.class);
+			return new ResponseEntity<>(response.getBody(), RestUtils.getJSONUTF8Headers(), OK);
+			
 		} else {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
-
+		
 	}
-
+	
 	@RequestMapping("/security/authenticate")
 	@ResponseBody
-	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication) throws JSONException {
+	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication)
+	        throws JSONException {
 		if (useOpenSRPTeamModule) {
-			return authenticateUsingOrganization(request,authentication);
+			return authenticateUsingOrganization(request, authentication);
 		}
-		User u = currentUser(request,authentication);
+		User u = currentUser(request, authentication);
 		System.out.println(u);
 		String lid = "";
 		JSONObject tm = null;
 		try {
 			tm = openmrsUserService.getTeamMember(u.getAttribute("_PERSON_UUID").toString());
 			JSONArray locs = tm.getJSONArray(OpenMRSCrossVariables.LOCATIONS_JSON_KEY.makeVariable(OPENMRS_VERSION));
-
+			
 			for (int i = 0; i < locs.length(); i++) {
 				lid += locs.getJSONObject(i).getString("uuid") + ";;";
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
 		}
 		if (StringUtils.isBlank(lid)) {
@@ -197,9 +187,9 @@ public class UserController {
 				lid = (String) u.getAttribute("Locations");
 				if (lid == null) {
 					throw new IllegalStateException(
-							"User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
+					        "User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
 				}
-
+				
 			}
 		}
 		LocationTree l = openmrsLocationService.getLocationTreeOf(lid.split(";;"));
@@ -207,10 +197,11 @@ public class UserController {
 		map.put("user", u);
 		try {
 			Map<String, Object> tmap = new Gson().fromJson(tm.toString(), new TypeToken<HashMap<String, Object>>() {
-
+				
 			}.getType());
 			map.put("team", tmap);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 		map.put("locations", l);
@@ -218,11 +209,12 @@ public class UserController {
 		map.put("time", t);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
-
-	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request,Authentication authentication) throws JSONException {
-		User u = currentUser(request,authentication);
+	
+	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request, Authentication authentication)
+	        throws JSONException {
+		User u = currentUser(request, authentication);
 		System.out.println(u);
-
+		
 		Map<String, String> openMRSIdsMap = new HashMap<>();
 		Set<String> openMRSIds = new HashSet<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
@@ -233,14 +225,14 @@ public class UserController {
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
-
+			
 			for (AssignedLocations assignedLocation : organizationService
-					.findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
+			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
-
+			
 			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
-
+			
 			for (PhysicalLocation jurisdiction : jurisdictions) {
 				if (PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
 					continue;
@@ -252,7 +244,7 @@ public class UserController {
 				}
 				jurisdictionNames.add(jurisdiction.getProperties().getName());
 			}
-
+			
 			Set<String> parentLocations = LocationUtils.getRootLocation(locationAndParent);
 			if (parentLocations.size() == 1) {
 				openMRSIds.addAll(openMRSIdsMap.values());
@@ -266,23 +258,24 @@ public class UserController {
 					}
 				}
 			}
-
-		} catch (Exception e) {
+			
+		}
+		catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
 		}
 		if (openMRSIds.isEmpty()) {
 			throw new IllegalStateException(
-					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
+			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
 		}
-
+		
 		LocationTree l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
-
+		
 		JSONObject teamMemberJson = new JSONObject();
 		teamMemberJson.put("identifier", practionerOrganizationIds.left.getIdentifier());
 		teamMemberJson.put("uuid", practionerOrganizationIds.left.getUserId());
-
+		
 		JSONObject teamJson = new JSONObject();
 		// TODO populate organizations if user has many organizations
 		Organization organization = organizationService.getOrganization(practionerOrganizationIds.right.get(0));
@@ -290,7 +283,7 @@ public class UserController {
 		teamJson.put("display", organization.getName());
 		teamJson.put("uuid", organization.getIdentifier());
 		teamJson.put("organizationIds", practionerOrganizationIds.right);
-
+		
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
 		PhysicalLocation jurisdiction = jurisdictions.get(0);
@@ -298,19 +291,20 @@ public class UserController {
 		teamLocation.put("name", jurisdiction.getProperties().getName());
 		teamLocation.put("display", jurisdiction.getProperties().getName());
 		teamJson.put("location", teamLocation);
-
+		
 		JSONArray locations = new JSONArray();
 		locations.put(teamLocation);
 		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
-
+		
 		try {
 			Map<String, Object> tmap = new Gson().fromJson(teamMemberJson.toString(),
-					new TypeToken<HashMap<String, Object>>() {
-
-					}.getType());
+			    new TypeToken<HashMap<String, Object>>() {
+			    
+			    }.getType());
 			map.put("team", tmap);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 		map.put("locations", l);
@@ -319,7 +313,7 @@ public class UserController {
 		map.put("jurisdictions", jurisdictionNames);
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
-
+	
 	@RequestMapping("/security/configuration")
 	@ResponseBody
 	public ResponseEntity<String> configuration() throws JSONException {
@@ -327,13 +321,9 @@ public class UserController {
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
-
+	
 	public void setOpenmrsUserService(OpenmrsUserService openmrsUserService) {
 		this.openmrsUserService = openmrsUserService;
 	}
-
-	public void setOpensrpAuthenticationProvider(DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
-		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
-	}
-
+	
 }
