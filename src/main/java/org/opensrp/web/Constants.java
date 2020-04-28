@@ -18,4 +18,8 @@ public interface Constants {
     String ERROR_OCCURRED = "Error occurred";
     String FAILURE = "Failure occurred";
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
+
+    interface ContentType {
+        String APPLICATION_YAML = "application/x-yaml";
+    }
 }

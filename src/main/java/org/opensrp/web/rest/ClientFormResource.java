@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -9,12 +10,14 @@ import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.web.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -125,8 +128,9 @@ public class ClientFormResource {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
-        if (!jsonFile.getContentType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-            return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
+        String fileContentType = jsonFile.getContentType();
+        if (!isClientFormContentTypeValid(fileContentType)) {
+            return new ResponseEntity<>("The form is not a JSON/Text/Yaml file", HttpStatus.BAD_REQUEST);
         }
 
         if (jsonFile.isEmpty()) {
@@ -162,6 +166,11 @@ public class ClientFormResource {
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @VisibleForTesting
+    protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
+        return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) || fileContentType.equals(ContentType.TEXT_PLAIN.getMimeType()) || fileContentType.equals(Constants.ContentType.APPLICATION_YAML));
     }
 
 }
