@@ -12,11 +12,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -27,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Rule;
@@ -245,6 +242,12 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     }
 
     @Test
+    public void testCreateShouldThrowException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).addPlan(any(PlanDefinition.class));
+        postRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
+    }
+
+    @Test
     public void testUpdateShouldUpdateExistingPlanResource() throws Exception {
         List<Jurisdiction> operationalAreas = new ArrayList<>();
         Jurisdiction operationalArea = new Jurisdiction();
@@ -268,6 +271,12 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         verify(planService).updatePlan(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
+    }
+
+    @Test
+    public void testUpdateShouldThrowException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class));
+        putRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
     }
 
     @Test

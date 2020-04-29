@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,14 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
@@ -117,6 +114,38 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
         verify(practitionerService).deletePractitioner(stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getValue(), "practitioner-id");
+    }
+
+    @Test
+    public void testCreateWithInternalError() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        postRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerService);
+    }
+
+    @Test
+    public void testCreateWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        postRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerService);
+    }
+
+    @Test
+    public void testUpdateWithInternalError() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        putRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerService);
+    }
+
+    @Test
+    public void testUpdateWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        putRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        verifyNoMoreInteractions(practitionerService);
     }
 
     @Override

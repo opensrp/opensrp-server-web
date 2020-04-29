@@ -46,6 +46,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		/* @formatter:off */
 		configureOpenSRPBasicSecurity(http)
 				.mvcMatchers("/login**").permitAll()
 				.mvcMatchers("/**").hasRole(Role.OPENMRS)
@@ -68,6 +69,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        .and()
 		        	.csrf()
 		        	.ignoringAntMatchers("/rest/**");
+		/* @formatter:on */
 	}
 	
 	

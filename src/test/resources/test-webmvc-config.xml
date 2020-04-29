@@ -26,6 +26,7 @@
 	<bean class="org.opensrp.web.rest.shadow.PractitionerRoleResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.UserResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.EventResourceShadow" />
+	<bean class="org.opensrp.web.rest.shadow.LocationTagResourceShadow" />
 	<bean class="org.opensrp.web.rest.shadow.ClientFormResourceShadow" />
 
 </beans>

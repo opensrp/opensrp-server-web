@@ -27,6 +27,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -60,13 +61,17 @@ public class XlsDataImportController {
 	public static final String MEASLES_VACCINE = "measles";
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 	private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+	@Value("#{opensrp['multimedia.allowed.file.types']}")
+	private String allowedMimeTypes;
 	
 	private ClientService clientService;
 	private EventService eventService;
 	private OpenmrsIDService openmrsIDService;
 	 
 	private DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
-	
+
+
 	@Autowired
 	public XlsDataImportController(ClientService clientService, EventService eventService, OpenmrsIDService openmrsIDService) {
 		this.clientService = clientService;
@@ -76,14 +81,18 @@ public class XlsDataImportController {
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/file")
 	public ResponseEntity<String> importXlsData(@RequestParam("file") MultipartFile file) throws SQLException {
+
+		String mimeType = file.getContentType();
+		if (!allowedMimeTypes.contains(mimeType)) {
+			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
+		}
 		Map<String, Object> stats = new HashMap<>();
 
 
 		int eventCount = 0;
 		int clientCount = 0;
 		CSVParser parser;
-		try {
-			Reader reader = new InputStreamReader(file.getInputStream());
+		try(Reader reader = new InputStreamReader(file.getInputStream())) {
 			parser = new CSVParser(reader, CSVFormat.EXCEL.withHeader());
 			List<CSVRecord> records = parser.getRecords();
 			int recordCount = records.size();
