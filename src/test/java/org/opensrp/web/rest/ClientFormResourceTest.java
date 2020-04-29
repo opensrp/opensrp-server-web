@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.http.entity.ContentType;
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -288,7 +287,7 @@ public class ClientFormResourceTest {
         String formName = "Registration properties file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/opd_register.properties",
-                "text/plain", TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.getBytes());
+                "application/octet-stream", TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.getBytes());
 
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
@@ -326,22 +325,15 @@ public class ClientFormResourceTest {
     }
 
     @Test
-    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextYaml() throws Exception {
+    public void testIsPropertiesFileShouldReturnTrue() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML));
+        assertTrue(clientFormResource.isPropertiesFile("application/octet-stream", "anc_register.properties"));
     }
 
     @Test
-    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextFile() throws Exception {
+    public void testIsPropertiesFileShouldReturnFalse() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(ContentType.TEXT_PLAIN.getMimeType()));
-    }
-
-
-    @Test
-    public void testIsClientFormContentTypeValidShouldReturnFalseWhenGivenXml() throws Exception {
-        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertFalse(clientFormResource.isClientFormContentTypeValid(ContentType.APPLICATION_XML.getMimeType()));
+        assertFalse(clientFormResource.isPropertiesFile("application/octet-stream", "anc_register"));
     }
 
 }

@@ -142,8 +142,8 @@ public class ClientFormResource {
         }
 
         String fileContentType = jsonFile.getContentType();
-        if (!isClientFormContentTypeValid(fileContentType)) {
-            return new ResponseEntity<>("The form is not a JSON/Text/Yaml file", HttpStatus.BAD_REQUEST);
+        if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
+            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
         }
 
         if (jsonFile.isEmpty()) {
@@ -184,8 +184,12 @@ public class ClientFormResource {
     @VisibleForTesting
     protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
         return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) ||
-                fileContentType.equals(ContentType.TEXT_PLAIN.getMimeType()) || fileContentType.equals(Constants.ContentType.APPLICATION_YAML) ||
-                fileContentType.equals(Constants.ContentType.TEXT_YAML));
+                fileContentType.equals(Constants.ContentType.APPLICATION_YAML));
+    }
+
+    @VisibleForTesting
+    protected boolean isPropertiesFile(@NonNull String fileContentType, @NonNull String fileName) {
+        return fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && fileName.endsWith(".properties");
     }
 
 }
