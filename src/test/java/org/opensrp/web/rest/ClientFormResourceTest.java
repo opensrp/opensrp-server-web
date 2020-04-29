@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.http.entity.ContentType;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -174,6 +175,8 @@ public class ClientFormResourceTest {
                 .param("current_form_version", currentFormVersion))
                 .andExpect(status().isNotFound())
                 .andReturn();
+
+        assertEquals("", result.getResponse().getContentAsString());
     }
 
     @Test
