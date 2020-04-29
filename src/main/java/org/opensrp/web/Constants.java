@@ -21,5 +21,6 @@ public interface Constants {
 
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
+        String TEXT_YAML = "text/yaml";
     }
 }

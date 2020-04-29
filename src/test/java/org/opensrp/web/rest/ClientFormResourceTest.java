@@ -18,6 +18,7 @@ import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
+import org.opensrp.web.Constants;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -218,9 +219,15 @@ public class ClientFormResourceTest {
     }
 
     @Test
-    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenYaml() throws Exception {
+    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenApplicationYaml() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid("application/x-yaml"));
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.APPLICATION_YAML));
+    }
+
+    @Test
+    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextYaml() throws Exception {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML));
     }
 
     @Test
