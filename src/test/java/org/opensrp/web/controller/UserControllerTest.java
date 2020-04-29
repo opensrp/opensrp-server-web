@@ -1,28 +1,46 @@
 package org.opensrp.web.controller;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
 
-import com.google.gson.Gson;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest {
 	
@@ -38,6 +56,20 @@ public class UserControllerTest {
 	
 	@Mock
 	private UserController controller;
+
+	@Autowired
+	protected WebApplicationContext webApplicationContext;
+
+	private MockMvc mockMvc;
+
+	@Mock
+	private OrganizationService organizationService;
+
+	@Mock
+	private PractitionerService practitionerService;
+
+	@Mock
+	private PhysicalLocationService physicalLocationService;
 	
 	private DrishtiAuthenticationProvider auth;
 	
@@ -48,6 +80,11 @@ public class UserControllerTest {
 	
 	@Mock
 	private HttpServletRequest servletRequest;
+
+	@InjectMocks
+	private UserController userController;
+
+	protected ObjectMapper mapper = new ObjectMapper();
 	
 	public UserControllerTest() throws IOException {
 		super();
@@ -58,6 +95,15 @@ public class UserControllerTest {
 		initMocks(this);
 		auth = new DrishtiAuthenticationProvider(userservice);
 		usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken("demook", "demook");
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController)
+				.build();
+		userController.setOpensrpAuthenticationProvider(auth);
+		userController.setOrganizationService(organizationService);
+		userController.setPractitionerService(practitionerService);
+		userController.setLocationService(physicalLocationService);
+		ReflectionTestUtils.setField(userController, "opensrpAllowedSources", "");
+		ReflectionTestUtils.setField(userController, "OPENMRS_VERSION", "2.1.3");
+
 	}
 	
 	@Test
@@ -84,5 +130,93 @@ public class UserControllerTest {
 		when(auth.getDrishtiUser(usernamePasswordAuthenticationToken, "demook")).thenReturn(u);
 		
 		controller.authenticate(servletRequest, authentication);
+	}
+
+	@Test
+	public void testAuthenticateUser() throws Exception {
+		MvcResult result = mockMvc.perform(get("/authenticate-user"))
+				.andExpect(status().isOk()).andReturn();
+	}
+
+	@Test
+	public void testAuthenticate() throws Exception {
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		Authentication authentication = getMockedAuthentication();
+		Map<String, Object> userAttributes = new HashMap<>();
+		userAttributes.put("Location", "Test");
+		userAttributes.put("_PERSON_UUID", "Test-UUID");
+		User user = new User("Base-entity-id");
+		user.setUsername("admin");
+		user.setPassword("admin");
+		user.setAttributes(userAttributes);
+		String[] locations = new String[5];
+		locations[0] = "Test";
+		LocationTree locationTree = mock(LocationTree.class);
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("user", user);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("test", data);
+
+		when(userservice.authenticate(anyString(), anyString())).thenReturn(Boolean.TRUE);
+		when(userservice.getUser(anyString())).thenReturn(user);
+		when(locationservice.getLocationTreeOf(locations)).thenReturn(locationTree);
+		when(userservice.getTeamMember(anyString())).thenReturn(jsonObject);
+
+		ResponseEntity<String> result = userController.authenticate(httpServletRequest, authentication);
+		String responseString = result.getBody();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		assertEquals(result.getStatusCode(), HttpStatus.OK);
+		assertEquals(actualObj.get("user").get("username").asText(), "admin");
+	}
+
+	@Test
+	public void testConfiguration() throws Exception {
+		MvcResult result = mockMvc.perform(get("/security/configuration"))
+				.andExpect(status().isOk()).andReturn();
+	}
+
+	private Authentication getMockedAuthentication() {
+		Authentication authentication = new Authentication() {
+
+			@Override
+			public Collection<? extends GrantedAuthority> getAuthorities() {
+				return null;
+			}
+
+			@Override
+			public Object getCredentials() {
+				return "";
+			}
+
+			@Override
+			public Object getDetails() {
+				return null;
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return "Test User";
+			}
+
+			@Override
+			public boolean isAuthenticated() {
+				return false;
+			}
+
+			@Override
+			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+			}
+
+			@Override
+			public String getName() {
+				return "admin";
+			}
+		};
+
+		return authentication;
 	}
 }

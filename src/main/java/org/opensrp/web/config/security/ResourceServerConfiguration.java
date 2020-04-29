@@ -54,7 +54,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		http.cors()
 		.and()
 			.anonymous().disable()
-		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**")
+		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**", "/uniqueids/*")
 		.and()
 			.authorizeRequests()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)

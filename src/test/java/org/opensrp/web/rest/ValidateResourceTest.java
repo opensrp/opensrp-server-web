@@ -1,0 +1,96 @@
+package org.opensrp.web.rest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.opensrp.domain.Client;
+import org.opensrp.domain.Event;
+import org.opensrp.service.ClientService;
+import org.opensrp.service.EventService;
+import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+public class ValidateResourceTest {
+
+	@Autowired
+	protected WebApplicationContext webApplicationContext;
+
+	private MockMvc mockMvc;
+
+	@Mock
+	private ClientService clientService;
+
+	@Mock
+	private EventService eventService;
+
+	@InjectMocks
+	private ValidateResource validateResource;
+
+	protected ObjectMapper mapper = new ObjectMapper();
+
+	private final String BASE_URL = "/rest/validate/";
+
+	private String INVALID_JSON = "{\n"
+			+ "  \"client\" : {\n"
+			+ "  \"firstName\" : \"Test\" \n"
+			+ "  }\n"
+			+ "}";
+
+	@Before
+	public void setUp() {
+		MockitoAnnotations.initMocks(this);
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(validateResource)
+				.build();
+	}
+
+	@Test
+	public void testValidateSyncWithBlankData() throws Exception {
+		when(clientService.getByBaseEntityId(any(String.class))).thenReturn(createClient());
+		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(createEvent());
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content("".getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+	}
+
+	@Test
+	public void testValidateSyncWithWrongData() throws Exception {
+		when(clientService.getByBaseEntityId(any(String.class))).thenReturn(createClient());
+		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(createEvent());
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(INVALID_JSON.getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+	}
+
+	private Client createClient() {
+		Client client = new Client("Base-entity-id");
+		client.setFirstName("test");
+		client.setLastName("user");
+		return client;
+	}
+
+	private Event createEvent() {
+		Event event = new Event();
+		event.setBaseEntityId("Base-entity-id");
+		event.setId("ID-123");
+		return event;
+	}
+
+
+}
