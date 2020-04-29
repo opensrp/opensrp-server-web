@@ -51,7 +51,9 @@ public class ClientFormResource {
     @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
+            , @RequestParam(value = "strict", defaultValue = "false") String strict
             , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) throws JsonProcessingException {
+        boolean strictSearch = Boolean.parseBoolean(strict.toLowerCase());
         DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
         DefaultArtifactVersion currentFormVersionV = null;
         if (!TextUtils.isEmpty(currentFormVersion)) {
@@ -76,9 +78,20 @@ public class ClientFormResource {
             // Get an older form version
             clientFormMetadata = getMostRecentVersion(formIdentifier);
             if (clientFormMetadata == null) {
-                return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             } else {
                 formId = clientFormMetadata.getId();
+
+                if (strictSearch) {
+                    if (clientFormMetadata.getVersion().equals(currentFormVersion)) {
+                        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                    } else {
+                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    }
+                } else {
+                    clientFormMetadata = getMostRecentVersion(formIdentifier);
+                }
+
             }
 
         } else {

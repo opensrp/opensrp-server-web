@@ -79,7 +79,105 @@ public class ClientFormResourceTest {
     }
 
     @Test
-    public void testSearchForFormByFormVersion() throws Exception {
+    public void testSearchForFormByFormVersionShouldReturnSpecificVersion() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.0.3";
+        String currentFormVersion = "0.0.1";
+        List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+        idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+        idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+        idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+        ClientForm clientForm = new ClientForm();
+        clientForm.setJson("{}");
+        clientForm.setId(3L);
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setVersion("0.0.3");
+
+        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(clientFormMetadata);
+        when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL)
+                .param("form_identifier", formIdentifier)
+                .param("form_version", formVersion)
+                .param("current_form_version", currentFormVersion)
+                .param("strict", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals("{}", jsonNode.get("clientForm").get("json").textValue());
+        assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
+        assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
+    }
+
+    @Test
+    public void testSearchForFormByFormVersionShouldReturnNoContentWhenVersionHasntChangedAndStrictIsTrue() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String currentFormVersion = "0.0.3";
+        List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+        idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+        idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+        idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setVersion("0.0.3");
+
+        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL)
+                .param("form_identifier", formIdentifier)
+                .param("form_version", formVersion)
+                .param("strict", "True")
+                .param("current_form_version", currentFormVersion))
+                .andExpect(status().isNoContent())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        assertEquals("", responseString);
+    }
+
+    @Test
+    public void testSearchForFormByFormVersionShouldReturn404WhenStrictIsTrueAndCurrentFormVersionIsOutOfDate() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String currentFormVersion = "0.0.2";
+        List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+        idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+        idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+        idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setVersion("0.0.3");
+
+        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL)
+                .param("form_identifier", formIdentifier)
+                .param("form_version", formVersion)
+                .param("strict", "True")
+                .param("current_form_version", currentFormVersion))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    public void testSearchForFormByFormVersionShouldReturnNextVersion() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.1.1";
         String currentFormVersion = "0.0.1";
