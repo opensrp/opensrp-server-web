@@ -118,10 +118,21 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	public User currentUser(HttpServletRequest request, Authentication authentication) {
-		//return getAuthenticationProvider().getDrishtiUser(authentication, authentication.getName());
-		//TODO implement this method
-		throw new UnsupportedOperationException();
+	public User currentUser(Authentication authentication) {
+		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
+			        .getPrincipal();
+			AccessToken token = kp.getKeycloakSecurityContext().getToken();
+			User user = new User(token.getId());
+			user.setPreferredName(token.getName());
+			user.setUsername(token.getPreferredUsername());
+			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
+			        .collect(Collectors.toList());
+			user.setRoles(authorities);
+			user.setPermissions(authorities);
+			return user;
+		}
+		return null;
 	}
 	
 	public Time getServerTime() {
@@ -162,7 +173,7 @@ public class UserController {
 		if (useOpenSRPTeamModule) {
 			return authenticateUsingOrganization(request, authentication);
 		}
-		User u = currentUser(request, authentication);
+		User u = currentUser(authentication);
 		System.out.println(u);
 		String lid = "";
 		JSONObject tm = null;
@@ -208,8 +219,8 @@ public class UserController {
 	
 	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request, Authentication authentication)
 	        throws JSONException {
-		User u = currentUser(request, authentication);
-		System.out.println(u);
+		User u = currentUser(authentication);
+		logger.debug("logged in user {}", u.toString());
 		
 		Map<String, String> openMRSIdsMap = new HashMap<>();
 		Set<String> openMRSIds = new HashSet<>();
