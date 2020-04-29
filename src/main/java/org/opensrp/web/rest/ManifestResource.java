@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -89,12 +90,25 @@ public class ManifestResource {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @RequestMapping(value = "appId/{appId:.+}", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/appId/{appId:.+}", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getManifestByAppId(@PathVariable("appId") String appId) throws JsonProcessingException {
         return new ResponseEntity<>(objectMapper.writeValueAsString(manifestService.getManifestByAppId(appId)), RestUtils.getJSONUTF8Headers(),
                 HttpStatus.OK);
 
+    }
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getManifestByAppIdAndAppVersion(@RequestParam(value = "app_version") String appVersion
+            , @RequestParam(value = "app_id") String appId) throws JsonProcessingException {
+        Manifest manifest = manifestService.getManifest(appId, appVersion);
+        if (manifest == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(objectMapper.writeValueAsString(manifest), RestUtils.getJSONUTF8Headers(),
+                HttpStatus.OK);
     }
 
 }
