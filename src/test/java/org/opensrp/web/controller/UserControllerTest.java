@@ -9,8 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -52,9 +50,6 @@ public class UserControllerTest {
 	
 	@Mock
 	private Authentication authentication;
-	
-	@Mock
-	private HttpServletRequest servletRequest;
 	
 	@InjectMocks
 	private UserController userController;

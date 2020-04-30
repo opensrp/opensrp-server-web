@@ -53,10 +53,7 @@ public class UniqueIdControllerTest {
 
 	@Mock
 	private OpenmrsIDService openmrsIdService;
-
-	@Mock
-	private UserController userController;
-
+	
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/uniqueids";
