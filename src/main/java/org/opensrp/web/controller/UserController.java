@@ -53,7 +53,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
@@ -140,8 +139,7 @@ public class UserController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/user-details")
-	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication,
-	        @RequestParam(value = "anm-id", required = false) String anmIdentifier)
+	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication)
 	        throws MalformedURLException, IOException {
 		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
