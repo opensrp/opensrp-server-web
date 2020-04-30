@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package org.opensrp.web.rest;
 
@@ -35,20 +35,20 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 public class UserResourceTest {
-
+	
 	@Rule
 	public MockitoRule rule = MockitoJUnit.rule();
-
+	
 	@Mock
 	private OpenmrsUserService userService;
-
+	
 	@Autowired
 	protected WebApplicationContext webApplicationContext;
-
+	
 	private MockMvc mockMvc;
-
+	
 	private String BASE_URL = "/rest/user/";
-
+	
 	@Before
 	public void setUp() {
 		UserResource userResource = webApplicationContext.getBean(UserResource.class);
@@ -56,7 +56,7 @@ public class UserResourceTest {
 		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 	}
-
+	
 	@Test
 	public void testGetAllUsers() throws Exception {
 		String expected = "{\"person\":{\"display\":\"Reveal Tes Demo\"},\"display\":\"reveal\",\"uuid\":\"5e33cf03-2352nkh\"}";
@@ -68,6 +68,6 @@ public class UserResourceTest {
 		verify(userService).getUsers(limit, offset);
 		verifyNoMoreInteractions(userService);
 		assertEquals(expected, result.getResponse().getContentAsString());
-
+		
 	}
 }
