@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
@@ -211,5 +212,9 @@ public class UserControllerTest {
 		JsonNode actualObj = new ObjectMapper().readTree(responseString);
 		assertEquals(result.getStatusCode(), HttpStatus.OK);
 		assertEquals(actualObj.get("user").get("username").asText(), user.getUsername());
+		assertTrue(actualObj.has("locations"));
+		assertTrue(actualObj.has("team"));
+		assertTrue(actualObj.has("time"));
+		assertTrue(actualObj.has("jurisdictions"));
 	}
 }
