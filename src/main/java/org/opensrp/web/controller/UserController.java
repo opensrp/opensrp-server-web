@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -122,7 +123,7 @@ public class UserController {
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			User user = new User(token.getId());
+			User user = new User(authentication.getName());
 			user.setPreferredName(token.getName());
 			user.setUsername(token.getPreferredUsername());
 			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
@@ -147,7 +148,7 @@ public class UserController {
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
 			UserDetail userDetail = new UserDetail();
-			userDetail.setIdentifier(token.getId());
+			userDetail.setIdentifier(authentication.getName());
 			userDetail.setUserName(token.getPreferredUsername());
 			userDetail.setPreferredName(token.getName());
 			userDetail.setFamilyName(token.getFamilyName());

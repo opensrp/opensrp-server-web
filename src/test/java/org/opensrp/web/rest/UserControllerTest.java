@@ -124,7 +124,7 @@ public class UserControllerTest {
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
 		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
-		when(token.getId()).thenReturn(user.getBaseEntityId());
+		when(authentication.getName()).thenReturn(user.getBaseEntityId());
 		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication);
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
@@ -166,7 +166,7 @@ public class UserControllerTest {
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
-		when(token.getId()).thenReturn(user.getBaseEntityId());
+		when(authentication.getName()).thenReturn(user.getBaseEntityId());
 		List<Long> ids = Collections.singletonList(12233l);
 		when(organizationService.getOrganization(ids.get(0))).thenReturn(new Organization());
 		
