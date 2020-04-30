@@ -127,6 +127,7 @@ public class UserController {
 			user.setUsername(token.getPreferredUsername());
 			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
 			        .collect(Collectors.toList());
+			user.setAttributes(token.getOtherClaims());
 			user.setRoles(authorities);
 			user.setPermissions(authorities);
 			return user;
@@ -145,7 +146,6 @@ public class UserController {
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			Map<String, Object> otherClaims = token.getOtherClaims();
 			UserDetail userDetail = new UserDetail();
 			userDetail.setIdentifier(token.getId());
 			userDetail.setUserName(token.getPreferredUsername());
@@ -169,7 +169,7 @@ public class UserController {
 	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication)
 	        throws JSONException {
 		if (useOpenSRPTeamModule) {
-			return authenticateUsingOrganization(request, authentication);
+			return authenticateUsingOrganization(authentication);
 		}
 		User u = currentUser(authentication);
 		System.out.println(u);
@@ -215,8 +215,7 @@ public class UserController {
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	
-	private ResponseEntity<String> authenticateUsingOrganization(HttpServletRequest request, Authentication authentication)
-	        throws JSONException {
+	private ResponseEntity<String> authenticateUsingOrganization(Authentication authentication) throws JSONException {
 		User u = currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		

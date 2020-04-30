@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +28,10 @@ import org.junit.runner.RunWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
-import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.AssignedLocations;
@@ -56,6 +52,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -89,12 +86,6 @@ public class UserControllerTest {
 	@Mock
 	private AccessToken token;
 	
-	@Captor
-	private ArgumentCaptor<Authentication> authenticationCaptor;
-	
-	@Captor
-	private ArgumentCaptor<String> usernameCaptor;
-	
 	private UserController userController;
 	
 	@Mock
@@ -106,7 +97,7 @@ public class UserControllerTest {
 	@Mock
 	private PhysicalLocationService locationService;
 	
-	List<String> roles = Arrays.asList("ROLE_USER", "ADMIN");
+	private List<String> roles = Arrays.asList("ROLE_USER", "ADMIN");
 	
 	@Before
 	public void setUp() {
@@ -119,7 +110,8 @@ public class UserControllerTest {
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		when(authentication.getAuthorities()).thenAnswer(a -> roles.stream().map(role -> new GrantedAuthority() {
-			
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String getAuthority() {
 				return role;
@@ -142,10 +134,6 @@ public class UserControllerTest {
 		
 	}
 	
-	public void getRoles(Collection<String> roles) {
-		
-	}
-	
 	@Test
 	public void testGetUserDetailReturnsNull() throws Exception {
 		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication);
@@ -156,7 +144,8 @@ public class UserControllerTest {
 	
 	@Test
 	public void testGetUserDetailsShouldReturnUnauthorized() throws Exception {
-		mockMvc.perform(get("/user-details")).andExpect(status().isUnauthorized()).andReturn();
+		MvcResult result = mockMvc.perform(get("/user-details")).andExpect(status().isUnauthorized()).andReturn();
+		assertTrue(result.getResponse().getContentAsString().isBlank());
 	}
 	
 	@Test(expected = IllegalStateException.class)
@@ -197,7 +186,6 @@ public class UserControllerTest {
 		
 		String[] locations = new String[5];
 		locations[0] = "Test";
-		LocationTree locationTree = mock(LocationTree.class);
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("user", user);
 		JSONObject jsonObject = new JSONObject();
