@@ -1,11 +1,11 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,13 +30,12 @@ import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.server.MockMvc;
-import org.springframework.test.web.server.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -76,7 +75,7 @@ public class UserControllerTest {
 	
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOpenmrsUserService(openmrsUserService);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
@@ -84,7 +83,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testGetUserDetailsShouldUseParam() throws Exception {
+	public void testGetUserDetailsReturnsCorrectDetails() throws Exception {
 		
 		User user = new User(UUID.randomUUID().toString()).withRoles(Collections.singletonList("ROLE_USER"))
 		        .withUsername("test_user1");
@@ -98,7 +97,7 @@ public class UserControllerTest {
 				return role;
 			}
 		}).collect(Collectors.toList()));
-		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication, "test_user1");
+		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication);
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
 		assertEquals(user.getUsername(), userDetail.getUserName());
@@ -108,26 +107,15 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testGetUserDetailsShouldUseLoggedInUser() throws Exception {
-		User user = new User(UUID.randomUUID().toString()).withRoles(Collections.singletonList("ROLE_USER"))
-		        .withUsername("loggenIn_user");
-		Authentication authentication = new UsernamePasswordAuthenticationToken("loggenIn_user", "");
-		//when(opensrpAuthenticationProvider.getDrishtiUser(any(Authentication.class), anyString())).thenReturn(user);
-		when(openmrsUserService.getUser(user.getUsername())).thenReturn(user);
-		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication, null);
-		/*verify(opensrpAuthenticationProvider, never()).getDrishtiUser(authenticationCaptor.capture(),
-		    usernameCaptor.capture());*/
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+	public void testGetUserDetailReturnsNull() throws Exception {
+		ResponseEntity<UserDetail> result = userController.getUserDetails(authentication);
+		assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 		UserDetail userDetail = result.getBody();
-		assertEquals(user.getUsername(), userDetail.getUserName());
-		assertEquals(user.getRoles(), userDetail.getRoles());
+		assertNull(userDetail);
 	}
 	
 	@Test
 	public void testGetUserDetailsShouldReturnUnauthorized() throws Exception {
-		//when(opensrpAuthenticationProvider.getDrishtiUser(any(Authentication.class), anyString())).thenReturn(null);
 		mockMvc.perform(get("/user-details")).andExpect(status().isUnauthorized()).andReturn();
-		/*verify(opensrpAuthenticationProvider, never()).getDrishtiUser(authenticationCaptor.capture(),
-		    usernameCaptor.capture());*/
 	}
 }
