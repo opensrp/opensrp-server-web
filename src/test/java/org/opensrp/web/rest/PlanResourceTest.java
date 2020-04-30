@@ -523,5 +523,27 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
         assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
     }
+    
+	@Test
+	public void testFindByUsername() throws Exception {
+	    List<Jurisdiction> operationalAreas = new ArrayList<>();
+	    Jurisdiction operationalArea = new Jurisdiction();
+	    operationalArea.setCode("operational_area");
+	    operationalAreas.add(operationalArea);
+	
+	    PlanDefinition expectedPlan = new PlanDefinition();
+	    expectedPlan.setIdentifier("plan_1");
+	    expectedPlan.setJurisdiction(operationalAreas);
+	
+	    List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
+	    when(planService.getPlansByUsernameAndServerVersion("onatest", 0l))
+	            .thenReturn(planDefinitions);
+	    MvcResult result = mockMvc
+	            .perform(get(BASE_URL + "/findByUsername?serverVersion=0&username=onatest"))
+	            .andExpect(status().isOk()).andReturn();
+	    verify(planService).getPlansByUsernameAndServerVersion("onatest", 0l);
+	    assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
+	
+	}
 
 }
