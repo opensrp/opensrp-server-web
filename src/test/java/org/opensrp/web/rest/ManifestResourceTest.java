@@ -217,4 +217,40 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         assertEquals("org.smartregister.giz", returned.getAppId());
 
     }
+
+    @Test
+    public void testGetManifestByAppIdAndAppVersion() throws Exception {
+        Manifest manifest = new Manifest();
+        String appId = "org.smartregister.giz";
+        manifest.setAppId(appId);
+        String appVersion = "0.0.1";
+        manifest.setAppVersion(appVersion);
+        manifest.setIdentifier("opd/registration.json");
+        manifest.setJson("{}");
+
+        doReturn(manifest).when(manifestService).getManifest(eq(appId), eq(appVersion));
+
+        String responseString = getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
+                , MockMvcResultMatchers.status().isOk());
+
+        verify(manifestService).getManifest(eq(appId), eq(appVersion));
+        Manifest returned = mapper.readValue(responseString, Manifest.class);
+
+        assertEquals(appVersion, returned.getAppVersion());
+        assertEquals(appId, returned.getAppId());
+
+    }
+
+
+    @Test
+    public void testGetManifestByAppIdAndAppVersionShouldReturnNotFound() throws Exception {
+        String appId = "org.smartregister.giz";
+        String appVersion = "0.0.1";
+
+        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
+                , MockMvcResultMatchers.status().isNotFound());
+
+        verify(manifestService).getManifest(eq(appId), eq(appVersion));
+
+    }
 }
