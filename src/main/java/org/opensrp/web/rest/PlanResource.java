@@ -72,6 +72,8 @@ public class PlanResource {
 	
 	public static final String FIELDS = "fields";
 	
+	public static final String USERNAME = "username";
+	
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
@@ -260,6 +262,37 @@ public class PlanResource {
 
 	}
 
+	/**
+	 * This method provides an API endpoint that searches for plans using a
+	 *  provided username
+	 *
+	 * @param username
+	 * @return plan definitions whose identifiers match the provided param
+	 */
+	@RequestMapping(value = "/findByUsername", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> fetchPlansForUser(@RequestParam(value = USERNAME) String username,
+			@RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion) {
+		
+		if (StringUtils.isBlank(username)) {
+			return new ResponseEntity<>("Request Param missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
+		}
+		
+		long currentServerVersion = 0;
+		try {
+			currentServerVersion = Long.parseLong(serverVersion);
+		}
+		catch (NumberFormatException e) {
+			logger.error("server version not a number");
+		}
+
+		List<PlanDefinition> plans;
+
+		plans = planService.getPlansByUsernameAndServerVersion(username, currentServerVersion);
+
+		return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+	}
 	
 	public boolean doesObjectContainField(Object object, String fieldName) {
 		Class<?> objectClass = object.getClass();
