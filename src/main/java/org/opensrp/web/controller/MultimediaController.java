@@ -47,6 +47,9 @@ public class MultimediaController {
 	
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
+
+	@Value("#{opensrp['multimedia.allowed.file.types']}")
+	private String allowedMimeTypes;
 	
 	private MultimediaService multimediaService;
 	
@@ -145,11 +148,16 @@ public class MultimediaController {
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
 	public ResponseEntity<String> uploadFiles(@RequestParam("anm-id") String providerId,
-	        @RequestParam("entity-id") String entityId, @RequestParam("file-category") String fileCategory,
-	        @RequestParam("file") MultipartFile file) {
-		
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(),
-		        null, fileCategory.trim());
+			@RequestParam("entity-id") String entityId,
+			@RequestParam("file-category") String fileCategory,
+			@RequestParam("file") MultipartFile file) {
+
+		String mimeType = file.getContentType();
+		if (!allowedMimeTypes.contains(mimeType)) {
+			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
+		}
+
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		String status = null;
 		try {
 			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
