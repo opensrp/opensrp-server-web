@@ -275,7 +275,13 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
 		}
 		
-		LocationTree l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
+		LocationTree l = new LocationTree();
+		try {
+			l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
+		}
+		catch (Exception e) {
+			logger.error("Error getting location tree from OpenMRS", e);
+		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
