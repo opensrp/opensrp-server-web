@@ -103,15 +103,15 @@ public class UserControllerTest {
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 		userController = webApplicationContext.getBean(UserController.class);
-		userController.setOpenmrsUserService(openmrsUserService);
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);
 		userController.setPractitionerService(practitionerService);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		when(authentication.getAuthorities()).thenAnswer(a -> roles.stream().map(role -> new GrantedAuthority() {
+			
 			private static final long serialVersionUID = 1L;
-
+			
 			@Override
 			public String getAuthority() {
 				return role;
@@ -155,7 +155,7 @@ public class UserControllerTest {
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		Whitebox.setInternalState(userController, "useOpenSRPTeamModule", true);
-		userController.authenticate(httpServletRequest, authentication);
+		userController.authenticate(authentication);
 	}
 	
 	@Test
@@ -192,7 +192,7 @@ public class UserControllerTest {
 		jsonObject.put("test", data);
 		
 		Whitebox.setInternalState(userController, "useOpenSRPTeamModule", true);
-		ResponseEntity<String> result = userController.authenticate(httpServletRequest, authentication);
+		ResponseEntity<String> result = userController.authenticate(authentication);
 		String responseString = result.getBody();
 		if (responseString.isEmpty()) {
 			fail("Test case failed");

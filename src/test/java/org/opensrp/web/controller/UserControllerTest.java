@@ -69,7 +69,7 @@ public class UserControllerTest {
 	public void setUp() throws Exception {
 		initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController).build();
-
+		
 		ReflectionTestUtils.setField(userController, "opensrpAllowedSources", "");
 		ReflectionTestUtils.setField(userController, "OPENMRS_VERSION", "2.1.3");
 		
@@ -94,12 +94,12 @@ public class UserControllerTest {
 		
 		when(userservice.authenticate("demook", "demook")).thenReturn(true);
 		
-		controller.authenticate(servletRequest, authentication);
+		controller.authenticate(authentication);
 	}
 	
 	@Test
 	public void testAuthenticateUser() throws Exception {
-	 mockMvc.perform(get("/authenticate-user")).andExpect(status().isOk());
+		mockMvc.perform(get("/authenticate-user")).andExpect(status().isOk());
 	}
 	
 	@Test

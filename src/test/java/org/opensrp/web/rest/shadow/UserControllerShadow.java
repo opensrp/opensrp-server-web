@@ -9,12 +9,12 @@ import org.opensrp.web.controller.UserController;
 
 public class UserControllerShadow extends UserController {
 	
-	public UserControllerShadow(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService) {
-		super(openmrsLocationService, openmrsUserService);
+	public UserControllerShadow(OpenmrsLocationService openmrsLocationService) {
+		super(openmrsLocationService);
 	}
 	
 	public UserControllerShadow() {
-		super(null,  null);
+		super(null);
 	}
 	
 	@Override

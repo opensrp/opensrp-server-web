@@ -15,10 +15,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -31,9 +28,7 @@ import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
-import org.opensrp.common.util.OpenMRSCrossVariables;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.LocationProperty.PropertyStatus;
 import org.opensrp.domain.Organization;
@@ -69,8 +64,6 @@ public class UserController {
 	
 	private OpenmrsLocationService openmrsLocationService;
 	
-	private OpenmrsUserService openmrsUserService;
-	
 	private OrganizationService organizationService;
 	
 	private PractitionerService practitionerService;
@@ -84,9 +77,8 @@ public class UserController {
 	protected boolean useOpenSRPTeamModule = false;
 	
 	@Autowired
-	public UserController(OpenmrsLocationService openmrsLocationService, OpenmrsUserService openmrsUserService) {
+	public UserController(OpenmrsLocationService openmrsLocationService) {
 		this.openmrsLocationService = openmrsLocationService;
-		this.openmrsUserService = openmrsUserService;
 	}
 	
 	/**
@@ -166,57 +158,7 @@ public class UserController {
 	}
 	
 	@RequestMapping("/security/authenticate")
-	@ResponseBody
-	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication)
-	        throws JSONException {
-		if (useOpenSRPTeamModule) {
-			return authenticateUsingOrganization(authentication);
-		}
-		User u = currentUser(authentication);
-		System.out.println(u);
-		String lid = "";
-		JSONObject tm = null;
-		try {
-			tm = openmrsUserService.getTeamMember(u.getAttribute("_PERSON_UUID").toString());
-			JSONArray locs = tm.getJSONArray(OpenMRSCrossVariables.LOCATIONS_JSON_KEY.makeVariable(OPENMRS_VERSION));
-			
-			for (int i = 0; i < locs.length(); i++) {
-				lid += locs.getJSONObject(i).getString("uuid") + ";;";
-			}
-		}
-		catch (Exception e) {
-			logger.error("USER Location info not mapped in team management module. Now trying Person Attribute", e);
-		}
-		if (StringUtils.isBlank(lid)) {
-			lid = (String) u.getAttribute("Location");
-			if (StringUtils.isBlank(lid)) {
-				lid = (String) u.getAttribute("Locations");
-				if (lid == null) {
-					throw new IllegalStateException(
-					        "User not mapped on any location. Make sure that user have a person attribute Location or Locations with uuid(s) of valid OpenMRS Location(s) separated by ;;");
-				}
-				
-			}
-		}
-		LocationTree l = openmrsLocationService.getLocationTreeOf(lid.split(";;"));
-		Map<String, Object> map = new HashMap<>();
-		map.put("user", u);
-		try {
-			Map<String, Object> tmap = new Gson().fromJson(tm.toString(), new TypeToken<HashMap<String, Object>>() {
-				
-			}.getType());
-			map.put("team", tmap);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		map.put("locations", l);
-		Time t = getServerTime();
-		map.put("time", t);
-		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
-	}
-	
-	private ResponseEntity<String> authenticateUsingOrganization(Authentication authentication) throws JSONException {
+	public ResponseEntity<String> authenticate(Authentication authentication) throws JSONException {
 		User u = currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		
@@ -331,10 +273,6 @@ public class UserController {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
-	}
-	
-	public void setOpenmrsUserService(OpenmrsUserService openmrsUserService) {
-		this.openmrsUserService = openmrsUserService;
 	}
 	
 }
