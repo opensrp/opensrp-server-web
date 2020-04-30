@@ -1,7 +1,6 @@
 package org.opensrp.web.rest.shadow;
 
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;

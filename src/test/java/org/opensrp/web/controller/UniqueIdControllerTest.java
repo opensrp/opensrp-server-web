@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.api.domain.User;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +56,6 @@ public class UniqueIdControllerTest {
 
 	@Mock
 	private UserController userController;
-
-	@Mock
-	private OpenmrsUserService openmrsUserService;
 
 	protected ObjectMapper mapper = new ObjectMapper();
 

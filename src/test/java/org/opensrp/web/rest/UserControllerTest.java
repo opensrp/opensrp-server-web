@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
@@ -33,7 +30,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.domain.UserDetail;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.PhysicalLocation;
@@ -70,9 +66,6 @@ public class UserControllerTest {
 	protected WebApplicationContext webApplicationContext;
 	
 	private MockMvc mockMvc;
-	
-	@Mock
-	private OpenmrsUserService openmrsUserService;
 	
 	@Mock
 	private Authentication authentication;
@@ -151,7 +144,6 @@ public class UserControllerTest {
 	@Test(expected = IllegalStateException.class)
 	public void testAuthenticateIfUserIsNotMapped() throws Exception {
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
-		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		Whitebox.setInternalState(userController, "useOpenSRPTeamModule", true);
@@ -162,7 +154,6 @@ public class UserControllerTest {
 	public void testAuthenticate() throws Exception {
 		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
-		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
