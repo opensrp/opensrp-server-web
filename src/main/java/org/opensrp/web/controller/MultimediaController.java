@@ -281,7 +281,7 @@ public class MultimediaController {
 
 	private void fileWithSpecialCharactersError(HttpServletResponse response) throws IOException {
 		String errorMessage = "Sorry. File Name should not contain any special character";
-		logger.info(errorMessage);
+		logger.error(errorMessage);
 		OutputStream outputStream = response.getOutputStream();
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
