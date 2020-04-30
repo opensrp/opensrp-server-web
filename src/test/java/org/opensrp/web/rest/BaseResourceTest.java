@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -53,7 +54,8 @@ public abstract class BaseResourceTest<T> {
 
     @Before
     public void bootStrap() {
-        this.mockMvc = MockMvcBuilders.webApplicationContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webApplicationContextSetup(this.webApplicationContext).
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

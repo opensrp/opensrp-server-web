@@ -16,6 +16,7 @@ import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.bean.ClientSyncBean;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -77,6 +78,7 @@ public class ClientResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(clientResource)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
 				.build();
 		clientResource.setObjectMapper(objectMapper);
 	}

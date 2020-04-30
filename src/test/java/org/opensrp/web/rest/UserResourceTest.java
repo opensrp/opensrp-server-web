@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.rest;
 
@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -34,27 +35,28 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 public class UserResourceTest {
-	
+
 	@Rule
 	public MockitoRule rule = MockitoJUnit.rule();
-	
+
 	@Mock
 	private OpenmrsUserService userService;
-	
+
 	@Autowired
 	protected WebApplicationContext webApplicationContext;
-	
+
 	private MockMvc mockMvc;
-	
+
 	private String BASE_URL = "/rest/user/";
-	
+
 	@Before
 	public void setUp() {
 		UserResource userResource = webApplicationContext.getBean(UserResource.class);
 		userResource.setUserService(userService);
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 	}
-	
+
 	@Test
 	public void testGetAllUsers() throws Exception {
 		String expected = "{\"person\":{\"display\":\"Reveal Tes Demo\"},\"display\":\"reveal\",\"uuid\":\"5e33cf03-2352nkh\"}";
@@ -66,6 +68,6 @@ public class UserResourceTest {
 		verify(userService).getUsers(limit, offset);
 		verifyNoMoreInteractions(userService);
 		assertEquals(expected, result.getResponse().getContentAsString());
-		
+
 	}
 }
