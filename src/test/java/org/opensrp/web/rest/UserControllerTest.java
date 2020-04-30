@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -45,6 +48,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -74,7 +79,7 @@ public class UserControllerTest {
 	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
 	
 	@Mock
-	private KeycloakSecurityContext securityContext;
+	private RefreshableKeycloakSecurityContext securityContext;
 	
 	@Mock
 	private AccessToken token;
@@ -90,11 +95,11 @@ public class UserControllerTest {
 	@Mock
 	private PhysicalLocationService locationService;
 	
-	private List<String> roles = Arrays.asList("ROLE_USER", "ADMIN");
+	private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 	
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);
@@ -136,9 +141,66 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	public void testGetUserDetailsShouldReturnUnauthorized() throws Exception {
-		MvcResult result = mockMvc.perform(get("/user-details")).andExpect(status().isUnauthorized()).andReturn();
-		assertTrue(result.getResponse().getContentAsString().isBlank());
+	@WithMockUser(username = "admin", roles = { "ADMIN" })
+	public void testGetUserDetailsIntegrationTest() throws Exception {
+		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
+		when(token.getPreferredUsername()).thenReturn(user.getUsername());
+		Authentication authentication = new Authentication() {
+			
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String getName() {
+				return user.getBaseEntityId();
+			}
+			
+			@Override
+			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public boolean isAuthenticated() {
+				return true;
+			}
+			
+			@Override
+			public Object getPrincipal() {
+				return keycloakPrincipal;
+			}
+			
+			@Override
+			public Object getDetails() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public Object getCredentials() {
+				return null;
+			}
+			
+			@Override
+			public Collection<? extends GrantedAuthority> getAuthorities() {
+				return roles.stream().map(role -> new GrantedAuthority() {
+					
+					private static final long serialVersionUID = 1L;
+					
+					@Override
+					public String getAuthority() {
+						return role;
+					}
+				}).collect(Collectors.toList());
+			}
+		};
+		MvcResult result = mockMvc
+		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
+		UserDetail userDetail = new ObjectMapper().readValue(result.getResponse().getContentAsString(), UserDetail.class);
+		assertEquals(user.getUsername(), userDetail.getUserName());
+		assertEquals(user.getBaseEntityId(), userDetail.getIdentifier());
+		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 	
 	@Test(expected = IllegalStateException.class)
