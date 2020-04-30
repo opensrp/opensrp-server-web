@@ -80,6 +80,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
+		.mvcMatchers("/rest/plans/findByUsername").hasRole(Role.PLANS_FOR_USER)
 		.mvcMatchers(OPTIONS,"/**").permitAll();
 		/* @formatter:on */
 		

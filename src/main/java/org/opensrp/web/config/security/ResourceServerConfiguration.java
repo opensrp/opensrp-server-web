@@ -58,6 +58,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		.and()
 			.authorizeRequests()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
+				.mvcMatchers("/rest/plans/findByUsername").hasRole(Role.PLANS_FOR_USER)
 				.anyRequest().hasRole(Role.OPENMRS)
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
