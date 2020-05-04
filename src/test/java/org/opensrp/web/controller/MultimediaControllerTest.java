@@ -12,10 +12,12 @@ import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,12 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 public class MultimediaControllerTest {
 
@@ -43,6 +48,7 @@ public class MultimediaControllerTest {
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
 	private final String FILE_NAME_ERROR = "File Name with special characters is not allowed!";
 	private final String ENTITY_ID_ERROR = "Entity Id should not contain any special character!";
+	private final String BASE_URL = "/multimedia";
 
 	@Before
 	public void setUp() {
@@ -112,7 +118,42 @@ public class MultimediaControllerTest {
 		assertEquals(response.getBody(),FILE_NAME_ERROR);
 	}
 
+	@Test
+	public void testDownloadFileByClientIdWithSpecialCharacterFileName() throws Exception {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("username", "testUser");
+		httpHeaders.add("password", "password");
 
+		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
+		Whitebox.setInternalState(multimediaController, "provider", provider);
+		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
+		File file = mock(File.class);
+		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
+		when(file.getName()).thenReturn("testFile"+ "\r" + ".pdf");
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id")
+				.headers(httpHeaders))
+				.andExpect(content().string("Sorry. File Name should not contain any special character"))
+				.andReturn();
+		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
+	}
+
+	@Test
+	public void testDownloadFileWithAuthWithSpecialCharacterFileName() throws Exception {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("username", "testUser");
+		httpHeaders.add("password", "password");
+
+		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
+		Whitebox.setInternalState(multimediaController, "provider", provider);
+		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
+		
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf")
+				.headers(httpHeaders))
+				.andExpect(content().string("Sorry. File Name should not contain any special character"))
+				.andReturn();
+		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
+	}
+	
 	private Authentication getMockedAuthentication() {
 		Authentication authentication = new Authentication() {
 
