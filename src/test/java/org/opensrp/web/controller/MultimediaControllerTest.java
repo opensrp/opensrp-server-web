@@ -31,7 +31,8 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -113,7 +114,7 @@ public class MultimediaControllerTest {
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
 
-		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id"+"\r", "file-category", multipartFile);
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getBody(),FILE_NAME_ERROR);
 	}
