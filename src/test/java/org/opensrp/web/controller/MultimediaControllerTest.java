@@ -109,7 +109,7 @@ public class MultimediaControllerTest {
 
 	@Test
 	public void testUploadShouldReturnBadRequestWithSpecialCharacterFileName() throws Exception {
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		MultipartFile multipartFile = mock(MultipartFile.class);
 		Mockito.doReturn("originalName" + "\t").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
@@ -144,7 +144,7 @@ public class MultimediaControllerTest {
 		httpHeaders.add("username", "testUser");
 		httpHeaders.add("password", "password");
 
-		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
+		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		Whitebox.setInternalState(multimediaController, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 		
