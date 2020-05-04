@@ -29,6 +29,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,6 +64,11 @@ public class ClientResourceTest {
 	private static final String GENDER = "gender";
 	private static final String CLIENTTYPE = "clientType";
 	public static final String ALLCLIENTS = "clients";
+	public static final String HOUSEHOLD = "ec_family";
+	public static final String HOUSEHOLDMEMEBR = "householdMember";
+	public static final String ANC = "anc";
+	public static final String CHILD = "child";
+
 
 	private String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON =  "{\n"
 			+ "\t\"clients\": [{\n"
@@ -113,7 +119,7 @@ public class ClientResourceTest {
 	}
 
 	@Test
-	public void testSearchByCriteria() throws Exception {
+	public void testSearchByCriteriaWithClientTypeAsClients() throws Exception {
 
 		List<Client> expectedClients = new ArrayList<>();
 		expectedClients.add(createClient());
@@ -144,6 +150,126 @@ public class ClientResourceTest {
 
 	}
 
+	@Test
+	public void testSearchByCriteriaWithClientTypeAsHousehold() throws Exception {
+
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+		HouseholdClient householdClient = new HouseholdClient();
+		householdClient.setTotalCount(1);
+
+		when(clientService.findHouseholdByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), any(DateTime.class),any(DateTime.class))).thenReturn(expectedClients);
+		when(clientService.findTotalCountHouseholdByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class))).thenReturn(householdClient);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
+				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+				.param(CLIENTTYPE, HOUSEHOLD))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		ClientSyncBean response = mapper.treeToValue(actualObj, ClientSyncBean.class);
+
+		assertEquals(response.getClients().size(),1);
+		assertEquals(response.getTotal().intValue(), 1);
+		assertEquals(response.getClients().get(0).getFirstName(), "Test");
+		assertEquals(response.getClients().get(0).getLastName(), "User");
+
+	}
+
+	@Test
+	public void testSearchByCriteriaWithClientTypeAsHouseholdMember() throws Exception {
+
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+
+		when(clientService.findMembersByRelationshipId(anyString())).thenReturn(expectedClients);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
+				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+				.param(CLIENTTYPE, HOUSEHOLDMEMEBR))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		ClientSyncBean response = mapper.treeToValue(actualObj, ClientSyncBean.class);
+
+		assertEquals(response.getClients().size(),1);
+		assertEquals(response.getTotal().intValue(), 1);
+		assertEquals(response.getClients().get(0).getFirstName(), "Test");
+		assertEquals(response.getClients().get(0).getLastName(), "User");
+	}
+
+	@Test
+	public void testSearchByCriteriaWithClientTypeAsANC() throws Exception {
+
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+		int total = 1;
+
+		when(clientService.findAllANCByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class))).thenReturn(expectedClients);
+		when(clientService.findCountANCByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class))).thenReturn(total);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
+				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+				.param(CLIENTTYPE, ANC))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		ClientSyncBean response = mapper.treeToValue(actualObj, ClientSyncBean.class);
+
+		assertEquals(response.getClients().size(),1);
+		assertEquals(response.getTotal().intValue(), 1);
+		assertEquals(response.getClients().get(0).getFirstName(), "Test");
+		assertEquals(response.getClients().get(0).getLastName(), "User");
+
+	}
+
+	@Test
+	public void testSearchByCriteriaWithClientTypeAsChild() throws Exception {
+
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+		int total = 1;
+
+		when(clientService.findAllChildByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class))).thenReturn(expectedClients);
+		when(clientService.findCountChildByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class))).thenReturn(total);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
+				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+				.param(CLIENTTYPE, CHILD))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		ClientSyncBean response = mapper.treeToValue(actualObj, ClientSyncBean.class);
+
+		assertEquals(response.getClients().size(),1);
+		assertEquals(response.getTotal().intValue(), 1);
+		assertEquals(response.getClients().get(0).getFirstName(), "Test");
+		assertEquals(response.getClients().get(0).getLastName(), "User");
+
+	}
 
 	private Client createClient() {
 		Client client = new Client("base-entity-id");
