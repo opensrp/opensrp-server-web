@@ -74,17 +74,17 @@ public class MultimediaControllerTest {
 				.saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class), stringArgumentCaptor.capture());
 
 		// verify call arguments
-		Assert.assertEquals(stringArgumentCaptor.getValue(), "originalName");
+		assertEquals(stringArgumentCaptor.getValue(), "originalName");
 	}
 
 	@Test
 	public void testDownloadWithAuth() {
 		MultimediaController controller = Mockito.spy(new MultimediaController());
 
-		MultimediaService multimediaService = Mockito.mock(MultimediaService.class);
-		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
-		HttpServletResponse httpServletResponse = Mockito.mock(HttpServletResponse.class);
-		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+		MultimediaService multimediaService = mock(MultimediaService.class);
+		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
+		HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
 		Whitebox.setInternalState(controller, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
@@ -97,7 +97,7 @@ public class MultimediaControllerTest {
 
 	@Test
 	public void testUploadShouldReturnBadRequestWithInvalidEntityId() throws Exception {
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		MultipartFile multipartFile = mock(MultipartFile.class);
 		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
@@ -125,7 +125,7 @@ public class MultimediaControllerTest {
 		httpHeaders.add("username", "testUser");
 		httpHeaders.add("password", "password");
 
-		DrishtiAuthenticationProvider provider = Mockito.mock(DrishtiAuthenticationProvider.class);
+		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		Whitebox.setInternalState(multimediaController, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 		File file = mock(File.class);
