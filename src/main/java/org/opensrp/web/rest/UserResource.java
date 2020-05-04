@@ -36,7 +36,7 @@ public class UserResource {
 	@Autowired
 	private KeycloakRestTemplate restTemplate;
 	
-	@Value("#{keycloak.password.reset.endpoint']}")
+	@Value("#{opensrp['keycloak.password.reset.endpoint']}")
 	private String resetPasswordURL;
 	
 	/**
@@ -56,7 +56,7 @@ public class UserResource {
 		
 	}
 	
-	@RequestMapping(value = "/reset-password", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/reset-password", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	private ResponseEntity<String> changePassword(@RequestBody ResetPasswordBean resetPasswordBean) {
 		String url = MessageFormat.format(resetPasswordURL, keycloakDeployment.getAuthServerBaseUrl(),
 		    keycloakDeployment.getRealm());
