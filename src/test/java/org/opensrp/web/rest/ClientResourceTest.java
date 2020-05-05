@@ -28,9 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.Client.*;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,6 +92,15 @@ public class ClientResourceTest {
 	}
 
 	@Test
+	public void testRequiredProperties() {
+		List<String> requiredProperties = clientResource.requiredProperties();
+		assertTrue(requiredProperties.contains(FIRST_NAME));
+		assertTrue(requiredProperties.contains(GENDER));
+		assertTrue(requiredProperties.contains(BIRTH_DATE));
+		assertTrue(requiredProperties.contains(BASE_ENTITY_ID));
+	}
+	
+	@Test
 	public void testGetByUniqueId() {
 		Client expected = createClient();
 		when(clientService.find(any(String.class))).thenReturn(expected);
@@ -117,6 +129,17 @@ public class ClientResourceTest {
 		Client actual = clientResource.update(obj);
 		assertEquals(actual.getId(),expected.getId());
 		assertEquals(actual.getDateEdited(),expected.getDateEdited());
+	}
+	
+	@Test
+	public void testFilter() {
+		List<Client> expected = new ArrayList<>();
+		expected.add(createClient());
+		
+		when(clientService.findByDynamicQuery(anyString())).thenReturn(expected);
+		List<Client> actual = clientResource.filter("");
+		assertEquals(actual.size(),expected.size());
+		assertEquals(actual.get(0).getFirstName(),expected.get(0).getFirstName());
 	}
 
 	@Test
