@@ -150,7 +150,7 @@ public class MultimediaControllerTest {
 		File file = mock(File.class);
 		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		when(file.getName()).thenReturn("testFile" + ".pdf");
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id" + "\n")
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*")
 				.headers(httpHeaders))
 				.andExpect(content().string("Sorry. Entity Id should not contain any special character"))
 				.andReturn();
