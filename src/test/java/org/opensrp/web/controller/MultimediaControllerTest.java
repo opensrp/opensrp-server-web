@@ -139,6 +139,26 @@ public class MultimediaControllerTest {
 	}
 
 	@Test
+	public void testDownloadFileByClientIdWithSpecialCharacterEntityId() throws Exception {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("username", "testUser");
+		httpHeaders.add("password", "password");
+
+		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
+		Whitebox.setInternalState(multimediaController, "provider", provider);
+		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
+		File file = mock(File.class);
+		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
+		when(file.getName()).thenReturn("testFile" + ".pdf");
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id" + "\n")
+				.headers(httpHeaders))
+				.andExpect(content().string("Sorry. Entity Id should not contain any special character"))
+				.andReturn();
+		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
+	}
+
+
+	@Test
 	public void testDownloadFileWithAuthWithSpecialCharacterFileName() throws Exception {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("username", "testUser");

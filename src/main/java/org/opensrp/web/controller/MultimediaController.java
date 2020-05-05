@@ -111,7 +111,17 @@ public class MultimediaController {
 	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
 			@RequestHeader(value = "username") String userName,
 			@RequestHeader(value = "password") String password, HttpServletRequest request) {
-		downloadFileWithAuth(baseEntityId, userName, password, request, response);
+
+		try {
+			if (hasSpecialCharacters(baseEntityId)) {
+				entityIdWithSpecialCharactersError(response);
+				return;
+			}
+			downloadFileWithAuth(baseEntityId, userName, password, request, response);
+		}
+		catch (Exception e) {
+			logger.error("Exception occurred in downloading file by client ID ", e);
+		}
 	}
 
 	/**
@@ -281,6 +291,15 @@ public class MultimediaController {
 
 	private void fileWithSpecialCharactersError(HttpServletResponse response) throws IOException {
 		String errorMessage = "Sorry. File Name should not contain any special character";
+		logger.error(errorMessage);
+		OutputStream outputStream = response.getOutputStream();
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.close();
+	}
+
+	private void entityIdWithSpecialCharactersError(HttpServletResponse response) throws IOException {
+		String errorMessage = "Sorry. Entity Id should not contain any special character";
 		logger.error(errorMessage);
 		OutputStream outputStream = response.getOutputStream();
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
