@@ -68,6 +68,7 @@ public class ClientResourceTest {
 	public static final String HOUSEHOLDMEMEBR = "householdMember";
 	public static final String ANC = "anc";
 	public static final String CHILD = "child";
+	public static final String LOCATION_ID = "locationId";
 
 
 	private String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON =  "{\n"
@@ -254,7 +255,8 @@ public class ClientResourceTest {
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
 				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
 				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-				.param(CLIENTTYPE, CHILD))
+				.param(CLIENTTYPE, CHILD)
+				.param(LOCATION_ID, "location1,location2"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
