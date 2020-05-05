@@ -14,6 +14,7 @@ import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -48,7 +50,11 @@ public class StockResourceTest {
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/rest/stockresource/";
-
+	
+	private final String SYNC_PAYLOAD = "{\n"
+			+ "\t\"stocks\": \"[{\\\"identifier\\\":123,\\\"providerid\\\":\\\"test-id\\\"}]\"\n"
+			+ "}";
+	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -141,7 +147,25 @@ public class StockResourceTest {
 		Stock actual = stockResource.update(stockObject);
 		assertEquals(actual.getId(), actual.getId());
 	}
+	
+	@Test
+	public void testSave() throws Exception {
+		when(stockService.addorUpdateStock(any(Stock.class))).thenReturn(createStock());
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
+				.content(SYNC_PAYLOAD.getBytes()))
+				.andExpect(status().isCreated()).andReturn();
 
+		assertEquals(result.getResponse().getContentAsString(), "");
+	}
+
+	@Test
+	public void testSaveWithBlankData() throws Exception {
+		when(stockService.addorUpdateStock(any(Stock.class))).thenReturn(createStock());
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
+				.content("".getBytes()))
+				.andExpect(status().isBadRequest()).andReturn();
+	}
+	
 	private Stock createStock() {
 		Stock stock = new Stock();
 		stock.setIdentifier(12345l);
