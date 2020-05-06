@@ -24,13 +24,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
@@ -295,6 +297,18 @@ public class ClientResourceTest {
 		assertEquals(response.getClients().get(0).getFirstName(), "Test");
 		assertEquals(response.getClients().get(0).getLastName(), "User");
 
+	}
+	
+	@Test
+	public void testSearch() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+		expected.add(createClient());
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),expected.size());
+		assertEquals(clients.get(0).getFirstName(),expected.get(0).getFirstName());
 	}
 
 	private Client createClient() {

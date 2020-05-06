@@ -12,6 +12,7 @@ import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import org.mockito.*;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
+import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.bean.EventSyncBean;
@@ -37,7 +39,8 @@ import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.springframework.test.web.servlet.MockMvc;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class EventResourceTest extends BaseResourceTest<Event> {
 
@@ -280,6 +283,16 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		List<Event> actual = eventResource.filter("");
 		assertEquals(actual.size(),expected.size());
 		assertEquals(actual.get(0).getId(),expected.get(0).getId());
+	}
+	
+	@Test
+	public void testSearch() throws Exception {
+    	List<Event> expected = new ArrayList<>();
+    	expected.add(createEvent());
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(eventService.findEventsBy(any(EventSearchBean.class))).thenReturn(expected);
+		List<Event> events = eventResource.search(httpServletRequest);
+		assertEquals(events.size(),expected.size());
 	}
 	
 	private Event createEvent() {
