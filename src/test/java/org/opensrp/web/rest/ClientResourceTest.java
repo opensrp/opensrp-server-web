@@ -33,7 +33,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.Client.*;
+import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -276,7 +277,7 @@ public class ClientResourceTest {
 		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				param(BASE_ENTITY_ID, "15421904649873")
 				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
 				.param(CLIENTTYPE, CHILD)
 				.param(LOCATION_ID, "location1,location2"))

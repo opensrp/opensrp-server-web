@@ -87,7 +87,7 @@ public class ReportResourceTest {
 		assertEquals(responseString, "");
 	}
 	
-	Report createReport() {
+	private Report createReport() {
 		Report report = new Report();
          report.setId("Test-ID");
          report.setLocationId("locationId");

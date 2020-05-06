@@ -167,6 +167,7 @@ public class StockResourceTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
 				.content("".getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
+		assertEquals(result.getResponse().getContentAsString(), "");
 	}
 
 	@Test
