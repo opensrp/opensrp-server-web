@@ -161,14 +161,11 @@ public class UserController {
 	public ResponseEntity<String> authenticate(Authentication authentication) throws JSONException {
 		User u = currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
-		
-		Map<String, String> openMRSIdsMap = new HashMap<>();
 		Set<String> openMRSIds = new HashSet<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
 		Set<String> jurisdictionNames = new HashSet<>();
-		Map<String, String> locationAndParent = new HashMap<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -180,39 +177,13 @@ public class UserController {
 			
 			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
 			
-			for (PhysicalLocation jurisdiction : jurisdictions) {
-				if (PropertyStatus.INACTIVE.equals(jurisdiction.getProperties().getStatus()))
-					continue;
-				String openMRSId = jurisdiction.getProperties().getCustomProperties().get("OpenMRS_Id");
-				if (StringUtils.isNotBlank(openMRSId)) {
-					String parentId = jurisdiction.getProperties().getParentId();
-					openMRSIdsMap.put(jurisdiction.getId(), openMRSId);
-					locationAndParent.put(jurisdiction.getId(), parentId);
-				}
-				jurisdictionNames.add(jurisdiction.getProperties().getName());
-			}
-			
-			Set<String> parentLocations = LocationUtils.getRootLocation(locationAndParent);
-			if (parentLocations.size() == 1) {
-				openMRSIds.addAll(openMRSIdsMap.values());
-			} else {
-				for (String locationId : parentLocations) {
-					if (openMRSIdsMap.containsKey(locationId)) {
-						openMRSIds.add(openMRSIdsMap.get(locationId));
-					} else {
-						openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
-						        .get("OpenMRS_Id"));
-					}
-				}
-			}
-			
 		}
 		catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
 		}
-		if (openMRSIds.isEmpty()) {
+		if (locationIds.isEmpty()) {
 			throw new IllegalStateException(
-			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) including OpenMRS ");
+			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
 		LocationTree l = new LocationTree();
