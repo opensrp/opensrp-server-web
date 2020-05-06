@@ -78,6 +78,16 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 			+ "\t\"clients\": \"[{\\\"birthdate\\\":\\\"1970-01-01T05:00:00.000Z\\\",\\\"firstName\\\":\\\"Test\\\",\\\"gender\\\":\\\"Male\\\",\\\"lastName\\\":\\\"User\\\" , \\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\"}]\",\n"
 			+ "\t\"events\": \"[{\\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\",\\\"entityType\\\":\\\"ec_family\\\",\\\"eventDate\\\":\\\"2020-05-02T23:26:21.685Z\\\"}]\"\n"
 			+ "}";
+	
+	private String POST_SYNC_REQUEST = "{\n"
+			+ "\t\"providerId\": \"test\",\n"
+			+ "\t\"locationId\": \"test\",\n"
+			+ "\t\"baseEntityId\": \"test\",\n"
+			+ "\t\"serverVersion\": 15421904649873,\n"
+			+ "\t\"team\": \"test\",\n"
+			+ "\t\"teamId\": \"test\",\n"
+			+ "\t\"limit\": 5\n"
+			+ "}";
 
     public EventResourceTest() throws IOException {
         super();
@@ -352,12 +362,30 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 	    doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
 
 	    String parameter = PROVIDER_ID+"=providerId&"+LOCATION_ID+"=locationId&"+BASE_ENTITY_ID+"=base-entity-id&"+SERVER_VERSIOIN+"=15421904649873&"+TEAM+"=team&"+TEAM_ID+"=team_id";
-	    String response = getResponseAsString(BASE_URL + "/getAll", parameter, status().isOk());
+	    String response = getResponseAsString(BASE_URL + "/sync", parameter, status().isOk());
 	    verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
 	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 	    assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
 	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
     }
+
+	@Test
+	public void testPostSync() throws Exception {
+		List<Event> expectedEvents = new ArrayList<>();
+		expectedEvents.add(createEvent());
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+
+		doReturn(expectedEvents).when(eventService).findEvents(any(EventSearchBean.class), anyString(), anyString(), any(int.class));
+		doReturn(expectedClients).when(clientService).findByFieldValue(anyString(),anyList());
+		doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
+
+		postRequestWithJsonContent(BASE_URL + "/sync", POST_SYNC_REQUEST, status().isOk());
+		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
+		assertEquals(integerArgumentCaptor.getValue(), new Integer(5));
+		assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+	}
 
 
 	private Event createEvent() {
