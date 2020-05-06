@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -28,9 +27,7 @@ import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.LocationProperty.PropertyStatus;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
@@ -38,7 +35,6 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
-import org.opensrp.web.utils.LocationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +58,6 @@ public class UserController {
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
 	
-	private OpenmrsLocationService openmrsLocationService;
-	
 	private OrganizationService organizationService;
 	
 	private PractitionerService practitionerService;
@@ -75,11 +69,6 @@ public class UserController {
 	
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
-	
-	@Autowired
-	public UserController(OpenmrsLocationService openmrsLocationService) {
-		this.openmrsLocationService = openmrsLocationService;
-	}
 	
 	/**
 	 * @param organizationService the organizationService to set
@@ -161,11 +150,9 @@ public class UserController {
 	public ResponseEntity<String> authenticate(Authentication authentication) throws JSONException {
 		User u = currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
-		Set<String> openMRSIds = new HashSet<>();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
-		Set<String> jurisdictionNames = new HashSet<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -175,7 +162,7 @@ public class UserController {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 			
-			jurisdictions = locationService.findLocationsByIdsOrParentIds(false, new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
 			
 		}
 		catch (Exception e) {
@@ -186,13 +173,7 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = new LocationTree();
-		try {
-			l = openmrsLocationService.getLocationTreeOf(openMRSIds.toArray(new String[] {}));
-		}
-		catch (Exception e) {
-			logger.error("Error getting location tree from OpenMRS", e);
-		}
+		LocationTree l = locationService.findLocationHierachy(locationIds);
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
@@ -211,7 +192,7 @@ public class UserController {
 		JSONObject teamLocation = new JSONObject();
 		// TODO populate jurisdictions if user has many jurisdictions
 		PhysicalLocation jurisdiction = jurisdictions.get(0);
-		teamLocation.put("uuid", openMRSIds.iterator().next());
+		teamLocation.put("uuid", locationIds.iterator().next());
 		teamLocation.put("name", jurisdiction.getProperties().getName());
 		teamLocation.put("display", jurisdiction.getProperties().getName());
 		teamJson.put("location", teamLocation);
@@ -234,7 +215,8 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		map.put("jurisdictions", jurisdictionNames);
+		map.put("jurisdictions",
+		    jurisdictions.stream().map(location -> location.getProperties().getName()).collect(Collectors.toSet()));
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	
