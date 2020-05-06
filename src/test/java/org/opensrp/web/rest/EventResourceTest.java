@@ -8,6 +8,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.common.AllConstants.Event.*;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
@@ -30,6 +33,7 @@ import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.search.EventSearchBean;
+import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.bean.EventSyncBean;
@@ -39,6 +43,7 @@ import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,6 +54,8 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     private String eventType = "Spray";
 
     private EventService eventService;
+
+	private ClientService clientService;
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -61,9 +68,16 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
     @Captor
     private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
+    
+    @Captor
+    private ArgumentCaptor<EventSearchBean> eventSearchBeanArgumentCaptor = ArgumentCaptor.forClass(EventSearchBean.class);
 
 	private EventResource eventResource;
-
+	
+	private String ADD_REQUEST_PAYLOAD  = "{\n"
+			+ "\t\"clients\": \"[{\\\"birthdate\\\":\\\"1970-01-01T05:00:00.000Z\\\",\\\"firstName\\\":\\\"Test\\\",\\\"gender\\\":\\\"Male\\\",\\\"lastName\\\":\\\"User\\\" , \\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\"}]\",\n"
+			+ "\t\"events\": \"[{\\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\",\\\"entityType\\\":\\\"ec_family\\\",\\\"eventDate\\\":\\\"2020-05-02T23:26:21.685Z\\\"}]\"\n"
+			+ "}";
 
     public EventResourceTest() throws IOException {
         super();
@@ -72,8 +86,10 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     @Before
     public void setUp() {
         eventService = mock(EventService.class);
+        clientService = mock(ClientService.class);
         eventResource = webApplicationContext.getBean(EventResource.class);
         eventResource.setEventService(eventService);
+        eventResource.setClientService(clientService);
 		eventResource.setObjectMapper(mapper);
     }
 
@@ -295,11 +311,70 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		assertEquals(events.size(),expected.size());
 	}
 	
+	@Test
+	public void testSave() throws Exception {
+	    Client client = createClient();
+	    Event event = createEvent();
+		doReturn(client).when(clientService).addorUpdate(any(Client.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class));
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+	}
+
+	@Test
+	public void testGetAll() throws Exception {
+		List<Event> expectedEvents = new ArrayList<>();
+		expectedEvents.add(createEvent());
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+		
+		doReturn(expectedEvents).when(eventService).findEvents(any(EventSearchBean.class), anyString(), anyString(), any(int.class));
+		doReturn(expectedClients).when(clientService).findByFieldValue(anyString(),anyList());
+		doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
+
+		String parameter = SERVER_VERSIOIN + "=15421904649873";
+		String response = getResponseAsString(BASE_URL + "/getAll", parameter, status().isOk());
+		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
+		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
+		assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+    }
+    
+    @Test
+    public void testGetSync() throws Exception{
+	    List<Event> expectedEvents = new ArrayList<>();
+	    expectedEvents.add(createEvent());
+	    List<Client> expectedClients = new ArrayList<>();
+	    expectedClients.add(createClient());
+
+	    doReturn(expectedEvents).when(eventService).findEvents(any(EventSearchBean.class), anyString(), anyString(), any(int.class));
+	    doReturn(expectedClients).when(clientService).findByFieldValue(anyString(),anyList());
+	    doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
+
+	    String parameter = PROVIDER_ID+"=providerId&"+LOCATION_ID+"=locationId&"+BASE_ENTITY_ID+"=base-entity-id&"+SERVER_VERSIOIN+"=15421904649873&"+TEAM+"=team&"+TEAM_ID+"=team_id";
+	    String response = getResponseAsString(BASE_URL + "/getAll", parameter, status().isOk());
+	    verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
+	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
+	    assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+    }
+
+
 	private Event createEvent() {
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 				.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 		String expectedEventString = "{\"identifiers\":{},\"baseEntityId\":\"5dd43b2e-a873-444b-b527-95c4b040a5bb\",\"locationId\":\"fb7ed5db-138d-4e6f-94d8-bc443b58dadb\",\"eventDate\":\"2020-02-14T03:00:00.000+03:00\",\"eventType\":\"Family Member Registration\",\"formSubmissionId\":\"a2fba8d2-42f5-4811-b982-57609f1815fe\",\"providerId\":\"unifiedchwone\",\"duration\":0,\"obs\":[{\"fieldType\":\"formsubmissionField\",\"fieldDataType\":\"text\",\"fieldCode\":\"same_as_fam_name\",\"parentCode\":\"\",\"values\":[\"true\"],\"set\":[],\"formSubmissionField\":\"same_as_fam_name\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"\",\"parentCode\":\"\",\"values\":[\"Baba\"],\"set\":[],\"formSubmissionField\":\"fam_name\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"\",\"parentCode\":\"\",\"values\":[\"43\"],\"set\":[],\"formSubmissionField\":\"age_calculated\",\"humanReadableValues\":[]},{\"fieldType\":\"formsubmissionField\",\"fieldDataType\":\"text\",\"fieldCode\":\"dob_unknown\",\"parentCode\":\"\",\"values\":[\"true\"],\"set\":[],\"formSubmissionField\":\"dob_unknown\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"\",\"parentCode\":\"\",\"values\":[\"1\"],\"set\":[],\"formSubmissionField\":\"wra\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"\",\"parentCode\":\"\",\"values\":[\"0\"],\"set\":[],\"formSubmissionField\":\"mra\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"160692AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"],\"set\":[],\"formSubmissionField\":\"preg_1yr\",\"humanReadableValues\":[\"No\"]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"162558AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"],\"set\":[],\"formSubmissionField\":\"disabilities\",\"humanReadableValues\":[\"No\"]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"\",\"parentCode\":\"\",\"values\":[null],\"set\":[],\"formSubmissionField\":\"is_primary_caregiver\",\"humanReadableValues\":[\"Yes\"]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"1542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"1542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"values\":[\"163096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"],\"set\":[],\"formSubmissionField\":\"service_provider\",\"humanReadableValues\":[\"Community IMCI\"]},{\"fieldType\":\"formsubmissionField\",\"fieldDataType\":\"text\",\"fieldCode\":\"last_interacted_with\",\"parentCode\":\"\",\"values\":[\"1581697252432\"],\"set\":[],\"formSubmissionField\":\"last_interacted_with\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"start\",\"fieldCode\":\"163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"2020-02-14 19:19:58\"],\"set\":[],\"formSubmissionField\":\"start\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"end\",\"fieldCode\":\"163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"2020-02-14 19:20:52\"],\"set\":[],\"formSubmissionField\":\"end\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"deviceid\",\"fieldCode\":\"163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"359050095070928\"],\"set\":[],\"formSubmissionField\":\"deviceid\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"subscriberid\",\"fieldCode\":\"163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"639070028267663\"],\"set\":[],\"formSubmissionField\":\"subscriberid\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"simserial\",\"fieldCode\":\"163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"89254070000282676636\"],\"set\":[],\"formSubmissionField\":\"simserial\",\"humanReadableValues\":[]},{\"fieldType\":\"concept\",\"fieldDataType\":\"text\",\"fieldCode\":\"162849AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\"parentCode\":\"\",\"values\":[\"true\"],\"set\":[],\"formSubmissionField\":\"wra\",\"humanReadableValues\":[]}],\"entityType\":\"ec_family_member\",\"version\":1581697252446,\"teamId\":\"de7d5dbe-6d21-4300-a72e-6eee14712f62\",\"team\":\"Madona\",\"dateCreated\":\"2020-02-14T19:21:21.295+03:00\",\"serverVersion\":1581697281295,\"clientApplicationVersion\":2,\"clientDatabaseVersion\":13,\"type\":\"Event\",\"id\":\"24032715-7d65-434d-b50a-0b96ec63996a\",\"revision\":\"v1\"}";
 		return gson.fromJson(expectedEventString, new TypeToken<Event>() {}.getType());
+	}
+
+	private Client createClient() {
+		Client client = new Client("base-entity-id");
+		client.setFirstName("Test");
+		client.setLastName("User");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setDateEdited(new DateTime());
+		return client;
 	}
 
 }
