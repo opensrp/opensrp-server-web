@@ -45,7 +45,6 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
     private String eventType = "Spray";
 
-    @Mock
     private EventService eventService;
 
     @Captor
@@ -60,10 +59,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     @Captor
     private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
 
-    @InjectMocks
 	private EventResource eventResource;
-
-	private MockMvc mockMvc;
 
 
     public EventResourceTest() throws IOException {
@@ -72,10 +68,10 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
     @Before
     public void setUp() {
-	    MockitoAnnotations.initMocks(this);
-	    mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(eventResource)
-			    .build();
-	    eventResource.setObjectMapper(mapper);
+        eventService = mock(EventService.class);
+        eventResource = webApplicationContext.getBean(EventResource.class);
+        eventResource.setEventService(eventService);
+		eventResource.setObjectMapper(mapper);
     }
 
     @Test
@@ -280,7 +276,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		List<Event> expected = new ArrayList<>();
 		expected.add(createEvent());
 
-		Mockito.when(eventService.findEventsByDynamicQuery(anyString())).thenReturn(expected);
+		when(eventService.findEventsByDynamicQuery(anyString())).thenReturn(expected);
 		List<Event> actual = eventResource.filter("");
 		assertEquals(actual.size(),expected.size());
 		assertEquals(actual.get(0).getId(),expected.get(0).getId());
