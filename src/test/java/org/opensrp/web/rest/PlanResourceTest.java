@@ -409,7 +409,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
-        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "sync", SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());

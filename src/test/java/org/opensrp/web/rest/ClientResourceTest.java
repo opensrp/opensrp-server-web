@@ -31,9 +31,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
@@ -248,7 +250,7 @@ public class ClientResourceTest {
 		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				param(BASE_ENTITY_ID, "15421904649873")
 				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
 				.param(CLIENTTYPE, ANC))
 				.andExpect(status().isOk()).andReturn();

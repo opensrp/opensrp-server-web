@@ -7,15 +7,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.common.AllConstants.Event.*;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,8 +25,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import org.opensrp.common.AllConstants;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
+import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -43,7 +53,6 @@ import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -71,7 +80,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     
     @Captor
     private ArgumentCaptor<EventSearchBean> eventSearchBeanArgumentCaptor = ArgumentCaptor.forClass(EventSearchBean.class);
-
+    
 	private EventResource eventResource;
 	
 	private String ADD_REQUEST_PAYLOAD  = "{\n"
@@ -140,7 +149,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, false, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
-        String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "&serverVersion=0";
+        String parameter = EVENT_TYPE + "=" + eventType + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
@@ -168,7 +177,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
 
-        String parameter = AllConstants.Event.EVENT_TYPE + "=" + eventType + "&is_deleted=" + true + "&serverVersion=0";
+        String parameter = EVENT_TYPE + "=" + eventType + "&is_deleted=" + true + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
@@ -383,7 +392,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		postRequestWithJsonContent(BASE_URL + "/sync", POST_SYNC_REQUEST, status().isOk());
 		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(5));
-		assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
 	}
 
