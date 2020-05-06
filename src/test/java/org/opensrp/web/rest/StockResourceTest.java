@@ -25,8 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -108,7 +111,7 @@ public class StockResourceTest {
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/sync").param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
-						.param("limit", "1"))
+						.param("limit", "0"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -164,6 +167,25 @@ public class StockResourceTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
 				.content("".getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
+	}
+
+	@Test
+	public void testRequiredProperties() {
+		List<String> actualRequiredProperties = stockResource.requiredProperties();
+
+		assertEquals(2, actualRequiredProperties.size());
+		assertTrue(actualRequiredProperties.contains(PROVIDERID));
+		assertTrue(actualRequiredProperties.contains(TIMESTAMP));
+	}
+	
+	@Test
+	public void testFilter() {
+		List<Stock> expected = new ArrayList<>();
+		expected.add(createStock());
+		when(stockService.findAllStocks()).thenReturn(expected);
+		List<Stock> actual = stockResource.filter("");
+		assertEquals(expected.size(),actual.size());
+		assertEquals(expected.get(0).getIdentifier(),actual.get(0).getIdentifier());
 	}
 	
 	private Stock createStock() {
