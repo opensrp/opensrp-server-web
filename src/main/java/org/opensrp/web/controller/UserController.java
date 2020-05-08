@@ -173,7 +173,7 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = locationService.findLocationHierachy(locationIds);
+		LocationTree l = locationService.buildLocationHierachy(locationIds);
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
@@ -189,16 +189,18 @@ public class UserController {
 		teamJson.put("uuid", organization.getIdentifier());
 		teamJson.put("organizationIds", practionerOrganizationIds.right);
 		
-		JSONObject teamLocation = new JSONObject();
-		// TODO populate jurisdictions if user has many jurisdictions
-		PhysicalLocation jurisdiction = jurisdictions.get(0);
-		teamLocation.put("uuid", locationIds.iterator().next());
-		teamLocation.put("name", jurisdiction.getProperties().getName());
-		teamLocation.put("display", jurisdiction.getProperties().getName());
-		teamJson.put("location", teamLocation);
-		
 		JSONArray locations = new JSONArray();
-		locations.put(teamLocation);
+		
+		for (PhysicalLocation jurisdiction : jurisdictions) {
+			JSONObject teamLocation = new JSONObject();
+			teamLocation.put("uuid", locationIds.iterator().next());
+			teamLocation.put("name", jurisdiction.getProperties().getName());
+			teamLocation.put("display", jurisdiction.getProperties().getName());
+			locations.put(teamLocation);
+		}
+		
+		//team location is still returned as 1 object
+		teamJson.put("location", locations.getJSONObject(0));
 		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
 		
