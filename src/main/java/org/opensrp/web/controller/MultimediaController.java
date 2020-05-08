@@ -52,6 +52,9 @@ public class MultimediaController {
 
 	private MultimediaService multimediaService;
 
+	private final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
+	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
+
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
 		this.multimediaService = multimediaService;
@@ -76,7 +79,7 @@ public class MultimediaController {
 
 		try {
 			if (hasSpecialCharacters(fileName)) {
-				fileWithSpecialCharactersError(response);
+				specialCharactersError(response, Boolean.TRUE);
 				return;
 			}
 
@@ -114,7 +117,7 @@ public class MultimediaController {
 
 		try {
 			if (hasSpecialCharacters(baseEntityId)) {
-				entityIdWithSpecialCharactersError(response);
+				specialCharactersError(response, Boolean.FALSE);
 				return;
 			}
 			downloadFileWithAuth(baseEntityId, userName, password, request, response);
@@ -240,7 +243,7 @@ public class MultimediaController {
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 
 		if(hasSpecialCharacters(file.getName())) {
-			fileWithSpecialCharactersError(response);
+			specialCharactersError(response, Boolean.TRUE);
 			return;
 		}
 
@@ -289,21 +292,16 @@ public class MultimediaController {
 		outputStream.close();
 	}
 
-	private void fileWithSpecialCharactersError(HttpServletResponse response) throws IOException {
-		String errorMessage = "Sorry. File Name should not contain any special character";
-		logger.error(errorMessage);
+	private void specialCharactersError(HttpServletResponse response, Boolean specialCharactersInFile) throws IOException {
 		OutputStream outputStream = response.getOutputStream();
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-		outputStream.close();
-	}
-
-	private void entityIdWithSpecialCharactersError(HttpServletResponse response) throws IOException {
-		String errorMessage = "Sorry. Entity Id should not contain any special character";
-		logger.error(errorMessage);
-		OutputStream outputStream = response.getOutputStream();
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		if (specialCharactersInFile) {
+			logger.error(FILE_NAME_ERROR_MESSAGE);
+			outputStream.write(FILE_NAME_ERROR_MESSAGE.getBytes(Charset.forName("UTF-8")));
+		} else {
+			logger.error(ENTITY_ID_ERROR_MESSAGE);
+			outputStream.write(ENTITY_ID_ERROR_MESSAGE.getBytes(Charset.forName("UTF-8")));
+		}
 		outputStream.close();
 	}
 }
