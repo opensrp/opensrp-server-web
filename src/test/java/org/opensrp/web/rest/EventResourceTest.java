@@ -82,6 +82,12 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     @Captor
     private ArgumentCaptor<EventSearchBean> eventSearchBeanArgumentCaptor = ArgumentCaptor.forClass(EventSearchBean.class);
     
+    @Captor
+    private ArgumentCaptor<Client> clientArgumentCaptor = ArgumentCaptor.forClass(Client.class);
+    
+    @Captor
+    private ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    
 	private EventResource eventResource;
 	
 	private String ADD_REQUEST_PAYLOAD  = "{\n"
@@ -339,6 +345,10 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class));
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
+		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
+		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture());
+		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Family Member Registration");
 	}
 
 	@Test
@@ -357,7 +367,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		JsonNode actualObj = mapper.readTree(response);
 		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
-		assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
 		assertEquals(actualObj.size(),3);
 		assertEquals(actualObj.get("clients").size(),1);
