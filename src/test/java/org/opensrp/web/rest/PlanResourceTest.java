@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -33,7 +35,6 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
@@ -407,7 +408,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
 
-        String actualPlansString = getResponseAsString(BASE_URL + "sync", AllConstants.BaseEntity.SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", status().isOk());
+        String actualPlansString = getResponseAsString(BASE_URL + "sync", SERVER_VERSIOIN + "="+ 1 + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2", status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
 
         verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
@@ -522,6 +523,37 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
         assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
+    }
+
+    @Test
+    public void testGetSync() throws Exception{
+        List<PlanDefinition> planDefinitions = new ArrayList<>();
+        planDefinitions.add(createPlanDefinition());
+        List<String> operationalAreaIds = new ArrayList<>();
+        operationalAreaIds.add("1");
+        
+        doReturn(planDefinitions).when(planService).getPlansByServerVersionAndOperationalArea(any(long.class), anyList());
+       
+        String parameter = SERVER_VERSIOIN+"=15421904649873&"+OPERATIONAL_AREA_ID+"=[1]";
+        String response = getResponseAsString(BASE_URL + "/sync", parameter, status().isOk());
+        JsonNode actualObj = mapper.readTree(response);
+        
+        verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
+        assertEquals(longArgumentCaptor.getValue(), new Long(15421904649873l));
+        assertEquals(listArgumentCaptor.getAllValues().size(), operationalAreaIds.size());
+        assertEquals(actualObj.get(0).get("identifier").textValue(), planDefinitions.get(0).getIdentifier());
+        
+    }
+
+    private PlanDefinition createPlanDefinition() {
+        List<Jurisdiction> operationalAreas = new ArrayList<>();
+        Jurisdiction operationalArea = new Jurisdiction();
+        operationalArea.setCode("operational_area");
+        operationalAreas.add(operationalArea);
+        PlanDefinition expectedPlan = new PlanDefinition();
+        expectedPlan.setIdentifier("plan_1");
+        expectedPlan.setJurisdiction(operationalAreas);
+        return expectedPlan;
     }
 
 }

@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,6 +53,11 @@ public class ValidateResourceTest {
 			+ "  \"firstName\" : \"Test\" \n"
 			+ "  }\n"
 			+ "}";
+	
+	private String SYNC_REQUEST_PAYLOAD = "{\n"
+			+ "\t\"clients\": \"[ 1 , 2 ]\",\n"
+			+ "\t\"events\": \"[ 1 , 2]\"\n"
+			+ "}";
 
 	@Before
 	public void setUp() {
@@ -76,6 +82,18 @@ public class ValidateResourceTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
 				.content(INVALID_JSON.getBytes()))
 				.andExpect(status().isBadRequest()).andReturn();
+	}
+
+	@Test
+	public void testValidateSync() throws Exception {
+		String expected = "{\"clients\":[\"1\",\"2\"],\"events\":[\"1\",\"2\"]}";
+		when(clientService.getByBaseEntityId(any(String.class))).thenReturn(null);
+		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(null);
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(SYNC_REQUEST_PAYLOAD.getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		
+		assertEquals(result.getResponse().getContentAsString(), expected);
 	}
 
 	private Client createClient() {
