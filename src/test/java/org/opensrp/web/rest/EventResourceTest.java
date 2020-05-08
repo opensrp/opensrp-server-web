@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -353,10 +354,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
 		String parameter = SERVER_VERSIOIN + "=15421904649873";
 		String response = getResponseAsString(BASE_URL + "/getAll", parameter, status().isOk());
+		JsonNode actualObj = mapper.readTree(response);
 		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+		assertEquals(actualObj.size(),3);
+		assertEquals(actualObj.get("clients").size(),1);
+		assertEquals(actualObj.get("events").size(),1);
     }
     
     @Test
@@ -372,10 +377,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
 	    String parameter = PROVIDER_ID+"=providerId&"+LOCATION_ID+"=locationId&"+BASE_ENTITY_ID+"=base-entity-id&"+SERVER_VERSIOIN+"=15421904649873&"+TEAM+"=team&"+TEAM_ID+"=team_id";
 	    String response = getResponseAsString(BASE_URL + "/sync", parameter, status().isOk());
+	    JsonNode actualObj = mapper.readTree(response);
 	    verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(), stringArgumentCaptor.capture() ,integerArgumentCaptor.capture());
 	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
-	    assertEquals(stringArgumentCaptor.getAllValues().get(0), AllConstants.BaseEntity.SERVER_VERSIOIN);
+	    assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+	    assertEquals(actualObj.size(),3);
+	    assertEquals(actualObj.get("clients").size(),1);
+	    assertEquals(actualObj.get("events").size(),1);
     }
 
 	@Test

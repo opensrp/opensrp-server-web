@@ -35,7 +35,6 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.opensrp.common.AllConstants;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;

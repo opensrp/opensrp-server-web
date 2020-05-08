@@ -220,7 +220,7 @@ public class ClientResourceTest {
 		when(clientService.findMembersByRelationshipId(anyString())).thenReturn(expectedClients);
 		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-				param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+				param(BASE_ENTITY_ID, "15421904649873")
 				.param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
 				.param(CLIENTTYPE, HOUSEHOLDMEMEBR))
 				.andExpect(status().isOk()).andReturn();
