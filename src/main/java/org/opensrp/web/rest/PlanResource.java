@@ -269,9 +269,9 @@ public class PlanResource {
 	 * @param username
 	 * @return plan definitions whose identifiers match the provided param
 	 */
-	@RequestMapping(value = "/findByUsername", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> fetchPlansForUser(@RequestParam(value = USERNAME) String username,
+	public ResponseEntity<String> fetchPlansForUser(@PathVariable(USERNAME) String username,
 			@RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion) {
 		
 		if (StringUtils.isBlank(username)) {

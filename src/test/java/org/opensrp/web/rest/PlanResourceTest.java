@@ -539,7 +539,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 	    when(planService.getPlansByUsernameAndServerVersion("onatest", 0l))
 	            .thenReturn(planDefinitions);
 	    MvcResult result = mockMvc
-	            .perform(get(BASE_URL + "/findByUsername?serverVersion=0&username=onatest"))
+	            .perform(get(BASE_URL + "/user/onatest?serverVersion=0"))
 	            .andExpect(status().isOk()).andReturn();
 	    verify(planService).getPlansByUsernameAndServerVersion("onatest", 0l);
 	    assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
