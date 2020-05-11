@@ -1,15 +1,37 @@
 package org.opensrp.web.rest.rapid;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.Event.BIRTH_REGISTRATION;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.MVACC_DATE_FORMAT;
+import static org.opensrp.common.AllConstants.Event.MVACC_UUID_IDENTIFIER_TYPE;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.openmrs.service.PatientService;
-import org.opensrp.domain.*;
+import org.opensrp.domain.Address;
+import org.opensrp.domain.Client;
+import org.opensrp.domain.Event;
+import org.opensrp.domain.Obs;
+import org.opensrp.domain.RapidProContact;
 import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
@@ -18,27 +40,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.MVACC_DATE_FORMAT;
-import static org.opensrp.common.AllConstants.Event.MVACC_UUID_IDENTIFIER_TYPE;
-import static org.opensrp.common.AllConstants.Event.BIRTH_REGISTRATION;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/repidpro")
@@ -61,8 +73,7 @@ public class RapidProResource {
 		this.patientService = patientService;
 	}
 
-	@RequestMapping(value = "/sync", method = RequestMethod.GET)
-	@ResponseBody
+	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> getNewContacts(HttpServletRequest request) {
 		List<Event> events;
 		List<RapidProContact> rapidProContacts = new ArrayList<>();
