@@ -41,15 +41,11 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 		chain.doFilter(request, xssPreventionResponseWrapper);
 		String responseString = xssPreventionResponseWrapper.getCaptureAsString();
 		try {
-			if (response.getContentType() != null) {
-				if (response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
+			if (response.getContentType() != null && response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
 					JsonNode jsonNode = mapper.readTree(responseString);
 					JsonNode updatedJsonNode = encode(jsonNode);
 					String encodedJsonString = updatedJsonNode.toString();
 					response.getOutputStream().write(encodedJsonString.getBytes());
-				} else {
-					response.getOutputStream().write(responseString.getBytes());
-				}
 			} 
 			else {
 				response.getOutputStream().write(responseString.getBytes());
