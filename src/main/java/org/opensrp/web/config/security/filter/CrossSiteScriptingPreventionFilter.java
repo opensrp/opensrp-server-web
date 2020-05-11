@@ -11,8 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import javax.servlet.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,7 +29,7 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-
+     // do nothing
 	}
 
 	@Override
@@ -53,7 +58,7 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 
 	@Override
 	public void destroy() {
-
+		// do nothing
 	}
 
 	private static JsonNode encode(JsonNode node) {
