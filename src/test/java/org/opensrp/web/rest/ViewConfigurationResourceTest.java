@@ -15,10 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.viewconfiguration.ViewConfiguration;
 import org.opensrp.service.ViewConfigurationService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,8 +51,8 @@ public class ViewConfigurationResourceTest {
 	
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		viewConfigurationResource = webApplicationContext.getBean(ViewConfigurationResource.class);
 		viewConfigurationResource.setViewConfigurationService(viewConfigurationService);
 	}
