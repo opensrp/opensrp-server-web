@@ -333,10 +333,6 @@
 			<artifactId>maven-artifact</artifactId>
 			<version>3.0.3</version>
 		</dependency>
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 	</dependencies>
 
 	<build>
