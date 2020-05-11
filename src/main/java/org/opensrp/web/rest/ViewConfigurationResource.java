@@ -10,10 +10,10 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.viewconfiguration.ViewConfiguration;
 import org.opensrp.service.ViewConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/rest/viewconfiguration")
@@ -26,8 +26,7 @@ public class ViewConfigurationResource {
 		this.viewConfigurationService = viewConfigurationService;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/sync")
-	@ResponseBody
+	@RequestMapping(method = RequestMethod.GET, value = "/sync", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<ViewConfiguration> findViewConfigurationsByVersion(HttpServletRequest request) {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		Long lastSyncedServerVersion = null;
