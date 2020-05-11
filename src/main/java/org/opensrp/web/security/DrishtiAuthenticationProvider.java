@@ -44,6 +44,8 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
 	private static final String GET_ALL_EVENTS_ROlE = "OpenSRP: Get All Events";
 	
+	private static final String GET_PLANS_FOR_USER_ROlE = "OpenSRP: Get Plans For User";
+	
 	private OpenmrsUserService openmrsUserService;
 
 	@Resource(name = "redisTemplate")
@@ -152,6 +154,8 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	private SimpleGrantedAuthority getSimpleGrantedAuthorityFromRole(String role) {
 		if (GET_ALL_EVENTS_ROlE.equals(role))
 			return new SimpleGrantedAuthority("ROLE_ALL_EVENTS");
+		else if (GET_PLANS_FOR_USER_ROlE.equals(role))
+			return new SimpleGrantedAuthority("ROLE_PLANS_FOR_USER");
 		return new SimpleGrantedAuthority("ROLE_OPENMRS");
 	}
 }
