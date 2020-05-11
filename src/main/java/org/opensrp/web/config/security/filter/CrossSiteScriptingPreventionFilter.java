@@ -36,19 +36,23 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		logger.debug("Inside CrossSiteScriptingPreventionFilter  ...............");
-		XssPreventionResponseWrapper xssPreventionResponseWrapper = new XssPreventionResponseWrapper(
-				(HttpServletResponse) response);
-		chain.doFilter(request, xssPreventionResponseWrapper);
 		try {
-			String responseString = xssPreventionResponseWrapper.getCaptureAsString();
-			JsonNode jsonNode = mapper.readTree(responseString);
-			JsonNode updatedJsonNode = encode(jsonNode);
-			String encodedJsonString = updatedJsonNode.toString();
+			if (response.getContentType() != null) {
+				XssPreventionResponseWrapper xssPreventionResponseWrapper = new XssPreventionResponseWrapper(
+						(HttpServletResponse) response);
+				chain.doFilter(request, xssPreventionResponseWrapper);
+				String responseString = xssPreventionResponseWrapper.getCaptureAsString();
 
-			if (response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
-				response.getOutputStream().write(encodedJsonString.getBytes());
+				if (response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
+					JsonNode jsonNode = mapper.readTree(responseString);
+					JsonNode updatedJsonNode = encode(jsonNode);
+					String encodedJsonString = updatedJsonNode.toString();
+					response.getOutputStream().write(encodedJsonString.getBytes());
+				} else {
+					response.getOutputStream().write(responseString.getBytes());
+				}
 			} else {
-				response.getOutputStream().write(responseString.getBytes());
+				chain.doFilter(request, response);
 			}
 		}
 		catch (Exception e) {
