@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.viewconfiguration.ViewConfiguration;
 import org.opensrp.service.ViewConfigurationService;
@@ -35,6 +38,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml" })
 public class ViewConfigurationResourceTest {
 	
+	@Rule
+	public MockitoRule rule = MockitoJUnit.rule();
+	
 	@Autowired
 	protected WebApplicationContext webApplicationContext;
 	
@@ -42,8 +48,6 @@ public class ViewConfigurationResourceTest {
 	
 	@Mock
 	private ViewConfigurationService viewConfigurationService;
-	
-	private ViewConfigurationResource viewConfigurationResource;
 	
 	protected ObjectMapper mapper = new ObjectMapper();
 	
@@ -53,7 +57,7 @@ public class ViewConfigurationResourceTest {
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
 		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-		viewConfigurationResource = webApplicationContext.getBean(ViewConfigurationResource.class);
+		ViewConfigurationResource viewConfigurationResource = webApplicationContext.getBean(ViewConfigurationResource.class);
 		viewConfigurationResource.setViewConfigurationService(viewConfigurationService);
 	}
 	
