@@ -279,6 +279,11 @@
 			<artifactId>spring-session-data-redis</artifactId>
 			<version>2.2.2.RELEASE</version>
 		</dependency>
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>${redis.jedis.version}</version>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
@@ -618,14 +623,6 @@
 			<properties>
 				<opensrp.redis.client.profile>jedis</opensrp.redis.client.profile>
 			</properties>
-			<dependencies>
-				<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
-				<dependency>
-					<groupId>redis.clients</groupId>
-					<artifactId>jedis</artifactId>
-					<version>${redis.jedis.version}</version>
-				</dependency>
-			</dependencies>
 		</profile>
 		<profile>
 			<id>lettuce</id>
