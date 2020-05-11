@@ -24,6 +24,7 @@ import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
@@ -66,7 +67,8 @@ public class UserControllerTest {
 
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOpenmrsUserService(openmrsUserService);
 		userController.setOpensrpAuthenticationProvider(opensrpAuthenticationProvider);

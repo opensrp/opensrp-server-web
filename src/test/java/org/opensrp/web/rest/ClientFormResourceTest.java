@@ -16,6 +16,7 @@ import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -62,7 +63,8 @@ public class ClientFormResourceTest {
         clientFormResource.setClientFormService(clientFormService);
         clientFormResource.setObjectMapper(mapper);
 
-        mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
