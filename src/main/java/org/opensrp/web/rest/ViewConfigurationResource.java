@@ -26,7 +26,7 @@ public class ViewConfigurationResource {
 		this.viewConfigurationService = viewConfigurationService;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/sync",  produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(method = RequestMethod.GET, value = "/sync", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<ViewConfiguration> findViewConfigurationsByVersion(HttpServletRequest request) {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		Long lastSyncedServerVersion = null;
