@@ -16,6 +16,7 @@ import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -124,7 +125,8 @@ public class SettingResourceTest {
 		settingConfiguration.setIdentifier("site_characteristics");
 		settingConfiguration.setTeamId("my-team-id");
 		listSettingConfigurations.add(settingConfiguration);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(settingResource).build();
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(settingResource).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 	}
 	
 	@Test

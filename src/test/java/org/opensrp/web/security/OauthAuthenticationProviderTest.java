@@ -99,15 +99,16 @@ public class OauthAuthenticationProviderTest {
 	@Test
 	public void testGetRolesAsAuthoritiesRuturnsAllRoles() throws JSONException {
 		User user = new User(UUID.randomUUID().toString());
-		user.setRoles(Arrays.asList("Provider", "OpenSRP: Get All Events"));
+		user.setRoles(Arrays.asList("Provider", "OpenSRP: Get All Events", "OpenSRP: Get Plans For User"));
 		when(openmrsUserService.getUser("user1")).thenReturn(user);
 		when(openmrsUserService.authenticate("user1", "myPassword")).thenReturn(true);
 		Authentication auth = authenticationProvider.authenticate(authentication);
 		verify(openmrsUserService).getUser("user1");
 		verify(openmrsUserService).authenticate("user1", "myPassword");
-		assertEquals(2, auth.getAuthorities().size());
+		assertEquals(3, auth.getAuthorities().size());
 		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ALL_EVENTS")));
 		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_OPENMRS")));
+		assertTrue(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_PLANS_FOR_USER")));
 	}
 
 }

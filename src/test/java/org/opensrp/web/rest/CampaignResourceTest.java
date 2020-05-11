@@ -12,6 +12,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
 import org.opensrp.web.GlobalExceptionHandler;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -64,7 +65,9 @@ public class CampaignResourceTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(campaignResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).build();
+				.setControllerAdvice(new GlobalExceptionHandler()).
+						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+						build();
 	}
 
 	@Test

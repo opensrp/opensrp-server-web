@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.viewconfiguration.ViewConfiguration;
 import org.opensrp.service.ViewConfigurationService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,6 +53,7 @@ public class ViewConfigurationResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(viewConfigurationResource)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
 				.build();
 	}
 
