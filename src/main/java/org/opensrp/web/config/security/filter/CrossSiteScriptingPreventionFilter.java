@@ -1,6 +1,11 @@
 package org.opensrp.web.config.security.filter;
 
-import com.google.gson.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +14,13 @@ import org.springframework.http.MediaType;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 
 public class CrossSiteScriptingPreventionFilter implements Filter {
 
 	private static Logger logger = LoggerFactory.getLogger(CrossSiteScriptingPreventionFilter.class);
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -29,9 +36,9 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 		chain.doFilter(request, xssPreventionResponseWrapper);
 		try {
 			String responseString = xssPreventionResponseWrapper.getCaptureAsString();
-			JsonElement jsonElement = new JsonParser().parse(responseString);
-			JsonElement updatedJsonElement = encode(jsonElement);
-			String encodedJsonString = updatedJsonElement.toString();
+			JsonNode jsonNode = mapper.readTree(responseString);
+			JsonNode updatedJsonNode = encode(jsonNode);
+			String encodedJsonString = updatedJsonNode.toString();
 
 			if (response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
 				response.getOutputStream().write(encodedJsonString.getBytes());
@@ -49,35 +56,36 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 
 	}
 
-	private static JsonElement encode(JsonElement element) {
-		if (element.isJsonPrimitive()) {
-			JsonPrimitive primitive = element.getAsJsonPrimitive();
-			if (primitive != null && primitive.isString() && !isEscapedString(primitive)) {
-				return new JsonPrimitive(Encode.forJava(primitive.getAsString()));
+	private static JsonNode encode(JsonNode node) {
+		if (node.isValueNode()) {
+			if (JsonNodeType.STRING == node.getNodeType() && !isEscapedString(node)) {
+				return JsonNodeFactory.instance.textNode(Encode.forJava(node.asText()));
+			} else if (JsonNodeType.NULL == node.getNodeType()) {
+				return null;
 			} else {
-				return primitive;
+				return node;
 			}
-		} else if (element.isJsonArray()) {
-			JsonArray jsonArray = element.getAsJsonArray();
-			JsonArray cleanedNewArray = new JsonArray();
-			for (JsonElement jsonElement : jsonArray) {
-				cleanedNewArray.add(encode(jsonElement));
+		} else if (node.isNull()) {
+			return null;
+		} else if (node.isArray()) {
+			ArrayNode arrayNode = (ArrayNode) node;
+			ArrayNode cleanedNewArrayNode = mapper.createArrayNode();
+			for (JsonNode jsonNode : arrayNode) {
+				cleanedNewArrayNode.add(encode(jsonNode));
 			}
-			return cleanedNewArray;
-		} else if (element.isJsonNull()) {
-			return element.getAsJsonNull();
+			return cleanedNewArrayNode;
 		} else {
-			JsonObject obj = element.getAsJsonObject();
-			JsonObject encodedJsonObject = new JsonObject();
-			for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-				encodedJsonObject.add(Encode.forJava(entry.getKey()), encode(entry.getValue()));
+			ObjectNode encodedObjectNode = mapper.createObjectNode();
+			for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
+				Map.Entry<String, JsonNode> entry = it.next();
+				encodedObjectNode.set(Encode.forJava(entry.getKey()), encode(entry.getValue()));
 			}
-			return encodedJsonObject;
+			return encodedObjectNode;
 		}
 	}
 
-	public static boolean isEscapedString(JsonPrimitive primitive) {
-		return primitive.toString().contains("\\") ? true : false;
+	public static boolean isEscapedString(JsonNode jsonNode) {
+		return jsonNode.toString().contains("\\") ? true : false;
 	}
 }
 
