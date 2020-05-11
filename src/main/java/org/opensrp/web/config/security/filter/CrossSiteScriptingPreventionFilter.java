@@ -36,13 +36,12 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		logger.debug("Inside CrossSiteScriptingPreventionFilter  ...............");
+		XssPreventionResponseWrapper xssPreventionResponseWrapper = new XssPreventionResponseWrapper(
+				(HttpServletResponse) response);
+		chain.doFilter(request, xssPreventionResponseWrapper);
+		String responseString = xssPreventionResponseWrapper.getCaptureAsString();
 		try {
 			if (response.getContentType() != null) {
-				XssPreventionResponseWrapper xssPreventionResponseWrapper = new XssPreventionResponseWrapper(
-						(HttpServletResponse) response);
-				chain.doFilter(request, xssPreventionResponseWrapper);
-				String responseString = xssPreventionResponseWrapper.getCaptureAsString();
-
 				if (response.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
 					JsonNode jsonNode = mapper.readTree(responseString);
 					JsonNode updatedJsonNode = encode(jsonNode);
@@ -51,8 +50,9 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 				} else {
 					response.getOutputStream().write(responseString.getBytes());
 				}
-			} else {
-				chain.doFilter(request, response);
+			} 
+			else {
+				response.getOutputStream().write(responseString.getBytes());
 			}
 		}
 		catch (Exception e) {
