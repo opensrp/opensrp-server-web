@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
 import org.springframework.http.HttpHeaders;
@@ -54,7 +55,8 @@ public class MultimediaControllerTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		mockMvc = MockMvcBuilders.standaloneSetup(multimediaController).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(multimediaController).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(multimediaController, "allowedMimeTypes", allowedMimeTypes);
 	}
 

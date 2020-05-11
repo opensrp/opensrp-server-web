@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OpenmrsIDService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.powermock.api.mockito.PowerMockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,8 @@ public class UniqueIdControllerTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(uniqueIdController).build();
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(uniqueIdController)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(uniqueIdController, "qrCodesDir", "");
 
 	}
