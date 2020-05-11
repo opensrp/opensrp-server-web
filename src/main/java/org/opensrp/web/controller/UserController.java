@@ -1,7 +1,8 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
@@ -49,10 +52,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 public class UserController {
@@ -168,7 +170,6 @@ public class UserController {
 	}
 
 	@RequestMapping("/security/authenticate")
-	@ResponseBody
 	public ResponseEntity<String> authenticate(HttpServletRequest request, Authentication authentication) throws JSONException {
 		if (useOpenSRPTeamModule) {
 			return authenticateUsingOrganization(request,authentication);
@@ -317,7 +318,6 @@ public class UserController {
 	}
 
 	@RequestMapping("/security/configuration")
-	@ResponseBody
 	public ResponseEntity<String> configuration() throws JSONException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
