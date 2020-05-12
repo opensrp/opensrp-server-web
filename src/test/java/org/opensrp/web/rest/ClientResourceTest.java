@@ -2,6 +2,10 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +20,7 @@ import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.bean.ClientSyncBean;
+import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +33,27 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -324,6 +337,25 @@ public class ClientResourceTest {
 		client.setDateEdited(new DateTime());
 		return client;
 	}
+	
+    @Test
+    public void testFindAllIds() throws Exception {
+        Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
+        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
+                .andReturn();
+
+        String actualTaskIdString = result.getResponse().getContentAsString();
+        Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
+        List<String> actualTaskIdList = actualIdModels.getIdentifiers();
+
+
+        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean());
+        verifyNoMoreInteractions(clientService);
+        assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+        assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
+        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
+    }
 
 
 }
