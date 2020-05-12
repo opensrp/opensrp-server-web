@@ -53,7 +53,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
@@ -110,7 +109,6 @@ public class EventResource extends RestResource<Event> {
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	protected ResponseEntity<String> sync(HttpServletRequest request) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 		try {
@@ -149,7 +147,6 @@ public class EventResource extends RestResource<Event> {
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 		try {
@@ -183,7 +180,6 @@ public class EventResource extends RestResource<Event> {
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/sync-by-base-entity-ids", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	public ResponseEntity<String> syncClientsAndEventsByBaseEntityIds(@RequestBody String jsonObject)
 	        throws JsonProcessingException {
 		EventSyncBean combinedEventClients = new EventSyncBean();
@@ -306,7 +302,6 @@ public class EventResource extends RestResource<Event> {
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	protected ResponseEntity<String> getAll(@RequestParam long serverVersion,
 	        @RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit)
 	        throws JsonProcessingException {
@@ -447,7 +442,6 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/findIdsByEventType", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 	        @RequestParam(value = SERVER_VERSION) long serverVersion,

@@ -24,10 +24,10 @@ import org.opensrp.domain.Obs;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping ("/rest/rapid/client")
@@ -57,8 +57,7 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 		this.es = es;
 	}
 
-	@RequestMapping(value="/cv", method= RequestMethod.POST)
-	@ResponseBody
+	@RequestMapping(value="/cv", method= RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Map<String, Object> createChild(HttpServletRequest req) {
 		Map<String, Object> res = new HashMap<>();
 		String firstName = req.getParameter("firstName");
@@ -141,8 +140,8 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 		}
 		return vaccineCard;
 	}
-	@RequestMapping(value="/uvo", method=RequestMethod.POST)
-	@ResponseBody
+	
+	@RequestMapping(value="/uvo", method=RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Map<String, String> updateVaccineO(HttpServletRequest req){
 		Map<String, String> resp = new HashMap<>();
 		String id = req.getParameter("clientId");
@@ -186,8 +185,7 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 		}
 	}
 	
-	@RequestMapping("/c")
-	@ResponseBody
+	@RequestMapping(value="/c", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Map<String, Object> findInfo(HttpServletRequest req) {
 		String id = req.getParameter("id");
 		Map<String, Object> m = new HashMap<String, Object>();
