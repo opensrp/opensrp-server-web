@@ -111,6 +111,7 @@ public class UserController {
 	
 	public User currentUser(Authentication authentication) {
 		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			@SuppressWarnings("unchecked")
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
@@ -135,19 +136,15 @@ public class UserController {
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication)
 	        throws MalformedURLException, IOException {
 		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			@SuppressWarnings("unchecked")
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			UserDetail userDetail = new UserDetail();
-			userDetail.setIdentifier(authentication.getName());
-			userDetail.setUserName(token.getPreferredUsername());
-			userDetail.setPreferredName(token.getName());
-			userDetail.setFamilyName(token.getFamilyName());
-			userDetail.setGivenName(token.getGivenName());
-			userDetail.setEmail(token.getEmail());
-			userDetail.setEmailVerified(token.getEmailVerified());
-			userDetail.setRoles(
-			    authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()));
+			UserDetail userDetail = UserDetail.builder().identifier(authentication.getName())
+			        .userName(token.getPreferredUsername()).preferredName(token.getName()).familyName(token.getFamilyName())
+			        .givenName(token.getGivenName()).email(token.getEmail()).emailVerified(token.getEmailVerified())
+			        .roles(authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()))
+			        .build();
 			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 			
 		} else {
