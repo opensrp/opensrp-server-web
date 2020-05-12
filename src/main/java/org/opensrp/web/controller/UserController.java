@@ -49,7 +49,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -268,7 +267,6 @@ public class UserController {
 	}
 	
 	@RequestMapping("/security/configuration")
-	@ResponseBody
 	public ResponseEntity<String> configuration() throws JSONException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));

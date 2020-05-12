@@ -15,10 +15,10 @@ import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/rest/provider")
@@ -27,8 +27,7 @@ public class ProviderResource extends RestResource<Provider> {
 	@Autowired
 	private OpenmrsUserService userService;
 
-	@RequestMapping(value = "authenticate", method = RequestMethod.GET)
-	@ResponseBody
+	@RequestMapping(value = "authenticate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Map<String, Object> authenticate(HttpServletRequest request) throws JSONException {
 		Map<String, Object> resp = new HashMap<String, Object>();
 		String u = request.getParameter("u");

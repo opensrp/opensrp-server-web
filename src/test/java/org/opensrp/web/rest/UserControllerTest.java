@@ -40,6 +40,7 @@ import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.powermock.reflect.Whitebox;
@@ -99,7 +100,8 @@ public class UserControllerTest {
 	
 	@Before
 	public void setUp() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);

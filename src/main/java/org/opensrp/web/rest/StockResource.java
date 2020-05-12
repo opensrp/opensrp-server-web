@@ -1,15 +1,28 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
+import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
+import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
+import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
+import static org.opensrp.common.AllConstants.Stock.TO_FROM;
+import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
+import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
+import static org.opensrp.common.AllConstants.Stock.VALUE;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
@@ -27,22 +40,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
-import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
-import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
-import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
-import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
-import static org.opensrp.common.AllConstants.Stock.TO_FROM;
-import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
-import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
-import static org.opensrp.common.AllConstants.Stock.VALUE;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
@@ -73,7 +75,6 @@ public class StockResource extends RestResource<Stock> {
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
-	@ResponseBody
 	protected ResponseEntity<String> getAll() {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
@@ -111,7 +112,6 @@ public class StockResource extends RestResource<Stock> {
 	 *         occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
-	@ResponseBody
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 

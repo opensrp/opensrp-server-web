@@ -19,6 +19,7 @@ import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -63,8 +64,9 @@ public class UserControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController).build();
-		
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
+				.build();
 		ReflectionTestUtils.setField(userController, "opensrpAllowedSources", "");
 		ReflectionTestUtils.setField(userController, "OPENMRS_VERSION", "2.1.3");
 		
