@@ -16,6 +16,7 @@ import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -96,6 +97,7 @@ public class UserControllerTest {
 		auth = new DrishtiAuthenticationProvider(userservice);
 		usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken("demook", "demook");
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(userController)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
 				.build();
 		userController.setOpensrpAuthenticationProvider(auth);
 		userController.setOrganizationService(organizationService);

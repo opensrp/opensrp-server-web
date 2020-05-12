@@ -1,32 +1,50 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:mvc="http://www.springframework.org/schema/mvc"
-	   xmlns:util="http://www.springframework.org/schema/util"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd           
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd           
 	   http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="mvcContentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="true" />
+		<property name="ignoreAcceptHeader" value="true" />
+		<property name="defaultContentType" value="text/html" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="html" value="text/html" />
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="contentNegotiationManager"
+			ref="mvcContentNegotiationManager" />
+		<property name="viewResolvers">
+			<bean
+				class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+				p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+		</property>
+		<property name="defaultViews">
+			<ref bean="mappingJackson2JsonView" />
+		</property>
+	</bean>
+
+	<bean class="org.opensrp.web.config.security.WebConfig" />
 
 
 	<util:properties id="opensrp"
-					 location="classpath:/opensrp.properties" />
-
+		location="classpath:/opensrp.properties" />
 
 	<mvc:annotation-driven />
 	<mvc:default-servlet-handler />
 
-	<bean class="org.opensrp.web.rest.shadow.ManifestResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.CampaignResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.TaskResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.LocationResourseShadow" />
-	<bean class="org.opensrp.web.rest.shadow.SettingResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.UserControllerShadow" />
-	<bean class="org.opensrp.web.rest.shadow.PlanResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.OrganizationResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.PractitionerResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.PractitionerRoleResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.UserResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.EventResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.LocationTagResourceShadow" />
-	<bean class="org.opensrp.web.rest.shadow.ClientFormResourceShadow" />
+	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
 
 </beans>

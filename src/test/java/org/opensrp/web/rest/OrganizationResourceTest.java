@@ -20,6 +20,7 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -87,7 +88,8 @@ public class OrganizationResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(organizationResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).build();
+				.setControllerAdvice(new GlobalExceptionHandler()).
+						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 

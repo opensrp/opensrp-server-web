@@ -1,8 +1,12 @@
 package org.opensrp.web.rest;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -22,12 +26,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
@@ -48,7 +50,6 @@ public class ClientFormResource {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
             , @RequestParam(value = "strict", defaultValue = "false") String strict
@@ -131,7 +132,6 @@ public class ClientFormResource {
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
-    @ResponseBody
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
                                                  @RequestParam("form_identifier") String formIdentifier,
                                                  @RequestParam("form_name") String formName,
