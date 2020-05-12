@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.io.File;
-import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,11 +22,8 @@ import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.powermock.reflect.Whitebox;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -121,94 +117,27 @@ public class MultimediaControllerTest {
 	
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterFileName() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
 		
-		/*Whitebox.setInternalState(multimediaController, "provider", provider);
-		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));*/
 		File file = mock(File.class);
 		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		when(file.getName()).thenReturn("testFile" + "\r" + ".pdf");
-		MvcResult result = mockMvc
-		        .perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id").headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id"))
 		        .andExpect(content().string("Sorry. File Name should not contain any special character")).andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
 	
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterEntityId() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
-		
-		/*		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
-				Whitebox.setInternalState(multimediaController, "provider", provider);
-				Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
-				File file = mock(File.class);
-			when(multimediaService.retrieveFile(anyString())).thenReturn(file);
-			when(file.getName()).thenReturn("testFile" + ".pdf");*/
-		MvcResult result = mockMvc
-		        .perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*").headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*"))
 		        .andExpect(content().string("Sorry. Entity Id should not contain any special character")).andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
 	
 	@Test
 	public void testDownloadFileWithAuthWithSpecialCharacterFileName() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
-		
-		/*	DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
-			Whitebox.setInternalState(multimediaController, "provider", provider);
-			Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));*/
-		
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf").headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf"))
 		        .andExpect(content().string("Sorry. File Name should not contain any special character")).andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
-	}
-	
-	private Authentication getMockedAuthentication() {
-		Authentication authentication = new Authentication() {
-			
-			@Override
-			public Collection<? extends GrantedAuthority> getAuthorities() {
-				return null;
-			}
-			
-			@Override
-			public Object getCredentials() {
-				return "";
-			}
-			
-			@Override
-			public Object getDetails() {
-				return null;
-			}
-			
-			@Override
-			public Object getPrincipal() {
-				return "Test User";
-			}
-			
-			@Override
-			public boolean isAuthenticated() {
-				return true;
-			}
-			
-			@Override
-			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-				
-			}
-			
-			@Override
-			public String getName() {
-				return "admin";
-			}
-		};
-		
-		return authentication;
 	}
 	
 }
