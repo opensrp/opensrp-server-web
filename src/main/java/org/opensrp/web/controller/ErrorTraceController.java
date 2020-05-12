@@ -3,8 +3,13 @@
  */
 package org.opensrp.web.controller;
 
-import java.text.SimpleDateFormat;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,30 +17,21 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.opensrp.domain.ErrorTrace;
+import org.opensrp.domain.ErrorTraceForm;
+import org.opensrp.service.ErrorTraceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
-import org.opensrp.domain.ErrorTrace;
-import org.opensrp.domain.ErrorTraceForm;
-
-import org.opensrp.service.ErrorTraceService;
 
 import com.google.gson.Gson;
 
@@ -81,8 +77,7 @@ public class ErrorTraceController {
 
 	}
 
-	@RequestMapping(method = GET, value = "/errortrace")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/errortrace",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<ErrorTrace>> allErrors() {
 
 		try {
@@ -100,8 +95,7 @@ public class ErrorTraceController {
 
 	}
 
-	@RequestMapping(method = GET, value = "/unsolvederrors")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/unsolvederrors",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<ErrorTrace>> showUnsolved() {
 
 		try {
@@ -118,8 +112,7 @@ public class ErrorTraceController {
 		}
 	}
 
-	@RequestMapping(method = GET, value = "/solvederrors")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/solvederrors",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<ErrorTrace>> showSolved() {
 
 		try {
@@ -139,8 +132,7 @@ public class ErrorTraceController {
 
 	}
 
-	@RequestMapping(method = GET, value = "/viewerror")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/viewerror",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<ErrorTraceForm> showError(@RequestParam("id") String id) {
 		try {
 			ErrorTrace error = errorTraceService.getError(id);
@@ -159,8 +151,7 @@ public class ErrorTraceController {
 
 	}
 
-	@RequestMapping(method = GET, value = "/getstatusoptions")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/getstatusoptions",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<String>> statusOptions() {
 		try {
 
@@ -204,8 +195,7 @@ public class ErrorTraceController {
 		return "redirect:/errorhandler/index";
 	}
 
-	@RequestMapping(method = GET, value = "/allerrors")
-	@ResponseBody
+	@RequestMapping(method = GET, value = "/allerrors",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public <T> ResponseEntity<T> getAllErrors() {
 
 		List<ErrorTrace> list = errorTraceService.getAllErrors();

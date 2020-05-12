@@ -9,10 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
 
@@ -26,14 +25,12 @@ public class LocationController {
 		this.openmrsLocationService = openmrsLocationService;
 	}
 	
-	@RequestMapping("location-tree")
-	@ResponseBody
+	@RequestMapping(value = "location-tree", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationTree() throws JSONException {
 		return new ResponseEntity<>(new Gson().toJson(openmrsLocationService.getLocationTree()),HttpStatus.OK);
 	}
 	
-	@RequestMapping("location-tree/{uuid}")
-	@ResponseBody
+	@RequestMapping(value = "location-tree/{uuid}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationTree(@PathVariable("uuid") String uuid) throws JSONException {
 		return new ResponseEntity<>(new Gson().toJson(openmrsLocationService.getLocationTreeOf(uuid)),HttpStatus.OK);
 	}

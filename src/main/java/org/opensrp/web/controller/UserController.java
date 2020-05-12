@@ -49,7 +49,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -112,6 +111,7 @@ public class UserController {
 	
 	public User currentUser(Authentication authentication) {
 		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			@SuppressWarnings("unchecked")
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
@@ -136,19 +136,15 @@ public class UserController {
 	public ResponseEntity<UserDetail> getUserDetails(Authentication authentication)
 	        throws MalformedURLException, IOException {
 		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			@SuppressWarnings("unchecked")
 			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
 			        .getPrincipal();
 			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			UserDetail userDetail = new UserDetail();
-			userDetail.setIdentifier(authentication.getName());
-			userDetail.setUserName(token.getPreferredUsername());
-			userDetail.setPreferredName(token.getName());
-			userDetail.setFamilyName(token.getFamilyName());
-			userDetail.setGivenName(token.getGivenName());
-			userDetail.setEmail(token.getEmail());
-			userDetail.setEmailVerified(token.getEmailVerified());
-			userDetail.setRoles(
-			    authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()));
+			UserDetail userDetail = UserDetail.builder().identifier(authentication.getName())
+			        .userName(token.getPreferredUsername()).preferredName(token.getName()).familyName(token.getFamilyName())
+			        .givenName(token.getGivenName()).email(token.getEmail()).emailVerified(token.getEmailVerified())
+			        .roles(authentication.getAuthorities().stream().map(e -> e.getAuthority()).collect(Collectors.toList()))
+			        .build();
 			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 			
 		} else {
@@ -268,7 +264,6 @@ public class UserController {
 	}
 	
 	@RequestMapping("/security/configuration")
-	@ResponseBody
 	public ResponseEntity<String> configuration() throws JSONException {
 		Map<String, Object> map = new HashMap<>();
 		map.put("serverDatetime", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));

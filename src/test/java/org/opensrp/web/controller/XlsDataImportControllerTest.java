@@ -26,6 +26,7 @@ import org.opensrp.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -52,7 +53,8 @@ public class XlsDataImportControllerTest {
 	@Before
 	public void setUp() {
 		initMocks(this);
-		mockMvc = MockMvcBuilders.standaloneSetup(xlsDataImportController).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(xlsDataImportController).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(xlsDataImportController, "allowedMimeTypes", allowedMimeTypes);
 	}
 
