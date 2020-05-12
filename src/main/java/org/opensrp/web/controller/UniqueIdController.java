@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 
@@ -61,10 +61,9 @@ public class UniqueIdController extends OpenmrsService {
 	 * @return
 	 * @throws JSONException
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/print")
-	@ResponseBody
-	public ResponseEntity<String> thisMonthDataSendTODHIS2(HttpServletRequest request, HttpServletResponse response) {
-		
+	@RequestMapping(method = RequestMethod.GET, value = "/print", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> thisMonthDataSendTODHIS2(HttpServletRequest request, HttpServletResponse response){
+
 		String message;
 		User user;
 		Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
@@ -118,9 +117,8 @@ public class UniqueIdController extends OpenmrsService {
 	 *
 	 * @return json array object with ids
 	 */
-	
-	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	@ResponseBody
+
+	@RequestMapping(value = "/get", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> get(HttpServletRequest request) throws JSONException {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);

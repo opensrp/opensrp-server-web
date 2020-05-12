@@ -1,7 +1,5 @@
 package org.opensrp.web.controller;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +10,13 @@ import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.AuditMessageType;
 import org.opensrp.common.audit.Auditor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Controller
 public class AuditMessageController {
@@ -29,15 +28,12 @@ public class AuditMessageController {
 		this.auditor = auditor;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/audit/messages")
-	@ResponseBody
+	@RequestMapping(method = RequestMethod.GET, value = "/audit/messages", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<AuditMessageItem> getAuditMessages(
 	        @RequestParam(value = "previousAuditMessageIndex", defaultValue = "0") long previousIndex) throws IOException {
 		List<AuditMessage> messages = auditor.messagesSince(previousIndex);
-		return messages.stream()
-				.map(auditMessage -> AuditMessageItem.from(auditMessage))
-				.collect(Collectors.toList());
-
+		return messages.stream().map(auditMessage -> AuditMessageItem.from(auditMessage)).collect(Collectors.toList());
+		
 	}
 	
 	protected static class AuditMessageItem {

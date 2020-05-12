@@ -51,6 +51,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -119,7 +120,9 @@ public class LocationResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(locationResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).build();
+				.setControllerAdvice(new GlobalExceptionHandler()).
+						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+						build();
 	}
 
 	@Test

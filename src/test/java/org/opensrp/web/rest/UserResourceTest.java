@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,7 +53,8 @@ public class UserResourceTest {
 	public void setUp() {
 		UserResource userResource = webApplicationContext.getBean(UserResource.class);
 		userResource.setUserService(userService);
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).build();
+		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
+				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 	}
 	
 	@Test

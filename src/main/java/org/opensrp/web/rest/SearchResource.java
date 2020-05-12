@@ -1,11 +1,21 @@
 package org.opensrp.web.rest;
 
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
+import static org.opensrp.common.AllConstants.Client.GENDER;
+import static org.opensrp.common.AllConstants.Client.LAST_NAME;
+import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -21,18 +31,10 @@ import org.opensrp.web.utils.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.LAST_NAME;
-import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping(value = "/rest/search")
@@ -100,8 +102,7 @@ public class SearchResource extends RestResource<Client> {
 		return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/path")
-	@ResponseBody
+	@RequestMapping(method = RequestMethod.GET, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
 	private List<ChildMother> searchPathBy(HttpServletRequest request) throws ParseException {
 		try {
 			
@@ -171,7 +172,7 @@ public class SearchResource extends RestResource<Client> {
 					mothers.add(linkedMother);
 				}
 			}
-
+			
 			return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
 			
 		}

@@ -1,6 +1,7 @@
 package org.opensrp.web.controller;
 
 import static org.opensrp.web.rest.RestUtils.zipFiles;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.BufferedInputStream;
@@ -15,7 +16,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.util.TextUtils;
@@ -31,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,11 +46,15 @@ public class MultimediaController {
 	
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
-
+	
 	@Value("#{opensrp['multimedia.allowed.file.types']}")
 	private String allowedMimeTypes;
 	
 	private MultimediaService multimediaService;
+	
+	private final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
+	
+	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
 	
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
@@ -74,6 +77,10 @@ public class MultimediaController {
 	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName) {
 		
 		try {
+			if (hasSpecialCharacters(fileName)) {
+				specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
+				return;
+			}
 			File file = multimediaService
 			        .retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
 			if (file != null) {
@@ -84,6 +91,7 @@ public class MultimediaController {
 			} else {
 				writeFileNotFound(response);
 			}
+			downloadFile(file, response);
 		}
 		catch (Exception e) {
 			logger.error("", e);
@@ -101,10 +109,18 @@ public class MultimediaController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
-	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
-	        @RequestHeader(value = "username") String userName, @RequestHeader(value = "password") String password,
-	        HttpServletRequest request) {
-		downloadFileWithAuth(baseEntityId, response);
+	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId) {
+		
+		try {
+			if (hasSpecialCharacters(baseEntityId)) {
+				specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
+				return;
+			}
+			downloadFileWithAuth(baseEntityId, response);
+		}
+		catch (Exception e) {
+			logger.error("Exception occurred in downloading file by client ID ", e);
+		}
 	}
 	
 	/**
@@ -148,16 +164,23 @@ public class MultimediaController {
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
 	public ResponseEntity<String> uploadFiles(@RequestParam("anm-id") String providerId,
-			@RequestParam("entity-id") String entityId,
-			@RequestParam("file-category") String fileCategory,
-			@RequestParam("file") MultipartFile file) {
-
+	        @RequestParam("entity-id") String entityId, @RequestParam("file-category") String fileCategory,
+	        @RequestParam("file") MultipartFile file) {
+		
+		if (hasSpecialCharacters(file.getOriginalFilename())) {
+			return new ResponseEntity<String>("File Name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
+		}
+		if (hasSpecialCharacters(entityId)) {
+			return new ResponseEntity<String>("Entity Id should not contain any special character!", HttpStatus.BAD_REQUEST);
+		}
+		
 		String mimeType = file.getContentType();
 		if (!allowedMimeTypes.contains(mimeType)) {
 			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
 		}
-
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
+		
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(),
+		        null, fileCategory.trim());
 		String status = null;
 		try {
 			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
@@ -202,6 +225,11 @@ public class MultimediaController {
 	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
 		
+		if (hasSpecialCharacters(file.getName())) {
+			specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
+			return;
+		}
+		
 		if (!file.exists()) {
 			writeFileNotFound(response);
 			return;
@@ -242,6 +270,14 @@ public class MultimediaController {
 		String errorMessage = "Sorry. The file you are looking for does not exist";
 		logger.info(errorMessage);
 		OutputStream outputStream = response.getOutputStream();
+		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.close();
+	}
+	
+	private void specialCharactersError(HttpServletResponse response, String errorMessage) throws IOException {
+		logger.error(errorMessage);
+		OutputStream outputStream = response.getOutputStream();
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
 		outputStream.close();
 	}
