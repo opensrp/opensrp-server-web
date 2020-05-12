@@ -1,0 +1,10 @@
+{
+  "realm": "opensrp",
+  "auth-server-url": "http://localhost:8080/auth/",
+  "ssl-required": "external",
+  "resource": "opensrp-server",
+  "credentials": {
+    "secret": "9d83d72e-d9e0-4c54-be74-a9e7ac1f1e01"
+  },
+  "confidential-port": 0
+}
