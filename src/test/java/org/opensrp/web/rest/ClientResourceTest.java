@@ -52,8 +52,6 @@ import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
