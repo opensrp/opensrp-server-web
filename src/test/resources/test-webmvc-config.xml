@@ -49,6 +49,8 @@
 	<mvc:annotation-driven />
 	<mvc:default-servlet-handler />
 
+	<bean class="org.opensrp.TestSecurityConfig"/>
+	
 	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
 
 	<sec:http  request-matcher="mvc" auto-config="true" >
