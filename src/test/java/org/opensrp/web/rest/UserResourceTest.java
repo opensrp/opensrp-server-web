@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.opensrp.TestSecurityConfig;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -33,7 +34,8 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Samuel Githengi created on 10/14/19
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml" }, classes = {
+        TestSecurityConfig.class })
 public class UserResourceTest {
 	
 	@Rule
@@ -53,8 +55,8 @@ public class UserResourceTest {
 	public void setUp() {
 		UserResource userResource = webApplicationContext.getBean(UserResource.class);
 		userResource.setUserService(userService);
-		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
-				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext)
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 	}
 	
 	@Test
