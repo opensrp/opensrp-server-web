@@ -1,6 +1,5 @@
 package org.opensrp.web.rest.shadow;
 
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
@@ -9,14 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserControllerShadow extends UserController {
-	
-	public UserControllerShadow(OpenmrsLocationService openmrsLocationService) {
-		super(openmrsLocationService);
-	}
-	
-	public UserControllerShadow() {
-		super(null);
-	}
 	
 	@Override
 	public void setPractitionerService(PractitionerService practitionerService) {
