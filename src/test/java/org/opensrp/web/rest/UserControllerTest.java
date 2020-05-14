@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
+import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
@@ -223,6 +224,7 @@ public class UserControllerTest {
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
 		when(authentication.getName()).thenReturn(user.getBaseEntityId());
 		List<Long> ids = Collections.singletonList(12233l);
+
 		when(organizationService.getOrganization(ids.get(0))).thenReturn(new Organization());
 		
 		Practitioner practitioner = new Practitioner();
@@ -234,9 +236,11 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
+
+		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId))).thenReturn(new LocationTree());
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
-		when(locationService.findLocationsByIdsOrParentIds(false, Collections.singletonList(jurisdictionId)))
+		when(locationService.findLocationsByIds(false, Collections.singletonList(jurisdictionId)))
 		        .thenReturn(Collections.singletonList(location));
 		
 		String[] locations = new String[5];
