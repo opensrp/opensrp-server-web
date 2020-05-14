@@ -1,20 +1,29 @@
 package org.opensrp.web.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.api.domain.User;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
-import org.powermock.api.mockito.PowerMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,18 +36,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -55,13 +54,7 @@ public class UniqueIdControllerTest {
 
 	@Mock
 	private OpenmrsIDService openmrsIdService;
-
-	@Mock
-	private UserController userController;
-
-	@Mock
-	private OpenmrsUserService openmrsUserService;
-
+	
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/uniqueids";
@@ -89,10 +82,9 @@ public class UniqueIdControllerTest {
 		SecurityContextHolder.setContext(securityContext);
 
 		when(openmrsIdService
-				.getOpenMRSIdentifiers(any(String.class), any(String.class), nullable(String.class), any(String.class)))
+				.getOpenMRSIdentifiers(any(String.class), any(String.class), nullable(String.class), nullable(String.class)))
 				.thenReturn(mocked_expected_ids);
-		when(userController.getAuthenticationAdvisor(any(HttpServletRequest.class))).thenReturn(getMockedAuthentication());
-		when(securityContext.getAuthentication()).thenReturn(authentication);
+		when(securityContext.getAuthentication()).thenReturn(spy(getMockedAuthentication()));
 		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/get").param("numberToGenerate", "10")
