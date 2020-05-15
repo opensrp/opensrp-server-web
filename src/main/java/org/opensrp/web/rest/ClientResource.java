@@ -32,12 +32,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.bean.ClientSyncBean;
+import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +49,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -81,6 +86,10 @@ public class ClientResource extends RestResource<Client> {
 	public static final String STARTDATE = "startDate";
 	
 	public static final String ENDDATE = "endDate";
+	
+	private static final String IS_ARCHIVED = "is_archived";
+
+	private static final String FALSE = "false";
 	
 	@Autowired
 	public ClientResource(ClientService clientService) {
@@ -316,6 +325,27 @@ public class ClientResource extends RestResource<Client> {
 		response.setClients(clients);
 		response.setTotal(total);
 		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+	}
+	
+	/**
+	 * This methods provides an API endpoint that searches for all clients Ids
+	 * ordered by server version ascending
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param isArchived whether a client has been archived
+	 * @return A list of task Ids
+	 */
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
+
+		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
+		Identifier identifiers = new Identifier();
+		identifiers.setIdentifiers(taskIdsPair.getLeft());
+		identifiers.setLastServerVersion(taskIdsPair.getRight());
+		return new ResponseEntity<>(identifiers, HttpStatus.OK);
 	}
 	
 }

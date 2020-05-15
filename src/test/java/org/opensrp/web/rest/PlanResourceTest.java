@@ -44,6 +44,7 @@ import org.opensrp.web.bean.Identifier;
 import org.springframework.test.web.server.MvcResult;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -480,7 +481,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
                 .perform(get(BASE_URL + "findLocationNames/{planIdentifier}", "plan_id"))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationDetailsByPlanId(anyString());
-        assertEquals(LocationResource.gson.toJson(locationDetails), result.getResponse().getContentAsString());
+        assertEquals(new GsonBuilder().serializeNulls().create().toJson(locationDetails), result.getResponse().getContentAsString());
 
     }
 

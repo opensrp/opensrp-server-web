@@ -5,8 +5,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.text.MessageFormat;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.opensrp.common.util.HttpAgent;
 import org.opensrp.common.util.HttpResponse;
@@ -42,10 +40,10 @@ public class ANMLocationController {
     }
 
     @RequestMapping(method = GET, value = "/anm-villages",produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<VillagesDTO> villagesForANM(HttpServletRequest req, Authentication authentication) {
+    public ResponseEntity<VillagesDTO> villagesForANM(Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {
-            String anmIdentifier = userController.currentUser(req,authentication).getUsername();
+            String anmIdentifier = userController.currentUser(authentication).getUsername();
             response = httpAgent.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier);
             VillagesDTO villagesDTOs = new Gson().fromJson(response.body(),
                     new TypeToken<VillagesDTO>() {
