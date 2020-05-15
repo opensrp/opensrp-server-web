@@ -33,7 +33,6 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 				.equals(HttpMethod.PUT.name()))
 				&& request.getContentType() != null && !request.getContentType()
 				.contains(MediaType.MULTIPART_FORM_DATA_VALUE)) {
-			wrappedRequest.resetInputStream();
 			chain.doFilter(wrappedRequest, response);
 		} else {
 			chain.doFilter(request, response);
