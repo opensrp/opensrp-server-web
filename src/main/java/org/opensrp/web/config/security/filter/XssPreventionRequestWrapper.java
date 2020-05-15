@@ -111,6 +111,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 			mapper.readTree(json);
 		}
 		catch (JsonProcessingException e) {
+			logger.error("Error while processing JSON", e);
 			valid = false;
 		}
 		return valid;
