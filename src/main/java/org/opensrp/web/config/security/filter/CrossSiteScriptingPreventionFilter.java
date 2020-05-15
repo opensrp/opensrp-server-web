@@ -1,6 +1,5 @@
 package org.opensrp.web.config.security.filter;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -29,15 +28,15 @@ public class CrossSiteScriptingPreventionFilter implements Filter {
 		logger.debug("Inside CrossSiteScriptingPreventionFilter  ...............");
 		XssPreventionRequestWrapper wrappedRequest = new XssPreventionRequestWrapper(
 				(HttpServletRequest) request);
-		
-		if((wrappedRequest.getMethod().equals(HttpMethod.POST) || wrappedRequest.getMethod().equals(HttpMethod.PUT))
-				&& !request.getContentType().contains(MediaType.MULTIPART_FORM_DATA_VALUE)) {
-			String body = IOUtils.toString(wrappedRequest.getReader());
+
+		if ((wrappedRequest.getMethod().equals(HttpMethod.POST.name()) || wrappedRequest.getMethod()
+				.equals(HttpMethod.PUT.name()))
+				&& request.getContentType() != null && !request.getContentType()
+				.contains(MediaType.MULTIPART_FORM_DATA_VALUE)) {
 			wrappedRequest.resetInputStream();
 			chain.doFilter(wrappedRequest, response);
-		}
-		else {
-			chain.doFilter(request,response);
+		} else {
+			chain.doFilter(request, response);
 		}
 		
 	}

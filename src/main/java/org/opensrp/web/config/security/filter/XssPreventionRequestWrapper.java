@@ -38,7 +38,11 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		this.servletStream = new ResettableServletInputStream();
 	}
 
-	public void resetInputStream() {
+	public void resetInputStream() throws IOException {
+		if (rawData == null) {
+			rawData = IOUtils.toByteArray(this.request.getReader());
+			servletStream.stream = new ByteArrayInputStream(rawData);
+		}
 		servletStream.stream = new ByteArrayInputStream(rawData);
 	}
 
@@ -75,8 +79,8 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 
 	private static JsonNode encode(JsonNode node) {
 		if (node.isValueNode()) {
-			if (JsonNodeType.STRING == node.getNodeType() && !isEscapedString(node)) {
-				return JsonNodeFactory.instance.textNode(Encode.forJava(node.asText()));
+			if (JsonNodeType.STRING == node.getNodeType()) {
+				return JsonNodeFactory.instance.textNode(Encode.forHtmlContent(node.asText()));
 			} else if (JsonNodeType.NULL == node.getNodeType()) {
 				return null;
 			} else {
@@ -95,14 +99,10 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 			ObjectNode encodedObjectNode = mapper.createObjectNode();
 			for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
 				Map.Entry<String, JsonNode> entry = it.next();
-				encodedObjectNode.set(Encode.forJava(entry.getKey()), encode(entry.getValue()));
+				encodedObjectNode.set(Encode.forHtmlContent(entry.getKey()), encode(entry.getValue()));
 			}
 			return encodedObjectNode;
 		}
-	}
-
-	public static boolean isEscapedString(JsonNode jsonNode) {
-		return jsonNode.toString().contains("\\") ? true : false;
 	}
 
 	private static boolean isValidJSON(final String json) throws IOException {
