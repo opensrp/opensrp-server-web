@@ -37,15 +37,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		this.request = request;
 		this.servletStream = new ResettableServletInputStream();
 	}
-
-	public void resetInputStream() throws IOException {
-		if (rawData == null) {
-			rawData = IOUtils.toByteArray(this.request.getReader());
-			servletStream.stream = new ByteArrayInputStream(rawData);
-		}
-		servletStream.stream = new ByteArrayInputStream(rawData);
-	}
-
+	
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		if (rawData == null) {
