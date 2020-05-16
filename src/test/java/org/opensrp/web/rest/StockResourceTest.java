@@ -12,6 +12,7 @@ import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Stock;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -62,6 +63,7 @@ public class StockResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(stockResource)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
 				.build();
 	}
 

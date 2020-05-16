@@ -9,8 +9,6 @@ import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -42,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +47,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 
 @Controller
@@ -392,7 +392,6 @@ public class LocationResource {
 	}
 	
 	@RequestMapping(value = "/search-by-tag", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseBody
 	public ResponseEntity<String> searchLocations(LocationSearchBean locationSearchBean)
 	    throws JsonProcessingException {
 		LocationSearchcBean response = new LocationSearchcBean();

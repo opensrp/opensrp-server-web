@@ -11,6 +11,7 @@ import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -63,6 +64,7 @@ public class ValidateResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(validateResource)
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
 				.build();
 	}
 

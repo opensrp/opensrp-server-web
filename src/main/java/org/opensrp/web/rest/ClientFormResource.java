@@ -1,7 +1,12 @@
 package org.opensrp.web.rest;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -9,22 +14,22 @@ import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.web.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
@@ -45,10 +50,11 @@ public class ClientFormResource {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
+            , @RequestParam(value = "strict", defaultValue = "false") String strict
             , @RequestParam(value = "current_form_version", required = false) String currentFormVersion) throws JsonProcessingException {
+        boolean strictSearch = Boolean.parseBoolean(strict.toLowerCase());
         DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
         DefaultArtifactVersion currentFormVersionV = null;
         if (!TextUtils.isEmpty(currentFormVersion)) {
@@ -73,9 +79,20 @@ public class ClientFormResource {
             // Get an older form version
             clientFormMetadata = getMostRecentVersion(formIdentifier);
             if (clientFormMetadata == null) {
-                return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             } else {
                 formId = clientFormMetadata.getId();
+
+                if (strictSearch) {
+                    if (clientFormMetadata.getVersion().equals(currentFormVersion)) {
+                        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                    } else {
+                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    }
+                } else {
+                    clientFormMetadata = getMostRecentVersion(formIdentifier);
+                }
+
             }
 
         } else {
@@ -115,7 +132,6 @@ public class ClientFormResource {
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
-    @ResponseBody
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
                                                  @RequestParam("form_identifier") String formIdentifier,
                                                  @RequestParam("form_name") String formName,
@@ -125,8 +141,9 @@ public class ClientFormResource {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
-        if (!jsonFile.getContentType().equals(ContentType.APPLICATION_JSON.getMimeType())) {
-            return new ResponseEntity<>("The form is not a JSON file", HttpStatus.BAD_REQUEST);
+        String fileContentType = jsonFile.getContentType();
+        if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
+            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
         }
 
         if (jsonFile.isEmpty()) {
@@ -162,6 +179,17 @@ public class ClientFormResource {
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @VisibleForTesting
+    protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
+        return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) ||
+                fileContentType.equals(Constants.ContentType.APPLICATION_YAML));
+    }
+
+    @VisibleForTesting
+    protected boolean isPropertiesFile(@NonNull String fileContentType, @NonNull String fileName) {
+        return fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && fileName.endsWith(".properties");
     }
 
 }
