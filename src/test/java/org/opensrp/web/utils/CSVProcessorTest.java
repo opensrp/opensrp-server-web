@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.setting.Setting;
@@ -19,8 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CSVProcessorTest {
-
-    private JSONCSVUtil processor = new JSONCSVUtil();
 
     @Test
     public void processCSV() {
@@ -41,9 +40,11 @@ public class CSVProcessorTest {
         JSONObject jsonObject = new JSONObject();
         for (Pair<String, String> pa :
                 getAttributes()) {
-            processor.addNodeToJson(pa.getKey(), pa.getValue(), jsonObject);
+            JSONCSVUtil.addNodeToJson(pa.getKey(), pa.getValue(), jsonObject);
         }
-        System.out.println(jsonObject.toString());
+
+        String expectedJSON = "{\"client\":{\"lastName\":\"Williams\",\"firstName\":\"Mark\",\"relationships\":{\"family\":[\"f785d89a-8c8c-4b92-91b4-f0a3bb160fed\"]},\"birthdate\":\"2013-05-15T00:00:00.000Z\",\"identifiers\":{\"opensrp_id\":\"2446768-0\",\"reveal_id\":\"2013051524467680\"},\"attributes\":{\"grade_class\":\"1\",\"grade\":\"Grade 2\",\"school_name\":\"St Christophers\",\"age_category\":\"6-10\",\"school_enrolled\":\"Yes\",\"reveal_id\":\"12345\"},\"baseEntityId\":\"f785d89a-8c8c-4b92-91b4-f0a3bb160fed\",\"birthdateApprox\":\"false\"}}";
+        Assert.assertEquals(expectedJSON, jsonObject.toString());
     }
 
     private List<Pair<String, String>> getAttributes() {

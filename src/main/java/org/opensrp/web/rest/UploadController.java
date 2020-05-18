@@ -4,9 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.opensrp.domain.CSVRowConfig;
+import org.opensrp.domain.Client;
+import org.opensrp.domain.Event;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.service.MultimediaService;
@@ -30,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,7 +56,6 @@ public class UploadController {
 
     public static final String BATCH_SIZE = "batch_size";
     public static final String OFFSET = "offset";
-    public static final String EVENT_NAME = "event_name";
     public static final String TEAM_ID = "team_id";
     public static final String PROVIDER_ID = "provider_id";
     public static final String LOCATION = "location";
@@ -90,12 +96,40 @@ public class UploadController {
                     .withDateUploaded(new Date())
                     .withSummary(mapper.writeValueAsString(details));
 
-            status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+
+            List<Map<String,String>> csv_clients = new ArrayList<>();
+            CSVParser parser;
+            try(Reader reader = new InputStreamReader(file.getInputStream())) {
+                parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+                List<CSVRecord> records = parser.getRecords();
+                for (CSVRecord record : records) {
+                    csv_clients.add(record.toMap());
+                }
+                parser.close();
+            }
+
+            // get clients and events
+            List<Pair<Client,Event>> event_client = uploadService.getClientFromCSVBytes(csv_clients, eventName);
+
+            List<Client> clients = event_client.stream()
+                    .map(Pair::getLeft)
+                    .collect(Collectors.toList());
+
+
+            return new ResponseEntity<>(gson.toJson(clients), HttpStatus.OK);
+
+            // assign new id details if opensrp_id is missing
+
+            // search for base entity id from db
+
+            // persist all of them
+
+            //status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
         } catch (Exception e) {
             logger.error("", e);
         }
 
-        return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
+        return new ResponseEntity<>(gson.toJson(status), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/validate", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
