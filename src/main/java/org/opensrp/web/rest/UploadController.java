@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.joda.time.DateTime;
+import org.opensrp.domain.CSVRowConfig;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.UploadService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.bean.UploadBean;
 import org.slf4j.Logger;
@@ -28,13 +30,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/upload")
 public class UploadController {
 
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").serializeNulls()
+    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     private static Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
@@ -42,14 +45,25 @@ public class UploadController {
 
     public static final String BATCH_SIZE = "batch_size";
     public static final String OFFSET = "offset";
+    public static final String EVENT_NAME = "event_name";
+    public static final String TEAM_ID = "team_id";
+    public static final String PROVIDER_ID = "provider_id";
+    public static final String LOCATION = "location";
+    public static final String LOCATION_HIERARCHY = "location_hierarchy";
     public static final String FILE_CATEGORY = "csv";
 
     private MultimediaService multimediaService;
+    private UploadService uploadService;
     private MultimediaRepository multimediaRepository;
 
     @Autowired
     public void setMultimediaService(MultimediaService multimediaService) {
         this.multimediaService = multimediaService;
+    }
+
+    @Autowired
+    public void setUploadService(UploadService uploadService) {
+        this.uploadService = uploadService;
     }
 
     @Autowired
@@ -60,7 +74,6 @@ public class UploadController {
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = POST)
     public ResponseEntity<String> uploadCSV(@RequestParam("event_name") String eventName, @RequestParam("file") MultipartFile file) {
 
-        String fileCategory = "csv";
         String entityId = UUID.randomUUID().toString();
         String providerId = getCurrentUser();
         MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId, file.getContentType().trim(), null, FILE_CATEGORY);
@@ -117,8 +130,19 @@ public class UploadController {
     }
 
     @RequestMapping(value = "/template", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void getUploadTemplate(HttpServletRequest request) {
+    public ResponseEntity<String>  getUploadTemplate(HttpServletRequest request) {
+        String eventName = getStringFilter(EVENT_NAME, request);
+        String teamID = getStringFilter(TEAM_ID, request);
+        String providerID = getStringFilter(PROVIDER_ID, request);
+        String locationID = getStringFilter(LOCATION, request);
+        String locationHierarchy = getStringFilter(LOCATION_HIERARCHY, request);
 
+        List<CSVRowConfig> values = uploadService.getCSVConfig(eventName);
+
+
+        return new ResponseEntity<>(
+                gson.toJson(values),
+                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
