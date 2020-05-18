@@ -3,6 +3,8 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.DateTime;
 import org.opensrp.domain.CSVRowConfig;
 import org.opensrp.dto.form.MultimediaDTO;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,19 +134,33 @@ public class UploadController {
     }
 
     @RequestMapping(value = "/template", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String>  getUploadTemplate(HttpServletRequest request) {
-        String eventName = getStringFilter(EVENT_NAME, request);
+    public void getUploadTemplate(@RequestParam("event_name") String eventName, HttpServletRequest request, HttpServletResponse response) {
         String teamID = getStringFilter(TEAM_ID, request);
         String providerID = getStringFilter(PROVIDER_ID, request);
         String locationID = getStringFilter(LOCATION, request);
         String locationHierarchy = getStringFilter(LOCATION_HIERARCHY, request);
 
-        List<CSVRowConfig> values = uploadService.getCSVConfig(eventName);
+        String csvFileName = eventName.replace(" ", "").toLowerCase() + ".csv";
+        response.setContentType("text/csv");
+        String headerKey = "Content-Disposition";
+        String headerValue = String.format("attachment; filename=\"%s\"",
+                csvFileName);
+        response.setHeader(headerKey, headerValue);
 
+        String[] HEADERS = uploadService.getCSVConfig(eventName)
+                .stream().map(CSVRowConfig::getColumnName)
+                .toArray(String[]::new);
 
-        return new ResponseEntity<>(
-                gson.toJson(values),
-                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+        try (CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT
+                .withHeader(HEADERS))) {
+            /*
+            AUTHOR_BOOK_MAP.forEach((author, title) -> {
+                printer.printRecord(author, title);
+            });
+             */
+        } catch (IOException e) {
+            logger.error("CSV Export >>> " + e.toString());
+        }
     }
 
     @RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
