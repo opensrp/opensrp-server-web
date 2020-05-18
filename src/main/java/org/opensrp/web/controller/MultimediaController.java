@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -190,6 +191,7 @@ public class MultimediaController {
 		}
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
+		multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
 		String status = null;
 		try {
 			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
