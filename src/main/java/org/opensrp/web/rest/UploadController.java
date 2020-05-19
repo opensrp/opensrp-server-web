@@ -273,7 +273,7 @@ public class UploadController {
                 RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/template", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @RequestMapping(value = "/template", method = RequestMethod.GET)
     public void getUploadTemplate(@RequestParam("event_name") String eventName, HttpServletRequest request, HttpServletResponse response) {
         String locationID = getStringFilter(LOCATION_ID, request);
         String locationHierarchy = getStringFilter(LOCATION_HIERARCHY, request);
@@ -298,7 +298,10 @@ public class UploadController {
         try (CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT
                 .withHeader(HEADERS))) {
             for (Client client : clients) {
-                printer.printRecord(JSONCSVUtil.jsonToString(new JSONObject(gson.toJson(client)), fieldMappings));
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("client", new JSONObject(gson.toJson(client)));
+                printer.printRecord(JSONCSVUtil.jsonToString(jsonObject, fieldMappings));
             }
         } catch (IOException e) {
             logger.error("CSV Export >>> " + e.toString());
