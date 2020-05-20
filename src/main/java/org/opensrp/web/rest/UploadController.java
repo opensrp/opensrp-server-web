@@ -55,11 +55,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping(value = "/rest/upload")
 public class UploadController {
 
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-    private static Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Value("#{opensrp['opensrp.config.global_id']}")
     private String globalID;
@@ -72,7 +72,6 @@ public class UploadController {
     public static final String TEAM_ID = "team_id";
     public static final String TEAM_NAME = "team_name";
     public static final String LOCATION_ID = "location_id";
-    public static final String LOCATION_HIERARCHY = "location_hierarchy";
     public static final String FILE_CATEGORY = "csv";
     public static final String DEFAULT_RESIDENCE = "default_residence";
 
@@ -276,7 +275,6 @@ public class UploadController {
     @RequestMapping(value = "/template", method = RequestMethod.GET)
     public void getUploadTemplate(@RequestParam("event_name") String eventName, HttpServletRequest request, HttpServletResponse response) {
         String locationID = getStringFilter(LOCATION_ID, request);
-        String locationHierarchy = getStringFilter(LOCATION_HIERARCHY, request);
 
         String csvFileName = eventName.replace(" ", "").toLowerCase() + ".csv";
         response.setContentType("text/csv");
