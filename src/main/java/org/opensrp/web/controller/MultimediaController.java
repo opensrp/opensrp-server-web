@@ -176,23 +176,28 @@ public class MultimediaController {
 			@RequestParam("file-category") String fileCategory,
 			@RequestParam("file") MultipartFile file) {
 
-		if(hasSpecialCharacters(file.getOriginalFilename()))
-		{
-			return new ResponseEntity<String>("File Name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
+		if(hasSpecialCharacters(file.getOriginalFilename())) {
+			logger.warn("Could not save multimedia file. File name with special characters is not allowed!");
+			return new ResponseEntity<String>("File name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
 		}
-		if(hasSpecialCharacters(entityId)) {
+
+		if (hasSpecialCharacters(entityId)) {
+			logger.warn("Could not save multimedia file. Entity Id should not contain any special character!");
 			return new ResponseEntity<String>("Entity Id should not contain any special character!", HttpStatus.BAD_REQUEST);
 		}
 
 		String mimeType = file.getContentType();
 		if (!allowedMimeTypes.contains(mimeType)) {
+			logger.warn("Could not save multimedia file. MIME Type is not allowed!");
 			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
 		}
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		String status = null;
 		try {
+			logger.warn("Saving multimedia file...");
 			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+			logger.info("Multimedia file successfully saved!");
 		} catch (IOException e) {
 			logger.error("", e);
 		}
