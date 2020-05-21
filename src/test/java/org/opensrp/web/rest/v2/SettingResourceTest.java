@@ -23,6 +23,7 @@ import org.opensrp.service.SettingService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,6 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith (SpringJUnit4ClassRunner.class)
@@ -51,19 +53,15 @@ public class SettingResourceTest {
 	private SettingService settingService;
 	@InjectMocks
 	private SettingResource settingResource;
-	private List<SettingConfiguration> listSettingConfigurations;
 	private MockMvc mockMvc;
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		listSettingConfigurations = new ArrayList<>();
-		SettingConfiguration settingConfiguration = new SettingConfiguration();
-		settingConfiguration.setIdentifier("site_characteristics");
-		settingConfiguration.setTeamId("my-team-id");
-		listSettingConfigurations.add(settingConfiguration);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(settingResource).
+		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(this.settingResource).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		settingResource.setSettingService(settingService);
+		settingResource.setObjectMapper(mapper);
 	}
 	
 	@Test
@@ -144,15 +142,12 @@ public class SettingResourceTest {
 	
 	@Test
 	public void testCreateOrUpdate() throws Exception {
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<Setting> argumentCaptor = ArgumentCaptor.forClass(Setting.class);
 		String EXPECTED_SETTINGS = "{\"type\":\"Setting\",\"identifier\":\"setting_123\",\"teamId\":\"TEAM-ID-123\",\"key\":\"hiv_prevalence\",\"value\":\"true\",\"description\":\"The area HIV prevalence is more than 5%\"}";
-		MvcResult result =
-				mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/").contentType(MediaType.APPLICATION_JSON).content(EXPECTED_SETTINGS.getBytes())).andExpect(MockMvcResultMatchers.status().isCreated()).andReturn();
-		Mockito.verify(settingService, Mockito.times(1)).saveSetting(argumentCaptor.capture());
+		mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/").contentType(MediaType.APPLICATION_JSON).content(EXPECTED_SETTINGS.getBytes())).andExpect(MockMvcResultMatchers.status().isCreated()).andReturn();
+		Mockito.verify(settingService, Mockito.times(1)).addOrUpdateSettings(argumentCaptor.capture());
 		Mockito.verifyNoMoreInteractions(settingService);
-		String settingConfiguration = argumentCaptor.getValue();
-		String EXPECTED_IDENTFIER = "setting_123";
-		Assert.assertTrue(settingConfiguration.contains(EXPECTED_IDENTFIER));
+		Assert.assertEquals("setting_123", argumentCaptor.getValue().getIdentifier());
 	}
 	
 	@Test
@@ -162,7 +157,22 @@ public class SettingResourceTest {
 				mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/").contentType(MediaType.APPLICATION_JSON).content(
 						"EXPECTED_SETTINGS.getBytes()")).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
 		Mockito.verifyNoInteractions(settingService);
-		Assert.assertEquals("{}", result.getResponse().getContentAsString());
+		Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+	}
+	
+	@Test
+	public void testDelete() throws Exception {
+		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
+		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}",1)).andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
+		Mockito.verify(settingService, Mockito.times(1)).deleteSetting(argumentCaptor.capture());
+		assertEquals(argumentCaptor.getValue().longValue(), 1);
+	}
+	@Test
+	public void testDeleteWithNoIdentifier() throws Exception {
+		MvcResult result =
+				mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}","test")).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+		Mockito.verifyNoInteractions(settingService);
+		Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
 	}
 	
 	private List<Setting> createSettingsList() {

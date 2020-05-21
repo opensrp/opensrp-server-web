@@ -30,7 +30,7 @@ public class RestUtils {
 	public static final String DATETIME_FORMAT = "dd-MM-yyyy HH:mm";
 	public static final SimpleDateFormat SDTF = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
-	private static Logger logger = LoggerFactory.getLogger(RestUtils.class.toString());
+	private static final Logger logger = LoggerFactory.getLogger(RestUtils.class.toString());
 
 
 	public static String getStringFilter(String filter, HttpServletRequest req)
@@ -52,6 +52,11 @@ public class RestUtils {
 	{
 	  String strval = getStringFilter(filter, req);
 	  return strval == null ? null : Integer.parseInt(strval);
+	}
+	
+	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
+		String stringFilter = getStringFilter(filter, req);
+		return Boolean.parseBoolean(stringFilter);
 	}
 	
 	public static Float getFloatFilter(String filter, HttpServletRequest req)

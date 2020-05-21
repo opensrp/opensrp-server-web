@@ -159,7 +159,9 @@ public class UserController {
 			String userName = org.apache.commons.lang.StringUtils.isBlank(anmIdentifier) ? auth.getName()
 					: anmIdentifier;
 			user = openmrsUserService.getUser(userName);
-			UserDetail userDetail = new UserDetail(user.getUsername(), user.getRoles());
+			UserDetail userDetail = new UserDetail();
+			userDetail.setUserName(user.getUsername());
+			userDetail.setRoles(user.getRoles());
 			userDetail.setPreferredName(user.getPreferredName());
 			return new ResponseEntity<>(userDetail, RestUtils.getJSONUTF8Headers(), OK);
 

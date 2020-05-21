@@ -1,23 +1,26 @@
 package org.opensrp.web.rest.v2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
-import org.opensrp.repository.postgres.handler.BaseTypeHandler;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
+import org.opensrp.web.Constants;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,22 +41,33 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping (value = "/rest/v2/settings")
+@RequestMapping (value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+	protected ObjectMapper objectMapper;
 	private SettingService settingService;
+	
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 	
 	@Autowired
 	public void setSettingService(SettingService settingService) {
 		this.settingService = settingService;
 	}
 	
-	
+	/**
+	 * Gets settings by the unique is
+	 *
+	 * @param identifier {@link String} - settings identifier
+	 * @return setting {@link Setting} - the settings object
+	 */
 	@RequestMapping (value = "/{identifier}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> getByUniqueId(@PathVariable ("identifier") String identifier) {
+	public ResponseEntity<String> getByUniqueId(@PathVariable (Constants.RestPartVariables.IDENTIFIER) String identifier) {
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
 		settingQueryBean.setIdentifier(identifier);
 		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
@@ -69,7 +83,7 @@ public class SettingResource {
 	 * @return A list of settings
 	 */
 	@RequestMapping (value = "/", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> getAllSettings(HttpServletRequest request) throws JsonProcessingException {
+	public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
 		try {
 			JSONObject response = new JSONObject();
 			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
@@ -77,9 +91,10 @@ public class SettingResource {
 			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
+			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS,request);
 			
-			if ((TextUtils.isBlank(team) && TextUtils.isBlank(providerId) && TextUtils.isBlank(locationId)
-					&& TextUtils.isBlank(teamId) && TextUtils.isBlank(team)) || TextUtils.isBlank(serverVersion)) {
+			if ((StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
+					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team)) || StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 			}
 			
@@ -91,6 +106,7 @@ public class SettingResource {
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
 			settingQueryBean.setServerVersion(lastSyncedServerVersion);
+			settingQueryBean.setResolveSettings(resolveSettings);
 			
 			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
 			List<Setting> settingList = extractSettings(settingConfigurations);
@@ -118,28 +134,50 @@ public class SettingResource {
 		return settingList;
 	}
 	
+	/**
+	 * Creates or updates a given settings
+	 *
+	 * @param entity {@link Setting} - the settings object
+	 * @return
+	 */
 	@RequestMapping (method = {RequestMethod.POST, RequestMethod.PUT}, consumes = {MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE})
 	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
 		try {
-			Setting setting = gson.fromJson(entity, Setting.class);
-			String identifier = settingService.saveSetting(convertSettingToSettingConfiguration(setting));
-			return new ResponseEntity<>(identifier, RestUtils.getJSONUTF8Headers(), HttpStatus.CREATED);
+			Setting setting = objectMapper.readValue(entity, Setting.class);
+			settingService.addOrUpdateSettings(setting);
+			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid settings representation" + entity);
-			return new ResponseEntity<>("", RestUtils.getJSONUTF8Headers(),HttpStatus.BAD_REQUEST);
+			logger.error("The request doesnt contain a valid settings json" + entity);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		} catch (JsonMappingException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		
 	}
 	
-	private String convertSettingToSettingConfiguration(Setting setting) {
-		SettingConfiguration settingConfiguration = new SettingConfiguration();
-		List<Setting> settingList = new ArrayList<>();
-		settingList.add(setting);
-		settingConfiguration.setSettings(settingList);
-		settingConfiguration.setIdentifier(setting.getIdentifier());
-		settingConfiguration.setType(setting.getType());
+	/**
+	 * Deletes a settings by primary key
+	 *
+	 * @param id {@link Long}
+	 * @return
+	 */
+	@RequestMapping (value = "/{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<String> delete(@PathVariable (Constants.RestPartVariables.ID) Long id) {
+		try {
+			if (id == null) {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			} else {
+				settingService.deleteSetting(id);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+		} catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 		
-		return settingConfiguration.toString();
 	}
 }
