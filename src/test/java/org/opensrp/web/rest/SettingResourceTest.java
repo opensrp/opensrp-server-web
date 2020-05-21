@@ -155,6 +155,12 @@ public class SettingResourceTest {
 	}
 
 	@Test
+	public void findSettingsByVersionShouldReturn500IfServerVersionIsNotSpecified() throws Exception {
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync")).andExpect(status().isBadRequest()).andReturn();
+		assertEquals("{}", result.getResponse().getContentAsString());
+	}
+
+	@Test
 	public void testValidValue() throws Exception {
 		SettingConfiguration settingConfiguration = getSettingConfigurationObject();
 		assertNotNull(settingConfiguration);
