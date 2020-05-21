@@ -327,6 +327,12 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextYamlContentTypeForYamlFile() throws Exception {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML));
+    }
+
+    @Test
     public void testIsPropertiesFileShouldReturnTrue() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertTrue(clientFormResource.isPropertiesFile("application/octet-stream", "anc_register.properties"));
