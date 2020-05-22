@@ -77,6 +77,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/multimedia/download/**").permitAll()
 		.mvcMatchers("/multimedia/profileimage/**").permitAll()
 		.mvcMatchers("/multimedia/media/**").permitAll()
+		.mvcMatchers("/multimedia/upload").hasRole(Role.PROVIDER)
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 		.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)

@@ -13,4 +13,6 @@ public interface Role {
 	 String ALL_EVENTS ="ALL_EVENTS";
 	 
 	 String PLANS_FOR_USER ="PLANS_FOR_USER";
+
+	 String PROVIDER = "Provider";
 }
