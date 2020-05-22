@@ -7,13 +7,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
