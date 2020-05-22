@@ -94,8 +94,7 @@ public class MultimediaController {
 					writeFileNotFound(response);
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("", e);
 		}
 	}
@@ -121,8 +120,7 @@ public class MultimediaController {
 				return;
 			}
 			downloadFileWithAuth(baseEntityId, userName, password, request, response);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Exception occurred in downloading file by client ID ", e);
 		}
 	}
@@ -150,8 +148,8 @@ public class MultimediaController {
 			@RequestHeader(value = "password") String password) {
 
 		// todo: change this to a common repo constant
-		boolean isAuthenticated = authenticate(userName, password, request).isAuthenticated();
-		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory) && isAuthenticated) {
+		if (!authenticate(userName, password, request).isAuthenticated()) { return; }
+		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
 			List<Multimedia> multimediaFiles = multimediaService
 					.getMultimediaFiles(entityId.trim(), contentType.trim(), fileCategory.trim());
 			response.setContentType("image/jpeg/zip");
@@ -160,8 +158,7 @@ public class MultimediaController {
 				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
 				zipFiles(zipOutputStream, multimediaFiles, multimediaService.getFileManager());
 				zipOutputStream.close();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 		} else {
@@ -217,16 +214,15 @@ public class MultimediaController {
 	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
-			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
-				if (file != null) {
-					downloadFile(file, response);
-				} else {
-					writeFileNotFound(response);
-				}
+			if (!authenticate(userName, password, request).isAuthenticated()) { return; }
+			MultimediaDTO multimediaDTO = new MultimediaDTO(baseEntityId, "", "image/jpeg", null, "");
+			File file = multimediaService.retrieveFile(multimediaService.getFileManager().getMultimediaFilePath(multimediaDTO, baseEntityId));
+			if (file != null) {
+				downloadFile(file, response);
+			} else {
+				writeFileNotFound(response);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("", e);
 		}
 	}
