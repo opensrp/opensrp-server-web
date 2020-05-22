@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.setting.SettingConfiguration;
+import org.opensrp.repository.postgres.handler.BaseTypeHandler;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
@@ -41,11 +42,11 @@ public class SettingResource {
 	
 	private SettingService settingService;
 	
-	private static Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 	
-	private String TEAM_ID = "teamId";
+	private final String TEAM_ID = "teamId";
 	
-	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
@@ -81,7 +82,7 @@ public class SettingResource {
 			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
 
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
-			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
+			String settingsArrayString = BaseTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
 			responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders, HttpStatus.OK); // todo: why is this conversion to json array necessary?
 		} catch (Exception e) {
@@ -108,9 +109,8 @@ public class SettingResource {
 			JSONArray dbSettingsArray = new JSONArray();
 
 			for (int i = 0; i < clientSettings.length(); i++) {
-
-				dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
-
+				String settingConfigurationsString = clientSettings.getJSONObject(i).toString();
+				dbSettingsArray.put(settingService.saveSetting(settingConfigurationsString));
 			}
 
 			response.put("validated_records", dbSettingsArray);
