@@ -26,9 +26,9 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.2.1-ANC-ALPHA1-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.0.1-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
-		<opensrp.common.version>2.0.1-ANC-ALPHA-SNAPSHOT</opensrp.common.version>
+		<opensrp.core.version>2.2.2-ANC-ALPHA1-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
+		<opensrp.common.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.0-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
@@ -84,16 +84,6 @@
 			<url>https://maven.springframework.org/release</url>
 		</repository>
 		<repository>
-			<id>jcenter-release</id>
-			<name>jcenter</name>
-			<url>https://oss.jfrog.org/artifactory/oss-release-local/</url>
-		</repository>
-		<repository>
-			<id>spring-maven-milestone</id>
-			<name>Spring Maven Milestone Repository</name>
-			<url>https://maven.springframework.org/milestone</url>
-		</repository>
-		<repository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
@@ -102,6 +92,16 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>jcenter-release</id>
+			<name>jcenter</name>
+			<url>https://oss.jfrog.org/artifactory/oss-release-local/</url>
+		</repository>
+		<repository>
+			<id>spring-maven-milestone</id>
+			<name>Spring Maven Milestone Repository</name>
+			<url>https://maven.springframework.org/milestone</url>
 		</repository>
 		<repository>
 			<id>spring-libs-release</id>
