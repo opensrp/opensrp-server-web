@@ -38,7 +38,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-@Controller
+@Controller ("settingResourceV2")
 @RequestMapping (value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
 	
