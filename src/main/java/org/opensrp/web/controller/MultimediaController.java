@@ -52,6 +52,8 @@ public class MultimediaController {
 
 	private MultimediaService multimediaService;
 
+	private final String MULTI_VERSION = "multi_version";
+
 	private final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
 	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
 
@@ -147,9 +149,10 @@ public class MultimediaController {
 			@RequestHeader(value = "username") String userName,
 			@RequestHeader(value = "password") String password) {
 
-		// todo: change this to a common repo constant
+
 		if (!authenticate(userName, password, request).isAuthenticated()) { return; }
-		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
+
+		if (!TextUtils.isBlank(fileCategory) && MULTI_VERSION.equals(fileCategory)) {
 			List<Multimedia> multimediaFiles = multimediaService
 					.getMultimediaFiles(entityId.trim(), contentType.trim(), fileCategory.trim());
 			response.setContentType("image/jpeg/zip");
