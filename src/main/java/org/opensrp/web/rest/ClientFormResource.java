@@ -184,7 +184,7 @@ public class ClientFormResource {
     @VisibleForTesting
     protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
         return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) ||
-                fileContentType.equals(Constants.ContentType.APPLICATION_YAML));
+                fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML));
     }
 
     @VisibleForTesting
