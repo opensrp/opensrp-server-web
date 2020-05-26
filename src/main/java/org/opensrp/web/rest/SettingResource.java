@@ -83,11 +83,8 @@ public class SettingResource {
 			settingQueryBean.setServerVersion(Long.valueOf(serverVersion) + 1);
 			settingQueryBean.setV1Settings(true);
 			
-			logger.debug(settingQueryBean.toString() + " ------------------------------- find settings from the endpoint");
 			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
 			
-			logger.debug(SettingConfigurations.toString() + " ------------------------------- settings config lists on the" +
-					" resource");
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 			

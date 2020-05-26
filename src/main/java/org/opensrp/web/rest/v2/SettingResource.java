@@ -89,7 +89,7 @@ public class SettingResource {
 			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
-			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS,request);
+			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
 			if ((StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
 					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team)) || StringUtils.isBlank(serverVersion)) {
