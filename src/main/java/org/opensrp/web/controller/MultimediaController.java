@@ -44,7 +44,7 @@ public class MultimediaController {
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
 
-	@Value("#{opensrp['multimedia.allowed.file.types']}")
+	@Value("#{opensrp['multimedia.allowed.file.types'] ?: 'application/octet-stream,image/jpeg,image/gif,image/png'}")
 	private String allowedMimeTypes;
 
 	@Autowired
