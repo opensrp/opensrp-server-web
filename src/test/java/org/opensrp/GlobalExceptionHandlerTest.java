@@ -12,6 +12,7 @@ import org.opensrp.service.CampaignService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.rest.CampaignResource;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
 public class GlobalExceptionHandlerTest {
 
     @InjectMocks
