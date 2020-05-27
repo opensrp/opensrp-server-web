@@ -19,12 +19,22 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -54,8 +64,8 @@ public class MultimediaController {
 
 	private final String MULTI_VERSION = "multi_version";
 
-	private final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
-	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
+	public static final String FILE_NAME_ERROR_MESSAGE = "Sorry. File name should not contain any special character";
+	public static final String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity ID should not contain any special character";
 
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
@@ -81,7 +91,7 @@ public class MultimediaController {
 
 		try {
 			if (hasSpecialCharacters(fileName)) {
-				specialCharactersError(response,FILE_NAME_ERROR_MESSAGE);
+				specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
 				return;
 			}
 
@@ -177,8 +187,8 @@ public class MultimediaController {
 			@RequestParam("file") MultipartFile file) {
 
 		if(hasSpecialCharacters(file.getOriginalFilename())) {
-			logger.warn("Could not save multimedia file. File name with special characters is not allowed!");
-			return new ResponseEntity<String>("File name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
+			logger.warn(FILE_NAME_ERROR_MESSAGE);
+			return new ResponseEntity<String>(FILE_NAME_ERROR_MESSAGE, HttpStatus.BAD_REQUEST);
 		}
 
 		if (hasSpecialCharacters(entityId)) {
