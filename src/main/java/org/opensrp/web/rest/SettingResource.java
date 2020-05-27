@@ -73,7 +73,7 @@ public class SettingResource {
 			String teamId = getStringFilter(TEAM_ID, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
-			if (TextUtils.isBlank(serverVersion)) {
+			if (StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
 			

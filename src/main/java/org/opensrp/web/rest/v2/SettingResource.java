@@ -91,12 +91,16 @@ public class SettingResource {
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
-			if ((StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team)) || StringUtils.isBlank(serverVersion)) {
+			if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
+					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 			}
 			
-			Long lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+			long lastSyncedServerVersion = 0L;
+			if (StringUtils.isNotBlank(serverVersion)) {
+				lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+			}
+			
 			
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
