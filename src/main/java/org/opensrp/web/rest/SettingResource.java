@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -70,6 +71,7 @@ public class SettingResource {
 			String locationId = getStringFilter(LOCATION_ID, request);
 			String team = getStringFilter(TEAM, request);
 			String teamId = getStringFilter(TEAM_ID, request);
+			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
 			if (TextUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
@@ -82,6 +84,9 @@ public class SettingResource {
 			settingQueryBean.setLocationId(locationId);
 			settingQueryBean.setServerVersion(Long.valueOf(serverVersion) + 1);
 			settingQueryBean.setV1Settings(true);
+			if (StringUtils.isNotBlank(locationId)) {
+				settingQueryBean.setResolveSettings(resolveSettings);
+			}
 			
 			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
 			

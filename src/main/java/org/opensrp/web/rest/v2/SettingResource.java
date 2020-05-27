@@ -104,7 +104,9 @@ public class SettingResource {
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
 			settingQueryBean.setServerVersion(lastSyncedServerVersion);
-			settingQueryBean.setResolveSettings(resolveSettings);
+			if (StringUtils.isNotBlank(locationId)) {
+				settingQueryBean.setResolveSettings(resolveSettings);
+			}
 			
 			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
 			List<Setting> settingList = extractSettings(settingConfigurations);
