@@ -145,10 +145,6 @@ public class SettingResource {
 	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
-			logger.debug(setting.getId() + "===============================================");
-			logger.debug(setting.getSettingsId() + "===============================================");
-			logger.debug(setting.getIdentifier() + "===============================================");
-			logger.debug(setting.getLocationId() + "===============================================");
 			settingService.addOrUpdateSettings(setting);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
