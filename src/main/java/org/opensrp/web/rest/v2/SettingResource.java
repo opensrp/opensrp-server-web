@@ -8,13 +8,11 @@ import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
-import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
@@ -120,12 +118,12 @@ public class SettingResource {
 			}
 			
 			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
-			List<Setting> settingList = extractSettings(settingConfigurations);
+			List<Setting> settingList = extractSettings(settingConfigurations);/*
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
-			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(settingList);
+			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(settingList);*/
 			
 			
-			return new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		} catch (Exception e) {
 			logger.error(MessageFormat.format("Fetching settings failed with the following error {0}.- ", e));
