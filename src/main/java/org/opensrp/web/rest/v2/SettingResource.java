@@ -43,6 +43,8 @@ import javax.servlet.http.HttpServletRequest;
 public class SettingResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+	public static final String SETTING_IDENTIFIER = "identifier";
+	
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	protected ObjectMapper objectMapper;
@@ -89,6 +91,7 @@ public class SettingResource {
 			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
+			String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
 			if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
@@ -109,6 +112,9 @@ public class SettingResource {
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
 			settingQueryBean.setServerVersion(lastSyncedServerVersion);
+			if (StringUtils.isNotBlank(identifier)) {
+				settingQueryBean.setIdentifier(identifier);
+			}
 			if (StringUtils.isNotBlank(locationId)) {
 				settingQueryBean.setResolveSettings(resolveSettings);
 			}
