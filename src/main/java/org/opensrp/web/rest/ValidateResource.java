@@ -72,7 +72,7 @@ public class ValidateResource {
 			List<String> missingClientIds = new ArrayList<>();
 			if (syncData.has("clients")) {
 
-				List<String> clientIds = gson.fromJson(syncData.getString("clients"),
+				List<String> clientIds = gson.fromJson(String.valueOf(syncData.getJSONArray("clients")),
 						new TypeToken<ArrayList<String>>() {
 						}.getType());
 				for (String clientId : clientIds) {
@@ -89,7 +89,7 @@ public class ValidateResource {
 
 			List<String> missingEventIds = new ArrayList<>();
 			if (syncData.has("events")) {
-				List<String> eventIds = gson.fromJson(syncData.getString("events"), new TypeToken<ArrayList<String>>() {
+				List<String> eventIds = gson.fromJson(String.valueOf(syncData.getJSONArray("events")), new TypeToken<ArrayList<String>>() {
 				}.getType());
 				for (String eventId : eventIds) {
 					try {
