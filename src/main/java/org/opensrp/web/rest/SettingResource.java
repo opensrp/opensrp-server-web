@@ -1,10 +1,6 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
@@ -13,12 +9,12 @@ import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -92,7 +88,8 @@ public class SettingResource {
 		return responseEntity;
 	}
 	
-	@RequestMapping (headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/sync")
+	@RequestMapping (headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/sync", consumes = {MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE})
 	public ResponseEntity<String> saveSetting(@RequestBody String data) {
 		JSONObject response = new JSONObject();
 		HttpHeaders responseHeaders = new HttpHeaders();
