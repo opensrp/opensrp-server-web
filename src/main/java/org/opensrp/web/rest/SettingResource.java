@@ -34,6 +34,7 @@ import static java.text.MessageFormat.format;
 @RequestMapping (value = "/rest/settings")
 public class SettingResource {
 	
+	public static final String SETTING_CONFIGURATIONS = "settingConfigurations";
 	private SettingService settingService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
@@ -68,7 +69,7 @@ public class SettingResource {
 			settingQueryBean.setTeamId(teamId);
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
-			settingQueryBean.setServerVersion(Long.valueOf(serverVersion) + 1);
+			settingQueryBean.setServerVersion(Long.parseLong(serverVersion) + 1);
 			settingQueryBean.setV1Settings(true);
 			if (StringUtils.isNotBlank(locationId)) {
 				settingQueryBean.setResolveSettings(resolveSettings);
@@ -97,7 +98,7 @@ public class SettingResource {
 		
 		JSONObject syncData = new JSONObject(data);
 		
-		if (!syncData.has("settingConfigurations")) {
+		if (!syncData.has(SETTING_CONFIGURATIONS)) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
 			
