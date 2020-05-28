@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.setting.SettingConfiguration;
-import org.opensrp.repository.postgres.handler.BaseTypeHandler;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
@@ -33,11 +31,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+;
 
 @Controller
 @RequestMapping (value = "/rest/settings")
@@ -46,11 +41,6 @@ public class SettingResource {
 	private SettingService settingService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
-	
-	private final String TEAM_ID = "teamId";
-	
-	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
 	public void setSettingService(SettingService settingService) {
@@ -66,11 +56,11 @@ public class SettingResource {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		try {
-			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-			String providerId = getStringFilter(PROVIDER_ID, request);
-			String locationId = getStringFilter(LOCATION_ID, request);
-			String team = getStringFilter(TEAM, request);
-			String teamId = getStringFilter(TEAM_ID, request);
+			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+			String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
+			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
+			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
+			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
 			if (StringUtils.isBlank(serverVersion)) {
@@ -102,7 +92,7 @@ public class SettingResource {
 		return responseEntity;
 	}
 	
-	@RequestMapping (headers = {"Accept=application/json"}, method = POST, value = "/sync")
+	@RequestMapping (headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/sync")
 	public ResponseEntity<String> saveSetting(@RequestBody String data) {
 		JSONObject response = new JSONObject();
 		HttpHeaders responseHeaders = new HttpHeaders();

@@ -93,7 +93,8 @@ public class SettingResource {
 			
 			if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
 					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
-				return new ResponseEntity<>(response.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("All parameters cannot be null for this endpoint",
+						RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 			}
 			
 			long lastSyncedServerVersion = 0L;
@@ -149,8 +150,10 @@ public class SettingResource {
 	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
+			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
 			settingService.addOrUpdateSettings(setting);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid settings json" + entity);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -173,10 +176,12 @@ public class SettingResource {
 	public ResponseEntity<String> delete(@PathVariable (Constants.RestPartVariables.ID) Long id) {
 		try {
 			if (id == null) {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
+						HttpStatus.BAD_REQUEST);
 			} else {
 				settingService.deleteSetting(id);
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
+						HttpStatus.NO_CONTENT);
 			}
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
