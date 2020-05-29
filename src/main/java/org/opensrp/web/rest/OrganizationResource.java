@@ -6,6 +6,8 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
@@ -24,6 +26,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.rest.UploadController.LOCATION_ID;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -65,9 +72,15 @@ public class OrganizationResource {
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAllOrganizations() {
-		return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
-		        HttpStatus.OK);
+	public ResponseEntity<String> getAllOrganizations(HttpServletRequest request) {
+		String locationID = getStringFilter(LOCATION_ID, request);
+		if(StringUtils.isNotBlank(locationID)){
+			return new ResponseEntity<>(gson.toJson(organizationService.getOrganizationsInLocations(locationID)), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
+		}
 	}
 
 	/**
