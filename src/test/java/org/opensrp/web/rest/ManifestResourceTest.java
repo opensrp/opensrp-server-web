@@ -228,19 +228,21 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         manifest.setIdentifier("opd/registration.json");
         manifest.setJson("{}");
 
-        doReturn(manifest).when(manifestService).getManifest(eq(appId), eq(appVersion));
+        List<Manifest> manifestList = new ArrayList<>();
+        manifestList.add(manifest);
+
+        doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
 
         String responseString = getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
                 , MockMvcResultMatchers.status().isOk());
 
-        verify(manifestService).getManifest(eq(appId), eq(appVersion));
+        verify(manifestService).getManifestsByAppId(eq(appId));
         Manifest returned = mapper.readValue(responseString, Manifest.class);
 
         assertEquals(appVersion, returned.getAppVersion());
         assertEquals(appId, returned.getAppId());
 
     }
-
 
     @Test
     public void testGetManifestByAppIdAndAppVersionShouldReturnNotFound() throws Exception {
@@ -250,7 +252,87 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
                 , MockMvcResultMatchers.status().isNotFound());
 
-        verify(manifestService).getManifest(eq(appId), eq(appVersion));
+        verify(manifestService).getManifestsByAppId(eq(appId));
 
+    }
+
+    @Test
+    public void testGetManifestByAppIdAndAppVersionShouldReturnLowerVersionManifestWhenStrictDefaultIsFalseAndLowerVersionManifestIsAvailable() throws Exception {
+        List<Manifest> manifestList = new ArrayList<>();
+        String appId = "org.smartregister.giz";
+        String requestedAppVersion = "0.0.11";
+
+        for (int i = 0; i < 10; i++) {
+            Manifest manifest = new Manifest();
+            manifest.setAppId(appId);
+            String appVersion = "0.0." + (i + 1);
+            manifest.setAppVersion(appVersion);
+            manifest.setIdentifier("opd/registration.json");
+            manifest.setJson("{}");
+
+            manifestList.add(manifest);
+        }
+
+        doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
+
+        String responseString = getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
+                , MockMvcResultMatchers.status().isOk());
+
+        verify(manifestService).getManifestsByAppId(eq(appId));
+        Manifest returned = mapper.readValue(responseString, Manifest.class);
+
+        assertEquals("0.0.10", returned.getAppVersion());
+        assertEquals(appId, returned.getAppId());
+    }
+
+    @Test
+    public void testGetManifestByAppIdAndAppVersionShouldReturn404WhenStrictIsTrue() throws Exception {
+        List<Manifest> manifestList = new ArrayList<>();
+        String appId = "org.smartregister.giz";
+        String requestedAppVersion = "0.0.11";
+
+        for (int i = 0; i < 10; i++) {
+            Manifest manifest = new Manifest();
+            manifest.setAppId(appId);
+            String appVersion = "0.0." + (i + 1);
+            manifest.setAppVersion(appVersion);
+            manifest.setIdentifier("opd/registration.json");
+            manifest.setJson("{}");
+
+            manifestList.add(manifest);
+        }
+
+        doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
+
+        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s&strict=true", appId, requestedAppVersion)
+                , MockMvcResultMatchers.status().isNotFound());
+
+        verify(manifestService).getManifest(eq(appId), eq(requestedAppVersion));
+    }
+
+
+    @Test
+    public void testGetManifestByAppIdAndAppVersionShouldReturn404WhenStrictDefaultIsFalseAndLowerVersionManifestIsNotFound() throws Exception {
+        List<Manifest> manifestList = new ArrayList<>();
+        String appId = "org.smartregister.giz";
+        String requestedAppVersion = "0.0.10";
+
+        for (int i = 0; i < 10; i++) {
+            Manifest manifest = new Manifest();
+            manifest.setAppId(appId);
+            String appVersion = "0.0." + (i + 11);
+            manifest.setAppVersion(appVersion);
+            manifest.setIdentifier("opd/registration.json");
+            manifest.setJson("{}");
+
+            manifestList.add(manifest);
+        }
+
+        doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
+
+        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
+                , MockMvcResultMatchers.status().isNotFound());
+
+        verify(manifestService).getManifestsByAppId(eq(appId));
     }
 }
