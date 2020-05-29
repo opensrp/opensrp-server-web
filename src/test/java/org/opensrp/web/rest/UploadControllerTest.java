@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,11 +16,14 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.Event;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
 import org.opensrp.service.ClientService;
+import org.opensrp.service.EventService;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UploadService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.GlobalExceptionHandler;
@@ -47,8 +51,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -87,6 +93,12 @@ public class UploadControllerTest {
 	@Mock
 	private UploadService uploadService;
 
+	@Mock
+	private EventService eventService;
+
+	@Mock
+	private OpenmrsIDService openmrsIDService;
+
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
@@ -109,6 +121,86 @@ public class UploadControllerTest {
 		when(securityContext.getAuthentication()).thenReturn(authentication);
 		SecurityContextHolder.setContext(securityContext);
 		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(applicationUser);
+	}
+
+	@Test
+	public void testUploadCSV() throws Exception {
+		mockSecurityUser();
+		String path = "src/test/resources/sample/childregistration.csv";
+		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+				Files.readAllBytes(Paths.get(path)));
+
+		UploadValidationBean validationBean = new UploadValidationBean();
+		validationBean.setRowsToUpdate(1);
+		validationBean.setRowsToCreate(2);
+		validationBean.setHeaderColumns(4);
+
+		int low = 10000;
+		int high = 100000;
+
+		List<String> results = new ArrayList<>();
+		results.add(Integer.toString(new Random().nextInt(high - low) + low));
+
+		List<Pair<Client, Event>> clients = new ArrayList<>();
+		Client client = new Client("");
+		clients.add(Pair.of(client, null));
+		validationBean.setAnalyzedData(clients);
+
+		when(openmrsIDService.downloadOpenmrsIds(Mockito.anyLong())).thenReturn(results);
+		when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
+				.thenReturn(validationBean);
+
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders
+						.multipart(BASE_URL + "?team_id=teamID&team_name=name&location_id=12345&event_name=ChildReg")
+						.file(firstFile)
+		)
+				.andExpect(status().isOk())
+				.andReturn();
+
+		// verify validation
+		verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
+
+		// verify data was created and inserted
+		verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
+		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class));
+
+		// verify file was saved
+		verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());
+
+		assertTrue(result.getResponse().getContentAsString().contains("size"));
+		assertTrue(result.getResponse().getContentAsString().contains("imported"));
+		assertTrue(result.getResponse().getContentAsString().contains("updated"));
+	}
+
+	@Test
+	public void testUploadCSVWithErrors() throws Exception {
+		mockSecurityUser();
+		String path = "src/test/resources/sample/childregistration.csv";
+		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+				Files.readAllBytes(Paths.get(path)));
+
+		UploadValidationBean validationBean = new UploadValidationBean();
+		validationBean.setRowsToUpdate(1);
+		validationBean.setRowsToCreate(2);
+		validationBean.setHeaderColumns(4);
+
+		List<String> errors = new ArrayList<>();
+		errors.add("Sample error");
+		validationBean.setErrors(errors);
+
+		when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
+				.thenReturn(validationBean);
+
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders
+						.multipart(BASE_URL + "?team_id=teamID&team_name=name&location_id=12345&event_name=ChildReg")
+						.file(firstFile)
+		)
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
+		assertTrue(result.getResponse().getContentAsString().contains("A number of errors were found during validation"));
 	}
 
 	@Test
