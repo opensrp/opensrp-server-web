@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -100,9 +102,38 @@ public class ManifestResource {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<String> getManifestByAppIdAndAppVersion(@RequestParam(value = "app_version") String appVersion
-            , @RequestParam(value = "app_id") String appId) throws JsonProcessingException {
-        Manifest manifest = manifestService.getManifest(appId, appVersion);
+    public ResponseEntity<String> getManifestByAppIdAndAppVersion(
+            @RequestParam(value = "app_version") String appVersion,
+            @RequestParam(value = "app_id") String appId,
+            @RequestParam(value = "strict", defaultValue = "false") String strict) throws JsonProcessingException {
+        boolean strictSearch = Boolean.parseBoolean(strict.toLowerCase());
+        Manifest manifest = null;
+
+        if (strictSearch) {
+            manifest = manifestService.getManifest(appId, appVersion);
+        } else {
+            List<Manifest> manifests = manifestService.getManifestsByAppId(appId);
+            if (manifests != null) {
+                DefaultArtifactVersion requestedAppVersion = new DefaultArtifactVersion(appVersion);
+                DefaultArtifactVersion highestAppVersion = null;
+
+                for (Manifest queryResultManifest: manifests) {
+                    DefaultArtifactVersion manifestAppVersion = new DefaultArtifactVersion(queryResultManifest.getAppVersion());
+
+                    int comparisonResult = manifestAppVersion.compareTo(requestedAppVersion);
+                    if (comparisonResult == 0) {
+                        manifest = queryResultManifest;
+                        break;
+                    }
+
+                    if (comparisonResult < 0 && (highestAppVersion == null || manifestAppVersion.compareTo(highestAppVersion) > 0)) {
+                        highestAppVersion = manifestAppVersion;
+                        manifest = queryResultManifest;
+                    }
+                }
+            }
+        }
+
         if (manifest == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
