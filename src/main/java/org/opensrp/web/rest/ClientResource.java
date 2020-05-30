@@ -6,6 +6,7 @@ import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
 import static org.opensrp.common.AllConstants.BaseEntity.COUNTRY;
 import static org.opensrp.common.AllConstants.BaseEntity.COUNTY_DISTRICT;
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.common.AllConstants.BaseEntity.STATE_PROVINCE;
 import static org.opensrp.common.AllConstants.BaseEntity.SUB_DISTRICT;
 import static org.opensrp.common.AllConstants.BaseEntity.SUB_TOWN;
@@ -20,6 +21,7 @@ import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
 import static org.opensrp.common.AllConstants.Client.PROVIDERID;
 import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -52,8 +54,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -88,7 +88,7 @@ public class ClientResource extends RestResource<Client> {
 	public static final String ENDDATE = "endDate";
 	
 	private static final String IS_ARCHIVED = "is_archived";
-
+	
 	private static final String FALSE = "false";
 	
 	@Autowired
@@ -251,12 +251,12 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		
 		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
-		
+		clientSearchBean.setClientType(ALLCLIENTS);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -264,14 +264,14 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		DateTime[] lastEdit = null;
 		ClientSyncBean response = new ClientSyncBean();
 		List<Client> clients;
 		
-		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
-		    lastEdit == null ? null : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean, lastEdit == null ? null
+		        : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -286,6 +286,7 @@ public class ClientResource extends RestResource<Client> {
 			if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
 				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
 			} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
+				clientSearchBean.setClientType(HOUSEHOLD);
 				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean)
 				        .getTotalCount();
 			} else if (clientType.equalsIgnoreCase(ANC)) {
@@ -302,7 +303,7 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllANC(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);
@@ -315,7 +316,7 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	public ResponseEntity<String> getAllChild(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
-	        throws JsonProcessingException {
+	    throws JsonProcessingException {
 		
 		ClientSyncBean response = new ClientSyncBean();
 		clientSearchBean.setClientType(null);
@@ -328,20 +329,19 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	/**
-	 * This methods provides an API endpoint that searches for all clients Ids
-	 * ordered by server version ascending
+	 * This methods provides an API endpoint that searches for all clients Ids ordered by server
+	 * version ascending
 	 *
 	 * @param serverVersion serverVersion using to filter by
 	 * @param isArchived whether a client has been archived
 	 * @return A list of task Ids
 	 */
-	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
-
-		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+	                                          @RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
+		
+		Pair<List<String>, Long> taskIdsPair = clientService
+		        .findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
