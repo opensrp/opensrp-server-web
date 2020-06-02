@@ -16,13 +16,13 @@ public class HttpSessionConfig {
 	@Autowired
 	private RedisConnectionFactory redisConnectionFactory;
 
-	@Bean
+	/*@Bean
 	public HttpSessionIdResolver httpSessionIdResolver() {
 		return HeaderHttpSessionIdResolver.xAuthToken();
 	}
-
+	
 	@Bean
 	public static ConfigureRedisAction configureRedisAction() {
 		return ConfigureRedisAction.NO_OP;
-	}
+	}*/
 }
