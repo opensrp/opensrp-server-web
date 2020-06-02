@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
@@ -211,7 +212,13 @@ public class ClientFormResource {
             }
         } else {
             // This is a properties file
-
+            try {
+                Properties properties = new Properties();
+                properties.load(new StringReader(fileContentString));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return e.getMessage();
+            }
         }
 
         return null;
