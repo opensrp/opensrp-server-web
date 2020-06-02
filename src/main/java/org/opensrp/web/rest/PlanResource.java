@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
@@ -217,10 +216,10 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+	public ResponseEntity<String> findLocationDetailsByPlanId(
 	        @PathVariable("planIdentifier") String planIdentifier) {
 
-		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
+		return new ResponseEntity<>(LocationResource.gson.toJson(locationService.findLocationDetailsByPlanId(planIdentifier)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
@@ -240,7 +239,6 @@ public class PlanResource {
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
 	}
 
 	/**
@@ -330,5 +328,4 @@ public class PlanResource {
 			return organizations;
 		}
 	}
-	
 }

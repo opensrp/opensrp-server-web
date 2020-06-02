@@ -469,11 +469,18 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testFindLocationNamesByPlanId() throws Exception {
+        List<LocationDetail> locationDetails = new ArrayList<>();
+
         LocationDetail locationDetail = new LocationDetail();
         locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-486b02f7b84d");
         locationDetail.setName("location one");
+        locationDetails.add(locationDetail);
 
-        List<LocationDetail> locationDetails = Collections.singletonList(locationDetail);
+        locationDetail = new LocationDetail();
+        locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-489b02f7584d");
+        locationDetail.setName("location two");
+        locationDetails.add(locationDetail);
+
         when(locationService.findLocationDetailsByPlanId(anyString()))
                 .thenReturn(locationDetails);
         MvcResult result = mockMvc
@@ -481,7 +488,6 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationDetailsByPlanId(anyString());
         assertEquals(LocationResource.gson.toJson(locationDetails), result.getResponse().getContentAsString());
-
     }
 
     @Test
