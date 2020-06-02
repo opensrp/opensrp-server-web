@@ -332,8 +332,6 @@ public class ClientFormResourceTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
-        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
         verifyNoInteractions(clientFormService);
 
         String errorMessage = result.getResponse().getContentAsString();
@@ -370,6 +368,32 @@ public class ClientFormResourceTest {
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenInvalidPropertiesFileShouldReturn400() throws Exception {
+        String formIdentifier = "opd/opd_register.properties";
+        String formVersion = "0.1.1";
+        String formName = "Registration properties file";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/opd_register.properties",
+                "application/octet-stream", (TestFileContent.JMAG_PROPERTIES_FILE_CONTENT + "\\uxxxx").getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult result = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verifyNoInteractions(clientFormService);
+
+        String errorMessage = result.getResponse().getContentAsString();
+        assertEquals("File content error:", errorMessage.substring(0, 19));
     }
 
     @Test
@@ -412,6 +436,12 @@ public class ClientFormResourceTest {
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidYamlStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10), "application/x-yaml"));
+    }
+
+    @Test
+    public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidPropertiesStructure() {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType()));
     }
 
 }
