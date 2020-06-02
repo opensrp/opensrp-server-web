@@ -83,10 +83,10 @@ public class MultimediaControllerTest {
 		
 		MultimediaService multimediaService = mock(MultimediaService.class);
 		HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-		Mockito.when(httpServletResponse.getOutputStream()).thenReturn(Mockito.mock(ServletOutputStream.class));
+		when(httpServletResponse.getOutputStream()).thenReturn(mock(ServletOutputStream.class));
 		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
 		File file= new File("opensrp-server-web/src/main/webapp/resources/opensrp_logo.png");
-		Mockito.when(multimediaService.retrieveFile(anyString())).thenReturn(file);
+		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		controller.downloadFileWithAuth(httpServletResponse, "fileName");
 		
 		// verify call to the service
