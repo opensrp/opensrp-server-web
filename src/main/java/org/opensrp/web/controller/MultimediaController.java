@@ -74,28 +74,24 @@ public class MultimediaController {
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
-	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName) {
+	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName)
+	        throws IOException {
 		
-		try {
-			if (hasSpecialCharacters(fileName)) {
-				specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
-				return;
-			}
-			File file = multimediaService
-			        .retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-			if (file != null) {
-				if (fileName.endsWith("mp4")) {
-					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
-				}
-				downloadFile(file, response);
-			} else {
-				writeFileNotFound(response);
+		if (hasSpecialCharacters(fileName)) {
+			specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
+			return;
+		}
+		File file = multimediaService
+		        .retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+		if (file != null) {
+			if (fileName.endsWith("mp4")) {
+				file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
 			}
 			downloadFile(file, response);
+		} else {
+			writeFileNotFound(response);
 		}
-		catch (Exception e) {
-			logger.error("", e);
-		}
+		downloadFile(file, response);
 	}
 	
 	/**
@@ -106,21 +102,19 @@ public class MultimediaController {
 	 * @param baseEntityId
 	 * @param userName
 	 * @param password
+	 * @throws IOException
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
-	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId) {
+	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId)
+	        throws IOException {
 		
-		try {
-			if (hasSpecialCharacters(baseEntityId)) {
-				specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
-				return;
-			}
-			downloadFileWithAuth(baseEntityId, response);
+		if (hasSpecialCharacters(baseEntityId)) {
+			specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
+			return;
 		}
-		catch (Exception e) {
-			logger.error("Exception occurred in downloading file by client ID ", e);
-		}
+		downloadFileWithAuth(baseEntityId, response);
+		
 	}
 	
 	/**
@@ -136,11 +130,12 @@ public class MultimediaController {
 	 * @param fileCategory
 	 * @param userName
 	 * @param password
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
 	public void downloadFiles(HttpServletResponse response, @PathVariable("entity-id") String entityId,
 	        @RequestParam(value = "content-type", required = false) String contentType,
-	        @RequestParam(value = "file-category", required = false) String fileCategory) {
+	        @RequestParam(value = "file-category", required = false) String fileCategory) throws IOException {
 		
 		// todo: change this to a common repo constant
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
@@ -148,14 +143,9 @@ public class MultimediaController {
 			    fileCategory.trim());
 			response.setContentType("image/jpeg/zip");
 			response.setHeader("Content-Disposition", "attachment; filename=images.zip");
-			try {
-				ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
-				zipFiles(zipOutputStream, multimediaFiles, multimediaService.getFileManager());
-				zipOutputStream.close();
-			}
-			catch (IOException e) {
-				logger.error("", e);
-			}
+			ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream()));
+			zipFiles(zipOutputStream, multimediaFiles, multimediaService.getFileManager());
+			zipOutputStream.close();
 		} else {
 			// default to single profile image retrieval logic
 			downloadFileWithAuth(entityId, response);
@@ -165,7 +155,7 @@ public class MultimediaController {
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/upload")
 	public ResponseEntity<String> uploadFiles(@RequestParam("anm-id") String providerId,
 	        @RequestParam("entity-id") String entityId, @RequestParam("file-category") String fileCategory,
-	        @RequestParam("file") MultipartFile file) {
+	        @RequestParam("file") MultipartFile file) throws IOException {
 		
 		if (hasSpecialCharacters(file.getOriginalFilename())) {
 			return new ResponseEntity<String>("File Name with special characters is not allowed!", HttpStatus.BAD_REQUEST);
@@ -181,13 +171,7 @@ public class MultimediaController {
 		
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(),
 		        null, fileCategory.trim());
-		String status = null;
-		try {
-			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-		}
-		catch (IOException e) {
-			logger.error("", e);
-		}
+		String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 		
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
@@ -200,19 +184,15 @@ public class MultimediaController {
 	 * @param password
 	 * @param request
 	 * @param response
+	 * @throws Exception
 	 */
-	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) {
-		try {
-			File file = multimediaService.retrieveFile(multiMediaDir + File.separator + MultimediaService.IMAGES_DIR
-			        + File.separator + baseEntityId.trim() + ".jpg");
-			if (file != null) {
-				downloadFile(file, response);
-			} else {
-				writeFileNotFound(response);
-			}
-		}
-		catch (Exception e) {
-			logger.error("", e);
+	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) throws IOException {
+		File file = multimediaService.retrieveFile(
+		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+		if (file != null) {
+			downloadFile(file, response);
+		} else {
+			writeFileNotFound(response);
 		}
 	}
 	
@@ -223,7 +203,7 @@ public class MultimediaController {
 	 * @param response
 	 * @throws Exception
 	 */
-	private void downloadFile(File file, HttpServletResponse response) throws Exception {
+	private void downloadFile(File file, HttpServletResponse response) throws IOException {
 		
 		if (hasSpecialCharacters(file.getName())) {
 			specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
