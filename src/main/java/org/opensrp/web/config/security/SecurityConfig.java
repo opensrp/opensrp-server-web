@@ -98,11 +98,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.anyRequest().authenticated()
 		.and()
     		.csrf()
-    		.ignoringAntMatchers("/rest/**","/multimedia/**")
-    	.and()
-    		.httpBasic();/*
-    	.and()
-    		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();;*/
+    		.ignoringAntMatchers("/rest/**","/multimedia/**");
 		/* @formatter:on */
 	}
 	
