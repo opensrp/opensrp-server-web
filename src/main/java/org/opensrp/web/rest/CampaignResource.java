@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,20 +42,17 @@ public class CampaignResource {
 		this.campaignService = campaignService;
 	}
 
-	@PreAuthorize("hasRole('CAMPAIGN_VIEW')")
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
 		return new ResponseEntity<>(gson.toJson(campaignService.getCampaign(identifier)), HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasRole('CAMPAIGN_VIEW')")
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getCampaigns() {
 		return new ResponseEntity<>(gson.toJson(campaignService.getAllCampaigns()), HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasRole('CAMPAIGN_CREATE')")
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
@@ -71,7 +67,6 @@ public class CampaignResource {
 
 	}
 
-	@PreAuthorize("hasRole('CAMPAIGN_UPDATE')")
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
@@ -85,7 +80,6 @@ public class CampaignResource {
 		}
 	}
 
-	@PreAuthorize("hasRole('CAMPAIGN_SYNC')")
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersion(HttpServletRequest request) {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
