@@ -118,10 +118,7 @@ public class SettingResource {
 			}
 			
 			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
-			List<Setting> settingList = extractSettings(settingConfigurations);/*
-			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
-			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(settingList);*/
-			
+			List<Setting> settingList = extractSettings(settingConfigurations);
 			
 			return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
