@@ -26,6 +26,7 @@ import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +57,10 @@ public class TaskResource {
 	public static final String GROUP = "group";
 
 	public static final String OWNER= "owner";
+	
+	public static final String RETURN_COUNT= "return_count";
+
+	private static final String TOTAL_RECORDS = "total_records";
 
 	private TaskService taskService;
 	
@@ -77,6 +82,7 @@ public class TaskResource {
 		String group = StringUtils.join(taskSyncRequestWrapper.getGroup(), ",");
 		String owner = taskSyncRequestWrapper.getOwner();
 		long serverVersion = taskSyncRequestWrapper.getServerVersion();
+		boolean returnCount = taskSyncRequestWrapper.isReturnCount();
 		
 		long currentServerVersion = 0;
 		try {
@@ -85,7 +91,7 @@ public class TaskResource {
 		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion, returnCount);
 	}
 	
 	// here for backward compatibility
@@ -95,6 +101,7 @@ public class TaskResource {
 		String group = getStringFilter(GROUP, request);
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		String owner = getStringFilter(OWNER, request);
+		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
 
 		long currentServerVersion = 0;
 		try {
@@ -103,23 +110,33 @@ public class TaskResource {
 		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
-		return getTaskSyncResponse(plan, group, owner, currentServerVersion);
+		return getTaskSyncResponse(plan, group, owner, currentServerVersion, returnCount);
 	}
 
-	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion) {
+	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion, boolean returnCount) {
 		if (StringUtils.isBlank(plan)) {
 			logger.error("Plan Identifier is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
 		if (!StringUtils.isBlank(group)) {
-			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			String tasks = gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion));
+			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+			if (returnCount){
+				Long taskCount = taskService.countTasksByPlanAndGroup(plan, group, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
+			}
+
+			return new ResponseEntity<>(tasks, headers, HttpStatus.OK);
 		} else if (!StringUtils.isBlank(owner)) {
-			return new ResponseEntity<>(
-					gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			String tasks = gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion));
+			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+			if (returnCount){
+				Long taskCount = taskService.countTasksByPlanAndGroup(plan, group, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
+			}
+
+			return new ResponseEntity<>(tasks, headers, HttpStatus.OK);
 		} else {
 			logger.error("Either owner or group identifier field is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -245,6 +262,9 @@ public class TaskResource {
 
 		@JsonProperty
 		private String owner;
+		
+		@JsonProperty(RETURN_COUNT)
+		private boolean returnCount;
 
 		public List<String> getPlan() {
 			return plan;
@@ -261,6 +281,12 @@ public class TaskResource {
 		public String getOwner() {
 			return owner;
 		}
+
+		
+		public boolean isReturnCount() {
+			return returnCount;
+		}
+		
 	}
 	
 }
