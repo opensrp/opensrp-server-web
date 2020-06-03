@@ -23,4 +23,14 @@ public interface Constants {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
     }
+
+    interface EndpointParam {
+        String APP_ID = "app_id";
+        String STRICT = "strict";
+        String APP_VERSION = "app_version";
+    }
+
+    interface DefaultEndpointParam {
+        String FALSE = "false";
+    }
 }
