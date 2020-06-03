@@ -217,11 +217,9 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+	public List<LocationDetail> findLocationDetailsByPlanId(
 	        @PathVariable("planIdentifier") String planIdentifier) {
-
-		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return locationService.findLocationDetailsByPlanId(planIdentifier);
 	}
 
 	/**
