@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
+import org.opensrp.web.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import java.util.Set;
 public class ManifestResource {
 
     private static Logger logger = LoggerFactory.getLogger(ManifestResource.class.toString());
+    public static final String FALSE = Boolean.FALSE.toString();
     private ManifestService manifestService;
     public static final String IDENTIFIER = "identifier";
     protected ObjectMapper objectMapper;
@@ -103,9 +105,9 @@ public class ManifestResource {
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getManifestByAppIdAndAppVersion(
-            @RequestParam(value = "app_version") String appVersion,
-            @RequestParam(value = "app_id") String appId,
-            @RequestParam(value = "strict", defaultValue = "false") String strict) throws JsonProcessingException {
+            @RequestParam(value = Constants.EndpointParam.APP_VERSION) String appVersion,
+            @RequestParam(value = Constants.EndpointParam.APP_ID) String appId,
+            @RequestParam(value = Constants.EndpointParam.STRICT, defaultValue = Constants.DefaultEndpointParam.FALSE) String strict) throws JsonProcessingException {
         boolean strictSearch = Boolean.parseBoolean(strict.toLowerCase());
         Manifest manifest = null;
 
