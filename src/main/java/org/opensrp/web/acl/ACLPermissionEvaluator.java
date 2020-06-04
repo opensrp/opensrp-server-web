@@ -1,16 +1,17 @@
 /**
  * 
  */
-package org.opensrp.web.config.security;
+package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 
 /**
  * @author Samuel Githengi created on 06/03/20
  */
-public class PermissionEvaluator implements org.springframework.security.access.PermissionEvaluator{
+public class ACLPermissionEvaluator implements PermissionEvaluator{
 
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {

@@ -3,6 +3,7 @@
  */
 package org.opensrp.web.config.security;
 
+import org.opensrp.web.acl.ACLPermissionEvaluator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
@@ -20,7 +21,7 @@ public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 	protected MethodSecurityExpressionHandler createExpressionHandler() {
 		
 		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		PermissionEvaluator permissionEvaluator = new PermissionEvaluator();
+		ACLPermissionEvaluator permissionEvaluator = new ACLPermissionEvaluator();
 		expressionHandler.setPermissionEvaluator(permissionEvaluator);
 		return expressionHandler;
 		
