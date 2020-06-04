@@ -20,7 +20,10 @@ import org.json.JSONException;
 import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
+import org.opensrp.domain.IdentifierSource;
+import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.OpenmrsIDService;
+import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.web.utils.PdfUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,12 @@ public class UniqueIdController extends OpenmrsService {
 	
 	@Autowired
 	private OpenmrsUserService openmrsUserService;
+	
+	@Autowired
+	private IdentifierSourceService identifierSourceService;
+	
+	@Autowired
+	private UniqueIdentifierService uniqueIdentifierService;
 	
 	/**
 	 * Download extra ids from openmrs if less than the specified batch size, convert the ids to qr
@@ -123,11 +132,21 @@ public class UniqueIdController extends OpenmrsService {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
+		String usedBy = getStringFilter("usedBy", request);
 		Map<String, Object> map = new HashMap<>();
-		
-		map.put("identifiers", openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
-		
+		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
+		if (identifierSource != null) {
+			List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
+					Integer.parseInt(numberToGenerate), usedBy);
+			if (identifiers != null) {
+				map.put("identifiers", identifiers);
+			}
+		} else {
+			map.put("identifiers",
+					openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
+		}
+
 		return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
 	}
-	
+
 }
