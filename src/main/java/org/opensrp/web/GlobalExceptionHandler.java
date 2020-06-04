@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +52,17 @@ public class GlobalExceptionHandler {
 		logger.error("Connnection Exception occurred : ", exception);
 		ResponseDto<?> dto = buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		dto.setMessage("Connnection Exception: Connection refused");
+		return dto;
+	}
+	
+
+	@ResponseBody
+	@ExceptionHandler(AccessDeniedException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseDto<?> exceptionHandler(AccessDeniedException exception) {
+		logger.warn("Access denied : ", exception.getMessage());
+		ResponseDto<?> dto = buildErrorResponse(HttpStatus.FORBIDDEN);
+		dto.setMessage("Access is denied. You do not have enough permissions for the resource.");
 		return dto;
 	}
 	
