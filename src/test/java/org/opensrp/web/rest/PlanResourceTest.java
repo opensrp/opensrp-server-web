@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
@@ -41,6 +42,8 @@ import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.web.bean.Identifier;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.server.MvcResult;
 
 import com.google.gson.Gson;
@@ -157,6 +160,9 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     
     @Captor
     private ArgumentCaptor<List<Long>> orgsArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> userNameArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -577,6 +583,40 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         expectedPlan.setIdentifier("plan_1");
         expectedPlan.setJurisdiction(operationalAreas);
         return expectedPlan;
+    }
+
+    @Test
+    public void testGetPlanIdentifiersByUserNameShouldReturnListOfIdentifiersPlans() throws Exception {
+        List<String> expectedPlanIdentifiers = new ArrayList<>();
+        expectedPlanIdentifiers.add("plan_1");
+        expectedPlanIdentifiers.add("plan_2");
+
+        Authentication auth = Mockito.mock(Authentication.class);
+        String username = "mwasi";
+        Mockito.when(auth.getName()).thenReturn(username);
+
+        doReturn(expectedPlanIdentifiers).when(planService).getPlanIdentifiersByUsername(username);
+
+        String finalUrl =  BASE_URL + "getPlanIdentifier/";
+
+        MvcResult mvcResult = this.mockMvc.perform(get(finalUrl)//.with(authentication(auth))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            responseString = null;
+        }
+        List<String> actualPlanIdentifiers = new Gson().fromJson(responseString, new TypeToken<List<String>>(){}.getType());
+
+        //assertIdentifierListsAreSameIgnoringOrder(actualPlanIdentifiers, expectedPlanIdentifiers);
+    }
+
+    protected void assertIdentifierListsAreSameIgnoringOrder(List<String> expectedList, List<String> actualList) {
+        if (expectedList == null || actualList == null) {
+            throw new AssertionError("One of the lists is null");
+        }
+        assertEquals(expectedList.size(), actualList.size());
     }
 
 }
