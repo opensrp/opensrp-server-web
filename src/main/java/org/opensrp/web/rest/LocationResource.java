@@ -30,6 +30,7 @@ import org.opensrp.web.bean.LocationSearchcBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -88,7 +90,11 @@ public class LocationResource {
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
+	public static final String RETURN_COUNT= "return_count";
+
 	public static final String RETURN_TAGS = "return_tags";
+
+	private static final String TOTAL_RECORDS = "total_records";
 
 	private PhysicalLocationService locationService;
 
@@ -124,24 +130,38 @@ public class LocationResource {
 		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
+		boolean returnCount = locationSyncRequestWrapper.isReturnCount();
 
-		if (isJurisdiction) {
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		Long locationCount = 0l;
+	if (isJurisdiction) {
 			if (StringUtils.isBlank(locationNames)) {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				String locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
+				if (returnCount){
+					locationCount = locationService.countLocationsByServerVersion(currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
+				return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 			}
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+			String locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
+			if (returnCount){
+				locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+			}
+			return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 
 		} else {
 			if (StringUtils.isBlank(parentIds)) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<>(gson.toJson(
-					locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
-					HttpStatus.OK);
+
+			String structures = gson.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
+			if (returnCount){
+				Long structureCount = locationService.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(structureCount));
+			}
+			return new ResponseEntity<>(structures, headers, HttpStatus.OK);
 		}
 	}
 
@@ -150,7 +170,8 @@ public class LocationResource {
 	public ResponseEntity<String> getLocationsTwo(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
-			@RequestParam(value = PARENT_ID, required = false) String parentIds) {
+			@RequestParam(value = PARENT_ID, required = false) String parentIds,
+			@RequestParam(value = RETURN_COUNT, defaultValue = FALSE, required = false) boolean returnCount) {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -159,23 +180,34 @@ public class LocationResource {
 			logger.error("server version not a number");
 		}
 
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		Long locationCount = 0l;
 		if (isJurisdiction) {
 			if (StringUtils.isBlank(locationNames)) {
-				return new ResponseEntity<>(
-						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
-						RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				String locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
+				if (returnCount){
+					locationCount = locationService.countLocationsByServerVersion(currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
+				return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 			}
-			return new ResponseEntity<>(
-					gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion)),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			String locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
+			if (returnCount){
+				locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+			}
+			return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 
 		} else {
 			if (StringUtils.isBlank(parentIds)) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<>(gson.toJson(
-					locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion)),
-					HttpStatus.OK);
+			String structures = gson.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
+			if (returnCount){
+				Long structureCount = locationService.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
+				headers.add(TOTAL_RECORDS, String.valueOf(structureCount));
+			}
+			return new ResponseEntity<>(structures, headers, HttpStatus.OK);
 		}
 	}
 
@@ -458,6 +490,9 @@ public class LocationResource {
 		@JsonProperty
 		private long serverVersion;
 
+		@JsonProperty(RETURN_COUNT)
+		private boolean returnCount;
+
 		public Boolean getIsJurisdiction() {
 			return isJurisdiction;
 		}
@@ -473,6 +508,12 @@ public class LocationResource {
 		public long getServerVersion() {
 			return serverVersion;
 		}
+
+
+		public boolean isReturnCount() {
+			return returnCount;
+		}
+
 	}
 
 }
