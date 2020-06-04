@@ -284,7 +284,9 @@ public class EventResource extends RestResource<Event> {
 
 			searchMissingClients(clientIds, clients, startTime);
 			
-			totalRecords = eventService.countEvents(eventSearchBean);
+			if (returnCount) {
+				totalRecords = eventService.countEvents(eventSearchBean);
+			}
 			
 		}
 
