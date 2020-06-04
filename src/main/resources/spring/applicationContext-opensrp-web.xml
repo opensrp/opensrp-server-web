@@ -62,7 +62,7 @@
 
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
-    <alias name="${multimedia_file_manager}" alias="multimedia.file.manager"/>
+    <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
 
     <beans profile="chw_referral_module">
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>
