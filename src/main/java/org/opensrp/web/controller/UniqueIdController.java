@@ -135,18 +135,22 @@ public class UniqueIdController extends OpenmrsService {
 		String usedBy = getStringFilter("usedBy", request);
 		Map<String, Object> map = new HashMap<>();
 		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
-		if (identifierSource != null) {
-			List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
-					Integer.parseInt(numberToGenerate), usedBy);
-			if (identifiers != null) {
-				map.put("identifiers", identifiers);
+		try {
+			if (identifierSource != null) {
+				List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
+						Integer.parseInt(numberToGenerate), usedBy);
+				if (identifiers != null) {
+					map.put("identifiers", identifiers);
+				}
+			} else {
+				map.put("identifiers",
+						openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
 			}
-		} else {
-			map.put("identifiers",
-					openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
+			return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
 		}
-
-		return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
+		catch (IllegalArgumentException exception) {
+			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 	}
 
 }
