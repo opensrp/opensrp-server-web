@@ -31,6 +31,7 @@ public class ClientFormValidator {
         jsonPathForRuleReferences.add("$.*.fields[*].constraints.rules-engine.ex-rules.rules-file");
     }
 
+    @NonNull
     public HashSet<String> checkForMissingFormReferences(@NonNull String jsonForm) {
         HashSet<String> subFormReferences = new HashSet<>();
         HashSet<String> missingSubFormReferences = new HashSet<>();
@@ -53,6 +54,7 @@ public class ClientFormValidator {
         return missingSubFormReferences;
     }
 
+    @NonNull
     public HashSet<String> checkForMissingRuleReferences(@NonNull String jsonForm) {
         HashSet<String> ruleFileReferences = new HashSet<>();
         HashSet<String> missingRuleFileReferences = new HashSet<>();
