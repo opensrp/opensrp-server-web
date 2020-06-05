@@ -36,8 +36,11 @@ public class BasePermissionEvaluator {
 	}
 	
 	protected boolean hasPermission(Authentication authentication, String permission) {
-		return authentication.getAuthorities().stream()
+		/* @formatter:on */
+		return authentication.getAuthorities()
+				.stream()
 		        .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + permission));
+		/* @formatter:off */
 	}
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {

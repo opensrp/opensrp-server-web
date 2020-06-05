@@ -35,14 +35,26 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator {
 	}
 	
 	private boolean hasPermissiononPlan(Authentication authentication, String identifier) {
-		return getAssignedLocations(authentication.getName()).stream().anyMatch(a -> a.getPlanId().equals(identifier));
+		/* @formatter:off */
+		return getAssignedLocations(authentication.getName())
+				.stream()
+				.anyMatch(a -> a.getPlanId().equals(identifier));
+		/* @formatter:on */
 	}
 	
 	private boolean hasPermissionOnJurisdictions(Authentication authentication, List<Jurisdiction> jurisdictions) {
-		Set<String> jurisdictionIdentifiers = jurisdictions.stream().map(j -> j.getCode()).collect(Collectors.toSet());
-		return getAssignedLocations(authentication.getName()).stream().anyMatch((a) -> {
-			return jurisdictionIdentifiers.contains(a.getJurisdictionId());
-		});
+		/* @formatter:off */
+		Set<String> jurisdictionIdentifiers = jurisdictions
+				.stream()
+				.map(j -> j.getCode())
+				.collect(Collectors.toSet());
+		
+		return getAssignedLocations(authentication.getName())
+				.stream()
+				.anyMatch((a) -> {
+					return jurisdictionIdentifiers.contains(a.getJurisdictionId());
+					});
+		/* @formatter:on */
 	}
 	
 	/**
