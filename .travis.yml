@@ -10,6 +10,7 @@ install:
   - sudo updatedb #Giving couchdb time to start.
   - sudo netstat -tuplen # listing all the port for debug purpose.
 before_script:
+  - sudo redis-server /etc/redis/redis.conf --port 6379 --requirepass 'RedI$P@S5'
   - curl -X PUT http://localhost:5984/_config/admins/rootuser -d '"adminpass"'
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('VA1913wm') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - sudo /etc/init.d/postgresql stop
