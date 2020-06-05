@@ -92,7 +92,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/config/keycloak").permitAll()
-			.mvcMatchers("/rest/identifiersource/**").permitAll()
 			.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 			.mvcMatchers(OPTIONS,"/**").permitAll()
 			.mvcMatchers("/rest/**").hasRole(Role.OPENMRS)
