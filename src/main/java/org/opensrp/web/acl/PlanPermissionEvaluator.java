@@ -28,9 +28,8 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator {
 	 */
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
 		PlanDefinition plan = (PlanDefinition) targetDomainObject;
-		return hasPermission(authentication, permission.toString())
-		        && (hasPermissiononPlan(authentication, plan.getIdentifier())
-		                || hasPermissionOnJurisdictions(authentication, plan.getJurisdiction()));
+		return hasPermissiononPlan(authentication, plan.getIdentifier())
+		                || hasPermissionOnJurisdictions(authentication, plan.getJurisdiction());
 	}
 	
 	private boolean hasPermissiononPlan(Authentication authentication, String identifier) {

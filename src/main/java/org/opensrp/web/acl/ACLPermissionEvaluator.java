@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @author Samuel Githengi created on 06/03/20
  */
 @Component
-public class ACLPermissionEvaluator implements PermissionEvaluator {
+public class ACLPermissionEvaluator extends BasePermissionEvaluator implements PermissionEvaluator {
 	
 	@Autowired
 	private PlanPermissionEvaluator planPermissionEvaluator;
@@ -23,7 +23,7 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
 		boolean hasAccess = false;
-		if (targetDomainObject == null || permission == null) {
+		if (targetDomainObject == null || permission == null || !hasPermission(authentication, permission.toString())) {
 			return hasAccess;
 		} else if (targetDomainObject instanceof PlanDefinition) {
 			return planPermissionEvaluator.hasPermission(authentication, targetDomainObject, permission);
@@ -34,8 +34,12 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 	@Override
 	public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType,
 	        Object permission) {
-		// TODO Auto-generated method stub
-		return false;
+		if (permission == null || !hasPermission(authentication, permission.toString())) {
+			return false;
+		} else {
+			return true;
+			
+		}
 	}
 	
 }
