@@ -36,10 +36,11 @@ public class ACLPermissionEvaluator extends BasePermissionEvaluator implements P
 	        Object permission) {
 		if (permission == null || !hasPermission(authentication, permission.toString())) {
 			return false;
-		} else {
-			return true;
+		} else if(PlanDefinition.class.getSimpleName().equals(targetType)) {
+			return planPermissionEvaluator.hasObjectPermission(authentication,targetId, permission);
 			
 		}
+		return false;
 	}
 	
 }

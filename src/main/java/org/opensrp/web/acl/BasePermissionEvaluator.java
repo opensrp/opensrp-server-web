@@ -3,6 +3,7 @@
  */
 package org.opensrp.web.acl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +13,6 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +42,11 @@ public class BasePermissionEvaluator {
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
 		return collection == null || collection.isEmpty();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected boolean isListOfString(Serializable targetId) {
+		return targetId instanceof List &&  !((List)targetId).isEmpty() && ((List)targetId).get(0) instanceof String;
 	}
 	
 }
