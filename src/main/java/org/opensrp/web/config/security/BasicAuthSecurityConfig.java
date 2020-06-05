@@ -3,14 +3,6 @@
  */
 package org.opensrp.web.config.security;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.OPTIONS;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
-
-import java.util.Arrays;
-
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +22,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 
 /**
  * @author Samuel Githengi created on 03/09/20
@@ -63,7 +63,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		.and()
     		.csrf()
-    		.ignoringAntMatchers("/rest/**","/location/**");
+    		.ignoringAntMatchers("/rest/**","/location/**", "/multimedia/upload");
 		applyBasicAndStateless(http);
 		/* @formatter:on */
 	}
