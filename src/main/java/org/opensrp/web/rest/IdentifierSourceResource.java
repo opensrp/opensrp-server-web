@@ -34,11 +34,8 @@ public class IdentifierSourceResource {
 
 	@GetMapping(value = "/{identifier}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getByIdentifier(@PathVariable String identifier)
-			throws JsonProcessingException {
-
-		return new ResponseEntity<>(objectMapper.writeValueAsString(
-				identifierSourceService.findByIdentifier(identifier)),
+	public ResponseEntity<IdentifierSource> getByIdentifier(@PathVariable String identifier) {
+		return new ResponseEntity<>(identifierSourceService.findByIdentifier(identifier),
 				RestUtils.getJSONUTF8Headers(),
 				HttpStatus.OK);
 	}
