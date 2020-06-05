@@ -132,7 +132,7 @@ public class TaskResource {
 			String tasks = gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion));
 			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 			if (returnCount){
-				Long taskCount = taskService.countTasksByPlanAndGroup(plan, group, currentServerVersion);
+				Long taskCount = taskService.countTasksByPlanAndOwner(plan, owner, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 			}
 
