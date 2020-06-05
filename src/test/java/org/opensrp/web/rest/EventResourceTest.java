@@ -261,9 +261,9 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		String jsonObjectPayload = "{\"baseEntityIds\":[\"5dd43b2e-a873-444b-b527-95c4b040a5bb\"],\"withFamilyEvents\":true}";
 
 		doReturn(expectedEventSyncBean).when(eventResource).sync(null, null, "5dd43b2e-a873-444b-b527-95c4b040a5bb", "0",
-				null, null, null);
+				null, null, null, false);
 		doReturn(expectedFamilyEventSyncBean).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4",
-				"0", null, null, null);
+				"0", null, null, null, false);
 
 		ResponseEntity<String> clientEventsResponseEntity = eventResource
 				.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
