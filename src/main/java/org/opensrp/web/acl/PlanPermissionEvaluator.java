@@ -3,16 +3,12 @@
  */
 package org.opensrp.web.acl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
-import org.opensrp.service.OrganizationService;
-import org.opensrp.service.PractitionerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -20,13 +16,7 @@ import org.springframework.stereotype.Component;
  * @author Samuel Githengi created on 06/04/20
  */
 @Component
-public class PlanPermissionEvaluator {
-	
-	@Autowired
-	private OrganizationService organizationService;
-	
-	@Autowired
-	private PractitionerService practitionerService;
+public class PlanPermissionEvaluator extends BasePermissionEvaluator {
 	
 	/**
 	 * Evaluates if a user with authentication has permission on targetDomainObject
@@ -38,32 +28,20 @@ public class PlanPermissionEvaluator {
 	 */
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
 		PlanDefinition plan = (PlanDefinition) targetDomainObject;
-		return hasPermissiononPlan(authentication.getName(), plan.getIdentifier(), permission.toString())
-		        || hasPermissionOnJurisdictions(authentication.getName(), plan.getJurisdiction(), permission.toString());
+		return hasPermission(authentication, permission.toString())
+		        && (hasPermissiononPlan(authentication, plan.getIdentifier())
+		                || hasPermissionOnJurisdictions(authentication, plan.getJurisdiction()));
 	}
 	
-	private boolean hasPermissiononPlan(String username, String identifier, String permission) {
-		List<Long> organizationIds = practitionerService.getOrganizationIdsByUserId(username);
-		if (isEmptyOrNull(organizationIds)) {
-			return false;
-		}
-		return organizationService.findAssignedLocationsAndPlans(organizationIds).stream()
-		        .anyMatch(a -> a.getPlanId().equals(identifier));
+	private boolean hasPermissiononPlan(Authentication authentication, String identifier) {
+		return getAssignedLocations(authentication.getName()).stream().anyMatch(a -> a.getPlanId().equals(identifier));
 	}
 	
-	private boolean hasPermissionOnJurisdictions(String username, List<Jurisdiction> jurisdictions, String permission) {
-		Set<String> identifiers = jurisdictions.stream().map(j -> j.getCode()).collect(Collectors.toSet());
-		List<Long> organizationIds = practitionerService.getOrganizationIdsByUserId(username);
-		if (isEmptyOrNull(organizationIds)) {
-			return false;
-		}
-		return organizationService.findAssignedLocationsAndPlans(organizationIds).stream().anyMatch((a) -> {
-			return identifiers.contains(a.getJurisdictionId());
+	private boolean hasPermissionOnJurisdictions(Authentication authentication, List<Jurisdiction> jurisdictions) {
+		Set<String> jurisdictionIdentifiers = jurisdictions.stream().map(j -> j.getCode()).collect(Collectors.toSet());
+		return getAssignedLocations(authentication.getName()).stream().anyMatch((a) -> {
+			return jurisdictionIdentifiers.contains(a.getJurisdictionId());
 		});
-	}
-	
-	private boolean isEmptyOrNull(Collection<? extends Object> collection) {
-		return collection == null || collection.isEmpty();
 	}
 	
 }
