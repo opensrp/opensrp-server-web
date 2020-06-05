@@ -358,6 +358,11 @@
 			<artifactId>easy-rules-mvel</artifactId>
 			<version>3.3.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
