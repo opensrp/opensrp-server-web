@@ -369,7 +369,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-		assertEquals(actualObj.size(),3);
+		assertEquals(actualObj.size(),4);
 		assertEquals(actualObj.get("clients").size(),1);
 		assertEquals(actualObj.get("events").size(),1);
     }
@@ -392,7 +392,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 	    assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-	    assertEquals(actualObj.size(),3);
+	    assertEquals(actualObj.size(),4);
 	    assertEquals(actualObj.get("clients").size(),1);
 	    assertEquals(actualObj.get("events").size(),1);
     }
