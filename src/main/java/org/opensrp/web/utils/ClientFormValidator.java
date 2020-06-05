@@ -77,7 +77,7 @@ public class ClientFormValidator {
         return missingRuleFileReferences;
     }
 
-    class MissingFileReferences {
+    static class MissingFileReferences {
 
     }
 }
