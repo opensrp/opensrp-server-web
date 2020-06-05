@@ -36,15 +36,8 @@ public class BasePermissionEvaluator {
 	}
 	
 	protected boolean hasPermission(Authentication authentication, String permission) {
-		return authentication.getAuthorities().contains(new GrantedAuthority() {
-			
-			private static final long serialVersionUID = 1L;
-			
-			@Override
-			public String getAuthority() {
-				return permission;
-			}
-		});
+		return authentication.getAuthorities().stream()
+		        .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + permission));
 	}
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
