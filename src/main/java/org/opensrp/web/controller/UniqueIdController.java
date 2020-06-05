@@ -15,6 +15,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.opensrp.api.domain.User;
@@ -60,6 +62,9 @@ public class UniqueIdController extends OpenmrsService {
 	
 	@Autowired
 	private UniqueIdentifierService uniqueIdentifierService;
+
+	@Autowired
+	protected ObjectMapper objectMapper;
 	
 	/**
 	 * Download extra ids from openmrs if less than the specified batch size, convert the ids to qr
@@ -146,9 +151,9 @@ public class UniqueIdController extends OpenmrsService {
 				map.put("identifiers",
 						openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
 			}
-			return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
 		}
-		catch (IllegalArgumentException exception) {
+		catch (IllegalArgumentException | JsonProcessingException exception) {
 			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
