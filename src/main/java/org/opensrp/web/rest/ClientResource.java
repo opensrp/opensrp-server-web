@@ -256,7 +256,7 @@ public class ClientResource extends RestResource<Client> {
 		ClientSyncBean response = new ClientSyncBean();
 		
 		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
-		
+		clientSearchBean.setClientType(ALLCLIENTS);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -286,6 +286,7 @@ public class ClientResource extends RestResource<Client> {
 			if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
 				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
 			} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
+				clientSearchBean.setClientType(HOUSEHOLD);
 				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean)
 				        .getTotalCount();
 			} else if (clientType.equalsIgnoreCase(ANC)) {
