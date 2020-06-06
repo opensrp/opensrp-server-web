@@ -3,15 +3,20 @@
  */
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.util.List;
+
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
+import org.opensrp.web.bean.OrganizationSearchcBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,5 +183,27 @@ public class OrganizationResource {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	
+	@RequestMapping(value = "/search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> searchLocations(OrganizationSearchBean organizationSearchBean)
+	    throws JsonProcessingException {
+		
+		OrganizationSearchcBean response = new OrganizationSearchcBean();
+		Integer pageNumber = organizationSearchBean.getPageNumber();
+		try {
+			int total = 0;
+			if (pageNumber != null && pageNumber == 1) {
+				total = organizationService.getTotalSearchOrganizations(organizationSearchBean);
+			}
+			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
+			response.setOrganizations(organizations);
+			
+			response.setTotal(total);
+		}
+		catch (IllegalArgumentException e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		
+	}
 }
