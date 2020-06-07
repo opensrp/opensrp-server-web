@@ -185,7 +185,7 @@ public class OrganizationResource {
 	}
 	
 	@RequestMapping(value = "/search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> searchLocations(OrganizationSearchBean organizationSearchBean)
+	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
 	    throws JsonProcessingException {
 		
 		OrganizationSearchcBean response = new OrganizationSearchcBean();
