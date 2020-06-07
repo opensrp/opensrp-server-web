@@ -8,7 +8,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.io.File;
+import java.io.IOException;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
@@ -76,13 +78,15 @@ public class MultimediaControllerTest {
 	}
 	
 	@Test
-	public void testDownloadWithAuth() {
+	public void testDownloadWithAuth() throws IOException {
 		MultimediaController controller = Mockito.spy(new MultimediaController());
 		
 		MultimediaService multimediaService = mock(MultimediaService.class);
 		HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+		when(httpServletResponse.getOutputStream()).thenReturn(mock(ServletOutputStream.class));
 		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
-		
+		File file= new File("opensrp-server-web/src/main/webapp/resources/opensrp_logo.png");
+		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		controller.downloadFileWithAuth(httpServletResponse, "fileName");
 		
 		// verify call to the service

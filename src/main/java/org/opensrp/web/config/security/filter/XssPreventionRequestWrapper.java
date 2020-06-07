@@ -41,7 +41,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		if (rawData == null) {
-			rawData = IOUtils.toByteArray(this.request.getReader());
+			rawData = IOUtils.toByteArray(this.request.getInputStream());
 			servletStream.stream = new ByteArrayInputStream(rawData);
 		}
 		updateParameters();
@@ -51,7 +51,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 	@Override
 	public BufferedReader getReader() throws IOException {
 		if (rawData == null) {
-			rawData = IOUtils.toByteArray(this.request.getReader());
+			rawData = IOUtils.toByteArray(this.request.getReader(),StandardCharsets.UTF_8);
 			servletStream.stream = new ByteArrayInputStream(rawData);
 		}
 		updateParameters();
