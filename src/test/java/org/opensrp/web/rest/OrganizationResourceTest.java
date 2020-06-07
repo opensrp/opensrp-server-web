@@ -373,9 +373,9 @@ public class OrganizationResourceTest {
 	}
 	
 	@Test
-	public void testGetSearchLocationsWithParams() throws Exception {
+	public void testGetSearchOrganizationWithParams() throws Exception {
 		List<Organization> expected = new ArrayList<>();
-		expected.add(createSearchLocation());
+		expected.add(createSearchOrganization());
 		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
 		MvcResult result = mockMvc
 		        .perform(
@@ -387,14 +387,14 @@ public class OrganizationResourceTest {
 		expectedOrganizations.setTotal(1);
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
-		assertEquals(LocationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
+		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
 	}
 	
-	private Organization createSearchLocation() {
+	private Organization createSearchOrganization() {
 		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":1}";
 
-		Organization searchLocation = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
+		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
-		return searchLocation;
+		return searchOrganization;
 	}
 }
