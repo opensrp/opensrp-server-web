@@ -36,7 +36,7 @@ public class ClientFormValidatorTest extends TestCase {
     public void testCheckForMissingFormReferencesShouldReturnNonEmptyHashSetWhenGivenFormWithMissingSubFormReferences() {
         Mockito.doReturn(true).when(clientFormService).isClientFormExists("abdominal_exam_sub_form");
 
-        HashSet<String> missingReferences = clientFormValidator.checkForMissingFormReferences(TestFileContent.JSON_SUB_FORM_FILE_1);
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingFormReferences(TestFileContent.PHYSICAL_EXAM_FORM_FILE);
         Mockito.verify(clientFormService, Mockito.times(13)).isClientFormExists(Mockito.anyString());
         assertEquals(6, missingReferences.size());
     }
@@ -44,7 +44,7 @@ public class ClientFormValidatorTest extends TestCase {
     public void testCheckForMissingFormReferencesShouldReturnEmptyHashSetWhenGivenFormWithAvailableSubFormReferences() {
         Mockito.doReturn(true).when(clientFormService).isClientFormExists(Mockito.anyString());
 
-        HashSet<String> missingReferences = clientFormValidator.checkForMissingFormReferences(TestFileContent.JSON_SUB_FORM_FILE_1);
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingFormReferences(TestFileContent.PHYSICAL_EXAM_FORM_FILE);
         Mockito.verify(clientFormService, Mockito.times(7)).isClientFormExists(Mockito.anyString());
         assertEquals(0, missingReferences.size());
     }
@@ -58,7 +58,7 @@ public class ClientFormValidatorTest extends TestCase {
     public void testCheckForMissingRuleReferencesShouldReturnNonEmptyHashSetWhenGivenFormWithMissingRuleFileReferences() {
         Mockito.doReturn(true).when(clientFormService).isClientFormExists("physical-exam-relevance-rules.yml");
 
-        HashSet<String> missingReferences = clientFormValidator.checkForMissingRuleReferences(TestFileContent.JSON_SUB_FORM_FILE_1);
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingRuleReferences(TestFileContent.PHYSICAL_EXAM_FORM_FILE);
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
         assertEquals(1, missingReferences.size());
     }
@@ -67,7 +67,7 @@ public class ClientFormValidatorTest extends TestCase {
         Mockito.doReturn(true).when(clientFormService).isClientFormExists("physical-exam-relevance-rules.yml");
         Mockito.doReturn(true).when(clientFormService).isClientFormExists("physical-exam-calculations-rules.yml");
 
-        HashSet<String> missingReferences = clientFormValidator.checkForMissingRuleReferences(TestFileContent.JSON_SUB_FORM_FILE_1);
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingRuleReferences(TestFileContent.PHYSICAL_EXAM_FORM_FILE);
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
         assertEquals(0, missingReferences.size());
     }
