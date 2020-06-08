@@ -52,11 +52,9 @@ public class ClientFormValidator {
 
         // Check if the references exist in the DB
         for (String subFormReference: subFormReferences) {
-            if (!clientFormService.isClientFormExists(subFormReference)) {
-                // Add a .json extension & check again
-                if (!clientFormService.isClientFormExists(subFormReference + ".json")) {
-                    missingSubFormReferences.add(subFormReference);
-                }
+            // If the form does not exist, Add a .json extension & check again
+            if (!clientFormService.isClientFormExists(subFormReference) && !clientFormService.isClientFormExists(subFormReference + ".json")) {
+                missingSubFormReferences.add(subFormReference);
             }
         }
 
