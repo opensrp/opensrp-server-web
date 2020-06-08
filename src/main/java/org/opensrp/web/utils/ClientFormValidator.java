@@ -1,12 +1,12 @@
 package org.opensrp.web.utils;
 
 import com.jayway.jsonpath.JsonPath;
-import org.opensrp.repository.ClientFormRepository;
 import org.opensrp.service.ClientFormService;
 import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class ClientFormValidator {
 
@@ -41,7 +41,7 @@ public class ClientFormValidator {
             subFormReferences.addAll(references);
         }
 
-        // Check if the refernces exist in the DB
+        // Check if the references exist in the DB
         for (String subFormReference: subFormReferences) {
             if (!clientFormService.isClientFormExists(subFormReference)) {
                 // Add a .json extension & check again
@@ -59,25 +59,18 @@ public class ClientFormValidator {
         HashSet<String> ruleFileReferences = new HashSet<>();
         HashSet<String> missingRuleFileReferences = new HashSet<>();
 
-        for (String jsonPath: jsonPathForSubFormReferences) {
+        for (String jsonPath: jsonPathForRuleReferences) {
             List<String> references = JsonPath.read(jsonForm, jsonPath);
             ruleFileReferences.addAll(references);
         }
 
-        // Check if the refernces exist in the DB
+        // Check if the references exist in the DB
         for (String ruleFileReference: ruleFileReferences) {
             if (!clientFormService.isClientFormExists(ruleFileReference)) {
-                // Add a .json extension & check again
-                if (!clientFormService.isClientFormExists(ruleFileReference + ".json")) {
-                    missingRuleFileReferences.add(ruleFileReference);
-                }
+                missingRuleFileReferences.add(ruleFileReference);
             }
         }
 
         return missingRuleFileReferences;
-    }
-
-    static class MissingFileReferences {
-
     }
 }

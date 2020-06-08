@@ -193,7 +193,7 @@ public class ClientFormResource {
                 }
 
                 if (errorMessage != null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST, errorMessage);
+                    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
                 }
             }
         }
