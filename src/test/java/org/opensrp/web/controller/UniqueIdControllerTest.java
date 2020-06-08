@@ -26,6 +26,8 @@ import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -65,11 +67,38 @@ public class UniqueIdControllerTest {
 
 	@Mock
 	private UniqueIdentifierService uniqueIdentifierService;
+
+	@Mock
+	private Authentication authentication;
+
+	@Mock
+	private ObjectMapper objectMapper;
 	
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/uniqueids";
 	private final String ERROR_MESSAGE = "\"Sorry, an error occured when generating the qr code pdf\"";
+
+	private String EXPECTED_IDENTIFIER = "{\n"
+			+ "    \"identifiers\": [\n"
+			+ "        \"AAAB-9\",\n"
+			+ "        \"AAA1-6\",\n"
+			+ "        \"AAA2-4\",\n"
+			+ "        \"AABA-0\",\n"
+			+ "        \"AABB-8\",\n"
+			+ "        \"AAB1-5\",\n"
+			+ "        \"AAB2-3\",\n"
+			+ "        \"AA1A-7\",\n"
+			+ "        \"AA1B-5\",\n"
+			+ "        \"AA11-2\"\n"
+			+ "    ]\n"
+			+ "}";
+
+	private String EXPECTED_OPENMRS_IDENTIFER = "{\n"
+			+ "    \"identifiers\": [\n"
+			+ "        \"1\"\n"
+			+ "    ]\n"
+			+ "}";
 
 	@Before
 	public void setUp() {
@@ -98,12 +127,15 @@ public class UniqueIdControllerTest {
 				.thenReturn(mocked_expected_ids);
 		when(securityContext.getAuthentication()).thenReturn(spy(getMockedAuthentication()));
 		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_OPENMRS_IDENTIFER);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/get").param("numberToGenerate", "10")
-				.param("source", "test"))
-				.andExpect(status().isOk()).andReturn();
+		MockHttpServletRequest req = new MockHttpServletRequest();
+		req.addParameter("numberToGenerate", "10");
+		req.addParameter("source", "test");
 
-		String responseString = result.getResponse().getContentAsString();
+		ResponseEntity<String> stringResponseEntity = uniqueIdController.get(req, authentication);
+
+		String responseString = stringResponseEntity.getBody();
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
 		}
@@ -116,26 +148,27 @@ public class UniqueIdControllerTest {
 	@Test
 	public void testGetIdentifiersByIdSource() throws Exception {
 		List<String> mocked_expected_ids = new ArrayList<>();
-		mocked_expected_ids.add("BA21-4");
+		mocked_expected_ids.add("AAAB-9");
 		IdentifierSource identifierSource = createIdentifierSource();
 
 		when(identifierSourceService.findByIdentifier(anyString())).thenReturn(identifierSource);
-		when(uniqueIdentifierService.generateIdentifiers(any(IdentifierSource.class),any(int.class),anyString()))
+		when(uniqueIdentifierService.generateIdentifiers(any(IdentifierSource.class), any(int.class), anyString()))
 				.thenReturn(mocked_expected_ids);
+		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_IDENTIFIER);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/get").param("numberToGenerate", "10")
-				.param("source", "test")
-		.param("usedBy", "admin"))
-				.andExpect(status().isOk()).andReturn();
+		MockHttpServletRequest req = new MockHttpServletRequest();
+		req.addParameter("numberToGenerate", "10");
+		req.addParameter("source", "10");
 
-		String responseString = result.getResponse().getContentAsString();
+		ResponseEntity<String> stringResponseEntity = uniqueIdController.get(req, authentication);
+
+		String responseString = stringResponseEntity.getBody();
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
-
-		assertEquals(actualObj.get("identifiers").get(0).asText(), "BA21-4");
-		assertEquals(actualObj.get("identifiers").size(), 1);
+		assertEquals(actualObj.get("identifiers").get(0).asText(), "AAAB-9");
+		assertEquals(actualObj.get("identifiers").size(), 10);
 	}
 
 	@Test
