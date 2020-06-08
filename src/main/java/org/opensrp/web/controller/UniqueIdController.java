@@ -137,7 +137,8 @@ public class UniqueIdController extends OpenmrsService {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
-		String usedBy = getStringFilter("usedBy", request);
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String usedBy = authentication.getName();
 		Map<String, Object> map = new HashMap<>();
 		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
 		try {
