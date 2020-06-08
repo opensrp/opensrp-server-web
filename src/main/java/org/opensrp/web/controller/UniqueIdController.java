@@ -133,11 +133,10 @@ public class UniqueIdController extends OpenmrsService {
 	 */
 
 	@RequestMapping(value = "/get", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	protected ResponseEntity<String> get(HttpServletRequest request) throws JSONException {
+	protected ResponseEntity<String> get(HttpServletRequest request,Authentication authentication) throws JSONException {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String usedBy = authentication.getName();
 		Map<String, Object> map = new HashMap<>();
 		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
