@@ -1,7 +1,5 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
 import org.slf4j.Logger;
