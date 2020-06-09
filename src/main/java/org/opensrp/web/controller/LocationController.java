@@ -66,8 +66,7 @@ public class LocationController {
 	@RequestMapping(value = "/by-team-ids", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE },produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationsByTeamIds(@RequestBody String payload) throws JSONException {
-		Gson gson = new Gson();
-		List<String> teamIds = gson.fromJson(payload,  new TypeToken<List<String>>(){}.getType());
-		return new ResponseEntity<>(gson.toJson(openmrsLocationService.getLocationsByTeamIds(teamIds)), HttpStatus.OK);
+		List<String> teamIds = new Gson().fromJson(payload,  new TypeToken<List<String>>(){}.getType());
+		return new ResponseEntity<>(openmrsLocationService.getLocationsByTeamIds(teamIds).toString(), HttpStatus.OK);
 	}
 }
