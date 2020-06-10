@@ -146,7 +146,7 @@ public class ClientFormResource {
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module) {
-        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formIdentifier) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
@@ -207,7 +207,7 @@ public class ClientFormResource {
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setVersion(formVersion);
-        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setIdentifier(formName);
         clientFormMetadata.setLabel(formName);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
