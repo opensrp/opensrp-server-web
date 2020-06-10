@@ -71,4 +71,19 @@ public class ClientFormValidatorTest extends TestCase {
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
         assertEquals(0, missingReferences.size());
     }
+
+    public void testCheckForMissingPropertyFileReferencesShouldReturnEmptyHashSetWhenGivenFormWithAvailablePropertyFiles() {
+        Mockito.doReturn(true).when(clientFormService).isClientFormExists("anc_register.properties");
+
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingPropertyFileReferences(TestFileContent.ANC_REGISTER_JSON_FORM_FILE);
+        Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
+        assertEquals(0, missingReferences.size());
+    }
+
+    public void testCheckForMissingPropertyFileReferencesShouldReturnNonEmptyHashSetWhenGivenFormWithMissingPropertyFiles() {
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingPropertyFileReferences(TestFileContent.ANC_REGISTER_JSON_FORM_FILE);
+        Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
+        assertEquals(1, missingReferences.size());
+        assertEquals("anc_register", missingReferences.toArray()[0]);
+    }
 }

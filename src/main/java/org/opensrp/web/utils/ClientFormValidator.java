@@ -1,6 +1,8 @@
 package org.opensrp.web.utils;
 
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import org.opensrp.service.ClientFormService;
 import org.springframework.lang.NonNull;
 
@@ -12,12 +14,15 @@ public class ClientFormValidator {
 
     private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
     private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
+    private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
     private ClientFormService clientFormService;
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
+
         initialiseSubFormJsonPathReferences();
         initialiseRuleJsonPathReferences();
+        initialisePropertiesFileJsonPathReferences();
     }
 
     private void initialiseSubFormJsonPathReferences() {
@@ -29,6 +34,10 @@ public class ClientFormValidator {
         jsonPathForRuleReferences.add("$.*.fields[*].calculation.rules-engine.ex-rules.rules-file");
         jsonPathForRuleReferences.add("$.*.fields[*].relevance.rules-engine.ex-rules.rules-file");
         jsonPathForRuleReferences.add("$.*.fields[*].constraints.rules-engine.ex-rules.rules-file");
+    }
+
+    private void initialisePropertiesFileJsonPathReferences() {
+        jsonPathForPropertyFileReferences.add("$.properties_file_name");
     }
 
     @NonNull
@@ -70,5 +79,31 @@ public class ClientFormValidator {
         }
 
         return missingRuleFileReferences;
+    }
+
+    @NonNull
+    public HashSet<String> checkForMissingPropertyFileReferences(@NonNull String jsonForm) {
+        Configuration conf = Configuration.defaultConfiguration()
+                .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+
+        HashSet<String> propertyFileReferences = new HashSet<>();
+        HashSet<String> missingPropertyFileReferences = new HashSet<>();
+
+        for (String jsonPath: jsonPathForPropertyFileReferences) {
+            String reference = (JsonPath.using(conf)).parse(jsonForm).read(jsonPath);
+
+            if (reference != null) {
+                propertyFileReferences.add(reference);
+            }
+        }
+
+        // Check if the references exist in the DB
+        for (String propertyFileReference: propertyFileReferences) {
+            if (!clientFormService.isClientFormExists(propertyFileReference) && !clientFormService.isClientFormExists(propertyFileReference + ".properties")) {
+                missingPropertyFileReferences.add(propertyFileReference);
+            }
+        }
+
+        return missingPropertyFileReferences;
     }
 }

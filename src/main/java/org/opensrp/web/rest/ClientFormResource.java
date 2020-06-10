@@ -179,22 +179,25 @@ public class ClientFormResource {
         if (isJsonFile(fileContentType)) {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
+            HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
 
             String errorMessage = null;
-            if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty()) {
+            if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
                 errorMessage = "Form upload failed.";
 
                 if (!missingSubFormReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following sub-forms are uploaded before: " + String.join(", ", missingSubFormReferences);
+                    errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
                 }
 
                 if (!missingRuleFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following rules file are uploaded before: " + String.join(",", missingRuleFileReferences);
+                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
                 }
 
-                if (errorMessage != null) {
-                    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+                if (!missingPropertyFileReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
                 }
+
+                return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
             }
         }
 
