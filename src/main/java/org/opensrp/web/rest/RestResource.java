@@ -6,7 +6,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,8 +45,8 @@ public abstract class RestResource<T> {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/search", produces = { MediaType.APPLICATION_JSON_VALUE })
-	private String searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException {
-		return objectMapper.writeValueAsString(search(request));
+	private ResponseEntity<String> searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException {
+		return new ResponseEntity<>(objectMapper.writeValueAsString(search(request)),HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
