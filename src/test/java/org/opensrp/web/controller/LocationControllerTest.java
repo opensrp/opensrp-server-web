@@ -3,42 +3,36 @@ package org.opensrp.web.controller;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.opensrp.api.domain.Location;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
-import org.opensrp.web.utils.TestResourceLoader;
 import org.powermock.reflect.Whitebox;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
-@ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
-public class LocationControllerTest extends TestResourceLoader {
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = {"jedis", "postgres", "basic_auth"})
+public class LocationControllerTest {
 
     @InjectMocks
     private LocationController locationController;
 
     private MockMvc mockMvc;
-
-    public LocationControllerTest() throws IOException {
-        super();
-    }
 
     @Before
     public void setUp() {
@@ -61,19 +55,22 @@ public class LocationControllerTest extends TestResourceLoader {
 
     @Test
     public void testLocationControllerWithParameters() throws Exception {
-        mockMvc.perform(post("/by-level-and-tags", "{\n" +
-                        "locationTagsQueried\": [\n" +
-                        "    \"Facility\"\n" +
-                        "  ],\n" +
-                        "  \"locationTopLevel\": \"Council\",\n" +
-                        "  \"locationUUID\": \"bcf5a36d-fb53-4de9-9813-01f1d480e3fe\"\n" +
-                        "}"))
+        MvcResult mvcResult = mockMvc.perform(post("/location/by-level-and-tags")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("{\"locationTagsQueried\":[\"Facility\"],\"locationTopLevel\":\"Council\",\"locationUUID\":\"bcf5a36d-fb53-4de9-9813-01f1d480e3fe\"}"))
                 .andExpect(status().isOk()).andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        Assert.assertNotNull(contentAsString);
     }
 
     @Test
     public void getLocationsByTeamIds() throws Exception {
-        mockMvc.perform(post("/by-team-ids", "[\"718b2864-7d6a-44c8-b5b6-bb375f82654e\"]"))
+        MvcResult mvcResult = mockMvc.perform(post("/location/by-team-ids")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("[\"718b2864-7d6a-44c8-b5b6-bb375f82654e\"]"))
                 .andExpect(status().isOk()).andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        Assert.assertNotNull(contentAsString);
+        Assert.assertTrue(contentAsString.contains("Kabila Village"));
     }
 }
