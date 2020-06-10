@@ -43,8 +43,8 @@ public abstract class RestResource<T> {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/search", produces = { MediaType.APPLICATION_JSON_VALUE })
-	private List<T> searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException {
-		return search(request);
+	private String searchBy(HttpServletRequest request) throws ParseException, JsonProcessingException {
+		return objectMapper.writeValueAsString(search(request));
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
