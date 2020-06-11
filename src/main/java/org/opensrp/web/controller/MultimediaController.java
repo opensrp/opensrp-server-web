@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -203,6 +204,7 @@ public class MultimediaController {
 		}
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
+		multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
 		String status = null;
 		try {
 			logger.info("Saving multimedia file...");
