@@ -224,9 +224,8 @@ public class ClientFormResourceTest {
 
     @Test
     public void testAddClientFormWhenGivenJSON() throws Exception {
-        String formIdentifier = "opd/reg.json";
+        String formName = "opd/reg.json";
         String formVersion = "0.1.1";
-        String formName = "REGISTRATION FORM";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
@@ -236,7 +235,6 @@ public class ClientFormResourceTest {
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
-                        .param("form_identifier", formIdentifier)
                         .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isCreated())
@@ -248,7 +246,7 @@ public class ClientFormResourceTest {
 
         assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
-        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formName, clientFormMetadata.getIdentifier());
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
@@ -282,9 +280,8 @@ public class ClientFormResourceTest {
 
     @Test
     public void testAddClientFormWhenGivenYaml() throws Exception {
-        String formIdentifier = "opd/calculation.yaml";
+        String formName = "opd/calculation.yaml";
         String formVersion = "0.1.1";
-        String formName = "Calculation file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yaml",
                 "application/x-yaml", TestFileContent.CALCULATION_YAML_FILE_CONTENT.getBytes());
@@ -294,7 +291,6 @@ public class ClientFormResourceTest {
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
-                        .param("form_identifier", formIdentifier)
                         .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isCreated())
@@ -306,7 +302,7 @@ public class ClientFormResourceTest {
 
         assertEquals(TestFileContent.CALCULATION_YAML_FILE_CONTENT, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
-        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formName, clientFormMetadata.getIdentifier());
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
@@ -340,9 +336,8 @@ public class ClientFormResourceTest {
 
     @Test
     public void testAddClientFormWhenGivenPropertiesFile() throws Exception {
-        String formIdentifier = "opd/opd_register.properties";
+        String formName = "opd/opd_register.properties";
         String formVersion = "0.1.1";
-        String formName = "Registration properties file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/opd_register.properties",
                 "application/octet-stream", TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.getBytes());
@@ -352,7 +347,6 @@ public class ClientFormResourceTest {
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
-                        .param("form_identifier", formIdentifier)
                         .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isCreated())
@@ -364,7 +358,7 @@ public class ClientFormResourceTest {
 
         assertEquals(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
-        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formName, clientFormMetadata.getIdentifier());
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());

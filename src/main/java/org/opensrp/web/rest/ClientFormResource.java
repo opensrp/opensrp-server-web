@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 @Controller
@@ -138,7 +139,7 @@ public class ClientFormResource {
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
-                                                 @RequestParam("form_identifier") String formIdentifier,
+                                                 @RequestParam(value = "form_identifier", required = false) String formIdentifier,
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module) {
