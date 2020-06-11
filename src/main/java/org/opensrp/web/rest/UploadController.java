@@ -59,18 +59,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
 import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
 
 @Controller
 @RequestMapping(value = "/rest/upload")
 public class UploadController {
 
-	protected ObjectMapper objectMapper;
-
-	@Autowired
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
+	private ObjectMapper objectMapper;
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
 
@@ -83,8 +79,6 @@ public class UploadController {
 	private String multiMediaDir;
 
 	public static final String EVENT_NAME_ERROR_MESSAGE = "Sorry. Event name should not contain any special character";
-
-	public static final String LOCATION_ID = "location_id";
 
 	public static final String FILE_CATEGORY = "csv";
 
@@ -101,6 +95,11 @@ public class UploadController {
 	private ClientService clientService;
 
 	private EventService eventService;
+
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
@@ -173,6 +172,27 @@ public class UploadController {
 			throw new BusinessLogicException(objectMapper.writeValueAsString(validationBean));
 		}
 
+		saveClients(validationBean,locationID,providerId,eventName,teamID,teamName);
+
+		Map<String, Object> details = new HashMap<>();
+		details.put("size", Long.toString(file.getSize()));
+		details.put("imported", Integer.toString(validationBean.getRowsToCreate()));
+		details.put("updated", Integer.toString(validationBean.getRowsToUpdate()));
+		multimediaDTO.withOriginalFileName(file.getOriginalFilename())
+				.withDateUploaded(new Date())
+				.withSummary(mapper.writeValueAsString(details));
+
+		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+
+		return details;
+	}
+
+	private void saveClients(UploadValidationBean validationBean,
+			String locationID,
+			String providerId,
+			String eventName,
+			String teamID,
+			String teamName){
 		UniqueIDProvider uniqueIDProvider = new OpenMRSUniqueIDProvider(openmrsIDService,
 				validationBean.getRowsToCreate());
 
@@ -209,18 +229,6 @@ public class UploadController {
 			// save the event
 			eventService.addorUpdateEvent(event);
 		}
-
-		Map<String, Object> details = new HashMap<>();
-		details.put("size", Long.toString(file.getSize()));
-		details.put("imported", Integer.toString(validationBean.getRowsToCreate()));
-		details.put("updated", Integer.toString(validationBean.getRowsToUpdate()));
-		multimediaDTO.withOriginalFileName(file.getOriginalFilename())
-				.withDateUploaded(new Date())
-				.withSummary(mapper.writeValueAsString(details));
-
-		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-
-		return details;
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, value = "/validate", produces = {
@@ -328,8 +336,8 @@ public class UploadController {
 			throw new IllegalArgumentException("Missing file name");
 
 		if (hasSpecialCharacters(fileName)) {
-			logger.error(EVENT_NAME_ERROR_MESSAGE);
-			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
+			logger.error(FILE_NAME_ERROR_MESSAGE);
+			throw new IllegalArgumentException(FILE_NAME_ERROR_MESSAGE);
 		}
 
 		File file = multimediaService
