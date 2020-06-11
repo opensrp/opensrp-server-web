@@ -1,52 +1,33 @@
 package org.opensrp.web.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class UploadBean {
 
-    private String identifier;
-    private String fileName;
-    private Date uploadDate;
-    private String providerID;
-    private String url;
+	@JsonProperty
+	private String identifier;
 
-    public String getIdentifier() {
-        return identifier;
-    }
+	@JsonProperty
+	private String fileName;
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
+	@JsonProperty
+	private Date uploadDate;
 
-    public String getFileName() {
-        return fileName;
-    }
+	@JsonProperty
+	private String providerID;
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Date getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(Date uploadDate) {
-        this.uploadDate = uploadDate;
-    }
-
-    public String getProviderID() {
-        return providerID;
-    }
-
-    public void setProviderID(String providerID) {
-        this.providerID = providerID;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	@JsonProperty
+	private String url;
 }

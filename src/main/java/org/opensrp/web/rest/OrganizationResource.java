@@ -27,11 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.opensrp.web.rest.UploadController.LOCATION_ID;
-
 /**
  * @author Samuel Githengi created on 09/10/19
  */
@@ -72,8 +67,7 @@ public class OrganizationResource {
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAllOrganizations(HttpServletRequest request) {
-		String locationID = getStringFilter(LOCATION_ID, request);
+	public ResponseEntity<String> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
 		if(StringUtils.isNotBlank(locationID)){
 			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)), RestUtils.getJSONUTF8Headers(),
 					HttpStatus.OK);

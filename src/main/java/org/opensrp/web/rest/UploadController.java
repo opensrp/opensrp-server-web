@@ -1,8 +1,6 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -22,29 +20,26 @@ import org.opensrp.service.EventService;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UploadService;
-import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.util.JSONCSVUtil;
 import org.opensrp.web.bean.UploadBean;
+import org.opensrp.web.exceptions.BusinessLogicException;
 import org.opensrp.web.utils.OpenMRSUniqueIDProvider;
 import org.opensrp.web.utils.UniqueIDProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -64,16 +59,18 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
 
 @Controller
 @RequestMapping(value = "/rest/upload")
 public class UploadController {
 
-	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+	protected ObjectMapper objectMapper;
+
+	@Autowired
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
 
@@ -85,13 +82,7 @@ public class UploadController {
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
 
-	public static final String BATCH_SIZE = "batch_size";
-
-	public static final String OFFSET = "offset";
-
-	public static final String TEAM_ID = "team_id";
-
-	public static final String TEAM_NAME = "team_name";
+	public static final String EVENT_NAME_ERROR_MESSAGE = "Sorry. Event name should not contain any special character";
 
 	public static final String LOCATION_ID = "location_id";
 
@@ -142,122 +133,116 @@ public class UploadController {
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
-		List<Map<String, String>> csv_clients = new ArrayList<>();
-		CSVParser parser;
-		try (Reader reader = new InputStreamReader(file.getInputStream())) {
-			parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+		List<Map<String, String>> csvClients = new ArrayList<>();
+		try (Reader reader = new InputStreamReader(file.getInputStream());
+		     CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
+
 			List<CSVRecord> records = parser.getRecords();
 			for (CSVRecord record : records) {
-				csv_clients.add(record.toMap());
+				csvClients.add(record.toMap());
 			}
-			parser.close();
 		}
-		return csv_clients;
+		return csvClients;
 	}
 
-	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, produces = {
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> uploadCSV(@RequestParam("event_name") String eventName,
-			@RequestParam("file") MultipartFile file, HttpServletRequest request) {
-		String teamID = getStringFilter(TEAM_ID, request);
-		String teamName = getStringFilter(TEAM_NAME, request);
-		String locationID = getStringFilter(LOCATION_ID, request);
+	public Map<String, Object> uploadCSV(@RequestParam("event_name") String eventName,
+			@RequestParam("file") MultipartFile file,
+			@RequestParam(value = "team_id", required = false) String teamID,
+			@RequestParam(value = "team_name", required = false) String teamName,
+			@RequestParam(value = "location_id", required = false) String locationID,
+			Authentication authentication
+	) throws IOException,
+			BusinessLogicException {
+		if (hasSpecialCharacters(eventName)) {
+			logger.error(EVENT_NAME_ERROR_MESSAGE);
+			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
+		}
 
 		String entityId = UUID.randomUUID().toString();
-		String providerId = getCurrentUser();
+		String providerId = authentication.getName();
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId, file.getContentType().trim(), null,
 				FILE_CATEGORY);
 
-		String status = null;
-		try {
-			List<Map<String, String>> csv_clients = readCSVFile(file);
+		List<Map<String, String>> csvClients = readCSVFile(file);
 
-			UploadValidationBean validationBean = uploadService.validateFieldValues(csv_clients, eventName, globalID);
-			if (validationBean.getErrors() != null && validationBean.getErrors().size() > 0) {
-				validationBean.setAnalyzedData(null);
-				Map<String, Object> map = new HashMap<>();
-				map.put("status", "A number of errors were found during validation");
-				map.put("summary", validationBean);
-				return new ResponseEntity<>(gson.toJson(map), HttpStatus.BAD_REQUEST);
-			}
-
-			UniqueIDProvider uniqueIDProvider = new OpenMRSUniqueIDProvider(openmrsIDService,
-					validationBean.getRowsToCreate());
-
-			for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {
-				Client client = eventClient.getLeft();
-
-				String baseEntityID = client.getBaseEntityId();
-				boolean newClient = false;
-				if (StringUtils.isBlank(baseEntityID)) {
-					baseEntityID = UUID.randomUUID().toString();
-					client.setBaseEntityId(baseEntityID);
-					newClient = true;
-				}
-
-				client.addAttribute(DEFAULT_RESIDENCE, locationID);
-
-				assignClientUniqueID(client, globalID, uniqueIDProvider);
-				clientService.addorUpdate(client);
-
-				// update event details
-				Event event = (eventClient.getRight() == null) ? new Event() : eventClient.getRight();
-				String eventType = newClient ? eventName : "Update " + eventName;
-				prepareEvent(event, baseEntityID, providerId, eventType);
-
-				if (StringUtils.isNotBlank(teamID))
-					event.setTeamId(teamID);
-
-				if (StringUtils.isNotBlank(teamName))
-					event.setTeam(teamName);
-
-				if (StringUtils.isNotBlank(locationID))
-					event.setLocationId(locationID);
-
-				// save the event
-				eventService.addorUpdateEvent(event);
-			}
-
-			Map<String, String> details = new HashMap<>();
-			details.put("size", Long.toString(file.getSize()));
-			details.put("imported", Integer.toString(validationBean.getRowsToCreate()));
-			details.put("updated", Integer.toString(validationBean.getRowsToUpdate()));
-			multimediaDTO.withOriginalFileName(file.getOriginalFilename())
-					.withDateUploaded(new Date())
-					.withSummary(mapper.writeValueAsString(details));
-
-			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-
-			return new ResponseEntity<>(gson.toJson(details), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			logger.error("", e);
+		UploadValidationBean validationBean = uploadService.validateFieldValues(csvClients, eventName, globalID);
+		if (validationBean.getErrors() != null && validationBean.getErrors().size() > 0) {
+			validationBean.setAnalyzedData(null);
+			throw new BusinessLogicException(objectMapper.writeValueAsString(validationBean));
 		}
 
-		return new ResponseEntity<>(gson.toJson(status), HttpStatus.OK);
+		UniqueIDProvider uniqueIDProvider = new OpenMRSUniqueIDProvider(openmrsIDService,
+				validationBean.getRowsToCreate());
+
+		for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {
+			Client client = eventClient.getLeft();
+
+			String baseEntityID = client.getBaseEntityId();
+			boolean newClient = false;
+			if (StringUtils.isBlank(baseEntityID)) {
+				baseEntityID = UUID.randomUUID().toString();
+				client.setBaseEntityId(baseEntityID);
+				newClient = true;
+			}
+
+			client.addAttribute(DEFAULT_RESIDENCE, locationID);
+
+			assignClientUniqueID(client, globalID, uniqueIDProvider);
+			clientService.addorUpdate(client);
+
+			// update event details
+			Event event = (eventClient.getRight() == null) ? new Event() : eventClient.getRight();
+			String eventType = newClient ? eventName : "Update " + eventName;
+			prepareEvent(event, baseEntityID, providerId, eventType);
+
+			if (StringUtils.isNotBlank(teamID))
+				event.setTeamId(teamID);
+
+			if (StringUtils.isNotBlank(teamName))
+				event.setTeam(teamName);
+
+			if (StringUtils.isNotBlank(locationID))
+				event.setLocationId(locationID);
+
+			// save the event
+			eventService.addorUpdateEvent(event);
+		}
+
+		Map<String, Object> details = new HashMap<>();
+		details.put("size", Long.toString(file.getSize()));
+		details.put("imported", Integer.toString(validationBean.getRowsToCreate()));
+		details.put("updated", Integer.toString(validationBean.getRowsToUpdate()));
+		multimediaDTO.withOriginalFileName(file.getOriginalFilename())
+				.withDateUploaded(new Date())
+				.withSummary(mapper.writeValueAsString(details));
+
+		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+
+		return details;
 	}
 
-	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/validate", produces = {
+	@PostMapping(headers = { "Accept=multipart/form-data" }, value = "/validate", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> validateFile(@RequestParam("event_name") String eventName,
-			@RequestParam("file") MultipartFile file) {
-		try {
-			List<Map<String, String>> csv_clients = readCSVFile(file);
-			UploadValidationBean validationBean = uploadService.validateFieldValues(csv_clients, eventName, globalID);
-			validationBean.setAnalyzedData(null);
-			return new ResponseEntity<>(gson.toJson(validationBean), HttpStatus.OK);
+	public UploadValidationBean validateFile(@RequestParam("event_name") String eventName,
+			@RequestParam("file") MultipartFile file) throws IOException {
+		if (hasSpecialCharacters(eventName)) {
+			logger.error(EVENT_NAME_ERROR_MESSAGE);
+			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
 		}
-		catch (Exception e) {
-			logger.error("", e);
-		}
-		return new ResponseEntity<>(gson.toJson("An error occurred while reading the file"), HttpStatus.EXPECTATION_FAILED);
+
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		UploadValidationBean validationBean = uploadService.validateFieldValues(csvClients, eventName, globalID);
+		validationBean.setAnalyzedData(null);
+		return validationBean;
 	}
 
 	private void prepareEvent(Event event, String baseEntityID, String providerId, String eventType) {
-		if (event.getFormSubmissionId() == null)
+		if (StringUtils.isBlank(event.getFormSubmissionId()))
 			event.setFormSubmissionId(UUID.randomUUID().toString());
 
-		if (event.getBaseEntityId() == null)
+		if (StringUtils.isBlank(event.getBaseEntityId()))
 			event.setBaseEntityId(baseEntityID);
 
 		event.setDateCreated(new DateTime());
@@ -279,19 +264,13 @@ public class UploadController {
 		}
 	}
 
-	@RequestMapping(value = "/history", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getUploadHistory(HttpServletRequest request) {
-		Integer batchSize = getIntegerFilter(BATCH_SIZE, request);
-		if (batchSize == null)
-			batchSize = 50;
-
-		Integer offset = getIntegerFilter(OFFSET, request);
-		if (offset == null)
-			offset = 0;
-
-		String providerID = getCurrentUser();
-
-		List<UploadBean> uploadBeans = multimediaRepository.getByProviderID(providerID, FILE_CATEGORY, offset, batchSize)
+	@GetMapping(value = "/history", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public List<UploadBean> getUploadHistory(
+			@RequestParam(value = "batch_size", required = false, defaultValue = "50") Integer batchSize,
+			@RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
+			Authentication authentication
+	) {
+		return multimediaRepository.getByProviderID(authentication.getName(), FILE_CATEGORY, offset, batchSize)
 				.stream()
 				.map(multimedia -> {
 					UploadBean uploadBean = new UploadBean();
@@ -303,16 +282,17 @@ public class UploadController {
 					return uploadBean;
 				})
 				.collect(Collectors.toList());
-
-		return new ResponseEntity<>(
-				gson.toJson(uploadBeans),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/template", method = RequestMethod.GET)
-	public void getUploadTemplate(@RequestParam("event_name") String eventName, HttpServletRequest request,
-			HttpServletResponse response) {
-		String locationID = getStringFilter(LOCATION_ID, request);
+	@GetMapping(value = "/template")
+	public void getUploadTemplate(HttpServletResponse response,
+			@RequestParam("event_name") String eventName,
+			@RequestParam(value = "location_id", required = false) String locationID) throws IOException {
+
+		if (hasSpecialCharacters(eventName)) {
+			logger.error(EVENT_NAME_ERROR_MESSAGE);
+			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
+		}
 
 		String csvFileName = eventName.replace(" ", "").toLowerCase() + ".csv";
 		response.setContentType("text/csv");
@@ -336,17 +316,22 @@ public class UploadController {
 			for (Client client : clients) {
 
 				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("client", new JSONObject(gson.toJson(client)));
+				jsonObject.put("client", new JSONObject(objectMapper.writeValueAsString(client)));
 				printer.printRecord(JSONCSVUtil.jsonToString(jsonObject, fieldMappings));
 			}
 		}
-		catch (IOException e) {
-			logger.error("CSV Export >>> " + e.toString());
-		}
 	}
 
-	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
+	@GetMapping(value = "/download/{fileName:.+}")
 	public void downloadFile(@PathVariable("fileName") String fileName, HttpServletResponse response) throws IOException {
+		if (StringUtils.isBlank(fileName))
+			throw new IllegalArgumentException("Missing file name");
+
+		if (hasSpecialCharacters(fileName)) {
+			logger.error(EVENT_NAME_ERROR_MESSAGE);
+			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
+		}
+
 		File file = multimediaService
 				.retrieveFile(multiMediaDir + File.separator + FILE_CATEGORY + File.separator + fileName.trim());
 		if (file != null) {
@@ -367,12 +352,4 @@ public class UploadController {
 		}
 	}
 
-	private String getCurrentUser() {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetails) {
-			return ((UserDetails) principal).getUsername();
-		} else {
-			return principal.toString();
-		}
-	}
 }
