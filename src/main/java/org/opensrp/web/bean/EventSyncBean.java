@@ -16,6 +16,9 @@ public class EventSyncBean {
 	
 	private String msg;
 	
+	@JsonProperty("total_records")
+	private Long totalRecords;
+	
 	public List<Event> getEvents() {
 		return events;
 	}
@@ -47,4 +50,16 @@ public class EventSyncBean {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
+
+	
+	public Long getTotalRecords() {
+		return totalRecords;
+	}
+
+	
+	public void setTotalRecords(Long totalRecords) {
+		this.totalRecords = totalRecords;
+	}
+	
+	
 }

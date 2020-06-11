@@ -41,6 +41,7 @@
 	<!-- Added for V2.1 only -->
 	<bean class="org.opensrp.web.security.DrishtiAuthenticationProvider" />
 	<bean class="org.opensrp.connector.openmrs.service.OpenmrsUserService"/>
+	<bean class="org.opensrp.connector.openmrs.service.OpenmrsLocationService"/>
 	<!-- Added for V2.1 only -->
 
 
