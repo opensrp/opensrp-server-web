@@ -6,6 +6,8 @@ import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
@@ -74,10 +76,7 @@ public class PlanResource {
 	public static final String FIELDS = "fields";
 	
 	public static final String USERNAME = "username";
-	
-	public static final String RETURN_COUNT= "return_count";
 
-	private static final String TOTAL_RECORDS = "total_records";
 	
 	@Autowired
 	public void setPlanService(PlanService planService) {

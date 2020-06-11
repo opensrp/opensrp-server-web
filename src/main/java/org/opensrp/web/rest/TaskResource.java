@@ -4,6 +4,8 @@ import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
@@ -57,10 +59,6 @@ public class TaskResource {
 	public static final String GROUP = "group";
 
 	public static final String OWNER= "owner";
-	
-	public static final String RETURN_COUNT= "return_count";
-
-	private static final String TOTAL_RECORDS = "total_records";
 
 	private TaskService taskService;
 	
