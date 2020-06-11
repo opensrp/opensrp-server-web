@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -201,8 +202,9 @@ public class ClientFormResource {
             }
         }
 
+        String identifier = formIdentifier;
         if (TextUtils.isEmpty(formIdentifier)){
-            formIdentifier = jsonFile.getOriginalFilename();
+            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
         }
 
         logger.info(fileContentString);
@@ -211,7 +213,7 @@ public class ClientFormResource {
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setVersion(formVersion);
-        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setIdentifier(identifier);
         clientFormMetadata.setLabel(formName);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
