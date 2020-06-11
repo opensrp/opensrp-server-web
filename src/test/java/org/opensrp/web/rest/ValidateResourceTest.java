@@ -58,8 +58,8 @@ public class ValidateResourceTest {
 			+ "}";
 	
 	private String SYNC_REQUEST_PAYLOAD = "{\n"
-			+ "\t\"clients\": \"[ 1 , 2 ]\",\n"
-			+ "\t\"events\": \"[ 1 , 2]\"\n"
+			+ "\t\"clients\": [ 1 , 2 ],\n"
+			+ "\t\"events\": [ 1 , 2]\n"
 			+ "}";
 
 	@Before
