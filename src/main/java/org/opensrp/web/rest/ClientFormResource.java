@@ -201,13 +201,17 @@ public class ClientFormResource {
             }
         }
 
+        if (TextUtils.isEmpty(formIdentifier)){
+            formIdentifier = jsonFile.getOriginalFilename();
+        }
+
         logger.info(fileContentString);
         clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setVersion(formVersion);
-        clientFormMetadata.setIdentifier(formName);
+        clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setLabel(formName);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
