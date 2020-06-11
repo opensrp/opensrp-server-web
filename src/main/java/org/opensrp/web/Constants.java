@@ -19,6 +19,9 @@ public interface Constants {
     String FAILURE = "Failure occurred";
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
 
+    public static final String RETURN_COUNT= "return_count";
+    public static final String TOTAL_RECORDS = "total_records";
+
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
