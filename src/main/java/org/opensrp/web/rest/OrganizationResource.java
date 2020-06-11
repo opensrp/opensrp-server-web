@@ -75,7 +75,7 @@ public class OrganizationResource {
 	public ResponseEntity<String> getAllOrganizations(HttpServletRequest request) {
 		String locationID = getStringFilter(LOCATION_ID, request);
 		if(StringUtils.isNotBlank(locationID)){
-			return new ResponseEntity<>(gson.toJson(organizationService.getOrganizationsInLocations(locationID)), RestUtils.getJSONUTF8Headers(),
+			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)), RestUtils.getJSONUTF8Headers(),
 					HttpStatus.OK);
 		}else{
 			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
