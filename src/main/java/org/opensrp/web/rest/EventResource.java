@@ -333,7 +333,7 @@ public class EventResource extends RestResource<Event> {
 
 			if (syncData.has("clients")) {
 
-				ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
+				ArrayList<Client> clients = gson.fromJson(syncData.getJSONArray("clients").toString(),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				for (Client client : clients) {
 					try {
@@ -348,7 +348,7 @@ public class EventResource extends RestResource<Event> {
 
 			}
 			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
+				ArrayList<Event> events = gson.fromJson(syncData.getJSONArray("events").toString(),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
