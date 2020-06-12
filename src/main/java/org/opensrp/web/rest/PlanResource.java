@@ -6,6 +6,8 @@ import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
@@ -28,6 +30,7 @@ import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +76,7 @@ public class PlanResource {
 	public static final String FIELDS = "fields";
 	
 	public static final String USERNAME = "username";
+
 	
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -147,15 +151,29 @@ public class PlanResource {
 		}
 
 		List<PlanDefinition> plans;
+		Long planCount = 0l;
 		if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
 			plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
 					planSyncRequestWrapper.getServerVersion());
+			if (planSyncRequestWrapper.isReturnCount()) {
+				planCount = planService.countPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
+					planSyncRequestWrapper.getServerVersion());
+			}
 		} else if (username != null) {
 			plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
+			if (planSyncRequestWrapper.isReturnCount()) {
+				planCount = planService.countPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
+			}
 		} else {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		if (planSyncRequestWrapper.isReturnCount()){
+			headers.add(TOTAL_RECORDS, String.valueOf(planCount));
+		}
+
+		return new ResponseEntity<>(gson.toJson(plans), headers, HttpStatus.OK);
 
 	}
 	
@@ -217,11 +235,9 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+	public List<LocationDetail> findLocationDetailsByPlanId(
 	        @PathVariable("planIdentifier") String planIdentifier) {
-
-		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return locationService.findLocationDetailsByPlanId(planIdentifier);
 	}
 
 	/**
@@ -318,6 +334,9 @@ public class PlanResource {
 		@JsonProperty
 		private List<Long> organizations;
 		
+		@JsonProperty(RETURN_COUNT)
+		private boolean returnCount;
+		
 		public List<String> getOperationalAreaId() {
 			return operationalAreaId;
 		}
@@ -329,6 +348,12 @@ public class PlanResource {
 		public List<Long> getOrganizations() {
 			return organizations;
 		}
+
+		
+		public boolean isReturnCount() {
+			return returnCount;
+		}
+				
 	}
 	
 }

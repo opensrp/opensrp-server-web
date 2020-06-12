@@ -4,17 +4,19 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.jeasy.rules.mvel.MVELRuleFactory;
+import org.jeasy.rules.support.YamlRuleDefinitionReader;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.utils.ClientFormValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
@@ -38,10 +45,12 @@ public class ClientFormResource {
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
+    private ClientFormValidator clientFormValidator;
 
     @Autowired
     public void setClientFormService(ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
+        this.clientFormValidator = new ClientFormValidator(clientFormService);
     }
 
     @Autowired
@@ -160,9 +169,40 @@ public class ClientFormResource {
             return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
         }
 
-        String jsonString = new String(bytes);
-        logger.info(jsonString);
-        clientForm.setJson(jsonString);
+        String fileContentString = new String(bytes);
+
+        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
+        if (errorMessageForInvalidContent != null) {
+            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+        }
+
+        if (isJsonFile(fileContentType)) {
+            HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
+            HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
+            HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
+
+            String errorMessage = null;
+            if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
+                errorMessage = "Form upload failed.";
+
+                if (!missingSubFormReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
+                }
+
+                if (!missingRuleFileReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
+                }
+
+                if (!missingPropertyFileReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
+                }
+
+                return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        logger.info(fileContentString);
+        clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
@@ -182,9 +222,49 @@ public class ClientFormResource {
     }
 
     @VisibleForTesting
+    @Nullable
+    protected String checkValidJsonYamlPropertiesStructure(@NonNull String fileContentString, @NonNull String contentType) {
+        if (isJsonFile(contentType)) {
+            try {
+                new JSONObject(fileContentString);
+                return null;
+            } catch (JSONException ex) {
+                logger.error("JSON File upload is invalid JSON", ex);
+                return ex.getMessage();
+            }
+        } else if (isYamlContentType(contentType)) {
+            try {
+                (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
+            } catch (Exception ex) {
+                logger.error("Rules file upload is invalid YAML rules file", ex);
+                return ex.getMessage();
+            }
+        } else {
+            // This is a properties file
+            try {
+                Properties properties = new Properties();
+                properties.load(new StringReader(fileContentString));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return e.getMessage();
+            }
+        }
+
+        return null;
+    }
+
+    @VisibleForTesting
     protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
-        return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) ||
-                fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML));
+        return fileContentType != null && (isJsonFile(fileContentType) ||
+                isYamlContentType(fileContentType));
+    }
+
+    private boolean isJsonFile(@Nullable String fileContentType) {
+        return fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType());
+    }
+
+    private boolean isYamlContentType(@NonNull String fileContentType) {
+        return fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML);
     }
 
     @VisibleForTesting

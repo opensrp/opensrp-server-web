@@ -31,6 +31,7 @@
 
     <mvc:annotation-driven/>
     <bean id="multipartResolver"
+          name="filterMultipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- max upload size in bytes -->
         <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
@@ -64,7 +65,7 @@
 
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
-    <alias name="${multimedia_file_manager}" alias="multimedia_file_manager"/>
+    <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
 
     <beans profile="chw_referral_module">
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>

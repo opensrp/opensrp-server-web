@@ -67,6 +67,11 @@
         <filter-class>org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter</filter-class>
     </filter>
 
+ 	<filter>
+        <filter-name>springSessionRepositoryFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>AuthenticationFilter</filter-name>
         <url-pattern>/authenticate-user/</url-pattern>
@@ -101,8 +106,13 @@
         <filter-name>CrossSiteScriptingPreventionFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>springSessionRepositoryFilter</filter-name>
+      	<url-pattern>/*</url-pattern>
+    </filter-mapping>
 
-    <!-- Creates the Spring Container shared by all Servlets and Filters -->
+	 <!-- Creates the Spring Container shared by all Servlets and Filters -->
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>

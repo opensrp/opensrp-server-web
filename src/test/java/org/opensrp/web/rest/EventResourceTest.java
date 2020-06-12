@@ -90,9 +90,9 @@ public class EventResourceTest extends BaseResourceTest<Event> {
     
 	private EventResource eventResource;
 	
-	private String ADD_REQUEST_PAYLOAD  = "{\n"
-			+ "\t\"clients\": \"[{\\\"birthdate\\\":\\\"1970-01-01T05:00:00.000Z\\\",\\\"firstName\\\":\\\"Test\\\",\\\"gender\\\":\\\"Male\\\",\\\"lastName\\\":\\\"User\\\" , \\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\"}]\",\n"
-			+ "\t\"events\": \"[{\\\"baseEntityId\\\":\\\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\\\",\\\"entityType\\\":\\\"ec_family\\\",\\\"eventDate\\\":\\\"2020-05-02T23:26:21.685Z\\\"}]\"\n"
+ 	private String ADD_REQUEST_PAYLOAD  = "{\n"
+			+ "\t\"clients\": [{\"birthdate\":\"1970-01-01T05:00:00.000Z\",\"firstName\":\"Test\",\"gender\":\"Male\",\"lastName\":\"User\",\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"}],\n"
+			+ "\t\"events\": [{\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\"entityType\":\"ec_family\",\"eventDate\":\"2020-05-02T23:26:21.685Z\"}]\n"
 			+ "}";
 	
 	private String POST_SYNC_REQUEST = "{\n"
@@ -261,9 +261,9 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		String jsonObjectPayload = "{\"baseEntityIds\":[\"5dd43b2e-a873-444b-b527-95c4b040a5bb\"],\"withFamilyEvents\":true}";
 
 		doReturn(expectedEventSyncBean).when(eventResource).sync(null, null, "5dd43b2e-a873-444b-b527-95c4b040a5bb", "0",
-				null, null, null);
+				null, null, null, false);
 		doReturn(expectedFamilyEventSyncBean).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4",
-				"0", null, null, null);
+				"0", null, null, null, false);
 
 		ResponseEntity<String> clientEventsResponseEntity = eventResource
 				.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
@@ -369,7 +369,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-		assertEquals(actualObj.size(),3);
+		assertEquals(actualObj.size(),4);
 		assertEquals(actualObj.get("clients").size(),1);
 		assertEquals(actualObj.get("events").size(),1);
     }
@@ -392,7 +392,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 	    assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-	    assertEquals(actualObj.size(),3);
+	    assertEquals(actualObj.size(),4);
 	    assertEquals(actualObj.get("clients").size(),1);
 	    assertEquals(actualObj.get("events").size(),1);
     }

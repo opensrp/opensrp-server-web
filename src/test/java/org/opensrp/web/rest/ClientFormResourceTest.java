@@ -23,6 +23,7 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.server.MockMvc;
@@ -36,11 +37,15 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
@@ -48,6 +53,7 @@ import static org.springframework.test.web.server.result.MockMvcResultMatchers.s
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
 public class ClientFormResourceTest {
 
     @Autowired
@@ -251,6 +257,59 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testAddClientFormWhenGivenJSONWithMissingReferencesShouldReturn400() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.PHYSICAL_EXAM_FORM_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult mvcResult = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(clientFormService, times(16)).isClientFormExists(anyString());
+
+        String errorMessage = mvcResult.getResponse().getContentAsString();
+        assertTrue(errorMessage.contains("physical-exam-relevance-rules.yml"));
+        assertTrue(errorMessage.contains("physical-exam-calculations-rules.yml"));
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenInvalidJSONShouldReturn400() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.JSON_FORM_FILE.substring(0, 20).getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult result = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verifyNoInteractions(clientFormService);
+
+        String errorMessage = result.getResponse().getContentAsString();
+        assertEquals("File content error:", errorMessage.substring(0, 19));
+    }
+
+    @Test
     public void testAddClientFormWhenGivenYaml() throws Exception {
         String formIdentifier = "opd/calculation.yaml";
         String formVersion = "0.1.1";
@@ -280,6 +339,32 @@ public class ClientFormResourceTest {
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenInvalidYamlShouldReturn400() throws Exception {
+        String formIdentifier = "opd/calculation.yaml";
+        String formVersion = "0.1.1";
+        String formName = "Calculation file";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yaml",
+                "application/x-yaml", TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10).getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult result = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verifyNoInteractions(clientFormService);
+
+        String errorMessage = result.getResponse().getContentAsString();
+        assertEquals("File content error:", errorMessage.substring(0, 19));
     }
 
     @Test
@@ -315,6 +400,32 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testAddClientFormWhenGivenInvalidPropertiesFileShouldReturn400() throws Exception {
+        String formIdentifier = "opd/opd_register.properties";
+        String formVersion = "0.1.1";
+        String formName = "Registration properties file";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/opd_register.properties",
+                "application/octet-stream", (TestFileContent.JMAG_PROPERTIES_FILE_CONTENT + "\\uxxxx").getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult result = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verifyNoInteractions(clientFormService);
+
+        String errorMessage = result.getResponse().getContentAsString();
+        assertEquals("File content error:", errorMessage.substring(0, 19));
+    }
+
+    @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertTrue(clientFormResource.isClientFormContentTypeValid(ContentType.APPLICATION_JSON.getMimeType()));
@@ -342,6 +453,24 @@ public class ClientFormResourceTest {
     public void testIsPropertiesFileShouldReturnFalse() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertFalse(clientFormResource.isPropertiesFile("application/octet-stream", "anc_register"));
+    }
+
+    @Test
+    public void testCheckValidContentShouldReturnErrorMessageWhenGivenInvalidJSONStructure() {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JSON_FORM_FILE.substring(0, 10), "application/json"));
+    }
+
+    @Test
+    public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidYamlStructure() {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10), "application/x-yaml"));
+    }
+
+    @Test
+    public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidPropertiesStructure() {
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType()));
     }
 
 }
