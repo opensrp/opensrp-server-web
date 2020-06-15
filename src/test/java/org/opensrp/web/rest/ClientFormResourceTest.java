@@ -713,7 +713,6 @@ public class ClientFormResourceTest {
     @Test
     public void testCanAddClientFormWithRelation() throws Exception{
         String relatedJsonIdentifier = "json.form/child-registration.json";
-        String formIdentifier = "rule/calculation.yml";
         String formVersion = "0.1.1";
         String formName = "CHILD CALCULATION";
 
@@ -725,7 +724,6 @@ public class ClientFormResourceTest {
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
-                        .param("form_identifier", formIdentifier)
                         .param("form_relation", relatedJsonIdentifier)
                         .param("form_version", formVersion)
                         .param("form_name", formName))
@@ -738,10 +736,6 @@ public class ClientFormResourceTest {
 
         assertEquals(TestFileContent.CALCULATION_YAML_FILE_CONTENT, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
-        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
-        assertEquals(formVersion, clientFormMetadata.getVersion());
-        assertEquals(formName, clientFormMetadata.getLabel());
-        assertNull(clientFormMetadata.getModule());
         assertEquals(relatedJsonIdentifier, clientFormMetadata.getRelation());
     }
 
