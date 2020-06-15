@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -181,12 +182,17 @@ public class ClientFormResource {
         
         ResponseEntity<String> errorMessage = validateJsonFile(fileContentType, fileContentString);
         if (errorMessage != null) return errorMessage;
+    
+        String identifier = formIdentifier;
+        if (StringUtils.isBlank(formIdentifier)){
+            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+        }
         
         logger.info(fileContentString);
         clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
         
-        ClientFormMetadata clientFormMetadata = getClientFormMetadata(formIdentifier, formName, module);
+        ClientFormMetadata clientFormMetadata = getClientFormMetadata(identifier, formName, module);
         ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
         
         if (completeClientForm == null) {
