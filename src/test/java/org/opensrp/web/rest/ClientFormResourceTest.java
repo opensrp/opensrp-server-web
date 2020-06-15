@@ -263,6 +263,40 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testAddClientFormWhenGivenJSONValidatorFile() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM VALIDATOR";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.JSON_VALIDATOR_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName)
+                        .param("is_json_validator", "true"))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+
+        assertEquals(TestFileContent.JSON_VALIDATOR_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertTrue(clientFormMetadata.getIsJsonValidator());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
     public void testAddClientFormWhenGivenJSONWithMissingReferencesShouldReturn400() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.1.1";
