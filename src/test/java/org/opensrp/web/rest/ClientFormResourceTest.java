@@ -480,12 +480,12 @@ public class ClientFormResourceTest {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.1.1";
         String formName = "REGISTRATION FORM";
-    
+
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.JSON_FORM_FILE.substring(0, 20).getBytes());
-    
+
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
-    
+
         MvcResult result = mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
@@ -496,7 +496,7 @@ public class ClientFormResourceTest {
                 .andReturn();
     
         verifyNoInteractions(clientFormService);
-    
+
         String errorMessage = result.getResponse().getContentAsString();
         assertEquals("File content error:", errorMessage.substring(0, 19));
     }
