@@ -206,7 +206,9 @@ public class ClientFormResource {
                                                  @RequestParam(value = "form_identifier", required = false) String formIdentifier,
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
-                                                 @RequestParam(required = false) String module) {
+                                                 @RequestParam(required = false) String module,
+                                                 @RequestParam(value = "is_json_validator", defaultValue = "false") String isJsonValidatorStringRep) {
+        boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorStringRep.toLowerCase());
         if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
@@ -237,7 +239,7 @@ public class ClientFormResource {
             return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
         }
 
-        if (isJsonFile(fileContentType)) {
+        if (isJsonFile(fileContentType) && !isJsonValidator) {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
@@ -275,6 +277,7 @@ public class ClientFormResource {
         clientFormMetadata.setVersion(formVersion);
         clientFormMetadata.setIdentifier(identifier);
         clientFormMetadata.setLabel(formName);
+        clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
 
