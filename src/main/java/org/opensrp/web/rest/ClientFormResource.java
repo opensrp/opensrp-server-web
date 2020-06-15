@@ -46,25 +46,25 @@ import java.util.Properties;
 @Controller
 @RequestMapping (value = "/rest/clientForm")
 public class ClientFormResource {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
     private ClientFormValidator clientFormValidator;
-    
+
     @Autowired
     public void setClientFormService(ClientFormService clientFormService, ManifestService manifestService) {
         this.clientFormService = clientFormService;
         this.manifestService = manifestService;
         this.clientFormValidator = new ClientFormValidator(clientFormService);
     }
-    
+
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
-    
+
     @RequestMapping (method = RequestMethod.GET)
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam (value = "form_identifier") String formIdentifier
             , @RequestParam (value = "form_version") String formVersion
@@ -76,21 +76,21 @@ public class ClientFormResource {
         if (!TextUtils.isEmpty(currentFormVersion)) {
             currentFormVersionV = new DefaultArtifactVersion(currentFormVersion);
         }
-        
+
         if (currentFormVersionV != null && currentFormVersionV.compareTo(formVersionRequired) > 0) {
             return new ResponseEntity<>((String) null, HttpStatus.BAD_REQUEST);
         }
-        
+
         if (!clientFormService.isClientFormExists(formIdentifier)) {
             return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
         }
-        
+
         // Check if the form identifier with that version exists
         ClientFormMetadata clientFormMetadata = clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion);
         ClientFormService.CompleteClientForm completeClientForm = null;
-        
+
         long formId;
-        
+
         if (clientFormMetadata == null) {
             // Get an older form version
             clientFormMetadata = getMostRecentVersion(formIdentifier);
@@ -98,7 +98,7 @@ public class ClientFormResource {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             } else {
                 formId = clientFormMetadata.getId();
-                
+
                 if (strictSearch) {
                     if (clientFormMetadata.getVersion().equals(currentFormVersion)) {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -108,37 +108,35 @@ public class ClientFormResource {
                 } else {
                     clientFormMetadata = getMostRecentVersion(formIdentifier);
                 }
-                
             }
-            
         } else {
             formId = clientFormMetadata.getId();
         }
-        
+
         ClientForm clientForm = clientFormService.getClientFormById(formId);
         if (clientForm == null) {
             return new ResponseEntity<>((String) null, HttpStatus.NOT_FOUND);
         }
-        
+
         completeClientForm = new ClientFormService.CompleteClientForm(clientForm, clientFormMetadata);
-        
+
         return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
-    
+
     private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier) {
         List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier);
         DefaultArtifactVersion highestVersion = null;
         IdVersionTuple highestIdVersionTuple = null;
-        
+
         for (IdVersionTuple availableFormVersion : availableFormVersions) {
             DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
-            
+
             if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
                 highestVersion = semanticFormVersion;
                 highestIdVersionTuple = availableFormVersion;
             }
         }
-        
+
         if (highestVersion == null) {
             return null;
         } else {
@@ -146,7 +144,7 @@ public class ClientFormResource {
             return clientFormService.getClientFormMetadataById(formId);
         }
     }
-    
+
     @RequestMapping (headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     private ResponseEntity<String> addClientForm(@RequestParam ("form_identifier") String formIdentifier,
                                                  @RequestParam ("form_name") String formName,
@@ -155,18 +153,18 @@ public class ClientFormResource {
         if (StringUtils.isEmpty(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
-        
+
         String fileContentType = jsonFile.getContentType();
         if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
             return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
         }
-        
+
         if (jsonFile.isEmpty()) {
             return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
         }
-        
+
         ClientForm clientForm = new ClientForm();
-        
+
         byte[] bytes;
         try {
             bytes = jsonFile.getBytes();
@@ -174,35 +172,35 @@ public class ClientFormResource {
             logger.error("Error occurred trying to read uploaded json file", e);
             return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
         }
-        
+
         String fileContentString = new String(bytes);
-        
+
         ResponseEntity<String> errorMessageForInvalidContent1 = validateYaml(fileContentType, fileContentString);
         if (errorMessageForInvalidContent1 != null) return errorMessageForInvalidContent1;
-        
+
         ResponseEntity<String> errorMessage = validateJsonFile(fileContentType, fileContentString);
         if (errorMessage != null) return errorMessage;
-        
+
         String identifier = formIdentifier;
         if (StringUtils.isBlank(formIdentifier)) {
             identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
         }
-        
+
         logger.info(fileContentString);
         clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
-        
+
         ClientFormMetadata clientFormMetadata = getClientFormMetadata(identifier, formName, module);
         ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
-        
+
         if (completeClientForm == null) {
             return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server",
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-    
+
     private String generateFormVersion(int limit) {
         String formVersion = "0.0.1";
         if (limit < 6) {//I don't think we would have more than six
@@ -230,17 +228,17 @@ public class ClientFormResource {
                             break;
                         }
                     }
-                    
+
                     if (i + 1 == manifestList.size()) {
                         generateFormVersion(limit + 1);
                     }
                 }
             }
         }
-        
+
         return formVersion;
     }
-    
+
     private ClientFormMetadata getClientFormMetadata(@RequestParam ("form_identifier") String formIdentifier,
                                                      @RequestParam ("form_name") String formName,
                                                      @RequestParam (required = false) String module) {
@@ -252,7 +250,7 @@ public class ClientFormResource {
         clientFormMetadata.setModule(module);
         return clientFormMetadata;
     }
-    
+
     private ResponseEntity<String> validateYaml(String fileContentType, String fileContentString) {
         String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
         if (errorMessageForInvalidContent != null) {
@@ -260,35 +258,35 @@ public class ClientFormResource {
         }
         return null;
     }
-    
+
     private ResponseEntity<String> validateJsonFile(String fileContentType, String fileContentString) {
         if (isJsonFile(fileContentType)) {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
-            
-            String errorMessage = null;
+
+            String errorMessage;
             if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
                 errorMessage = "Form upload failed.";
-                
+
                 if (!missingSubFormReferences.isEmpty()) {
                     errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
                 }
-                
+
                 if (!missingRuleFileReferences.isEmpty()) {
                     errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
                 }
-                
+
                 if (!missingPropertyFileReferences.isEmpty()) {
                     errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
                 }
-                
+
                 return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
             }
         }
         return null;
     }
-    
+
     @VisibleForTesting
     @Nullable
     protected String checkValidJsonYamlPropertiesStructure(@NonNull String fileContentString, @NonNull String contentType) {
@@ -317,24 +315,24 @@ public class ClientFormResource {
                 return e.getMessage();
             }
         }
-        
+
         return null;
     }
-    
+
     @VisibleForTesting
     protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
         return fileContentType != null && (isJsonFile(fileContentType) ||
                 isYamlContentType(fileContentType));
     }
-    
+
     private boolean isJsonFile(@Nullable String fileContentType) {
         return fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType());
     }
-    
+
     private boolean isYamlContentType(@NonNull String fileContentType) {
         return fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML);
     }
-    
+
     @VisibleForTesting
     protected boolean isPropertiesFile(@NonNull String fileContentType, @NonNull String fileName) {
         return fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && fileName.endsWith(".properties");
