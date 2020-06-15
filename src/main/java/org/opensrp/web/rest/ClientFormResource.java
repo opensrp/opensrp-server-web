@@ -163,8 +163,6 @@ public class ClientFormResource {
             return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
         }
 
-        ClientForm clientForm = new ClientForm();
-
         byte[] bytes;
         try {
             bytes = jsonFile.getBytes();
@@ -181,15 +179,10 @@ public class ClientFormResource {
         ResponseEntity<String> errorMessage = validateJsonFile(fileContentType, fileContentString);
         if (errorMessage != null) return errorMessage;
 
-        String identifier = formIdentifier;
-        if (StringUtils.isBlank(formIdentifier)) {
-            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
-        }
+        String identifier = getIdentifier(formIdentifier, jsonFile);
 
         logger.info(fileContentString);
-        clientForm.setJson(fileContentString);
-        clientForm.setCreatedAt(new Date());
-
+        ClientForm clientForm = getClientForm(fileContentString);
         ClientFormMetadata clientFormMetadata = getClientFormMetadata(identifier, formName, module);
         ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
 
@@ -199,6 +192,23 @@ public class ClientFormResource {
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    private String getIdentifier(
+            @RequestParam("form_identifier") String formIdentifier,
+            @RequestParam("form") MultipartFile jsonFile) {
+        String identifier = formIdentifier;
+        if (StringUtils.isBlank(formIdentifier)) {
+            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+        }
+        return identifier;
+    }
+
+    private ClientForm getClientForm(String fileContentString) {
+        ClientForm clientForm = new ClientForm();
+        clientForm.setJson(fileContentString);
+        clientForm.setCreatedAt(new Date());
+        return clientForm;
     }
 
     private String generateFormVersion(int limit) {

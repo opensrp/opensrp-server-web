@@ -66,14 +66,14 @@ public class ClientFormResourceTest {
     private MockMvc mockMvc;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
-    private ClientFormResource clientFormResource;
+
     private final String BASE_URL = "/rest/clientForm/";
 
     @Before
     public void setUp() {
         clientFormService = mock(ClientFormService.class);
         manifestService = mock(ManifestService.class);
-        clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         clientFormResource.setClientFormService(clientFormService, manifestService);
         clientFormResource.setObjectMapper(mapper);
 
