@@ -39,8 +39,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -250,6 +252,33 @@ public class ClientFormResourceTest {
         assertEquals(formVersion, clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenJSONWithMissingReferencesShouldReturn400() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.PHYSICAL_EXAM_FORM_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult mvcResult = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(clientFormService, times(16)).isClientFormExists(anyString());
+
+        String errorMessage = mvcResult.getResponse().getContentAsString();
+        assertTrue(errorMessage.contains("physical-exam-relevance-rules.yml"));
+        assertTrue(errorMessage.contains("physical-exam-calculations-rules.yml"));
     }
 
     @Test
