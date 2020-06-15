@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.http.entity.ContentType;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -67,16 +68,17 @@ public class ClientFormResourceTest {
     @Before
     public void setUp() {
         clientFormService = mock(ClientFormService.class);
+
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         clientFormResource.setClientFormService(clientFormService);
         clientFormResource.setObjectMapper(mapper);
 
         mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
                 addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.setDateFormat(DateFormat.getDateTimeInstance());
 
         SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
         dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
@@ -500,6 +502,61 @@ public class ClientFormResourceTest {
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidPropertiesStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType()));
+    }
+
+    @Test
+    public void testGetClientFormMetadataListShouldReturnAllForms() throws Exception {
+        int count = 11;
+        String formIdentifier = "opd/opd_register.properties";
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) (i + 1));
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setVersion("0.0." + (i + 1));
+
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        when(clientFormService.getAllClientFormMetadata()).thenReturn(clientFormMetadataList);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL + "metadata"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        ArrayNode arrayNode = (ArrayNode) mapper.readTree(responseString);
+        assertEquals(count, arrayNode.size());
+        assertEquals(1L, arrayNode.get(0).get("id").longValue());
+        assertEquals("0.0.1", arrayNode.get(0).get("version").textValue());
+    }
+
+    @Test
+    public void testGetClientFormMetadataListShouldReturnDraftForms() throws Exception {
+        int count = 7;
+        String formIdentifier = "opd/opd_register.properties";
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) (i + 1));
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setIsDraft(true);
+            clientFormMetadata.setVersion("0.0." + (i + 1));
+
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        when(clientFormService.getClientFormMetadata(true)).thenReturn(clientFormMetadataList);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
+                .param("is_draft", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        ArrayNode arrayNode = (ArrayNode) mapper.readTree(responseString);
+        assertEquals(count, arrayNode.size());
+        assertEquals(1L, arrayNode.get(0).get("id").longValue());
+        assertEquals("0.0.1", arrayNode.get(0).get("version").textValue());
+        assertTrue(arrayNode.get(0).get("isDraft").booleanValue());
     }
 
 }
