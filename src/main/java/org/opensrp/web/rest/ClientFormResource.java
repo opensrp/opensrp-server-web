@@ -47,7 +47,7 @@ import java.util.Properties;
 @RequestMapping (value = "/rest/clientForm")
 public class ClientFormResource {
     
-    private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+    private static final Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
@@ -182,9 +182,9 @@ public class ClientFormResource {
         
         ResponseEntity<String> errorMessage = validateJsonFile(fileContentType, fileContentString);
         if (errorMessage != null) return errorMessage;
-    
+        
         String identifier = formIdentifier;
-        if (StringUtils.isBlank(formIdentifier)){
+        if (StringUtils.isBlank(formIdentifier)) {
             identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
         }
         
@@ -203,8 +203,7 @@ public class ClientFormResource {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
     
-    @VisibleForTesting
-    protected String generateFormVersion(int limit) {
+    private String generateFormVersion(int limit) {
         String formVersion = "0.0.1";
         if (limit < 6) {//I don't think we would have more than six
             // manifests without form versions.
@@ -231,7 +230,6 @@ public class ClientFormResource {
                             break;
                         }
                     }
-                    
                     
                     if (i + 1 == manifestList.size()) {
                         generateFormVersion(limit + 1);
@@ -341,5 +339,4 @@ public class ClientFormResource {
     protected boolean isPropertiesFile(@NonNull String fileContentType, @NonNull String fileName) {
         return fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && fileName.endsWith(".properties");
     }
-    
 }

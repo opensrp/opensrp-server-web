@@ -24,7 +24,6 @@ import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.Constants;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
-import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -44,7 +43,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -64,15 +62,12 @@ public class ClientFormResourceTest {
     
     @Autowired
     protected WebApplicationContext webApplicationContext;
-    
+    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
     private MockMvc mockMvc;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
     private ClientFormResource clientFormResource;
-    
-    private String BASE_URL = "/rest/clientForm/";
-    
-    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    private final String BASE_URL = "/rest/clientForm/";
     
     @Before
     public void setUp() {
@@ -240,7 +235,7 @@ public class ClientFormResourceTest {
         
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
-    
+        
         when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestList());
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
         
@@ -351,7 +346,7 @@ public class ClientFormResourceTest {
         ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
         ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
         verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
-        verify(manifestService ,times(4)).getAllManifest(anyInt());
+        verify(manifestService, times(4)).getAllManifest(anyInt());
         
         assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
@@ -410,7 +405,7 @@ public class ClientFormResourceTest {
     }
     
     
-    private List<Manifest> getManifestMinorVersionGreaterThan1000(){
+    private List<Manifest> getManifestMinorVersionGreaterThan1000() {
         Manifest manifest1 = new Manifest();
         manifest1.setAppId("org.smartregister.anc");
         manifest1.setAppVersion("1.2.13");
@@ -425,7 +420,7 @@ public class ClientFormResourceTest {
         return manifestList;
     }
     
-    private List<Manifest> getManifestPatchVersionGreaterThan1000(){
+    private List<Manifest> getManifestPatchVersionGreaterThan1000() {
         Manifest manifest1 = new Manifest();
         manifest1.setAppId("org.smartregister.anc");
         manifest1.setAppVersion("1.2.13");
@@ -440,7 +435,7 @@ public class ClientFormResourceTest {
         return manifestList;
     }
     
-    private List<Manifest> getManifestWithNoForMVersion(){
+    private List<Manifest> getManifestWithNoForMVersion() {
         Manifest manifest1 = new Manifest();
         manifest1.setAppId("org.smartregister.anc");
         manifest1.setAppVersion("1.2.13");
@@ -628,12 +623,12 @@ public class ClientFormResourceTest {
         String formIdentifier = "reg.json";
         String formVersion = "0.1.1";
         String formName = "REGISTRATION FORM";
-
+        
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
-
+        
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
-
+        
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
@@ -641,11 +636,11 @@ public class ClientFormResourceTest {
                         .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
-
+        
         ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
         ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
         verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
-
+        
         assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
         assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
@@ -653,7 +648,7 @@ public class ClientFormResourceTest {
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
     }
-
+    
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
