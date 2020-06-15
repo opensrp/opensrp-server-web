@@ -711,6 +711,41 @@ public class ClientFormResourceTest {
 	}
 
     @Test
+    public void testCanAddClientFormWithRelation() throws Exception{
+        String relatedJsonIdentifier = "json.form/child-registration.json";
+        String formIdentifier = "rule/calculation.yml";
+        String formVersion = "0.1.1";
+        String formName = "CHILD CALCULATION";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yml",
+                "application/x-yaml", TestFileContent.CALCULATION_YAML_FILE_CONTENT.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_relation", relatedJsonIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+
+        assertEquals(TestFileContent.CALCULATION_YAML_FILE_CONTENT, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
+        assertEquals(relatedJsonIdentifier, clientFormMetadata.getRelation());
+    }
+
+    @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertTrue(clientFormResource.isClientFormContentTypeValid(ContentType.APPLICATION_JSON.getMimeType()));
