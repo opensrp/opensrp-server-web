@@ -181,7 +181,9 @@ public class ClientFormResource {
                     for (int i = 0; i < fileIdentifiers.length(); i++) {
                         String fileIdentifier = fileIdentifiers.getString(i);
                         ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier);
-                        clientFormMetadataList.add(clientFormMetadata);
+                        if (clientFormMetadata != null) {
+                            clientFormMetadataList.add(clientFormMetadata);
+                        }
                     }
                 } else {
                     return new ResponseEntity<>("This manifest does not have any files related to it",
@@ -192,7 +194,7 @@ public class ClientFormResource {
                        HttpStatus.NO_CONTENT);
             }
         } else {
-            return new ResponseEntity<>("No manifest matching the given identifier was found",
+            return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NOT_FOUND);
         }
 
