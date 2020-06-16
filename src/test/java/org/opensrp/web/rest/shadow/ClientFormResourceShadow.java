@@ -19,5 +19,4 @@ public class ClientFormResourceShadow extends ClientFormResource {
     public void setObjectMapper(ObjectMapper objectMapper) {
         super.setObjectMapper(objectMapper);
     }
-
 }

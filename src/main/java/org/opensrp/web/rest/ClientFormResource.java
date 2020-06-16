@@ -11,6 +11,7 @@ import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.jeasy.rules.support.YamlRuleDefinitionReader;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.domain.IdVersionTuple;
@@ -47,8 +48,9 @@ import java.util.Properties;
 @Controller
 @RequestMapping (value = "/rest/clientForm")
 public class ClientFormResource {
+    public static final String FORM_IDENTIFIERS = "identifiers";
 
-    private static final Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+    private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
@@ -158,12 +160,51 @@ public class ClientFormResource {
         }
     }
 
-    @RequestMapping (headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
-    private ResponseEntity<String> addClientForm(@RequestParam (value = "form_identifier", required = false) String formIdentifier,
-                                                 @RequestParam ("form_name") String formName,
-                                                 @RequestParam ("form") MultipartFile jsonFile,
-                                                 @RequestParam (required = false) String module) {
-        if (StringUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+    @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
+    private ResponseEntity<String> getAllFilesRelatedToRelease(@RequestParam(value = "identifier") String releaseIdentifier)
+            throws JsonProcessingException {
+        if (StringUtils.isBlank(releaseIdentifier)) {
+            return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
+        }
+
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+
+        Manifest manifest = manifestService.getManifest(releaseIdentifier);
+        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
+            JSONObject json = new JSONObject(manifest.getJson());
+            if (json.has(FORM_IDENTIFIERS)) {
+                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
+                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
+                    for (int i = 0; i < fileIdentifiers.length(); i++) {
+                        String fileIdentifier = fileIdentifiers.getString(i);
+                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier);
+                        if (clientFormMetadata != null) {
+                            clientFormMetadataList.add(clientFormMetadata);
+                        }
+                    }
+                } else {
+                    return new ResponseEntity<>("This manifest does not have any files related to it",
+                                HttpStatus.NO_CONTENT);
+                }
+            } else {
+                return new ResponseEntity<>("This manifest does not have any files related to it",
+                       HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
+    }
+
+    @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
+    private ResponseEntity<String> addClientForm(
+            @RequestParam(value = "form_identifier", required = false) String formIdentifier,
+                                                 @RequestParam("form_name") String formName,
+                                                 @RequestParam("form") MultipartFile jsonFile,
+                                                 @RequestParam(required = false) String module) {
+        if (StringUtils.isBlank(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
