@@ -182,9 +182,7 @@ public class ClientFormResource {
         String identifier = getIdentifier(formIdentifier, jsonFile);
 
         logger.info(fileContentString);
-        ClientForm clientForm = getClientForm(fileContentString);
-        ClientFormMetadata clientFormMetadata = getClientFormMetadata(identifier, formName, module);
-        ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
+        ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(identifier, formName, module));
 
         if (completeClientForm == null) {
             return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server",
