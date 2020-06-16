@@ -81,44 +81,6 @@ public class ClientFormResource {
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
-    private ResponseEntity<String> getAllFilesRelatedToRelease(@RequestParam(value = "identifier") String releaseIdentifier)
-            throws JsonProcessingException {
-        if (StringUtils.isBlank(releaseIdentifier)) {
-            return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
-        }
-
-        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
-
-        Manifest manifest = manifestService.getManifest(releaseIdentifier);
-        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
-            JSONObject json = new JSONObject(manifest.getJson());
-            if (json.has(FORM_IDENTIFIERS)) {
-                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
-                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
-                    for (int i = 0; i < fileIdentifiers.length(); i++) {
-                        String fileIdentifier = fileIdentifiers.getString(i);
-                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier);
-                        if (clientFormMetadata != null) {
-                            clientFormMetadataList.add(clientFormMetadata);
-                        }
-                    }
-                } else {
-                    return new ResponseEntity<>("This manifest does not have any files related to it",
-                            HttpStatus.NO_CONTENT);
-                }
-            } else {
-                return new ResponseEntity<>("This manifest does not have any files related to it",
-                        HttpStatus.NO_CONTENT);
-            }
-        } else {
-            return new ResponseEntity<>("This manifest does not have any files related to it",
-                    HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
-    }
-
     @RequestMapping(method = RequestMethod.GET)
     private ResponseEntity<String> searchForFormByFormVersionAndIdentifier(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
@@ -197,6 +159,44 @@ public class ClientFormResource {
             long formId = highestIdVersionTuple.getId();
             return clientFormService.getClientFormMetadataById(formId);
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
+    private ResponseEntity<String> getAllFilesRelatedToRelease(@RequestParam(value = "identifier") String releaseIdentifier)
+            throws JsonProcessingException {
+        if (StringUtils.isBlank(releaseIdentifier)) {
+            return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
+        }
+
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+
+        Manifest manifest = manifestService.getManifest(releaseIdentifier);
+        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
+            JSONObject json = new JSONObject(manifest.getJson());
+            if (json.has(FORM_IDENTIFIERS)) {
+                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
+                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
+                    for (int i = 0; i < fileIdentifiers.length(); i++) {
+                        String fileIdentifier = fileIdentifiers.getString(i);
+                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
+                        if (clientFormMetadata != null) {
+                            clientFormMetadataList.add(clientFormMetadata);
+                        }
+                    }
+                } else {
+                    return new ResponseEntity<>("This manifest does not have any files related to it",
+                                HttpStatus.NO_CONTENT);
+                }
+            } else {
+                return new ResponseEntity<>("This manifest does not have any files related to it",
+                       HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
