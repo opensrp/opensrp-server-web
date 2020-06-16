@@ -650,7 +650,7 @@ public class ClientFormResourceTest {
 		clientFormMetadata.setVersion("0.0.3");
 
 		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest3());
-		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
 		when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")

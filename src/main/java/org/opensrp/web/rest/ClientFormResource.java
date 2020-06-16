@@ -178,7 +178,7 @@ public class ClientFormResource {
                 if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
                     for (int i = 0; i < fileIdentifiers.length(); i++) {
                         String fileIdentifier = fileIdentifiers.getString(i);
-                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier);
+                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
                         if (clientFormMetadata != null) {
                             clientFormMetadataList.add(clientFormMetadata);
                         }
