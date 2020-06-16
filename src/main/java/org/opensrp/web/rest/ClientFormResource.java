@@ -4,17 +4,22 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.jeasy.rules.support.YamlRuleDefinitionReader;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.domain.IdVersionTuple;
+import org.opensrp.domain.Manifest;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
 import org.slf4j.Logger;
@@ -34,6 +39,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -43,14 +49,18 @@ import java.util.Properties;
 @RequestMapping(value = "/rest/clientForm")
 public class ClientFormResource {
 
+    public static final String FORM_IDENTIFIERS = "identifiers";
+
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
+    private ManifestService manifestService;
     private ClientFormValidator clientFormValidator;
 
     @Autowired
-    public void setClientFormService(ClientFormService clientFormService) {
+    public void setClientFormService(ClientFormService clientFormService, ManifestService manifestService) {
         this.clientFormService = clientFormService;
+        this.manifestService = manifestService;
         this.clientFormValidator = new ClientFormValidator(clientFormService);
     }
 
@@ -139,6 +149,42 @@ public class ClientFormResource {
             long formId = highestIdVersionTuple.getId();
             return clientFormService.getClientFormMetadataById(formId);
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
+    private ResponseEntity<String> getAllFilesRelatedToRelease(@RequestParam(value = "identifier") String releaseIdentifier)
+            throws JsonProcessingException {
+        if (StringUtils.isBlank(releaseIdentifier)) {
+            return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
+        }
+
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+
+        Manifest manifest = manifestService.getManifest(releaseIdentifier);
+        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
+            JSONObject json = new JSONObject(manifest.getJson());
+            if (json.has(FORM_IDENTIFIERS)) {
+                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
+                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
+                    for (int i = 0; i < fileIdentifiers.length(); i++) {
+                        String fileIdentifier = fileIdentifiers.getString(i);
+                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier);
+                        clientFormMetadataList.add(clientFormMetadata);
+                    }
+                } else {
+                    return new ResponseEntity<>("This manifest does not have any files related to it",
+                                HttpStatus.NO_CONTENT);
+                }
+            } else {
+                return new ResponseEntity<>("This manifest does not have any files related to it",
+                       HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new ResponseEntity<>("No manifest matching the given identifier was found",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)

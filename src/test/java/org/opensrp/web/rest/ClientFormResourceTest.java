@@ -13,9 +13,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.TestFileContent;
 import org.opensrp.domain.IdVersionTuple;
+import org.opensrp.domain.Manifest;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.service.ManifestService;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.Constants;
@@ -61,6 +63,7 @@ public class ClientFormResourceTest {
 
     private MockMvc mockMvc;
     private ClientFormService clientFormService;
+    private ManifestService manifestService;
 
     private String BASE_URL = "/rest/clientForm/";
 
@@ -69,8 +72,9 @@ public class ClientFormResourceTest {
     @Before
     public void setUp() {
         clientFormService = mock(ClientFormService.class);
+        manifestService = mock(ManifestService.class);
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        clientFormResource.setClientFormService(clientFormService);
+        clientFormResource.setClientFormService(clientFormService, manifestService);
         clientFormResource.setObjectMapper(mapper);
 
         mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
@@ -455,6 +459,133 @@ public class ClientFormResourceTest {
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
     }
+
+    @Test
+    public void testGetAllFilesRelatedToReleaseWithoutIdentifier() throws Exception {
+	    MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+			    .param("identifier", ""))
+			    .andExpect(status().isBadRequest())
+			    .andReturn();
+	    assertEquals("Request parameter cannot be empty", result.getResponse().getContentAsString());
+    }
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoValidManifest() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(new Manifest());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNotFound())
+				.andReturn();
+
+		assertEquals("No manifest matching the given identifier was found", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoFormIdentifierInManifest() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNoContent())
+				.andReturn();
+
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndEmptyFormIdentifierList() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest2());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNoContent())
+				.andReturn();
+
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToRelease() throws Exception {
+		String identifier = "0.0.5";
+		String formIdentifier = "opd/reg.json";
+
+		List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+		idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+		idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+		idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+		ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+		clientFormMetadata.setId(3L);
+		clientFormMetadata.setIdentifier(formIdentifier);
+		clientFormMetadata.setVersion("0.0.3");
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest3());
+		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+		when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		JsonNode jsonNode = mapper.readTree(responseString);
+		assertEquals("opd/reg.json", jsonNode.get(0).get("identifier").textValue());
+		assertEquals("0.0.3", jsonNode.get(0).get("version").textValue());
+	}
+
+	private static Manifest initTestManifest() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"name\":\"test\"}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
+
+	private static Manifest initTestManifest2() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"forms_version\":\"0.0.1\",\n"
+				+ "            \"identifiers\":[]}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
+
+	private static Manifest initTestManifest3() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"forms_version\":\"0.0.1\",\"identifiers\":[\"opd/reg.json\"]}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
 
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {
