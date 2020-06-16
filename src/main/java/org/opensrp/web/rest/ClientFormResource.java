@@ -159,7 +159,7 @@ public class ClientFormResource {
     }
 
     @RequestMapping (headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
-    private ResponseEntity<String> addClientForm(@RequestParam ("form_identifier") String formIdentifier,
+    private ResponseEntity<String> addClientForm(@RequestParam (value = "form_identifier", required = false) String formIdentifier,
                                                  @RequestParam ("form_name") String formName,
                                                  @RequestParam ("form") MultipartFile jsonFile,
                                                  @RequestParam (required = false) String module) {

@@ -453,7 +453,6 @@ public class ClientFormResourceTest {
     @Test
     public void testAddClientFormWhenGivenJSONWithMissingReferencesShouldReturn400() throws Exception {
         String formIdentifier = "opd/reg.json";
-        String formVersion = "0.1.1";
         String formName = "REGISTRATION FORM";
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.PHYSICAL_EXAM_FORM_FILE.getBytes());
@@ -464,7 +463,6 @@ public class ClientFormResourceTest {
                 fileUpload(BASE_URL)
                         .file(file)
                         .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -479,7 +477,6 @@ public class ClientFormResourceTest {
     @Test
     public void testAddClientFormWhenGivenInvalidJSONShouldReturn400() throws Exception {
         String formIdentifier = "opd/reg.json";
-        String formVersion = "0.1.1";
         String formName = "REGISTRATION FORM";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
@@ -491,7 +488,6 @@ public class ClientFormResourceTest {
                 fileUpload(BASE_URL)
                         .file(file)
                         .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -537,7 +533,6 @@ public class ClientFormResourceTest {
     @Test
     public void testAddClientFormWhenGivenInvalidYamlShouldReturn400() throws Exception {
         String formIdentifier = "opd/calculation.yaml";
-        String formVersion = "0.1.1";
         String formName = "Calculation file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yaml",
@@ -549,7 +544,6 @@ public class ClientFormResourceTest {
                 fileUpload(BASE_URL)
                         .file(file)
                         .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -595,7 +589,6 @@ public class ClientFormResourceTest {
     @Test
     public void testAddClientFormWhenGivenInvalidPropertiesFileShouldReturn400() throws Exception {
         String formIdentifier = "opd/opd_register.properties";
-        String formVersion = "0.1.1";
         String formName = "Registration properties file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/opd_register.properties",
@@ -607,7 +600,6 @@ public class ClientFormResourceTest {
                 fileUpload(BASE_URL)
                         .file(file)
                         .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -621,18 +613,17 @@ public class ClientFormResourceTest {
     @Test
     public void testAddClientFormWithoutIdentifierDefaultsToFilenameAsIdentifier() throws Exception {
         String formIdentifier = "reg.json";
-        String formVersion = "0.1.1";
         String formName = "REGISTRATION FORM";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
                 "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
 
+        when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestList());
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
                 fileUpload(BASE_URL)
                         .file(file)
-                        .param("form_version", formVersion)
                         .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -644,7 +635,7 @@ public class ClientFormResourceTest {
         assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
         assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
-        assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertEquals("0.0.2", clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
     }
