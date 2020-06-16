@@ -10,9 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.motechproject.scheduler.domain.MotechEvent;
-import org.motechproject.server.event.annotations.MotechListener;
 import org.opensrp.connector.dhis2.Dhis2TrackCaptureConnector;
-import org.opensrp.connector.openmrs.constants.OpenmrsConstants;
 import org.opensrp.connector.openmrs.constants.OpenmrsConstants.SchedulerConfig;
 import org.opensrp.connector.openmrs.service.EncounterService;
 import org.opensrp.connector.openmrs.service.PatientService;
@@ -140,7 +138,7 @@ public class OpenmrsSyncerListener {
 	// }
 	// }
 	
-//	@MotechListener(subjects = OpenmrsConstants.SCHEDULER_OPENMRS_DATA_PUSH_SUBJECT)
+	//	@MotechListener(subjects = OpenmrsConstants.SCHEDULER_OPENMRS_DATA_PUSH_SUBJECT)
 	public void pushToOpenMRS(MotechEvent event) {
 		
 		if (!lock.tryLock()) {
@@ -154,13 +152,13 @@ public class OpenmrsSyncerListener {
 			        .getAppStateTokenByName(SchedulerConfig.openmrs_syncer_sync_client_by_date_updated);
 			Long start = lastsync == null || lastsync.getValue() == null ? 0 : lastsync.longValue();
 			
-//			pushClient(start);
+			//			pushClient(start);
 			
 			logger.info("RUNNING FOR EVENTS");
 			
 			lastsync = config.getAppStateTokenByName(SchedulerConfig.openmrs_syncer_sync_event_by_date_updated);
 			start = lastsync == null || lastsync.getValue() == null ? 0 : lastsync.longValue();
-//			pushEvent(start);
+			//			pushEvent(start);
 			logger("PUSH TO OPENMRS FINISHED AT ", "");
 			
 		}
@@ -357,7 +355,7 @@ public class OpenmrsSyncerListener {
 		
 	}
 	
-	@MotechListener(subjects = OpenmrsConstants.SCHEDULER_OPENMRS_DATA_PUSH_RESYNC_SUBJECT)
+	/*@MotechListener(subjects = OpenmrsConstants.SCHEDULER_OPENMRS_DATA_PUSH_RESYNC_SUBJECT)*/
 	public void reSyncToOpenMRS(MotechEvent event) {
 		List<org.opensrp.domain.ErrorTrace> errorTraces = errorTraceService.findAllUnSyncErrors("org.opensrp.domain.Client");
 		JSONObject patient = new JSONObject();// only for test code purpose
