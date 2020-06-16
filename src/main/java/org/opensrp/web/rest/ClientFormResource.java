@@ -73,7 +73,7 @@ public class ClientFormResource {
         boolean strictSearch = Boolean.parseBoolean(strict.toLowerCase());
         DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
         DefaultArtifactVersion currentFormVersionV = null;
-        if (!TextUtils.isEmpty(currentFormVersion)) {
+        if (StringUtils.isNotBlank(currentFormVersion)) {
             currentFormVersionV = new DefaultArtifactVersion(currentFormVersion);
         }
 
@@ -87,7 +87,7 @@ public class ClientFormResource {
 
         // Check if the form identifier with that version exists
         ClientFormMetadata clientFormMetadata = clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion);
-        ClientFormService.CompleteClientForm completeClientForm = null;
+        ClientFormService.CompleteClientForm completeClientForm;
 
         long formId;
 
@@ -213,8 +213,7 @@ public class ClientFormResource {
 
     private String generateFormVersion(int limit) {
         String formVersion = "0.0.1";
-        if (limit < 6) {//I don't think we would have more than six
-            // manifests without form versions.
+        if (limit < 6) {//I don't think we would have more than six manifests without form versions.
             List<Manifest> manifestList = manifestService.getAllManifest(limit);
             if (manifestList != null && manifestList.size() > 0) {
                 for (int i = 0; i < manifestList.size(); i++) {
