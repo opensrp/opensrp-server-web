@@ -11,18 +11,21 @@
 	
 	<context:component-scan base-package="org.opensrp.web.listener"></context:component-scan>
 	<context:annotation-config></context:annotation-config>	
-	<bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"></bean>
+	
+	<!-- <bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"></bean>
     <bean id="rapidproMessageListener" class="org.opensrp.web.listener.RapidproMessageListener"></bean>
     <task:scheduled-tasks scheduler="dhis2Scheduler">        
         <task:scheduled ref="dhis2" method="vaccinationAggregatorDataCountForSendingToDHIS2" cron="0 30 23 28-31 * ?" />
     </task:scheduled-tasks>
     
     <task:scheduled-tasks scheduler="messageScheduler">
-    <!--     <task:scheduled ref="rapidproMessageListener" method="fetchClient" cron="0 10 16 01-31 * ?" /> -->
+        <task:scheduled ref="rapidproMessageListener" method="fetchClient" cron="0 10 16 01-31 * ?" />
     <task:scheduled ref="rapidproMessageListener" method="fetchClient" cron="*/60 * * * * *" /> 
     </task:scheduled-tasks>
     
     <task:scheduler pool-size="1" id="dhis2Scheduler"/>
-    <task:scheduler pool-size="1" id="messageScheduler"/>
+    <task:scheduler pool-size="1" id="messageScheduler"/> -->
+    
+    
 	<task:annotation-driven />
 </beans>
