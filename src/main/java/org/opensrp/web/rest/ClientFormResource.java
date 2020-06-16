@@ -69,6 +69,18 @@ public class ClientFormResource {
         this.objectMapper = objectMapper;
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/metadata")
+    private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        if (isDraftParam == null) {
+            clientFormMetadataList = clientFormService.getAllClientFormMetadata();
+        } else {
+            boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
+            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+        }
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     private ResponseEntity<String> searchForFormByFormVersion(@RequestParam(value = "form_identifier") String formIdentifier
             , @RequestParam(value = "form_version") String formVersion
