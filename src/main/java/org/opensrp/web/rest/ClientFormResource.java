@@ -34,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +58,18 @@ public class ClientFormResource {
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/metadata")
+    private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        if (isDraftParam == null) {
+            clientFormMetadataList = clientFormService.getAllClientFormMetadata();
+        } else {
+            boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
+            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+        }
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
