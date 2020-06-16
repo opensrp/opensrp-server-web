@@ -482,7 +482,7 @@ public class ClientFormResourceTest {
 				.andExpect(status().isNotFound())
 				.andReturn();
 
-		assertEquals("No manifest matching the given identifier was found", result.getResponse().getContentAsString());
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
 	}
 
 	@Test
