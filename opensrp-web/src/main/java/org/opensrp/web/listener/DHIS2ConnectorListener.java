@@ -7,11 +7,10 @@ import org.opensrp.connector.dhis2.DHIS2AggregateConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
 @Service
-@EnableScheduling
+/*@EnableScheduling*/
 public class DHIS2ConnectorListener {
 	
 	private static Logger logger = LoggerFactory.getLogger(DHIS2ConnectorListener.class.toString());

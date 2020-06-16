@@ -11,7 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.joda.time.DateTime;
 import org.motechproject.scheduler.domain.MotechEvent;
-import org.motechproject.server.event.annotations.MotechListener;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.AppStateToken;
 import org.opensrp.domain.Client;
@@ -60,7 +59,6 @@ public class EventsListener {
 		this.configService.registerAppStateToken(AllConstants.Config.EVENTS_PARSER_LAST_PROCESSED_EVENT, 0,
 		    "Token to keep track of events processed for client n event parsing and schedule handling", true);
 	}
-
 	
 	public EventsListener(EventsRouter eventsRouter, ConfigService configService, EventsRepository allEvents,
 	    EventService eventService, ErrorTraceService errorTraceService, ClientsRepository allClients) {
@@ -71,10 +69,10 @@ public class EventsListener {
 		this.eventService = eventService;
 		this.allClients = allClients;
 		this.configService.registerAppStateToken(AllConstants.Config.EVENTS_PARSER_LAST_PROCESSED_EVENT, 0,
-				"Token to keep track of events processed for client n event parsing and schedule handling", true);
+		    "Token to keep track of events processed for client n event parsing and schedule handling", true);
 	}
 	
-	@MotechListener(subjects = AllConstants.EVENTS_SCHEDULE_SUBJECT)
+	/*@MotechListener(subjects = AllConstants.EVENTS_SCHEDULE_SUBJECT)*/
 	public void processEvent(MotechEvent motechEvent) {
 		if (!lock.tryLock()) {
 			logger.warn("Not fetching events from Message Queue. It is already in progress.");
@@ -99,16 +97,15 @@ public class EventsListener {
 			
 			for (Event event : events) {
 				try {
-					event=eventService.processOutOfArea(event);
+					event = eventService.processOutOfArea(event);
 					eventsRouter.route(event);
 					configService.updateAppStateToken(AllConstants.Config.EVENTS_PARSER_LAST_PROCESSED_EVENT,
 					    event.getServerVersion());
 				}
 				catch (Exception e) {
 					e.printStackTrace();
-					errorTraceService
-					        .addError(new ErrorTrace(new DateTime(), "FormSubmissionProcessor", this.getClass().getName(),
-					                e.getStackTrace().toString(), "unsolved", FormSubmission.class.getName()));
+					errorTraceService.addError(new ErrorTrace(new DateTime(), "FormSubmissionProcessor", this.getClass()
+					        .getName(), e.getStackTrace().toString(), "unsolved", FormSubmission.class.getName()));
 				}
 			}
 		}
@@ -166,11 +163,11 @@ public class EventsListener {
 		}
 		
 	}
-
+	
 	public long getCurrentMilliseconds() {
 		return System.currentTimeMillis();
 	}
-
+	
 	private long getVersion() {
 		AppStateToken token = configService.getAppStateTokenByName(AllConstants.Config.EVENTS_PARSER_LAST_PROCESSED_EVENT);
 		return token == null ? 0L : token.longValue();
