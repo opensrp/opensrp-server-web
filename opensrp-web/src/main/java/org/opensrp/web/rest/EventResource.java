@@ -232,19 +232,16 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/sync", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
-
-		System.out.println("SYNC STARTED");
-
+		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
+			String dataProvider = request.getRemoteUser();
+			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
-			CustomQuery user = eventService.getUser(request.getRemoteUser());
-			//CustomQuery customQuery = clientService.getUserStatus(dataProvider);
-			
-			if(user != null && !user.getEnable()){
+			if(customQuery != null && !customQuery.getEnable()){
 				return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 			}
-			
+			CustomQuery user = eventService.getUser(request.getRemoteUser());
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
 			List<CustomQuery> locations = (teamMember != null)?
 					clientService.getProviderLocationIdByChildRole(user.getId(), ss, village)
@@ -295,7 +292,11 @@ public class EventResource extends RestResource<Event> {
 
 				addressSearchBean.setVillageId(address);
 
-				events = eventService.selectBySearchBean(addressSearchBean, lastSyncedServerVersion, providerId, 0);
+				if (isEmptyToAdd.equalsIgnoreCase("true")) {
+					events = eventService.selectBySearchBean(addressSearchBean, lastSyncedServerVersion, providerId, 0);
+				} else {
+					events = eventService.findByProvider(lastSyncedServerVersion, providerId, 0);
+				}
 
 				List<String> ids = new ArrayList<String>();
 
@@ -350,7 +351,8 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<String> clientListToDeleteFromAPP(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
-			List<CustomQuery> locations = eventService.getLocations(request.getRemoteUser());
+			System.err.println("");
+			/*List<CustomQuery> locations = eventService.getLocations(request.getRemoteUser());
 			String location = "";
 			String userType = "";
 			List<String> address = new ArrayList<String>();
@@ -428,8 +430,8 @@ public class EventResource extends RestResource<Event> {
 			} else {
 				logger.info("No location found..");
 				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-			
+			}*/
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		catch (Exception e) {
 			response.put("msg", "Error occurred");
@@ -454,7 +456,7 @@ public class EventResource extends RestResource<Event> {
 			if (!syncData.has("clients") && !syncData.has("events")) {
 				return new ResponseEntity<>(BAD_REQUEST);
 			}
-			
+			String getProvider = "";
 			
 			logger.info("dataProvider:" + dataProvider);
 			
@@ -462,28 +464,36 @@ public class EventResource extends RestResource<Event> {
 				ArrayList<Event> events = (ArrayList<Event>) gson.fromJson(syncData.getString("events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				logger.info("received event size:" + events.size());
+				System.out.println(dataProvider+": received event size:" + events.size());
 				for (Event event : events) {
-					try {						
-							event = eventService.processOutOfArea(event);
-							event.withIsSendToOpenMRS("yes");
-							eventService.addorUpdateEvent(event);
-						
+					try {
+						event = eventService.processOutOfArea(event);
+						event.withIsSendToOpenMRS("yes");
+						eventService.addorUpdateEvent(event);
+//						Client client = clientService.find(event.getBaseEntityId());
+//						if (client != null) {
+//							client.setServerVersion(System.currentTimeMillis());
+//							clientService.addOrUpdate(client);
+//						}
+					} catch (Exception e) {
+						logger.error(
+						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
+						            : event.getBaseEntityId() + " failed to sync", e);
 					}
-					catch (Exception e) {}
 				}
 			}
+			
 			if (syncData.has("clients")) {
 				
 				ArrayList<Client> clients = (ArrayList<Client>) gson.fromJson(syncData.getString("clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				logger.info("received client size:" + clients.size());
+				System.out.println(dataProvider+": received client size:" + clients.size());
 				for (Client client : clients) {
 					try {
 						client.withIsSendToOpenMRS("yes");
 						clientService.addOrUpdate(client);
-						
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						logger.error("Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId()
 						        + " failed to sync", e);
 					}

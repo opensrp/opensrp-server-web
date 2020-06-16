@@ -225,6 +225,11 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 
 	@Override
+	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
+		return null;
+	}
+
+	@Override
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return null;
 	}
@@ -285,8 +290,40 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 
 	@Override
+	public CustomQuery findUserId(String username) {
+		return null;
+	}
+
+	@Override
+	public CustomQuery getMaxHealthId(Integer locationId) {
+		return null;
+	}
+
+	@Override
 	public void updateAppVersion(String username,String version) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Integer findClientIdByBaseEntityId(String baseEntityId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Client findClientByClientId(Integer clientId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag) {
+		return null;
+	}
+
+	@Override
+	public CustomQuery imeiCheck(String imeiNumber) {
+		return null;
 	}
 }

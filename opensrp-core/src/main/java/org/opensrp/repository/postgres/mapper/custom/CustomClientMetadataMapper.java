@@ -24,4 +24,8 @@ public interface CustomClientMetadataMapper extends ClientMetadataMapper {
 	
 	List<Client> selectByName(@Param("name") String nameMatches, @Param("offset") int offset,
 	                                  @Param("limit") int limit);
+
+	Integer findClientIdByBaseEntityId(String baseEntityId);
+
+	Client findClientByClientId(Integer clientId);
 }

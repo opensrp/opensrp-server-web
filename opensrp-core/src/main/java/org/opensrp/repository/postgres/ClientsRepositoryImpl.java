@@ -315,6 +315,11 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 	}
 
 	@Override
+	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
+		return clientMapper.getVillageByProviderId(memberId, childRoleId, locationTagId);
+	}
+
+	@Override
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return clientMapper.getProviderLocationIdByChildRole(memberId, childRoleId, locationTagId);
 	}
@@ -477,8 +482,50 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 	}
 
 	@Override
+	public CustomQuery findUserId(String username) {
+		// TODO Auto-generated method stub
+		return clientMapper.findUserId(username);
+	}
+
+	@Override
+	public CustomQuery getMaxHealthId(Integer locationId) {
+		// TODO Auto-generated method stub
+		return clientMapper.getMaxHealthId(locationId);
+	}
+
+	@Override
 	public void updateAppVersion(String username,String version) {
 		clientMapper.updateAppVersion(username, version);
 		
 	}
+
+	@Override
+	public Integer findClientIdByBaseEntityId(String baseEntityId) {
+		// TODO Auto-generated method stub
+		return clientMetadataMapper.findClientIdByBaseEntityId(baseEntityId);
+	}
+
+	@Override
+	public Client findClientByClientId(Integer clientId) {
+		if (clientId == null) {
+			return null;
+		}
+
+		org.opensrp.domain.postgres.Client pgClient = clientMetadataMapper.findClientByClientId(clientId);
+		if(pgClient != null){
+			return convert(pgClient);
+		}
+		return null;
+	}
+
+	@Override
+	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag) {
+		return clientMapper.getDistrictAndUpazila(parentLocationTag);
+	}
+
+	@Override
+	public CustomQuery imeiCheck(String imeiNumber) {
+		return clientMapper.imeiCheck(imeiNumber);
+	}
+
 }

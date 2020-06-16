@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
+import org.opensrp.repository.EventsRepository;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.util.DateTimeTypeConverter;
@@ -40,6 +41,8 @@ public class ValidateResource {
 	private ClientService clientService;
 	
 	private EventService eventService;
+
+	private EventsRepository eventsRepository;
 	
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -76,13 +79,13 @@ public class ValidateResource {
 				    new TypeToken<ArrayList<String>>() {}.getType());
 				for (String clientId : clientIds) {
 					try {
-						Client client = clientService.getByBaseEntityId(clientId);
-						if (client == null) {
-							//missingClientIds.add(clientId);
+						Integer clientIdFromDB = clientService.findClientIdByBaseEntityId(clientId);
+						if (clientIdFromDB == null || clientIdFromDB == 0) {
+							missingClientIds.add(clientId);
 						}
 					}
 					catch (Exception e) {
-						logger.error("Client Sync Valiation Failed, BaseEntityId: " + clientId, e);
+						logger.error("Client Sync Validation Failed, BaseEntityId: " + clientId, e);
 					}
 				}
 			}
@@ -93,9 +96,9 @@ public class ValidateResource {
 				    new TypeToken<ArrayList<String>>() {}.getType());
 				for (String eventId : eventIds) {
 					try {
-						Event event = eventService.findByFormSubmissionId(eventId);
-						if (event == null) {
-							//missingEventIds.add(eventId);
+						Integer eventIdFromDB = eventService.findEventIdByFormSubmissionId(eventId);
+						if (eventIdFromDB == null || eventIdFromDB == 0) {
+							missingEventIds.add(eventId);
 						}
 						
 					}

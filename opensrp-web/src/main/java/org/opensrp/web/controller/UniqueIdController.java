@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.util.HttpResponse;
 import org.opensrp.common.util.HttpUtil;
+import org.opensrp.common.util.TurnOffCertificateValidation;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
@@ -172,8 +173,7 @@ public class UniqueIdController {
 	@RequestMapping(value = "/get/health-id", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> getHealthId(HttpServletRequest request) throws JSONException, KeyManagementException,
-	    NoSuchAlgorithmException, KeyStoreException {
-		
+	    NoSuchAlgorithmException, KeyStoreException {		
 		/*System.err.println("getHealthId:"+eventService.getHealthId());*/
 		HttpResponse op = HttpUtil.get(opensrpWebUurl + "/rest/api/v1/health-id/reserved", "", opensrpWebUsername,
 		    opensrpWebPassword);
