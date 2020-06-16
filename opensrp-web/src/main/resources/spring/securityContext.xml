@@ -25,5 +25,7 @@
     <security:authentication-manager>
         <security:authentication-provider ref="opensrpAuthenticationProvider"/>
     </security:authentication-manager>
-
+	 <bean id="bcryptPasswordEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+	</bean>
 </beans>

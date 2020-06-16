@@ -85,21 +85,18 @@
 		select core.event.id,core.event.json
 		FROM core.event , core.event_metadata where core.event.id=core.event_metadata.event_id
 		and server_version::BIGINT >= #{serverVersion,jdbcType=BIGINT}  and
-
-		provider_id = #{providerId} 
-		<if test="addressBean.villageId != null">
-		and
-
 		base_entity_id=any(
 		select base_entity_id from core.client_metadata
 		where
-			village_id = any (array           	
-	            	<foreach close="]" collection="addressBean.villageId" item="listItem" open="[" separator=",">
-						#{listItem}
-					</foreach>
-					)
-		)
+
+		<if test="addressBean.villageId != null">
+			village_id=any(array
+			<foreach close="]" collection="addressBean.villageId" item="listItem" open="[" separator=",">
+				#{listItem}
+			</foreach>
+			)
 		</if>
+		)
 		order by core.event_metadata.server_version asc
 		LIMIT #{limit}
 
@@ -175,5 +172,46 @@
 		LIMIT #{limit} OFFSET #{offset}
 	</select>
 
+	<select id="findEventIdByFormSubmissionId" parameterType="java.lang.String"
+		resultType="Integer">
+		select event_id
+		from core.event_metadata em
+		where em.form_submission_id = #{formSubmissionId,jdbcType=VARCHAR} and em.date_deleted is null limit 1
+	</select>
+	
+	<select id="findEventByEventId" parameterType="java.lang.Integer"
+		resultMap="BaseEventResultMap">
+		select
+		e.id, e.json
+		from core.event e
+		where e.id = #{eventId} limit 1
+	</select>
 
+	<select id="selectByProvider"
+			resultMap="BaseEventResultMap">
+				with em as (
+					select
+						event_id
+					from
+						core.event_metadata
+					where
+						provider_id=#{providerId,jdbcType=VARCHAR}
+						and server_version::BIGINT >= #{serverVersion,jdbcType=BIGINT}
+				)select
+				 	core.event.id,core.event.json
+				from
+				  	core.event
+				where
+				  	id=any(select event_id from em )
+				order by
+				 	core.event.json->>'serverVersion' asc
+	</select>
+
+	<select id="getHouseholdId" parameterType="java.lang.Integer"
+		resultType="java.lang.String">
+		select
+		 	LPAD(n::text, (case when length(n::text)>=4 then length(n::text) else 4 end), '0')
+		from
+		 	generate_series(${maxId}, ${maxIdPlus}) as x(n) order by x.n
+	</select>
 </mapper>

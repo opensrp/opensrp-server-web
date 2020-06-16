@@ -1,16 +1,20 @@
 package org.opensrp.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.HealthId;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -31,7 +35,10 @@ public class ClientService {
 	public ClientService(ClientsRepository allClients) {
 		this.allClients = allClients;
 	}
-	
+
+	@Autowired
+	private ErrorTraceService errorTraceService;
+
 	public Client getByBaseEntityId(String baseEntityId) {
 		return allClients.findByBaseEntityId(baseEntityId);
 	}
@@ -232,19 +239,32 @@ public class ClientService {
 	
 	public Client addOrUpdate(Client client) {
 		if (client.getBaseEntityId() == null) {
+			if (client != null) {
+				ErrorTrace errorTrace = new ErrorTrace();
+				errorTrace.setRevision("missing base_entity_id");
+				errorTrace.setDate(new DateTime());
+				errorTrace.setDocumentType("Client");
+				errorTrace.setStackTrace(client.toString());
+				errorTrace.setRecordId(client.getBaseEntityId());
+				errorTrace.setStatus("failed");
+				errorTraceService.addError(errorTrace);
+			}
 			throw new RuntimeException("No baseEntityId");
 		}
 		//Client c = findClient(client);
 		try {
-			Client c = findClient(client);
-			if (c != null) {
-				client.setRevision(c.getRevision());
-				client.setId(c.getId());
-				client.setDateEdited(DateTime.now());
-				client.setDateCreated(c.getDateCreated());
-				client.setServerVersion(System.currentTimeMillis());
-				client.addIdentifier("OPENMRS_UUID", c.getIdentifier("OPENMRS_UUID"));
-				allClients.update(client);
+			Integer clientId = allClients.findClientIdByBaseEntityId(client.getBaseEntityId());
+			if (clientId != null) {
+				Client c = allClients.findClientByClientId(clientId);
+				if(c != null){
+					client.setRevision(c.getRevision());
+					client.setId(c.getId());
+					client.setDateEdited(DateTime.now());
+					client.setDateCreated(c.getDateCreated());
+					client.setServerVersion(System.currentTimeMillis());
+					client.addIdentifier("OPENMRS_UUID", c.getIdentifier("OPENMRS_UUID"));
+					allClients.update(client);
+				}
 				
 			} else {
 				client.setServerVersion(System.currentTimeMillis());
@@ -254,6 +274,16 @@ public class ClientService {
 			}
 		}
 		catch (Exception e) {
+			if (client != null) {
+				ErrorTrace errorTrace = new ErrorTrace();
+				errorTrace.setDate(new DateTime());
+				errorTrace.setDocumentType("Client");
+				errorTrace.setStackTrace(client.toString());
+				errorTrace.setRecordId("missing");
+				errorTrace.setStatus("failed");
+				errorTrace.setRevision(e.getMessage());
+				errorTraceService.addError(errorTrace);
+			}
 			e.printStackTrace();
 		}
 		return client;
@@ -300,6 +330,10 @@ public class ClientService {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
 
+	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
+		return allClients.getVillageByProviderId(memberId, childRoleId, locationTagId);
+	}
+
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return allClients.getProviderLocationIdByChildRole(memberId, childRoleId, locationTagId);
 	}
@@ -308,9 +342,43 @@ public class ClientService {
 		// TODO Auto-generated method stub
 		return allClients.findUserStatus(username);
 	}
+
+	public CustomQuery getUserId(String username) {
+		// TODO Auto-generated method stub
+		return allClients.findUserId(username);
+	}
+
+	public CustomQuery getMaxHealthId(Integer locationId) {
+		// TODO Auto-generated method stub
+		return allClients.getMaxHealthId(locationId);
+	}
 	
 	public void updateAppVersion(String username,String version) {
 		allClients.updateAppVersion(username, version);
-		
+	}
+
+	public JSONArray getDistrictAndUpazila(Integer parentLocationTag) throws JSONException {
+		List<CustomQuery> districtAndUpazila = allClients.getDistrictAndUpazila(parentLocationTag);
+		JSONArray response = new JSONArray();
+		for (CustomQuery o: districtAndUpazila) {
+			JSONObject disAndUpa = new JSONObject();
+			disAndUpa.put("name", o.getName());
+			String[] upazilas = o.getCode().split(",");
+			JSONArray upa = new JSONArray();
+			for (String upazila: upazilas) {
+				upa.put(upazila);
+			}
+			disAndUpa.put("upazilas", upa);
+			response.put(disAndUpa);
+		}
+		return response;
+	}
+
+	public Integer findClientIdByBaseEntityId(String baseEntityId) {
+		return allClients.findClientIdByBaseEntityId(baseEntityId);
+	}
+
+	public CustomQuery imeiCheck(String imeiNumber) {
+		return allClients.imeiCheck(imeiNumber);
 	}
 }

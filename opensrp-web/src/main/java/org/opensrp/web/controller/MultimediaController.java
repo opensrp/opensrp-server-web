@@ -74,7 +74,7 @@ public class MultimediaController {
 	                         @RequestHeader(value = "password") String password, HttpServletRequest request)
 	    throws Exception {
 		
-		try {
+		/*try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				File file = new File(multiMediaDir + File.separator + "images" + File.separator + fileName);
 				if (fileName.endsWith("mp4")) {
@@ -86,7 +86,7 @@ public class MultimediaController {
 		}
 		catch (Exception e) {
 			logger.error("", e);
-		}
+		}*/
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class MultimediaController {
 	                                   @RequestHeader(value = "password") String password, HttpServletRequest request)
 	    throws Exception {
 		
-		try {
+		/*try {
 			if (authenticate(userName, password, request).isAuthenticated()) {
 				
 				Multimedia multiMedia = multimediaService.findByCaseId(baseEntityId);
@@ -132,7 +132,7 @@ public class MultimediaController {
 		}
 		catch (Exception e) {
 			logger.error("", e);
-		}
+		}*/
 		
 	}
 	

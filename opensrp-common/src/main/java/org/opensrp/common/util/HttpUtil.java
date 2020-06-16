@@ -14,6 +14,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -77,8 +78,7 @@ public class HttpUtil {
 		try {
 			HttpPost request = (HttpPost) makeConnection(url, payload, RequestMethod.POST, authType, authString);
 			request.setHeader(HTTP.CONTENT_TYPE, contentType);
-			StringEntity entity = new StringEntity(data == null ? "" : data, "UTF-8");
-			System.out.println(data);
+			StringEntity entity = new StringEntity(data == null ? "" : data, "UTF-8");			
 			entity.setContentEncoding(contentType);
 			request.setEntity(entity);
 			org.apache.http.HttpResponse response = httpClient.execute(request);
@@ -120,7 +120,7 @@ public class HttpUtil {
 	
 	public static HttpResponse delete(String url, String payload, AuthType authType, String authString) {
 		try {
-			HttpDelete request = (HttpDelete) makeConnection(url, payload, RequestMethod.DELETE, authType, authString);
+			HttpDelete request = (HttpDelete) makeConnection(url, payload, RequestMethod.DELETE, AuthType.NONE, authString);
 			org.apache.http.HttpResponse response = httpClient.execute(request);
 			return createCustomResponseFrom(response);
 		}
@@ -128,6 +128,20 @@ public class HttpUtil {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static HttpResponse getGeneratedId(String url) {
+		try {
+			HttpGet get = new HttpGet(url);
+			org.apache.http.HttpResponse response = httpClient.execute(get);
+			
+			return createCustomResponseFrom(response);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+	
 	
 	static HttpResponse createCustomResponseFrom(org.apache.http.HttpResponse response) throws IOException {
 		int statusCode = response.getStatusLine().getStatusCode();
@@ -179,7 +193,6 @@ public class HttpUtil {
 			requestBase.addHeader("Authorization", "Token " + authString);
 		}
 		
-		System.out.println(requestBase);
 		return requestBase;
 	}
 	
