@@ -70,7 +70,7 @@ public class ClientFormResource {
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
     private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
-        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        List<ClientFormMetadata> clientFormMetadataList;
         if (isDraftParam == null) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
         } else {
