@@ -1,34 +1,15 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
-import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -47,14 +28,9 @@ import org.opensrp.service.UploadService;
 import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
-import org.opensrp.web.exceptions.UploadValidationException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -64,11 +40,28 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
+import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -80,15 +73,12 @@ public class UploadControllerTest {
 	public MockitoRule rule = MockitoJUnit.rule();
 
 	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
 	protected WebApplicationContext webApplicationContext;
 
 	private MockMvc mockMvc;
 
-	@InjectMocks
-	private UploadController uploadController;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Mock
 	private MultimediaService multimediaService;
@@ -117,25 +107,20 @@ public class UploadControllerTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
-		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
+		UploadController uploadController = webApplicationContext.getBean(UploadController.class);
+		uploadController.setMultimediaService(multimediaService);
+		uploadController.setMultimediaRepository(multimediaRepository);
+		uploadController.setClientService(clientService);
+		uploadController.setUploadService(uploadService);
+		uploadController.setEventService(eventService);
+		uploadController.setOpenmrsIDService(openmrsIDService);
 		uploadController.setObjectMapper(objectMapper);
-	}
-
-	private void mockSecurityUser() {
-		User applicationUser = mock(User.class);
-		Mockito.doReturn("providerID").when(applicationUser).getUsername();
-
-		Authentication authentication = mock(Authentication.class);
-		SecurityContext securityContext = mock(SecurityContext.class);
-		when(securityContext.getAuthentication()).thenReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(applicationUser);
 	}
 
 	@Test
 	public void testUploadCSV() throws Exception {
-		mockSecurityUser();
 		String path = "src/test/resources/sample/childregistration.csv";
 		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
 				Files.readAllBytes(Paths.get(path)));
@@ -183,9 +168,8 @@ public class UploadControllerTest {
 		assertTrue(result.getResponse().getContentAsString().contains("updated"));
 	}
 
-	@Test(expected = UploadValidationException.class)
+	@Test(expected = NestedServletException.class)
 	public void testUploadCSVWithErrors() throws Exception {
-		mockSecurityUser();
 		String path = "src/test/resources/sample/childregistration.csv";
 		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
 				Files.readAllBytes(Paths.get(path)));
@@ -239,8 +223,6 @@ public class UploadControllerTest {
 
 	@Test
 	public void testGetHistory() throws Exception {
-		mockSecurityUser();
-
 		List<Multimedia> multimediaList = new ArrayList<>();
 
 		Multimedia multimedia = new Multimedia();
@@ -254,25 +236,26 @@ public class UploadControllerTest {
 
 		multimediaList.add(multimedia);
 
-		when(multimediaRepository.getByProviderID("", FILE_CATEGORY, 0, 50)).thenReturn(multimediaList);
+		when(multimediaRepository.getByProviderID("admin", FILE_CATEGORY, 0, 50)).thenReturn(multimediaList);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/history")).andExpect(status().isOk())
 				.andReturn();
-		verify(multimediaRepository, times(1)).getByProviderID("", FILE_CATEGORY, 0, 50);
+		verify(multimediaRepository, times(1)).getByProviderID("admin", FILE_CATEGORY, 0, 50);
 		verifyNoMoreInteractions(multimediaRepository);
 
 		String content = result.getResponse().getContentAsString();
 
-		Type listOfMyClassObject = new TypeToken<ArrayList<UploadBean>>() {
+		List<UploadBean> values = objectMapper.readValue(content, new TypeReference<List<UploadBean>>() {
 
-		}.getType();
-		List<UploadBean> values = gson.fromJson(content, listOfMyClassObject);
+		});
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		assertEquals(1, values.size());
 		UploadBean uploadBean = values.get(0);
 		assertEquals(uploadBean.getFileName(), multimedia.getOriginalFileName());
 		assertEquals(uploadBean.getIdentifier(), multimedia.getCaseId());
 		assertEquals(uploadBean.getProviderID(), multimedia.getProviderId());
-		assertEquals(uploadBean.getUploadDate(), multimedia.getDateUploaded());
+		assertEquals(sdf.format(uploadBean.getUploadDate()), sdf.format(multimedia.getDateUploaded()));
 		assertEquals(uploadBean.getUrl(), (multimedia.getCaseId() + "." + FILE_CATEGORY));
 	}
 
