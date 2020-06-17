@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.http.entity.ContentType;
+import org.hamcrest.core.StringStartsWith;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.opensrp.TestFileContent;
 import org.opensrp.domain.IdVersionTuple;
 import org.opensrp.domain.Manifest;
@@ -39,18 +41,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -688,6 +691,41 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testAddClientFormWhenGivenJSONWithMissingFieldsShouldReturn400() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        ClientForm formValidator = new ClientForm();
+        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"aefi_form\"]}}");
+
+        Mockito.doReturn(formValidator)
+                .when(clientFormService).getMostRecentFormValidator(formIdentifier);
+
+        MvcResult mvcResult = mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(clientFormService, times(0)).addClientForm(any(ClientForm.class), any(ClientFormMetadata.class));
+        String response = mvcResult.getResponse().getContentAsString();
+
+
+        assertThat(response, StringStartsWith.startsWith("Kindly make sure that the following fields are still in the form : "));
+        assertTrue(response.contains("reaction_vaccine_duration"));
+        assertTrue(response.contains("reaction_vaccine_dosage"));
+    }
+
+    @Test
     public void testAddClientFormWhenGivenYaml() throws Exception {
         String formIdentifier = "opd/calculation.yaml";
         String formName = "Calculation file";
@@ -955,6 +993,35 @@ public class ClientFormResourceTest {
 
 		return manifest;
 	}
+
+    @Test
+    public void testCanAddClientFormWithRelation() throws Exception{
+        String relatedJsonIdentifier = "json.form/child-registration.json";
+        String formVersion = "0.1.1";
+        String formName = "CHILD CALCULATION";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yml",
+                "application/x-yaml", TestFileContent.CALCULATION_YAML_FILE_CONTENT.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_relation", relatedJsonIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+
+        assertEquals(TestFileContent.CALCULATION_YAML_FILE_CONTENT, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(relatedJsonIdentifier, clientFormMetadata.getRelation());
+    }
 
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {

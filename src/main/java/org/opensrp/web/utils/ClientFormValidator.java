@@ -1,14 +1,19 @@
 package org.opensrp.web.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.web.Constants;
+import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
 import org.springframework.lang.NonNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class ClientFormValidator {
 
@@ -105,5 +110,44 @@ public class ClientFormValidator {
         }
 
         return missingPropertyFileReferences;
+    }
+
+    @NonNull
+    public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull String clientFormContent) throws JsonProcessingException {
+        ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
+        HashSet<String> fieldsMap = new HashSet<>();
+        if (formValidator != null && formValidator.getJson() != null && !((String) formValidator.getJson()).isEmpty()) {
+            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue((String) formValidator.getJson(), JsonWidgetValidatorDefinition.class);
+            JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition.getCannotRemove();
+            if (widgetCannotRemove != null && widgetCannotRemove.getFields() != null && widgetCannotRemove.getFields().size() > 0) {
+                JsonNode jsonNode = objectMapper.readTree(clientFormContent);
+                fieldsMap.addAll(widgetCannotRemove.getFields());
+
+                Iterator<Map.Entry<String, JsonNode>> iterator = jsonNode.fields();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonNode> jsonFormField = iterator.next();
+                    if (jsonFormField.getKey().startsWith(Constants.JsonForm.Key.STEP)) {
+                        JsonNode step = jsonFormField.getValue();
+                        if (step.has(Constants.JsonForm.Key.FIELDS)) {
+                            JsonNode fields = step.get(Constants.JsonForm.Key.FIELDS);
+                            if (fields instanceof ArrayNode) {
+                                ArrayNode fieldsArray = (ArrayNode) fields;
+                                for (int i = 0; i < fieldsArray.size(); i++) {
+                                    JsonNode jsonNodeField = fieldsArray.get(i);
+                                    String key = jsonNodeField.get(Constants.JsonForm.Key.KEY).asText();
+
+                                    if (fieldsMap.remove(key) && fieldsMap.size() == 0) {
+                                        return fieldsMap;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return fieldsMap;
     }
 }
