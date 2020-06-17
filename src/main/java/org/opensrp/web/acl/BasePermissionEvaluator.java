@@ -28,7 +28,7 @@ public class BasePermissionEvaluator {
 	private PractitionerService practitionerService;
 	
 	protected List<AssignedLocations> getAssignedLocations(String username) {
-		List<Long> organizationIds = practitionerService.getOrganizationIdsByUserId(username);
+		List<Long> organizationIds = practitionerService.getOrganizationsByUserId(username).right;
 		if (isEmptyOrNull(organizationIds)) {
 			return new ArrayList<>();
 		}
