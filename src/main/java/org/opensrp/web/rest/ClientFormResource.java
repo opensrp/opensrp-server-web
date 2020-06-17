@@ -16,6 +16,7 @@ import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.utils.ClientFormValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -43,10 +45,12 @@ public class ClientFormResource {
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
+    private ClientFormValidator clientFormValidator;
 
     @Autowired
     public void setClientFormService(ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
+        this.clientFormValidator = new ClientFormValidator(clientFormService);
     }
 
     @Autowired
@@ -172,6 +176,31 @@ public class ClientFormResource {
             return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
         }
 
+        if (isJsonFile(fileContentType)) {
+            HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
+            HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
+            HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
+
+            String errorMessage = null;
+            if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
+                errorMessage = "Form upload failed.";
+
+                if (!missingSubFormReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
+                }
+
+                if (!missingRuleFileReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
+                }
+
+                if (!missingPropertyFileReferences.isEmpty()) {
+                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
+                }
+
+                return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+            }
+        }
+
         logger.info(fileContentString);
         clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
@@ -195,7 +224,7 @@ public class ClientFormResource {
     @VisibleForTesting
     @Nullable
     protected String checkValidJsonYamlPropertiesStructure(@NonNull String fileContentString, @NonNull String contentType) {
-        if (contentType.equals(ContentType.APPLICATION_JSON.getMimeType())) {
+        if (isJsonFile(contentType)) {
             try {
                 new JSONObject(fileContentString);
                 return null;
@@ -226,8 +255,12 @@ public class ClientFormResource {
 
     @VisibleForTesting
     protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
-        return fileContentType != null && (fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType()) ||
+        return fileContentType != null && (isJsonFile(fileContentType) ||
                 isYamlContentType(fileContentType));
+    }
+
+    private boolean isJsonFile(@Nullable String fileContentType) {
+        return fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType());
     }
 
     private boolean isYamlContentType(@NonNull String fileContentType) {
