@@ -6,6 +6,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,11 @@ public class ManifestResource {
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity<HttpStatus> create(@RequestBody Manifest manifest) {
+    public ResponseEntity<HttpStatus> create(@RequestBody (required = false) Manifest manifest,
+            @RequestParam(value = "json", required = false) String json) {
+        if (manifest == null) {
+			manifest = generateManifest(json);
+        }
         logger.info("Manifest version " + manifest.getAppVersion());
         manifestService.addManifest(manifest);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -144,4 +149,15 @@ public class ManifestResource {
                 HttpStatus.OK);
     }
 
+    protected Manifest generateManifest(String jsonString) {
+        Manifest latestManifest = manifestService.getAllManifest(1).get(0);
+        Manifest generatedManifest = new Manifest();
+        if (latestManifest != null) {
+            generatedManifest.setIdentifier(latestManifest.getIdentifier());
+            generatedManifest.setAppId(latestManifest.getAppId());
+            generatedManifest.setAppVersion(latestManifest.getAppVersion());
+        }
+		generatedManifest.setJson(jsonString);
+        return generatedManifest;
+    }
 }

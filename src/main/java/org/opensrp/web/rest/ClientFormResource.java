@@ -22,6 +22,7 @@ import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,21 +293,7 @@ public class ClientFormResource {
                         if (jsonObject.has(FORMS_VERSION)) {
                             String version = jsonObject.getString(FORMS_VERSION);
                             if (StringUtils.isNotBlank(version)) {
-                                DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(version);
-                                if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
-                                                    "." + newVersion;
-                                } else if (defaultArtifactVersion.getMinorVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion.getIncrementalVersion();
-                                } else {
-                                    int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
-                                    formVersion =
-                                            newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion.getIncrementalVersion();
-                                }
+                                formVersion = FormConfigUtils.getNewVersion(version);
                                 break;
                             }
                         }
