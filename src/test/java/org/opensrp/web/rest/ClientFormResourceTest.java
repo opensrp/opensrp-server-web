@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.http.entity.ContentType;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -13,9 +14,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.TestFileContent;
 import org.opensrp.domain.IdVersionTuple;
+import org.opensrp.domain.Manifest;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.domain.postgres.ClientFormMetadata;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.service.ManifestService;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.web.Constants;
@@ -61,6 +64,7 @@ public class ClientFormResourceTest {
 
     private MockMvc mockMvc;
     private ClientFormService clientFormService;
+    private ManifestService manifestService;
 
     private String BASE_URL = "/rest/clientForm/";
 
@@ -69,16 +73,18 @@ public class ClientFormResourceTest {
     @Before
     public void setUp() {
         clientFormService = mock(ClientFormService.class);
-        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        clientFormResource.setClientFormService(clientFormService);
-        clientFormResource.setObjectMapper(mapper);
-
-        mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
-                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+        manifestService = mock(ManifestService.class);
 
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
+        ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
+        clientFormResource.setClientFormService(clientFormService, manifestService);
+        clientFormResource.setObjectMapper(mapper);
+
+        mockMvc = MockMvcBuilders.webApplicationContextSetup(webApplicationContext).
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
         SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
         dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
@@ -87,14 +93,10 @@ public class ClientFormResourceTest {
     }
 
     @Test
-    public void testSearchForFormByFormVersionShouldReturnSpecificVersion() throws Exception {
+    public void testSearchForFormByFormVersionShouldReturnSpecificJsonFormVersion() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.0.3";
         String currentFormVersion = "0.0.1";
-        List<IdVersionTuple> idVersionTuples = new ArrayList<>();
-        idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
-        idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
-        idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
 
         ClientForm clientForm = new ClientForm();
         clientForm.setJson("{}");
@@ -105,8 +107,8 @@ public class ClientFormResourceTest {
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setVersion("0.0.3");
 
-        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
-        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(clientFormMetadata);
+        when(clientFormService.isClientFormExists(formIdentifier, false)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false)).thenReturn(clientFormMetadata);
         when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
@@ -115,6 +117,43 @@ public class ClientFormResourceTest {
                 .param("form_version", formVersion)
                 .param("current_form_version", currentFormVersion)
                 .param("strict", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals("{}", jsonNode.get("clientForm").get("json").textValue());
+        assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
+        assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
+    }
+
+
+    @Test
+    public void testSearchForFormByFormVersionShouldReturnSpecificJsonValidatorVersion() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.0.3";
+        String currentFormVersion = "0.0.1";
+
+        ClientForm clientForm = new ClientForm();
+        clientForm.setJson("{}");
+        clientForm.setId(3L);
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
+        clientFormMetadata.setIsJsonValidator(true);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setVersion("0.0.3");
+
+        when(clientFormService.isClientFormExists(formIdentifier, true)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, true)).thenReturn(clientFormMetadata);
+        when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL)
+                .param("form_identifier", formIdentifier)
+                .param("form_version", formVersion)
+                .param("current_form_version", currentFormVersion)
+                .param("strict", "true")
+                .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -139,9 +178,9 @@ public class ClientFormResourceTest {
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setVersion("0.0.3");
 
-        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
-        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
-        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+        when(clientFormService.isClientFormExists(formIdentifier, false)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
@@ -170,9 +209,9 @@ public class ClientFormResourceTest {
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setVersion("0.0.3");
 
-        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
-        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
-        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+        when(clientFormService.isClientFormExists(formIdentifier, false)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
@@ -184,10 +223,15 @@ public class ClientFormResourceTest {
                 .andReturn();
 
         assertEquals("", result.getResponse().getContentAsString());
+
+        verify(clientFormService).isClientFormExists(formIdentifier, false);
+        verify(clientFormService).getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false);
+        verify(clientFormService).getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false);
+        verify(clientFormService).getClientFormMetadataById(3L);
     }
 
     @Test
-    public void testSearchForFormByFormVersionShouldReturnNextVersion() throws Exception {
+    public void testSearchForFormByFormVersionShouldReturnNextJsonFormVersion() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formVersion = "0.1.1";
         String currentFormVersion = "0.0.1";
@@ -205,9 +249,9 @@ public class ClientFormResourceTest {
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setVersion("0.0.3");
 
-        when(clientFormService.isClientFormExists(formIdentifier)).thenReturn(true);
-        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion)).thenReturn(null);
-        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier)).thenReturn(idVersionTuples);
+        when(clientFormService.isClientFormExists(formIdentifier, false)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
         when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
@@ -222,6 +266,55 @@ public class ClientFormResourceTest {
         assertEquals("{}", jsonNode.get("clientForm").get("json").textValue());
         assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
         assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
+
+
+        verify(clientFormService).isClientFormExists(formIdentifier, false);
+        verify(clientFormService).getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, false);
+        verify(clientFormService).getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false);
+        verify(clientFormService).getClientFormById(3L);
+        verify(clientFormService).getClientFormMetadataById(3L);
+    }
+
+
+    @Test
+    public void testSearchForFormByFormVersionShouldReturnNextJsonValidatorVersion() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String currentFormVersion = "0.0.1";
+        List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+        idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+        idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+        idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+        ClientForm clientForm = new ClientForm();
+        clientForm.setJson("{}");
+        clientForm.setId(3L);
+
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setId(3L);
+        clientFormMetadata.setIsJsonValidator(true);
+        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setVersion("0.0.3");
+
+        when(clientFormService.isClientFormExists(formIdentifier, true)).thenReturn(true);
+        when(clientFormService.getClientFormMetadataByIdentifierAndVersion(formIdentifier, formVersion, true)).thenReturn(null);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, true)).thenReturn(idVersionTuples);
+        when(clientFormService.getClientFormById(3L)).thenReturn(clientForm);
+        when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL)
+                .param("form_identifier", formIdentifier)
+                .param("form_version", formVersion)
+                .param("current_form_version", currentFormVersion)
+                .param("is_json_validator", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals("{}", jsonNode.get("clientForm").get("json").textValue());
+        assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
+        assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
+        assertTrue(jsonNode.get("clientFormMetadata").get("isJsonValidator").booleanValue());
     }
 
     @Test
@@ -252,6 +345,40 @@ public class ClientFormResourceTest {
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
         assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
         assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenJSONValidatorFile() throws Exception {
+        String formIdentifier = "opd/reg.json";
+        String formVersion = "0.1.1";
+        String formName = "REGISTRATION FORM VALIDATOR";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.JSON_VALIDATOR_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("form_name", formName)
+                        .param("is_json_validator", "true"))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+
+        assertEquals(TestFileContent.JSON_VALIDATOR_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals(formVersion, clientFormMetadata.getVersion());
+        assertTrue(clientFormMetadata.getIsJsonValidator());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
     }
@@ -457,6 +584,133 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testGetAllFilesRelatedToReleaseWithoutIdentifier() throws Exception {
+	    MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+			    .param("identifier", ""))
+			    .andExpect(status().isBadRequest())
+			    .andReturn();
+	    assertEquals("Request parameter cannot be empty", result.getResponse().getContentAsString());
+    }
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoValidManifest() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(new Manifest());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNotFound())
+				.andReturn();
+
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoFormIdentifierInManifest() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNoContent())
+				.andReturn();
+
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseWithIdentifierAndEmptyFormIdentifierList() throws Exception {
+		String identifier = "0.0.5";
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest2());
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isNoContent())
+				.andReturn();
+
+		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToRelease() throws Exception {
+		String identifier = "0.0.5";
+		String formIdentifier = "opd/reg.json";
+
+		List<IdVersionTuple> idVersionTuples = new ArrayList<>();
+		idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
+		idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
+		idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+
+		ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+		clientFormMetadata.setId(3L);
+		clientFormMetadata.setIdentifier(formIdentifier);
+		clientFormMetadata.setVersion("0.0.3");
+
+		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest3());
+		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+		when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		JsonNode jsonNode = mapper.readTree(responseString);
+		assertEquals("opd/reg.json", jsonNode.get(0).get("identifier").textValue());
+		assertEquals("0.0.3", jsonNode.get(0).get("version").textValue());
+	}
+
+	private static Manifest initTestManifest() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"name\":\"test\"}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
+
+	private static Manifest initTestManifest2() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"forms_version\":\"0.0.1\",\n"
+				+ "            \"identifiers\":[]}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
+
+	private static Manifest initTestManifest3() {
+		Manifest manifest = new Manifest();
+		String identifier = "mani1234";
+		String appVersion = "1234234";
+		String json = "{\"forms_version\":\"0.0.1\",\"identifiers\":[\"opd/reg.json\"]}";
+		String appId = "1234567op";
+
+		manifest.setAppId(appId);
+		manifest.setAppVersion(appVersion);
+		manifest.setIdentifier(identifier);
+		manifest.setJson(json);
+
+		return manifest;
+	}
+
+    @Test
     public void testCanAddClientFormWithRelation() throws Exception{
         String relatedJsonIdentifier = "json.form/child-registration.json";
         String formVersion = "0.1.1";
@@ -531,6 +785,61 @@ public class ClientFormResourceTest {
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidPropertiesStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
         assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType()));
+    }
+
+    @Test
+    public void testGetClientFormMetadataListShouldReturnAllForms() throws Exception {
+        int count = 11;
+        String formIdentifier = "opd/opd_register.properties";
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) (i + 1));
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setVersion("0.0." + (i + 1));
+
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        when(clientFormService.getAllClientFormMetadata()).thenReturn(clientFormMetadataList);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL + "metadata"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        ArrayNode arrayNode = (ArrayNode) mapper.readTree(responseString);
+        assertEquals(count, arrayNode.size());
+        assertEquals(1L, arrayNode.get(0).get("id").longValue());
+        assertEquals("0.0.1", arrayNode.get(0).get("version").textValue());
+    }
+
+    @Test
+    public void testGetClientFormMetadataListShouldReturnDraftForms() throws Exception {
+        int count = 7;
+        String formIdentifier = "opd/opd_register.properties";
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) (i + 1));
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setIsDraft(true);
+            clientFormMetadata.setVersion("0.0." + (i + 1));
+
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        when(clientFormService.getClientFormMetadata(true)).thenReturn(clientFormMetadataList);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
+                .param("is_draft", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        ArrayNode arrayNode = (ArrayNode) mapper.readTree(responseString);
+        assertEquals(count, arrayNode.size());
+        assertEquals(1L, arrayNode.get(0).get("id").longValue());
+        assertEquals("0.0.1", arrayNode.get(0).get("version").textValue());
+        assertTrue(arrayNode.get(0).get("isDraft").booleanValue());
     }
 
 }
