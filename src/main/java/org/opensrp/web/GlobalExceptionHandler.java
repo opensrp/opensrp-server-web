@@ -47,15 +47,15 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(UploadValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
-        logger.error("BusinessLogicException occurred : ", exception);
+        logger.error("UploadValidationException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ResponseBody
     @ExceptionHandler(IOException.class)
-    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseDto<?> exceptionHandler(IOException exception) {
         logger.error("IOException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.EXPECTATION_FAILED, exception.getMessage());
