@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 /**
  * @author Samuel Githengi created on 06/05/20
  */
-@Component
-public class BasePermissionEvaluator {
+
+public abstract class BasePermissionEvaluator<T> implements PermissionContract<T> {
 	
 	@Autowired
 	private OrganizationService organizationService;
@@ -33,14 +33,6 @@ public class BasePermissionEvaluator {
 			return new ArrayList<>();
 		}
 		return organizationService.findAssignedLocationsAndPlans(organizationIds);
-	}
-	
-	protected boolean hasPermission(Authentication authentication, String permission) {
-		/* @formatter:on */
-		return authentication.getAuthorities()
-				.stream()
-		        .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + permission));
-		/* @formatter:off */
 	}
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {

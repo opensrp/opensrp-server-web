@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  * @author Samuel Githengi created on 06/04/20
  */
 @Component
-public class PlanPermissionEvaluator extends BasePermissionEvaluator {
+public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinition> {
 	
 	/**
 	 * Evaluates if a user with authentication has permission on targetDomainObject
@@ -28,7 +28,7 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator {
 	 * @param permission the permission to evaluate
 	 * @return true/false if user has the permission for the plan
 	 */
-	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
+	public boolean hasPermission(Authentication authentication, PlanDefinition targetDomainObject) {
 		PlanDefinition plan = (PlanDefinition) targetDomainObject;
 		return hasPermissiononPlan(authentication, plan.getIdentifier())
 		        || hasPermissionOnJurisdictions(authentication, plan.getJurisdiction());
