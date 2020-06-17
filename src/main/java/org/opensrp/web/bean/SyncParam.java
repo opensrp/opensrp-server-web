@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Samuel Githengi created on 10/07/19
  */
@@ -14,6 +16,8 @@ public class SyncParam {
 	private String team;
 	private String teamId;
 	private Integer limit;
+	@JsonProperty("return_count")
+	private boolean returnCount;
 
 	public String getProviderId() {
 		return providerId;
@@ -70,5 +74,13 @@ public class SyncParam {
 	public void setLimit(Integer limit) {
 		this.limit = limit;
 	}
-
+	
+	public boolean isReturnCount() {
+		return returnCount;
+	}
+	
+	public void setReturnCount(boolean returnCount) {
+		this.returnCount = returnCount;
+	}
+	
 }

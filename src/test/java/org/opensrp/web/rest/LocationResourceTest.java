@@ -831,5 +831,75 @@ public class LocationResourceTest {
 		
 		return searchLocation;
 	}
+	
+	@Test
+	public void testSyncLocationsByServerVersionsWithReturnCount() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByServerVersion(1542640316113l)).thenReturn(expected);
+		long totalRecords = 5l;
+		when(locationService.countLocationsByServerVersion(1542640316113l)).thenReturn(totalRecords);
+
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\", \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByServerVersion(1542640316113l);
+		verify(locationService).countLocationsByServerVersion(1542640316113l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
+
+	@Test
+	public void testsSyncLocationsByNamesWithreturnCount() throws Exception {
+
+		String locationNames = "01_5";
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		long totalRecords = 5l;
+		when(locationService.countLocationsByNames(locationNames, 0l)).thenReturn(totalRecords);
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames +"\"],\"return_count\":true}").getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
+		verify(locationService).countLocationsByNames(locationNames, 0l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(),
+				PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+
+	}
+
+	@Test
+	public void testSyncStructuresByParentIdAndServerVersionWithReturnCount() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(expected);
+		long totalRecords = 3l;
+		when(locationService.countStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(totalRecords);
+
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"serverVersion\":1542640316,\"parent_id\":[\"3734\"], \"is_jurisdiction\":\"false\",\"return_count\":true}".getBytes())).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByParentAndServerVersion("3734", 1542640316l);
+		verify(locationService).countStructuresByParentAndServerVersion("3734", 1542640316l);
+		verifyNoMoreInteractions(locationService);
+
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+
+	}
 
 }
