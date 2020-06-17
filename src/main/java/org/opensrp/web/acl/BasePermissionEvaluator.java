@@ -11,11 +11,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opensrp.domain.AssignedLocations;
+import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 /**
  * @author Samuel Githengi created on 06/05/20
@@ -43,7 +46,13 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 				.stream()
 				.map(j -> j.getCode())
 				.collect(Collectors.toSet());
-		
+		return hasPermissionOnJurisdictions(authentication, jurisdictionIdentifiers);
+		/* @formatter:on */
+	}
+	
+	protected boolean hasPermissionOnJurisdictions(Authentication authentication,
+	        Collection<String> jurisdictionIdentifiers) {
+		/* @formatter:off */
 		return getAssignedLocations(authentication.getName())
 				.stream()
 				.anyMatch((a) -> {
@@ -51,7 +60,6 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 					});
 		/* @formatter:on */
 	}
-	
 	
 	protected boolean hasPermissionOnJurisdiction(Authentication authentication, String jurisdiction) {
 		/* @formatter:off */
@@ -64,14 +72,20 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 		/* @formatter:on */
 	}
 	
-	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
 		return collection == null || collection.isEmpty();
 	}
 	
 	@SuppressWarnings("rawtypes")
-	protected boolean isListOfString(Serializable targetId) {
-		return targetId instanceof List &&  !((List)targetId).isEmpty() && ((List)targetId).get(0) instanceof String;
+	protected boolean isCollectionOfString(Serializable targetId) {
+		return targetId instanceof Collection && !((Collection) targetId).isEmpty()
+		        && ((Collection) targetId).iterator().next() instanceof String;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected boolean isCollectionOfResources(Serializable targetId, Class clazz) {
+		return targetId instanceof Collection && !((Collection) targetId).isEmpty()
+		        && clazz.isInstance(((Collection) targetId).iterator().next());
 	}
 	
 }

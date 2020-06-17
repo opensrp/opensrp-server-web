@@ -4,13 +4,11 @@
 package org.opensrp.web.acl;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.opensrp.domain.PlanDefinition;
-import org.opensrp.domain.postgres.Jurisdiction;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -56,8 +54,8 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 					.stream()
 			        .anyMatch(assignedLocation -> assignedLocation.getPlanId().equals(targetId));
 			/* @formatter:on */
-		} else if (isListOfString(targetId)) {
-			List<String> identifiers = (List<String>) targetId;
+		} else if (isCollectionOfString(targetId)) {
+			Collection<String> identifiers = (Collection<String>) targetId;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
@@ -77,8 +75,8 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 								.anyMatch(judisdiction -> judisdiction.getCode().equals(assignedLocation.getJurisdictionId()));
 						});
 			/* @formatter:on */
-		} else if (isListOfPlans(targetId)) {
-			List<PlanDefinition> plans = (List<PlanDefinition>) targetId;
+		} else if (isCollectionOfResources(targetId, PlanDefinition.class)) {
+			Collection<PlanDefinition> plans = (Collection<PlanDefinition>) targetId;
 			Set<String> planIdentifiers = new HashSet<>();
 			Set<String> jurisdictionIdentifiers = new HashSet<>();
 			/* @formatter:off */
@@ -101,12 +99,6 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 			/* @formatter:on */
 		}
 		return false;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	protected boolean isListOfPlans(Serializable targetId) {
-		return targetId instanceof List && !((List) targetId).isEmpty()
-		        && ((List) targetId).get(0) instanceof PlanDefinition;
 	}
 	
 }

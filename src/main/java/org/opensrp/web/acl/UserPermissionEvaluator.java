@@ -16,8 +16,7 @@ public class UserPermissionEvaluator extends BasePermissionEvaluator<String> {
 	
 	@Override
 	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		// TODO Auto-generated method stub
-		return false;
+		return authentication.getName().equals(targetId);
 	}
 	
 	@Override
