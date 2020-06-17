@@ -198,6 +198,7 @@ public class ClientFormResource {
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
                                                  @RequestParam(value = "form_identifier", required = false) String formIdentifier,
+                                                 @RequestParam(value = "form_relation", required = false) String relation,
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module,
@@ -267,7 +268,7 @@ public class ClientFormResource {
         }
 
         String identifier = formIdentifier;
-        if (TextUtils.isEmpty(formIdentifier)){
+        if (TextUtils.isBlank(formIdentifier)){
             identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
         }
 
@@ -282,6 +283,10 @@ public class ClientFormResource {
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
+
+        if (!TextUtils.isBlank(relation)){
+            clientFormMetadata.setRelation(relation);
+        }
 
         ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
 
