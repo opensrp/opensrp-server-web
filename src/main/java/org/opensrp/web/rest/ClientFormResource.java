@@ -51,7 +51,7 @@ public class ClientFormResource {
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
-    ClientFormValidator clientFormValidator;
+    private ClientFormValidator clientFormValidator;
 
     @Autowired
     public void setClientFormService(ClientFormService clientFormService, ManifestService manifestService) {
