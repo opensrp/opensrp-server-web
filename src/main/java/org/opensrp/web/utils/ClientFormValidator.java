@@ -9,6 +9,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
 import org.springframework.lang.NonNull;
 
@@ -125,15 +126,15 @@ public class ClientFormValidator {
                 Iterator<Map.Entry<String, JsonNode>> iterator = jsonNode.fields();
                 while (iterator.hasNext()) {
                     Map.Entry<String, JsonNode> jsonFormField = iterator.next();
-                    if (jsonFormField.getKey().startsWith("step")) {
+                    if (jsonFormField.getKey().startsWith(Constants.JsonForm.Key.STEP)) {
                         JsonNode step = jsonFormField.getValue();
-                        if (step.has("fields")) {
-                            JsonNode fields = step.get("fields");
+                        if (step.has(Constants.JsonForm.Key.FIELDS)) {
+                            JsonNode fields = step.get(Constants.JsonForm.Key.FIELDS);
                             if (fields instanceof ArrayNode) {
                                 ArrayNode fieldsArray = (ArrayNode) fields;
                                 for (int i = 0; i < fieldsArray.size(); i++) {
                                     JsonNode jsonNodeField = fieldsArray.get(i);
-                                    String key = jsonNodeField.get("key").asText();
+                                    String key = jsonNodeField.get(Constants.JsonForm.Key.KEY).asText();
 
                                     if (fieldsMap.remove(key) && fieldsMap.size() == 0) {
                                         return fieldsMap;

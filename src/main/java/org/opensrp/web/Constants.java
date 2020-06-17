@@ -33,4 +33,12 @@ public interface Constants {
     interface DefaultEndpointParam {
         String FALSE = "false";
     }
+
+    interface JsonForm {
+        interface Key {
+            String STEP = "step";
+            String FIELDS = "fields";
+            String KEY = "key";
+        }
+    }
 }

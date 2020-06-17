@@ -465,7 +465,7 @@ public class ClientFormResourceTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(clientFormService, times(0)).addClientForm(Mockito.any(ClientForm.class), Mockito.any(ClientFormMetadata.class));
+        verify(clientFormService, times(0)).addClientForm(any(ClientForm.class), any(ClientFormMetadata.class));
         String response = mvcResult.getResponse().getContentAsString();
 
 
