@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(UploadValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
         logger.error("UploadValidationException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(IOException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseDto<?> exceptionHandler(IOException exception) {
         logger.error("IOException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.EXPECTATION_FAILED, exception.getMessage());
