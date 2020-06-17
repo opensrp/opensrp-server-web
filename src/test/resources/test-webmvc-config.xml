@@ -4,10 +4,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:sec="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd           
 	   http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd 
 	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+	   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
 	<bean id="mvcContentNegotiationManager"
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
@@ -51,5 +53,20 @@
 	<mvc:default-servlet-handler />
 
 	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
+	
+	
+	<sec:http  request-matcher="mvc" auto-config="true"  >
+	    <sec:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')" /> 
+	     <sec:csrf disabled="true"/> 
+	
+	</sec:http>
+	
+	 <sec:authentication-manager>  
+      <sec:authentication-provider>  
+        <sec:user-service>  
+        <sec:user name="admin" password="1234" authorities="hasRole(ROLE_USER)" />  
+        </sec:user-service>  
+      </sec:authentication-provider>  
+    </sec:authentication-manager>  
 
 </beans>

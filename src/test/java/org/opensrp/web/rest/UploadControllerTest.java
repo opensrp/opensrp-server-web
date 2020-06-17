@@ -1,9 +1,27 @@
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
+import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -27,7 +45,6 @@ import org.opensrp.service.MultimediaService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UploadService;
 import org.opensrp.util.DateTimeTypeConverter;
-import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.exceptions.UploadValidationException;
@@ -38,38 +55,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.File;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
-import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 @ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
+@WithMockUser(username = "admin", roles = { "ADMIN" })
 public class UploadControllerTest {
 
 	@Rule
@@ -112,9 +116,8 @@ public class UploadControllerTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(uploadController)
-				.setControllerAdvice(new GlobalExceptionHandler()).
-						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
 		uploadController.setObjectMapper(objectMapper);
 	}
