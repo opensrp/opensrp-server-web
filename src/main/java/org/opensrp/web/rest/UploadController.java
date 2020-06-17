@@ -22,9 +22,9 @@ import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UploadService;
 import org.opensrp.util.JSONCSVUtil;
 import org.opensrp.web.bean.UploadBean;
-import org.opensrp.web.exceptions.BusinessLogicException;
-import org.opensrp.web.utils.OpenMRSUniqueIDProvider;
-import org.opensrp.web.utils.UniqueIDProvider;
+import org.opensrp.web.exceptions.UploadValidationException;
+import org.opensrp.web.uniqueid.OpenMRSUniqueIDProvider;
+import org.opensrp.web.uniqueid.UniqueIDProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +151,7 @@ public class UploadController {
 			@RequestParam(value = "location_id", required = false) String locationID,
 			Authentication authentication
 	) throws IOException,
-			BusinessLogicException {
+			UploadValidationException {
 		if (hasSpecialCharacters(eventName)) {
 			logger.error(EVENT_NAME_ERROR_MESSAGE);
 			throw new IllegalArgumentException(EVENT_NAME_ERROR_MESSAGE);
@@ -167,7 +167,7 @@ public class UploadController {
 		UploadValidationBean validationBean = uploadService.validateFieldValues(csvClients, eventName, globalID);
 		if (validationBean.getErrors() != null && validationBean.getErrors().size() > 0) {
 			validationBean.setAnalyzedData(null);
-			throw new BusinessLogicException(objectMapper.writeValueAsString(validationBean));
+			throw new UploadValidationException(objectMapper.writeValueAsString(validationBean));
 		}
 
 		saveClients(validationBean,locationID,providerId,eventName,teamID,teamName);

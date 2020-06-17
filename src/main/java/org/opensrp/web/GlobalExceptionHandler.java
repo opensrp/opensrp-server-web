@@ -1,7 +1,7 @@
 package org.opensrp.web;
 
 import org.opensrp.web.dto.ResponseDto;
-import org.opensrp.web.exceptions.BusinessLogicException;
+import org.opensrp.web.exceptions.UploadValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -46,9 +46,9 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
-    @ExceptionHandler(BusinessLogicException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseDto<?> exceptionHandler(BusinessLogicException exception) {
+    @ExceptionHandler(UploadValidationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
         logger.error("BusinessLogicException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
     }

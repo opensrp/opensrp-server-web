@@ -1,4 +1,4 @@
-package org.opensrp.web.utils;
+package org.opensrp.web.uniqueid;
 
 import org.opensrp.service.OpenmrsIDService;
 

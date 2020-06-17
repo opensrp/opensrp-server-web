@@ -30,7 +30,7 @@ import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
-import org.opensrp.web.exceptions.BusinessLogicException;
+import org.opensrp.web.exceptions.UploadValidationException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -44,7 +44,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.File;
@@ -181,7 +180,7 @@ public class UploadControllerTest {
 		assertTrue(result.getResponse().getContentAsString().contains("updated"));
 	}
 
-	@Test(expected = BusinessLogicException.class)
+	@Test(expected = UploadValidationException.class)
 	public void testUploadCSVWithErrors() throws Exception {
 		mockSecurityUser();
 		String path = "src/test/resources/sample/childregistration.csv";
