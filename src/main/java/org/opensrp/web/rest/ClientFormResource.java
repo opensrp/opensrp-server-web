@@ -50,6 +50,8 @@ import java.util.Properties;
 public class ClientFormResource {
     public static final String FORM_IDENTIFIERS = "identifiers";
 
+    public static final String FORMS_VERSION = "forms_version";
+
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
@@ -201,14 +203,17 @@ public class ClientFormResource {
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     private ResponseEntity<String> addClientForm(
             @RequestParam(value = "form_identifier", required = false) String formIdentifier,
+            @RequestParam(value = "form_version", required = false) String formVersion,
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module,
                                                  @RequestParam(value = "is_json_validator", defaultValue = "false") String isJsonValidatorStringRep) {
         boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorStringRep.toLowerCase());
-        if (TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+        if (StringUtils.isBlank(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
+
+
 
         String fileContentType = jsonFile.getContentType();
         if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
@@ -236,11 +241,12 @@ public class ClientFormResource {
         if (errorMessage != null) return errorMessage;
 
         String identifier = getIdentifier(formIdentifier, jsonFile);
+        String version = getFormVersion(formVersion);
 
         logger.info(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(identifier,
-                        formName, module, isJsonValidator));
+                        formName, module, isJsonValidator, version));
 
         if (completeClientForm == null) {
             return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server",
@@ -250,9 +256,15 @@ public class ClientFormResource {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    private String getIdentifier(
-            @RequestParam("form_identifier") String formIdentifier,
-            @RequestParam("form") MultipartFile jsonFile) {
+    private String getFormVersion(String formVersion){
+        String version = formVersion;
+        if (StringUtils.isBlank(formVersion)) {
+            version = generateFormVersion(2);
+        }
+        return  version;
+    }
+
+    private String getIdentifier(String formIdentifier, MultipartFile jsonFile) {
         String identifier = formIdentifier;
         if (StringUtils.isBlank(formIdentifier)) {
             identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
@@ -277,20 +289,26 @@ public class ClientFormResource {
                     String json = manifest.getJson();
                     if (StringUtils.isNotBlank(json)) {
                         JSONObject jsonObject = new JSONObject(json);
-                        if (jsonObject.has("forms_version")) {
-                            String version = jsonObject.getString("forms_version");
-                            String[] versions = version.split("\\.");
-                            if (versions.length > 2 && Integer.parseInt(versions[2]) < 1000) {
-                                int newVersion = Integer.parseInt(versions[2]) + 1;
-                                formVersion = versions[0] + "." + versions[1] + "." + newVersion;
-                            } else if (versions.length > 1 && Integer.parseInt(versions[1]) < 1000) {
-                                int newVersion = Integer.parseInt(versions[1]) + 1;
-                                formVersion = versions[0] + "." + newVersion + "." + versions[2];
-                            } else {
-                                int newVersion = Integer.parseInt(versions[0]) + 1;
-                                formVersion = newVersion + "." + versions[1] + "." + versions[2];
+                        if (jsonObject.has(FORMS_VERSION)) {
+                            String version = jsonObject.getString(FORMS_VERSION);
+                            if (StringUtils.isNotBlank(version)) {
+                                DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(version);
+                                if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
+                                    int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
+                                    formVersion =
+                                            defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
+                                                    "." + newVersion;
+                                } else if (defaultArtifactVersion.getMinorVersion() < 1000) {
+                                    int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
+                                    formVersion =
+                                            defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion.getIncrementalVersion();
+                                } else {
+                                    int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
+                                    formVersion =
+                                            newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion.getIncrementalVersion();
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
 
@@ -304,12 +322,10 @@ public class ClientFormResource {
         return formVersion;
     }
 
-    private ClientFormMetadata getClientFormMetadata(@RequestParam ("form_identifier") String formIdentifier,
-                                                     @RequestParam ("form_name") String formName,
-                                                     @RequestParam (required = false) String module,
-                                                     boolean  isJsonValidator) {
+    private ClientFormMetadata getClientFormMetadata(String formIdentifier,String formName,String module,
+            boolean  isJsonValidator, String formVersion) {
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
-        clientFormMetadata.setVersion(generateFormVersion(2));
+        clientFormMetadata.setVersion(formVersion);
         clientFormMetadata.setIdentifier(formIdentifier);
         clientFormMetadata.setLabel(formName);
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
