@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(IOException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseDto<?> exceptionHandler(IOException exception) {
         logger.error("IOException occurred : ", exception);
         return buildErrorResponseForBadRequest(HttpStatus.EXPECTATION_FAILED, exception.getMessage());
