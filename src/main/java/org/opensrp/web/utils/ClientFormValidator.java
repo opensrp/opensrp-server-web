@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -113,14 +112,14 @@ public class ClientFormValidator {
     }
 
     @NonNull
-    public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull ClientForm clientForm) throws JsonProcessingException {
+    public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull String clientFormContent) throws JsonProcessingException {
         ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
         HashSet<String> fieldsMap = new HashSet<>();
         if (formValidator != null && formValidator.getJson() != null && !((String) formValidator.getJson()).isEmpty()) {
             JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue((String) formValidator.getJson(), JsonWidgetValidatorDefinition.class);
             JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition.getCannotRemove();
             if (widgetCannotRemove != null && widgetCannotRemove.getFields() != null && widgetCannotRemove.getFields().size() > 0) {
-                JsonNode jsonNode = objectMapper.readTree((String) clientForm.getJson());
+                JsonNode jsonNode = objectMapper.readTree(clientFormContent);
                 fieldsMap.addAll(widgetCannotRemove.getFields());
 
                 Iterator<Map.Entry<String, JsonNode>> iterator = jsonNode.fields();
@@ -136,10 +135,8 @@ public class ClientFormValidator {
                                     JsonNode jsonNodeField = fieldsArray.get(i);
                                     String key = jsonNodeField.get("key").asText();
 
-                                    if (fieldsMap.remove(key)) {
-                                        if (fieldsMap.size() == 0) {
-                                            return fieldsMap;
-                                        }
+                                    if (fieldsMap.remove(key) && fieldsMap.size() == 0) {
+                                        return fieldsMap;
                                     }
                                 }
                             }

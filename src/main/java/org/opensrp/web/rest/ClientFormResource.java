@@ -249,20 +249,20 @@ public class ClientFormResource {
                 }
 
                 if (!missingRuleFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
+                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(", ", missingRuleFileReferences);
                 }
 
                 if (!missingPropertyFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
+                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
                 }
 
                 return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
             }
 
             // Perform check to make sure that fields are not removed
-            HashSet<String> missingFields = clientFormValidator.performWidgetValidation(objectMapper, formIdentifier, clientForm);
+            HashSet<String> missingFields = clientFormValidator.performWidgetValidation(objectMapper, formIdentifier, fileContentString);
             if (missingFields.size() > 0) {
-                return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(",", missingFields)
+                return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(", ", missingFields)
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }

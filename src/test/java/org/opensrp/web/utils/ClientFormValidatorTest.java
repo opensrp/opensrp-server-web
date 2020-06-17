@@ -97,11 +97,8 @@ public class ClientFormValidatorTest extends TestCase {
     public void testPerformWidgetValidation() throws JsonProcessingException {
         String formIdentifier = "anc_registration.json";
 
-        ClientForm clientForm = new ClientForm();
-        clientForm.setJson(TestFileContent.JSON_FORM_FILE);
-
         ClientForm formValidator = new ClientForm();
-        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"\"]}}");
+        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"aefi_form\"]}}");
 
         Mockito.doReturn(formValidator)
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);
@@ -113,7 +110,7 @@ public class ClientFormValidatorTest extends TestCase {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setDateFormat(DateFormat.getDateTimeInstance());
 
-        HashSet<String> missingWidgets = clientFormValidator.performWidgetValidation(mapper, formIdentifier, clientForm);
-        assertEquals(3, missingWidgets.size());
+        HashSet<String> missingWidgets = clientFormValidator.performWidgetValidation(mapper, formIdentifier, TestFileContent.JSON_FORM_FILE);
+        assertEquals(2, missingWidgets.size());
     }
 }
