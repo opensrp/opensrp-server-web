@@ -70,8 +70,6 @@ public class UploadController {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
 
-	private static final ObjectMapper mapper = new ObjectMapper();
-
 	@Value("#{opensrp['opensrp.config.global_id'] ?: 'opensrp_id'}")
 	private String globalID;
 
@@ -180,7 +178,7 @@ public class UploadController {
 		details.put("updated", Integer.toString(validationBean.getRowsToUpdate()));
 		multimediaDTO.withOriginalFileName(file.getOriginalFilename())
 				.withDateUploaded(new Date())
-				.withSummary(mapper.writeValueAsString(details));
+				.withSummary(objectMapper.writeValueAsString(details));
 
 		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 

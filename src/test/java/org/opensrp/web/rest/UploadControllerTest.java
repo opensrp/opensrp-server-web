@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -29,6 +30,7 @@ import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
+import org.opensrp.web.exceptions.BusinessLogicException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -42,6 +44,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.File;
@@ -74,6 +77,9 @@ public class UploadControllerTest {
 	public MockitoRule rule = MockitoJUnit.rule();
 
 	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
 	protected WebApplicationContext webApplicationContext;
 
 	private MockMvc mockMvc;
@@ -99,10 +105,10 @@ public class UploadControllerTest {
 	@Mock
 	private OpenmrsIDService openmrsIDService;
 
-	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-	private String BASE_URL = "/rest/upload/";
+	private final String BASE_URL = "/rest/upload/";
 
 	@Before
 	public void setUp() {
@@ -110,6 +116,8 @@ public class UploadControllerTest {
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(uploadController)
 				.setControllerAdvice(new GlobalExceptionHandler()).
 						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+
+		uploadController.setObjectMapper(objectMapper);
 	}
 
 	private void mockSecurityUser() {
@@ -173,7 +181,7 @@ public class UploadControllerTest {
 		assertTrue(result.getResponse().getContentAsString().contains("updated"));
 	}
 
-	@Test
+	@Test(expected = BusinessLogicException.class)
 	public void testUploadCSVWithErrors() throws Exception {
 		mockSecurityUser();
 		String path = "src/test/resources/sample/childregistration.csv";
@@ -244,10 +252,10 @@ public class UploadControllerTest {
 
 		multimediaList.add(multimedia);
 
-		when(multimediaRepository.getByProviderID("providerID", FILE_CATEGORY, 0, 50)).thenReturn(multimediaList);
+		when(multimediaRepository.getByProviderID("", FILE_CATEGORY, 0, 50)).thenReturn(multimediaList);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/history")).andExpect(status().isOk())
 				.andReturn();
-		verify(multimediaRepository, times(1)).getByProviderID("providerID", FILE_CATEGORY, 0, 50);
+		verify(multimediaRepository, times(1)).getByProviderID("", FILE_CATEGORY, 0, 50);
 		verifyNoMoreInteractions(multimediaRepository);
 
 		String content = result.getResponse().getContentAsString();
