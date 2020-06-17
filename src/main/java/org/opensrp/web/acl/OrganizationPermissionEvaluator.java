@@ -22,9 +22,13 @@ public class OrganizationPermissionEvaluator  extends BasePermissionEvaluator<Or
 	}
 
 	@Override
-	public boolean hasPermission(Authentication authentication, Organization targetDomainObject) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean hasPermission(Authentication authentication, Organization organization) {
+		/* @formatter:off */
+		return getAssignedLocations(authentication.getName())
+				.stream()
+				.anyMatch(a->a.getOrganizationId().equals(organization.getIdentifier()));
+		
+		/* @formatter:on */
 	}
 	
 }

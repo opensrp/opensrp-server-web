@@ -14,17 +14,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class JurisdictionPermissionEvaluator extends BasePermissionEvaluator<PhysicalLocation> {
-
+	
 	@Override
 	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
-	public boolean hasPermission(Authentication authentication, PhysicalLocation targetDomainObject) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean hasPermission(Authentication authentication, PhysicalLocation jurisdiction) {
+		return hasPermissionOnJurisdiction(authentication, jurisdiction.getId());
 	}
 	
 }

@@ -16,7 +16,6 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Samuel Githengi created on 06/05/20
@@ -52,6 +51,19 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 					});
 		/* @formatter:on */
 	}
+	
+	
+	protected boolean hasPermissionOnJurisdiction(Authentication authentication, String jurisdiction) {
+		/* @formatter:off */
+		
+		return getAssignedLocations(authentication.getName())
+				.stream()
+				.anyMatch((a) -> {
+					return jurisdiction.equals(a.getOrganizationId());
+					});
+		/* @formatter:on */
+	}
+	
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
 		return collection == null || collection.isEmpty();
