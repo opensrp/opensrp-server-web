@@ -42,21 +42,6 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 		/* @formatter:on */
 	}
 	
-	private boolean hasPermissionOnJurisdictions(Authentication authentication, List<Jurisdiction> jurisdictions) {
-		/* @formatter:off */
-		Set<String> jurisdictionIdentifiers = jurisdictions
-				.stream()
-				.map(j -> j.getCode())
-				.collect(Collectors.toSet());
-		
-		return getAssignedLocations(authentication.getName())
-				.stream()
-				.anyMatch((a) -> {
-					return jurisdictionIdentifiers.contains(a.getJurisdictionId());
-					});
-		/* @formatter:on */
-	}
-	
 	/**
 	 * @param authentication
 	 * @param targetId

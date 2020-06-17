@@ -7,8 +7,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.opensrp.domain.AssignedLocations;
+import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,21 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 			return new ArrayList<>();
 		}
 		return organizationService.findAssignedLocationsAndPlans(organizationIds);
+	}
+	
+	protected boolean hasPermissionOnJurisdictions(Authentication authentication, List<Jurisdiction> jurisdictions) {
+		/* @formatter:off */
+		Set<String> jurisdictionIdentifiers = jurisdictions
+				.stream()
+				.map(j -> j.getCode())
+				.collect(Collectors.toSet());
+		
+		return getAssignedLocations(authentication.getName())
+				.stream()
+				.anyMatch((a) -> {
+					return jurisdictionIdentifiers.contains(a.getJurisdictionId());
+					});
+		/* @formatter:on */
 	}
 	
 	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
