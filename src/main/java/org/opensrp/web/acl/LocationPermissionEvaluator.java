@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * @author Samuel Githengi created on 06/17/20
  */
 @Component
-public class JurisdictionPermissionEvaluator extends BasePermissionEvaluator<PhysicalLocation> {
+public class LocationPermissionEvaluator extends BasePermissionEvaluator<PhysicalLocation> {
 	
 	@SuppressWarnings("unchecked")
 	@Override

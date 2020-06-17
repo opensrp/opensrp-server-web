@@ -5,6 +5,8 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
+import org.opensrp.domain.Organization;
+import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
@@ -20,6 +22,15 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 	@Autowired
 	private PlanPermissionEvaluator planPermissionEvaluator;
 	
+	@Autowired
+	private OrganizationPermissionEvaluator organizationPermissionEvaluator;
+	
+	@Autowired
+	private LocationPermissionEvaluator locationPermissionEvaluator;
+	
+	@Autowired
+	private UserPermissionEvaluator userPermissionEvaluator;
+	
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
 		boolean hasAccess = false;
@@ -27,6 +38,12 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return hasAccess;
 		} else if (targetDomainObject instanceof PlanDefinition) {
 			return planPermissionEvaluator.hasPermission(authentication, (PlanDefinition) targetDomainObject);
+		} else if (targetDomainObject instanceof Organization) {
+			return organizationPermissionEvaluator.hasPermission(authentication, (Organization) targetDomainObject);
+		} else if (targetDomainObject instanceof PhysicalLocation) {
+			return locationPermissionEvaluator.hasPermission(authentication, (PhysicalLocation) targetDomainObject);
+		} else if (targetDomainObject instanceof String) {
+			return userPermissionEvaluator.hasPermission(authentication, (String) targetDomainObject);
 		}
 		return hasAccess;
 	}
@@ -38,7 +55,12 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return false;
 		} else if (PlanDefinition.class.getSimpleName().equals(targetType)) {
 			return planPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
-			
+		} else if (Organization.class.getSimpleName().equals(targetType)) {
+			return organizationPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
+		} else if (PhysicalLocation.class.getSimpleName().equals(targetType)) {
+			return locationPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
+		} else if ("User".equals(targetType)) {
+			return userPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
 		}
 		return false;
 	}
