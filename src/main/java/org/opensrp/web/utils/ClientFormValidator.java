@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -38,7 +37,12 @@ import java.util.Map;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ClientFormValidator {
@@ -68,7 +72,7 @@ public class ClientFormValidator {
 
         File file = new File(assetsFilePath);
         HashMap<String, String> ruleFileRelations = new HashMap<>();
-        HashMap<String, String> subformFileRelations = new HashMap<>();
+        HashMap<String, String> subFormFileRelations = new HashMap<>();
         HashSet<String> jsonFormFiles = new HashSet<>();
         HashMap<String, String> formLabels = new HashMap<>();
 
@@ -122,7 +126,7 @@ public class ClientFormValidator {
 
                                         if (references != null && references.size() > 0) {
                                             for (String reference : references) {
-                                                subformFileRelations.put(reference + ".json", formFileName);
+                                                subFormFileRelations.put(reference + ".json", formFileName);
                                             }
                                         }
                                     }
@@ -157,8 +161,8 @@ public class ClientFormValidator {
                                             if (subFormFileName.endsWith(".json")) {
                                                 System.out.println(
                                                         String.format("JSON SUB-FORM FILE %s @ %s", subFormFileName, subFormFile.getAbsolutePath()));
-                                                if (!subformFileRelations.containsKey(subFormFileName)) {
-                                                    subformFileRelations.put(subFormFileName, null);
+                                                if (!subFormFileRelations.containsKey(subFormFileName)) {
+                                                    subFormFileRelations.put(subFormFileName, null);
                                                 }
                                             }
                                         }
