@@ -1,8 +1,13 @@
 package org.opensrp.web.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.json.JSONObject;
 
 public class FormConfigUtils {
+
+	public static final String FORMS_VERSION = "forms_version";
+	public static final String JSON = "json";
 
 	public static String getNewVersion(String initialVersion) {
 		String formVersion;
@@ -22,6 +27,18 @@ public class FormConfigUtils {
 			formVersion =
 					newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion
 							.getIncrementalVersion();
+		}
+		return formVersion;
+	}
+
+	public static String getFormsVersion(String jsonString) {
+		String formVersion = "";
+		if (StringUtils.isNotBlank(jsonString)) {
+			JSONObject parentObject = new JSONObject(jsonString);
+			JSONObject jsonObject = (parentObject.has(JSON)) ? new JSONObject(Utils.getStringFromJSON(parentObject,"json")): parentObject;
+			if (jsonObject.has(FORMS_VERSION)) {
+				formVersion = Utils.getStringFromJSON(jsonObject, FORMS_VERSION);
+			}
 		}
 		return formVersion;
 	}

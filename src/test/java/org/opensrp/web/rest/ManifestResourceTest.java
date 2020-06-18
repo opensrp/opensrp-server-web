@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.opensrp.web.utils.Utils;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
@@ -164,9 +165,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         doReturn(new Manifest()).when(manifestService).addManifest(any());
         Manifest expectedManifest = initTestManifest();
 
-        JSONObject parentObject = new JSONObject(manifestJson);
-        JSONObject jsonObject = new JSONObject(Utils.getStringFromJSON(parentObject,"json"));
-        String formVersion = Utils.getStringFromJSON(jsonObject, "forms_version");
+        String formVersion = FormConfigUtils.getFormsVersion(manifestJson);
 
         postRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
 
@@ -187,9 +186,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         List manifestList = new ArrayList<Manifest>();
         manifestList.add(existingManifest);
 
-        JSONObject parentObject = new JSONObject(manifestJsonOnlyValue);
-        JSONObject jsonObject = new JSONObject(Utils.getStringFromJSON(parentObject,"json"));
-        String formVersion = Utils.getStringFromJSON(jsonObject, "forms_version");
+        String formVersion = FormConfigUtils.getFormsVersion(manifestJsonOnlyValue);
 
         doReturn(manifestList).when(manifestService).getAllManifest(1);
         doReturn(new Manifest()).when(manifestService).addManifest(any());
