@@ -10,7 +10,6 @@ import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.FormConfigUtils;
-import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +85,7 @@ public class ManifestResource {
         }
         logger.info("Manifest version " + newManifest.getAppVersion());
         manifestService.addManifest(newManifest);
-        clientFormService.updateClientFormMetadataIsDraftValue(false, FormConfigUtils.getFormsVersion(manifestJson));
+        clientFormService.updateClientFormMetadataIsDraftValueByVersion(false, FormConfigUtils.getFormsVersion(manifestJson));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
