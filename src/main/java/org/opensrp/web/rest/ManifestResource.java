@@ -6,9 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.json.JSONObject;
 import org.opensrp.domain.Manifest;
+import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.FormConfigUtils;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,9 @@ public class ManifestResource {
     private static Logger logger = LoggerFactory.getLogger(ManifestResource.class.toString());
     public static final String FALSE = Boolean.FALSE.toString();
     private ManifestService manifestService;
+    private ClientFormService clientFormService;
     public static final String IDENTIFIER = "identifier";
+    public static final String FORM_VERSION = "forms_version";
     protected ObjectMapper objectMapper;
 
     @Autowired
@@ -44,6 +48,11 @@ public class ManifestResource {
     @Autowired
     public void setManifestService(ManifestService manifestService) {
         this.manifestService = manifestService;
+    }
+
+    @Autowired
+    public void setClientFormService(ClientFormService clientFormService) {
+        this.clientFormService = clientFormService;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -68,11 +77,16 @@ public class ManifestResource {
     public ResponseEntity<HttpStatus> create(@RequestBody (required = false) Manifest manifest,
             @RequestParam(value = "json", required = false) String json) {
         Manifest newManifest = manifest;
+        String manifestJson = json;
         if (manifest.getIdentifier() == null && json != null) {
-            newManifest = generateManifest(json);
+            newManifest = generateManifest(manifestJson);
+        }
+        else {
+            manifestJson = manifest.getJson();
         }
         logger.info("Manifest version " + newManifest.getAppVersion());
         manifestService.addManifest(newManifest);
+        clientFormService.updateClientFormMetadataIsDraftValue(false, getFormVersion(manifestJson));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -173,5 +187,17 @@ public class ManifestResource {
         }
 		generatedManifest.setJson(jsonString);
         return generatedManifest;
+    }
+
+    protected String getFormVersion(String jsonString) {
+        String formVersion = "";
+        if (StringUtils.isNotBlank(jsonString)) {
+            JSONObject parentObject = new JSONObject(jsonString);
+            JSONObject jsonObject = (parentObject.has("json")) ? new JSONObject(Utils.getStringFromJSON(parentObject,"json")): parentObject;
+            if (jsonObject.has(FORM_VERSION)) {
+                formVersion = Utils.getStringFromJSON(jsonObject, FORM_VERSION);
+            }
+        }
+        return formVersion;
     }
 }
