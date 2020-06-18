@@ -26,12 +26,15 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
+
 		<opensrp.core.version>2.4.8-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.2-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
+
 		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
+		<lombok.version>1.18.12</lombok.version>
 	</properties>
 
 	<distributionManagement>
@@ -186,6 +189,11 @@
 			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${spring.version}</version>
@@ -272,7 +280,12 @@
 			<artifactId>encoder</artifactId>
 			<version>1.2.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
 <!--		HTTP session replication dependency-->
 		<dependency>
 			<groupId>org.springframework.session</groupId>

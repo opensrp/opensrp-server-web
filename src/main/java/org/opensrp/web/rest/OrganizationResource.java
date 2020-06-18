@@ -6,6 +6,8 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
@@ -65,9 +67,14 @@ public class OrganizationResource {
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAllOrganizations() {
-		return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
-		        HttpStatus.OK);
+	public ResponseEntity<String> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
+		if(StringUtils.isNotBlank(locationID)){
+			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.OK);
+		}
 	}
 
 	/**
