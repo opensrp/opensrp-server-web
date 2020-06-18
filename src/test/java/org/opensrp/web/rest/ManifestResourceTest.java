@@ -1,7 +1,6 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -9,7 +8,6 @@ import org.opensrp.domain.Manifest;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.utils.FormConfigUtils;
-import org.opensrp.web.utils.Utils;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -17,7 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -170,7 +171,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         postRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
 
         verify(manifestService).addManifest(argumentCaptor.capture());
-        verify(clientFormService).updateClientFormMetadataIsDraftValue(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        verify(clientFormService).updateClientFormMetadataIsDraftValueByVersion(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(stringArgumentCaptor.getValue(), formVersion);
@@ -197,7 +198,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         verify(manifestService).addManifest(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
-        verify(clientFormService).updateClientFormMetadataIsDraftValue(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
+        verify(clientFormService).updateClientFormMetadataIsDraftValueByVersion(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(stringArgumentCaptor.getValue(), formVersion);
