@@ -86,7 +86,7 @@ public class ManifestResource {
         }
         logger.info("Manifest version " + newManifest.getAppVersion());
         manifestService.addManifest(newManifest);
-        clientFormService.updateClientFormMetadataIsDraftValue(false, getFormVersion(manifestJson));
+        clientFormService.updateClientFormMetadataIsDraftValue(false, FormConfigUtils.getFormsVersion(manifestJson));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -187,17 +187,5 @@ public class ManifestResource {
         }
 		generatedManifest.setJson(jsonString);
         return generatedManifest;
-    }
-
-    protected String getFormVersion(String jsonString) {
-        String formVersion = "";
-        if (StringUtils.isNotBlank(jsonString)) {
-            JSONObject parentObject = new JSONObject(jsonString);
-            JSONObject jsonObject = (parentObject.has("json")) ? new JSONObject(Utils.getStringFromJSON(parentObject,"json")): parentObject;
-            if (jsonObject.has(FORM_VERSION)) {
-                formVersion = Utils.getStringFromJSON(jsonObject, FORM_VERSION);
-            }
-        }
-        return formVersion;
     }
 }
