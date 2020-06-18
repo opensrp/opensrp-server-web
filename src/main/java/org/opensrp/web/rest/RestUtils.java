@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
+import org.opensrp.service.multimedia.ObjectStorageMultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +153,7 @@ public class RestUtils {
 				logger.info("Done downloading file " + file.getName());
 
 				// clean up temp files (may want to cache in future)
-				if (fileManager instanceof S3MultimediaFileManager) {
+				if (fileManager instanceof ObjectStorageMultimediaFileManager) {
 					file.delete();
 				}
 			}

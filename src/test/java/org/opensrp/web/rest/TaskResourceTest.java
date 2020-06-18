@@ -384,5 +384,47 @@ public class TaskResourceTest {
 		assertEquals(TaskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
 	}
+	
+	@Test
+	public void testGetTasksByPlanAndGroupWithReturnCount() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		long totalRecords = 3l;
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(tasks);
+		when(taskService.countTasksByPlanAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(totalRecords);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873, \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
+		verify(taskService, times(1)).countTasksByPlanAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
+
+	@Test
+	public void testGetTasksByPlanAndOwnerWithReturnCount() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		long totalRecords = 5l;
+		when(taskService.getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(tasks);
+		when(taskService.countTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(totalRecords);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"owner\":\"demouser\", \"serverVersion\":15421904649873, \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
+		verify(taskService, times(1)).countTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
 
 }

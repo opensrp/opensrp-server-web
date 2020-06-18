@@ -1,27 +1,28 @@
 package org.opensrp.web.controller;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.multimedia.FileSystemMultimediaFileManager;
+import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +33,11 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.opensrp.web.controller.MultimediaController.ENTITY_ID_ERROR_MESSAGE;
+import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -48,7 +52,6 @@ public class MultimediaControllerTest {
 	private MockMvc mockMvc;
 
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
-	private final String FILE_NAME_ERROR = "File Name with special characters is not allowed!";
 	private final String ENTITY_ID_ERROR = "Entity Id should not contain any special character!";
 	private final String BASE_URL = "/multimedia";
 
@@ -118,7 +121,7 @@ public class MultimediaControllerTest {
 
 		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-		assertEquals(response.getBody(),FILE_NAME_ERROR);
+		assertEquals(response.getBody(), FILE_NAME_ERROR_MESSAGE);
 	}
 
 	@Test
@@ -133,9 +136,14 @@ public class MultimediaControllerTest {
 		File file = mock(File.class);
 		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		when(file.getName()).thenReturn("testFile"+ "\r" + ".pdf");
+
+		MultimediaFileManager fileManager = mock(FileSystemMultimediaFileManager.class);
+		doReturn("file_path").when(fileManager).getMultimediaFilePath(any(MultimediaDTO.class), anyString());
+		doReturn(fileManager).when(multimediaService).getFileManager();
+
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id")
 				.headers(httpHeaders))
-				.andExpect(content().string("Sorry. File Name should not contain any special character"))
+				.andExpect(content().string(FILE_NAME_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
@@ -154,7 +162,7 @@ public class MultimediaControllerTest {
 		when(file.getName()).thenReturn("testFile" + ".pdf");
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*")
 				.headers(httpHeaders))
-				.andExpect(content().string("Sorry. Entity Id should not contain any special character"))
+				.andExpect(content().string(ENTITY_ID_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
@@ -172,7 +180,7 @@ public class MultimediaControllerTest {
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf")
 				.headers(httpHeaders))
-				.andExpect(content().string("Sorry. File Name should not contain any special character"))
+				.andExpect(content().string(FILE_NAME_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
@@ -218,6 +226,4 @@ public class MultimediaControllerTest {
 
 		return authentication;
 	}
-
-
 }

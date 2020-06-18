@@ -6,7 +6,7 @@
     <groupId>org.smartregister</groupId>
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.1.17-ANC-ALPHA-SNAPSHOT</version>
+    <version>2.1.29-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -25,12 +25,15 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.2.2-ANC-ALPHA10-SNAPSHOT</opensrp.core.version>
+
+        <opensrp.core.version>2.4.8-ANC-ALPHA10-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
         <opensrp.common.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.common.version>
+
         <opensrp.interface.version>2.0.0-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
         <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
+        <lombok.version>1.18.12</lombok.version>
     </properties>
 
     <distributionManagement>
@@ -188,6 +191,11 @@
             <version>${spring.security.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
@@ -274,7 +282,12 @@
             <artifactId>encoder</artifactId>
             <version>1.2.2</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <!--		HTTP session replication dependency-->
         <dependency>
             <groupId>org.springframework.session</groupId>
@@ -334,6 +347,16 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
             <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-rules-mvel</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.4.0</version>
         </dependency>
     </dependencies>
 
@@ -442,16 +465,13 @@
                     <stopKey>secret</stopKey>
                     <stopPort>6679</stopPort>
                     <connectors>
-                        <connector
-                            implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>${jetty.port}</port>
                         </connector>
                         <connector
                             implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
-                            <keystore>
-                                ${main.basedir}/configs/assets/security/drishti_server.keystore
-                            </keystore>
+                            <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
                             <password>mouse monitor cube</password>
                         </connector>

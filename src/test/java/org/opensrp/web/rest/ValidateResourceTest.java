@@ -58,6 +58,11 @@ public class ValidateResourceTest {
 			+ "}";
 	
 	private String SYNC_REQUEST_PAYLOAD = "{\n"
+			+ "\t\"clients\": [ 1 , 2 ],\n"
+			+ "\t\"events\": [ 1 , 2]\n"
+			+ "}";
+	
+	private String SYNC_REQUEST_STRING_PAYLOAD = "{\n"
 			+ "\t\"clients\": \"[ 1 , 2 ]\",\n"
 			+ "\t\"events\": \"[ 1 , 2]\"\n"
 			+ "}";
@@ -95,6 +100,18 @@ public class ValidateResourceTest {
 		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(null);
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
 				.content(SYNC_REQUEST_PAYLOAD.getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		
+		assertEquals(result.getResponse().getContentAsString(), expected);
+	}
+	
+	@Test
+	public void testValidateSyncWithStringArray() throws Exception {
+		String expected = "{\"clients\":[\"1\",\"2\"],\"events\":[\"1\",\"2\"]}";
+		when(clientService.getByBaseEntityId(any(String.class))).thenReturn(null);
+		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(null);
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(SYNC_REQUEST_STRING_PAYLOAD.getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		
 		assertEquals(result.getResponse().getContentAsString(), expected);

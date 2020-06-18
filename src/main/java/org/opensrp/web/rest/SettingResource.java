@@ -106,8 +106,7 @@ public class SettingResource {
 			JSONArray dbSettingsArray = new JSONArray();
 			
 			for (int i = 0; i < clientSettings.length(); i++) {
-				String settingConfigurationsString = clientSettings.getJSONObject(i).toString();
-				dbSettingsArray.put(settingService.saveSetting(settingConfigurationsString));
+				dbSettingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
 			}
 			
 			response.put("validated_records", dbSettingsArray);
