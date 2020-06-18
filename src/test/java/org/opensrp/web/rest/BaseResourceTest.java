@@ -101,6 +101,20 @@ public abstract class BaseResourceTest<T> {
         return actualObj;
     }
 
+    protected JsonNode postRequestWithJsonParam(String url, String data, ResultMatcher expectedStatus) throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(
+                post(url).contentType(MediaType.APPLICATION_JSON)
+                        .param("json", data))
+                .andExpect(expectedStatus).andReturn();
+
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        JsonNode actualObj = mapper.readTree(responseString);
+	    return actualObj;
+    }
+
     protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(

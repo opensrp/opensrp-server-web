@@ -1,11 +1,14 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
 
 public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
@@ -32,6 +36,15 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
 
     private final static String manifestJson = "{\"identifier\":\"mani1234\",\"json\":\"{}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
+    private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.2\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\"]}\"}";
+    private final static String existingManifestJson = "{\n"
+            + "    \"json\": \"{\\\"forms_version\\\":\\\"1.0.2\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\"]}\",\n"
+            + "    \"appId\": \"org.smartregister.anc\",\n"
+            + "    \"createdAt\": \"2020-06-12T14:24:32.871+03:00\",\n"
+            + "    \"updatedAt\": \"2020-06-12T14:24:32.871+03:00\",\n"
+            + "    \"appVersion\": \"3.4.2\",\n"
+            + "    \"identifier\": \"1.0.1\"\n"
+            + "}";
 
     @Before
     public void setUp() {
@@ -67,6 +80,20 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         manifest.setAppVersion(appVersion);
         manifest.setIdentifier(identifier);
         manifest.setJson(json);
+
+        return manifest;
+    }
+
+    private static Manifest initTestManifest3() {
+        Manifest manifest = new Manifest();
+        String identifier = "1.0.2";
+        String appVersion = "3.4.2";
+        String appId = "org.smartregister.anc";
+
+        manifest.setAppId(appId);
+        manifest.setAppVersion(appVersion);
+        manifest.setIdentifier(identifier);
+        manifest.setJson(existingManifestJson);
 
         return manifest;
     }
@@ -140,6 +167,27 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         verify(manifestService).addManifest(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
 
+    }
+
+    @Test
+    public void testCreateNewManifestWithJsonOnly() throws Exception {
+        Manifest existingManifest = new Manifest();
+
+        existingManifest.setAppId("org.smartregister.anc");
+        existingManifest.setAppVersion("3.4.2");
+        existingManifest.setJson(existingManifestJson);
+        List manifestList = new ArrayList<Manifest>();
+        manifestList.add(existingManifest);
+
+        doReturn(manifestList).when(manifestService).getAllManifest(1);
+        doReturn(new Manifest()).when(manifestService).addManifest(any());
+
+        Manifest expectedManifest = initTestManifest3();
+
+        postRequestWithJsonParam(BASE_URL, manifestJsonOnlyValue, MockMvcResultMatchers.status().isCreated());
+
+        verify(manifestService).addManifest(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
     }
 
     @Test
