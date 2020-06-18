@@ -2,7 +2,9 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.json.JSONObject;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
@@ -65,7 +67,7 @@ public class ManifestResource {
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<HttpStatus> create(@RequestBody (required = false) Manifest manifest,
             @RequestParam(value = "json", required = false) String json) {
-        if (manifest == null) {
+        if (manifest.getIdentifier() == null && json != null) {
 			manifest = generateManifest(json);
         }
         logger.info("Manifest version " + manifest.getAppVersion());
@@ -151,9 +153,20 @@ public class ManifestResource {
 
     protected Manifest generateManifest(String jsonString) {
         Manifest latestManifest = manifestService.getAllManifest(1).get(0);
+        String identifier = "0.0.1";
         Manifest generatedManifest = new Manifest();
         if (latestManifest != null) {
-            generatedManifest.setIdentifier(latestManifest.getIdentifier());
+            String json = latestManifest.getJson();
+            if (StringUtils.isNotBlank(json)) {
+                JSONObject jsonObject = new JSONObject(json);
+                if (jsonObject.has(IDENTIFIER)) {
+                    String version = jsonObject.getString(IDENTIFIER);
+                    if (StringUtils.isNotBlank(version)) {
+                       identifier = FormConfigUtils.getNewVersion(version);
+                    }
+                }
+            }
+            generatedManifest.setIdentifier(identifier);
             generatedManifest.setAppId(latestManifest.getAppId());
             generatedManifest.setAppVersion(latestManifest.getAppVersion());
         }
