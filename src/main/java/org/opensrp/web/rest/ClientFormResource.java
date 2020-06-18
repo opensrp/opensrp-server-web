@@ -67,8 +67,8 @@ public class ClientFormResource {
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
     private ResponseEntity<String> getClientFormMetadataList(
-            @RequestParam(value = "is_draft", required = false) String isDraftParam,
-            @RequestParam(value = "is_json_validator", required = false) String isJsonValidatorParam)
+            @RequestParam(value = Constants.EndpointParam.IS_DRAFT, required = false) String isDraftParam,
+            @RequestParam(value = Constants.EndpointParam.IS_JSON_VALIDATOR, required = false) String isJsonValidatorParam)
             throws JsonProcessingException {
         List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
         if (isDraftParam == null && isJsonValidatorParam == null) {
