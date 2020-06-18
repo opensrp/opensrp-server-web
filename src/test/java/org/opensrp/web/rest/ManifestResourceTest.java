@@ -1,14 +1,11 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ManifestService;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -26,7 +23,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
 
 public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 

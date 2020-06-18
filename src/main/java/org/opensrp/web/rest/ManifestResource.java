@@ -67,11 +67,12 @@ public class ManifestResource {
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<HttpStatus> create(@RequestBody (required = false) Manifest manifest,
             @RequestParam(value = "json", required = false) String json) {
+        Manifest newManifest = manifest;
         if (manifest.getIdentifier() == null && json != null) {
-			manifest = generateManifest(json);
+            newManifest = generateManifest(json);
         }
-        logger.info("Manifest version " + manifest.getAppVersion());
-        manifestService.addManifest(manifest);
+        logger.info("Manifest version " + newManifest.getAppVersion());
+        manifestService.addManifest(newManifest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
