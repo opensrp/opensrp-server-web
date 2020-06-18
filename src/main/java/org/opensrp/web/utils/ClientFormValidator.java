@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import com.squareup.okhttp.Call;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -58,186 +61,6 @@ public class ClientFormValidator {
 	private final ClientFormService clientFormService;
 
 	private static final String PROPERTIES_FILE_NAME = "properties_file_name";
-
-    public static void main(String[] mainArgs) throws IOException {
-        ClientFormValidator clientFormValidator = new ClientFormValidator();
-        clientFormValidator.performUpload();
-    }
-
-    private void performUpload() throws IOException {
-        String assetsFilePath = "/home/ona-kigamba/Documents/Projects/OpenSRP/opensrp-client-reveal/opensrp-reveal/src/main/assets/";
-        String formVersion = "0.0.1000";
-        String clientFormUrl = "http://192.168.56.103:8082/opensrp/rest/clientForm";
-        String basicAuthValue = "Basic ZXBocmFpbTpBbWFuaTEyMw==";
-
-        File file = new File(assetsFilePath);
-        HashMap<String, String> ruleFileRelations = new HashMap<>();
-        HashMap<String, String> subFormFileRelations = new HashMap<>();
-        HashSet<String> jsonFormFiles = new HashSet<>();
-        HashMap<String, String> formLabels = new HashMap<>();
-
-        // JSONPath Configuration
-        Configuration conf = Configuration.defaultConfiguration()
-                .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
-
-        if (file.exists() && file.isDirectory()) {
-            File[] files = file.listFiles();
-
-            for (File fileD: files) {
-                String fileName = fileD.getName();
-                if (fileD.isDirectory()) {
-                    System.out.println(fileD.getName() + " @ " + fileD.getAbsolutePath());
-                    if (fileName.equals("rule")) {
-                        File[] ruleFiles = fileD.listFiles();
-                        if (ruleFiles != null) {
-                            for (File ruleFile : ruleFiles) {
-                                String ruleFileName = ruleFile.getName();
-                                if (ruleFileName.endsWith(".yml")) {
-                                    System.out.println(
-                                            String.format("RULE FILE %s @ %s", ruleFileName, ruleFile.getAbsolutePath()));
-                                    if (!ruleFileRelations.containsKey(ruleFileName)) {
-                                        ruleFileRelations.put(fileName, null);
-                                    }
-                                }
-                            }
-                        }
-                    } else if (fileName.equals("json.form")) {
-                        File[] formFiles = fileD.listFiles();
-                        if (formFiles != null) {
-                            for (File formFile : formFiles) {
-                                String formFileName = formFile.getName();
-                                if (formFileName.endsWith(".json")) {
-                                    System.out.println(
-                                            String.format("JSON FORM FILE %s @ %s", formFileName, formFile.getAbsolutePath()));
-                                    jsonFormFiles.add(formFileName);
-
-                                    String fileStringContent = Files.readString(formFile.toPath());
-
-                                    String title = (JsonPath.using(conf)).parse(fileStringContent).read("$.step1.title");;
-
-                                    title = title == null ? "Sample Form" : title;
-                                    formLabels.put(formFileName, title);
-
-
-                                    // TODO: FETCH DEPENDENT RULE & FORM FILES
-                                    for (String jsonPath: jsonPathForSubFormReferences) {
-                                        List<String> references = (JsonPath.using(conf)).parse(
-                                                fileStringContent).read(jsonPath);
-
-                                        if (references != null && references.size() > 0) {
-                                            for (String reference : references) {
-                                                subFormFileRelations.put(reference + ".json", formFileName);
-                                            }
-                                        }
-                                    }
-
-
-                                    for (String jsonPath: jsonPathForRuleReferences) {
-                                        List<String> references = (JsonPath.using(conf)).parse(
-                                                fileStringContent).read(jsonPath);
-
-                                        if (references != null) {
-                                            for (String reference : references) {
-                                                ruleFileRelations.put(reference, formFileName);
-                                            }
-                                        }
-                                    }
-/*
-
-                                    for (String jsonPath: jsonPathForPropertyFileReferences) {
-                                        List<String> references = (JsonPath.using(conf)).parse(Files.readString(formFile.toPath())).read(jsonPath);
-
-                                        for(String reference: references) {
-                                            ruleFileRelations.put(reference + ".yml", formFileName);
-                                        }
-                                    }*/
-
-
-                                } else if (formFile.isDirectory() && formFileName.equals("sub_form")) {
-                                    File[] subFormFiles = formFile.listFiles();
-                                    if (subFormFiles != null) {
-                                        for (File subFormFile : subFormFiles) {
-                                            String subFormFileName = subFormFile.getName();
-                                            if (subFormFileName.endsWith(".json")) {
-                                                System.out.println(
-                                                        String.format("JSON SUB-FORM FILE %s @ %s", subFormFileName, subFormFile.getAbsolutePath()));
-                                                if (!subFormFileRelations.containsKey(subFormFileName)) {
-                                                    subFormFileRelations.put(subFormFileName, null);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // TODO: Fetch each YML file & upload
-            for (String ymlFileName: ruleFileRelations.keySet()) {
-                File ymlFile = new File(assetsFilePath + "/rule/" + ymlFileName);
-                if (ymlFile.exists()) {
-                    // Lets upload it
-                    JSONObject jsonObject = new JSONObject();
-                    //jsonObject.
-
-                    String parentJsonFormFileName = ruleFileRelations.get(ymlFileName);
-                    String title = "Sample YML File";
-
-                    if (parentJsonFormFileName != null) {
-                        String titleRetrieved = formLabels.get(parentJsonFormFileName);
-                        title = titleRetrieved == null ? title : titleRetrieved + " Rules File";
-                    }
-
-                    MultipartBuilder multipartBuilder = new MultipartBuilder()
-                            .type(MultipartBuilder.FORM)
-                            .addFormDataPart("form_version", formVersion)
-                            .addFormDataPart("form_identifier", ymlFileName.replace(".yml", ""))
-                            .addFormDataPart("form_name", title)
-                            .addFormDataPart("form", ymlFileName, RequestBody
-                                    .create(MediaType.parse("application/x-yaml"), Files.readAllBytes(ymlFile.toPath())));
-
-                    //.addPart(RequestBody.create(MediaType.parse("application/x-yaml"), Files.readAllBytes(ymlFile.toPath())));
-
-                    if (parentJsonFormFileName != null) {
-                        multipartBuilder.addFormDataPart("form_relation", parentJsonFormFileName);
-                    }
-
-                    RequestBody requestBody = multipartBuilder.build();
-
-                    Request request = new Request.Builder()
-                            .header("Authorization", basicAuthValue)
-                            .url(clientFormUrl)
-                            .post(requestBody)
-                            .build();
-                    OkHttpClient httpClient = new OkHttpClient();
-                    try {
-                        httpClient.setReadTimeout(1, TimeUnit.SECONDS);
-                        Response response = httpClient
-                                .newCall(request)
-                                .execute();
-                        if (response.isSuccessful()) {
-                            // notification about succesful request
-                            System.out.println("Request was successful for " + ymlFileName);
-                        } else {
-                            // notification about failure request
-                            System.out.println("Request was not successful for " + ymlFileName);
-                        }
-                    }
-                    catch (IOException e1) {
-                        // notification about other problems
-                        System.out.println("Request exception for posting " + ymlFileName);
-                        e1.printStackTrace();
-                    }
-                }
-            }
-            // TODO: Fetch each JSON sub-form file & upload
-            // TODO: Check each JSON form file & upload
-
-            // TODO: Upload the final manifest
-        }
-    }
 
     private ClientFormValidator() {
         initialiseSubFormJsonPathReferences();
@@ -415,5 +238,29 @@ public class ClientFormValidator {
 			logger.info("", exception);
 		}
 		return fieldsMap;
+	}
+
+	public ArrayList<String> getJsonPathForSubFormReferences() {
+		return jsonPathForSubFormReferences;
+	}
+
+	public void setJsonPathForSubFormReferences(ArrayList<String> jsonPathForSubFormReferences) {
+		this.jsonPathForSubFormReferences = jsonPathForSubFormReferences;
+	}
+
+	public ArrayList<String> getJsonPathForRuleReferences() {
+		return jsonPathForRuleReferences;
+	}
+
+	public void setJsonPathForRuleReferences(ArrayList<String> jsonPathForRuleReferences) {
+		this.jsonPathForRuleReferences = jsonPathForRuleReferences;
+	}
+
+	public ArrayList<String> getJsonPathForPropertyFileReferences() {
+		return jsonPathForPropertyFileReferences;
+	}
+
+	public void setJsonPathForPropertyFileReferences(ArrayList<String> jsonPathForPropertyFileReferences) {
+		this.jsonPathForPropertyFileReferences = jsonPathForPropertyFileReferences;
 	}
 }
