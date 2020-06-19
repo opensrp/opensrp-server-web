@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -142,11 +143,11 @@ public class ClientFormResource {
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
     private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
-                                                 @RequestParam("form_identifier") String formIdentifier,
+                                                 @RequestParam(value = "form_identifier", required = false) String formIdentifier,
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module) {
-        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formIdentifier) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
@@ -201,13 +202,18 @@ public class ClientFormResource {
             }
         }
 
+        String identifier = formIdentifier;
+        if (TextUtils.isEmpty(formIdentifier)){
+            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+        }
+
         logger.info(fileContentString);
         clientForm.setJson(fileContentString);
         clientForm.setCreatedAt(new Date());
 
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setVersion(formVersion);
-        clientFormMetadata.setIdentifier(formIdentifier);
+        clientFormMetadata.setIdentifier(identifier);
         clientFormMetadata.setLabel(formName);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
