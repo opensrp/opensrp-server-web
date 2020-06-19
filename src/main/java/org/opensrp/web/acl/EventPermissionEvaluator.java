@@ -25,49 +25,35 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
 	}
 
 	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof String) {
-			/* @formatter:off */
-			return getAssignedLocations(authentication.getName())
-					.stream()
-					.anyMatch(assignedLocation -> assignedLocation.getPlanId().equals(targetId));
-			/* @formatter:on */
-		} else if (isCollectionOfString(targetId)) {
-			Collection<String> identifiers = (Collection<String>) targetId;
-			/* @formatter:off */
-			return getAssignedLocations(authentication.getName())
-					.stream()
-					.allMatch((assignedLocation) -> {
-						return identifiers.contains(assignedLocation.getPlanId());
-					});
-			/* @formatter:on */
-		} else if (targetId instanceof Event) {
+		if (targetId instanceof Event) {
 			Event event = (Event) targetId;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
 					.anyMatch((assignedLocation) -> {
-						return assignedLocation.getPlanId().equals(event.getLocationId());
+						return assignedLocation.getJurisdictionId().equals(event.getLocationId()) ||
+								assignedLocation.getOrganizationId().equals(event.getTeamId());
 					});
 			/* @formatter:on */
 		} else if (isCollectionOfResources(targetId, Event.class)) {
 			Collection<Event> events = (Collection<Event>) targetId;
-			Set<String> planIdentifiers = new HashSet<>();
+			Set<String> organizationIdentifiers = new HashSet<>();
 			Set<String> jurisdictionIdentifiers = new HashSet<>();
 			/* @formatter:off */
 			getAssignedLocations(authentication.getName())
 					.stream()
 					.forEach((assignedLocation) -> {
-						planIdentifiers.add(assignedLocation.getPlanId());
+						organizationIdentifiers.add(assignedLocation.getOrganizationId());
 						jurisdictionIdentifiers.add(assignedLocation.getJurisdictionId());
 					});
 			return events
 					.stream()
 					.allMatch((event) -> {
-						return planIdentifiers.contains(event.getLocationId());
+						return jurisdictionIdentifiers.contains(event.getLocationId()) ||
+								organizationIdentifiers.contains(event.getTeamId());
 					});
 			/* @formatter:on */
 		}
 		return false;
 	}
-
 }
