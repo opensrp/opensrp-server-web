@@ -104,8 +104,6 @@ public class SearchResource extends RestResource<Client> {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
 	private List<ChildMother> searchPathBy(HttpServletRequest request) throws ParseException {
-		try {
-			
 			//Process clients search via demographics
 			
 			ClientSearchBean searchBean = new ClientSearchBean();
@@ -174,13 +172,6 @@ public class SearchResource extends RestResource<Client> {
 			}
 			
 			return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
-			
-		}
-		catch (Exception e) {
-			
-			logger.error("", e);
-			return new ArrayList<ChildMother>();
-		}
 	}
 	
 	public List<String> getClientBaseEntityIdsByContactPhoneNumber(String motherGuardianPhoneNumber) {
