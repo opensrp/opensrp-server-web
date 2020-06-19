@@ -111,31 +111,24 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> sync(HttpServletRequest request) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
-		try {
-			String providerId = getStringFilter(PROVIDER_ID, request);
-			String locationId = getStringFilter(LOCATION_ID, request);
-			String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-			String team = getStringFilter(TEAM, request);
-			String teamId = getStringFilter(TEAM_ID, request);
-			Integer limit = getIntegerFilter("limit", request);
 
-			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
+		String providerId = getStringFilter(PROVIDER_ID, request);
+		String locationId = getStringFilter(LOCATION_ID, request);
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String team = getStringFilter(TEAM, request);
+		String teamId = getStringFilter(TEAM_ID, request);
+		Integer limit = getIntegerFilter("limit", request);
 
-				return new ResponseEntity<>(
-				        objectMapper.writeValueAsString(
-				            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
-			}
+		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
-		}
-		catch (Exception e) {
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(
+			        objectMapper.writeValueAsString(
+			            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			response.setMsg("specify atleast one filter");
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 		}
 	}
 
@@ -149,25 +142,17 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
-		try {
 
-			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
-			        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
-				
-				return new ResponseEntity<>(objectMapper.writeValueAsString(
-				    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
-				        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
-			}
+		if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
+		        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
 
-		}
-		catch (Exception e) {			
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(
+			    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
+			        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			response.setMsg("specify atleast one filter");
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 		}
 	}
 
