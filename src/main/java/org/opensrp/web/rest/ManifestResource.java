@@ -73,19 +73,14 @@ public class ManifestResource {
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity<HttpStatus> create(@RequestBody (required = false) Manifest manifest,
-            @RequestParam(value = "json", required = false) String json) {
+    public ResponseEntity<HttpStatus> create(@RequestBody Manifest manifest) {
         Manifest newManifest = manifest;
-        String manifestJson = json;
-        if (manifest.getIdentifier() == null && json != null) {
-            newManifest = generateManifest(manifestJson);
-        }
-        else {
-            manifestJson = manifest.getJson();
+        if (manifest.getIdentifier() == null && manifest.getJson() != null) {
+            newManifest = generateManifest(manifest.getJson());
         }
         logger.info("Manifest version " + newManifest.getAppVersion());
         manifestService.addManifest(newManifest);
-        clientFormService.updateClientFormMetadataIsDraftValueByVersion(false, FormConfigUtils.getFormsVersion(manifestJson));
+        clientFormService.updateClientFormMetadataIsDraftValueByVersion(false, FormConfigUtils.getFormsVersion(newManifest.getJson()));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -167,19 +162,10 @@ public class ManifestResource {
 
     protected Manifest generateManifest(String jsonString) {
         Manifest latestManifest = manifestService.getAllManifest(1).get(0);
-        String identifier = "0.0.1";
         Manifest generatedManifest = new Manifest();
         if (latestManifest != null) {
-            String json = latestManifest.getJson();
-            if (StringUtils.isNotBlank(json)) {
-                JSONObject jsonObject = new JSONObject(json);
-                if (jsonObject.has(IDENTIFIER)) {
-                    String version = jsonObject.getString(IDENTIFIER);
-                    if (StringUtils.isNotBlank(version)) {
-                       identifier = FormConfigUtils.getNewVersion(version);
-                    }
-                }
-            }
+            String identifier = FormConfigUtils.getNewVersion(latestManifest.getIdentifier());
+            logger.info("Generated Identifier -> " + identifier);
             generatedManifest.setIdentifier(identifier);
             generatedManifest.setAppId(latestManifest.getAppId());
             generatedManifest.setAppVersion(latestManifest.getAppVersion());
