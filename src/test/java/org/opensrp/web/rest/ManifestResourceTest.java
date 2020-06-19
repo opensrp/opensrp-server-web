@@ -90,7 +90,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
     private static Manifest initTestManifest3() {
         Manifest manifest = new Manifest();
-        String identifier = "1.0.2";
+        String identifier = "0.0.2";
         String appVersion = "3.4.2";
         String appId = "org.smartregister.anc";
 
@@ -180,7 +180,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     @Test
     public void testCreateNewManifestWithJsonOnly() throws Exception {
         Manifest existingManifest = new Manifest();
-
+        existingManifest.setIdentifier("0.0.1");
         existingManifest.setAppId("org.smartregister.anc");
         existingManifest.setAppVersion("3.4.2");
         existingManifest.setJson(existingManifestJson);
@@ -194,7 +194,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         Manifest expectedManifest = initTestManifest3();
 
-        postRequestWithJsonParam(BASE_URL, manifestJsonOnlyValue, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContent(BASE_URL, manifestJsonOnlyValue, MockMvcResultMatchers.status().isCreated());
 
         verify(manifestService).addManifest(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
