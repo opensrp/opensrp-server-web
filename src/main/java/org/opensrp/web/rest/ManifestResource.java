@@ -2,9 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.json.JSONObject;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
