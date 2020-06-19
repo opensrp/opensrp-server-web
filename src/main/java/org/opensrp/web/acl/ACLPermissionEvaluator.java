@@ -5,9 +5,7 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
-import org.opensrp.domain.Organization;
-import org.opensrp.domain.PhysicalLocation;
-import org.opensrp.domain.PlanDefinition;
+import org.opensrp.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -30,12 +28,14 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 	
 	@Autowired
 	private UserPermissionEvaluator userPermissionEvaluator;
+
+	@Autowired
+	private EventPermissionEvaluator eventPermissionEvaluator;
 	
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-		boolean hasAccess = false;
 		if (targetDomainObject == null || permission == null || !hasPermission(authentication, permission.toString())) {
-			return hasAccess;
+			return false;
 		} else if (targetDomainObject instanceof PlanDefinition) {
 			return planPermissionEvaluator.hasPermission(authentication, (PlanDefinition) targetDomainObject);
 		} else if (targetDomainObject instanceof Organization) {
@@ -44,8 +44,10 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return locationPermissionEvaluator.hasPermission(authentication, (PhysicalLocation) targetDomainObject);
 		} else if (targetDomainObject instanceof String) {
 			return userPermissionEvaluator.hasPermission(authentication, (String) targetDomainObject);
+		} else if (targetDomainObject instanceof Event) {
+			return eventPermissionEvaluator.hasPermission(authentication, (Event) targetDomainObject);
 		}
-		return hasAccess;
+		return false;
 	}
 	
 	@Override
@@ -61,6 +63,8 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return locationPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
 		} else if ("User".equals(targetType)) {
 			return userPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
+		} else if (Event.class.getSimpleName().equals(targetType)) {
+			return eventPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
 		}
 		return false;
 	}
@@ -71,5 +75,4 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 		        .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + permission));
 		/* @formatter:off */
 	}
-	
 }
