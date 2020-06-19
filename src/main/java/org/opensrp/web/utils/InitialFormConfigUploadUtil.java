@@ -79,17 +79,36 @@ public class InitialFormConfigUploadUtil {
 
 
 	public void performUpload() throws IOException {
-		/* THESE VALUES SHOULD BE CHANGED */
+		/*
+		********************************
+		 THESE VALUES SHOULD BE CHANGED
+		********************************
+		*/
+
+		// Path to client project assets folder with json.form
 		String assetsFilePath = "/home/ona-kigamba/Documents/Projects/OpenSRP/opensrp-client-reveal/opensrp-reveal/src/main/assets/";
-		String formVersion = "0.0.1000";
+		// Initial form version
+		String formVersion = "0.0.1";
+
+		// Base URL for the server to which the forms will be uploaded
 		String baseUrl = "http://192.168.56.103:8082";
+
+		// Authentication details for the server
+		String username = "username";
+		String password = "password";
+		String encoding = new String(java.util.Base64.getEncoder().encode((username + ":" + password).getBytes()));
+
 		String clientFormUrl = baseUrl + "/opensrp/rest/clientForm";
 		String manifestUrl = baseUrl + "/opensrp/rest/manifest";
-		String basicAuthValue = "Basic ZXBocmFpbTpBbWFuaTEyMw==";
+		String basicAuthValue = "Basic " + encoding;
 		String appId = "org.smartregister.random";
 		String appVersion = "0.0.1";
 
-		/* END OF CHANGEABLE VALUES */
+		/*
+		********************************
+			END OF CHANGEABLE VALUES
+		********************************
+		*/
 
 		File file = new File(assetsFilePath);
 		HashMap<String, String> ruleFileRelations = new HashMap<>();
