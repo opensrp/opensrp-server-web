@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.opensrp.domain.Manifest;
+import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,9 @@ public class ManifestResource {
     private static Logger logger = LoggerFactory.getLogger(ManifestResource.class.toString());
     public static final String FALSE = Boolean.FALSE.toString();
     private ManifestService manifestService;
+    private ClientFormService clientFormService;
     public static final String IDENTIFIER = "identifier";
+    public static final String FORM_VERSION = "forms_version";
     protected ObjectMapper objectMapper;
 
     @Autowired
@@ -41,6 +45,11 @@ public class ManifestResource {
     @Autowired
     public void setManifestService(ManifestService manifestService) {
         this.manifestService = manifestService;
+    }
+
+    @Autowired
+    public void setClientFormService(ClientFormService clientFormService) {
+        this.clientFormService = clientFormService;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -63,8 +72,13 @@ public class ManifestResource {
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE})
     public ResponseEntity<HttpStatus> create(@RequestBody Manifest manifest) {
-        logger.info("Manifest version " + manifest.getAppVersion());
-        manifestService.addManifest(manifest);
+        Manifest newManifest = manifest;
+        if (manifest.getIdentifier() == null && manifest.getJson() != null) {
+            newManifest = generateManifest(manifest.getJson());
+        }
+        logger.info("Manifest version " + newManifest.getAppVersion());
+        manifestService.addManifest(newManifest);
+        clientFormService.updateClientFormMetadataIsDraftValueByVersion(false, FormConfigUtils.getFormsVersion(newManifest.getJson()));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -144,4 +158,17 @@ public class ManifestResource {
                 HttpStatus.OK);
     }
 
+    protected Manifest generateManifest(String jsonString) {
+        Manifest latestManifest = manifestService.getAllManifest(1).get(0);
+        Manifest generatedManifest = new Manifest();
+        if (latestManifest != null) {
+            String identifier = FormConfigUtils.getNewVersion(latestManifest.getIdentifier());
+            logger.info("Generated Identifier -> " + identifier);
+            generatedManifest.setIdentifier(identifier);
+            generatedManifest.setAppId(latestManifest.getAppId());
+            generatedManifest.setAppVersion(latestManifest.getAppVersion());
+        }
+		generatedManifest.setJson(jsonString);
+        return generatedManifest;
+    }
 }
