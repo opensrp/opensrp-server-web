@@ -1,13 +1,12 @@
 package org.opensrp.web;
 
 public interface Constants {
-
     String LIMIT = "limit";
-
+    
     int DEFAULT_LIMIT = 25;
-
+    
     int DEFAULT_GET_ALL_IDS_LIMIT = 5000;
-
+    
     String WITH_FAMILY_EVENTS = "withFamilyEvents";
     String BASE_ENTITY_IDS = "baseEntityIds";
     String CLIENTS = "clients";
@@ -17,16 +16,24 @@ public interface Constants {
     String NO_OF_EVENTS = "no_of_events";
     String ERROR_OCCURRED = "Error occurred";
     String FAILURE = "Failure occurred";
-    String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
-
-    String RETURN_COUNT= "return_count";
+    String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request.";
+    
+    String RETURN_COUNT = "return_count";
     String TOTAL_RECORDS = "total_records";
-
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
     }
-
+    
+    interface RestEndpointUrls {
+        String SETTINGS_V2_URL = "/rest/v2/settings";
+    }
+    
+    interface RestPartVariables {
+        String IDENTIFIER = "identifier";
+        String ID = "id";
+    }
+    
     interface EndpointParam {
         String APP_ID = "app_id";
         String STRICT = "strict";
@@ -34,7 +41,7 @@ public interface Constants {
         String IS_DRAFT= "is_draft";
         String IS_JSON_VALIDATOR= "is_json_validator";
     }
-
+    
     interface DefaultEndpointParam {
         String FALSE = "false";
     }
