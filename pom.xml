@@ -5,7 +5,7 @@
     <groupId>org.smartregister</groupId>
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.1.31-SNAPSHOT</version>
+    <version>2.1.32-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -25,9 +25,9 @@
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 
-        <opensrp.core.version>2.4.8-ANC-ALPHA10-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
-        <opensrp.common.version>2.0.2-ANC-ALPHA-SNAPSHOT</opensrp.common.version>
+        <opensrp.core.version>2.4.12</opensrp.core.version>
+        <opensrp.connector.version>2.0.3</opensrp.connector.version>
+        <opensrp.common.version>2.0.3</opensrp.common.version>
 
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
