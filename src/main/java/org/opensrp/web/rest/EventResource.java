@@ -1,6 +1,5 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
 import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
@@ -310,52 +309,30 @@ public class EventResource extends RestResource<Event> {
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-		try {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("clients") && !syncData.has("events")) {
-				return new ResponseEntity<>(BAD_REQUEST);
-			}
 
-			if (syncData.has("clients")) {
-
-				ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
-				    new TypeToken<ArrayList<Client>>() {}.getType());
-				for (Client client : clients) {
-					try {
-						clientService.addorUpdate(client);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-
-			}
-			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
-				    new TypeToken<ArrayList<Event>>() {}.getType());
-				for (Event event : events) {
-					try {
-						event = eventService.processOutOfArea(event);
-						eventService.addorUpdateEvent(event);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
-						            : event.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-			}
-
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("clients") && !syncData.has("events")) {
+			return new ResponseEntity<>(BAD_REQUEST);
 		}
-		catch (
 
-		Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		if (syncData.has("clients")) {
+
+			ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
+			    new TypeToken<ArrayList<Client>>() {}.getType());
+			for (Client client : clients) {
+				clientService.addorUpdate(client);
+			}
 		}
+
+		if (syncData.has("events")) {
+			ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
+			    new TypeToken<ArrayList<Event>>() {}.getType());
+			for (Event event : events) {
+				event = eventService.processOutOfArea(event);
+				eventService.addorUpdateEvent(event);
+			}
+		}
+
 		return new ResponseEntity<>(CREATED);
 	}
 
