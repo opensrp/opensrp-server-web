@@ -7,16 +7,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.TextUtils;
 import org.joda.time.DateTime;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
-import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
 import org.opensrp.util.DateTimeTypeConverter;
@@ -40,11 +36,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-@Controller
+@Controller ("settingResourceV2")
 @RequestMapping (value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+	public static final String SETTING_IDENTIFIER = "identifier";
+	
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	protected ObjectMapper objectMapper;
@@ -91,14 +89,20 @@ public class SettingResource {
 			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
-			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS,request);
+			String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
+			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
 			
-			if ((StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team)) || StringUtils.isBlank(serverVersion)) {
-				return new ResponseEntity<>(response.toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
+			if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
+					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
+				return new ResponseEntity<>("All parameters cannot be null for this endpoint",
+						RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 			}
 			
-			Long lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+			long lastSyncedServerVersion = 0L;
+			if (StringUtils.isNotBlank(serverVersion)) {
+				lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+			}
+			
 			
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
@@ -106,15 +110,17 @@ public class SettingResource {
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
 			settingQueryBean.setServerVersion(lastSyncedServerVersion);
-			settingQueryBean.setResolveSettings(resolveSettings);
+			if (StringUtils.isNotBlank(identifier)) {
+				settingQueryBean.setIdentifier(identifier);
+			}
+			if (StringUtils.isNotBlank(locationId)) {
+				settingQueryBean.setResolveSettings(resolveSettings);
+			}
 			
 			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
 			List<Setting> settingList = extractSettings(settingConfigurations);
-			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
-			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(settingList);
 			
-			
-			return new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 			
 		} catch (Exception e) {
 			logger.error(MessageFormat.format("Fetching settings failed with the following error {0}.- ", e));
@@ -145,8 +151,10 @@ public class SettingResource {
 	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
+			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
 			settingService.addOrUpdateSettings(setting);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid settings json" + entity);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -169,10 +177,12 @@ public class SettingResource {
 	public ResponseEntity<String> delete(@PathVariable (Constants.RestPartVariables.ID) Long id) {
 		try {
 			if (id == null) {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
+						HttpStatus.BAD_REQUEST);
 			} else {
 				settingService.deleteSetting(id);
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
+						HttpStatus.NO_CONTENT);
 			}
 		} catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
