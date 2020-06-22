@@ -12,7 +12,7 @@ import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.opensrp.util.DateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
