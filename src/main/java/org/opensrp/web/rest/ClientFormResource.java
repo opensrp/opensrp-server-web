@@ -21,6 +21,7 @@ import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,13 +67,21 @@ public class ClientFormResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
-    private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
-        List<ClientFormMetadata> clientFormMetadataList;
-        if (isDraftParam == null) {
+    private ResponseEntity<String> getClientFormMetadataList(
+            @RequestParam(value = Constants.EndpointParam.IS_DRAFT, required = false) String isDraftParam,
+            @RequestParam(value = Constants.EndpointParam.IS_JSON_VALIDATOR, required = false) String isJsonValidatorParam)
+            throws JsonProcessingException {
+
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+
+        if (StringUtils.isBlank(isDraftParam) && StringUtils.isBlank(isJsonValidatorParam)) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
-        } else {
+        } else if (StringUtils.isNotBlank(isDraftParam)) {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
-            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+            clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
+        } else if (StringUtils.isNotBlank(isJsonValidatorParam)) {
+            boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorParam.toLowerCase());
+            clientFormMetadataList = clientFormService.getJsonWidgetValidatorClientFormMetadata(isJsonValidator);
         }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
@@ -211,7 +220,6 @@ public class ClientFormResource {
         }
 
 
-
         String fileContentType = jsonFile.getContentType();
         if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
             return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
@@ -289,21 +297,7 @@ public class ClientFormResource {
                         if (jsonObject.has(FORMS_VERSION)) {
                             String version = jsonObject.getString(FORMS_VERSION);
                             if (StringUtils.isNotBlank(version)) {
-                                DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(version);
-                                if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
-                                                    "." + newVersion;
-                                } else if (defaultArtifactVersion.getMinorVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion.getIncrementalVersion();
-                                } else {
-                                    int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
-                                    formVersion =
-                                            newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion.getIncrementalVersion();
-                                }
+                                formVersion = FormConfigUtils.getNewVersion(version);
                                 break;
                             }
                         }
@@ -328,6 +322,11 @@ public class ClientFormResource {
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
+        if(!isJsonValidator) {
+            clientFormMetadata
+                    .setIsDraft(true); //After any upload all the files will need to be a draft except for the json
+            // widget validators.
+        }
 
         if (!StringUtils.isBlank(relation)){
             clientFormMetadata.setRelation(relation);
