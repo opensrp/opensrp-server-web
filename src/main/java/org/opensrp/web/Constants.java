@@ -1,7 +1,6 @@
 package org.opensrp.web;
 
 public interface Constants {
-    
     String LIMIT = "limit";
     
     int DEFAULT_LIMIT = 25;
@@ -21,7 +20,6 @@ public interface Constants {
     
     String RETURN_COUNT = "return_count";
     String TOTAL_RECORDS = "total_records";
-    
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
