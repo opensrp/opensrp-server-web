@@ -83,7 +83,6 @@ public class SettingResource {
 	@RequestMapping (value = "/", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
 		try {
-			JSONObject response = new JSONObject();
 			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 			String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
 			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);

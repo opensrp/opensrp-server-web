@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import static java.text.MessageFormat.format;
 
-;
-
 @Controller
 @RequestMapping (value = "/rest/settings")
 public class SettingResource {
