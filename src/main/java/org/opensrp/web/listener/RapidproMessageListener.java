@@ -9,7 +9,7 @@ import org.opensrp.connector.rapidpro.MessageFactory;
 import org.opensrp.connector.rapidpro.MessageService;
 import org.opensrp.connector.rapidpro.MessageType;
 import org.opensrp.connector.repository.couch.AllCamp;
-import org.opensrp.domain.Event;
+import org.smartregister.domain.Event;
 import org.opensrp.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

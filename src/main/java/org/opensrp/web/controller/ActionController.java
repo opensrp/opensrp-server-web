@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.opensrp.dto.Action;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.scheduler.Alert;

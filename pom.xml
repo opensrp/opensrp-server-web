@@ -26,8 +26,13 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
+<<<<<<< HEAD
 		<opensrp.core.version>2.4.4-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.0.2-SNAPSHOT</opensrp.connector.version>
+=======
+		<opensrp.core.version>2.5.0-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.0.3-SNAPSHOT</opensrp.connector.version>
+>>>>>>> 3af8343... Change domain package for entities
 		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.0-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>

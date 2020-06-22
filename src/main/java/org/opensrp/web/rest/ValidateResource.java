@@ -12,11 +12,16 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.opensrp.domain.Client;
-import org.opensrp.domain.Event;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+<<<<<<< HEAD
 import org.opensrp.util.DateTimeTypeConverter;
+=======
+import org.smartregister.utils.DateTimeTypeConverter;
+import org.opensrp.web.utils.Utils;
+>>>>>>> 3af8343... Change domain package for entities
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

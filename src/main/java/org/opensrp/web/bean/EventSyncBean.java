@@ -2,8 +2,8 @@ package org.opensrp.web.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.opensrp.domain.Client;
-import org.opensrp.domain.Event;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 
 public class EventSyncBean {
 	
