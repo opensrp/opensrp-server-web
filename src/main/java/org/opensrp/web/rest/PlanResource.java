@@ -99,10 +99,16 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans() {
-		return new ResponseEntity<>(gson.toJson(planService.getAllPlans()), RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
+	public ResponseEntity<List<PlanDefinition>> getPlans(
+			@RequestParam(value = "is_template", required = false) Boolean isTemplateParam) {
+		List<PlanDefinition> planDefinitions;
 
+		if (isTemplateParam == Boolean.TRUE) {
+			planDefinitions = planService.getPlanTemplates();
+		} else {
+			planDefinitions = planService.getPlansWithoutTemplates();
+		}
+		return new ResponseEntity<>(planDefinitions, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
