@@ -39,11 +39,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/rest/clientForm")
@@ -206,7 +202,8 @@ public class ClientFormResource {
                                                  @RequestParam("form_name") String formName,
                                                  @RequestParam("form") MultipartFile jsonFile,
                                                  @RequestParam(required = false) String module,
-                                                 @RequestParam(value = "is_json_validator", defaultValue = "false") String isJsonValidatorStringRep) {
+                                                 @RequestParam(value = "is_json_validator", defaultValue = "false") String isJsonValidatorStringRep)
+            throws JsonProcessingException {
         boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorStringRep.toLowerCase());
         if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
@@ -252,14 +249,21 @@ public class ClientFormResource {
                 }
 
                 if (!missingRuleFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(",", missingRuleFileReferences);
+                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(", ", missingRuleFileReferences);
                 }
 
                 if (!missingPropertyFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(",", missingPropertyFileReferences);
+                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
                 }
 
                 return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+            }
+
+            // Perform check to make sure that fields are not removed
+            HashSet<String> missingFields = clientFormValidator.performWidgetValidation(objectMapper, formIdentifier, fileContentString);
+            if (missingFields.size() > 0) {
+                return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(", ", missingFields)
+                        + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }
 

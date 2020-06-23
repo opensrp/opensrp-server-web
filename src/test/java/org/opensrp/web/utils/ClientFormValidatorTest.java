@@ -1,12 +1,18 @@
 package org.opensrp.web.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import junit.framework.TestCase;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.TestFileContent;
+import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 
+import java.text.DateFormat;
 import java.util.HashSet;
 
 public class ClientFormValidatorTest extends TestCase {
@@ -85,5 +91,26 @@ public class ClientFormValidatorTest extends TestCase {
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
         assertEquals(1, missingReferences.size());
         assertEquals("anc_register", missingReferences.toArray()[0]);
+    }
+
+
+    public void testPerformWidgetValidation() throws JsonProcessingException {
+        String formIdentifier = "anc_registration.json";
+
+        ClientForm formValidator = new ClientForm();
+        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"aefi_form\"]}}");
+
+        Mockito.doReturn(formValidator)
+                .when(clientFormService).getMostRecentFormValidator(formIdentifier);
+
+
+        ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
+
+        HashSet<String> missingWidgets = clientFormValidator.performWidgetValidation(mapper, formIdentifier, TestFileContent.JSON_FORM_FILE);
+        assertEquals(2, missingWidgets.size());
     }
 }
