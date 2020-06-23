@@ -42,10 +42,12 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Controller
-@RequestMapping(value = "/rest/clientForm")
+@RequestMapping (value = "/rest/clientForm")
 public class ClientFormResource {
 
     public static final String FORM_IDENTIFIERS = "identifiers";
+
+    public static final String FORMS_VERSION = "forms_version";
 
     private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
     protected ObjectMapper objectMapper;
@@ -67,7 +69,7 @@ public class ClientFormResource {
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
     private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
-        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        List<ClientFormMetadata> clientFormMetadataList;
         if (isDraftParam == null) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
         } else {
@@ -87,7 +89,7 @@ public class ClientFormResource {
         boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorStringRep.toLowerCase());
         DefaultArtifactVersion formVersionRequired = new DefaultArtifactVersion(formVersion);
         DefaultArtifactVersion currentFormVersionV = null;
-        if (!TextUtils.isEmpty(currentFormVersion)) {
+        if (!StringUtils.isEmpty(currentFormVersion)) {
             currentFormVersionV = new DefaultArtifactVersion(currentFormVersion);
         }
 
@@ -196,7 +198,7 @@ public class ClientFormResource {
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
-    private ResponseEntity<String> addClientForm(@RequestParam("form_version") String formVersion,
+    private ResponseEntity<String> addClientForm(@RequestParam(value = "form_version", required = false) String formVersion,
                                                  @RequestParam(value = "form_identifier", required = false) String formIdentifier,
                                                  @RequestParam(value = "form_relation", required = false) String relation,
                                                  @RequestParam("form_name") String formName,
@@ -205,7 +207,7 @@ public class ClientFormResource {
                                                  @RequestParam(value = "is_json_validator", defaultValue = "false") String isJsonValidatorStringRep)
             throws JsonProcessingException {
         boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorStringRep.toLowerCase());
-        if (TextUtils.isEmpty(formVersion) || TextUtils.isEmpty(formName) || jsonFile.isEmpty()) {
+        if (StringUtils.isBlank(formName) || jsonFile.isEmpty()) {
             return new ResponseEntity<>("Required params is empty", HttpStatus.BAD_REQUEST);
         }
 
@@ -218,8 +220,6 @@ public class ClientFormResource {
             return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
         }
 
-        ClientForm clientForm = new ClientForm();
-
         byte[] bytes;
         try {
             bytes = jsonFile.getBytes();
@@ -230,17 +230,123 @@ public class ClientFormResource {
 
         String fileContentString = new String(bytes);
 
-        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
-        if (errorMessageForInvalidContent != null) {
-            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+        ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType,
+                fileContentString);
+        if (errorMessageForInvalidContent1 != null)
+            return errorMessageForInvalidContent1;
+
+        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(formIdentifier, isJsonValidator,
+                fileContentType, fileContentString);
+        if (errorMessage != null)
+            return errorMessage;
+
+        String identifier = getIdentifier(formIdentifier, jsonFile);
+        String version = getFormVersion(formVersion);
+
+        logger.info(fileContentString);
+        ClientFormService.CompleteClientForm completeClientForm =
+                clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
+                formName, module, isJsonValidator, identifier, relation));
+
+        if (completeClientForm == null) {
+            return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    private String getFormVersion(String formVersion){
+        String version = formVersion;
+        if (StringUtils.isBlank(formVersion)) {
+            version = generateFormVersion(2);
+        }
+        return  version;
+    }
+
+    private String getIdentifier(String formIdentifier, MultipartFile jsonFile) {
+        String identifier = formIdentifier;
+        if (StringUtils.isBlank(formIdentifier)) {
+            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+        }
+        return identifier;
+    }
+
+
+    private ClientForm getClientForm(String fileContentString) {
+        ClientForm clientForm = new ClientForm();
+        clientForm.setJson(fileContentString);
+        clientForm.setCreatedAt(new Date());
+        return clientForm;
+    }
+
+    private String generateFormVersion(int limit) {
+        String formVersion = "0.0.1";
+        if (limit < 6) {//I don't think we would have more than six manifests without form versions.
+            List<Manifest> manifestList = manifestService.getAllManifest(limit);
+            if (manifestList != null && manifestList.size() > 0) {
+                for (int i = 0; i < manifestList.size(); i++) {
+                    Manifest manifest = manifestList.get(i);
+                    String json = manifest.getJson();
+                    if (StringUtils.isNotBlank(json)) {
+                        JSONObject jsonObject = new JSONObject(json);
+                        if (jsonObject.has(FORMS_VERSION)) {
+                            String version = jsonObject.getString(FORMS_VERSION);
+                            if (StringUtils.isNotBlank(version)) {
+                                DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(version);
+                                if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
+                                    int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
+                                    formVersion =
+                                            defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
+                                                    "." + newVersion;
+                                } else if (defaultArtifactVersion.getMinorVersion() < 1000) {
+                                    int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
+                                    formVersion =
+                                            defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion.getIncrementalVersion();
+                                } else {
+                                    int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
+                                    formVersion =
+                                            newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion.getIncrementalVersion();
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (i + 1 == manifestList.size()) {
+                        generateFormVersion(limit + 1);
+                    }
+                }
+            }
+        }
+
+        return formVersion;
+    }
+
+    private ClientFormMetadata getClientFormMetadata(String formVersion, String formName,String module,
+            boolean isJsonValidator, String identifier, String relation) {
+        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+        clientFormMetadata.setVersion(formVersion);
+        clientFormMetadata.setIdentifier(identifier);
+        clientFormMetadata.setLabel(formName);
+        clientFormMetadata.setIsJsonValidator(isJsonValidator);
+        clientFormMetadata.setCreatedAt(new Date());
+        clientFormMetadata.setModule(module);
+
+        if (!StringUtils.isBlank(relation)){
+            clientFormMetadata.setRelation(relation);
+        }
+        return clientFormMetadata;
+    }
+
+    private ResponseEntity<String> checkJsonFormsReferenceValidity(
+            @RequestParam(value = "form_identifier", required = false) String formIdentifier,
+            boolean isJsonValidator, String fileContentType, String fileContentString) throws JsonProcessingException {
         if (isJsonFile(fileContentType) && !isJsonValidator) {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
 
-            String errorMessage = null;
+            String errorMessage;
             if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
                 errorMessage = "Form upload failed.";
 
@@ -266,35 +372,15 @@ public class ClientFormResource {
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }
+        return null;
+    }
 
-        String identifier = formIdentifier;
-        if (TextUtils.isBlank(formIdentifier)){
-            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+    private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
+        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
+        if (errorMessageForInvalidContent != null) {
+            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
         }
-
-        logger.info(fileContentString);
-        clientForm.setJson(fileContentString);
-        clientForm.setCreatedAt(new Date());
-
-        ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
-        clientFormMetadata.setVersion(formVersion);
-        clientFormMetadata.setIdentifier(identifier);
-        clientFormMetadata.setLabel(formName);
-        clientFormMetadata.setIsJsonValidator(isJsonValidator);
-        clientFormMetadata.setCreatedAt(new Date());
-        clientFormMetadata.setModule(module);
-
-        if (!TextUtils.isBlank(relation)){
-            clientFormMetadata.setRelation(relation);
-        }
-
-        ClientFormService.CompleteClientForm completeClientForm = clientFormService.addClientForm(clientForm, clientFormMetadata);
-
-        if (completeClientForm == null) {
-            return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return null;
     }
 
     @VisibleForTesting
