@@ -74,10 +74,11 @@ public class ClientFormResource {
         List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
         if (isDraftParam == null) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
-        } else {
-            boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
-            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
         }
+//        else {
+//            boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
+//            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+//        }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 

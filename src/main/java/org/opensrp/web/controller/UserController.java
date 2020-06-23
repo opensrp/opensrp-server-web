@@ -28,10 +28,6 @@ import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
-<<<<<<< HEAD
-=======
-import org.smartregister.domain.LocationProperty.PropertyStatus;
->>>>>>> 3af8343... Change domain package for entities
 import org.opensrp.domain.Organization;
 import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
