@@ -93,6 +93,8 @@ public class LocationResource {
 
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
+	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
+
 	public static final String PLAN_ID = "plan_id";
 
 	public static final String PAGE_SIZE = "page_size";
@@ -472,7 +474,8 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findJurisdictionTree(
 			@RequestParam(value = PLAN_ID, required = false) String planIdentifier,
-			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
 		try {
@@ -491,7 +494,7 @@ public class LocationResource {
 					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 
-		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, true);
+		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);
 
 		return new ResponseEntity<>(
 				gson.toJson(locationTree),
