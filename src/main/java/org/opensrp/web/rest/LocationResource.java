@@ -21,12 +21,16 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.LocationProperty;
 import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
+import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PractitionerService;
 import org.opensrp.util.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -89,15 +93,37 @@ public class LocationResource {
 
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
+	public static final String PLAN_ID = "plan_id";
+
 	public static final String PAGE_SIZE = "page_size";
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 	
 	private PhysicalLocationService locationService;
+
+	private OrganizationService organizationService;
+
+	private PractitionerService practitionerService;
 	
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
+	}
+
+	/**
+	 * @param organizationService the organizationService to set
+	 */
+	@Autowired
+	public void setOrganizationService(OrganizationService organizationService) {
+		this.organizationService = organizationService;
+	}
+
+	/**
+	 * @param practitionerService the practitionerService to set
+	 */
+	@Autowired
+	public void setPractitionerService(PractitionerService practitionerService) {
+		this.practitionerService = practitionerService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -440,6 +466,37 @@ public class LocationResource {
 		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(),
 		        HttpStatus.OK);
 		
+	}
+
+	@RequestMapping(value = "/findJurisdictionTree", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> findJurisdictionTree(
+			@RequestParam(value = PLAN_ID, required = false) String planIdentifier,
+			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds) {
+
+		Set<String> locationIds = new HashSet<>();
+		try {
+
+			for (AssignedLocations assignedLocation : organizationService
+					.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier)) {
+				locationIds.add(assignedLocation.getJurisdictionId());
+			}
+
+		}
+		catch (Exception e) {
+			logger.error("USER Location info not mapped to an organization", e);
+		}
+		if (locationIds.isEmpty()) {
+			throw new IllegalStateException(
+					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
+		}
+
+		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, true);
+
+		return new ResponseEntity<>(
+				gson.toJson(locationTree),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 
 	static class LocationSyncRequestWrapper {
