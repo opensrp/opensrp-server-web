@@ -475,7 +475,6 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findJurisdictionTree(
 			@RequestParam(value = PLAN_ID, required = false) String planIdentifier,
-			@RequestParam(value = JURISDICTION_IDS, required = false) List<String> jurisdictionIds,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
