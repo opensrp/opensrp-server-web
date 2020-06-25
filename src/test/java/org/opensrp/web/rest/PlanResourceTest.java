@@ -227,7 +227,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testCreateShouldCreateNewPlanResource() throws Exception {
-        doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class));
+        doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class),anyString());
         List<Jurisdiction> operationalAreas = new ArrayList<>();
         Jurisdiction operationalArea = new Jurisdiction();
         operationalArea.setCode("operational_area_1");
@@ -239,13 +239,13 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         postRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
-        verify(planService).addPlan(argumentCaptor.capture());
+        verify(planService).addPlan(argumentCaptor.capture(),anyString());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
     public void testCreateShouldThrowException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).addPlan(any(PlanDefinition.class));
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).addPlan(any(PlanDefinition.class),anyString());
         postRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
     }
 
@@ -271,13 +271,13 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>(){}.getType());
         putRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
-        verify(planService).updatePlan(argumentCaptor.capture());
+        verify(planService).updatePlan(argumentCaptor.capture(),anyString());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
     public void testUpdateShouldThrowException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class));
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class),anyString());
         putRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
     }
 

@@ -28,7 +28,6 @@ import com.google.gson.reflect.TypeToken;
 public class ANMLocationController {
     private static Logger logger = LoggerFactory.getLogger(ANMLocationController.class.toString());
     private final String opensrpANMVillagesURL;
-    private UserController userController;
     private HttpAgent httpAgent;
 
     @Autowired
@@ -36,7 +35,6 @@ public class ANMLocationController {
                                  UserController userController,
                                  HttpAgent httpAgent) {
         this.opensrpANMVillagesURL = opensrpANMVillagesURL;
-        this.userController = userController;
         this.httpAgent = httpAgent;
     }
 
