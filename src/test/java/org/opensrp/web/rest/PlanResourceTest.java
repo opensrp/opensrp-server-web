@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -34,7 +35,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
@@ -156,8 +156,9 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		
 		List<String> planIdList = new ArrayList<>();
 		planIdList.add(expectedPlan.getIdentifier());
+		expectedPlans.add(expectedPlan);
 		
-		doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(anyList(),
+		doReturn(expectedPlans).when(planService).getPlansByIdsReturnOptionalFields(anyList(),
 		    eq(null));
 		
 		String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, status().isOk());
@@ -327,7 +328,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		        .andExpect(status().isBadRequest()).andReturn();
 		
 	
-		verify(planService, Mockito.never()).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(),
+		verify(planService, never()).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(),
 		    longArgumentCaptor.capture());
 		
 	}
@@ -373,6 +374,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		    listArgumentCaptor.capture());
 		assertEquals(longArgumentCaptor.getValue().longValue(), 1);
 		assertEquals(listArgumentCaptor.getValue().get(0), "operational_area");
+		assertEquals(expectedPlans, actualPlans);
 	}
 	
 	@Override
@@ -395,7 +397,6 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	
 	@Test
 	public void testfindByIdentifiersReturnOptionalFieldsShouldReturnCorrectPlans() throws Exception {
-		List<PlanDefinition> expectedPlans = new ArrayList<>();
 		
 		List<Jurisdiction> operationalAreas = new ArrayList<>();
 		Jurisdiction operationalArea = new Jurisdiction();
@@ -520,7 +521,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		
 		verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(),
 		    listArgumentCaptor.capture());
-		assertEquals(longArgumentCaptor.getValue(), new Long(15421904649873l));
+		assertEquals(longArgumentCaptor.getValue().longValue(), 15421904649873l);
 		assertEquals(listArgumentCaptor.getAllValues().size(), operationalAreaIds.size());
 		assertEquals(actualObj.get(0).get("identifier").textValue(), planDefinitions.get(0).getIdentifier());
 		
