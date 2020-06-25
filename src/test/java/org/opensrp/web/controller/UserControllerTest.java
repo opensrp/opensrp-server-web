@@ -20,6 +20,7 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
+import org.opensrp.web.rest.RestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -76,7 +77,7 @@ public class UserControllerTest {
 	public void test() throws JSONException {
 		User u = new User("test user 1");
 		u.withAttribute("Location", "cd4ed528-87cd-42ee-a175-5e7089521ebd");
-		when(controller.currentUser(authentication)).thenReturn(u);
+		when(RestUtils.currentUser(authentication)).thenReturn(u);
 		JSONObject to = new JSONObject(TEAM_MEMEBER_OBJECT);
 		
 		doReturn(to).when(userservice).getTeamMember(any(String.class));

@@ -1,7 +1,5 @@
 package org.opensrp.web.rest;
 
-
-
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
@@ -92,9 +90,8 @@ public class PlanResource {
 		}
 
 		return new ResponseEntity<>(
-				gson.toJson(
-						planService.getPlansByIdsReturnOptionalFields(Collections.singletonList(identifier), fields)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		        gson.toJson(planService.getPlansByIdsReturnOptionalFields(Collections.singletonList(identifier), fields)),
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 	
@@ -106,10 +103,10 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
+	public ResponseEntity<HttpStatus> create(@RequestBody String entity, Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.addPlan(plan);
+			planService.addPlan(plan, RestUtils.currentUser(authentication).getUsername());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
@@ -120,10 +117,10 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
+	public ResponseEntity<HttpStatus> update(@RequestBody String entity, Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.updatePlan(plan);
+			planService.updatePlan(plan, RestUtils.currentUser(authentication).getUsername());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
@@ -142,14 +139,14 @@ public class PlanResource {
 		String username = null;
 		if (authentication != null)
 			username = authentication.getName();
-		if ((operationalAreaIds==null || operationalAreaIds.isEmpty()) && StringUtils.isBlank(username)) {
+		if ((operationalAreaIds == null || operationalAreaIds.isEmpty()) && StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Sync Params missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 
 		List<PlanDefinition> plans;
 		if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
 			plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
-					planSyncRequestWrapper.getServerVersion());
+			    planSyncRequestWrapper.getServerVersion());
 		} else if (username != null) {
 			plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
 		} else {
@@ -176,9 +173,8 @@ public class PlanResource {
 		}
 
 		return new ResponseEntity<>(
-				gson.toJson(
-						planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		        gson.toJson(planService.getPlansByServerVersionAndOperationalArea(currentServerVersion, operationalAreaIds)),
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	/**
@@ -205,7 +201,7 @@ public class PlanResource {
 			}
 		}
 		return new ResponseEntity<>(gson.toJson(planService.getPlansByIdsReturnOptionalFields(identifiers, fields)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	/**
@@ -221,7 +217,7 @@ public class PlanResource {
 	        @PathVariable("planIdentifier") String planIdentifier) {
 
 		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	/**
@@ -231,15 +227,13 @@ public class PlanResource {
 	 * @param limit upper limit on number os plas to fetch
 	 * @return A list of plan definitions
 	 */
-	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAll(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+	        @RequestParam(value = LIMIT, required = false) Integer limit) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 
@@ -248,10 +242,9 @@ public class PlanResource {
 	 *
 	 * @return A list of plan Identifiers
 	 */
-	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false)  long serverVersion,
-										  @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false ) boolean isDeleted) {
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
 
 		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
 		Identifier identifiers = new Identifier();
@@ -263,16 +256,14 @@ public class PlanResource {
 	}
 
 	/**
-	 * This method provides an API endpoint that searches for plans using a
-	 *  provided username
+	 * This method provides an API endpoint that searches for plans using a provided username
 	 *
 	 * @param username
 	 * @return plan definitions whose identifiers match the provided param
 	 */
-	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> fetchPlansForUser(@PathVariable(USERNAME) String username,
-			@RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion) {
+	        @RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion) {
 		
 		if (StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Request Param missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
