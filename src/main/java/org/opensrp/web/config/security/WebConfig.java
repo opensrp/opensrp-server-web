@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Configuration
 @EnableWebMvc
 @ComponentScan
+@EnableAsync
 public class WebConfig {
 	
 	@Bean

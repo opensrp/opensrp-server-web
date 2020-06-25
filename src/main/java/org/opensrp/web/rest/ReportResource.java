@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.domain.Report;
 import org.opensrp.service.ReportService;
-import org.opensrp.util.DateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

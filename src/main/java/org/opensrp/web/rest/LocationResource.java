@@ -15,7 +15,6 @@ import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,14 +24,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.LocationProperty;
-import org.opensrp.domain.PhysicalLocation;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
-import org.opensrp.util.PropertiesConverter;
+import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
 import org.slf4j.Logger;
@@ -95,7 +94,7 @@ public class LocationResource {
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
 	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
-	
+
 	public static final String RETURN_TAGS = "return_tags";
 
 	public static final String PLAN_ID = "plan_id";
@@ -109,7 +108,7 @@ public class LocationResource {
 	private OrganizationService organizationService;
 
 	private PractitionerService practitionerService;
-	
+
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -472,7 +471,7 @@ public class LocationResource {
 		        HttpStatus.OK);
 		
 	}
-	
+
 	/**
 	 * Generate a tree hierarchy of all descendants for the specified location
 	 *
