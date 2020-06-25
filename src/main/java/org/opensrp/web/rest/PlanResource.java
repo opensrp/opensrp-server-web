@@ -71,6 +71,8 @@ public class PlanResource {
 	public static final String FIELDS = "fields";
 	
 	public static final String USERNAME = "username";
+
+	public static final String IS_TEMPLATE = "is_template";
 	
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -84,7 +86,7 @@ public class PlanResource {
 	
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
-	        @RequestParam(value = FIELDS, required = false) List<String> fields , @RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+	        @RequestParam(value = FIELDS, required = false) List<String> fields , @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 		if (identifier == null) {
 			return new ResponseEntity<>("Plan Id is required", HttpStatus.BAD_REQUEST);
 		}
@@ -96,10 +98,8 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<PlanDefinition>> getPlans(
-			@RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(planService.getAllPlans(isTemplateParam), RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
+	public ResponseEntity<List<PlanDefinition>> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		return new ResponseEntity<>(planService.getAllPlans(isTemplateParam), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -133,7 +133,7 @@ public class PlanResource {
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {
 	        MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndAssignedPlansOnOrganization(
-	        @RequestBody PlanSyncRequestWrapper planSyncRequestWrapper, Authentication authentication, @RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+	        @RequestBody PlanSyncRequestWrapper planSyncRequestWrapper, Authentication authentication, @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 		
 		List<String> operationalAreaIds = planSyncRequestWrapper.getOperationalAreaId();
 		String username = null;
@@ -159,7 +159,7 @@ public class PlanResource {
 	// here for backward compatibility
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> syncByServerVersionAndOperationalAreaTwo(HttpServletRequest request,
-	        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds , @RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+	        @RequestParam(value = OPERATIONAL_AREA_ID) List<String> operationalAreaIds , @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 		String serverVersion = getStringFilter(SERVER_VERSIOIN, request);
 		long currentServerVersion = 0;
 		try {
@@ -192,7 +192,7 @@ public class PlanResource {
 	public ResponseEntity<String> findByIdentifiersReturnOptionalFields(HttpServletRequest request,
 	        @RequestParam(value = IDENTIFIERS) List<String> identifiers,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields,
-			@RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 
 		if (fields != null && !fields.isEmpty()) {
 			for (String fieldName : fields) {
@@ -230,7 +230,7 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
-	        @RequestParam(value = LIMIT, required = false) Integer limit, @RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+	        @RequestParam(value = LIMIT, required = false) Integer limit, @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit, isTemplateParam)),
@@ -265,7 +265,7 @@ public class PlanResource {
 	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> fetchPlansForUser(@PathVariable(USERNAME) String username,
 	        @RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion,
-			@RequestParam(value = "is_template", required = false) boolean isTemplateParam) {
+			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
 		
 		if (StringUtils.isBlank(username)) {
 			return new ResponseEntity<>("Request Param missing", RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
@@ -281,7 +281,7 @@ public class PlanResource {
 
 		List<PlanDefinition> plans;
 
-		plans = planService.getPlansByUsernameAndServerVersion(username, currentServerVersion, isTemplateParam);
+		plans = planService.getPlansByUsernameAndServerVersion(username, currentServerVersion);
 
 		return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
