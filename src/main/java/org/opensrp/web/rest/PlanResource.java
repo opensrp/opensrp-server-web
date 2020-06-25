@@ -281,7 +281,7 @@ public class PlanResource {
 
 		List<PlanDefinition> plans;
 
-		plans = planService.getPlansByUsernameAndServerVersion(username, currentServerVersion);
+		plans = planService.getPlansByUsernameAndServerVersion(username, currentServerVersion, isTemplateParam);
 
 		return new ResponseEntity<>(gson.toJson(plans), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
