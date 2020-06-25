@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -17,12 +18,17 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
+import org.opensrp.api.domain.User;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 
 public class RestUtils {
 	public static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -152,5 +158,24 @@ public class RestUtils {
 				}
 			}
 		}
+	}
+	
+	public static User currentUser(Authentication authentication) {
+		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
+			@SuppressWarnings("unchecked")
+			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
+			        .getPrincipal();
+			AccessToken token = kp.getKeycloakSecurityContext().getToken();
+			User user = new User(authentication.getName());
+			user.setPreferredName(token.getName());
+			user.setUsername(token.getPreferredUsername());
+			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
+			        .collect(Collectors.toList());
+			user.setAttributes(token.getOtherClaims());
+			user.setRoles(authorities);
+			user.setPermissions(authorities);
+			return user;
+		}
+		return null;
 	}
 }

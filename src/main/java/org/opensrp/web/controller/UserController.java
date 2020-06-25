@@ -28,12 +28,7 @@ import org.opensrp.api.domain.User;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
-<<<<<<< HEAD
-=======
-import org.smartregister.domain.LocationProperty.PropertyStatus;
->>>>>>> 3af8343... Change domain package for entities
 import org.opensrp.domain.Organization;
-import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -41,6 +36,7 @@ import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -102,24 +98,6 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	public User currentUser(Authentication authentication) {
-		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
-			@SuppressWarnings("unchecked")
-			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
-			        .getPrincipal();
-			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			User user = new User(authentication.getName());
-			user.setPreferredName(token.getName());
-			user.setUsername(token.getPreferredUsername());
-			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
-			        .collect(Collectors.toList());
-			user.setAttributes(token.getOtherClaims());
-			user.setRoles(authorities);
-			user.setPermissions(authorities);
-			return user;
-		}
-		return null;
-	}
 	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
@@ -148,7 +126,7 @@ public class UserController {
 	
 	@RequestMapping("/security/authenticate")
 	public ResponseEntity<String> authenticate(Authentication authentication) throws JSONException {
-		User u = currentUser(authentication);
+		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
