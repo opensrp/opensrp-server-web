@@ -1,7 +1,5 @@
 package org.opensrp.web.rest;
 
-
-
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
@@ -19,6 +17,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
@@ -51,7 +50,6 @@ import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-
 @Controller
 @RequestMapping(value = "/rest/location")
 @Api(value = LOCATION_RESOURCE, produces = LOCATION_RESOURCE)
@@ -82,7 +80,7 @@ public class LocationResource {
 
 	public static final String PROPERTIES_FILTER = "properties_filter";
 
-    public static final String JURISDICTION_IDS = "jurisdiction_ids";
+	public static final String JURISDICTION_IDS = "jurisdiction_ids";
 
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
@@ -90,8 +88,10 @@ public class LocationResource {
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
+	public static final String RETURN_TAGS = "return_tags";
+
 	private PhysicalLocationService locationService;
-	
+
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -104,7 +104,9 @@ public class LocationResource {
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
 
 		return new ResponseEntity<>(
-				gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
+				gson.toJson(isJurisdiction ?
+						locationService.getLocation(id, returnGeometry) :
+						locationService.getStructure(id, returnGeometry)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
@@ -114,7 +116,8 @@ public class LocationResource {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = locationSyncRequestWrapper.getServerVersion();
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
 
@@ -122,7 +125,7 @@ public class LocationResource {
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
 
-	if (isJurisdiction) {
+		if (isJurisdiction) {
 			if (StringUtils.isBlank(locationNames)) {
 				return new ResponseEntity<>(
 						gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion)),
@@ -145,13 +148,14 @@ public class LocationResource {
 	// here for backward compatibility
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getLocationsTwo(@RequestParam(BaseEntity.SERVER_VERSIOIN) String serverVersion,
-											   @RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-											   @RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
-											   @RequestParam(value = PARENT_ID, required = false) String parentIds) {
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = LOCATION_NAMES, required = false) String locationNames,
+			@RequestParam(value = PARENT_ID, required = false) String parentIds) {
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			logger.error("server version not a number");
 		}
 
@@ -184,7 +188,8 @@ public class LocationResource {
 			location.setJurisdiction(isJurisdiction);
 			locationService.add(location);
 			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (JsonSyntaxException e) {
+		}
+		catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid location representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -199,7 +204,8 @@ public class LocationResource {
 			location.setJurisdiction(isJurisdiction);
 			locationService.update(location);
 			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (JsonSyntaxException e) {
+		}
+		catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid location representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -211,6 +217,7 @@ public class LocationResource {
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction) {
 		try {
 			Type listType = new TypeToken<List<PhysicalLocation>>() {
+
 			}.getType();
 			List<PhysicalLocation> locations = gson.fromJson(entity, listType);
 			Set<String> locationWithErrors = locationService.saveLocations(locations, isJurisdiction);
@@ -220,7 +227,8 @@ public class LocationResource {
 				return new ResponseEntity<>("Locations with Ids not processed: " + String.join(",", locationWithErrors),
 						HttpStatus.CREATED);
 
-		} catch (JsonSyntaxException e) {
+		}
+		catch (JsonSyntaxException e) {
 			logger.error("The request doesnt contain a valid location representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -238,12 +246,13 @@ public class LocationResource {
 	}
 
 	/**
-	 * This methods provides an API endpoint that searches for jurisdictions and structures with the properties including parentId. 
-	 * It returns the Geometry optionally if @param returnGeometry is set to true. 
-	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
-	 * @param returnGeometry boolean which controls if geometry is returned
+	 * This methods provides an API endpoint that searches for jurisdictions and structures with the properties including parentId.
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
+	 * @param isJurisdiction    boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param returnGeometry    boolean which controls if geometry is returned
 	 * @param propertiesFilters list of params with each param having name and value e.g name:House1
-	 * @return the structures or jurisdictions matching the params 
+	 * @return the structures or jurisdictions matching the params
 	 */
 	@RequestMapping(value = "/findByProperties", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
@@ -277,16 +286,16 @@ public class LocationResource {
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 
-
 	}
 
-    /**
-     * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
-     * It returns the Geometry optionally if @param returnGeometry is set to true.
-     * @param returnGeometry boolean which controls if geometry is returned
-     * @param jurisdictionIds list of jurisdiction ids
-     * @return jurisdictions whose ids match the provided params
-     */
+	/**
+	 * This methods provides an API endpoint that searches for jurisdictions using a list of provided jurisdiction ids.
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
+	 * @param returnGeometry  boolean which controls if geometry is returned
+	 * @param jurisdictionIds list of jurisdiction ids
+	 * @return jurisdictions whose ids match the provided params
+	 */
 	@RequestMapping(value = "/findByJurisdictionIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> findByJurisdictionIds(
@@ -297,14 +306,15 @@ public class LocationResource {
 				gson.toJson(locationService.findLocationsByIds(returnGeometry, jurisdictionIds)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
-    }
+	}
 
 	/**
 	 * This methods provides an API endpoint that searches for a location and it's children using the provided location id
 	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
 	 * @param returnGeometry boolean which controls if geometry is returned
 	 * @param jurisdictionId location id
-	 * @param pageSize number of records to be returned
+	 * @param pageSize       number of records to be returned
 	 * @return location together with it's children whose id matches the provided param
 	 */
 	@RequestMapping(value = "/findByIdWithChildren", method = RequestMethod.GET, produces = {
@@ -330,9 +340,10 @@ public class LocationResource {
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
+			@RequestParam(value = SERVER_VERSION) long serverVersion) {
 
-		Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> structureIdsPair = locationService
+				.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(structureIdsPair.getLeft());
 		identifiers.setLastServerVersion(structureIdsPair.getRight());
@@ -343,10 +354,11 @@ public class LocationResource {
 	/**
 	 * Fetch structures or jurisdictions ordered by serverVersion ascending
 	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
 	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
 	 * @param returnGeometry boolean which controls if geometry is returned
-	 * @param serverVersion serverVersion using to filter by
-	 * @param limit upper limit on number os plas to fetch
+	 * @param serverVersion  serverVersion using to filter by
+	 * @param limit          upper limit on number os plas to fetch
 	 * @return the structures or jurisdictions matching the params
 	 */
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
@@ -354,8 +366,8 @@ public class LocationResource {
 	public ResponseEntity<String> getAll(
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
-			@RequestParam(value = BaseEntity.SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = LIMIT, required = false) Integer limit) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
@@ -380,9 +392,10 @@ public class LocationResource {
 	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findLocationIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
+			@RequestParam(value = SERVER_VERSION) long serverVersion) {
 
-		Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> locationIdsPair = locationService
+				.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(locationIdsPair.getLeft());
 		identifiers.setLastServerVersion(locationIdsPair.getRight());
@@ -390,10 +403,10 @@ public class LocationResource {
 		return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
-	
+
 	@RequestMapping(value = "/search-by-tag", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> searchLocations(LocationSearchBean locationSearchBean)
-	    throws JsonProcessingException {
+			throws JsonProcessingException {
 		LocationSearchcBean response = new LocationSearchcBean();
 		Integer pageNumber = locationSearchBean.getPageNumber();
 		try {
@@ -409,11 +422,30 @@ public class LocationResource {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(),
-		        HttpStatus.OK);
-		
+				HttpStatus.OK);
+
+	}
+
+	/**
+	 * Generate a tree hierarchy of all descendants for the specified location
+	 *
+	 * @param locationId The root location id
+	 * @param returnTags Optional flag whether location tags should be returned or not
+	 * @return A locations tree of all of the root location's descendants
+	 */
+	@RequestMapping(value = "/getHierarchy/{locationId}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> generateLocationTree(
+			@PathVariable("locationId") String locationId,
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags) {
+
+		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags);
+
+		return new ResponseEntity<>(new Gson().toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	static class LocationSyncRequestWrapper {
+
 		@JsonProperty("is_jurisdiction")
 		private Boolean isJurisdiction;
 
