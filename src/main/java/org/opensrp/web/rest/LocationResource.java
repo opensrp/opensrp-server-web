@@ -491,9 +491,9 @@ public class LocationResource {
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/findJurisdictionTree", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/getHierarchy/plan/{planIdentifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> findJurisdictionTree(
+	public ResponseEntity<String> generateLocationTreeForPlan(
 			@RequestParam(value = PLAN_ID, required = false) String planIdentifier,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
