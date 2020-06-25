@@ -54,8 +54,7 @@
 	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
 
 	<sec:http  request-matcher="mvc" auto-config="true" >
-	    <sec:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')" />  
-	
+		<sec:csrf disabled="true"/> 
 	</sec:http>
 	
 	 <sec:authentication-manager>  

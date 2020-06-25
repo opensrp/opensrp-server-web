@@ -7,7 +7,6 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.jeasy.rules.support.YamlRuleDefinitionReader;
@@ -74,7 +73,7 @@ public class ClientFormResource {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
         } else {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
-            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+            clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
         }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }

@@ -1125,7 +1125,7 @@ public class ClientFormResourceTest {
             clientFormMetadataList.add(clientFormMetadata);
         }
 
-        when(clientFormService.getClientFormMetadata(true)).thenReturn(clientFormMetadataList);
+        when(clientFormService.getDraftsClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
                 .param("is_draft", "true"))

@@ -2,7 +2,7 @@ package org.opensrp.web.rest.it;
 
 import java.util.List;
 
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.ErrorTraceRepository;

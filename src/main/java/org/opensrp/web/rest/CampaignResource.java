@@ -10,7 +10,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
 import org.opensrp.util.DateTypeConverter;
-import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

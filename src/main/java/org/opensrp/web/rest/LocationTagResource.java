@@ -2,7 +2,7 @@ package org.opensrp.web.rest;
 
 import java.util.List;
 
-import org.opensrp.domain.LocationTag;
+import org.smartregister.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
