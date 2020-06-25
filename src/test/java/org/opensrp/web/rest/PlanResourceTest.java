@@ -101,7 +101,10 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	
 	@Captor
 	private ArgumentCaptor<List<Long>> orgsArgumentCaptor;
-	
+
+	@Captor
+	private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(boolean.class);
+
 	@Before
 	public void setUp() {
 		planService = mock(PlanService.class);
@@ -132,7 +135,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		
 		expectedPlans.add(expectedPlan);
 		
-		doReturn(expectedPlans).when(planService).getAllPlans();
+		doReturn(expectedPlans).when(planService).getAllPlans(false);
 		
 		String actualPlansString = getResponseAsString(BASE_URL, null, status().isOk());
 		List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString,
@@ -157,9 +160,9 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		List<String> planIdList = new ArrayList<>();
 		planIdList.add(expectedPlan.getIdentifier());
 		expectedPlans.add(expectedPlan);
-		
+
 		doReturn(expectedPlans).when(planService).getPlansByIdsReturnOptionalFields(anyList(),
-		    eq(null));
+		    eq(null), anyBoolean());
 		
 		String actualPlansString = getResponseAsString(BASE_URL + "plan_1", null, status().isOk());
 		List<PlanDefinition> actualPlanList = new Gson().fromJson(actualPlansString,
@@ -262,7 +265,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setServerVersion(1l);
 		expectedPlans.add(expectedPlan);
 		
-		doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong());
+		doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong(), anyBoolean());
 		
 		String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"],\"organizations\":[2]}";
 		String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isOk());
@@ -272,7 +275,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		    new TypeToken<List<PlanDefinition>>() {}.getType());
 		
 		verify(planService).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(),
-		    longArgumentCaptor.capture());
+		    longArgumentCaptor.capture(), booleanArgumentCaptor.capture());
 		assertEquals(longArgumentCaptor.getValue().longValue(), 1);
 		List<Long> list = orgsArgumentCaptor.getValue();
 		assertEquals(2l, list.get(0), 0);
@@ -318,7 +321,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setServerVersion(1l);
 		expectedPlans.add(expectedPlan);
 		
-		doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong());
+		doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong(), anyBoolean());
 		
 		String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
 		
@@ -329,7 +332,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		
 	
 		verify(planService, never()).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(),
-		    longArgumentCaptor.capture());
+		    longArgumentCaptor.capture(), booleanArgumentCaptor.capture());
 		
 	}
 	
@@ -362,7 +365,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setServerVersion(1l);
 		expectedPlans.add(expectedPlan);
 		
-		doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList());
+		doReturn(expectedPlans).when(planService).getPlansByServerVersionAndOperationalArea(anyLong(), anyList(), anyBoolean());
 		
 		String actualPlansString = getResponseAsString(BASE_URL + "sync", SERVER_VERSIOIN + "=" + 1 + "&"
 		        + OPERATIONAL_AREA_ID + "=" + "operational_area" + "&" + OPERATIONAL_AREA_ID + "=" + "operational_area_2",
@@ -371,7 +374,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		    new TypeToken<List<PlanDefinition>>() {}.getType());
 		
 		verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(),
-		    listArgumentCaptor.capture());
+		    listArgumentCaptor.capture(), booleanArgumentCaptor.capture());
 		assertEquals(longArgumentCaptor.getValue().longValue(), 1);
 		assertEquals(listArgumentCaptor.getValue().get(0), "operational_area");
 		assertEquals(expectedPlans, actualPlans);
@@ -415,7 +418,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		fieldNameList.add("name");
 		
 		doReturn(Collections.singletonList(expectedPlan)).when(planService).getPlansByIdsReturnOptionalFields(planIdList,
-		    fieldNameList);
+		    fieldNameList, false);
 		
 		String actualPlansString = getResponseAsString(
 		    BASE_URL + "findByIdsWithOptionalFields?identifiers=" + expectedPlan.getIdentifier() + "&fields=action,name",
@@ -459,10 +462,10 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setJurisdiction(operationalAreas);
 		
 		List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
-		when(planService.getAllPlans(anyLong(), anyInt())).thenReturn(planDefinitions);
+		when(planService.getAllPlans(anyLong(), anyInt(), anyBoolean())).thenReturn(planDefinitions);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=25")).andExpect(status().isOk())
 		        .andReturn();
-		verify(planService).getAllPlans(anyLong(), anyInt());
+		verify(planService).getAllPlans(anyLong(), anyInt(), anyBoolean());
 		assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 		
 	}
@@ -498,10 +501,10 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setJurisdiction(operationalAreas);
 		
 		List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
-		when(planService.getPlansByUsernameAndServerVersion("onatest", 0l)).thenReturn(planDefinitions);
+		when(planService.getPlansByUsernameAndServerVersion("onatest", 0l, false)).thenReturn(planDefinitions);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/user/onatest?serverVersion=0")).andExpect(status().isOk())
 		        .andReturn();
-		verify(planService).getPlansByUsernameAndServerVersion("onatest", 0l);
+		verify(planService).getPlansByUsernameAndServerVersion("onatest", 0l, false);
 		assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 		
 	}
@@ -513,14 +516,14 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		List<String> operationalAreaIds = new ArrayList<>();
 		operationalAreaIds.add("1");
 		
-		doReturn(planDefinitions).when(planService).getPlansByServerVersionAndOperationalArea(any(long.class), anyList());
+		doReturn(planDefinitions).when(planService).getPlansByServerVersionAndOperationalArea(any(long.class), anyList(), anyBoolean());
 		
 		String parameter = SERVER_VERSIOIN + "=15421904649873&" + OPERATIONAL_AREA_ID + "=[1]";
 		String response = getResponseAsString(BASE_URL + "/sync", parameter, status().isOk());
 		JsonNode actualObj = mapper.readTree(response);
 		
 		verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(),
-		    listArgumentCaptor.capture());
+		    listArgumentCaptor.capture(), booleanArgumentCaptor.capture());
 		assertEquals(longArgumentCaptor.getValue().longValue(), 15421904649873l);
 		assertEquals(listArgumentCaptor.getAllValues().size(), operationalAreaIds.size());
 		assertEquals(actualObj.get(0).get("identifier").textValue(), planDefinitions.get(0).getIdentifier());
