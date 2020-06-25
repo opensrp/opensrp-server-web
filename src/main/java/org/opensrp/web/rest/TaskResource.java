@@ -52,7 +52,7 @@ public class TaskResource {
 	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
 	
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-	        .serializeNulls().create();
+	        .create();
 	
 	public static final String PLAN = "plan";
 	
