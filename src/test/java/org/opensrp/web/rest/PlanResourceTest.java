@@ -12,11 +12,17 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.rest.PlanResource.OPERATIONAL_AREA_ID;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,20 +40,26 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
-import org.opensrp.domain.PlanDefinition;
-import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.web.bean.Identifier;
-import org.springframework.test.web.server.MvcResult;
+import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PlanDefinition;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
  */
-public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
+public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	
 	@Rule
 	public MockitoRule rule = MockitoJUnit.rule();
@@ -226,7 +236,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
     @Test
     public void testCreateShouldCreateNewPlanResource() throws Exception {
-        doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class));
+        doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class),anyString());
         List<Jurisdiction> operationalAreas = new ArrayList<>();
         Jurisdiction operationalArea = new Jurisdiction();
         operationalArea.setCode("operational_area_1");
@@ -238,13 +248,13 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
 
         postRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
-        verify(planService).addPlan(argumentCaptor.capture());
+        verify(planService).addPlan(argumentCaptor.capture(),eq("admin"));
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
     public void testCreateShouldThrowException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).addPlan(any(PlanDefinition.class));
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).addPlan(any(PlanDefinition.class),anyString());
         postRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
     }
 
@@ -270,13 +280,13 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>(){}.getType());
         putRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 
-        verify(planService).updatePlan(argumentCaptor.capture());
+        verify(planService).updatePlan(argumentCaptor.capture(),eq("admin"));
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
     }
 
     @Test
     public void testUpdateShouldThrowException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class));
+        doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class),anyString());
         putRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
     }
 
@@ -336,6 +346,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
     }
     
     @Test
+    @WithAnonymousUser
     public void testSyncByServerVersionAndAssignedPlansOnOrganizationWithoutOrgsAndAuthencation() throws Exception {
         List<PlanDefinition> expectedPlans = new ArrayList<>();
 
@@ -369,8 +380,12 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong());
 
         String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"]}";
-        postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isBadRequest());
-
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext)
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		
+		this.mockMvc.perform(post(BASE_URL + "sync").contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
+		        .accept(MediaType.APPLICATION_JSON))
+		        .andExpect(status().isBadRequest()).andReturn();
         
         verify(planService,Mockito.never()).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(), longArgumentCaptor.capture());
         
@@ -561,7 +576,7 @@ public class PlanResourceTest extends BaseResourceTest<PlanDefinition> {
         JsonNode actualObj = mapper.readTree(response);
         
         verify(planService).getPlansByServerVersionAndOperationalArea(longArgumentCaptor.capture(), listArgumentCaptor.capture());
-        assertEquals(longArgumentCaptor.getValue(), new Long(15421904649873l));
+        assertEquals(longArgumentCaptor.getValue().longValue(), 15421904649873l);
         assertEquals(listArgumentCaptor.getAllValues().size(), operationalAreaIds.size());
         assertEquals(actualObj.get(0).get("identifier").textValue(), planDefinitions.get(0).getIdentifier());
         

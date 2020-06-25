@@ -12,7 +12,7 @@ import org.joda.time.LocalDate;
 import org.opensrp.domain.PractitionerRole;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.util.DateTypeConverter;
-import org.opensrp.util.TaskDateTimeTypeConverter;
+import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

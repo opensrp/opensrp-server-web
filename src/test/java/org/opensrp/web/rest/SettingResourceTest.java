@@ -15,7 +15,7 @@ import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.opensrp.util.DateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;

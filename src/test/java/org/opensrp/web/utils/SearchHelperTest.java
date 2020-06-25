@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opensrp.common.util.EasyMap;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import junit.framework.Assert;
