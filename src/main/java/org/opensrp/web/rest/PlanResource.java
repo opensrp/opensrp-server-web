@@ -110,24 +110,24 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
+	public ResponseEntity<HttpStatus> create(@RequestBody String entity, Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.addPlan(plan);
+			planService.addPlan(plan, authentication.getName());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
 			logger.error("The request doesn't contain a valid plan representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
+	public ResponseEntity<HttpStatus> update(@RequestBody String entity,Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.updatePlan(plan);
+			planService.updatePlan(plan,authentication.getDetails());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
