@@ -127,7 +127,7 @@ public class PlanResource {
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity,Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.updatePlan(plan,authentication.getDetails());
+			planService.updatePlan(plan,authentication.getName());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
