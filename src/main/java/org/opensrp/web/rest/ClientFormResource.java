@@ -75,10 +75,6 @@ public class ClientFormResource {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
             clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
         }
-//        else {
-//            boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
-//            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
-//        }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
 
