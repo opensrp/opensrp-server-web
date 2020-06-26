@@ -495,7 +495,7 @@ public class LocationResource {
 	@RequestMapping(value = "/getHierarchy/plan/{planIdentifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTreeForPlan(
-			@RequestParam(value = PLAN_ID, required = false) String planIdentifier,
+			@PathVariable("planIdentifier") String planIdentifier,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
