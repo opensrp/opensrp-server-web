@@ -1,6 +1,6 @@
 package org.opensrp.web.utils;
 
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 
 public class ChildMother {
 	
