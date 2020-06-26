@@ -8,18 +8,21 @@ import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.json.JSONObject;
+import org.opensrp.api.domain.Location;
+import org.opensrp.api.util.LocationTree;
+import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.opensrp.util.DateTimeTypeConverter;
 import org.opensrp.web.Constants;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +35,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,6 +52,7 @@ public class SettingResource {
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	protected ObjectMapper objectMapper;
 	private SettingService settingService;
+	private OpenmrsLocationService openmrsLocationService;
 	
 	@Autowired
 	public void setObjectMapper(ObjectMapper objectMapper) {
@@ -54,8 +60,9 @@ public class SettingResource {
 	}
 	
 	@Autowired
-	public void setSettingService(SettingService settingService) {
+	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
 		this.settingService = settingService;
+		this.openmrsLocationService = openmrsLocationService;
 	}
 	
 	/**
@@ -68,12 +75,22 @@ public class SettingResource {
 	public ResponseEntity<String> getByUniqueId(@PathVariable (Constants.RestPartVariables.IDENTIFIER) String identifier) {
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
 		settingQueryBean.setIdentifier(identifier);
-		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
+		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean, null);
 		
 		return new ResponseEntity<>(gson.toJson(extractSettings(settingConfigurations)), RestUtils.getJSONUTF8Headers(),
 				HttpStatus.OK);
 	}
-	
+
+	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
+		String locationTreeString = new Gson().toJson(openmrsLocationService.getLocationTreeOf(locationId));
+		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
+		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
+		if (locationTree != null) {
+			treeNodeHashMap = locationTree.getLocationsHierarchy();
+		}
+
+		return treeNodeHashMap;
+	}
 	
 	/**
 	 * Fetch v2 compatible setting ordered by serverVersion ascending
@@ -116,7 +133,8 @@ public class SettingResource {
 				settingQueryBean.setResolveSettings(resolveSettings);
 			}
 			
-			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean);
+			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean,
+					getChildParentLocationTree(locationId));
 			List<Setting> settingList = extractSettings(settingConfigurations);
 			
 			return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);

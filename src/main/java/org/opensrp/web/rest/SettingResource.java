@@ -1,10 +1,16 @@
 package org.opensrp.web.rest;
 
+import com.google.gson.Gson;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.opensrp.api.domain.Location;
+import org.opensrp.api.util.LocationTree;
+import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
@@ -22,7 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,12 +42,25 @@ public class SettingResource {
 	
 	public static final String SETTING_CONFIGURATIONS = "settingConfigurations";
 	private SettingService settingService;
+	private OpenmrsLocationService openmrsLocationService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 	
 	@Autowired
-	public void setSettingService(SettingService settingService) {
+	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
 		this.settingService = settingService;
+		this.openmrsLocationService = openmrsLocationService;
+	}
+
+	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
+		String locationTreeString = new Gson().toJson(openmrsLocationService.getLocationTreeOf(locationId));
+		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
+		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
+		if (locationTree != null) {
+			treeNodeHashMap = locationTree.getLocationsHierarchy();
+		}
+
+		return treeNodeHashMap;
 	}
 	
 	@RequestMapping (method = RequestMethod.GET, value = "/sync")
@@ -73,7 +94,8 @@ public class SettingResource {
 				settingQueryBean.setResolveSettings(resolveSettings);
 			}
 			
-			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
+			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean,
+					getChildParentLocationTree(locationId));
 			
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);

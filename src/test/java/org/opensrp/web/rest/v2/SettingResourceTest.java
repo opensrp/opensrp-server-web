@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.search.SettingSearchBean;
@@ -51,6 +52,8 @@ public class SettingResourceTest {
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 	@Mock
 	private SettingService settingService;
+	@Mock
+	private OpenmrsLocationService openmrsLocationService;
 	@InjectMocks
 	private SettingResource settingResource;
 	private MockMvc mockMvc;
@@ -60,7 +63,7 @@ public class SettingResourceTest {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(this.settingResource).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-		settingResource.setSettingService(settingService);
+		settingResource.setSettingService(settingService, openmrsLocationService);
 		settingResource.setObjectMapper(mapper);
 	}
 	
@@ -82,12 +85,12 @@ public class SettingResourceTest {
 		config.setSettings(settingList);
 		settingConfig.add(config);
 		
-		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class))).thenReturn(settingConfig);
+		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), null)).thenReturn(settingConfig);
 		
 		MvcResult result =
 				mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/{identifier}", "setting_123")).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 		
-		Mockito.verify(settingService).findSettings(ArgumentMatchers.any(SettingSearchBean.class));
+		Mockito.verify(settingService).findSettings(ArgumentMatchers.any(SettingSearchBean.class), null);
 		Mockito.verifyNoMoreInteractions(settingService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -111,11 +114,11 @@ public class SettingResourceTest {
 		config.setSettings(createSettingsList());
 		settingConfig.add(config);
 		
-		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class))).thenReturn(settingConfig);
+		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class),null)).thenReturn(settingConfig);
 		MvcResult result = mockMvc
 				.perform(MockMvcRequestBuilders.get(BASE_URL + "/").param(AllConstants.Event.TEAM_ID, EXPECTED_TEAM_ID).param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873"))
 				.andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-		Mockito.verify(settingService).findSettings(ArgumentMatchers.any(SettingSearchBean.class));
+		Mockito.verify(settingService).findSettings(ArgumentMatchers.any(SettingSearchBean.class),null);
 		Mockito.verifyNoMoreInteractions(settingService);
 		JSONArray response = new JSONArray(result.getResponse().getContentAsString());
 		Assert.assertEquals(2, response.length());
@@ -132,7 +135,7 @@ public class SettingResourceTest {
 		config.setSettings(createSettingsList());
 		settingConfig.add(config);
 		
-		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class))).thenReturn(settingConfig);
+		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class),null)).thenReturn(settingConfig);
 		MvcResult result = mockMvc
 				.perform(MockMvcRequestBuilders.get(BASE_URL + "/")).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
 		Mockito.verifyNoInteractions(settingService);

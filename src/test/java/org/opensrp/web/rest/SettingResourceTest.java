@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.common.AllConstants.Event;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
@@ -59,6 +60,9 @@ public class SettingResourceTest {
 
 	@Mock
 	private SettingService settingService;
+
+	@Mock
+	private OpenmrsLocationService openmrsLocationService;
 
 	@InjectMocks
 	private SettingResource settingResource;
@@ -139,12 +143,12 @@ public class SettingResourceTest {
 		config.setIdentifier("ID-123");
 		settingConfig.add(config);
 
-		Mockito.when(settingService.findSettings(any(SettingSearchBean.class))).thenReturn(settingConfig);
+		Mockito.when(settingService.findSettings(any(SettingSearchBean.class), null)).thenReturn(settingConfig);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
 				.param(Event.TEAM_ID, "my-team-id").param(Event.PROVIDER_ID, "demo")).andExpect(status().isOk()).andReturn();
 
-		verify(settingService).findSettings(any(SettingSearchBean.class));
+		verify(settingService).findSettings(any(SettingSearchBean.class), null);
 		verifyNoMoreInteractions(settingService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -186,10 +190,11 @@ public class SettingResourceTest {
 	@Test
 	public void testFindSettingsByVersionAndTeamId() throws Exception {
 		SettingService settingService  = Mockito.spy(new SettingService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService);
+		settingResource.setSettingService(settingService, openmrsLocationService);
 		SettingSearchBean sQB = new SettingSearchBean();
 		sQB.setTeamId("my-team-id");
 		sQB.setTeam(null);
@@ -197,8 +202,8 @@ public class SettingResourceTest {
 		sQB.setProviderId(null);
 		sQB.setServerVersion(1000L);
 
-		settingService.findSettings(sQB);
-		Mockito.verify(settingRepository, Mockito.times(1)).findSettings(sQB);
+		settingService.findSettings(sQB,null);
+		Mockito.verify(settingRepository, Mockito.times(1)).findSettings(sQB, null);
 		Mockito.verifyNoMoreInteractions(settingRepository);
 
 	}
@@ -206,10 +211,11 @@ public class SettingResourceTest {
 	@Test
 	public void testSaveSetting() throws Exception {
 		SettingService settingService  = Mockito.spy(new SettingService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService);
+		settingResource.setSettingService(settingService, openmrsLocationService);
 		String documentId = "1";
 		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
@@ -222,10 +228,11 @@ public class SettingResourceTest {
 	@Test
 	public void testUpdateSetting() throws Exception {
 		SettingService settingService  = Mockito.spy(new SettingService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService);
+		settingResource.setSettingService(settingService,openmrsLocationService);
 		String documentId = "settings-document-id-2";
 		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(new SettingConfiguration());
 		Mockito.doNothing().when(settingRepository).update(Matchers.any(SettingConfiguration.class));
@@ -241,10 +248,11 @@ public class SettingResourceTest {
 	public void testAddServerVersion() throws Exception {
 
 		SettingService settingService  = Mockito.spy(new SettingService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService);
+		settingResource.setSettingService(settingService,openmrsLocationService);
 		settingService.addServerVersion();
 		Mockito.verify(settingRepository, Mockito.times(1)).findByEmptyServerVersion();
 		Mockito.verifyNoMoreInteractions(settingRepository);
