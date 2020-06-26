@@ -31,6 +31,9 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private EventPermissionEvaluator eventPermissionEvaluator;
+
+	@Autowired
+	private ClientPermissionEvaluator clientPermissionEvaluator;
 	
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -46,6 +49,8 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return userPermissionEvaluator.hasPermission(authentication, (String) targetDomainObject);
 		} else if (targetDomainObject instanceof Event) {
 			return eventPermissionEvaluator.hasPermission(authentication, (Event) targetDomainObject);
+		} else if (targetDomainObject instanceof Client) {
+			return clientPermissionEvaluator.hasPermission(authentication, (Client) targetDomainObject);
 		}
 		return false;
 	}
@@ -65,6 +70,8 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 			return userPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
 		} else if (Event.class.getSimpleName().equals(targetType)) {
 			return eventPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
+		} else if (Client.class.getSimpleName().equals(targetType)) {
+			return clientPermissionEvaluator.hasObjectPermission(authentication, targetId, permission);
 		}
 		return false;
 	}
