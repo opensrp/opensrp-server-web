@@ -31,7 +31,6 @@ import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.PractitionerService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -119,14 +118,6 @@ public class LocationResource {
 	@Autowired
 	public void setOrganizationService(OrganizationService organizationService) {
 		this.organizationService = organizationService;
-	}
-
-	/**
-	 * @param practitionerService the practitionerService to set
-	 */
-	@Autowired
-	public void setPractitionerService(PractitionerService practitionerService) {
-		this.practitionerService = practitionerService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
