@@ -78,6 +78,8 @@ public class SettingResource {
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+			List<SettingConfiguration> SettingConfigurations = null;
+			Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 			
 			if (StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
@@ -92,10 +94,10 @@ public class SettingResource {
 			settingQueryBean.setV1Settings(true);
 			if (StringUtils.isNotBlank(locationId)) {
 				settingQueryBean.setResolveSettings(resolveSettings);
+				treeNodeHashMap = getChildParentLocationTree(locationId);
 			}
 			
-			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean,
-					getChildParentLocationTree(locationId));
+			SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
 			
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);

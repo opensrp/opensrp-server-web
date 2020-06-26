@@ -30,7 +30,6 @@ public interface Constants {
     }
     
     interface RestPartVariables {
-        String IDENTIFIER = "identifier";
         String ID = "id";
     }
     
