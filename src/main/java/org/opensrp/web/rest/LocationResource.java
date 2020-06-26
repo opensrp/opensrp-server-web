@@ -108,8 +108,6 @@ public class LocationResource {
 
 	private OrganizationService organizationService;
 
-	private PractitionerService practitionerService;
-
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
