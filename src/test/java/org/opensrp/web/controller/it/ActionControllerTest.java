@@ -17,7 +17,7 @@ import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.opensrp.dto.ActionData;
 import org.opensrp.dto.AlertStatus;
 import org.opensrp.repository.postgres.ActionRepositoryImpl;
