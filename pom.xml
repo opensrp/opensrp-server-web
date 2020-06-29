@@ -28,8 +28,8 @@
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 
 
-        <opensrp.core.version>2.5.1-ANC-ALPHA2-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.1.1-ANC-ALPHA1-SNAPSHOT</opensrp.connector.version>
+        <opensrp.core.version>2.5.1-ANC-ALPHA3-SNAPSHOT</opensrp.core.version>
+        <opensrp.connector.version>2.1.1-ANC-ALPHA2-SNAPSHOT</opensrp.connector.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
 
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
