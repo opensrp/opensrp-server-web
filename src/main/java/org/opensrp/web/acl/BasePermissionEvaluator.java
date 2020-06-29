@@ -11,14 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 /**
  * @author Samuel Githengi created on 06/05/20

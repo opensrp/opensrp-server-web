@@ -5,9 +5,12 @@ package org.opensrp.web.config;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
@@ -17,10 +20,13 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.Duration;
+
 /**
  * @author Samuel Githengi created on 05/11/20
  */
 @Configuration
+@EnableCaching
 public class RedisConfig {
 	
 	@Value("#{opensrp['redis.host']}")
@@ -85,5 +91,16 @@ public class RedisConfig {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory());
 		return template;
+	}
+
+	@Bean
+	public RedisCacheManager cacheManager() {
+		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+		config = config.entryTtl(Duration.ofMinutes(30))
+			.disableCachingNullValues();
+
+		return RedisCacheManager.builder(jedisConnectionFactory())
+				.cacheDefaults(config)
+				.build();
 	}
 }

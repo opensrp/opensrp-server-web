@@ -2,12 +2,14 @@ package org.opensrp.web.acl;
 
 import org.opensrp.domain.Client;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
 
 	public boolean hasPermission(Authentication authentication, Client targetDomainObject) {
