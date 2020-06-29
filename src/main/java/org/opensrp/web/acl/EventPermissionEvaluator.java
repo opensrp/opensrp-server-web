@@ -20,7 +20,7 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
 		/* @formatter:off */
 		return getAssignedLocations(authentication.getName())
 				.stream()
-				.anyMatch(a -> a.getPlanId().equals(identifier));
+				.anyMatch(a -> a.getJurisdictionId().equals(identifier));
 		/* @formatter:on */
 	}
 
