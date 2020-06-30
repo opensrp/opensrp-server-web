@@ -159,7 +159,11 @@ public class ManifestResource {
     }
 
     protected Manifest generateManifest(String jsonString) {
-        Manifest latestManifest = manifestService.getAllManifest(1).get(0);
+        Manifest latestManifest = null;
+        List<Manifest> manifestList = manifestService.getAllManifest();
+        if (manifestList.size() > 0) {
+            latestManifest = manifestService.getAllManifest(1).get(0);
+        }
         Manifest generatedManifest = new Manifest();
         if (latestManifest != null) {
             String identifier = FormConfigUtils.getNewVersion(latestManifest.getIdentifier());
