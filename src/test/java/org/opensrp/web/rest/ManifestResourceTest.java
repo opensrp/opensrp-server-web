@@ -166,9 +166,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         verify(manifestService).addManifest(argumentCaptor.capture());
         verify(clientFormService).updateClientFormMetadataIsDraftValueByVersion(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
+        assertEquals(expectedManifest.getIdentifier(), argumentCaptor.getValue().getIdentifier());
         assertFalse(booleanArgumentCaptor.getValue());
-        assertEquals(stringArgumentCaptor.getValue(), formVersion);
+        assertEquals(formVersion, stringArgumentCaptor.getValue());
     }
 
     @Test
@@ -191,9 +191,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         postRequestWithJsonContent(BASE_URL, manifestJsonOnlyValue, MockMvcResultMatchers.status().isCreated());
 
         verify(manifestService).addManifest(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
+        assertEquals(expectedManifest.getIdentifier(), argumentCaptor.getValue().getIdentifier());
         verify(clientFormService).updateClientFormMetadataIsDraftValueByVersion(booleanArgumentCaptor.capture(), stringArgumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
+        assertEquals(expectedManifest.getIdentifier(), argumentCaptor.getValue().getIdentifier());
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(stringArgumentCaptor.getValue(), formVersion);
     }
@@ -224,7 +224,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         putRequestWithJsonContent(BASE_URL, manifestJson, MockMvcResultMatchers.status().isCreated());
 
         verify(manifestService).updateManifest(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
+        assertEquals(expectedManifest.getIdentifier(), argumentCaptor.getValue().getIdentifier());
     }
 
     @Test
