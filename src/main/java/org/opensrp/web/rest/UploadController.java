@@ -10,8 +10,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.domain.CSVRowConfig;
-import org.smartregister.domain.Client;
-import org.smartregister.domain.Event;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
@@ -27,6 +25,8 @@ import org.opensrp.web.uniqueid.OpenMRSUniqueIDProvider;
 import org.opensrp.web.uniqueid.UniqueIDProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -81,6 +81,8 @@ public class UploadController {
 	public static final String FILE_CATEGORY = "csv";
 
 	public static final String DEFAULT_RESIDENCE = "default_residence";
+
+	public static final String DEFAULT = "default";
 
 	private MultimediaService multimediaService;
 
@@ -205,7 +207,8 @@ public class UploadController {
 				newClient = true;
 			}
 
-			client.addAttribute(DEFAULT_RESIDENCE, locationID);
+			if (StringUtils.isNotBlank(locationID))
+				client.addAttribute(DEFAULT_RESIDENCE, locationID);
 
 			assignClientUniqueID(client, globalID, uniqueIDProvider);
 			clientService.addorUpdate(client);
@@ -220,6 +223,9 @@ public class UploadController {
 
 			if (StringUtils.isNotBlank(teamName))
 				event.setTeam(teamName);
+
+			if(StringUtils.isBlank(event.getTeamId()))
+				event.setTeamId(DEFAULT);
 
 			if (StringUtils.isNotBlank(locationID))
 				event.setLocationId(locationID);
