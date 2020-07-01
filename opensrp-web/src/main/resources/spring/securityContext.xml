@@ -11,6 +11,7 @@
         <security:intercept-url pattern="/index.html" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/deviceverify/get" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <security:intercept-url pattern="/is_resync" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/user/status" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/multimedia/download/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <security:intercept-url pattern="/multimedia/profileimage/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>

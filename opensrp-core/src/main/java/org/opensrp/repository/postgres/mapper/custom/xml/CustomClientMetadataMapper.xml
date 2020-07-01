@@ -235,4 +235,9 @@
 		from core.client c
 		where c.id = #{clientId} limit 1
 	</select>
+	
+	<select id="selectIsResync" parameterType="java.lang.String"
+		resultType="String">
+		select u.is_resync from core.users as u where u.username =#{username,jdbcType=VARCHAR}  limit 1
+	</select>
 </mapper>

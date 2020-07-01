@@ -53,30 +53,32 @@ public interface ClientsRepository extends BaseRepository<Client> {
 	List<Client> findByFieldValue(String field, List<String> ids);
 	
 	List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar);
-
+	
 	List<Client> findAllClientByUpazila(String name);
-
+	
 	CustomQuery findTeamInfo(String username);
-
+	
 	List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId);
-
+	
 	List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId);
-
+	
 	List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId);
-
+	
 	CustomQuery findUserStatus(String username);
-
+	
 	CustomQuery findUserId(String username);
-
+	
 	CustomQuery getMaxHealthId(Integer locationId);
-
-	void updateAppVersion(String username,String version);
-
+	
+	void updateAppVersion(String username, String version);
+	
 	Integer findClientIdByBaseEntityId(String baseEntityId);
-
+	
 	Client findClientByClientId(Integer clientId);
-
+	
 	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag);
-
+	
 	CustomQuery imeiCheck(String imeiNumber);
+	
+	String getIsResync(String username);
 }

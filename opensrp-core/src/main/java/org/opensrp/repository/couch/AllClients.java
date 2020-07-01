@@ -33,8 +33,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	private LuceneClientRepository lcr;
 	
 	@Autowired
-	protected AllClients(@Qualifier(AllConstants.OPENSRP_DATABASE_CONNECTOR) CouchDbConnector db,
-	    LuceneClientRepository lcr) {
+	protected AllClients(@Qualifier(AllConstants.OPENSRP_DATABASE_CONNECTOR) CouchDbConnector db, LuceneClientRepository lcr) {
 		super(Client.class, db);
 		this.lcr = lcr;
 	}
@@ -90,9 +89,8 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@View(name = "all_clients_by_matching_name", map = "function(doc) {if(doc.type === 'Client'){emit(doc.firstName, doc);emit(doc.lastName, doc);}}")
 	public List<Client> findAllByMatchingName(String nameMatches) {
-		return db.queryView(
-		    createQuery("all_clients_by_matching_name").startKey(nameMatches).endKey(nameMatches + "z").includeDocs(true),
-		    Client.class);
+		return db.queryView(createQuery("all_clients_by_matching_name").startKey(nameMatches).endKey(nameMatches + "z")
+		        .includeDocs(true), Client.class);
 	}
 	
 	/**
@@ -109,9 +107,8 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	public List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo) {
 		ComplexKey startKey = ComplexKey.of(relationalId, dateFrom);
 		ComplexKey endKey = ComplexKey.of(relationalId, dateTo);
-		List<Client> clients = db.queryView(
-		    createQuery("client_by_relationship_id_and_date_created").startKey(startKey).endKey(endKey).includeDocs(true),
-		    Client.class);
+		List<Client> clients = db.queryView(createQuery("client_by_relationship_id_and_date_created").startKey(startKey)
+		        .endKey(endKey).includeDocs(true), Client.class);
 		return clients;
 	}
 	
@@ -127,7 +124,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	//	public List<Client> findByRelationshipId(String identifier) {
 	//		return db.queryView(createQuery("clients_by_relationship").key(identifier).includeDocs(true), Client.class);
 	//	}
-
+	
 	public List<Client> findByCriteria(ClientSearchBean searchBean, AddressSearchBean addressSearchBean) {
 		return lcr.getByCriteria(searchBean, addressSearchBean, null);//db.queryView(q.includeDocs(true), Client.class);
 	}
@@ -141,7 +138,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	public List<Client> findByCriteria(AddressSearchBean addressSearchBean, DateTime lastEditFrom, DateTime lastEditTo) {
-		ClientSearchBean clientSearchBean=new ClientSearchBean();
+		ClientSearchBean clientSearchBean = new ClientSearchBean();
 		clientSearchBean.setLastEditFrom(lastEditFrom);
 		return lcr.getByCriteria(clientSearchBean, addressSearchBean, null);
 	}
@@ -202,38 +199,37 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 		if (serverStartKey < serverEndKey) {
 			ComplexKey startKey = ComplexKey.of(serverStartKey);
 			ComplexKey endKey = ComplexKey.of(serverEndKey);
-			return db.queryView(
-			    createQuery("clients_not_in_OpenMRS").startKey(startKey).endKey(endKey).limit(1000).includeDocs(true),
-			    Client.class);
+			return db.queryView(createQuery("clients_not_in_OpenMRS").startKey(startKey).endKey(endKey).limit(1000)
+			        .includeDocs(true), Client.class);
 		}
 		return new ArrayList<>();
 	}
-
+	
 	@Override
 	public List<Client> findAllClientByUpazila(String name) {
 		return null;
 	}
-
+	
 	@Override
 	public CustomQuery findTeamInfo(String username) {
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return null;
 	}
-
+	
 	public Client addClient(CouchDbConnector targetDb, Client client) {
 		if (client.getBaseEntityId() == null) {
 			throw new RuntimeException("No baseEntityId");
@@ -282,48 +278,54 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 			return null;
 		}
 	}
-
+	
 	@Override
 	public CustomQuery findUserStatus(String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public CustomQuery findUserId(String username) {
 		return null;
 	}
-
+	
 	@Override
 	public CustomQuery getMaxHealthId(Integer locationId) {
 		return null;
 	}
-
+	
 	@Override
-	public void updateAppVersion(String username,String version) {
+	public void updateAppVersion(String username, String version) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
 	public Integer findClientIdByBaseEntityId(String baseEntityId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public Client findClientByClientId(Integer clientId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag) {
 		return null;
 	}
-
+	
 	@Override
 	public CustomQuery imeiCheck(String imeiNumber) {
+		return null;
+	}
+	
+	@Override
+	public String getIsResync(String username) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

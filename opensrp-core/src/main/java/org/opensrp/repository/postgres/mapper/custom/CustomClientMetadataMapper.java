@@ -22,10 +22,11 @@ public interface CustomClientMetadataMapper extends ClientMetadataMapper {
 	                                @Param("addressBean") AddressSearchBean addressSearchBean, @Param("offset") int offset,
 	                                @Param("limit") int limit);
 	
-	List<Client> selectByName(@Param("name") String nameMatches, @Param("offset") int offset,
-	                                  @Param("limit") int limit);
-
+	List<Client> selectByName(@Param("name") String nameMatches, @Param("offset") int offset, @Param("limit") int limit);
+	
 	Integer findClientIdByBaseEntityId(String baseEntityId);
-
+	
 	Client findClientByClientId(Integer clientId);
+	
+	String selectIsResync(String username);
 }
