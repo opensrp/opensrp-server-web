@@ -27,7 +27,12 @@
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 
+<<<<<<< HEAD
 		<opensrp.core.version>2.5.2-SNAPSHOT</opensrp.core.version>
+=======
+
+		<opensrp.core.version>2.5.3-SNAPSHOT</opensrp.core.version>
+>>>>>>> 4e64b3ab... Allow multiple column upload config (#427)
 		<opensrp.connector.version>2.1.0-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
