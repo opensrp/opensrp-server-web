@@ -302,4 +302,21 @@ public class UserController {
 			return new ResponseEntity<>("error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/is_resync", method = RequestMethod.GET)
+	@ResponseBody
+	protected ResponseEntity<String> clientListToDeleteFromAPP(@RequestParam("username") String username)
+	    throws JSONException {
+		
+		try {
+			
+			String is_resync = clientService.getIsResync(username);
+			
+			return new ResponseEntity<>(is_resync, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			
+			return new ResponseEntity<>("", HttpStatus.OK);
+		}
+	}
 }

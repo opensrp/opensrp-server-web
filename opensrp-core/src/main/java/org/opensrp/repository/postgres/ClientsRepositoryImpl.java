@@ -32,13 +32,13 @@ import org.springframework.stereotype.Repository;
 public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements ClientsRepository {
 	
 	private static Logger logger = LoggerFactory.getLogger(ClientsRepository.class.toString());
-
+	
 	@Value("#{opensrp['address.type']}")
 	private String addressType;
-
+	
 	@Value("#{opensrp['use.address.client.in.metadata']}")
 	private Boolean userAddressInClientMetadata;
-
+	
 	@Autowired
 	private CustomClientMetadataMapper clientMetadataMapper;
 	
@@ -93,10 +93,10 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 	
 	@Override
 	public void update(Client entity) {
-
+		
 		System.out.println("<-Entity->");
 		System.out.println(entity);
-
+		
 		if (entity == null || entity.getBaseEntityId() == null) {
 			return;
 		}
@@ -298,32 +298,32 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 		}
 		return new ArrayList<>();
 	}
-
+	
 	@Override
 	public List<Client> findAllClientByUpazila(String name) {
 		return convert(clientMapper.getClientByUpazila(name));
 	}
-
+	
 	@Override
 	public CustomQuery findTeamInfo(String username) {
 		return clientMapper.getTeamInfo(username);
 	}
-
+	
 	@Override
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return clientMapper.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
-
+	
 	@Override
 	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
 		return clientMapper.getVillageByProviderId(memberId, childRoleId, locationTagId);
 	}
-
+	
 	@Override
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return clientMapper.getProviderLocationIdByChildRole(memberId, childRoleId, locationTagId);
 	}
-
+	
 	// Private Methods
 	protected List<Client> convert(List<org.opensrp.domain.postgres.Client> clients) {
 		if (clients == null || clients.isEmpty()) {
@@ -363,10 +363,10 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 	
 	private ClientMetadata createMetadata(Client client, Long clientId) {
 		try {
-
+			
 			System.out.println("Client DATA:->");
 			System.out.println(client);
-
+			
 			ClientMetadata clientMetadata = new ClientMetadata();
 			clientMetadata.setDocumentId(client.getId());
 			clientMetadata.setBaseEntityId(client.getBaseEntityId());
@@ -378,17 +378,17 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 			clientMetadata.setMiddleName(client.getMiddleName());
 			clientMetadata.setLastName(client.getLastName());
 			Map<String, String> addressFields = client.getAddresses().get(0).getAddressFields();
-
+			
 			if (userAddressInClientMetadata) {
 				Address requiredAddress = new Address();
-
+				
 				for (Address address : client.getAddresses()) {
 					if (address.getAddressType().equalsIgnoreCase(this.addressType)) {
 						requiredAddress = address;
 						break;
 					}
 				}
-
+				
 				if (requiredAddress != null) {
 					clientMetadata.setAddress1(requiredAddress.getAddressField("address1"));
 					clientMetadata.setAddress2(requiredAddress.getAddressField("address2"));
@@ -397,7 +397,7 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 						clientMetadata.setVillageId(Long.valueOf(requiredAddress.getAddressField("address8")));
 				}
 			}
-
+			
 			clientMetadata.setDivision(addressFields.get("division"));
 			clientMetadata.setDistrict(addressFields.get("district"));
 			clientMetadata.setCityCorporation(addressFields.get("cityCorporation"));
@@ -474,58 +474,63 @@ public class ClientsRepositoryImpl extends BaseRepositoryImpl<Client> implements
 		}
 		return t.getBaseEntityId();
 	}
-
+	
 	@Override
 	public CustomQuery findUserStatus(String username) {
 		// TODO Auto-generated method stub
 		return clientMapper.selectUserStatus(username);
 	}
-
+	
 	@Override
 	public CustomQuery findUserId(String username) {
 		// TODO Auto-generated method stub
 		return clientMapper.findUserId(username);
 	}
-
+	
 	@Override
 	public CustomQuery getMaxHealthId(Integer locationId) {
 		// TODO Auto-generated method stub
 		return clientMapper.getMaxHealthId(locationId);
 	}
-
+	
 	@Override
-	public void updateAppVersion(String username,String version) {
+	public void updateAppVersion(String username, String version) {
 		clientMapper.updateAppVersion(username, version);
 		
 	}
-
+	
 	@Override
 	public Integer findClientIdByBaseEntityId(String baseEntityId) {
 		// TODO Auto-generated method stub
 		return clientMetadataMapper.findClientIdByBaseEntityId(baseEntityId);
 	}
-
+	
 	@Override
 	public Client findClientByClientId(Integer clientId) {
 		if (clientId == null) {
 			return null;
 		}
-
+		
 		org.opensrp.domain.postgres.Client pgClient = clientMetadataMapper.findClientByClientId(clientId);
-		if(pgClient != null){
+		if (pgClient != null) {
 			return convert(pgClient);
 		}
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag) {
 		return clientMapper.getDistrictAndUpazila(parentLocationTag);
 	}
-
+	
 	@Override
 	public CustomQuery imeiCheck(String imeiNumber) {
 		return clientMapper.imeiCheck(imeiNumber);
 	}
-
+	
+	@Override
+	public String getIsResync(String username) {
+		// TODO Auto-generated method stub
+		return clientMetadataMapper.selectIsResync(username);
+	}
 }

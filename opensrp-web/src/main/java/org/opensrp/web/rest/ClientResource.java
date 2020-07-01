@@ -1,11 +1,21 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.*;
+import static org.opensrp.common.AllConstants.BaseEntity.ADDRESS_TYPE;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
+import static org.opensrp.common.AllConstants.BaseEntity.COUNTRY;
+import static org.opensrp.common.AllConstants.BaseEntity.COUNTY_DISTRICT;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.BaseEntity.STATE_PROVINCE;
+import static org.opensrp.common.AllConstants.BaseEntity.SUB_DISTRICT;
+import static org.opensrp.common.AllConstants.BaseEntity.SUB_TOWN;
+import static org.opensrp.common.AllConstants.BaseEntity.TOWN;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.web.rest.RestUtils.*;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -33,11 +43,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.mysql.jdbc.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -154,17 +166,17 @@ public class ClientResource extends RestResource<Client> {
 		return new ResponseEntity<>(jsonObj.toString(), HttpStatus.OK);
 		
 	}
-
+	
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/update-union")
 	public ResponseEntity<String> updateClientByUpazila(@RequestParam("changeAbleField") String changeAbleField,
-														@RequestParam("currentName") String currentName,
-														@RequestParam("rightName") String rightName) throws JSONException {
-
+	                                                    @RequestParam("currentName") String currentName,
+	                                                    @RequestParam("rightName") String rightName) throws JSONException {
+		
 		List<Client> clients = clientService.findAllClientByUpazila(currentName);
-
+		
 		System.out.println("TOTAL SIZE:->");
 		System.out.println(clients.size());
-
+		
 		try {
 			for (Client client : clients) {
 				Map<String, String> addressFields = client.getAddresses().get(0).getAddressFields();
@@ -172,11 +184,28 @@ public class ClientResource extends RestResource<Client> {
 				client.getAddresses().get(0).setAddressFields(addressFields);
 				clientService.updateClient(client);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		return new ResponseEntity<>("done", HttpStatus.OK);
 	}
 	
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/is_resync", method = RequestMethod.GET)
+	@ResponseBody
+	protected ResponseEntity<String> clientListToDeleteFromAPP(@RequestParam("username") String username)
+	    throws JSONException {
+		
+		try {
+			
+			String is_resync = clientService.getIsResync(username);
+			
+			return new ResponseEntity<>(is_resync, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			
+			return new ResponseEntity<>("", HttpStatus.OK);
+		}
+	}
 }

@@ -1,11 +1,9 @@
 package org.opensrp.service;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +12,6 @@ import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.postgres.CustomQuery;
-import org.opensrp.domain.postgres.HealthId;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -35,10 +32,10 @@ public class ClientService {
 	public ClientService(ClientsRepository allClients) {
 		this.allClients = allClients;
 	}
-
+	
 	@Autowired
 	private ErrorTraceService errorTraceService;
-
+	
 	public Client getByBaseEntityId(String baseEntityId) {
 		return allClients.findByBaseEntityId(baseEntityId);
 	}
@@ -128,17 +125,17 @@ public class ClientService {
 			logger.info("\n\n Client in findClient : " + client.toString() + "\n\n");
 			logger.info("\n\n Identifiers : " + client.getIdentifiers() + "\n\n");
 			
-//			for (String idt : client.getIdentifiers().keySet()) {
-//				if(!idt.equalsIgnoreCase("serial_no")){
-//					List<Client> cl = allClients.findAllByIdentifier(client.getIdentifier(idt));
-//					if (cl.size() > 1) {
-//						throw new IllegalArgumentException("Multiple clients with identifier type " + idt + " and ID "
-//								+ client.getIdentifier(idt) + " exist.");
-//					} else if (cl.size() != 0) {
-//						return cl.get(0);
-//					}
-//				}
-//			}
+			//			for (String idt : client.getIdentifiers().keySet()) {
+			//				if(!idt.equalsIgnoreCase("serial_no")){
+			//					List<Client> cl = allClients.findAllByIdentifier(client.getIdentifier(idt));
+			//					if (cl.size() > 1) {
+			//						throw new IllegalArgumentException("Multiple clients with identifier type " + idt + " and ID "
+			//								+ client.getIdentifier(idt) + " exist.");
+			//					} else if (cl.size() != 0) {
+			//						return cl.get(0);
+			//					}
+			//				}
+			//			}
 			logger.info("\n\n Client after finding : " + client.toString() + "\n\n");
 		}
 		catch (Exception e) {
@@ -256,7 +253,7 @@ public class ClientService {
 			Integer clientId = allClients.findClientIdByBaseEntityId(client.getBaseEntityId());
 			if (clientId != null) {
 				Client c = allClients.findClientByClientId(clientId);
-				if(c != null){
+				if (c != null) {
 					client.setRevision(c.getRevision());
 					client.setId(c.getId());
 					client.setDateEdited(DateTime.now());
@@ -317,23 +314,23 @@ public class ClientService {
 		}
 		return client;
 	}
-
+	
 	public List<Client> findAllClientByUpazila(String name) {
 		return allClients.findAllClientByUpazila(name);
 	}
-
+	
 	public CustomQuery findTeamInfo(String username) {
 		return allClients.findTeamInfo(username);
 	}
-
+	
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
-
+	
 	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {
 		return allClients.getVillageByProviderId(memberId, childRoleId, locationTagId);
 	}
-
+	
 	public List<CustomQuery> getProviderLocationIdByChildRole(int memberId, int childRoleId, int locationTagId) {
 		return allClients.getProviderLocationIdByChildRole(memberId, childRoleId, locationTagId);
 	}
@@ -342,30 +339,30 @@ public class ClientService {
 		// TODO Auto-generated method stub
 		return allClients.findUserStatus(username);
 	}
-
+	
 	public CustomQuery getUserId(String username) {
 		// TODO Auto-generated method stub
 		return allClients.findUserId(username);
 	}
-
+	
 	public CustomQuery getMaxHealthId(Integer locationId) {
 		// TODO Auto-generated method stub
 		return allClients.getMaxHealthId(locationId);
 	}
 	
-	public void updateAppVersion(String username,String version) {
+	public void updateAppVersion(String username, String version) {
 		allClients.updateAppVersion(username, version);
 	}
-
+	
 	public JSONArray getDistrictAndUpazila(Integer parentLocationTag) throws JSONException {
 		List<CustomQuery> districtAndUpazila = allClients.getDistrictAndUpazila(parentLocationTag);
 		JSONArray response = new JSONArray();
-		for (CustomQuery o: districtAndUpazila) {
+		for (CustomQuery o : districtAndUpazila) {
 			JSONObject disAndUpa = new JSONObject();
 			disAndUpa.put("name", o.getName());
 			String[] upazilas = o.getCode().split(",");
 			JSONArray upa = new JSONArray();
-			for (String upazila: upazilas) {
+			for (String upazila : upazilas) {
 				upa.put(upazila);
 			}
 			disAndUpa.put("upazilas", upa);
@@ -373,12 +370,16 @@ public class ClientService {
 		}
 		return response;
 	}
-
+	
 	public Integer findClientIdByBaseEntityId(String baseEntityId) {
 		return allClients.findClientIdByBaseEntityId(baseEntityId);
 	}
-
+	
 	public CustomQuery imeiCheck(String imeiNumber) {
 		return allClients.imeiCheck(imeiNumber);
+	}
+	
+	public String getIsResync(String username) {
+		return allClients.getIsResync(username);
 	}
 }
