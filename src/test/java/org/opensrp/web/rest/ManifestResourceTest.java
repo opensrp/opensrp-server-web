@@ -38,15 +38,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
 
     private final static String manifestJson = "{\"identifier\":\"mani1234\",\"json\":\"{\\\"forms_version\\\":\\\"1.0.3\\\"}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
-    private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\"]}\"}";
-    private final static String existingManifestJson = "{"
-            + "    \"json\": \"{\\\"forms_version\\\":\\\"1.0.2\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\"]}\",\n"
-            + "    \"appId\": \"org.smartregister.anc\",\n"
-            + "    \"createdAt\": \"2020-06-12T14:24:32.871+03:00\",\n"
-            + "    \"updatedAt\": \"2020-06-12T14:24:32.871+03:00\",\n"
-            + "    \"appVersion\": \"3.4.2\",\n"
-            + "    \"identifier\": \"1.0.1\""
-            + "}";
+    private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"remove_structure.json\\\"]}\"}";
+    private final static String existingManifestJson = "{\"forms_version\":\"1.0.2\",\"identifiers\":[\"add_structure.json\"]}";
+    private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"remove_structure.json\",\"add_structure.json\"]}";
 
     @Before
     public void setUp() {
@@ -202,6 +196,24 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedManifest.getIdentifier());
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(stringArgumentCaptor.getValue(), formVersion);
+    }
+
+    @Test
+    public void autogenerateManifestMergesFormIdentifiers() throws Exception {
+        Manifest existingManifest = new Manifest();
+        existingManifest.setIdentifier("0.0.1");
+        existingManifest.setAppId("org.smartregister.anc");
+        existingManifest.setAppVersion("3.4.2");
+        existingManifest.setJson(existingManifestJson);
+        List manifestList = new ArrayList<Manifest>();
+        manifestList.add(existingManifest);
+
+        doReturn(manifestList).when(manifestService).getAllManifest(1);
+        doReturn(new Manifest()).when(manifestService).addManifest(any());
+
+        postRequestWithJsonContent(BASE_URL, manifestJsonOnlyValue, MockMvcResultMatchers.status().isCreated());
+        verify(manifestService).addManifest(argumentCaptor.capture());
+        assertEquals(expectedManifestJson, argumentCaptor.getValue().getJson());
     }
 
     @Test
