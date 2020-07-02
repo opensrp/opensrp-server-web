@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
-import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
@@ -50,7 +49,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Autowired
 	private DataSource dataSource;
 	
-
+	@Autowired
+	private OpenmrsUserDetailsService userDetailsService;
 	
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -63,7 +63,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 			.authenticationManager(this.authenticationManager)
 			.tokenStore(jdbcTokenStore)
 			.userApprovalHandler(userApprovalHandler())
-			.userDetailsService(new ClientDetailsUserDetailsService(clientDetails))
+			.userDetailsService(userDetailsService)
 			.setClientDetailsService(clientDetails);
 	}
 	
