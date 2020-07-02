@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
+import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
@@ -49,6 +50,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Autowired
 	private DataSource dataSource;
 	
+
+	
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.withClientDetails(clientDetails);
@@ -59,7 +62,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 		endpoints
 			.authenticationManager(this.authenticationManager)
 			.tokenStore(jdbcTokenStore)
-			.userApprovalHandler(userApprovalHandler());
+			.userApprovalHandler(userApprovalHandler())
+			.userDetailsService(new ClientDetailsUserDetailsService(clientDetails))
+			.setClientDetailsService(clientDetails);
 	}
 	
 	@Override
