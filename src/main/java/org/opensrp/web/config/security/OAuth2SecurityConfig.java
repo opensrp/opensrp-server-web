@@ -21,7 +21,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
-import org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -90,9 +89,6 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		return providerManager;
 	}
 	
-	public ClientDetailsUserDetailsService clientDetailsUserService() {
-		return new ClientDetailsUserDetailsService(clientDetailsService);
-	}
 	
 	public DefaultTokenServices tokenServices() {
 		DefaultTokenServices tokenServices= new DefaultTokenServices();
