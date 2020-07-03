@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * @author Samuel Githengi created on 03/11/20
@@ -36,6 +37,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
 	
+	@Autowired
+	private CorsConfigurationSource corsConfigurationSource;
+	
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
 		/* @formatter:off */
@@ -51,10 +55,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		/* @formatter:off */
-		http.cors()
+		http.cors().configurationSource(corsConfigurationSource)
 		.and()
 			.anonymous().disable()
-		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**", "/uniqueids/*")
+		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**", "/uniqueids/*","/location/**")
 		.and()
 			.authorizeRequests()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
