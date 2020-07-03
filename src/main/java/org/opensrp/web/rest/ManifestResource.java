@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -184,21 +185,27 @@ public class ManifestResource {
     }
 
     protected JSONArray getMergedIdentifiersJSONArray(Manifest latestManifest, String json) {
-        JSONArray mergedIdentifiersArray = new JSONArray();
-        JSONArray existingIdentifiersArray;
-        JSONObject jsonObject = new JSONObject(json);
-        if (jsonObject.has(FORM_IDENTIFIERS)) {
-            mergedIdentifiersArray = jsonObject.getJSONArray(FORM_IDENTIFIERS);
-        }
+        JSONArray identifiersJsonArray = new JSONArray();
+        Set<String> identifiersSet = new HashSet<>();
         if (StringUtils.isNotBlank(latestManifest.getJson())) {
             JSONObject existingJson = new JSONObject(latestManifest.getJson());
             if (existingJson.has(FORM_IDENTIFIERS)) {
-                existingIdentifiersArray = existingJson.getJSONArray(FORM_IDENTIFIERS);
-                for (int i = 0; i < existingIdentifiersArray.length(); i++) {
-                    mergedIdentifiersArray.put(existingIdentifiersArray.get(i));
+                for (Object object : existingJson.getJSONArray(FORM_IDENTIFIERS)) {
+                    identifiersSet.add((String) object);
                 }
             }
         }
-        return mergedIdentifiersArray;
+        JSONObject jsonObject = new JSONObject(json);
+        if (jsonObject.has(FORM_IDENTIFIERS)) {
+            for (Object object : jsonObject.getJSONArray(FORM_IDENTIFIERS)) {
+                identifiersSet.add((String) object);
+            }
+        }
+        if (identifiersSet.size() > 0) {
+            for (String item : identifiersSet) {
+                identifiersJsonArray.put(item);
+            }
+        }
+        return identifiersJsonArray;
     }
 }
