@@ -469,7 +469,7 @@ public class LocationResource {
 	 * @param returnTags Optional flag whether location tags should be returned or not
 	 * @return A locations tree of all of the root location's descendants
 	 */
-	@RequestMapping(value = "/getHierarchy/{locationId}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/hierarchy/{locationId}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTree(
 			@PathVariable("locationId") String locationId,
@@ -481,17 +481,17 @@ public class LocationResource {
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/getHierarchy/plan/{planIdentifier}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/hierarchy/plan/{plan}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTreeForPlan(
-			@PathVariable("planIdentifier") String planIdentifier,
+			@PathVariable("plan") String plan,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
 		try {
 
 			for (AssignedLocations assignedLocation : organizationService
-					.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier)) {
+					.findAssignedLocationsAndPlansByPlanIdentifier(plan)) {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 
