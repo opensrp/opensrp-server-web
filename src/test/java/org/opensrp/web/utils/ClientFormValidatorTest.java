@@ -93,6 +93,20 @@ public class ClientFormValidatorTest extends TestCase {
         assertEquals("anc_register", missingReferences.toArray()[0]);
     }
 
+    public void testCheckForMissingPropertyFileReferencesShouldReturnEmptySetWhenYamlHasPropertyFiles() {
+        Mockito.doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
+
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(TestFileContent.ATTENTION_FLAGS_YAML_FILE);
+        Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
+        assertEquals(0, missingReferences.size());
+    }
+
+    public void testCheckForMissingPropertyFileReferencesShouldReturnNonEmptySetWhenYamlMissingPropertyFiles() {
+        HashSet<String> missingReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(TestFileContent.ATTENTION_FLAGS_YAML_FILE);
+        Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
+        assertEquals(1, missingReferences.size());
+        assertEquals("attention_flags", missingReferences.toArray()[0]);
+    }
 
     public void testPerformWidgetValidation() throws JsonProcessingException {
         String formIdentifier = "anc_registration.json";
