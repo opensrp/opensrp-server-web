@@ -58,7 +58,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		/* @formatter:off */
-		http.cors();
+		http.cors().configurationSource(corsConfigurationSource());
 		configureOpenSRPBasicSecurity(http)
 		.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		.and()
