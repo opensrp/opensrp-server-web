@@ -112,6 +112,15 @@ public class ClientFormValidator {
         return missingPropertyFileReferences;
     }
 
+    public HashSet<String> checkForMissingYamlPropertyFileReferences(@NonNull String fileContent) {
+        HashSet<String> propertyFileReferences = new HashSet<>();
+        HashSet<String> missingPropertyFileReferences = new HashSet<>();
+
+
+
+        return missingPropertyFileReferences;
+    }
+
     @NonNull
     public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull String clientFormContent) throws JsonProcessingException {
         ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
