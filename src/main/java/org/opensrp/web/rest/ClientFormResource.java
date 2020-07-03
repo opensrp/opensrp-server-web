@@ -349,6 +349,7 @@ public class ClientFormResource {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
+            missingPropertyFileReferences.addAll(clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString));
 
             String errorMessage;
             if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
