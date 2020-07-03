@@ -433,7 +433,7 @@ public class LocationResource {
 	 * @param returnTags Optional flag whether location tags should be returned or not
 	 * @return A locations tree of all of the root location's descendants
 	 */
-	@RequestMapping(value = "/getHierarchy/{locationId}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/hierarchy/{locationId}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTree(
 			@PathVariable("locationId") String locationId,
@@ -441,7 +441,7 @@ public class LocationResource {
 
 		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags);
 
-		return new ResponseEntity<>(new Gson().toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	static class LocationSyncRequestWrapper {
