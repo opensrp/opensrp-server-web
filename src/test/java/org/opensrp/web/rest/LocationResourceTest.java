@@ -847,7 +847,6 @@ public class LocationResourceTest {
 		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
-		LocationTree actualTree = new Gson().fromJson(actualTreeString, LocationTree.class);
 		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
 		assertFalse(booleanCaptor.getValue());
 		assertEquals("1", stringCaptor.getValue());
