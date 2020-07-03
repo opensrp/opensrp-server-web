@@ -38,9 +38,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
 
     private final static String manifestJson = "{\"identifier\":\"mani1234\",\"json\":\"{\\\"forms_version\\\":\\\"1.0.3\\\"}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
-    private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"remove_structure.json\\\"]}\"}";
+    private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\", \\\"remove_structure.json\\\"]}\"}";
     private final static String existingManifestJson = "{\"forms_version\":\"1.0.2\",\"identifiers\":[\"add_structure.json\"]}";
-    private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"remove_structure.json\",\"add_structure.json\"]}";
+    private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"add_structure.json\",\"remove_structure.json\"]}";
 
     @Before
     public void setUp() {
