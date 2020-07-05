@@ -4,22 +4,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.smartregister</groupId>
-
-<<<<<<< HEAD
-    <artifactId>opensrp-server-web</artifactId>
-    <packaging>war</packaging>
-    <version>2.1.32-SNAPSHOT</version>
-    <name>opensrp-server-web</name>
-    <description>OpenSRP Server Web Application</description>
-    <url>https://github.com/OpenSRP/opensrp-server-web</url>
-=======
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
-	<version>2.1.36-SNAPSHOT</version>
+	<version>2.1.37-SNAPSHOT</version>
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>https://github.com/OpenSRP/opensrp-server-web</url>
->>>>>>> 66ce2a5e06e1f1115b0bd60e28aaaed490f823eb
 
     <properties>
         <jetty.port>9979</jetty.port>
@@ -35,17 +25,9 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-
-
-<<<<<<< HEAD
         <opensrp.core.version>2.5.1-ANC-ALPHA1-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.1.1-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
-=======
-		<opensrp.core.version>2.5.3-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.1.0-SNAPSHOT</opensrp.connector.version>
-		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
->>>>>>> 66ce2a5e06e1f1115b0bd60e28aaaed490f823eb
 
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
