@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -180,7 +179,7 @@ public class SettingResourceTest {
 		settingConfig.add(config);
 
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		Mockito.when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
+		Mockito.when(openmrsLocationService.getLocationTreeOf(anyString())).thenReturn(locationTree);
 		Mockito.when(settingService.findSettings(any(SettingSearchBean.class), anyMap())).thenReturn(settingConfig);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
@@ -189,7 +188,7 @@ public class SettingResourceTest {
 
 		verify(settingService).findSettings(any(SettingSearchBean.class), anyMap());
 		verifyNoMoreInteractions(settingService);
-		Mockito.verify(openmrsLocationService).getLocationTreeOf(ArgumentMatchers.anyString());
+		Mockito.verify(openmrsLocationService).getLocationTreeOf(anyString());
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -245,7 +244,7 @@ public class SettingResourceTest {
 		sQB.setServerVersion(1000L);
 
 		settingService.findSettings(sQB, null);
-		Mockito.verify(settingRepository, Mockito.times(1)).findSettings(sQB, null);
+		Mockito.verify(settingRepository, times(1)).findSettings(sQB, null);
 		Mockito.verifyNoMoreInteractions(settingRepository);
 
 	}
