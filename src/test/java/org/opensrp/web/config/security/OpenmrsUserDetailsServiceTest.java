@@ -38,12 +38,10 @@ public class OpenmrsUserDetailsServiceTest {
 	@Mock
 	private OpenmrsUserService openmrsUserService;
 	
-	private OauthAuthenticationProvider authenticationProvider;
-	
 	@Before
 	public void setUp() {
 		userDetailsService = new OpenmrsUserDetailsService();
-		authenticationProvider = new OauthAuthenticationProvider(openmrsUserService);
+		OauthAuthenticationProvider authenticationProvider = new OauthAuthenticationProvider(openmrsUserService);
 		Whitebox.setInternalState(userDetailsService, "openmrsUserService", openmrsUserService);
 		Whitebox.setInternalState(userDetailsService, "authenticationProvider", authenticationProvider);
 	}
@@ -58,7 +56,7 @@ public class OpenmrsUserDetailsServiceTest {
 		assertEquals(username, userDetails.getUsername());
 		assertTrue(userDetails.getPassword().isBlank());
 		assertEquals(1, userDetails.getAuthorities().size());
-		assertEquals("ROLE_"+Role.ALL_EVENTS, userDetails.getAuthorities().iterator().next().getAuthority());
+		assertEquals("ROLE_" + Role.ALL_EVENTS, userDetails.getAuthorities().iterator().next().getAuthority());
 		verify(openmrsUserService).getUser(username);
 		
 	}
