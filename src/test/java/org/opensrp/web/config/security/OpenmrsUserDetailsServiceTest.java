@@ -58,7 +58,7 @@ public class OpenmrsUserDetailsServiceTest {
 		assertEquals(username, userDetails.getUsername());
 		assertTrue(userDetails.getPassword().isBlank());
 		assertEquals(1, userDetails.getAuthorities().size());
-		assertEquals(Role.ALL_EVENTS, userDetails.getAuthorities().iterator().next().getAuthority());
+		assertEquals("ROLE_"+Role.ALL_EVENTS, userDetails.getAuthorities().iterator().next().getAuthority());
 		verify(openmrsUserService).getUser(username);
 		
 	}
