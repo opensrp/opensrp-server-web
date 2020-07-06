@@ -15,17 +15,21 @@ import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.AssignedLocations;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
+import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
@@ -89,15 +93,31 @@ public class LocationResource {
 
 	public static final String JURISDICTION_ID = "jurisdiction_id";
 
+	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
+
+	public static final String RETURN_TAGS = "return_tags";
+
+	public static final String PLAN_ID = "plan_id";
+
 	public static final String PAGE_SIZE = "page_size";
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 	
 	private PhysicalLocationService locationService;
-	
+
+	private OrganizationService organizationService;
+
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
+	}
+
+	/**
+	 * @param organizationService the organizationService to set
+	 */
+	@Autowired
+	public void setOrganizationService(OrganizationService organizationService) {
+		this.organizationService = organizationService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -440,6 +460,56 @@ public class LocationResource {
 		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(),
 		        HttpStatus.OK);
 		
+	}
+
+	/**
+	 * Generate a tree hierarchy of all descendants for the specified location
+	 *
+	 * @param locationId The root location id
+	 * @param returnTags Optional flag whether location tags should be returned or not
+	 * @return A locations tree of all of the root location's descendants
+	 */
+	@RequestMapping(value = "/hierarchy/{locationId}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> generateLocationTree(
+			@PathVariable("locationId") String locationId,
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
+
+		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags, returnStructureCount);
+
+		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/hierarchy/plan/{plan}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> generateLocationTreeForPlan(
+			@PathVariable("plan") String plan,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
+
+		Set<String> locationIds = new HashSet<>();
+		try {
+
+			for (AssignedLocations assignedLocation : organizationService
+					.findAssignedLocationsAndPlansByPlanIdentifier(plan)) {
+				locationIds.add(assignedLocation.getJurisdictionId());
+			}
+
+		}
+		catch (Exception e) {
+			logger.error("USER Location info not mapped to an organization", e);
+		}
+		if (locationIds.isEmpty()) {
+			throw new IllegalStateException(
+					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
+		}
+
+		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);
+
+		return new ResponseEntity<>(
+				gson.toJson(locationTree),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 
 	static class LocationSyncRequestWrapper {
