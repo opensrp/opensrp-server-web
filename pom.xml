@@ -27,7 +27,7 @@
 
 		<opensrp.core.version>2.5.7-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.1.1-SNAPSHOT</opensrp.connector.version>
-		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
+		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
 
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
