@@ -46,7 +46,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -224,7 +223,7 @@ public class SettingResourceTest {
 				post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(SETTINGS_JSON.getBytes())
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andReturn();
-		verify(settingService, times(1)).saveSetting(anyString());
+		verify(settingService, Mockito.times(1)).saveSetting(anyString());
 		verifyNoMoreInteractions(settingService);
 		assertEquals(mvcResult.getResponse().getContentAsString(), EXPECTED_RESPONSE_SAVE_SETTING);
 	}
@@ -245,7 +244,7 @@ public class SettingResourceTest {
 		sQB.setServerVersion(1000L);
 
 		settingService.findSettings(sQB, null);
-		verify(settingRepository, times(1)).findSettings(sQB, null);
+		verify(settingRepository, Mockito.times(1)).findSettings(sQB, null);
 		verifyNoMoreInteractions(settingRepository);
 
 	}
