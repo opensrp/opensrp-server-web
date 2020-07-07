@@ -258,7 +258,7 @@ public class SettingResourceTest {
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
 		settingResource.setSettingService(settingService, openmrsLocationService);
 		String documentId = "1";
-		Mockito.doNothing().when(settingRepository).add(Matchers.any(SettingConfiguration.class));
+		Mockito.doNothing().when(settingRepository).add(any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
 
 		verify(settingRepository, Mockito.times(1)).add(settingConfigurationArgumentCaptor.capture());
@@ -276,7 +276,7 @@ public class SettingResourceTest {
 		settingResource.setSettingService(settingService, openmrsLocationService);
 		String documentId = "settings-document-id-2";
 		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(new SettingConfiguration());
-		Mockito.doNothing().when(settingRepository).update(ArgumentMatchers.any(SettingConfiguration.class));
+		Mockito.doNothing().when(settingRepository).update(any(SettingConfiguration.class));
 
 		settingService.saveSetting(settingJsonUpdate);
 
