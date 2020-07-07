@@ -10,24 +10,24 @@
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>https://github.com/OpenSRP/opensrp-server-web</url>
+	<properties>
+		<jetty.port>9979</jetty.port>
+		<main.basedir>${project.basedir}</main.basedir>
+		<hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.version>5.2.4.RELEASE</spring.version>
+		<spring.security.version>5.2.2.RELEASE</spring.security.version>
+		<spring.security.oauth.version>2.4.0.RELEASE</spring.security.oauth.version>
+		<spring.fox.swagger.version>2.9.2</spring.fox.swagger.version>
+		<spring.data.redis>2.2.4.RELEASE</spring.data.redis>
+		<redis.jedis.version>3.2.0</redis.jedis.version>
+		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
+		<opensrp.updatePolicy>always</opensrp.updatePolicy>
+		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 
-    <properties>
-        <jetty.port>9979</jetty.port>
-        <main.basedir>${project.basedir}</main.basedir>
-        <hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.2.4.RELEASE</spring.version>
-        <spring.security.version>5.2.2.RELEASE</spring.security.version>
-        <spring.security.oauth.version>2.4.0.RELEASE</spring.security.oauth.version>
-        <spring.fox.swagger.version>2.9.2</spring.fox.swagger.version>
-        <spring.data.redis>2.2.4.RELEASE</spring.data.redis>
-        <redis.jedis.version>3.2.0</redis.jedis.version>
-        <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
-        <opensrp.updatePolicy>always</opensrp.updatePolicy>
-        <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.5.1-ANC-ALPHA1-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.1.1-ANC-ALPHA-SNAPSHOT</opensrp.connector.version>
-        <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
+		<opensrp.core.version>2.5.7-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.1.1-SNAPSHOT</opensrp.connector.version>
+		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
 
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
