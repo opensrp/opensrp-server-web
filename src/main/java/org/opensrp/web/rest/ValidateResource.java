@@ -72,7 +72,6 @@ public class ValidateResource {
 
 			List<String> missingClientIds = new ArrayList<>();
 			if (syncData.has("clients")) {
-
 				List<String> clientIds = gson.fromJson(Utils.getStringFromJSON(syncData,"clients"),
 						new TypeToken<ArrayList<String>>() {
 						}.getType());
