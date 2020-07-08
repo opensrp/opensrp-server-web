@@ -506,7 +506,7 @@ public class LocationResource {
 
 		if (locationIds.isEmpty()) {
 			throw new IllegalStateException(
-					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
+					"Plan does not have any jurisdictions.");
 		}
 
 		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);
