@@ -27,7 +27,7 @@ public class ClientFormValidator {
     private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
     private ClientFormService clientFormService;
     private static String PROPERTIES_FILE_NAME = "properties_file_name";
-    private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+    private static Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
@@ -134,7 +134,7 @@ public class ClientFormValidator {
                 }
             }
         }catch (ComposerException exception) {
-            logger.error("Validator parsing a YAML that doesn't conform", exception);
+            logger.error("Validator parsing a YAML file that doesn't conform in structure", exception);
             return missingPropertyFileReferences;
         }
         return missingPropertyFileReferences;
