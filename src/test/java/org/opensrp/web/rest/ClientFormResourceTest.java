@@ -1119,7 +1119,7 @@ public class ClientFormResourceTest {
     @Test
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidYamlStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10), "application/x-yaml"));
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.INVALID_YAML_FILE_CONTENT, "application/x-yaml"));
     }
 
     @Test
