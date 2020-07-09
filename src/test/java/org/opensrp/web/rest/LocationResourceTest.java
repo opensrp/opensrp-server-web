@@ -47,12 +47,15 @@ import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.Geometry;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -116,6 +119,9 @@ public class LocationResourceTest {
 	
 	@Mock
 	private PhysicalLocationService locationService;
+	
+	@Mock
+	private PlanService planService;
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 	private String MESSAGE = "The server encountered an error processing the request.";
@@ -945,12 +951,15 @@ public class LocationResourceTest {
 		Set<String> locationIdentifiers = new HashSet<String>();
 		locationIdentifiers.add(locationId);
 
-		AssignedLocations assignedLocations = new AssignedLocations();
-		assignedLocations.setPlanId(planId);
-		assignedLocations.setJurisdictionId(locationId);
+		PlanDefinition planDefinition = new PlanDefinition();
+		planDefinition.setIdentifier(planId);
+		Jurisdiction jurisdiction = new Jurisdiction();
+		jurisdiction.setCode(locationId);
+		planDefinition.setJurisdiction(Collections.singletonList(jurisdiction));
 
-		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planId))
-				.thenReturn(Collections.singletonList(assignedLocations));
+		when(planService.getPlan(planId))
+				.thenReturn(planDefinition);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false)).thenReturn(tree);
 		when(locationService.buildLocationHierachy(locationIdentifiers, false)).thenReturn(tree);
 
 		MvcResult result = mockMvc

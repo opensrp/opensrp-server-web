@@ -30,7 +30,6 @@ import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
-import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
@@ -114,14 +113,6 @@ public class LocationResource {
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
-	}
-
-	/**
-	 * @param organizationService the organizationService to set
-	 */
-	@Autowired
-	public void setOrganizationService(OrganizationService organizationService) {
-		this.organizationService = organizationService;
 	}
 
 	@Autowired
