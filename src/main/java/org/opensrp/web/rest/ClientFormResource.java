@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -242,7 +243,7 @@ public class ClientFormResource {
         ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType, fileContentString);
         if (errorMessageForInvalidContent1 != null) return errorMessageForInvalidContent1;
 
-        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(fileContentType, fileContentString, isJsonValidator, formIdentifier);
+        ResponseEntity<String> errorMessage = checkFormsReferenceValidity(fileContentType, fileContentString, isJsonValidator, formIdentifier);
         if (errorMessage != null) return errorMessage;
 
         String identifier = getIdentifier(formIdentifier, jsonFile);
@@ -343,38 +344,45 @@ public class ClientFormResource {
         return null;
     }
 
-    private ResponseEntity<String> checkJsonFormsReferenceValidity(String fileContentType, String fileContentString,
+    private ResponseEntity<String> checkFormsReferenceValidity(String fileContentType, String fileContentString,
             boolean isJsonValidator, String formIdentifier) throws JsonProcessingException {
-        if (isJsonFile(fileContentType) && !isJsonValidator) {
-            HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
-            HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
-            HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
-            missingPropertyFileReferences.addAll(clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString));
+        if (!isJsonValidator) {
+            if (isJsonFile(fileContentType)) {
+                HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
+                HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
+                HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
+                String errorMessage;
+                if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
+                    errorMessage = "Form upload failed.";
 
-            String errorMessage;
-            if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
-                errorMessage = "Form upload failed.";
+                    if (!missingSubFormReferences.isEmpty()) {
+                        errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
+                    }
 
-                if (!missingSubFormReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following sub-form(s) are uploaded before: " + String.join(", ", missingSubFormReferences);
+                    if (!missingRuleFileReferences.isEmpty()) {
+                        errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(", ", missingRuleFileReferences);
+                    }
+
+                    if (!missingPropertyFileReferences.isEmpty()) {
+                        errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
+                    }
+
+                    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
                 }
 
-                if (!missingRuleFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following rules file(s) are uploaded before: " + String.join(", ", missingRuleFileReferences);
+                // Perform check to make sure that fields are not removed
+                HashSet<String> missingFields = clientFormValidator.performWidgetValidation(objectMapper, formIdentifier, fileContentString);
+                if (missingFields.size() > 0) {
+                    return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(", ", missingFields)
+                            + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
                 }
-
-                if (!missingPropertyFileReferences.isEmpty()) {
-                    errorMessage += "Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
-                }
-
-                return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
             }
-
-            // Perform check to make sure that fields are not removed
-            HashSet<String> missingFields = clientFormValidator.performWidgetValidation(objectMapper, formIdentifier, fileContentString);
-            if (missingFields.size() > 0) {
-                return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(", ", missingFields)
-                        + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
+            else if (isYamlContentType(fileContentType)) {
+                HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
+                if (!missingPropertyFileReferences.isEmpty()) {
+                    String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
+                    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+                }
             }
         }
         return null;
@@ -392,11 +400,23 @@ public class ClientFormResource {
                 return ex.getMessage();
             }
         } else if (isYamlContentType(contentType)) {
+            String errorMessage = null;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
+                return null;
             } catch (Exception ex) {
                 logger.error("Rules file upload is invalid YAML rules file", ex);
-                return ex.getMessage();
+                errorMessage += ex.getMessage();
+            }
+            try {
+                new Yaml().load(fileContentString);
+                return null;
+            }catch (Exception ex) {
+                logger.error("YAML file upload is invalid", ex);
+                errorMessage += "\n\n" + ex.getMessage();
+            }
+            if (StringUtils.isNotBlank(errorMessage)) {
+                return errorMessage;
             }
         } else {
             // This is a properties file
