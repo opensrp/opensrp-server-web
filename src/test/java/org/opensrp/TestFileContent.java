@@ -2,6 +2,15 @@ package org.opensrp;
 
 public class TestFileContent {
 
+    public static final String INVALID_YAML_FILE_CONTENT = "---\n" +
+            "name: step1_danger_signs_toaster\n" +
+            "description: Displays the womans danger signs.\n" +
+            "priority: 1\n" +
+            "condition: \"!global_danger_signs.isEmpty() && !global_danger_signs.contains('danger_none')\"\n" +
+            "actions:\n" +
+            "-'calculation = [\"danger_signs\" : global_danger_signs_value]'\n" +
+            "---\n";
+
     public static final String CALCULATION_YAML_FILE_CONTENT = "---\n" +
             "name: step1_danger_signs_toaster\n" +
             "description: Displays the womans danger signs.\n" +
@@ -63,5 +72,11 @@ public class TestFileContent {
             + "fields:\n"
             + "\n"
             + "  - template: \"{{attention_flags.yellow.age}}: {age}\"\n"
-            + "    relevance: \"age <= 17 || age >= 35\"";
+            + "    relevance: \"age <= 17 || age >= 35\"\n"
+            + "\n"
+            + "group: red_attention_flag\n"
+            + "fields:\n"
+            + "\n"
+            + "  - template: \"Danger sign(s): {danger_signs_value}\"\n"
+            + "    relevance: \"!danger_signs.isEmpty() && !danger_signs.contains('danger_none')\"";
 }

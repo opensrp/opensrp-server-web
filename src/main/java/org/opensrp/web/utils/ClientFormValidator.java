@@ -11,7 +11,6 @@ import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
-import org.opensrp.web.rest.EventResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
