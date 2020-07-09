@@ -112,9 +112,6 @@ public class LocationResourceTest {
 	@InjectMocks
 	private LocationResource locationResource;
 	
-	@Mock
-	private OrganizationService organizationService;
-
 	private MockMvc mockMvc;
 	
 	@Mock

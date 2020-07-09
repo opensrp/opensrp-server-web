@@ -106,8 +106,6 @@ public class LocationResource {
 	
 	private PhysicalLocationService locationService;
 
-	private OrganizationService organizationService;
-
 	private PlanService planService;
 
 	@Autowired
