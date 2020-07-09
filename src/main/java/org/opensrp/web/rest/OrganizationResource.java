@@ -193,7 +193,7 @@ public class OrganizationResource {
 		try {
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
-				total = organizationService.getTotalSearchOrganizations(organizationSearchBean);
+				total = organizationService.findOrganizationCount(organizationSearchBean);
 			}
 			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
 			response.setOrganizations(organizations);
