@@ -483,6 +483,7 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTreeForPlan(
 			@PathVariable("plan") String plan,
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
@@ -496,7 +497,7 @@ public class LocationResource {
 			return new ResponseEntity<>("Plan does not have any jurisdictions", HttpStatus.BAD_REQUEST);
 		}
 
-		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);
+		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount, returnTags);
 
 		return new ResponseEntity<>(
 				gson.toJson(locationTree),
