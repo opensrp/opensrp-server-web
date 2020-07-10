@@ -24,14 +24,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.AssignedLocations;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
-import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
@@ -108,8 +106,6 @@ public class LocationResource {
 	
 	private PhysicalLocationService locationService;
 
-	private OrganizationService organizationService;
-	
 	private PlanService planService;
 
 	@Autowired
@@ -117,14 +113,6 @@ public class LocationResource {
 		this.locationService = locationService;
 	}
 
-	/**
-	 * @param organizationService the organizationService to set
-	 */
-	@Autowired
-	public void setOrganizationService(OrganizationService organizationService) {
-		this.organizationService = organizationService;
-	}
-	
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
@@ -491,22 +479,21 @@ public class LocationResource {
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/getHierarchy/plan/{planIdentifier}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/getHierarchy/plan/{plan}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTreeForPlan(
-			@PathVariable("planIdentifier") String planIdentifier,
+			@PathVariable("plan") String plan,
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
 
-		PlanDefinition plan = planService.getPlan(planIdentifier);
-		for (Jurisdiction jurisdiction : plan.getJurisdiction()) {
+		PlanDefinition planDefinition = planService.getPlan(plan);
+		for (Jurisdiction jurisdiction : planDefinition.getJurisdiction()) {
 			locationIds.add(jurisdiction.getCode());
 		}
 
 		if (locationIds.isEmpty()) {
-			throw new IllegalStateException(
-					"Plan does not have any jurisdictions.");
+			return new ResponseEntity<>("Plan does not have any jurisdictions", HttpStatus.BAD_REQUEST);
 		}
 
 		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);

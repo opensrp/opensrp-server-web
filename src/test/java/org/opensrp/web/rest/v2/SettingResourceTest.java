@@ -41,10 +41,6 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
 @ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
@@ -100,8 +96,8 @@ public class SettingResourceTest {
 		config.setSettings(settingList);
 		settingConfig.add(config);
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
-		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.eq(null)))
+		Mockito.when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
+		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.eq(null)))
 				.thenReturn(settingConfig);
 
 		MvcResult result =
@@ -141,8 +137,8 @@ public class SettingResourceTest {
 		settingSearchBean.setServerVersion(Long.valueOf("15421904649873"));
 
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
-		when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.anyMap()))
+		Mockito.when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
+		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.anyMap()))
 				.thenReturn(settingConfig);
 
 		MvcResult result = mockMvc
@@ -209,7 +205,7 @@ public class SettingResourceTest {
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
 				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
 		Mockito.verify(settingService, Mockito.times(1)).deleteSetting(argumentCaptor.capture());
-		assertEquals(argumentCaptor.getValue().longValue(), 1);
+		Assert.assertEquals(argumentCaptor.getValue().longValue(), 1);
 	}
 
 	@Test
