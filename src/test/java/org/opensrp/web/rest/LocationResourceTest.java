@@ -954,15 +954,15 @@ public class LocationResourceTest {
 
 		when(planService.getPlan(planId))
 				.thenReturn(planDefinition);
-		when(locationService.buildLocationHierachy(locationIdentifiers, false)).thenReturn(tree);
-		when(locationService.buildLocationHierachy(locationIdentifiers, false)).thenReturn(tree);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/hierarchy/plan/" + planId)
 						.param(LocationResource.RETURN_STRUCTURE_COUNT, "false"))
 				.andExpect(status().isOk()).andReturn();
 
-		verify(locationService).buildLocationHierachy(stringSetCaptor.capture(), booleanCaptor.capture());
+		verify(locationService).buildLocationHierachy(stringSetCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
 
