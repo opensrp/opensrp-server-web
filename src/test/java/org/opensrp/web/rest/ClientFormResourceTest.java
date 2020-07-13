@@ -512,7 +512,7 @@ public class ClientFormResourceTest {
         assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
         ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
         assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
-        assertEquals("1.1000.1000", clientFormMetadata.getVersion());
+        assertEquals("1.0.0", clientFormMetadata.getVersion());
         assertEquals(formName, clientFormMetadata.getLabel());
         assertNull(clientFormMetadata.getModule());
     }
