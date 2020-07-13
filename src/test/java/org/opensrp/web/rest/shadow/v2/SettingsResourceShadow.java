@@ -1,16 +1,23 @@
-package org.opensrp.web.rest.shadow;
+package org.opensrp.web.rest.shadow.v2;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.service.SettingService;
-import org.opensrp.web.rest.SettingResource;
+import org.opensrp.web.rest.v2.SettingResource;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SettingResourceShadow extends SettingResource {
+public class SettingsResourceShadow extends SettingResource {
 
 	@Override
 	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
 		super.setSettingService(settingService, openmrsLocationService);
+	}
+
+	@Override
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		super.setObjectMapper(objectMapper);
 	}
 
 }

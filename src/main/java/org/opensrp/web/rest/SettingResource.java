@@ -1,23 +1,26 @@
 package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.apache.http.util.TextUtils;
-import org.joda.time.DateTime;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.opensrp.api.domain.Location;
+import org.opensrp.api.util.LocationTree;
+import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,79 +28,91 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
-@RequestMapping(value = "/rest/settings")
+@RequestMapping (value = "/rest/settings")
 public class SettingResource {
-	
+
+	public static final String SETTING_CONFIGURATIONS = "settingConfigurations";
 	private SettingService settingService;
-	
-	private static Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
-	
-	private String TEAM_ID = "teamId";
-	
-	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-	
+	private OpenmrsLocationService openmrsLocationService;
+
+	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+
 	@Autowired
-	public void setSettingService(SettingService settingService) {
+	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
 		this.settingService = settingService;
+		this.openmrsLocationService = openmrsLocationService;
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/sync")
-	public @ResponseBody ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
+
+	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
+		String locationTreeString = new Gson().toJson(openmrsLocationService.getLocationTreeOf(locationId));
+		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
+		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
+		if (locationTree != null) {
+			treeNodeHashMap = locationTree.getLocationsHierarchy();
+		}
+
+		return treeNodeHashMap;
+	}
+
+	@RequestMapping (method = RequestMethod.GET, value = "/sync")
+	public @ResponseBody
+	ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
-		
+		ResponseEntity responseEntity;
+
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		try {
-			
-			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-			String providerId = getStringFilter(PROVIDER_ID, request);
-			String locationId = getStringFilter(LOCATION_ID, request);
-			String team = getStringFilter(TEAM, request);
-			String teamId = getStringFilter(TEAM_ID, request);
-			
-			if ((TextUtils.isBlank(team) && TextUtils.isBlank(providerId) && TextUtils.isBlank(locationId)
-			        && TextUtils.isBlank(teamId) && TextUtils.isBlank(teamId)) || TextUtils.isBlank(serverVersion)) {
+			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+			String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
+			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
+			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
+			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
+			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+			List<SettingConfiguration> SettingConfigurations = null;
+			Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
+
+			if (StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
-			
-			Long lastSyncedServerVersion = serverVersion != null ? Long.valueOf(serverVersion) + 1 : 0;
-			
+
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
 			settingQueryBean.setTeamId(teamId);
 			settingQueryBean.setProviderId(providerId);
 			settingQueryBean.setLocationId(locationId);
-			settingQueryBean.setServerVersion(lastSyncedServerVersion);
-			
-			List<SettingConfiguration> SettingConfigurations = settingService.findSettings(settingQueryBean);
+			settingQueryBean.setServerVersion(Long.parseLong(serverVersion) + 1);
+			settingQueryBean.setV1Settings(true);
+			if (StringUtils.isNotBlank(locationId)) {
+				settingQueryBean.setResolveSettings(resolveSettings);
+				treeNodeHashMap = getChildParentLocationTree(locationId);
+			}
+
+			SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
 
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
-			return new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,
-					HttpStatus.OK);
-			
-		}
-		catch (Exception e) {
+			responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders, HttpStatus.OK); // todo: why is this conversion to json array necessary?
+		} catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+			responseEntity = new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
+		return responseEntity;
 	}
-	
-	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/sync")
+
+	@RequestMapping (headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/sync", consumes = {MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE})
 	public ResponseEntity<String> saveSetting(@RequestBody String data) {
 		JSONObject response = new JSONObject();
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -105,7 +120,7 @@ public class SettingResource {
 
 		JSONObject syncData = new JSONObject(data);
 
-		if (!syncData.has("settingConfigurations")) {
+		if (!syncData.has(SETTING_CONFIGURATIONS)) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
 
@@ -113,9 +128,7 @@ public class SettingResource {
 			JSONArray dbSettingsArray = new JSONArray();
 
 			for (int i = 0; i < clientSettings.length(); i++) {
-
-				dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
-
+				dbSettingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
 			}
 
 			response.put("validated_records", dbSettingsArray);
