@@ -108,7 +108,7 @@ public class OrganizationResourceTest {
 	public void testGetAllOrganizationsUnderLocation() throws Exception {
 		List<Organization> expected = Collections.singletonList(getOrganization());
 		when(organizationService.getAllOrganizations()).thenReturn(expected);
-		MvcResult result = mockMvc.perform(get(BASE_URL)
+		mockMvc.perform(get(BASE_URL)
 				.param("location_id", "12345")
 		).andExpect(status().isOk()).andReturn();
 		verify(organizationService).selectOrganizationsEncompassLocations("12345");
