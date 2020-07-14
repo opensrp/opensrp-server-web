@@ -2,6 +2,7 @@ package org.opensrp.web.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,6 +47,9 @@ public class XlsDataImportControllerTest {
 
 	@InjectMocks
 	private XlsDataImportController xlsDataImportController;
+
+	@Mock
+	private Authentication authentication;
 
 	private MockMvc mockMvc;
 
@@ -72,7 +77,7 @@ public class XlsDataImportControllerTest {
 
 		when(openmrsIDService.downloadOpenmrsIds(openmrsIds.size())).thenReturn(openmrsIds);
 
-		ResponseEntity<String> response = xlsDataImportController.importXlsData(file);
+		ResponseEntity<String> response = xlsDataImportController.importXlsData(file, authentication);
 		String responseBody = response.getBody();
 		JSONObject responseJson = new JSONObject(responseBody);
 		
@@ -82,6 +87,6 @@ public class XlsDataImportControllerTest {
 		assertEquals(summaryClientCount, 4);
 		assertEquals(summaryEventCount, 28);
 		verify(clientService, times(4)).addorUpdate(any(Client.class));
-		verify(eventService, times(28)).addEvent(any(Event.class));
+		verify(eventService, times(28)).addEvent(any(Event.class),anyString());
 	}
 }
