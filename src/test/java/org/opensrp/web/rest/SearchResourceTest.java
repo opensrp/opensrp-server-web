@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opensrp.repository.PlanRepository;
+import org.opensrp.service.TaskGenerator;
 import org.smartregister.domain.Client;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
@@ -42,6 +44,10 @@ public class SearchResourceTest {
 	private ClientsRepository clientRepository;
 	
 	private EventsRepository eventsRepository;
+
+	private TaskGenerator taskGenerator;
+
+	private PlanRepository planRepository;
 	
 	@Before
 	public void setUp() {
@@ -49,7 +55,7 @@ public class SearchResourceTest {
 		searchRepository = Mockito.mock(SearchRepository.class);
 		searchService = Mockito.spy(new SearchService(searchRepository));
 		clientService = Mockito.spy(new ClientService(clientRepository));
-		eventService = Mockito.spy(new EventService(eventsRepository, clientService));
+		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository));
 		
 	}
 	
