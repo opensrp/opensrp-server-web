@@ -178,6 +178,9 @@ public class SettingResource {
 	private ResponseEntity<String> performCreateOrUpdate(String entity, Long id) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
+			if (id > 0) {
+				setting.setSettingMetadataId(String.valueOf(id));
+			}
 			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
 			settingService.addOrUpdateSettings(setting);
 			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
@@ -197,7 +200,7 @@ public class SettingResource {
 	 * @return
 	 */
 	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> update(@RequestBody java.lang.String entity,
+	public ResponseEntity<String> update(@RequestBody String entity,
 			@PathVariable(Constants.RestPartVariables.ID) Long id) {
 		return performCreateOrUpdate(entity, id);
 	}
