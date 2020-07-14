@@ -10,10 +10,10 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,19 +42,18 @@ public class SettingResource {
 
 	public static final String SETTING_CONFIGURATIONS = "settingConfigurations";
 	private SettingService settingService;
-	private OpenmrsLocationService openmrsLocationService;
+	private PhysicalLocationService physicalLocationService;
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 
 	@Autowired
-	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
+	public void setSettingService(SettingService settingService, PhysicalLocationService openmrsLocationService) {
 		this.settingService = settingService;
-		this.openmrsLocationService = openmrsLocationService;
+		this.physicalLocationService = openmrsLocationService;
 	}
 
 	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
-		String locationTreeString = new Gson().toJson(openmrsLocationService.getLocationTreeOf(locationId));
-		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
+		LocationTree locationTree = physicalLocationService.buildLocationHierachyFromLocation(locationId, false);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
 		if (locationTree != null) {
 			treeNodeHashMap = locationTree.getLocationsHierarchy();

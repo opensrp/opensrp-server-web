@@ -1,10 +1,8 @@
 package org.opensrp.web.rest.v2;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -13,10 +11,10 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.search.SettingSearchBean;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.rest.RestUtils;
@@ -28,12 +26,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.text.MessageFormat;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class SettingResource {
 
 	private SettingService settingService;
 
-	private OpenmrsLocationService openmrsLocationService;
+	private PhysicalLocationService physicalLocationService;
 
 	@Autowired
 	public void setObjectMapper(ObjectMapper objectMapper) {
@@ -64,9 +65,9 @@ public class SettingResource {
 	}
 
 	@Autowired
-	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
+	public void setSettingService(SettingService settingService, PhysicalLocationService openmrsLocationService) {
 		this.settingService = settingService;
-		this.openmrsLocationService = openmrsLocationService;
+		this.physicalLocationService = openmrsLocationService;
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class SettingResource {
 	 * @param identifier {@link String} - settings identifier
 	 * @return setting {@link Setting} - the settings object
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable(Constants.RestPartVariables.ID) String identifier) {
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
 		settingQueryBean.setId(identifier);
@@ -86,8 +87,7 @@ public class SettingResource {
 	}
 
 	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
-		String locationTreeString = new Gson().toJson(openmrsLocationService.getLocationTreeOf(locationId));
-		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
+		LocationTree locationTree = physicalLocationService.buildLocationHierachyFromLocation(locationId, false);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
 		if (locationTree != null) {
 			treeNodeHashMap = locationTree.getLocationsHierarchy();
@@ -101,55 +101,47 @@ public class SettingResource {
 	 *
 	 * @return A list of settings
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
-		try {
-			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-			String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
-			String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
-			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
-			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
-			String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
-			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
-			Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
+		String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
+		String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
+		String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
+		String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
+		String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
+		boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+		Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 
-			if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-					&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
-				return new ResponseEntity<>("All parameters cannot be null for this endpoint",
-						RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
-			}
-
-			long lastSyncedServerVersion = 0L;
-			if (StringUtils.isNotBlank(serverVersion)) {
-				lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
-			}
-
-			SettingSearchBean settingQueryBean = new SettingSearchBean();
-			settingQueryBean.setTeam(team);
-			settingQueryBean.setTeamId(teamId);
-			settingQueryBean.setProviderId(providerId);
-			settingQueryBean.setLocationId(locationId);
-			settingQueryBean.setServerVersion(lastSyncedServerVersion);
-			if (StringUtils.isNotBlank(identifier)) {
-				settingQueryBean.setIdentifier(identifier);
-			}
-			if (StringUtils.isNotBlank(locationId)) {
-				settingQueryBean.setResolveSettings(resolveSettings);
-				treeNodeHashMap = getChildParentLocationTree(locationId);
-			}
-
-			List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean,
-					treeNodeHashMap);
-			List<Setting> settingList = extractSettings(settingConfigurations);
-
-			return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
-		}
-		catch (Exception e) {
-			logger.error(MessageFormat.format("Fetching settings failed with the following error {0}.- ", e));
-			return new ResponseEntity<>(RestUtils.getJSONUTF8Headers(), HttpStatus.INTERNAL_SERVER_ERROR);
+		if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
+				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
+			return new ResponseEntity<>("All parameters cannot be null for this endpoint",
+					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 
+		long lastSyncedServerVersion = 0L;
+		if (StringUtils.isNotBlank(serverVersion)) {
+			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+		}
+
+		SettingSearchBean settingQueryBean = new SettingSearchBean();
+		settingQueryBean.setTeam(team);
+		settingQueryBean.setTeamId(teamId);
+		settingQueryBean.setProviderId(providerId);
+		settingQueryBean.setLocationId(locationId);
+		settingQueryBean.setServerVersion(lastSyncedServerVersion);
+		if (StringUtils.isNotBlank(identifier)) {
+			settingQueryBean.setIdentifier(identifier);
+		}
+		if (StringUtils.isNotBlank(locationId)) {
+			settingQueryBean.setResolveSettings(resolveSettings);
+			treeNodeHashMap = getChildParentLocationTree(locationId);
+		}
+
+		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean,
+				treeNodeHashMap);
+		List<Setting> settingList = extractSettings(settingConfigurations);
+
+		return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	private List<Setting> extractSettings(List<SettingConfiguration> settingConfigurations) {
@@ -164,30 +156,41 @@ public class SettingResource {
 	}
 
 	/**
-	 * Creates or updates a given settings
+	 * Creates a setting
 	 *
 	 * @param entity {@link Setting} - the settings object
 	 * @return
 	 */
-	@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
+	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> create(@RequestBody String entity) {
+		return performCreateOrUpdate(entity, 0L);
+	}
+
+	/**
+	 * Update a setting
+	 *
+	 * @param entity {@link Setting} - the settings object
+	 * @param id     {@link Long} - the settings-metadata id
+	 * @return
+	 */
+	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> update(@RequestBody java.lang.String entity,
+			@PathVariable(Constants.RestPartVariables.ID) Long id) {
+		return performCreateOrUpdate(entity, id);
+	}
+
+	private ResponseEntity<String> performCreateOrUpdate(String entity, Long id) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
+			if (id > 0) {
+				setting.setSettingMetadataId(String.valueOf(id));
+			}
 			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
 			settingService.addOrUpdateSettings(setting);
 			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
 					HttpStatus.CREATED);
 		}
-		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid settings json" + entity);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-		catch (JsonMappingException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-		catch (Exception e) {
+		catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
@@ -199,22 +202,16 @@ public class SettingResource {
 	 * @param id {@link Long}
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
-		try {
-			if (id == null) {
-				return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
-						HttpStatus.BAD_REQUEST);
-			} else {
-				settingService.deleteSetting(id);
-				return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
-						HttpStatus.NO_CONTENT);
-			}
+		if (id == null) {
+			return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			settingService.deleteSetting(id);
+			return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.NO_CONTENT);
 		}
-		catch (IllegalArgumentException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-
 	}
+}
 }
