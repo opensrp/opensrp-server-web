@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @EnableWebMvc
 @EnableCaching
 public class WebConfig {
+
+	@Value("#{opensrp['redis.ttl']}")
+	private long redisEntryTtl;
 
 	@Autowired
 	RedisConnectionFactory redisConnectionFactory;
@@ -68,7 +72,7 @@ public class WebConfig {
 	@Bean
 	public RedisCacheManager cacheManager() {
 		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
-		config = config.entryTtl(Duration.ofMinutes(30))
+		config = config.entryTtl(Duration.ofSeconds(redisEntryTtl))
 				.disableCachingNullValues();
 
 		return RedisCacheManager.builder(redisConnectionFactory)
