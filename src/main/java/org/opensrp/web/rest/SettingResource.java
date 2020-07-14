@@ -114,7 +114,7 @@ public class SettingResource {
 
 			for (int i = 0; i < clientSettings.length(); i++) {
 
-				dbSettingsArray.put(settingService.saveSetting(clientSettings.getString(i).toString()));
+				dbSettingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
 
 			}
 
