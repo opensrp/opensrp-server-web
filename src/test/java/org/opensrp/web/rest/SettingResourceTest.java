@@ -23,6 +23,7 @@ import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
 import org.opensrp.search.SettingSearchBean;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -42,6 +43,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,7 +67,7 @@ public class SettingResourceTest {
 	private SettingService settingService;
 
 	@Mock
-	private OpenmrsLocationService openmrsLocationService;
+	private PhysicalLocationService physicalLocationService;
 
 	@InjectMocks
 	private SettingResource settingResource;
@@ -178,7 +180,7 @@ public class SettingResourceTest {
 		settingConfig.add(config);
 
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		Mockito.when(openmrsLocationService.getLocationTreeOf(anyString())).thenReturn(locationTree);
+		Mockito.when(physicalLocationService.buildLocationHierachyFromLocation(anyString(), anyBoolean())).thenReturn(locationTree);
 		Mockito.when(settingService.findSettings(any(SettingSearchBean.class), anyMap())).thenReturn(settingConfig);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
@@ -187,7 +189,7 @@ public class SettingResourceTest {
 
 		verify(settingService).findSettings(any(SettingSearchBean.class), anyMap());
 		verifyNoMoreInteractions(settingService);
-		verify(openmrsLocationService).getLocationTreeOf(anyString());
+		verify(physicalLocationService).buildLocationHierachyFromLocation(anyString(), anyBoolean());
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -230,7 +232,7 @@ public class SettingResourceTest {
 	@Test
 	public void testFindSettingsByVersionAndTeamId() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -251,7 +253,7 @@ public class SettingResourceTest {
 	@Test
 	public void testSaveSetting() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -268,7 +270,7 @@ public class SettingResourceTest {
 	@Test
 	public void testUpdateSetting() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -288,7 +290,7 @@ public class SettingResourceTest {
 	public void testAddServerVersion() {
 
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);

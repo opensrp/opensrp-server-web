@@ -18,10 +18,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants;
-import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.domain.setting.Setting;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.search.SettingSearchBean;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -59,7 +59,7 @@ public class SettingResourceTest {
 	private SettingService settingService;
 
 	@Mock
-	private OpenmrsLocationService openmrsLocationService;
+	private PhysicalLocationService physicalLocationService;
 
 	@InjectMocks
 	private SettingResource settingResource;
@@ -74,7 +74,7 @@ public class SettingResourceTest {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(this.settingResource).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-		settingResource.setSettingService(settingService, openmrsLocationService);
+		settingResource.setSettingService(settingService, physicalLocationService);
 		settingResource.setObjectMapper(mapper);
 	}
 
@@ -96,7 +96,8 @@ public class SettingResourceTest {
 		config.setSettings(settingList);
 		settingConfig.add(config);
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		Mockito.when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
+		Mockito.when(physicalLocationService.buildLocationHierachyFromLocation(ArgumentMatchers.anyString(),
+				ArgumentMatchers.anyBoolean())).thenReturn(locationTree);
 		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.eq(null)))
 				.thenReturn(settingConfig);
 
@@ -107,7 +108,7 @@ public class SettingResourceTest {
 		Mockito.verify(settingService)
 				.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.eq(null));
 		Mockito.verifyNoMoreInteractions(settingService);
-		Mockito.verifyNoInteractions(openmrsLocationService);
+		Mockito.verifyNoInteractions(physicalLocationService);
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -137,7 +138,8 @@ public class SettingResourceTest {
 		settingSearchBean.setServerVersion(Long.valueOf("15421904649873"));
 
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		Mockito.when(openmrsLocationService.getLocationTreeOf(ArgumentMatchers.anyString())).thenReturn(locationTree);
+		Mockito.when(physicalLocationService.buildLocationHierachyFromLocation(ArgumentMatchers.anyString(),
+				ArgumentMatchers.anyBoolean())).thenReturn(locationTree);
 		Mockito.when(settingService.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.anyMap()))
 				.thenReturn(settingConfig);
 
@@ -150,7 +152,8 @@ public class SettingResourceTest {
 		Mockito.verify(settingService)
 				.findSettings(ArgumentMatchers.any(SettingSearchBean.class), ArgumentMatchers.anyMap());
 		Mockito.verifyNoMoreInteractions(settingService);
-		Mockito.verify(openmrsLocationService).getLocationTreeOf(ArgumentMatchers.anyString());
+		Mockito.verify(physicalLocationService).buildLocationHierachyFromLocation(ArgumentMatchers.anyString(),
+				ArgumentMatchers.anyBoolean());
 
 		JSONArray response = new JSONArray(result.getResponse().getContentAsString());
 		Assert.assertEquals(2, response.length());

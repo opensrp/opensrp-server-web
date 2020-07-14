@@ -1,7 +1,5 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,9 +45,9 @@ public class SettingResource {
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
 
 	@Autowired
-	public void setSettingService(SettingService settingService, PhysicalLocationService openmrsLocationService) {
+	public void setSettingService(SettingService settingService, PhysicalLocationService physicalLocationService) {
 		this.settingService = settingService;
-		this.physicalLocationService = openmrsLocationService;
+		this.physicalLocationService = physicalLocationService;
 	}
 
 	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
