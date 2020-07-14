@@ -450,9 +450,10 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTree(
 			@PathVariable("locationId") String locationId,
-			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags) {
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
-		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags);
+		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags, returnStructureCount);
 
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
