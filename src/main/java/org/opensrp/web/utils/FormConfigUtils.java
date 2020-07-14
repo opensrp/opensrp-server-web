@@ -19,8 +19,7 @@ public class FormConfigUtils {
 					"." + newVersion;
 		} else if (defaultArtifactVersion.getMinorVersion() < 1000) {
 			int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
-			formVersion = defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion
-					.getIncrementalVersion();
+			formVersion = defaultArtifactVersion.getMajorVersion() + "." + newVersion + ".0";
 		} else {
 			int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
 			formVersion = newVersion + ".0" + ".0";
