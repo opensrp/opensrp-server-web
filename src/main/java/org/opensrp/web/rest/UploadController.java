@@ -211,13 +211,9 @@ public class UploadController {
 		for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {
 			Client client = eventClient.getLeft();
 
-			String baseEntityID = client.getBaseEntityId();
-			boolean newClient = false;
-			if (StringUtils.isBlank(baseEntityID)) {
-				baseEntityID = UUID.randomUUID().toString();
-				client.setBaseEntityId(baseEntityID);
-				newClient = true;
-			}
+			boolean newClient = StringUtils.isBlank(client.getBaseEntityId());
+			String baseEntityID = StringUtils.defaultIfBlank(client.getBaseEntityId(), UUID.randomUUID().toString());
+			client.setBaseEntityId(baseEntityID);
 
 			if (StringUtils.isNotBlank(locationID))
 				client.addAttribute(DEFAULT_RESIDENCE, locationID);
@@ -230,17 +226,9 @@ public class UploadController {
 			String eventType = newClient ? eventName : "Update " + eventName;
 			prepareEvent(event, baseEntityID, providerId, eventType);
 
-			if (StringUtils.isNotBlank(teamID))
-				event.setTeamId(teamID);
-
-			if (StringUtils.isNotBlank(teamName))
-				event.setTeam(teamName);
-
-			if(StringUtils.isBlank(event.getTeamId()))
-				event.setTeamId(DEFAULT);
-
-			if (StringUtils.isNotBlank(locationID))
-				event.setLocationId(locationID);
+			event.setTeamId(StringUtils.defaultIfBlank(teamID,event.getTeamId()));
+			event.setTeam(StringUtils.defaultIfBlank(teamName,event.getTeam()));
+			event.setLocationId(StringUtils.defaultIfBlank(locationID,event.getLocationId()));
 
 			// save the event
 			eventService.addorUpdateEvent(event);
@@ -263,12 +251,9 @@ public class UploadController {
 	}
 
 	private void prepareEvent(Event event, String baseEntityID, String providerId, String eventType) {
-		if (StringUtils.isBlank(event.getFormSubmissionId()))
-			event.setFormSubmissionId(UUID.randomUUID().toString());
-
-		if (StringUtils.isBlank(event.getBaseEntityId()))
-			event.setBaseEntityId(baseEntityID);
-
+		event.setFormSubmissionId(StringUtils.defaultIfBlank(event.getFormSubmissionId(),UUID.randomUUID().toString()));
+		event.setBaseEntityId(StringUtils.defaultIfBlank(event.getBaseEntityId(),baseEntityID));
+		event.setTeamId(StringUtils.defaultIfBlank(event.getTeamId(),DEFAULT));
 		event.setDateCreated(new DateTime());
 		event.setEventDate(new DateTime());
 		event.setProviderId(providerId);
