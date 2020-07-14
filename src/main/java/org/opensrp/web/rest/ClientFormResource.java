@@ -396,13 +396,13 @@ public class ClientFormResource {
                 return ex.getMessage();
             }
         } else if (isYamlContentType(contentType)) {
-            String errorMessage = null;
+            String errorMessage;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
                 return null;
             } catch (Exception ex) {
                 logger.error("Rules file upload is invalid YAML rules file", ex);
-                errorMessage += ex.getMessage();
+                errorMessage = ex.getMessage();
             }
             try {
                 new Yaml().load(fileContentString);
