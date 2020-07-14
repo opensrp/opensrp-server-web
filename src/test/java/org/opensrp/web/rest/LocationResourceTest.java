@@ -855,11 +855,12 @@ public class LocationResourceTest {
 						.param(LocationResource.RETURN_TAGS, "false"))
 				.andExpect(status().isOk()).andReturn();
 
-		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture());
+		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
 		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
-		assertFalse(booleanCaptor.getValue());
+		assertFalse(booleanCaptor.getAllValues().get(0));
+		assertFalse(booleanCaptor.getAllValues().get(1));
 		assertEquals("1", stringCaptor.getValue());
 	}
 	
