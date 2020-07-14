@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+@Deprecated
 public class OpenMRSUniqueIDProvider implements UniqueIDProvider {
     private final OpenmrsIDService openmrsIDService;
     private final Queue<String> availableIDs = new LinkedList<>();

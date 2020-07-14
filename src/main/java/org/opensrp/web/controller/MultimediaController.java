@@ -165,13 +165,9 @@ public class MultimediaController {
 
 		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
 		multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
-		String status = null;
-		try {
-			logger.info("Saving multimedia file...");
-			status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-		} catch (IOException e) {
-			logger.error("", e);
-		}
+
+		logger.info("Saving multimedia file...");
+		String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}

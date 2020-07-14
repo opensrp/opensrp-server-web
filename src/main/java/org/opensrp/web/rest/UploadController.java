@@ -15,14 +15,15 @@ import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.MultimediaService;
-import org.opensrp.service.OpenmrsIDService;
+import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.service.UploadService;
 import org.opensrp.util.JSONCSVUtil;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.exceptions.UploadValidationException;
-import org.opensrp.web.uniqueid.OpenMRSUniqueIDProvider;
 import org.opensrp.web.uniqueid.UniqueIDProvider;
+import org.opensrp.web.uniqueid.UniqueIdentifierProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Client;
@@ -73,6 +74,9 @@ public class UploadController {
 	@Value("#{opensrp['opensrp.config.global_id'] ?: 'opensrp_id'}")
 	private String globalID;
 
+	@Value("#{opensrp['opensrp.config.id_source'] ?: '1'}")
+	private String IDSource;
+
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
 
@@ -90,11 +94,13 @@ public class UploadController {
 
 	private MultimediaRepository multimediaRepository;
 
-	private OpenmrsIDService openmrsIDService;
-
 	private ClientService clientService;
 
 	private EventService eventService;
+
+	private IdentifierSourceService identifierSourceService;
+
+	private UniqueIdentifierService uniqueIdentifierService;
 
 	@Autowired
 	public void setObjectMapper(ObjectMapper objectMapper) {
@@ -117,8 +123,13 @@ public class UploadController {
 	}
 
 	@Autowired
-	public void setOpenmrsIDService(OpenmrsIDService openmrsIDService) {
-		this.openmrsIDService = openmrsIDService;
+	public void setIdentifierSourceService(IdentifierSourceService identifierSourceService) {
+		this.identifierSourceService = identifierSourceService;
+	}
+
+	@Autowired
+	public void setUniqueIdentifierService(UniqueIdentifierService uniqueIdentifierService) {
+		this.uniqueIdentifierService = uniqueIdentifierService;
 	}
 
 	@Autowired
@@ -193,7 +204,8 @@ public class UploadController {
 			String eventName,
 			String teamID,
 			String teamName){
-		UniqueIDProvider uniqueIDProvider = new OpenMRSUniqueIDProvider(openmrsIDService,
+		UniqueIDProvider uniqueIDProvider = new UniqueIdentifierProvider(uniqueIdentifierService, identifierSourceService,
+				IDSource,
 				validationBean.getRowsToCreate());
 
 		for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {

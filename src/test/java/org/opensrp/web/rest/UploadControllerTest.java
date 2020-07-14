@@ -15,6 +15,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.opensrp.domain.IdentifierSource;
+import org.opensrp.service.IdentifierSourceService;
+import org.opensrp.service.UniqueIdentifierService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.domain.Multimedia;
@@ -23,7 +26,6 @@ import org.opensrp.search.UploadValidationBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.MultimediaService;
-import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UploadService;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.opensrp.web.bean.UploadBean;
@@ -96,7 +98,10 @@ public class UploadControllerTest {
 	private EventService eventService;
 
 	@Mock
-	private OpenmrsIDService openmrsIDService;
+	private IdentifierSourceService identifierSourceService;
+
+	@Mock
+	private UniqueIdentifierService uniqueIdentifierService;
 
 	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -115,7 +120,8 @@ public class UploadControllerTest {
 		uploadController.setClientService(clientService);
 		uploadController.setUploadService(uploadService);
 		uploadController.setEventService(eventService);
-		uploadController.setOpenmrsIDService(openmrsIDService);
+		uploadController.setIdentifierSourceService(identifierSourceService);
+		uploadController.setUniqueIdentifierService(uniqueIdentifierService);
 		uploadController.setObjectMapper(objectMapper);
 	}
 
@@ -141,7 +147,9 @@ public class UploadControllerTest {
 		clients.add(Pair.of(client, null));
 		validationBean.setAnalyzedData(clients);
 
-		when(openmrsIDService.downloadOpenmrsIds(Mockito.anyLong())).thenReturn(results);
+		IdentifierSource identifierSource = Mockito.mock(IdentifierSource.class);
+		when(identifierSourceService.findByIdentifier(Mockito.anyString())).thenReturn(identifierSource);
+		when(uniqueIdentifierService.generateIdentifiers(Mockito.any(IdentifierSource.class), Mockito.anyInt(), Mockito.anyString())).thenReturn(results);
 		when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
 				.thenReturn(validationBean);
 
