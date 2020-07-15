@@ -11,16 +11,19 @@ import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
+import org.opensrp.web.rest.ClientFormResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 
 import java.util.*;
 
 public class ClientFormValidator {
-
-    private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
-    private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
-    private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
-    private ClientFormService clientFormService;
+    private static final Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
+    private final ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
+    private final ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
+    private final ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
+    private final ClientFormService clientFormService;
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
@@ -116,8 +119,9 @@ public class ClientFormValidator {
     public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull String clientFormContent) throws JsonProcessingException {
         ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
         HashSet<String> fieldsMap = new HashSet<>();
-        if (formValidator != null && formValidator.getJson() != null && !((String) formValidator.getJson()).isEmpty()) {
-            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue((String) formValidator.getJson(), JsonWidgetValidatorDefinition.class);
+        if (formValidator != null && formValidator.getJson() != null && !formValidator.getJson().toString().isEmpty()) {
+            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition =
+                    objectMapper.readValue(formValidator.getJson().toString(), JsonWidgetValidatorDefinition.class);
             JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition.getCannotRemove();
             if (widgetCannotRemove != null && widgetCannotRemove.getFields() != null && widgetCannotRemove.getFields().size() > 0) {
                 JsonNode jsonNode = objectMapper.readTree(clientFormContent);

@@ -48,7 +48,7 @@ public class ClientFormResource {
 
     public static final String FORMS_VERSION = "forms_version";
 
-    private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+    private static Logger logger = LoggerFactory.getLogger(ClientFormResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
