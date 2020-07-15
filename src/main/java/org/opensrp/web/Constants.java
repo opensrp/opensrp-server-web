@@ -24,6 +24,14 @@ public interface Constants {
         String TEXT_YAML = "text/yaml";
     }
 
+    interface RestEndpointUrls {
+        String SETTINGS_V2_URL = "/rest/v2/settings";
+    }
+
+    interface RestPartVariables {
+        String ID = "id";
+    }
+
     interface EndpointParam {
         String APP_ID = "app_id";
         String STRICT = "strict";

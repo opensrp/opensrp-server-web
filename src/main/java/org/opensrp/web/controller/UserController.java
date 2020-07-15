@@ -151,7 +151,7 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = locationService.buildLocationHierachy(locationIds);
+		LocationTree l = locationService.buildLocationHierachy(locationIds,true);
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
