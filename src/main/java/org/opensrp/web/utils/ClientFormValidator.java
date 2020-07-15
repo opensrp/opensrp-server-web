@@ -11,19 +11,22 @@ import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
-import org.opensrp.web.rest.ClientFormResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.composer.ComposerException;
 
 import java.util.*;
 
 public class ClientFormValidator {
     private static final Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
-    private final ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
-    private final ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
-    private final ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
-    private final ClientFormService clientFormService;
+
+    private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
+    private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
+    private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
+    private ClientFormService clientFormService;
+    private static String PROPERTIES_FILE_NAME = "properties_file_name";
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
@@ -112,6 +115,27 @@ public class ClientFormValidator {
             }
         }
 
+        return missingPropertyFileReferences;
+    }
+
+    public HashSet<String> checkForMissingYamlPropertyFileReferences(@NonNull String fileContent) {
+        HashSet<String> propertyFileReferences = new HashSet<>();
+        HashSet<String> missingPropertyFileReferences = new HashSet<>();
+        try {
+            Map<Object, Object> document = new Yaml().load(fileContent);
+            if (document.containsKey(PROPERTIES_FILE_NAME)) {
+                propertyFileReferences.add((String) document.get(PROPERTIES_FILE_NAME));
+            }
+            // Check if the references exist in the DB
+            for (String propertyFileReference: propertyFileReferences) {
+                if (!clientFormService.isClientFormExists(propertyFileReference) && !clientFormService.isClientFormExists(propertyFileReference + ".properties")) {
+                    missingPropertyFileReferences.add(propertyFileReference);
+                }
+            }
+        }catch (ComposerException exception) {
+            logger.error("Validator parsing a YAML file that doesn't conform in structure", exception);
+            return missingPropertyFileReferences;
+        }
         return missingPropertyFileReferences;
     }
 

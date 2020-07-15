@@ -1,10 +1,8 @@
 package org.opensrp.web.rest.v2;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -28,10 +26,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class SettingResource {
 	 * @param identifier {@link String} - settings identifier
 	 * @return setting {@link Setting} - the settings object
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable(Constants.RestPartVariables.ID) String identifier) {
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
 		settingQueryBean.setId(identifier);
@@ -101,7 +102,7 @@ public class SettingResource {
 	 *
 	 * @return A list of settings
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
 		try {
 			String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
@@ -169,23 +170,21 @@ public class SettingResource {
 	 * @param entity {@link Setting} - the settings object
 	 * @return
 	 */
-	@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE })
+	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> createOrUpdate(@RequestBody String entity) {
+		return performCreateOrUpdate(entity, 0L);
+	}
+
+	private ResponseEntity<String> performCreateOrUpdate(String entity, Long id) {
 		try {
 			Setting setting = objectMapper.readValue(entity, Setting.class);
+			if (id > 0) {
+				setting.setSettingMetadataId(String.valueOf(id));
+			}
 			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
 			settingService.addOrUpdateSettings(setting);
 			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
 					HttpStatus.CREATED);
-		}
-		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid settings json" + entity);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-		catch (JsonMappingException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -194,27 +193,33 @@ public class SettingResource {
 	}
 
 	/**
+	 * Update a setting
+	 *
+	 * @param entity {@link Setting} - the settings object
+	 * @param id     {@link Long} - the settings-metadata id
+	 * @return
+	 */
+	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> update(@RequestBody String entity,
+			@PathVariable(Constants.RestPartVariables.ID) Long id) {
+		return performCreateOrUpdate(entity, id);
+	}
+
+	/**
 	 * Deletes a settings by primary key
 	 *
 	 * @param id {@link Long}
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
-		try {
-			if (id == null) {
-				return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
-						HttpStatus.BAD_REQUEST);
-			} else {
-				settingService.deleteSetting(id);
-				return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
-						HttpStatus.NO_CONTENT);
-			}
+		if (id == null) {
+			return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			settingService.deleteSetting(id);
+			return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.NO_CONTENT);
 		}
-		catch (IllegalArgumentException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-
 	}
 }
