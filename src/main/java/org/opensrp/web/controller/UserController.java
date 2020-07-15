@@ -152,6 +152,7 @@ public class UserController {
 		}
 		
 		LocationTree l = locationService.buildLocationHierachy(locationIds, false, true);
+
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		

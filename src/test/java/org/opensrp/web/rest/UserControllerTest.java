@@ -191,8 +191,8 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
-
 		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId), false, true)).thenReturn(new LocationTree());
+
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
 		when(locationService.findLocationsByIds(false, Collections.singletonList(jurisdictionId)))
