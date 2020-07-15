@@ -848,7 +848,7 @@ public class LocationResourceTest {
 	public void testGenerateLocationTree() throws Exception {
 		LocationTree tree = LocationResource.gson.fromJson(locationTree, LocationTree.class);
 
-		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean())).thenReturn(tree);
+		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean(), anyBoolean())).thenReturn(tree);
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/hierarchy/" + 1)
