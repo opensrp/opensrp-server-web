@@ -157,27 +157,27 @@ public class XlsDataImportController {
 				    Event birthRegistrationEvent = this.buildBirthRegistrationEvent(record, childClient);
 				    this.addMultipleObs(birthRegistrationEvent, defaultObs);
 
-				    eventService.addEvent(birthRegistrationEvent, RestUtils.currentUser(authentication).getUsername());
+				    eventService.addEvent(birthRegistrationEvent, authentication.getName());
 				    eventCounter++;
 
 				    // Create New Woman Registration Event
 				    Event womanRegistrationEvent = this.buildNewWomanRegistrationEvent(record, motherClient);
 				    this.addMultipleObs(womanRegistrationEvent, defaultObs);
 
-				    eventService.addEvent(womanRegistrationEvent, RestUtils.currentUser(authentication).getUsername());
+				    eventService.addEvent(womanRegistrationEvent, authentication.getName());
 				    eventCounter++;
 
 				    // Create vaccination events
 				    for(Event e: this.buildVaccinationEvents(record, childClient)) {
 						this.addMultipleObs(e, defaultObs);
-				    	eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
+				    	eventService.addEvent(e, authentication.getName());
 				    	eventCounter++;
 				    }
 				    
 				    //Create growth monitoring events
 				    for(Event e: this.buildGrowthMonitoringEvents(record, childClient)) {
 				    	this.addMultipleObs(e, defaultObs);
-				    	eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
+				    	eventService.addEvent(e, authentication.getName());
 				    	eventCounter++;
 				    }
 

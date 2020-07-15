@@ -1,8 +1,7 @@
 package org.opensrp.web.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +86,6 @@ public class XlsDataImportControllerTest {
 		assertEquals(summaryClientCount, 4);
 		assertEquals(summaryEventCount, 28);
 		verify(clientService, times(4)).addorUpdate(any(Client.class));
-		verify(eventService, times(28)).addEvent(any(Event.class),anyString());
+		verify(eventService, times(28)).addEvent(any(Event.class),nullable(String.class));
 	}
 }
