@@ -4,40 +4,30 @@
 package org.opensrp.web.acl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.PlanDefinition;
 import org.opensrp.domain.postgres.Jurisdiction;
-import org.opensrp.service.OrganizationService;
-import org.opensrp.service.PractitionerService;
+import org.opensrp.service.PhysicalLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
-
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 /**
  * @author Samuel Githengi created on 06/05/20
  */
 
 public abstract class BasePermissionEvaluator<T> implements PermissionContract<T> {
-	
+
 	@Autowired
-	private OrganizationService organizationService;
-	
-	@Autowired
-	private PractitionerService practitionerService;
-	
+	private PhysicalLocationService locationService;
+
+	@Cacheable(value = "locationCache", key = "#username")
 	protected List<AssignedLocations> getAssignedLocations(String username) {
-		List<Long> organizationIds = practitionerService.getOrganizationsByUserId(username).right;
-		if (isEmptyOrNull(organizationIds)) {
-			return new ArrayList<>();
-		}
-		return organizationService.findAssignedLocationsAndPlans(organizationIds);
+		return locationService.getAssignedLocations(username);
 	}
 	
 	protected boolean hasPermissionOnJurisdictions(Authentication authentication, List<Jurisdiction> jurisdictions) {
@@ -70,10 +60,6 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 					return jurisdiction.equals(a.getOrganizationId());
 					});
 		/* @formatter:on */
-	}
-	
-	protected boolean isEmptyOrNull(Collection<? extends Object> collection) {
-		return collection == null || collection.isEmpty();
 	}
 	
 	@SuppressWarnings("rawtypes")

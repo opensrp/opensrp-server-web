@@ -4,12 +4,19 @@
 package org.opensrp.web.config.security;
 
 import java.text.DateFormat;
+import java.time.Duration;
 
 import org.joda.time.DateTime;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
@@ -24,7 +31,14 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  */
 @Configuration
 @EnableWebMvc
+@EnableCaching
 public class WebConfig {
+
+	@Value("#{opensrp['redis.ttl']}")
+	private long redisEntryTtl;
+
+	@Autowired
+	RedisConnectionFactory redisConnectionFactory;
 	
 	@Bean
 	public ObjectMapper objectMapper() {
@@ -54,5 +68,15 @@ public class WebConfig {
 		converter.setObjectMapper(objectMapper());
 		return converter;
 	}
-	
+
+	@Bean
+	public RedisCacheManager cacheManager() {
+		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+		config = config.entryTtl(Duration.ofSeconds(redisEntryTtl))
+				.disableCachingNullValues();
+
+		return RedisCacheManager.builder(redisConnectionFactory)
+				.cacheDefaults(config)
+				.build();
+	}
 }

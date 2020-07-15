@@ -1,6 +1,5 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
 import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
@@ -111,31 +110,24 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> sync(HttpServletRequest request) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
-		try {
-			String providerId = getStringFilter(PROVIDER_ID, request);
-			String locationId = getStringFilter(LOCATION_ID, request);
-			String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-			String team = getStringFilter(TEAM, request);
-			String teamId = getStringFilter(TEAM_ID, request);
-			Integer limit = getIntegerFilter("limit", request);
 
-			if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
+		String providerId = getStringFilter(PROVIDER_ID, request);
+		String locationId = getStringFilter(LOCATION_ID, request);
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String team = getStringFilter(TEAM, request);
+		String teamId = getStringFilter(TEAM_ID, request);
+		Integer limit = getIntegerFilter("limit", request);
 
-				return new ResponseEntity<>(
-				        objectMapper.writeValueAsString(
-				            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
-			}
+		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
-		}
-		catch (Exception e) {
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(
+			        objectMapper.writeValueAsString(
+			            sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit)),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			response.setMsg("specify atleast one filter");
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 		}
 	}
 
@@ -149,25 +141,17 @@ public class EventResource extends RestResource<Event> {
 	@RequestMapping(value = "/sync", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> syncByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
-		try {
 
-			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
-			        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
-				
-				return new ResponseEntity<>(objectMapper.writeValueAsString(
-				    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
-				        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
-				        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			} else {
-				response.setMsg("specify atleast one filter");
-				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
-			}
+		if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
+		        || syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
 
-		}
-		catch (Exception e) {			
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(
+			    sync(syncParam.getProviderId(), syncParam.getLocationId(), syncParam.getBaseEntityId(),
+			        syncParam.getServerVersion(), syncParam.getTeam(), syncParam.getTeamId(), syncParam.getLimit())),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			response.setMsg("specify atleast one filter");
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 		}
 	}
 
@@ -325,52 +309,30 @@ public class EventResource extends RestResource<Event> {
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-		try {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("clients") && !syncData.has("events")) {
-				return new ResponseEntity<>(BAD_REQUEST);
-			}
 
-			if (syncData.has("clients")) {
-
-				ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
-				    new TypeToken<ArrayList<Client>>() {}.getType());
-				for (Client client : clients) {
-					try {
-						clientService.addorUpdate(client);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-
-			}
-			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
-				    new TypeToken<ArrayList<Event>>() {}.getType());
-				for (Event event : events) {
-					try {
-						event = eventService.processOutOfArea(event);
-						eventService.addorUpdateEvent(event);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
-						            : event.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-			}
-
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("clients") && !syncData.has("events")) {
+			return new ResponseEntity<>(BAD_REQUEST);
 		}
-		catch (
 
-		Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		if (syncData.has("clients")) {
+
+			ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
+			    new TypeToken<ArrayList<Client>>() {}.getType());
+			for (Client client : clients) {
+				clientService.addorUpdate(client);
+			}
 		}
+
+		if (syncData.has("events")) {
+			ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
+			    new TypeToken<ArrayList<Event>>() {}.getType());
+			for (Event event : events) {
+				event = eventService.processOutOfArea(event);
+				eventService.addorUpdateEvent(event);
+			}
+		}
+
 		return new ResponseEntity<>(CREATED);
 	}
 
