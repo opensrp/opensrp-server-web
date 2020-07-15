@@ -174,7 +174,7 @@ public class SettingResource {
 	 * @return
 	 */
 	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> update(@RequestBody java.lang.String entity,
+	public ResponseEntity<String> update(@RequestBody String entity,
 			@PathVariable(Constants.RestPartVariables.ID) Long id) {
 		return performCreateOrUpdate(entity, id);
 	}
