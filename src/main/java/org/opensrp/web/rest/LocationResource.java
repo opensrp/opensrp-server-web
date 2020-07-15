@@ -24,13 +24,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.AssignedLocations;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
-import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -105,19 +106,16 @@ public class LocationResource {
 	
 	private PhysicalLocationService locationService;
 
-	private OrganizationService organizationService;
+	private PlanService planService;
 
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
 
-	/**
-	 * @param organizationService the organizationService to set
-	 */
 	@Autowired
-	public void setOrganizationService(OrganizationService organizationService) {
-		this.organizationService = organizationService;
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -488,20 +486,14 @@ public class LocationResource {
 			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
 		Set<String> locationIds = new HashSet<>();
-		try {
 
-			for (AssignedLocations assignedLocation : organizationService
-					.findAssignedLocationsAndPlansByPlanIdentifier(plan)) {
-				locationIds.add(assignedLocation.getJurisdictionId());
-			}
+		PlanDefinition planDefinition = planService.getPlan(plan);
+		for (Jurisdiction jurisdiction : planDefinition.getJurisdiction()) {
+			locationIds.add(jurisdiction.getCode());
+		}
 
-		}
-		catch (Exception e) {
-			logger.error("USER Location info not mapped to an organization", e);
-		}
 		if (locationIds.isEmpty()) {
-			throw new IllegalStateException(
-					"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
+			return new ResponseEntity<>("Plan does not have any jurisdictions", HttpStatus.BAD_REQUEST);
 		}
 
 		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount);

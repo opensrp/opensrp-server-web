@@ -1,6 +1,6 @@
 package org.opensrp.web.rest.shadow;
 
-import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.web.rest.LocationResource;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ public class LocationResourseShadow extends LocationResource {
 	}
 
 	@Override
-	public void setOrganizationService(OrganizationService organizationService) {
-		super.setOrganizationService(organizationService);
+	public void setPlanService(PlanService planService) {
+		super.setPlanService(planService);
 	}
 }
