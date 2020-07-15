@@ -3,8 +3,6 @@
  */
 package org.opensrp.web.config.security;
 
-import java.util.Arrays;
-
 import javax.sql.DataSource;
 
 import org.opensrp.web.config.Role;
@@ -14,13 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -67,7 +62,8 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
 		        	.csrf()
-		        	.ignoringAntMatchers("/rest/**");
+		        	.ignoringAntMatchers("/rest/**")
+		        .and().authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
 	
@@ -75,20 +71,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(opensrpAuthenticationProvider).eraseCredentials(false);
-	}
-	
-	
-	@Bean(name = "authenticationManagerBean")
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		OAuth2AuthenticationManager authenticationManager=new OAuth2AuthenticationManager();
-		authenticationManager.setClientDetailsService(clientDetailsService);
-		authenticationManager.setResourceId(ResourceServerConfiguration.RESOURCE_ID);
-		authenticationManager.setTokenServices(tokenServices());
-		ProviderManager providerManager= new ProviderManager(Arrays.asList(opensrpAuthenticationProvider),authenticationManager);
-		return providerManager;
-	}
-	
+	}	
 	
 	public DefaultTokenServices tokenServices() {
 		DefaultTokenServices tokenServices= new DefaultTokenServices();

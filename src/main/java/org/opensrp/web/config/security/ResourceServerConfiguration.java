@@ -4,6 +4,7 @@
 package org.opensrp.web.config.security;
 
 import org.opensrp.web.config.Role;
+import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -34,11 +35,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	private JdbcTokenStore jdbcTokenStore;
 	
 	@Autowired
-	@Qualifier("authenticationManagerBean")
-	private AuthenticationManager authenticationManager;
+	private CorsConfigurationSource corsConfigurationSource;
 	
 	@Autowired
-	private CorsConfigurationSource corsConfigurationSource;
+	private OauthAuthenticationProvider opensrpAuthenticationProvider;
 	
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
@@ -47,8 +47,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.resourceId(RESOURCE_ID)
 			.tokenStore(jdbcTokenStore)
 			.stateless(false)
-			.authenticationEntryPoint(auth2AuthenticationEntryPoint())
-			.authenticationManager(authenticationManager);
+			.authenticationEntryPoint(auth2AuthenticationEntryPoint());
 		/* @formatter:on */
 	}
 	
@@ -67,7 +66,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
-			.httpBasic();
+			.httpBasic()
+		.and().authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
 	
