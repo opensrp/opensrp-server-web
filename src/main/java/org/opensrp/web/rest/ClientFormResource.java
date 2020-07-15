@@ -237,16 +237,16 @@ public class ClientFormResource {
             return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
         }
 
+        String identifier = getIdentifier(formIdentifier, jsonFile);
+        String version = getFormVersion(formVersion);
         String fileContentString = new String(bytes);
 
         ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType, fileContentString);
         if (errorMessageForInvalidContent1 != null) return errorMessageForInvalidContent1;
 
-        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(fileContentType, fileContentString, isJsonValidator, formIdentifier);
+        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(fileContentType, fileContentString,
+                isJsonValidator, identifier);
         if (errorMessage != null) return errorMessage;
-
-        String identifier = getIdentifier(formIdentifier, jsonFile);
-        String version = getFormVersion(formVersion);
 
         logger.info(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =
@@ -272,7 +272,7 @@ public class ClientFormResource {
     private String getIdentifier(String formIdentifier, MultipartFile jsonFile) {
         String identifier = formIdentifier;
         if (StringUtils.isBlank(formIdentifier)) {
-            identifier = Paths.get(jsonFile.getOriginalFilename()).getFileName().toString();
+            identifier = Paths.get(Objects.requireNonNull(jsonFile.getOriginalFilename())).getFileName().toString();
         }
         return identifier;
     }
