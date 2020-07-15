@@ -151,13 +151,13 @@ public class PlanResource {
 		Long planCount = 0l;
 		if (planSyncRequestWrapper.getOrganizations() != null && !planSyncRequestWrapper.getOrganizations().isEmpty()) {
 			plans = planService.getPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
-					planSyncRequestWrapper.getServerVersion(), isTemplateParam));
+					planSyncRequestWrapper.getServerVersion(), isTemplateParam);
 			if (planSyncRequestWrapper.isReturnCount()) {
 				planCount = planService.countPlansByOrganizationsAndServerVersion(planSyncRequestWrapper.organizations,
 					planSyncRequestWrapper.getServerVersion());
 			}
 		} else if (username != null) {
-			plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion(), isTemplateParam));
+			plans = planService.getPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion(), isTemplateParam);
 			if (planSyncRequestWrapper.isReturnCount()) {
 				planCount = planService.countPlansByUsernameAndServerVersion(username, planSyncRequestWrapper.getServerVersion());
 			}
