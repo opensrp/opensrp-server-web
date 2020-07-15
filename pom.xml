@@ -27,10 +27,10 @@
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 
-		<opensrp.core.version>2.5.1-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>2.5.3-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.1.0-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.1-SNAPSHOT</opensrp.common.version>
-		<opensrp.interface.version>2.0.0-SNAPSHOT</opensrp.interface.version>
+		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
 		<lombok.version>1.18.12</lombok.version>
