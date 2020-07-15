@@ -12,6 +12,8 @@ import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
@@ -80,10 +82,6 @@ public class EventResource extends RestResource<Event> {
 
 	private static final String FALSE = "false";
 	
-	public static final String RETURN_COUNT= "return_count";
-
-	private static final String TOTAL_RECORDS = "total_records";
-
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
 		this.clientService = clientService;

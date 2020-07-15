@@ -4,6 +4,8 @@ import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
@@ -90,11 +92,7 @@ public class LocationResource {
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
-	public static final String RETURN_COUNT= "return_count";
-
 	public static final String RETURN_TAGS = "return_tags";
-
-	private static final String TOTAL_RECORDS = "total_records";
 
 	private PhysicalLocationService locationService;
 
