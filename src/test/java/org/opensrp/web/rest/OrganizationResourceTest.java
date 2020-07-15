@@ -108,6 +108,18 @@ public class OrganizationResourceTest {
 	}
 
 	@Test
+	public void testGetAllOrganizationsUnderLocation() throws Exception {
+		List<Organization> expected = Collections.singletonList(getOrganization());
+		when(organizationService.getAllOrganizations()).thenReturn(expected);
+		mockMvc.perform(get(BASE_URL)
+				.param("location_id", "12345")
+		).andExpect(status().isOk()).andReturn();
+		verify(organizationService).selectOrganizationsEncompassLocations("12345");
+		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	@Test
 	public void testGetOrganizationByIdentifier() throws Exception {
 		Organization expected = getOrganization();
 		when(organizationService.getOrganization(expected.getIdentifier())).thenReturn(expected);
