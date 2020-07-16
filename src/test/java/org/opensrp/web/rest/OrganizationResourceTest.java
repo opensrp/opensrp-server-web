@@ -389,6 +389,7 @@ public class OrganizationResourceTest {
 		List<Organization> expected = new ArrayList<>();
 		expected.add(createSearchOrganization());
 		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
+		when(organizationService.findOrganizationCount((OrganizationSearchBean) any())).thenReturn(1);
 		MvcResult result = mockMvc
 		        .perform(
 		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
@@ -400,7 +401,9 @@ public class OrganizationResourceTest {
 		System.out.println("Expec:::::::::::::::::::::::::"+OrganizationResource.gson.toJson(expectedOrganizations));
 		System.out.println("response:::::::::::::::::::::::::"+result.getResponse().getContentAsString());
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
+		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
+		
 		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
 	}
 	
