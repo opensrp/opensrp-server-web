@@ -9,6 +9,14 @@ public class JsonWidgetValidatorDefinition {
 	@JsonProperty(value = "cannot_remove")
 	private WidgetCannotRemove cannotRemove;
 
+	public JsonWidgetValidatorDefinition() {
+		super();
+	}
+
+	public JsonWidgetValidatorDefinition(WidgetCannotRemove cannotRemove) {
+		this.cannotRemove = cannotRemove;
+	}
+
 	public WidgetCannotRemove getCannotRemove() {
 		return cannotRemove;
 	}
@@ -18,7 +26,9 @@ public class JsonWidgetValidatorDefinition {
 	}
 
 	public static class WidgetCannotRemove {
+
 		private String title;
+
 		private ArrayList<String> fields;
 
 		public String getTitle() {
