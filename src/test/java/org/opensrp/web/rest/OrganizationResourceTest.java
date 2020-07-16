@@ -384,7 +384,7 @@ public class OrganizationResourceTest {
 
 	}
 	
-	/*@Test
+	@Test
 	public void testGetSearchOrganizationWithParams() throws Exception {
 		List<Organization> expected = new ArrayList<>();
 		expected.add(createSearchOrganization());
@@ -408,6 +408,6 @@ public class OrganizationResourceTest {
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
 		return searchOrganization;
-	}*/
+	}
 
 }
