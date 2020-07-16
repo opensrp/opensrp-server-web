@@ -396,14 +396,14 @@ public class OrganizationResourceTest {
 		        .andExpect(status().isOk()).andReturn();
 		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
 		expectedOrganizations.setOrganizations(expected);
-		expectedOrganizations.setTotal(1);
+		expectedOrganizations.setTotal(0);
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
 	}
 	
 	private Organization createSearchOrganization() {
-		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":1}";
+		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":0}";
 
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
