@@ -1,5 +1,6 @@
 package org.opensrp.web.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -164,6 +165,7 @@ public class ClientFormValidator {
 				logger.info((String) formValidator.getJson());
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+				objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
 				String formValidatorString = (String) formValidator.getJson();
 				formValidatorString = formValidatorString.substring(1, formValidatorString.length() - 1);
