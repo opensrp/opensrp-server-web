@@ -397,7 +397,7 @@ public class OrganizationResourceTest {
 		                    .param("orderByType", "ASC")).andExpect(status().isOk()).andReturn();
 		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
 		expectedOrganizations.setOrganizations(expected);
-		expectedOrganizations.setTotal(0);
+		expectedOrganizations.setTotal(1);
 		System.out.println("Expec:::::::::::::::::::::::::"+OrganizationResource.gson.toJson(expectedOrganizations));
 		System.out.println("response:::::::::::::::::::::::::"+result.getResponse().getContentAsString());
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
@@ -408,7 +408,7 @@ public class OrganizationResourceTest {
 	}
 	
 	private Organization createSearchOrganization() {
-		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":0}";
+		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":1}";
 		
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
