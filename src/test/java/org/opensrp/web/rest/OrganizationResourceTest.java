@@ -397,6 +397,8 @@ public class OrganizationResourceTest {
 		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
 		expectedOrganizations.setOrganizations(expected);
 		expectedOrganizations.setTotal(0);
+		System.out.println("Expec:::::::::::::::::::::::::"+OrganizationResource.gson.toJson(expectedOrganizations));
+		System.out.println("response:::::::::::::::::::::::::"+result.getResponse().getContentAsString());
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
