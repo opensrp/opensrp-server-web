@@ -8,7 +8,6 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
@@ -166,10 +165,11 @@ public class ClientFormValidator {
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 
-				String unescapedString = StringEscapeUtils.unescapeJava((String) formValidator.getJson());
-				logger.info(unescapedString + " ---- unescaped string");
+				String formValidatorString = (String) formValidator.getJson();
+				formValidatorString = formValidatorString.substring(1, formValidatorString.length() - 1);
+
 				JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition =
-						objectMapper.readValue(unescapedString, JsonWidgetValidatorDefinition.class);
+						objectMapper.readValue(formValidatorString, JsonWidgetValidatorDefinition.class);
 				JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition
 						.getCannotRemove();
 
