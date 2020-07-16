@@ -26,7 +26,7 @@ public class LocationPermissionEvaluator extends BasePermissionEvaluator<Physica
 			return hasPermissionOnJurisdiction(authentication, (String) targetId);
 		} else if (isCollectionOfString(targetId)) {
 			return hasPermissionOnJurisdictions(authentication, (Collection<String>) targetId);
-		} else if (targetId instanceof PhysicalLocation) {
+		} else if (targetId instanceof PhysicalLocation) {  //TODO: PhysicalLocation does not implements Serializable
 			return hasPermission(authentication, (PhysicalLocation) targetId);
 		} else if (isCollectionOfResources(targetId, PhysicalLocation.class)) {
 			Collection<PhysicalLocation> jurisdictions = (Collection<PhysicalLocation>) targetId;

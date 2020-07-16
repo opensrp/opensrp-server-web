@@ -63,7 +63,7 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 						return identifiers.contains(assignedLocation.getPlanId());
 						});
 			/* @formatter:on */
-		} else if (targetId instanceof PlanDefinition) {
+		} else if (targetId instanceof PlanDefinition) {  //TODO: PlanDefinition can't be an instance of Serializable
 			PlanDefinition plan = (PlanDefinition) targetId;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())

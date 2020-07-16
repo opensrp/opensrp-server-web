@@ -73,5 +73,8 @@ public abstract class BasePermissionEvaluator<T> implements PermissionContract<T
 		return targetId instanceof Collection && !((Collection) targetId).isEmpty()
 		        && clazz.isInstance(((Collection) targetId).iterator().next());
 	}
-	
+
+	public void setLocationService(PhysicalLocationService locationService) {
+		this.locationService = locationService;
+	}
 }
