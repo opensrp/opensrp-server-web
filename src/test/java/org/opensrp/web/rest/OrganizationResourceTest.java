@@ -392,20 +392,23 @@ public class OrganizationResourceTest {
 		List<Organization> expected = new ArrayList<>();
 		expected.add(createSearchOrganization());
 		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
+		when(organizationService.findOrganizationCount((OrganizationSearchBean) any())).thenReturn(1);
 		MvcResult result = mockMvc
 		        .perform(
 		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
+		                    .param("pageNumber", "1").param("pageSize", "10")
 		                    .param("orderByType", "ASC")).andExpect(status().isOk()).andReturn();
 		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
 		expectedOrganizations.setOrganizations(expected);
-		expectedOrganizations.setTotal(0);
+		expectedOrganizations.setTotal(1);
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
+		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
 	}
 	
 	private Organization createSearchOrganization() {
-		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":0}";
+		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":1}";
 		
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
