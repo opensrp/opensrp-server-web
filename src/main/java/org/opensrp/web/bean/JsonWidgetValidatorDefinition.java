@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class JsonWidgetValidatorDefinition {
 	@Setter
 	@NoArgsConstructor
 	@ToString
+	@AllArgsConstructor
 	public static class WidgetCannotRemove {
 
 		private String title;
