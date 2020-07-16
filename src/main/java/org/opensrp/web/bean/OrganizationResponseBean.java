@@ -6,7 +6,7 @@ import org.opensrp.domain.Organization;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrganizationSearchcBean {
+public class OrganizationResponseBean {
 	
 	private List<Organization> organizations;
 	

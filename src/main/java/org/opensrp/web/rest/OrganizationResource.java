@@ -13,7 +13,7 @@ import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
-import org.opensrp.web.bean.OrganizationSearchcBean;
+import org.opensrp.web.bean.OrganizationResponseBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,7 +194,7 @@ public class OrganizationResource {
 	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
 	    throws JsonProcessingException {
 		
-		OrganizationSearchcBean response = new OrganizationSearchcBean();
+		OrganizationResponseBean organizationResponseBean = new OrganizationResponseBean();
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		try {
 			int total = 0;
@@ -202,14 +202,14 @@ public class OrganizationResource {
 				total = organizationService.findOrganizationCount(organizationSearchBean);
 			}
 			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
-			response.setOrganizations(organizations);
+			organizationResponseBean.setOrganizations(organizations);
 			
-			response.setTotal(total);
+			organizationResponseBean.setTotal(total);
 		}
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizationResponseBean), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
 	}
 

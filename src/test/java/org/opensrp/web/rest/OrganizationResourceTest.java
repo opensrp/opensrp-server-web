@@ -41,7 +41,7 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
-import org.opensrp.web.bean.OrganizationSearchcBean;
+import org.opensrp.web.bean.OrganizationResponseBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -398,7 +398,7 @@ public class OrganizationResourceTest {
 		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
 		                    .param("pageNumber", "1").param("pageSize", "10")
 		                    .param("orderByType", "ASC")).andExpect(status().isOk()).andReturn();
-		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
+		OrganizationResponseBean expectedOrganizations = new OrganizationResponseBean();
 		expectedOrganizations.setOrganizations(expected);
 		expectedOrganizations.setTotal(1);
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
