@@ -3,23 +3,45 @@
  */
 package org.opensrp.web.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
+import org.opensrp.web.bean.OrganizationSearchcBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,25 +52,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.doThrow;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Samuel Githengi created on 09/17/19
@@ -379,6 +385,31 @@ public class OrganizationResourceTest {
 		practitioner.setActive(Boolean.TRUE);
 		return practitioner;
 
+	}
+	
+	@Test
+	public void testGetSearchOrganizationWithParams() throws Exception {
+		List<Organization> expected = new ArrayList<>();
+		expected.add(createSearchOrganization());
+		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
+		MvcResult result = mockMvc
+		        .perform(
+		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
+		                    .param("orderByType", "ASC")).andExpect(status().isOk()).andReturn();
+		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
+		expectedOrganizations.setOrganizations(expected);
+		expectedOrganizations.setTotal(0);
+		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
+		verifyNoMoreInteractions(organizationService);
+		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
+	}
+	
+	private Organization createSearchOrganization() {
+		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}],\"total\":0}";
+		
+		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
+		
+		return searchOrganization;
 	}
 
 }
