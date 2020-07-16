@@ -1,6 +1,5 @@
 package org.opensrp.web.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,8 +9,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
@@ -22,7 +19,6 @@ import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -170,9 +166,10 @@ public class ClientFormValidator {
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 				objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 
+				String unescapedString = StringEscapeUtils.unescapeJava((String) formValidator.getJson());
+				logger.info(unescapedString + " ---- unescaped string");
 				JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition =
-						objectMapper.readValue((new JSONObject(StringEscapeUtils.unescapeJava(formValidator.getJson().toString())).toString()),
-								JsonWidgetValidatorDefinition.class);
+						objectMapper.readValue(unescapedString, JsonWidgetValidatorDefinition.class);
 				JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition
 						.getCannotRemove();
 
