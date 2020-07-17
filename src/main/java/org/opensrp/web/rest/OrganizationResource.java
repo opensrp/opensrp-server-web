@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.rest;
 
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import org.opensrp.web.bean.OrganizationResponseBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -196,6 +199,7 @@ public class OrganizationResource {
 		
 		OrganizationResponseBean organizationResponseBean = new OrganizationResponseBean();
 		Integer pageNumber = organizationSearchBean.getPageNumber();
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 		try {
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
@@ -203,13 +207,12 @@ public class OrganizationResource {
 			}
 			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
 			organizationResponseBean.setOrganizations(organizations);
-			
-			organizationResponseBean.setTotal(total);
+			headers.add(TOTAL_RECORDS, String.valueOf(total));
 		}
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(organizationResponseBean), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizationResponseBean), headers, HttpStatus.OK);
 		
 	}
 
