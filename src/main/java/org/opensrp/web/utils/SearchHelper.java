@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.web.rest.RestUtils;
 

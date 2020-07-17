@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.api.domain.Time;
 import org.opensrp.domain.Location;
-import org.opensrp.domain.User;
+import org.smartregister.domain.User;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.springframework.beans.factory.annotation.Value;
 
