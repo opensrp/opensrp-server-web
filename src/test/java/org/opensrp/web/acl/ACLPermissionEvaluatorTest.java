@@ -149,9 +149,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
 
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
@@ -161,7 +158,6 @@ public class ACLPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 		doReturn(true).when(organizationPermissionEvaluator).hasPermission(authentication, organization);
-		aclPermissionEvaluator.setOrganizationPermissionEvaluator(organizationPermissionEvaluator);
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, organization, "USER");
 		assertTrue(hasPermission);
 	}
@@ -181,10 +177,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
-
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
 		doReturn(practitionerRoleList).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
@@ -193,7 +185,6 @@ public class ACLPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 		doReturn(true).when(locationPermissionEvaluator).hasPermission(authentication, physicalLocation);
-		aclPermissionEvaluator.setOrganizationPermissionEvaluator(organizationPermissionEvaluator);
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, physicalLocation, "USER");
 		assertTrue(hasPermission);
 	}
@@ -213,10 +204,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
-
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
 		doReturn(practitionerRoleList).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
@@ -225,7 +212,6 @@ public class ACLPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 		doReturn(true).when(eventPermissionEvaluator).hasPermission(authentication, event);
-		aclPermissionEvaluator.setOrganizationPermissionEvaluator(organizationPermissionEvaluator);
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, event, "USER");
 		assertTrue(hasPermission);
 	}
@@ -245,10 +231,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
-
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
 		doReturn(practitionerRoleList).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
@@ -295,10 +277,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
-
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
 		doReturn(practitionerRoleList).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
@@ -329,10 +307,6 @@ public class ACLPermissionEvaluatorTest {
 		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
 		practitionerRole.setOrganizationId(1234l);
 		practitionerRoleList.add(practitionerRole);
-		practitionerService = mock(PractitionerService.class);
-		locationService = mock(PhysicalLocationService.class);
-		organizationPermissionEvaluator = mock(OrganizationPermissionEvaluator.class);
-
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
 				organizationIds);
 		doReturn(practitionerRoleList).when(practitionerRoleService).getPgRolesForPractitioner(anyString());

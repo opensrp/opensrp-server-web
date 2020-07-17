@@ -5,6 +5,7 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
+import lombok.Setter;
 import org.opensrp.domain.Organization;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author Samuel Githengi created on 06/03/20
  */
+@Setter
 @Component
 public class ACLPermissionEvaluator implements PermissionEvaluator {
 	
@@ -87,27 +89,4 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 		/* @formatter:off */
 	}
 
-	public void setPlanPermissionEvaluator(PlanPermissionEvaluator planPermissionEvaluator) {
-		this.planPermissionEvaluator = planPermissionEvaluator;
-	}
-
-	public void setOrganizationPermissionEvaluator(OrganizationPermissionEvaluator organizationPermissionEvaluator) {
-		this.organizationPermissionEvaluator = organizationPermissionEvaluator;
-	}
-
-	public void setLocationPermissionEvaluator(LocationPermissionEvaluator locationPermissionEvaluator) {
-		this.locationPermissionEvaluator = locationPermissionEvaluator;
-	}
-
-	public void setUserPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator) {
-		this.userPermissionEvaluator = userPermissionEvaluator;
-	}
-
-	public void setEventPermissionEvaluator(EventPermissionEvaluator eventPermissionEvaluator) {
-		this.eventPermissionEvaluator = eventPermissionEvaluator;
-	}
-
-	public void setClientPermissionEvaluator(ClientPermissionEvaluator clientPermissionEvaluator) {
-		this.clientPermissionEvaluator = clientPermissionEvaluator;
-	}
 }

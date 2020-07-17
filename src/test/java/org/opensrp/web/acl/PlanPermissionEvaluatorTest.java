@@ -86,7 +86,7 @@ public class PlanPermissionEvaluatorTest {
 	@Test
 	public void testHasPermission() {
 		PlanDefinition planDefinition = new PlanDefinition();
-		planDefinition.setIdentifier("cd09a3d4-01d9-485c-a1c5-a2eb078a6sse");
+		planDefinition.setIdentifier("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
 
 		List<AssignedLocations> assignedLocations = new ArrayList<>();
 		AssignedLocations assignedLocation = new AssignedLocations();
@@ -112,16 +112,6 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 		boolean hasPermission = planPermissionEvaluator.hasPermission(authentication,planDefinition);
-		assertTrue(hasPermission);
-
-		planDefinition = new PlanDefinition();
-		planDefinition.setIdentifier("");
-		List<Jurisdiction> jurisdictions = new ArrayList<>();
-		Jurisdiction jurisdiction = new Jurisdiction();
-		jurisdiction.setCode("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		jurisdictions.add(jurisdiction);
-		planDefinition.setJurisdiction(jurisdictions);
-		hasPermission = planPermissionEvaluator.hasPermission(authentication,planDefinition);
 		assertTrue(hasPermission);
 	}
 
