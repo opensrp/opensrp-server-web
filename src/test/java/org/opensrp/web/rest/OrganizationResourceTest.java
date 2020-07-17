@@ -406,7 +406,7 @@ public class OrganizationResourceTest {
 		
 		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
 	}
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=Exception.class)
 	public void testGsetSearchOrganizationWithParams() throws Exception {
 		List<Organization> expected = new ArrayList<>();
 		expected.add(createSearchOrganization());
