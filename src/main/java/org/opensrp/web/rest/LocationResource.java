@@ -13,6 +13,7 @@ import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,11 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -93,12 +97,21 @@ public class LocationResource {
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
 	public static final String RETURN_TAGS = "return_tags";
+	
+	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
 
 	private PhysicalLocationService locationService;
+	
+	private PlanService planService;
 
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
+	}
+	
+	@Autowired
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -467,11 +480,38 @@ public class LocationResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTree(
 			@PathVariable("locationId") String locationId,
-			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags) {
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
 
-		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags);
+		LocationTree tree = locationService.buildLocationHierachyFromLocation(locationId, returnTags, returnStructureCount);
 
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/hierarchy/plan/{plan}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> generateLocationTreeForPlan(
+			@PathVariable("plan") String plan,
+			@RequestParam(value = RETURN_TAGS, defaultValue = FALSE, required = false) boolean returnTags,
+			@RequestParam(value = RETURN_STRUCTURE_COUNT, defaultValue = FALSE, required = false) boolean returnStructureCount) {
+
+		Set<String> locationIds = new HashSet<>();
+
+		PlanDefinition planDefinition = planService.getPlan(plan);
+		for (Jurisdiction jurisdiction : planDefinition.getJurisdiction()) {
+			locationIds.add(jurisdiction.getCode());
+		}
+
+		if (locationIds.isEmpty()) {
+			return new ResponseEntity<>("Plan does not have any jurisdictions", HttpStatus.BAD_REQUEST);
+		}
+
+		LocationTree locationTree = locationService.buildLocationHierachy(locationIds, returnStructureCount, returnTags);
+
+		return new ResponseEntity<>(
+				gson.toJson(locationTree),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 
 	static class LocationSyncRequestWrapper {

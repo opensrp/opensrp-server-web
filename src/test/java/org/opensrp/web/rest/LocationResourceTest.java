@@ -25,8 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,10 +47,13 @@ import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.Geometry;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -96,6 +101,9 @@ public class LocationResourceTest {
 
 	@Captor
 	private ArgumentCaptor<Integer> integerCaptor;
+	
+	@Captor
+    private ArgumentCaptor<Set<String>> stringSetCaptor;
 
 	@InjectMocks
 	private LocationResource locationResource;
@@ -104,6 +112,9 @@ public class LocationResourceTest {
 	
 	@Mock
 	private PhysicalLocationService locationService;
+	
+	@Mock
+	private PlanService planService;
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 	private String MESSAGE = "The server encountered an error processing the request.";
@@ -907,19 +918,55 @@ public class LocationResourceTest {
 	public void testGenerateLocationTree() throws Exception {
 		LocationTree tree = LocationResource.gson.fromJson(locationTree, LocationTree.class);
 
-		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean())).thenReturn(tree);
+		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean(), anyBoolean())).thenReturn(tree);
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/hierarchy/" + 1)
 						.param(LocationResource.RETURN_TAGS, "false"))
 				.andExpect(status().isOk()).andReturn();
 
-		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture());
+		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
 		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
-		assertFalse(booleanCaptor.getValue());
+		assertFalse(booleanCaptor.getAllValues().get(0));
+		assertFalse(booleanCaptor.getAllValues().get(1));
 		assertEquals("1", stringCaptor.getValue());
+	}
+	
+	@Test
+	public void testGetHierarchyForPlan() throws Exception {
+		LocationTree tree = LocationResource.gson.fromJson(locationTree, LocationTree.class);
+		String planId = "80deb645-f42e-50f0-b5cc-84a4dcfb2db4";
+		String locationId = "3921";
+
+		Set<String> locationIdentifiers = new HashSet<String>();
+		locationIdentifiers.add(locationId);
+
+		PlanDefinition planDefinition = new PlanDefinition();
+		planDefinition.setIdentifier(planId);
+		Jurisdiction jurisdiction = new Jurisdiction();
+		jurisdiction.setCode(locationId);
+		planDefinition.setJurisdiction(Collections.singletonList(jurisdiction));
+
+		when(planService.getPlan(planId))
+				.thenReturn(planDefinition);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/hierarchy/plan/" + planId)
+						.param(LocationResource.RETURN_STRUCTURE_COUNT, "false"))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(locationService).buildLocationHierachy(stringSetCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
+
+		String actualTreeString = result.getResponse().getContentAsString();
+
+		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
+		assertFalse(booleanCaptor.getAllValues().get(0));
+		assertEquals(1, stringSetCaptor.getValue().size());
+		assertTrue(stringSetCaptor.getValue().contains(locationId));
 	}
 
 }
