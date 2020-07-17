@@ -43,6 +43,7 @@ import org.opensrp.web.Constants;
 import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -355,8 +356,7 @@ public class EventResource extends RestResource<Event> {
 			}
 
 			if (syncData.has("clients")) {
-
-				ArrayList<Client> clients = gson.fromJson(syncData.getString("clients"),
+				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData,"clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				for (Client client : clients) {
 					try {
@@ -371,7 +371,7 @@ public class EventResource extends RestResource<Event> {
 
 			}
 			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(syncData.getString("events"),
+				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData,"events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
