@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.opensrp.domain.PlanDefinition;
+import org.smartregister.domain.PlanDefinition;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +63,7 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 						return identifiers.contains(assignedLocation.getPlanId());
 						});
 			/* @formatter:on */
-		} else if (targetId instanceof PlanDefinition) {  //TODO: PlanDefinition can't be an instance of Serializable
+		} else if (targetId instanceof PlanDefinition) {
 			PlanDefinition plan = (PlanDefinition) targetId;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())

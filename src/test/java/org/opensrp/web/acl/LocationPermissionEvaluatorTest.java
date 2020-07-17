@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.Event;
-import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.repository.LocationRepository;
 import org.opensrp.repository.PractitionerRepository;
@@ -16,9 +14,9 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.service.PractitionerService;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.parameters.P;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -146,36 +144,73 @@ public class LocationPermissionEvaluatorTest {
 		assertTrue(hasPermission);
 	}
 
-//	@Test
-//	public void testHasObjectPermissionWithPhysicalLocationAsTargetObject() {
-//		PhysicalLocation physicalLocation = new PhysicalLocation();
-//		physicalLocation.setId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-//
-//		List<AssignedLocations> assignedLocations = new ArrayList<>();
-//		AssignedLocations assignedLocation = new AssignedLocations();
-//		assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-//		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
-//		assignedLocations.add(assignedLocation);
-//		List<Long> organizationalIds = Collections.singletonList(12233l);
-//		Practitioner practitioner = new Practitioner();
-//		practitioner.setIdentifier("practitioner-id");
-//		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
-//				organizationalIds);
-//
-//		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
-//		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
-//		practitionerRole.setIdentifier("practitioner-role-id");
-//		practitionerRole.setOrganizationId(12345l);
-//		practitionerRoles.add(practitionerRole);
-//
-//		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
-//		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
-//		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
-//		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
-//		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
-//		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-//		boolean hasPermission = locationPermissionEvaluator.hasObjectPermission(authentication, (Serializable) physicalLocation,null);
-//		assertTrue(hasPermission);
-//	}
+	@Test
+	public void testHasObjectPermissionWithPhysicalLocationAsTargetObject() {
+		PhysicalLocation physicalLocation = new PhysicalLocation();
+		physicalLocation.setId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+
+		List<AssignedLocations> assignedLocations = new ArrayList<>();
+		AssignedLocations assignedLocation = new AssignedLocations();
+		assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
+		assignedLocations.add(assignedLocation);
+		List<Long> organizationalIds = Collections.singletonList(12233l);
+		Practitioner practitioner = new Practitioner();
+		practitioner.setIdentifier("practitioner-id");
+		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
+				organizationalIds);
+
+		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
+		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
+		practitionerRole.setIdentifier("practitioner-role-id");
+		practitionerRole.setOrganizationId(12345l);
+		practitionerRoles.add(practitionerRole);
+
+		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
+		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
+		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
+		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
+		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
+		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
+		boolean hasPermission = locationPermissionEvaluator.hasObjectPermission(authentication, physicalLocation,null);
+		assertTrue(hasPermission);
+	}
+
+	@Test
+	public void testHasObjectPermissionWithListOfPhysicalLocationAsTargetObject() {
+		List<PhysicalLocation> physicalLocations = new ArrayList<>();
+		PhysicalLocation physicalLocation = new PhysicalLocation();
+		physicalLocation.setId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+
+		physicalLocations.add(physicalLocation);
+		physicalLocations.add(physicalLocation);
+
+		List<AssignedLocations> assignedLocations = new ArrayList<>();
+		AssignedLocations assignedLocation = new AssignedLocations();
+		assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61b1");
+		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+		assignedLocations.add(assignedLocation);
+		List<Long> organizationalIds = Collections.singletonList(12233l);
+		Practitioner practitioner = new Practitioner();
+		practitioner.setIdentifier("practitioner-id");
+		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
+				organizationalIds);
+
+		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
+		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
+		practitionerRole.setIdentifier("practitioner-role-id");
+		practitionerRole.setOrganizationId(12345l);
+		practitionerRoles.add(practitionerRole);
+
+		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
+		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
+		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
+		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
+		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
+		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
+		boolean hasPermission = locationPermissionEvaluator.hasObjectPermission(authentication,
+				(Serializable) physicalLocations,null);
+		assertTrue(hasPermission);
+	}
 
 }

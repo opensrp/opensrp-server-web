@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.repository.LocationRepository;
 import org.opensrp.repository.PractitionerRepository;

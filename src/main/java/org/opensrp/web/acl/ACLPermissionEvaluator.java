@@ -5,7 +5,11 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
-import org.opensrp.domain.*;
+import org.opensrp.domain.Organization;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;

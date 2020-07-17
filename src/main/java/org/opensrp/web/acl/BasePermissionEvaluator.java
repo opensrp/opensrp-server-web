@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opensrp.domain.AssignedLocations;
-import org.opensrp.domain.postgres.Jurisdiction;
+import org.smartregister.domain.Jurisdiction;
 import org.opensrp.service.PhysicalLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
