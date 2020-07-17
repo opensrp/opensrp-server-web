@@ -406,7 +406,7 @@ public class OrganizationResourceTest {
 	}
 	
 	private Organization createSearchOrganization() {
-		String searchResponseJson = "[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}]";
+		String searchResponseJson = "{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}";
 		
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
