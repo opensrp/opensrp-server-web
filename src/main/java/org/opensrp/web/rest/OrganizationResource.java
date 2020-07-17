@@ -15,7 +15,6 @@ import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
-import org.opensrp.web.bean.OrganizationResponseBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +39,15 @@ import com.google.gson.GsonBuilder;
 @Controller
 @RequestMapping(value = "/rest/organization")
 public class OrganizationResource {
-
+	
 	private static Logger logger = LoggerFactory.getLogger(OrganizationResource.class.toString());
-
+	
 	private OrganizationService organizationService;
-
+	
 	private PractitionerService practitionerService;
-
+	
 	public static Gson gson = new GsonBuilder().create();
-
+	
 	/**
 	 * Set the organizationService
 	 * 
@@ -58,16 +57,17 @@ public class OrganizationResource {
 	public void setOrganizationService(OrganizationService organizationService) {
 		this.organizationService = organizationService;
 	}
-
+	
 	/**
-	 *  set the practitionerService
+	 * set the practitionerService
+	 * 
 	 * @param practitionerService the practitionerService to set
 	 */
 	@Autowired
 	public void setPractitionerService(PractitionerService practitionerService) {
 		this.practitionerService = practitionerService;
 	}
-
+	
 	/**
 	 * Gets all the organizations
 	 * 
@@ -75,90 +75,85 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
-		if(StringUtils.isNotBlank(locationID)){
-			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)), RestUtils.getJSONUTF8Headers(),
-					HttpStatus.OK);
-		}else{
-			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()), RestUtils.getJSONUTF8Headers(),
-					HttpStatus.OK);
+		if (StringUtils.isNotBlank(locationID)) {
+			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 	}
-
+	
 	/**
 	 * Gets an organization using the identifier
 	 * 
 	 * @param identifier the Organization Identifier
 	 * @return the organization
 	 */
-	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
 		return new ResponseEntity<>(gson.toJson(organizationService.getOrganization(identifier)),
 		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
-
+	
 	/**
 	 * Saves a new Organization
 	 * 
 	 * @param organization to add
 	 * @return the http status code
 	 */
-	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE })
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> createOrganization(@RequestBody Organization organization) {
 		try {
 			organizationService.addOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
-
+	
 	/**
 	 * update an Organization
 	 * 
 	 * @param organization to add
 	 * @return the http status code
 	 */
-	@RequestMapping(value = "/{identifier}", method = RequestMethod.PUT, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> updateOrganization(@PathVariable("identifier") String identifier,
-			@RequestBody Organization organization) {
+	                                                 @RequestBody Organization organization) {
 		try {
 			organizationService.updateOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
-
-	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = {
-			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE,
-					MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> assignLocationAndPlan(
-			@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
+	
+	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+	        MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> assignLocationAndPlan(@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
 				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganization(),
-						organizationAssigmentBean.getJurisdiction(),
-						organizationAssigmentBean.getPlan(), organizationAssigmentBean.getFromDate(),
-						organizationAssigmentBean.getToDate());
+				    organizationAssigmentBean.getJurisdiction(), organizationAssigmentBean.getPlan(),
+				    organizationAssigmentBean.getFromDate(), organizationAssigmentBean.getToDate());
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
-			@PathVariable("identifier") String identifier) {
+	
+	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(@PathVariable("identifier") String identifier) {
 		try {
 			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
@@ -168,26 +163,26 @@ public class OrganizationResource {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	@RequestMapping(value = "/practitioner/{identifier}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<Practitioner>> getOrgPractitioners(
-			@PathVariable("identifier") String identifier) {
+	
+	@RequestMapping(value = "/practitioner/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<Practitioner>> getOrgPractitioners(@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
-			@RequestParam(value = "plan") String planIdentifier) {
+	
+	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(@RequestParam(value = "plan") String planIdentifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier),
+			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -197,23 +192,23 @@ public class OrganizationResource {
 	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
 	    throws JsonProcessingException {
 		
-		OrganizationResponseBean organizationResponseBean = new OrganizationResponseBean();
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		List<Organization> organizations;
 		try {
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
 				total = organizationService.findOrganizationCount(organizationSearchBean);
 			}
-			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
-			organizationResponseBean.setOrganizations(organizations);
+			organizations = organizationService.getSearchOrganizations(organizationSearchBean);
+			
 			headers.add(TOTAL_RECORDS, String.valueOf(total));
 		}
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(organizationResponseBean), headers, HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizations), headers, HttpStatus.OK);
 		
 	}
-
+	
 }
