@@ -195,23 +195,24 @@ public class OrganizationResource {
 	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
 	    throws JsonProcessingException {
 		
-		OrganizationSearchcBean response = new OrganizationSearchcBean();
+		
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		List<Organization> organizations;
 		try {
 			int total = 0;
 			if (pageNumber != null && pageNumber == 1) {
 				total = organizationService.findOrganizationCount(organizationSearchBean);
 			}
-			List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
-			response.setOrganizations(organizations);
+			organizations = organizationService.getSearchOrganizations(organizationSearchBean);
+			
 			
 			headers.add("YY", String.valueOf(total));
 		}
 		catch (IllegalArgumentException e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(gson.toJson(response), headers, HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(organizations), headers, HttpStatus.OK);
 		
 	}
 

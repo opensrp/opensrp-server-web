@@ -395,33 +395,18 @@ public class OrganizationResourceTest {
 		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
 		                    .param("pageNumber", "1").param("pageSize", "10")
 		                    .param("orderByType", "ASC")).andExpect(status().isOk()).andReturn();
-		OrganizationSearchcBean expectedOrganizations = new OrganizationSearchcBean();
-		expectedOrganizations.setOrganizations(expected);
 		
-		System.out.println("Expec:::::::::::::::::::::::::"+OrganizationResource.gson.toJson(expectedOrganizations));
+		System.out.println("Expec:::::::::::::::::::::::::"+OrganizationResource.gson.toJson(expected));
 		System.out.println("response:::::::::::::::::::::::::"+result.getResponse().getContentAsString());
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
 		
-		assertEquals(OrganizationResource.gson.toJson(expectedOrganizations), result.getResponse().getContentAsString());
+		assertEquals(OrganizationResource.gson.toJson(expected), result.getResponse().getContentAsString());
 	}
-	@Test(expected=Exception.class)
-	public void testGsetSearchOrganizationWithParams() throws Exception {
-		List<Organization> expected = new ArrayList<>();
-		expected.add(createSearchOrganization());
-		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
-		
-		mockMvc
-		        .perform(
-		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
-		                    .param("pageNumber", "1").param("pageSize", "10")
-		                    .param("orderByType", "ASCs")).andExpect(status().isOk()).andReturn();
-		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
-		verifyNoMoreInteractions(organizationService);
-	}
+	
 	private Organization createSearchOrganization() {
-		String searchResponseJson = "{\"organizations\":[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}]}";
+		String searchResponseJson = "[{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}]";
 		
 		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
 		
