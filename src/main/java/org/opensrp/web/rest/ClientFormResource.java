@@ -72,12 +72,12 @@ public class ClientFormResource {
             @RequestParam(value = Constants.EndpointParam.IS_DRAFT, required = false) String isDraftParam,
             @RequestParam(value = Constants.EndpointParam.IS_JSON_VALIDATOR, required = false) String isJsonValidatorParam) throws JsonProcessingException {
         List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
-        if (isDraftParam == null && isJsonValidatorParam == null) {
+        if (StringUtils.isBlank(isDraftParam) && StringUtils.isBlank(isJsonValidatorParam)) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
-        } else if (isDraftParam != null && Boolean.parseBoolean(isDraftParam.toLowerCase())) {
+        } else if (StringUtils.isNotBlank(isDraftParam)) {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
             clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
-        } else if (isJsonValidatorParam != null && Boolean.parseBoolean(isJsonValidatorParam.toLowerCase())) {
+        } else if (StringUtils.isNotBlank(isJsonValidatorParam)) {
             boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorParam.toLowerCase());
             clientFormMetadataList = clientFormService.getJsonWidgetValidatorClientFormMetadata(isJsonValidator);
         }
@@ -322,7 +322,10 @@ public class ClientFormResource {
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
-
+        if(!isJsonValidator) {
+            clientFormMetadata.setIsDraft(true); //After any upload all the files will need to be a draft except for the json
+            // widget validators.
+        }
         if (!StringUtils.isBlank(relation)){
             clientFormMetadata.setRelation(relation);
         }
