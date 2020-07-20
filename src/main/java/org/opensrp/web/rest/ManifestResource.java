@@ -2,7 +2,10 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.opensrp.domain.Manifest;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,9 +37,10 @@ public class ManifestResource {
     public static final String FALSE = Boolean.FALSE.toString();
     private ManifestService manifestService;
     private ClientFormService clientFormService;
+    protected ObjectMapper objectMapper;
     public static final String IDENTIFIER = "identifier";
     public static final String FORM_VERSION = "forms_version";
-    protected ObjectMapper objectMapper;
+    public static final String FORM_IDENTIFIERS = "identifiers";
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
@@ -161,14 +166,46 @@ public class ManifestResource {
     protected Manifest generateManifest(String jsonString) {
         Manifest latestManifest = manifestService.getAllManifest(1).get(0);
         Manifest generatedManifest = new Manifest();
+        JSONArray mergedIdentifiersArray = null;
         if (latestManifest != null) {
+            mergedIdentifiersArray = getMergedIdentifiersJSONArray(latestManifest, jsonString);
             String identifier = FormConfigUtils.getNewVersion(latestManifest.getIdentifier());
             logger.info("Generated Identifier -> " + identifier);
             generatedManifest.setIdentifier(identifier);
             generatedManifest.setAppId(latestManifest.getAppId());
             generatedManifest.setAppVersion(latestManifest.getAppVersion());
         }
-		generatedManifest.setJson(jsonString);
+        String generatedManifestJson = jsonString;
+        if (mergedIdentifiersArray != null) {
+            JSONObject newJson = new JSONObject(jsonString).put(FORM_IDENTIFIERS, mergedIdentifiersArray);
+            generatedManifestJson = newJson.toString();
+        }
+        generatedManifest.setJson(generatedManifestJson);
         return generatedManifest;
+    }
+
+    protected JSONArray getMergedIdentifiersJSONArray(Manifest latestManifest, String json) {
+        JSONArray identifiersJsonArray = new JSONArray();
+        Set<String> identifiersSet = new HashSet<>();
+        if (StringUtils.isNotBlank(latestManifest.getJson())) {
+            JSONObject existingJson = new JSONObject(latestManifest.getJson());
+            if (existingJson.has(FORM_IDENTIFIERS)) {
+                for (Object object : existingJson.getJSONArray(FORM_IDENTIFIERS)) {
+                    identifiersSet.add((String) object);
+                }
+            }
+        }
+        JSONObject jsonObject = new JSONObject(json);
+        if (jsonObject.has(FORM_IDENTIFIERS)) {
+            for (Object object : jsonObject.getJSONArray(FORM_IDENTIFIERS)) {
+                identifiersSet.add((String) object);
+            }
+        }
+        if (identifiersSet.size() > 0) {
+            for (String item : identifiersSet) {
+                identifiersJsonArray.put(item);
+            }
+        }
+        return identifiersJsonArray;
     }
 }
