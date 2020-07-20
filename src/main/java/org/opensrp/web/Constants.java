@@ -19,9 +19,20 @@ public interface Constants {
     String FAILURE = "Failure occurred";
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
 
+    public static final String RETURN_COUNT= "return_count";
+    public static final String TOTAL_RECORDS = "total_records";
+
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
+    }
+
+    interface RestEndpointUrls {
+        String SETTINGS_V2_URL = "/rest/v2/settings";
+    }
+
+    interface RestPartVariables {
+        String ID = "id";
     }
 
     interface EndpointParam {
@@ -32,5 +43,13 @@ public interface Constants {
 
     interface DefaultEndpointParam {
         String FALSE = "false";
+    }
+
+    interface JsonForm {
+        interface Key {
+            String STEP = "step";
+            String FIELDS = "fields";
+            String KEY = "key";
+        }
     }
 }

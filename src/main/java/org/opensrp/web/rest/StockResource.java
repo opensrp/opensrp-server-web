@@ -30,7 +30,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Stock;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
-import org.opensrp.util.DateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

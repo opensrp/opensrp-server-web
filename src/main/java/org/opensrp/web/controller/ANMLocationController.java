@@ -9,6 +9,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.opensrp.common.util.HttpAgent;
 import org.opensrp.common.util.HttpResponse;
 import org.opensrp.dto.VillagesDTO;
+import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import com.google.gson.reflect.TypeToken;
 public class ANMLocationController {
     private static Logger logger = LoggerFactory.getLogger(ANMLocationController.class.toString());
     private final String opensrpANMVillagesURL;
-    private UserController userController;
     private HttpAgent httpAgent;
 
     @Autowired
@@ -35,7 +35,6 @@ public class ANMLocationController {
                                  UserController userController,
                                  HttpAgent httpAgent) {
         this.opensrpANMVillagesURL = opensrpANMVillagesURL;
-        this.userController = userController;
         this.httpAgent = httpAgent;
     }
 
@@ -43,7 +42,7 @@ public class ANMLocationController {
     public ResponseEntity<VillagesDTO> villagesForANM(Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {
-            String anmIdentifier = userController.currentUser(authentication).getUsername();
+            String anmIdentifier = RestUtils.currentUser(authentication).getUsername();
             response = httpAgent.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier);
             VillagesDTO villagesDTOs = new Gson().fromJson(response.body(),
                     new TypeToken<VillagesDTO>() {
