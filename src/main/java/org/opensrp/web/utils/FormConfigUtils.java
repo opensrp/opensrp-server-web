@@ -7,6 +7,7 @@ import org.json.JSONObject;
 public class FormConfigUtils {
 
 	public static final String FORMS_VERSION = "forms_version";
+
 	public static final String JSON = "json";
 
 	public static String getNewVersion(String initialVersion) {
@@ -19,14 +20,11 @@ public class FormConfigUtils {
 							"." + newVersion;
 		} else if (defaultArtifactVersion.getMinorVersion() < 1000) {
 			int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
-			formVersion =
-					defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion
-							.getIncrementalVersion();
+			formVersion = defaultArtifactVersion.getMajorVersion() + "." + newVersion + ".0";
 		} else {
 			int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
 			formVersion =
-					newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion
-							.getIncrementalVersion();
+					newVersion + ".0" + ".0";
 		}
 		return formVersion;
 	}
@@ -35,7 +33,9 @@ public class FormConfigUtils {
 		String formVersion = "";
 		if (StringUtils.isNotBlank(jsonString)) {
 			JSONObject parentObject = new JSONObject(jsonString);
-			JSONObject jsonObject = (parentObject.has(JSON)) ? new JSONObject(Utils.getStringFromJSON(parentObject,"json")): parentObject;
+			JSONObject jsonObject = (parentObject.has(JSON)) ?
+					new JSONObject(Utils.getStringFromJSON(parentObject, "json")) :
+					parentObject;
 			if (jsonObject.has(FORMS_VERSION)) {
 				formVersion = Utils.getStringFromJSON(jsonObject, FORMS_VERSION);
 			}
