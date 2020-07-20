@@ -5,6 +5,7 @@ import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 import java.net.ConnectException;
 
 import org.opensrp.web.dto.ResponseDto;
+import org.opensrp.web.exceptions.UploadValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,14 +19,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 	
-	private static Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.toString());
+	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.toString());
 	
 	@ResponseBody
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseDto<?> exceptionHandler(HttpMessageNotReadableException exception) {
 		logger.error("HttpMessageNotReadableException occurred : ", exception);
-		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
 	}
 	
 	@ResponseBody
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseDto<?> exceptionHandler(MissingServletRequestParameterException exception) {
 		logger.error("MissingServletRequestParameterException occurred : ", exception);
-		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
 	}
 	
 	@ResponseBody
@@ -42,6 +43,14 @@ public class GlobalExceptionHandler {
 	public ResponseDto<?> exceptionHandler(RuntimeException exception) {
 		logger.error("Runtime Exception occurred : ", exception);
 		return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ResponseBody
+	@ExceptionHandler(UploadValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
+		logger.error("UploadValidationException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
 	}
 	
 	@ResponseBody
@@ -68,11 +77,11 @@ public class GlobalExceptionHandler {
 		dto.setMessage(DEFAULT_EXCEPTION_HANDLER_MESSAGE);
 		return dto;
 	}
-	
-	public ResponseDto<Object> buildErrorResponseForBadRequest(HttpStatus status) {
+
+	public ResponseDto<Object> buildErrorResponseForBadRequest(HttpStatus status, String message) {
 		ResponseDto<Object> dto = new ResponseDto<>().makeFailureResponse(status);
 		dto.setData(null);
-		dto.setMessage("");
+		dto.setMessage(message);
 		return dto;
 	}
 }

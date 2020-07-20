@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opensrp.domain.Client;
-import org.opensrp.domain.Event;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
@@ -59,6 +59,11 @@ public class ValidateResourceTest {
 			+ "\t\"clients\": \"[ 1 , 2 ]\",\n"
 			+ "\t\"events\": \"[ 1 , 2]\"\n"
 			+ "}";
+	
+	private String SYNC_REQUEST_STRING_PAYLOAD = "{\n"
+			+ "\t\"clients\": \"[ 1 , 2 ]\",\n"
+			+ "\t\"events\": \"[ 1 , 2]\"\n"
+			+ "}";
 
 	@Before
 	public void setUp() {
@@ -93,6 +98,18 @@ public class ValidateResourceTest {
 		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(null);
 		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
 				.content(SYNC_REQUEST_PAYLOAD.getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		
+		assertEquals(result.getResponse().getContentAsString(), expected);
+	}
+	
+	@Test
+	public void testValidateSyncWithStringArray() throws Exception {
+		String expected = "{\"clients\":[\"1\",\"2\"],\"events\":[\"1\",\"2\"]}";
+		when(clientService.getByBaseEntityId(any(String.class))).thenReturn(null);
+		when(eventService.findByFormSubmissionId(any(String.class))).thenReturn(null);
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(SYNC_REQUEST_STRING_PAYLOAD.getBytes()))
 				.andExpect(status().isOk()).andReturn();
 		
 		assertEquals(result.getResponse().getContentAsString(), expected);

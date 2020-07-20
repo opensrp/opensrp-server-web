@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
+import java.util.Date;
 
 @Controller
 @RequestMapping("/multimedia")
@@ -52,7 +53,7 @@ public class MultimediaController {
 	
 	private MultimediaService multimediaService;
 	
-	private final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
+	public final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
 	
 	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
 	
@@ -69,8 +70,6 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param fileName
-	 * @param userName
-	 * @param password
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
@@ -100,8 +99,6 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param baseEntityId
-	 * @param userName
-	 * @param password
 	 * @throws IOException
 	 * @throws Exception
 	 */
@@ -124,12 +121,9 @@ public class MultimediaController {
 	 * default multimedia directory
 	 *
 	 * @param response
-	 * @param request
 	 * @param entityId
 	 * @param contentType
 	 * @param fileCategory
-	 * @param userName
-	 * @param password
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
@@ -168,11 +162,13 @@ public class MultimediaController {
 		if (!allowedMimeTypes.contains(mimeType)) {
 			return new ResponseEntity<String>("MIME Type is not allowed", HttpStatus.BAD_REQUEST);
 		}
-		
-		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(),
-		        null, fileCategory.trim());
+
+		MultimediaDTO multimediaDTO = new MultimediaDTO(entityId.trim(), providerId.trim(), file.getContentType().trim(), null, fileCategory.trim());
+		multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
+
+		logger.info("Saving multimedia file...");
 		String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-		
+
 		return new ResponseEntity<>(new Gson().toJson(status), HttpStatus.OK);
 	}
 	
@@ -180,9 +176,6 @@ public class MultimediaController {
 	 * Downloads file on successful authentication
 	 *
 	 * @param baseEntityId
-	 * @param userName
-	 * @param password
-	 * @param request
 	 * @param response
 	 * @throws Exception
 	 */

@@ -7,7 +7,6 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.http.util.TextUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.jeasy.rules.support.YamlRuleDefinitionReader;
@@ -69,13 +68,18 @@ public class ClientFormResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
-    private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
-        List<ClientFormMetadata> clientFormMetadataList;
-        if (isDraftParam == null) {
+    private ResponseEntity<String> getClientFormMetadataList(
+            @RequestParam(value = Constants.EndpointParam.IS_DRAFT, required = false) String isDraftParam,
+            @RequestParam(value = Constants.EndpointParam.IS_JSON_VALIDATOR, required = false) String isJsonValidatorParam) throws JsonProcessingException {
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        if (isDraftParam == null && isJsonValidatorParam == null) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
-        } else {
+        } else if (isDraftParam != null && Boolean.parseBoolean(isDraftParam.toLowerCase())) {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
-            clientFormMetadataList = clientFormService.getClientFormMetadata(isDraft);
+            clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
+        } else if (isJsonValidatorParam != null && Boolean.parseBoolean(isJsonValidatorParam.toLowerCase())) {
+            boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorParam.toLowerCase());
+            clientFormMetadataList = clientFormService.getJsonWidgetValidatorClientFormMetadata(isJsonValidator);
         }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }

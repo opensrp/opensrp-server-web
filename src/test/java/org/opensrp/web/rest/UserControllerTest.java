@@ -36,7 +36,7 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.PhysicalLocation;
+import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -44,8 +44,10 @@ import org.opensrp.service.PractitionerService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -146,61 +148,14 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
-		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
-		when(token.getPreferredUsername()).thenReturn(user.getUsername());
-		Authentication authentication = new Authentication() {
-			
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String getName() {
-				return user.getBaseEntityId();
-			}
-			
-			@Override
-			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public boolean isAuthenticated() {
-				return true;
-			}
-			
-			@Override
-			public Object getPrincipal() {
-				return keycloakPrincipal;
-			}
-			
-			@Override
-			public Object getDetails() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public Object getCredentials() {
-				return null;
-			}
-			
-			@Override
-			public Collection<? extends GrantedAuthority> getAuthorities() {
-				return roles.stream().map(role -> new GrantedAuthority() {
-					
-					private static final long serialVersionUID = 1L;
-					
-					@Override
-					public String getAuthority() {
-						return role;
-					}
-				}).collect(Collectors.toList());
-			}
-		};
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		authentication=authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
 		        .andExpect(status().isOk()).andReturn();
 		UserDetail userDetail = new ObjectMapper().readValue(result.getResponse().getContentAsString(), UserDetail.class);
+		
+		User user=authenticatedUser.getFirst();
 		assertEquals(user.getUsername(), userDetail.getUserName());
 		assertEquals(user.getBaseEntityId(), userDetail.getIdentifier());
 		assertEquals(user.getRoles(), userDetail.getRoles());
@@ -236,8 +191,8 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
+		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId), false, true)).thenReturn(new LocationTree());
 
-		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId))).thenReturn(new LocationTree());
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
 		when(locationService.findLocationsByIds(false, Collections.singletonList(jurisdictionId)))

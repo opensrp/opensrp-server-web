@@ -1,7 +1,7 @@
 package org.opensrp.web.bean;
 
 import java.util.List;
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 
 public class ClientSyncBean {
 	

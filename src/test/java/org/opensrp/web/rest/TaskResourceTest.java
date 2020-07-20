@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.Task;
+import org.smartregister.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.GlobalExceptionHandler;
@@ -75,7 +75,7 @@ public class TaskResourceTest {
 	@Mock
 	private TaskService taskService;
 
-	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"planIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionStartDate\":\"2018-11-10T2200\",\"executionEndDate\":null,\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879,\"reasonReference\":\"reasonreferenceuuid\",\"location\":null,\"requester\":null}";
+	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"planIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionStartDate\":\"2018-11-10T2200\",\"executionEndDate\":null,\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879,\"reasonReference\":\"reasonreferenceuuid\",\"location\":null,\"requester\":null,\"syncStatus\":null,\"structureId\":null,\"rowid\":null}";
 	private String taskUpdateJson = "{\"businessStatus\": \"Not Sprayed\", \"identifier\": \"tsk11231jh22\", \"status\": \"completed\" }";
 
 	private String BASE_URL = "/rest/task/";
@@ -383,6 +383,48 @@ public class TaskResourceTest {
 		verify(taskService).getAllTasks(anyLong(), anyInt());
 		assertEquals(TaskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
+	}
+	
+	@Test
+	public void testGetTasksByPlanAndGroupWithReturnCount() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		long totalRecords = 3l;
+		when(taskService.getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(tasks);
+		when(taskService.countTasksByPlanAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L)).thenReturn(totalRecords);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"group\":[\"2018_IRS-3734\"], \"serverVersion\":15421904649873, \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByTaskAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
+		verify(taskService, times(1)).countTasksByPlanAndGroup("IRS_2018_S1", "2018_IRS-3734", 15421904649873L);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
+
+	@Test
+	public void testGetTasksByPlanAndOwnerWithReturnCount() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		long totalRecords = 5l;
+		when(taskService.getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(tasks);
+		when(taskService.countTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L)).thenReturn(totalRecords);
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.content("{\"plan\":[\"IRS_2018_S1\"],\"owner\":\"demouser\", \"serverVersion\":15421904649873, \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
+		verify(taskService, times(1)).countTasksByPlanAndOwner("IRS_2018_S1", "demouser", 15421904649873L);
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
 	}
 
 }

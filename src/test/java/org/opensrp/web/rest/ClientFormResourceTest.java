@@ -1125,7 +1125,7 @@ public class ClientFormResourceTest {
             clientFormMetadataList.add(clientFormMetadata);
         }
 
-        when(clientFormService.getClientFormMetadata(true)).thenReturn(clientFormMetadataList);
+        when(clientFormService.getDraftsClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
                 .param("is_draft", "true"))
@@ -1139,4 +1139,33 @@ public class ClientFormResourceTest {
         assertTrue(arrayNode.get(0).get("isDraft").booleanValue());
     }
 
+    @Test
+    public void testGetClientFormMetadataListShouldReturnJsonWidgetValidators() throws Exception {
+        int count = 7;
+        String formIdentifier = "opd/opd_register.properties";
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) (i + 1));
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setIsDraft(true);
+            clientFormMetadata.setIsJsonValidator(true);
+            clientFormMetadata.setVersion("0.0." + (i + 1));
+
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        when(clientFormService.getJsonWidgetValidatorClientFormMetadata(true)).thenReturn(clientFormMetadataList);
+
+        MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
+                .param("is_json_validator", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseString = result.getResponse().getContentAsString();
+        ArrayNode arrayNode = (ArrayNode) mapper.readTree(responseString);
+        assertEquals(count, arrayNode.size());
+        assertEquals(1L, arrayNode.get(0).get("id").longValue());
+        assertEquals("0.0.1", arrayNode.get(0).get("version").textValue());
+        assertTrue(arrayNode.get(0).get("isJsonValidator").booleanValue());
+    }
 }
