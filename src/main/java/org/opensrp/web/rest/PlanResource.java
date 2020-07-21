@@ -102,8 +102,8 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<PlanDefinition>> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(planService.getAllPlans(isTemplateParam), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public List<PlanDefinition> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		return planService.getAllPlans(isTemplateParam);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
