@@ -37,10 +37,10 @@ public class WebConfig {
 		dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
 		dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
 		
-		SimpleModule dateModule = new SimpleModule("DateTimeModule");
+		SimpleModule dateModule = new SimpleModule("LocalDateModule");
 		dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
 		dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
-		objectMapper.registerModule(dateModule);
+		objectMapper.registerModules(dateTimeModule,dateModule);
 		return objectMapper;
 	}
 	
