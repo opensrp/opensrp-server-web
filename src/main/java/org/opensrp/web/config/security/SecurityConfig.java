@@ -34,6 +34,7 @@ import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -89,6 +90,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/").permitAll()
+			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/config/keycloak").permitAll()
@@ -100,9 +102,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     		.csrf()
     		.ignoringAntMatchers("/rest/**","/multimedia/**")
     	.and()
-    		.httpBasic();/*
-    	.and()
-    		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();;*/
+    		.logout()
+    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"));
 		/* @formatter:on */
 	}
 	

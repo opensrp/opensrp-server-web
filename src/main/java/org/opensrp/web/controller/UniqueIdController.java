@@ -149,7 +149,7 @@ public class UniqueIdController extends OpenmrsService {
 				}
 			} else {
 				map.put("identifiers",
-						openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, OPENMRS_USER, OPENMRS_PWD));
+						openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate));
 			}
 			return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
 		}

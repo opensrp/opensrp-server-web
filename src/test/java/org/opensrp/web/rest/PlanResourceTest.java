@@ -440,7 +440,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-486b02f7b84d");
 		locationDetail.setName("location one");
 		
-		List<LocationDetail> locationDetails = Collections.singletonList(locationDetail);
+		Set<LocationDetail> locationDetails = Collections.singleton(locationDetail);
 		when(locationService.findLocationDetailsByPlanId(anyString())).thenReturn(locationDetails);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "findLocationNames/{planIdentifier}", "plan_id"))
 		        .andExpect(status().isOk()).andReturn();
