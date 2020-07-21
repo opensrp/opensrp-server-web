@@ -11,6 +11,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,14 +20,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
-import org.smartregister.domain.PlanDefinition;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
-import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.PlanDefinition;
+import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -102,8 +103,8 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<PlanDefinition>> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(planService.getAllPlans(isTemplateParam), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(isTemplateParam)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -232,7 +233,7 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<LocationDetail>> findLocationDetailsByPlanId(
+	public ResponseEntity<Set<LocationDetail>> findLocationDetailsByPlanId(
 	        @PathVariable("planIdentifier") String planIdentifier) {
 
 		return new ResponseEntity<>(locationService.findLocationDetailsByPlanId(planIdentifier),
