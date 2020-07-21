@@ -44,13 +44,16 @@ public class UniqueIdController {
 
 	@Value("#{opensrp['qrcodes.directory.name']}")
 	private String qrCodesDir;
+	
+	@Value("#{opensrp['openmrs.username']}")
+	protected String OPENMRS_USER;
+	
+	@Value("#{opensrp['openmrs.password']}")
+	protected String OPENMRS_PWD;
 
 	@Autowired
 	private OpenmrsIDService openmrsIdService;
-
-	@Autowired
-	private UserController userController;
-
+	
 	@Autowired
 	private OpenmrsUserService openmrsUserService;
 
@@ -126,9 +129,7 @@ public class UniqueIdController {
 		String source = getStringFilter("source", request);
 		Map<String, Object> map = new HashMap<>();
 
-		map.put("identifiers", openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate,
-				SecurityContextHolder.getContext().getAuthentication().getName(),
-				userController.getAuthenticationAdvisor(request).getCredentials().toString()));
+		map.put("identifiers", openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate));
 
 		return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
 	}

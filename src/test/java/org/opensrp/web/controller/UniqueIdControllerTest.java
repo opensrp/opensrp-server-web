@@ -90,7 +90,7 @@ public class UniqueIdControllerTest {
 		SecurityContextHolder.setContext(securityContext);
 
 		when(openmrsIdService
-				.getOpenMRSIdentifiers(any(String.class), any(String.class), nullable(String.class), any(String.class)))
+				.getOpenMRSIdentifiers(any(String.class), any(String.class)))
 				.thenReturn(mocked_expected_ids);
 		when(userController.getAuthenticationAdvisor(any(HttpServletRequest.class))).thenReturn(getMockedAuthentication());
 		when(securityContext.getAuthentication()).thenReturn(authentication);

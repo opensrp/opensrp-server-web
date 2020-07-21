@@ -100,7 +100,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 				&& authentication.equals(UsernamePasswordAuthenticationToken.class);
 	}
 
-	protected List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
+	public List<SimpleGrantedAuthority> getRolesAsAuthorities(User user) {
 		return user != null && user.getRoles() != null ? user.getRoles().stream()
 				.map(role -> getSimpleGrantedAuthorityFromRole(role))
 				.collect(Collectors.toList()) : null;

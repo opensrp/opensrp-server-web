@@ -4,12 +4,11 @@
 package org.opensrp.web.config.security;
 
 import org.opensrp.web.config.Role;
+import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -34,11 +33,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	private JdbcTokenStore jdbcTokenStore;
 	
 	@Autowired
-	@Qualifier("authenticationManagerBean")
-	private AuthenticationManager authenticationManager;
+	private CorsConfigurationSource corsConfigurationSource;
 	
 	@Autowired
-	private CorsConfigurationSource corsConfigurationSource;
+	private OauthAuthenticationProvider opensrpAuthenticationProvider;
 	
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
@@ -47,8 +45,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.resourceId(RESOURCE_ID)
 			.tokenStore(jdbcTokenStore)
 			.stateless(false)
-			.authenticationEntryPoint(auth2AuthenticationEntryPoint())
-			.authenticationManager(authenticationManager);
+			.authenticationEntryPoint(auth2AuthenticationEntryPoint());
 		/* @formatter:on */
 	}
 	
@@ -58,7 +55,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		http.cors().configurationSource(corsConfigurationSource)
 		.and()
 			.anonymous().disable()
-		.requestMatchers().mvcMatchers("/rest/**","/user-details","/security/**", "/uniqueids/*","/location/**")
+		.requestMatchers().mvcMatchers("/**")
 		.and()
 			.authorizeRequests()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
@@ -67,7 +64,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		.and()
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
-			.httpBasic();
+			.httpBasic()
+		.and().authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
 	
