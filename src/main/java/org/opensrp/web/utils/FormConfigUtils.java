@@ -15,16 +15,14 @@ public class FormConfigUtils {
 		DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(initialVersion);
 		if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
 			int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
-			formVersion =
-					defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
-							"." + newVersion;
+			formVersion = defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() + "."
+					+ newVersion;
 		} else if (defaultArtifactVersion.getMinorVersion() < 1000) {
 			int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
 			formVersion = defaultArtifactVersion.getMajorVersion() + "." + newVersion + ".0";
 		} else {
 			int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
-			formVersion =
-					newVersion + ".0" + ".0";
+			formVersion = newVersion + ".0" + ".0";
 		}
 		return formVersion;
 	}
