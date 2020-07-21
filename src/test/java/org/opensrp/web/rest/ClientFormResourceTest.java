@@ -734,7 +734,7 @@ public class ClientFormResourceTest {
     }
 
     @Test
-    public void testAddClientFormWhenGivenYaml() throws Exception {
+    public void testAddClientFormWhenGivenRulesYaml() throws Exception {
         String formIdentifier = "opd/calculation.yaml";
         String formName = "Calculation file";
 
@@ -766,13 +766,70 @@ public class ClientFormResourceTest {
     }
 
     @Test
+    public void testAddClientFormWhenGivenYamlWithPropertiesReference() throws Exception {
+        String formIdentifier = "opd/attention_flag.yml";
+        String formName = "Relevance file";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/attention_flag.yml",
+                "application/x-yaml", TestFileContent.ATTENTION_FLAGS_YAML_FILE.getBytes());
+
+        Mockito.doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
+        when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestList());
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_name", formName))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+        verify(manifestService).getAllManifest(anyInt());
+
+        assertEquals(TestFileContent.ATTENTION_FLAGS_YAML_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals("0.0.2", clientFormMetadata.getVersion());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
+    }
+
+    @Test
+    public void testAddClientFormWhenGivenYamlWithMissingPropertiesReferenceReturns400() throws Exception {
+        String formIdentifier = "opd/attention_flag.yml";
+        String formName = "Relevance file";
+
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/attention_flag.yml",
+                "application/x-yaml", TestFileContent.ATTENTION_FLAGS_YAML_FILE.getBytes());
+
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+
+        MvcResult result =  mockMvc.perform(
+                fileUpload(BASE_URL)
+                        .file(file)
+                        .param("form_identifier", formIdentifier)
+                        .param("form_name", formName))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(clientFormService, times(2)).isClientFormExists(anyString());
+
+        String errorMessage = result.getResponse().getContentAsString();
+        assertTrue(errorMessage.contains("attention_flags"));
+    }
+
+    @Test
     public void testAddClientFormWhenGivenInvalidYamlShouldReturn400() throws Exception {
         String formIdentifier = "opd/calculation.yaml";
         String formVersion = "0.1.1";
         String formName = "Calculation file";
 
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/calculation.yaml",
-                "application/x-yaml", TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10).getBytes());
+                "application/x-yaml", TestFileContent.INVALID_YAML_FILE_CONTENT.getBytes());
 
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
@@ -1075,7 +1132,7 @@ public class ClientFormResourceTest {
     @Test
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidYamlStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.CALCULATION_YAML_FILE_CONTENT.substring(0, 10), "application/x-yaml"));
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.INVALID_YAML_FILE_CONTENT, "application/x-yaml"));
     }
 
     @Test
