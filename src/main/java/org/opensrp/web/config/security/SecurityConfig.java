@@ -90,6 +90,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/").permitAll()
+			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
 			.mvcMatchers("/rest/config/keycloak").permitAll()
@@ -101,9 +102,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     		.csrf()
     		.ignoringAntMatchers("/rest/**","/multimedia/**")
     	.and()
-    		.logout().logoutRequestMatcher(new AntPathRequestMatcher("logout", "GET"));/*
-    	.and()
-    		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();;*/
+    		.logout()
+    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"));
 		/* @formatter:on */
 	}
 	
