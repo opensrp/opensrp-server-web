@@ -34,6 +34,7 @@ import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -100,7 +101,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     		.csrf()
     		.ignoringAntMatchers("/rest/**","/multimedia/**")
     	.and()
-    		.httpBasic();/*
+    		.logout().logoutRequestMatcher(new AntPathRequestMatcher("logout", "GET"));/*
     	.and()
     		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();;*/
 		/* @formatter:on */
