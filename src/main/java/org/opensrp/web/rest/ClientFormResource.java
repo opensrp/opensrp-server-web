@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -339,7 +340,6 @@ public class ClientFormResource {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
-
             String errorMessage;
             if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
                 errorMessage = "Form upload failed.";
@@ -366,16 +366,23 @@ public class ClientFormResource {
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }
-        return null;
-    }
-
-    private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
-        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
-        if (errorMessageForInvalidContent != null) {
-            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+        else if (isYamlContentType(fileContentType)) {
+	        HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
+	        if (!missingPropertyFileReferences.isEmpty()) {
+		        String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
+		        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	        }
         }
         return null;
     }
+
+	private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
+		String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
+		if (errorMessageForInvalidContent != null) {
+			return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+		}
+		return null;
+	}
 
     @VisibleForTesting
     @Nullable
@@ -389,11 +396,23 @@ public class ClientFormResource {
                 return ex.getMessage();
             }
         } else if (isYamlContentType(contentType)) {
+            String errorMessage;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
+                return null;
             } catch (Exception ex) {
                 logger.error("Rules file upload is invalid YAML rules file", ex);
-                return ex.getMessage();
+                errorMessage = ex.getMessage();
+            }
+            try {
+                new Yaml().load(fileContentString);
+                return null;
+            }catch (Exception ex) {
+                logger.error("YAML file upload is invalid", ex);
+                errorMessage += "\n\n" + ex.getMessage();
+            }
+            if (StringUtils.isNotBlank(errorMessage)) {
+                return errorMessage;
             }
         } else {
             // This is a properties file
