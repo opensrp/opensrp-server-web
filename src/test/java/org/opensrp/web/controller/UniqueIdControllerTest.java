@@ -123,7 +123,7 @@ public class UniqueIdControllerTest {
 
 		when(identifierSourceService.findByIdentifier(anyString())).thenReturn(null);
 		when(openmrsIdService
-				.getOpenMRSIdentifiers(any(String.class), any(String.class), nullable(String.class), nullable(String.class)))
+				.getOpenMRSIdentifiers(any(String.class), any(String.class)))
 				.thenReturn(mocked_expected_ids);
 		when(securityContext.getAuthentication()).thenReturn(spy(getMockedAuthentication()));
 		when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(user);
