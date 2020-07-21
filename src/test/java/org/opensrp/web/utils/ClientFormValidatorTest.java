@@ -104,19 +104,21 @@ public class ClientFormValidatorTest {
         Assert.assertEquals("anc_register", missingReferences.toArray()[0]);
     }
 
+    @Test
     public void testCheckForMissingPropertyFileReferencesShouldReturnEmptySetWhenYamlHasPropertyFiles() {
         Mockito.doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
 
         HashSet<String> missingReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(TestFileContent.ATTENTION_FLAGS_YAML_FILE);
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
-        assertEquals(0, missingReferences.size());
+        Assert.assertEquals(0, missingReferences.size());
     }
 
+    @Test
     public void testCheckForMissingPropertyFileReferencesShouldReturnNonEmptySetWhenYamlMissingPropertyFiles() {
         HashSet<String> missingReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(TestFileContent.ATTENTION_FLAGS_YAML_FILE);
         Mockito.verify(clientFormService, Mockito.times(2)).isClientFormExists(Mockito.anyString());
-        assertEquals(1, missingReferences.size());
-        assertEquals("attention_flags", missingReferences.toArray()[0]);
+        Assert.assertEquals(1, missingReferences.size());
+        Assert.assertEquals("attention_flags", missingReferences.toArray()[0]);
     }
 
      @Test
