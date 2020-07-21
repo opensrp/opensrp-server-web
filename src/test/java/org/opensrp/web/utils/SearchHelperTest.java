@@ -18,17 +18,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 public class SearchHelperTest {
-
-	@Before
-	public void setUp() {
-
-		Client motherClient = new Client("dummy-mother-base-entity-id");
-		motherClient.setFirstName("Jane");
-		motherClient.setLastName("Doe");
-		motherClient.setGender("FEMALE");
-		motherClient.setIdentifiers(EasyMap.mapOf("M_ZEIR_ID", "673939_mother"));
-	}
-
+	
 	@Test
 	public void testCreateClientListIfEmptyCreatesListOnNull() {
 
