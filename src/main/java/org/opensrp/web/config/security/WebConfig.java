@@ -6,8 +6,8 @@ package org.opensrp.web.config.security;
 import java.text.DateFormat;
 
 import org.joda.time.DateTime;
-import org.opensrp.util.DateTimeDeserializer;
-import org.opensrp.util.DateTimeSerializer;
+import org.joda.time.LocalDate;
+import org.opensrp.util.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -36,7 +36,11 @@ public class WebConfig {
 		SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
 		dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
 		dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
-		objectMapper.registerModule(dateTimeModule);
+		
+		SimpleModule dateModule = new SimpleModule("DateTimeModule");
+		dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+		dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
+		objectMapper.registerModule(dateModule);
 		return objectMapper;
 	}
 	
