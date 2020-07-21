@@ -33,8 +33,36 @@ public class InitialFormConfigUploadUtil {
 
 
 	public static void main(String[] mainArgs) throws IOException {
+		/*
+		********************************
+		 THESE VALUES SHOULD BE CHANGED
+		********************************
+		*/
+
+		// Path to client project assets folder with json.form
+		String assetsFolderFullPath = "/home/ona-kigamba/Documents/Projects/OpenSRP/opensrp-client-reveal/opensrp-reveal/src/main/assets/";
+		// Initial form version
+		String formVersion = "0.0.1";
+
+		// Base URL for the server to which the forms will be uploaded
+		String baseUrl = "http://192.168.56.103:8082";
+
+		// Authentication details for the server
+		String username = "username";
+		String password = "password";
+
+		String appId = "org.smartregister.random";
+		String appVersion = "0.0.1";
+		String 
+
+		/*
+		********************************
+			END OF CHANGEABLE VALUES
+		********************************
+		*/
+
 		InitialFormConfigUploadUtil clientFormValidator = new InitialFormConfigUploadUtil();
-		clientFormValidator.performUpload();
+		clientFormValidator.performUpload(assetsFolderFullPath, formVersion, baseUrl, username, password, appId, appVersion);
 	}
 
 	public InitialFormConfigUploadUtil() {
@@ -78,39 +106,15 @@ public class InitialFormConfigUploadUtil {
 	}
 
 
-	public void performUpload() throws IOException {
-		/*
-		********************************
-		 THESE VALUES SHOULD BE CHANGED
-		********************************
-		*/
+	public void performUpload(String assetsFolderFullPath, String formVersion, String baseUrl, String username, String password
+			, String appId, String appVersion) throws IOException {
 
-		// Path to client project assets folder with json.form
-		String assetsFilePath = "/home/ona-kigamba/Documents/Projects/OpenSRP/opensrp-client-reveal/opensrp-reveal/src/main/assets/";
-		// Initial form version
-		String formVersion = "0.0.1";
-
-		// Base URL for the server to which the forms will be uploaded
-		String baseUrl = "http://192.168.56.103:8082";
-
-		// Authentication details for the server
-		String username = "username";
-		String password = "password";
 		String encoding = new String(java.util.Base64.getEncoder().encode((username + ":" + password).getBytes()));
-
 		String clientFormUrl = baseUrl + "/opensrp/rest/clientForm";
 		String manifestUrl = baseUrl + "/opensrp/rest/manifest";
 		String basicAuthValue = "Basic " + encoding;
-		String appId = "org.smartregister.random";
-		String appVersion = "0.0.1";
 
-		/*
-		********************************
-			END OF CHANGEABLE VALUES
-		********************************
-		*/
-
-		File file = new File(assetsFilePath);
+		File file = new File(assetsFolderFullPath);
 		HashMap<String, String> ruleFileRelations = new HashMap<>();
 		HashMap<String, String> subFormFileRelations = new HashMap<>();
 		HashSet<String> jsonFormFiles = new HashSet<>();
@@ -220,7 +224,7 @@ public class InitialFormConfigUploadUtil {
 
 			// TODO: Fetch each YML file & upload
 			for (String ymlFileName: ruleFileRelations.keySet()) {
-				File ymlFile = new File(assetsFilePath + "/rule/" + ymlFileName);
+				File ymlFile = new File(assetsFolderFullPath + "/rule/" + ymlFileName);
 				if (ymlFile.exists()) {
 					// Lets upload it
 					JSONObject jsonObject = new JSONObject();
@@ -259,7 +263,7 @@ public class InitialFormConfigUploadUtil {
 
 			// TODO: Fetch each JSON sub-form file & upload
 			for (String subFormFileName: subFormFileRelations.keySet()) {
-				File subFormFile = new File(assetsFilePath + "/json.form/sub_form/" + subFormFileName);
+				File subFormFile = new File(assetsFolderFullPath + "/json.form/sub_form/" + subFormFileName);
 				if (subFormFile.exists()) {
 					String parentJsonFormFileName = subFormFileRelations.get(subFormFileName);
 					String title = "Sample Sub-Form File";
@@ -295,7 +299,7 @@ public class InitialFormConfigUploadUtil {
 			Iterator<String> jsonFormFilesIterator = jsonFormFiles.iterator();
 			while (jsonFormFilesIterator.hasNext()) {
 				String formFileName = jsonFormFilesIterator.next();
-				File formFile = new File(assetsFilePath + "/json.form/" + formFileName);
+				File formFile = new File(assetsFolderFullPath + "/json.form/" + formFileName);
 
 				if (formFile.exists()) {
 					String titleRetrieved = formLabels.get(formFileName);
