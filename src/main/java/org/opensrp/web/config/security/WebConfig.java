@@ -7,7 +7,10 @@ import java.text.DateFormat;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.util.*;
+import org.opensrp.util.DateTimeDeserializer;
+import org.opensrp.util.DateTimeSerializer;
+import org.opensrp.util.LocalDateDeserializer;
+import org.opensrp.util.LocalDateSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
