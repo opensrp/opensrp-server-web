@@ -17,12 +17,14 @@ import org.opensrp.service.ClientFormService;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class InitialFormConfigUploadUtil {
@@ -33,36 +35,31 @@ public class InitialFormConfigUploadUtil {
 
 
 	public static void main(String[] mainArgs) throws IOException {
-		/*
-		********************************
-		 THESE VALUES SHOULD BE CHANGED
-		********************************
-		*/
-
-		// Path to client project assets folder with json.form
-		String assetsFolderFullPath = "/home/ona-kigamba/Documents/Projects/OpenSRP/opensrp-client-reveal/opensrp-reveal/src/main/assets/";
-		// Initial form version
-		String formVersion = "0.0.1";
-
-		// Base URL for the server to which the forms will be uploaded
-		String baseUrl = "http://192.168.56.103:8082";
-
-		// Authentication details for the server
-		String username = "username";
-		String password = "password";
-
-		String appId = "org.smartregister.random";
-		String appVersion = "0.0.1";
-		String jsonFormFolderFromAssets = "json.form";
-		String subFormJsonFolderFromAssets = "json.form/sub_form";
-
-		/*
-		********************************
-			END OF CHANGEABLE VALUES
-		********************************
-		*/
 
 		InitialFormConfigUploadUtil clientFormValidator = new InitialFormConfigUploadUtil();
+
+		Properties properties = new Properties();
+		InputStream inputStream = clientFormValidator.getClass().getClassLoader().getResourceAsStream("doc_config_script_configs.properties");
+		properties.load(inputStream);
+
+
+		// Path to client project assets folder with json.form
+		String assetsFolderFullPath = properties.getProperty("assetsFolderFullPath");
+		// Initial form version
+		String formVersion = properties.getProperty("formVersion");
+
+		// Base URL for the server to which the forms will be uploaded
+		String baseUrl = properties.getProperty("baseUrl");
+
+		// Authentication details for the server
+		String username = properties.getProperty("username");
+		String password = properties.getProperty("password");
+
+		String appId = properties.getProperty("appId");
+		String appVersion = properties.getProperty("appVersion");
+		String jsonFormFolderFromAssets = properties.getProperty("jsonFormFolderFromAssets");
+		String subFormJsonFolderFromAssets = properties.getProperty("subFormJsonFolderFromAssets");
+
 		clientFormValidator.performUpload(assetsFolderFullPath, formVersion, baseUrl, username, password, appId, appVersion, jsonFormFolderFromAssets, subFormJsonFolderFromAssets);
 	}
 

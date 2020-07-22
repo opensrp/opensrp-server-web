@@ -367,6 +367,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>doc_config_script_configs.properties</exclude>
+                </excludes>
             </resource>
             <resource>
                 <directory>configs/assets/config</directory>
