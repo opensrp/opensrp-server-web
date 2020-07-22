@@ -234,6 +234,8 @@ public class ClientFormResource {
             return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
         }
 
+        String identifier = getIdentifier(formIdentifier, jsonFile);
+        String version = getFormVersion(formVersion);
         String fileContentString = new String(bytes);
 
         ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType,
@@ -241,13 +243,11 @@ public class ClientFormResource {
         if (errorMessageForInvalidContent1 != null)
             return errorMessageForInvalidContent1;
 
-        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(formIdentifier, isJsonValidator,
+        ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(identifier, isJsonValidator,
                 fileContentType, fileContentString);
         if (errorMessage != null)
             return errorMessage;
 
-        String identifier = getIdentifier(formIdentifier, jsonFile);
-        String version = getFormVersion(formVersion);
 
         logger.info(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =

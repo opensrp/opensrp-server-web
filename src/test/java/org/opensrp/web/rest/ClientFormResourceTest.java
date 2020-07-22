@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import org.apache.http.entity.ContentType;
 import org.hamcrest.core.StringStartsWith;
 import org.joda.time.DateTime;
@@ -40,20 +41,20 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -710,7 +711,7 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         ClientForm formValidator = new ClientForm();
-        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"aefi_form\"]}}");
+        formValidator.setJson("\"{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\",\"aefi_form\"]}}\"");
 
         Mockito.doReturn(formValidator)
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);

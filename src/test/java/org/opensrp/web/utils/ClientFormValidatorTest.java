@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import junit.framework.TestCase;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -112,7 +114,7 @@ public class ClientFormValidatorTest extends TestCase {
         String formIdentifier = "anc_registration.json";
 
         ClientForm formValidator = new ClientForm();
-        formValidator.setJson("{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\", \"aefi_form\"]}}");
+        formValidator.setJson("\"{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\",\"aefi_form\"]}}\"");
 
         Mockito.doReturn(formValidator)
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);
