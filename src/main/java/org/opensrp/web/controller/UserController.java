@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -43,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -95,6 +99,12 @@ public class UserController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
 	public ResponseEntity<HttpStatus> authenticateUser() {
+		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
+	}
+	
+	@GetMapping( value = "/logout.do")
+	public ResponseEntity<HttpStatus> logoff(HttpServletRequest request) throws ServletException {
+		request.logout();
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
