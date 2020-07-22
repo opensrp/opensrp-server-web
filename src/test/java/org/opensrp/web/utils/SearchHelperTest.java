@@ -1,7 +1,6 @@
 package org.opensrp.web.utils;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opensrp.common.util.EasyMap;
@@ -18,7 +17,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 public class SearchHelperTest {
-	
+
 	@Test
 	public void testCreateClientListIfEmptyCreatesListOnNull() {
 
@@ -213,7 +212,7 @@ public class SearchHelperTest {
 	}
 
 	@Test
-	public void  childSearchParamProcessorShouldHaveCorrectIdentifierWhenCreatingBean() throws ParseException {
+	public void childSearchParamProcessorShouldHaveCorrectIdentifierWhenCreatingBean() throws ParseException {
 		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
 		Mockito.when(httpServletRequest.getParameter("limit")).thenReturn("20");
 		Mockito.when(httpServletRequest.getParameter("opensrp_id")).thenReturn("2093980");
@@ -253,6 +252,21 @@ public class SearchHelperTest {
 		List<ChildMother> childMothers = SearchHelper.processSearchResult(childList, motherList, mother);
 		Assert.assertEquals(1, childMothers.size());
 		Assert.assertEquals("John Doe", childMothers.get(0).getChild().fullName());
+	}
+
+	@Test
+	public void testMotherSearchParamProcessor() throws ParseException {
+		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+		Mockito.when(httpServletRequest.getParameter("limit")).thenReturn("0");
+		Mockito.when(httpServletRequest.getParameter("mother_first_name")).thenReturn("Jane");
+		Mockito.when(httpServletRequest.getParameter("mother_last_name")).thenReturn("Doe");
+		Mockito.when(httpServletRequest.getParameter("mother_nrc_number")).thenReturn("2093980");
+		Mockito.when(httpServletRequest.getParameter("NRC_Number")).thenReturn("20939801123");
+		SearchEntityWrapper searchEntityWrapper = SearchHelper.motherSearchParamProcessor(httpServletRequest);
+		Map<String, String> result = searchEntityWrapper.getClientSearchBean().getAttributes();
+		Assert.assertEquals(1,  result.size());
+		Assert.assertTrue( result.containsKey("NRC_Number"));
+		Assert.assertEquals("2093980", result.get("NRC_Number"));
 	}
 
 }
