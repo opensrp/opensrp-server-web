@@ -36,10 +36,10 @@ public class InitialFormConfigUploadUtil {
 
 	public static void main(String[] mainArgs) throws IOException {
 
-		InitialFormConfigUploadUtil clientFormValidator = new InitialFormConfigUploadUtil();
+		InitialFormConfigUploadUtil initialFormConfigUploadUtil = new InitialFormConfigUploadUtil();
 
 		Properties properties = new Properties();
-		InputStream inputStream = clientFormValidator.getClass().getClassLoader().getResourceAsStream("doc_config_script_configs.properties");
+		InputStream inputStream = initialFormConfigUploadUtil.getClass().getClassLoader().getResourceAsStream("spring/doc_config_script_configs.properties");
 		properties.load(inputStream);
 
 
@@ -60,7 +60,7 @@ public class InitialFormConfigUploadUtil {
 		String jsonFormFolderFromAssets = properties.getProperty("jsonFormFolderFromAssets");
 		String subFormJsonFolderFromAssets = properties.getProperty("subFormJsonFolderFromAssets");
 
-		clientFormValidator.performUpload(assetsFolderFullPath, formVersion, baseUrl, username, password, appId, appVersion, jsonFormFolderFromAssets, subFormJsonFolderFromAssets);
+		initialFormConfigUploadUtil.performUpload(assetsFolderFullPath, formVersion, baseUrl, username, password, appId, appVersion, jsonFormFolderFromAssets, subFormJsonFolderFromAssets);
 	}
 
 	public InitialFormConfigUploadUtil() {
@@ -114,6 +114,7 @@ public class InitialFormConfigUploadUtil {
 
 		File file = new File(assetsFolderFullPath);
 		HashMap<String, String> ruleFileRelations = new HashMap<>();
+		HashMap<String, String> propertyFileRelations = new HashMap<>();
 		HashMap<String, String> subFormFileRelations = new HashMap<>();
 		HashSet<String> jsonFormFiles = new HashSet<>();
 		HashMap<String, String> formLabels = new HashMap<>();
@@ -188,15 +189,14 @@ public class InitialFormConfigUploadUtil {
 											}
 										}
 									}
-/*
 
                                     for (String jsonPath: jsonPathForPropertyFileReferences) {
-                                        List<String> references = (JsonPath.using(conf)).parse(Files.readString(formFile.toPath())).read(jsonPath);
+                                        String reference = (JsonPath.using(conf)).parse(Files.readString(formFile.toPath())).read(jsonPath);
 
-                                        for(String reference: references) {
-                                            ruleFileRelations.put(reference + ".yml", formFileName);
+                                        if (reference != null) {
+	                                        propertyFileRelations.put(reference + ".properties", formFileName);
                                         }
-                                    }*/
+                                    }
 
 
 								} else if (formFile.isDirectory() && formFile.getAbsolutePath().contains(jsonSubFormFolderFromAssets)) {
@@ -210,6 +210,14 @@ public class InitialFormConfigUploadUtil {
 												if (!subFormFileRelations.containsKey(subFormFileName)) {
 													subFormFileRelations.put(subFormFileName, null);
 												}
+
+												for (String jsonPath: jsonPathForPropertyFileReferences) {
+													String reference = (JsonPath.using(conf)).parse(Files.readString(subFormFile.toPath())).read(jsonPath);
+
+													if (reference != null) {
+														propertyFileRelations.put(reference + ".properties", subFormFileName);
+													}
+												}
 											}
 										}
 									}
@@ -220,14 +228,71 @@ public class InitialFormConfigUploadUtil {
 				}
 			}
 
+			// Get the properties files
+			// And get their relations
+
+			File resourcesFolder = new File(assetsFolderFullPath.replace("/assets", "/resources"));
+			if (resourcesFolder.exists() && resourcesFolder.isDirectory()) {
+				File[] resourcesFolderFiles = resourcesFolder.listFiles();
+				for (File propertyFile : resourcesFolderFiles) {
+					String propertyFileName = propertyFile.getName();
+					if (!propertyFile.isDirectory()) {
+						if (propertyFileName.endsWith(".properties") && !propertyFileName.equals("robolectric.properties")) {
+							System.out.println(String.format("PROPERTY FILE %s @ %s", propertyFileName, propertyFile.getAbsolutePath()));
+
+							if (!propertyFileRelations.containsKey(propertyFileName)) {
+								// If this is a language file the
+								String propertyFileRelationsWithoutLocale = propertyFileName.substring(0, propertyFileName.lastIndexOf("_")) + ".properties";
+								String relatedFile = propertyFileRelations.get(propertyFileRelationsWithoutLocale);
+								propertyFileRelations.put(propertyFileName, relatedFile);
+							}
+						}
+					}
+				}
+			}
+
+
+			// TODO: Fetch each properties file & upload
+			for (String propertiesFileName: propertyFileRelations.keySet()) {
+				File propertiesFile = new File(assetsFolderFullPath.replace("/assets", "/resources") + "/" + propertiesFileName);
+
+				if (propertiesFile.exists()) {
+					String parentJsonFormFileName = propertyFileRelations.get(propertiesFileName);
+					String title = "Properties File";
+
+					if (parentJsonFormFileName != null) {
+						String titleRetrieved = formLabels.get(parentJsonFormFileName);
+						title = titleRetrieved == null ? title : titleRetrieved + " Rules File";
+					}
+
+					RequestBody requestBody = generateRequestBody(formVersion, propertiesFileName, "application/octet-stream", propertiesFile, parentJsonFormFileName,
+							title);
+					Call httpCall = generateHttpCall(clientFormUrl, basicAuthValue, requestBody);
+
+					try {
+						Response response = httpCall
+								.execute();
+						if (response.isSuccessful()) {
+							// notification about succesful request
+							System.out.println("Request was successful for " + propertiesFileName);
+						} else {
+							// notification about failure request
+							System.out.println("Request was not successful for " + propertiesFileName);
+						}
+					}
+					catch (IOException e1) {
+						// notification about other problems
+						System.out.println("Request exception for posting " + propertiesFileName);
+						e1.printStackTrace();
+					}
+				}
+			}
+
 			// TODO: Fetch each YML file & upload
 			for (String ymlFileName: ruleFileRelations.keySet()) {
 				File ymlFile = new File(assetsFolderFullPath + "/rule/" + ymlFileName);
-				if (ymlFile.exists()) {
-					// Lets upload it
-					JSONObject jsonObject = new JSONObject();
-					//jsonObject.
 
+				if (ymlFile.exists()) {
 					String parentJsonFormFileName = ruleFileRelations.get(ymlFileName);
 					String title = "Sample YML File";
 

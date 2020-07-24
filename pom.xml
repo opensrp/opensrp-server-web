@@ -367,9 +367,6 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <excludes>
-                    <exclude>doc_config_script_configs.properties</exclude>
-                </excludes>
             </resource>
             <resource>
                 <directory>configs/assets/config</directory>
@@ -592,6 +589,17 @@
                         <version>2.3.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <!-- Remove the doc config properties file -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- This is where the exclusion occurs -->
+                        <exclude>**/doc_config_script_configs.properties</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
