@@ -1,14 +1,23 @@
 package org.opensrp.web.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
+import org.opensrp.web.Constants;
+import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.composer.ComposerException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class ClientFormValidator {
 
@@ -16,6 +25,8 @@ public class ClientFormValidator {
     private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
     private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
     private ClientFormService clientFormService;
+    private static String PROPERTIES_FILE_NAME = "properties_file_name";
+    private static Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
@@ -105,5 +116,65 @@ public class ClientFormValidator {
         }
 
         return missingPropertyFileReferences;
+    }
+
+    public HashSet<String> checkForMissingYamlPropertyFileReferences(@NonNull String fileContent) {
+        HashSet<String> propertyFileReferences = new HashSet<>();
+        HashSet<String> missingPropertyFileReferences = new HashSet<>();
+        try {
+            Map<Object, Object> document = new Yaml().load(fileContent);
+            if (document.containsKey(PROPERTIES_FILE_NAME)) {
+                propertyFileReferences.add((String) document.get(PROPERTIES_FILE_NAME));
+            }
+            // Check if the references exist in the DB
+            for (String propertyFileReference: propertyFileReferences) {
+                if (!clientFormService.isClientFormExists(propertyFileReference) && !clientFormService.isClientFormExists(propertyFileReference + ".properties")) {
+                    missingPropertyFileReferences.add(propertyFileReference);
+                }
+            }
+        }catch (ComposerException exception) {
+            logger.error("Validator parsing a YAML file that doesn't conform in structure", exception);
+            return missingPropertyFileReferences;
+        }
+        return missingPropertyFileReferences;
+    }
+
+    @NonNull
+    public HashSet<String> performWidgetValidation(@NonNull ObjectMapper objectMapper, @NonNull String formIdentifier, @NonNull String clientFormContent) throws JsonProcessingException {
+        ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
+        HashSet<String> fieldsMap = new HashSet<>();
+        if (formValidator != null && formValidator.getJson() != null && !((String) formValidator.getJson()).isEmpty()) {
+            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue((String) formValidator.getJson(), JsonWidgetValidatorDefinition.class);
+            JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition.getCannotRemove();
+            if (widgetCannotRemove != null && widgetCannotRemove.getFields() != null && widgetCannotRemove.getFields().size() > 0) {
+                JsonNode jsonNode = objectMapper.readTree(clientFormContent);
+                fieldsMap.addAll(widgetCannotRemove.getFields());
+
+                Iterator<Map.Entry<String, JsonNode>> iterator = jsonNode.fields();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonNode> jsonFormField = iterator.next();
+                    if (jsonFormField.getKey().startsWith(Constants.JsonForm.Key.STEP)) {
+                        JsonNode step = jsonFormField.getValue();
+                        if (step.has(Constants.JsonForm.Key.FIELDS)) {
+                            JsonNode fields = step.get(Constants.JsonForm.Key.FIELDS);
+                            if (fields instanceof ArrayNode) {
+                                ArrayNode fieldsArray = (ArrayNode) fields;
+                                for (int i = 0; i < fieldsArray.size(); i++) {
+                                    JsonNode jsonNodeField = fieldsArray.get(i);
+                                    String key = jsonNodeField.get(Constants.JsonForm.Key.KEY).asText();
+
+                                    if (fieldsMap.remove(key) && fieldsMap.size() == 0) {
+                                        return fieldsMap;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return fieldsMap;
     }
 }

@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -29,7 +32,6 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -37,12 +39,14 @@ import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -98,24 +102,12 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	public User currentUser(Authentication authentication) {
-		if (authentication != null && authentication.getPrincipal() instanceof KeycloakPrincipal) {
-			@SuppressWarnings("unchecked")
-			KeycloakPrincipal<KeycloakSecurityContext> kp = (KeycloakPrincipal<KeycloakSecurityContext>) authentication
-			        .getPrincipal();
-			AccessToken token = kp.getKeycloakSecurityContext().getToken();
-			User user = new User(authentication.getName());
-			user.setPreferredName(token.getName());
-			user.setUsername(token.getPreferredUsername());
-			List<String> authorities = authentication.getAuthorities().stream().map(e -> e.getAuthority())
-			        .collect(Collectors.toList());
-			user.setAttributes(token.getOtherClaims());
-			user.setRoles(authorities);
-			user.setPermissions(authorities);
-			return user;
-		}
-		return null;
+	@GetMapping( value = "/logout.do")
+	public ResponseEntity<HttpStatus> logoff(HttpServletRequest request) throws ServletException {
+		request.logout();
+		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
+	
 	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
@@ -144,7 +136,7 @@ public class UserController {
 	
 	@RequestMapping("/security/authenticate")
 	public ResponseEntity<String> authenticate(Authentication authentication) throws JSONException {
-		User u = currentUser(authentication);
+		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
@@ -169,7 +161,8 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = locationService.buildLocationHierachy(locationIds);
+		LocationTree l = locationService.buildLocationHierachy(locationIds, false, true);
+
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		

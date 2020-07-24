@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.opensrp.domain.LocationTag;
+import org.smartregister.domain.LocationTag;
 import org.opensrp.service.LocationTagService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 

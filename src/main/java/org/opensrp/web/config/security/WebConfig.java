@@ -7,11 +7,14 @@ import java.text.DateFormat;
 import java.time.Duration;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
+import org.opensrp.util.LocalDateDeserializer;
+import org.opensrp.util.LocalDateSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -39,7 +42,7 @@ public class WebConfig {
 
 	@Autowired
 	RedisConnectionFactory redisConnectionFactory;
-	
+
 	@Bean
 	public ObjectMapper objectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -50,7 +53,11 @@ public class WebConfig {
 		SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
 		dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
 		dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
-		objectMapper.registerModule(dateTimeModule);
+
+		SimpleModule dateModule = new SimpleModule("LocalDateModule");
+		dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+		dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
+		objectMapper.registerModules(dateTimeModule,dateModule);
 		return objectMapper;
 	}
 	

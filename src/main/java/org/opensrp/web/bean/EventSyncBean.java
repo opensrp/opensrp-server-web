@@ -2,8 +2,8 @@ package org.opensrp.web.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.opensrp.domain.Client;
-import org.opensrp.domain.Event;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 
 public class EventSyncBean {
 	
@@ -15,6 +15,9 @@ public class EventSyncBean {
 	private Integer noOfEvents;
 	
 	private String msg;
+	
+	@JsonProperty("total_records")
+	private Long totalRecords;
 	
 	public List<Event> getEvents() {
 		return events;
@@ -47,4 +50,16 @@ public class EventSyncBean {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
+
+	
+	public Long getTotalRecords() {
+		return totalRecords;
+	}
+
+	
+	public void setTotalRecords(Long totalRecords) {
+		this.totalRecords = totalRecords;
+	}
+	
+	
 }
