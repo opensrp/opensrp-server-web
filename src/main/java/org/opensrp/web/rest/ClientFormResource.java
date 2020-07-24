@@ -21,6 +21,7 @@ import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
+import org.opensrp.web.utils.FormConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,13 +69,18 @@ public class ClientFormResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/metadata")
-    private ResponseEntity<String> getClientFormMetadataList(@RequestParam(value = "is_draft", required = false) String isDraftParam) throws JsonProcessingException {
-        List<ClientFormMetadata> clientFormMetadataList;
-        if (isDraftParam == null) {
+    private ResponseEntity<String> getClientFormMetadataList(
+            @RequestParam(value = Constants.EndpointParam.IS_DRAFT, required = false) String isDraftParam,
+            @RequestParam(value = Constants.EndpointParam.IS_JSON_VALIDATOR, required = false) String isJsonValidatorParam) throws JsonProcessingException {
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        if (StringUtils.isBlank(isDraftParam) && StringUtils.isBlank(isJsonValidatorParam)) {
             clientFormMetadataList = clientFormService.getAllClientFormMetadata();
-        } else {
+        } else if (StringUtils.isNotBlank(isDraftParam)) {
             boolean isDraft = Boolean.parseBoolean(isDraftParam.toLowerCase());
             clientFormMetadataList = clientFormService.getDraftsClientFormMetadata(isDraft);
+        } else if (StringUtils.isNotBlank(isJsonValidatorParam)) {
+            boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorParam.toLowerCase());
+            clientFormMetadataList = clientFormService.getJsonWidgetValidatorClientFormMetadata(isJsonValidator);
         }
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
     }
@@ -291,21 +298,7 @@ public class ClientFormResource {
                         if (jsonObject.has(FORMS_VERSION)) {
                             String version = jsonObject.getString(FORMS_VERSION);
                             if (StringUtils.isNotBlank(version)) {
-                                DefaultArtifactVersion defaultArtifactVersion = new DefaultArtifactVersion(version);
-                                if (defaultArtifactVersion.getIncrementalVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getIncrementalVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + defaultArtifactVersion.getMinorVersion() +
-                                                    "." + newVersion;
-                                } else if (defaultArtifactVersion.getMinorVersion() < 1000) {
-                                    int newVersion = defaultArtifactVersion.getMinorVersion() + 1;
-                                    formVersion =
-                                            defaultArtifactVersion.getMajorVersion() + "." + newVersion + "." + defaultArtifactVersion.getIncrementalVersion();
-                                } else {
-                                    int newVersion = defaultArtifactVersion.getMajorVersion() + 1;
-                                    formVersion =
-                                            newVersion + "." + defaultArtifactVersion.getMinorVersion() + "." + defaultArtifactVersion.getIncrementalVersion();
-                                }
+                                formVersion = FormConfigUtils.getNewVersion(version);
                                 break;
                             }
                         }
@@ -330,7 +323,10 @@ public class ClientFormResource {
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
-
+        if(!isJsonValidator) {
+            clientFormMetadata.setIsDraft(true); //After any upload all the files will need to be a draft except for the json
+            // widget validators.
+        }
         if (!StringUtils.isBlank(relation)){
             clientFormMetadata.setRelation(relation);
         }
@@ -344,7 +340,6 @@ public class ClientFormResource {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
             HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingPropertyFileReferences(fileContentString);
-
             String errorMessage;
             if (!missingRuleFileReferences.isEmpty() || !missingSubFormReferences.isEmpty() || !missingPropertyFileReferences.isEmpty()) {
                 errorMessage = "Form upload failed.";
@@ -371,16 +366,23 @@ public class ClientFormResource {
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }
-        return null;
-    }
-
-    private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
-        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
-        if (errorMessageForInvalidContent != null) {
-            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+        else if (isYamlContentType(fileContentType)) {
+	        HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
+	        if (!missingPropertyFileReferences.isEmpty()) {
+		        String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
+		        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	        }
         }
         return null;
     }
+
+	private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
+		String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
+		if (errorMessageForInvalidContent != null) {
+			return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+		}
+		return null;
+	}
 
     @VisibleForTesting
     @Nullable
@@ -394,11 +396,23 @@ public class ClientFormResource {
                 return ex.getMessage();
             }
         } else if (isYamlContentType(contentType)) {
+            String errorMessage;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
+                return null;
             } catch (Exception ex) {
                 logger.error("Rules file upload is invalid YAML rules file", ex);
-                return ex.getMessage();
+                errorMessage = ex.getMessage();
+            }
+            try {
+                new Yaml().load(fileContentString);
+                return null;
+            }catch (Exception ex) {
+                logger.error("YAML file upload is invalid", ex);
+                errorMessage += "\n\n" + ex.getMessage();
+            }
+            if (StringUtils.isNotBlank(errorMessage)) {
+                return errorMessage;
             }
         } else {
             // This is a properties file

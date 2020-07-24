@@ -39,6 +39,8 @@ public interface Constants {
         String APP_ID = "app_id";
         String STRICT = "strict";
         String APP_VERSION = "app_version";
+        String IS_DRAFT= "is_draft";
+        String IS_JSON_VALIDATOR= "is_json_validator";
     }
 
     interface DefaultEndpointParam {
