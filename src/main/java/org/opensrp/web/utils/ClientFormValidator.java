@@ -8,16 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.MultipartBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import org.json.JSONObject;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
@@ -27,17 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
-import springfox.documentation.service.BasicAuth;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,13 +30,13 @@ public class ClientFormValidator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
 
-	private final ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
+	private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
 
-	private final ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
+	private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
 
-	private final ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
+	private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
 
-	private final ClientFormService clientFormService;
+	private ClientFormService clientFormService;
 
 	private static final String PROPERTIES_FILE_NAME = "properties_file_name";
 
