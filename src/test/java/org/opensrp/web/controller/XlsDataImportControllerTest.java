@@ -38,10 +38,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 public class XlsDataImportControllerTest {
@@ -59,8 +57,6 @@ public class XlsDataImportControllerTest {
 
 	@Mock
 	private RefreshableKeycloakSecurityContext securityContext;
-
-	private RequestPostProcessor requestPostProcessors;
 
 	private Authentication authentication;
 
@@ -86,8 +82,6 @@ public class XlsDataImportControllerTest {
 		when(securityContext.getToken()).thenReturn(token);
 		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
 		authentication = authenticatedUser.getSecond();
-		requestPostProcessors = SecurityMockMvcRequestPostProcessors.authentication(authentication);
-
 	}
 
 	@Test
