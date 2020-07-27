@@ -25,8 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,10 +47,13 @@ import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.Geometry;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
@@ -96,6 +101,9 @@ public class LocationResourceTest {
 
 	@Captor
 	private ArgumentCaptor<Integer> integerCaptor;
+	
+	@Captor
+    private ArgumentCaptor<Set<String>> stringSetCaptor;
 
 	@InjectMocks
 	private LocationResource locationResource;
@@ -104,6 +112,9 @@ public class LocationResourceTest {
 	
 	@Mock
 	private PhysicalLocationService locationService;
+	
+	@Mock
+	private PlanService planService;
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 	private String MESSAGE = "The server encountered an error processing the request.";
@@ -832,24 +843,130 @@ public class LocationResourceTest {
 		
 		return searchLocation;
 	}
+	
+	@Test
+	public void testSyncLocationsByServerVersionsWithReturnCount() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByServerVersion(1542640316113l)).thenReturn(expected);
+		long totalRecords = 5l;
+		when(locationService.countLocationsByServerVersion(1542640316113l)).thenReturn(totalRecords);
+
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\", \"return_count\":true}".getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByServerVersion(1542640316113l);
+		verify(locationService).countLocationsByServerVersion(1542640316113l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		JSONAssert.assertEquals(parentJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
+
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
+
+	@Test
+	public void testsSyncLocationsByNamesWithreturnCount() throws Exception {
+
+		String locationNames = "01_5";
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
+		long totalRecords = 5l;
+		when(locationService.countLocationsByNames(locationNames, 0l)).thenReturn(totalRecords);
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames +"\"],\"return_count\":true}").getBytes()))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByNames(locationNames, 0l);
+		verify(locationService).countLocationsByNames(locationNames, 0l);
+		verifyNoMoreInteractions(locationService);
+
+		JSONArray jsonResponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonResponse.length());
+		PhysicalLocation location = LocationResource.gson.fromJson(jsonResponse.get(0).toString(),
+				PhysicalLocation.class);
+
+		assertEquals("01_5", location.getProperties().getName());
+		assertEquals("Feature", location.getType());
+		assertEquals("3734", location.getId());
+		assertEquals(Geometry.GeometryType.MULTI_POLYGON, location.getGeometry().getType());
+
+	}
+
+	@Test
+	public void testSyncStructuresByParentIdAndServerVersionWithReturnCount() throws Exception {
+		List<PhysicalLocation> expected = new ArrayList<>();
+		expected.add(createLocation());
+		when(locationService.findStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(expected);
+		long totalRecords = 3l;
+		when(locationService.countStructuresByParentAndServerVersion("3734", 1542640316l)).thenReturn(totalRecords);
+
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"serverVersion\":1542640316,\"parent_id\":[\"3734\"], \"is_jurisdiction\":\"false\",\"return_count\":true}".getBytes())).andExpect(status().isOk()).andReturn();
+		verify(locationService).findStructuresByParentAndServerVersion("3734", 1542640316l);
+		verify(locationService).countStructuresByParentAndServerVersion("3734", 1542640316l);
+		verifyNoMoreInteractions(locationService);
+
+		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords.longValue());
+
+	}
 
 	@Test
 	public void testGenerateLocationTree() throws Exception {
 		LocationTree tree = LocationResource.gson.fromJson(locationTree, LocationTree.class);
 
-		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean())).thenReturn(tree);
+		when(locationService.buildLocationHierachyFromLocation(anyString(), anyBoolean(), anyBoolean())).thenReturn(tree);
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/hierarchy/" + 1)
 						.param(LocationResource.RETURN_TAGS, "false"))
 				.andExpect(status().isOk()).andReturn();
 
-		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture());
+		verify(locationService).buildLocationHierachyFromLocation(stringCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
 		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
-		assertFalse(booleanCaptor.getValue());
+		assertFalse(booleanCaptor.getAllValues().get(0));
+		assertFalse(booleanCaptor.getAllValues().get(1));
 		assertEquals("1", stringCaptor.getValue());
+	}
+	
+	@Test
+	public void testGetHierarchyForPlan() throws Exception {
+		LocationTree tree = LocationResource.gson.fromJson(locationTree, LocationTree.class);
+		String planId = "80deb645-f42e-50f0-b5cc-84a4dcfb2db4";
+		String locationId = "3921";
+
+		Set<String> locationIdentifiers = new HashSet<String>();
+		locationIdentifiers.add(locationId);
+
+		PlanDefinition planDefinition = new PlanDefinition();
+		planDefinition.setIdentifier(planId);
+		Jurisdiction jurisdiction = new Jurisdiction();
+		jurisdiction.setCode(locationId);
+		planDefinition.setJurisdiction(Collections.singletonList(jurisdiction));
+
+		when(planService.getPlan(planId))
+				.thenReturn(planDefinition);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
+		when(locationService.buildLocationHierachy(locationIdentifiers, false, false)).thenReturn(tree);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/hierarchy/plan/" + planId)
+						.param(LocationResource.RETURN_STRUCTURE_COUNT, "false"))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(locationService).buildLocationHierachy(stringSetCaptor.capture(), booleanCaptor.capture(), booleanCaptor.capture());
+
+		String actualTreeString = result.getResponse().getContentAsString();
+
+		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
+		assertFalse(booleanCaptor.getAllValues().get(0));
+		assertEquals(1, stringSetCaptor.getValue().size());
+		assertTrue(stringSetCaptor.getValue().contains(locationId));
 	}
 
 }

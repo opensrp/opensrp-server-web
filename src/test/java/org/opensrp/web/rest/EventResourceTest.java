@@ -254,9 +254,9 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		String jsonObjectPayload = "{\"baseEntityIds\":[\"5dd43b2e-a873-444b-b527-95c4b040a5bb\"],\"withFamilyEvents\":true}";
 
 		doReturn(expectedEventSyncBean).when(eventResource).sync(null, null, "5dd43b2e-a873-444b-b527-95c4b040a5bb", "0",
-				null, null, null);
+				null, null, null, false);
 		doReturn(expectedFamilyEventSyncBean).when(eventResource).sync(null, null, "cf5d5fef-f120-4eb3-ab29-ed4d437e30c4",
-				"0", null, null, null);
+				"0", null, null, null, false);
 
 		ResponseEntity<String> clientEventsResponseEntity = eventResource
 				.syncClientsAndEventsByBaseEntityIds(jsonObjectPayload);
@@ -362,7 +362,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-		assertEquals(actualObj.size(),3);
+		assertEquals(actualObj.size(),4);
 		assertEquals(actualObj.get("clients").size(),1);
 		assertEquals(actualObj.get("events").size(),1);
     }
@@ -385,7 +385,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	    assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 	    assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 	    assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
-	    assertEquals(actualObj.size(),3);
+	    assertEquals(actualObj.size(),4);
 	    assertEquals(actualObj.get("clients").size(),1);
 	    assertEquals(actualObj.get("events").size(),1);
     }

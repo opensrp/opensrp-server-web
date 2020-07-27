@@ -440,7 +440,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		locationDetail.setIdentifier("304cbcd4-0850-404a-a8b1-486b02f7b84d");
 		locationDetail.setName("location one");
 		
-		List<LocationDetail> locationDetails = Collections.singletonList(locationDetail);
+		Set<LocationDetail> locationDetails = Collections.singleton(locationDetail);
 		when(locationService.findLocationDetailsByPlanId(anyString())).thenReturn(locationDetails);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "findLocationNames/{planIdentifier}", "plan_id"))
 		        .andExpect(status().isOk()).andReturn();
@@ -528,6 +528,62 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		assertEquals(listArgumentCaptor.getAllValues().size(), operationalAreaIds.size());
 		assertEquals(actualObj.get(0).get("identifier").textValue(), planDefinitions.get(0).getIdentifier());
 		
+	}
+	
+	@Test
+	public void testSyncByServerVersionAndAssignedPlansOnOrganizationWithReturnCount() throws Exception {
+		List<PlanDefinition> expectedPlans = new ArrayList<>();
+		long returnCount = 9l;
+
+		List<Jurisdiction> operationalAreas = new ArrayList<>();
+		Jurisdiction operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area");
+		operationalAreas.add(operationalArea);
+
+		PlanDefinition expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_1");
+		expectedPlan.setJurisdiction(operationalAreas);
+		expectedPlan.setServerVersion(1l);
+		expectedPlans.add(expectedPlan);
+
+		expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_2");
+		expectedPlan.setJurisdiction(operationalAreas);
+		expectedPlan.setServerVersion(0l);
+		expectedPlans.add(expectedPlan);
+
+		expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_3");
+		operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area_2");
+		operationalAreas.clear();
+		operationalAreas.add(operationalArea);
+		expectedPlan.setJurisdiction(operationalAreas);
+		expectedPlan.setServerVersion(1l);
+		expectedPlans.add(expectedPlan);
+
+		doReturn(expectedPlans).when(planService).getPlansByOrganizationsAndServerVersion(anyList(), anyLong(), anyBoolean());
+		doReturn(returnCount).when(planService).countPlansByOrganizationsAndServerVersion(anyList(), anyLong());
+
+		String data = "{\"serverVersion\":\"1\",\"operational_area_id\":[\"operational_area\",\"operational_area_2\"],\"organizations\":[2], \"return_count\":true}";
+		String actualPlansString = postRequestWithJsonContentAndReturnString(BASE_URL + "sync", data, status().isOk());
+
+		Gson gson =PlanResource.gson;
+		List<PlanDefinition> actualPlans = gson.fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());
+
+		verify(planService).getPlansByOrganizationsAndServerVersion(orgsArgumentCaptor.capture(), longArgumentCaptor.capture(), booleanArgumentCaptor.capture());
+		verify(planService).countPlansByOrganizationsAndServerVersion(any(), anyLong());
+		assertEquals(longArgumentCaptor.getValue().longValue(), 1);
+		List<Long> list  = orgsArgumentCaptor.getValue();
+		assertEquals(2l,list.get(0),0);
+		assertEquals(1,longArgumentCaptor.getValue(),0);
+
+		assertEquals(3, actualPlans.size());
+		assertEquals("plan_1", actualPlans.get(0).getIdentifier());
+		assertEquals("plan_2", actualPlans.get(1).getIdentifier());
+		assertEquals("plan_3", actualPlans.get(2).getIdentifier());
+		assertEquals(gson.toJson(expectedPlans), gson.toJson(actualPlans));
+
 	}
 	
 	private PlanDefinition createPlanDefinition() {

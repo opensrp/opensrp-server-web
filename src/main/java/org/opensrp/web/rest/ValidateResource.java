@@ -12,13 +12,14 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.smartregister.domain.Client;
-import org.smartregister.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
-import org.smartregister.utils.DateTimeTypeConverter;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,8 +72,7 @@ public class ValidateResource {
 
 			List<String> missingClientIds = new ArrayList<>();
 			if (syncData.has("clients")) {
-
-				List<String> clientIds = gson.fromJson(syncData.getString("clients"),
+				List<String> clientIds = gson.fromJson(Utils.getStringFromJSON(syncData,"clients"),
 						new TypeToken<ArrayList<String>>() {
 						}.getType());
 				for (String clientId : clientIds) {
@@ -89,7 +89,7 @@ public class ValidateResource {
 
 			List<String> missingEventIds = new ArrayList<>();
 			if (syncData.has("events")) {
-				List<String> eventIds = gson.fromJson(syncData.getString("events"), new TypeToken<ArrayList<String>>() {
+				List<String> eventIds = gson.fromJson(Utils.getStringFromJSON(syncData,"events"), new TypeToken<ArrayList<String>>() {
 				}.getType());
 				for (String eventId : eventIds) {
 					try {
