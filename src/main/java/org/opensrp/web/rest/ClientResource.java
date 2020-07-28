@@ -348,4 +348,28 @@ public class ClientResource extends RestResource<Client> {
 		return new ResponseEntity<>(identifiers, HttpStatus.OK);
 	}
 	
+	/**
+	 * Fetch clients ordered by serverVersion ascending order
+	 *
+	 * @return a response with clients
+	 */
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getAll(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(required = false) Integer limit)
+			throws JsonProcessingException {
+
+		ClientSyncBean response = new ClientSyncBean();
+		ClientSearchBean clientSearchBean = new ClientSearchBean();
+		clientSearchBean.setOrderByField(SERVER_VERSIOIN);
+		clientSearchBean.setPageSize(limit);
+		//clientSearchBean.setServerVersion(limit); //TODO set serverVersion
+		AddressSearchBean addressSearchBean = new AddressSearchBean();
+
+		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
+		response.setClients(clients);
+		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+	}
+	
 }
