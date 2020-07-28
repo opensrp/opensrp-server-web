@@ -18,6 +18,7 @@ import org.joda.time.Weeks;
 import org.json.JSONException;
 import org.opensrp.connector.openmrs.service.EncounterService;
 import org.opensrp.connector.openmrs.service.PatientService;
+import org.opensrp.web.rest.RestUtils;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.smartregister.domain.Obs;
@@ -25,6 +26,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -142,7 +144,7 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 	}
 	
 	@RequestMapping(value="/uvo", method=RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public Map<String, String> updateVaccineO(HttpServletRequest req){
+	public Map<String, String> updateVaccineO(HttpServletRequest req, Authentication authentication){
 		Map<String, String> resp = new HashMap<>();
 		String id = req.getParameter("clientId");
 		String location = req.getParameter("location");
@@ -174,7 +176,7 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 			values.add(date);
 			e.addObs(new Obs("concept", "txt", "1025AAAAAAAAAAAAAAAA", null, values , "", vaccine));
 
-			eventService.addEvent(e);
+			eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
 			resp.put("SUCCESS", Boolean.toString(true));
 			return resp;
 		}
