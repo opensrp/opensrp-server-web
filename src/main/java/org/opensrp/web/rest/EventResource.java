@@ -52,6 +52,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -348,7 +350,7 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
-	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
+	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
 		try {
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
@@ -375,7 +377,7 @@ public class EventResource extends RestResource<Event> {
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
-						event = eventService.processOutOfArea(event);
+						event = eventService.processOutOfArea(event, authentication.getName());
 						eventService.addorUpdateEvent(event);
 					}
 					catch (Exception e) {
@@ -399,7 +401,8 @@ public class EventResource extends RestResource<Event> {
 
 	@Override
 	public Event create(Event o) {
-		return eventService.addEvent(o);
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return eventService.addEvent(o, authentication.getName());
 	}
 
 	@Override

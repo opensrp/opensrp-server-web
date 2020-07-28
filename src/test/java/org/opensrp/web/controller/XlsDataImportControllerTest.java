@@ -2,6 +2,7 @@ package org.opensrp.web.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -46,6 +48,9 @@ public class XlsDataImportControllerTest {
 	@InjectMocks
 	private XlsDataImportController xlsDataImportController;
 
+    @Mock
+	private Authentication authentication;
+
 	private MockMvc mockMvc;
 
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
@@ -56,6 +61,7 @@ public class XlsDataImportControllerTest {
 		mockMvc = MockMvcBuilders.standaloneSetup(xlsDataImportController).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(xlsDataImportController, "allowedMimeTypes", allowedMimeTypes);
+		when(authentication.getName()).thenReturn("TestUser");
 	}
 
 	@Test
@@ -72,7 +78,7 @@ public class XlsDataImportControllerTest {
 
 		when(openmrsIDService.downloadOpenmrsIds(openmrsIds.size())).thenReturn(openmrsIds);
 
-		ResponseEntity<String> response = xlsDataImportController.importXlsData(file);
+		ResponseEntity<String> response = xlsDataImportController.importXlsData(file, authentication);
 		String responseBody = response.getBody();
 		JSONObject responseJson = new JSONObject(responseBody);
 		
@@ -82,6 +88,6 @@ public class XlsDataImportControllerTest {
 		assertEquals(summaryClientCount, 4);
 		assertEquals(summaryEventCount, 28);
 		verify(clientService, times(4)).addorUpdate(any(Client.class));
-		verify(eventService, times(28)).addEvent(any(Event.class));
+		verify(eventService, times(28)).addEvent(any(Event.class),nullable(String.class));
 	}
 }
