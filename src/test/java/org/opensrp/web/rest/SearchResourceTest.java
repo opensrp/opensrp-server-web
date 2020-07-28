@@ -17,7 +17,6 @@ import org.opensrp.service.EventService;
 import org.opensrp.service.SearchService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
-import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -38,12 +37,7 @@ public class SearchResourceTest {
 	private ClientService clientService;
 	
 	private EventService eventService;
-	
-	private SearchRepository searchRepository;
-	
-	private ClientsRepository clientRepository;
-	
-	private EventsRepository eventsRepository;
+
 
 	private TaskGenerator taskGenerator;
 
