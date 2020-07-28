@@ -40,8 +40,8 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 		        && StringUtils.isNotBlank(cacheLocationIds)) {
 			ExecutorService executor = Executors.newFixedThreadPool(5);
 			String[] locations = cacheLocationIds.split(",");
-			String[] locationTags = cacheLocationTag.split(",");
-			for (String id : locations) {
+			final String[] locationTags = cacheLocationTag.split(",");
+			for (final String id : locations) {
 				executor.submit(new Runnable() {
 					
 					@Override
