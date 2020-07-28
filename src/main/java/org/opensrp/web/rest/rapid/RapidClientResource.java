@@ -176,7 +176,7 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 			values.add(date);
 			e.addObs(new Obs("concept", "txt", "1025AAAAAAAAAAAAAAAA", null, values , "", vaccine));
 
-			eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
+			eventService.addEvent(e, authentication.getName());
 			resp.put("SUCCESS", Boolean.toString(true));
 			return resp;
 		}

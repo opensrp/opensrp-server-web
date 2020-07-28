@@ -377,7 +377,7 @@ public class EventResource extends RestResource<Event> {
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
-						event = eventService.processOutOfArea(event, RestUtils.currentUser(authentication).getUsername());
+						event = eventService.processOutOfArea(event, authentication.getName());
 						eventService.addorUpdateEvent(event);
 					}
 					catch (Exception e) {
@@ -402,7 +402,7 @@ public class EventResource extends RestResource<Event> {
 	@Override
 	public Event create(Event o) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return eventService.addEvent(o, RestUtils.currentUser(authentication).getUsername());
+		return eventService.addEvent(o, authentication.getName());
 	}
 
 	@Override
