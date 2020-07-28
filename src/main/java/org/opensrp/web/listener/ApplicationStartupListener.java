@@ -36,7 +36,7 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
 		logger.info(contextRefreshedEvent.getApplicationContext().getId());
-		if (contextRefreshedEvent.getApplicationContext().getId().endsWith(APPLICATION_ID)
+		if (contextRefreshedEvent.getApplicationContext().getId().endsWith(APPLICATION_ID+APPLICATION_ID)
 		        && StringUtils.isNotBlank(cacheLocationIds)) {
 			ExecutorService executor = Executors.newFixedThreadPool(5);
 			String[] locations = cacheLocationIds.split(",");
@@ -48,6 +48,7 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 					public void run() {
 						logger.info(String.format("populating OpenMRS location cache for %s, %s, %s ", id, cacheLocationLevel,new JSONArray(locationTags)));
 						openmrsLocationService.getLocationsByLevelAndTags(id, cacheLocationTag, new JSONArray(locationTags));
+						logger.info(String.format("completed populating OpenMRS location cache for %s, %s, %s ", id, cacheLocationLevel,new JSONArray(locationTags)));
 						
 					}
 				});
