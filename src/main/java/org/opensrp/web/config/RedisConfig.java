@@ -5,9 +5,12 @@ package org.opensrp.web.config;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
@@ -21,6 +24,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @author Samuel Githengi created on 05/11/20
  */
 @Configuration
+@EnableCaching
 public class RedisConfig {
 	
 	@Value("#{opensrp['redis.host']}")
@@ -55,6 +59,14 @@ public class RedisConfig {
 		return template;
 	}
 	
+	@Profile("lettuce")
+	@Bean
+	CacheManager lettuceCacheManager() {
+		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
+		        .fromConnectionFactory(lettuceConnectionFactory());
+		return builder.build();
+	}
+	
 	private RedisStandaloneConfiguration redisStandaloneConfiguration() {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
 		redisStandaloneConfiguration.setDatabase(redisDatabase);
@@ -85,5 +97,13 @@ public class RedisConfig {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory());
 		return template;
+	}
+
+	@Profile("jedis")
+	@Bean
+	CacheManager cacheManager() {
+		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
+		        .fromConnectionFactory(jedisConnectionFactory());
+		return builder.build();
 	}
 }
