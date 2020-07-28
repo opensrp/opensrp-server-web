@@ -370,7 +370,7 @@ public class ClientResource extends RestResource<Client> {
 	 * Get client using the client id
 	 *
 	 * @param clientId the event id
-	 * @return event with the event id
+	 * @return client with the client id
 	 */
 	@RequestMapping(value = "/findById", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Client getById(@RequestParam("id") String clientId) {
