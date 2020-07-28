@@ -82,7 +82,7 @@ public class LocationService {
 
 	}
 
-	public JSONArray convertLocationTreeToJSON(List<CustomQuery> treeDTOS, Boolean enable) throws JSONException {
+	public JSONArray convertLocationTreeToJSON(List<CustomQuery> treeDTOS, Boolean enable,String fullName) throws JSONException {
 		JSONArray locationTree = new JSONArray();
 
 		Map<String, Boolean> mp = new HashMap<>();
@@ -102,6 +102,7 @@ public class LocationService {
 					locations.put(fullLocation);
 					object.put("username", username.trim());
 					object.put("locations", locations);
+					object.put("full_name", fullName);
 					object.put("simprints_enable", enable);
 					locationTree.put(object);
 					locations = new JSONArray();
@@ -137,6 +138,7 @@ public class LocationService {
 				locations.put(fullLocation);
 				object.put("username", username.trim());
 				object.put("locations", locations);
+				object.put("full_name", fullName);
 				object.put("simprints_enable", enable);
 				locationTree.put(object);
 				object = new JSONObject();

@@ -216,7 +216,7 @@ public class UserController {
 		JSONArray array = new JSONArray();
 		try {
 			array = locationService.convertLocationTreeToJSON(treeDTOS,
-			    (user.getEnable() == null) ? false : user.getEnable());
+			    (user.getEnable() == null) ? false : user.getEnable(),user.getFullName());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
