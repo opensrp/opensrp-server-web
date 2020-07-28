@@ -1,5 +1,8 @@
 package org.opensrp.web.listener;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
@@ -13,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationStartupListener implements ApplicationListener<ContextRefreshedEvent> {
-	
 	
 	private static Logger logger = LoggerFactory.getLogger(ApplicationStartupListener.class.toString());
 	
@@ -36,14 +38,20 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 		logger.info(contextRefreshedEvent.getApplicationContext().getId());
 		if (contextRefreshedEvent.getApplicationContext().getId().endsWith(APPLICATION_ID)
 		        && StringUtils.isNotBlank(cacheLocationIds)) {
-			
+			ExecutorService executor = Executors.newFixedThreadPool(5);
 			String[] locations = cacheLocationIds.split(",");
 			String[] locationTags = cacheLocationTag.split(",");
 			for (String id : locations) {
-				logger.info(String.format("populating OpenMRS location cache for %s, %s, %s ", id, cacheLocationLevel,new JSONArray(locationTags)));
-				openmrsLocationService.getLocationsByLevelAndTags(id, cacheLocationTag, new JSONArray(locationTags));
+				executor.submit(new Runnable() {
+					
+					@Override
+					public void run() {
+						logger.info(String.format("populating OpenMRS location cache for %s, %s, %s ", id, cacheLocationLevel,new JSONArray(locationTags)));
+						openmrsLocationService.getLocationsByLevelAndTags(id, cacheLocationTag, new JSONArray(locationTags));
+						
+					}
+				});
 			}
 		}
 	}
-	
 }
