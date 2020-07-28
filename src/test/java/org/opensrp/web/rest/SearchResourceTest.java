@@ -40,7 +40,12 @@ public class SearchResourceTest {
 	private ClientService clientService;
 	
 	private EventService eventService;
-
+	
+	private SearchRepository searchRepository;
+	
+	private ClientsRepository clientRepository;
+	
+	private EventsRepository eventsRepository;
 
 	private TaskGenerator taskGenerator;
 
