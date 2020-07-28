@@ -11,6 +11,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -237,7 +238,7 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findLocationNames/{planIdentifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
-	public List<LocationDetail> findLocationDetailsByPlanId(@PathVariable("planIdentifier") String planIdentifier) {
+	public Set<LocationDetail> findLocationDetailsByPlanId(@PathVariable("planIdentifier") String planIdentifier) {
 		return locationService.findLocationDetailsByPlanId(planIdentifier);
 	}
 	
