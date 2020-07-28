@@ -22,12 +22,20 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 	public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
 		logger.info(contextRefreshedEvent.getApplicationContext().getId());
 		if (contextRefreshedEvent.getApplicationContext().getId().endsWith(APPLICATION_ID + APPLICATION_ID)) {
-		 
-						logger.info("Populating OpenMRS location cache");
-						
-						fetchLocationsHelper.getAllOpenMRSlocations();
-						
-						logger.info("Completed populating OpenMRS location cache");
+			
+			
+			new Thread(){
+			    @Override
+				public void run(){
+			    	
+			    	logger.info("Populating OpenMRS location cache");
+					
+					fetchLocationsHelper.getAllOpenMRSlocations();
+					
+					logger.info("Completed populating OpenMRS location cache");
+			    }
+			  }.start(); 
+			
 		}
 	}
 }
