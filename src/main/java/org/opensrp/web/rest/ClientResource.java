@@ -353,7 +353,7 @@ public class ClientResource extends RestResource<Client> {
 	 *
 	 * @return a response with clients
 	 */
-	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/getClients", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAll(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
@@ -361,15 +361,20 @@ public class ClientResource extends RestResource<Client> {
 			throws JsonProcessingException {
 
 		ClientSyncBean response = new ClientSyncBean();
-		ClientSearchBean clientSearchBean = new ClientSearchBean();
-		clientSearchBean.setOrderByField(SERVER_VERSIOIN);
-		clientSearchBean.setPageSize(limit);
-		//clientSearchBean.setServerVersion(limit); //TODO set serverVersion
-		AddressSearchBean addressSearchBean = new AddressSearchBean();
-
-		List<Client> clients = clientService.findAllClientsByCriteria(clientSearchBean, addressSearchBean);
+		List<Client> clients = clientService.findByServerVersion(serverVersion);
 		response.setClients(clients);
 		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+	}
+
+	/**
+	 * Get client using the client id
+	 *
+	 * @param clientId the event id
+	 * @return event with the event id
+	 */
+	@RequestMapping(value = "/findById", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public Client getById(@RequestParam("id") String clientId) {
+		return clientService.findById(clientId);
 	}
 	
 }
