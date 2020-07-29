@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -353,17 +355,13 @@ public class ClientResource extends RestResource<Client> {
 	 *
 	 * @return a response with clients
 	 */
-	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAll(
+	@GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<Client>> getAll(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(required = false) Integer limit)
-			throws JsonProcessingException {
+			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
 
-		ClientSyncBean response = new ClientSyncBean();
 		List<Client> clients = clientService.findByServerVersion(serverVersion, limit);
-		response.setClients(clients);
-		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+		return new ResponseEntity<>((clients), HttpStatus.OK);
 	}
 
 	/**
@@ -372,7 +370,7 @@ public class ClientResource extends RestResource<Client> {
 	 * @param clientId the event id
 	 * @return client with the client id
 	 */
-	@RequestMapping(value = "/findById", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Client getById(@RequestParam("id") String clientId) {
 		return clientService.findById(clientId);
 	}
