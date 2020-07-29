@@ -355,7 +355,7 @@ public class ClientResource extends RestResource<Client> {
 	 *
 	 * @return a response with clients
 	 */
-	@GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/getAll", produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<Client>> getAll(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
@@ -370,7 +370,7 @@ public class ClientResource extends RestResource<Client> {
 	 * @param clientId the event id
 	 * @return client with the client id
 	 */
-	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/findById", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Client getById(@RequestParam("id") String clientId) {
 		return clientService.findById(clientId);
 	}
