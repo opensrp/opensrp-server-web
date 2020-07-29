@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -78,6 +80,9 @@ public class UserResourceTest {
 	@Value("#{opensrp['keycloak.password.reset.endpoint']}")
 	private String resetPasswordURL;
 	
+	@Value("#{opensrp['keycloak.users.endpoint']}")
+	private String usersURL;
+	
 	@Autowired
 	protected WebApplicationContext webApplicationContext;
 	
@@ -86,7 +91,7 @@ public class UserResourceTest {
 	
 	private MockMvc mockMvc;
 	
-	private String BASE_URL = "/rest/user/";
+	private String BASE_URL = "/rest/user";
 	
 	private UserResource userResource;
 	
@@ -130,9 +135,9 @@ public class UserResourceTest {
 		mockMvc.perform(post(BASE_URL + "/reset-password").contentType(MediaType.APPLICATION_JSON)
 		        .content(objectMapper.writeValueAsBytes(passwordBean))).andExpect(status().isOk());
 		verify(restTemplate).postForEntity(eq(url), resetPasswordBeanCaptor.capture(), eq(String.class));
-		assertEquals(passwordBean.getCurrentPassword(),resetPasswordBeanCaptor.getValue().getCurrentPassword());
-		assertEquals(passwordBean.getNewPassword(),resetPasswordBeanCaptor.getValue().getNewPassword());
-		assertEquals(passwordBean.getConfirmation(),resetPasswordBeanCaptor.getValue().getConfirmation());
+		assertEquals(passwordBean.getCurrentPassword(), resetPasswordBeanCaptor.getValue().getCurrentPassword());
+		assertEquals(passwordBean.getNewPassword(), resetPasswordBeanCaptor.getValue().getNewPassword());
+		assertEquals(passwordBean.getConfirmation(), resetPasswordBeanCaptor.getValue().getConfirmation());
 		
 	}
 	
@@ -151,10 +156,49 @@ public class UserResourceTest {
 		        .postForEntity(anyString(), any(ResetPasswordBean.class), eq(String.class));
 		mockMvc.perform(post(BASE_URL + "/reset-password").contentType(MediaType.APPLICATION_JSON)
 		        .content(objectMapper.writeValueAsBytes(passwordBean))).andExpect(status().isBadRequest());
-		verify(restTemplate,atLeastOnce()).postForEntity(eq(url), resetPasswordBeanCaptor.capture(), eq(String.class));
-		assertEquals(passwordBean.getCurrentPassword(),resetPasswordBeanCaptor.getValue().getCurrentPassword());
-		assertEquals(passwordBean.getNewPassword(),resetPasswordBeanCaptor.getValue().getNewPassword());
-		assertEquals(passwordBean.getConfirmation(),resetPasswordBeanCaptor.getValue().getConfirmation());
+		verify(restTemplate, atLeastOnce()).postForEntity(eq(url), resetPasswordBeanCaptor.capture(), eq(String.class));
+		assertEquals(passwordBean.getCurrentPassword(), resetPasswordBeanCaptor.getValue().getCurrentPassword());
+		assertEquals(passwordBean.getNewPassword(), resetPasswordBeanCaptor.getValue().getNewPassword());
+		assertEquals(passwordBean.getConfirmation(), resetPasswordBeanCaptor.getValue().getConfirmation());
+		
+	}
+	
+	@Test
+	public void testGetAllKeycloakUsers() throws Exception {
+		String authServer = "http://localhost:8080/auth/";
+		String realm = "opensrp";
+		String url = MessageFormat.format(usersURL, authServer, realm);
+		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
+		when(keycloakDeployment.getRealm()).thenReturn(realm);
+		Map<String, Object> uriVariables = new HashMap<>();
+		uriVariables.put("first", 0);
+		uriVariables.put("max", 100);
+		String expected = "[{\"id\":\"wewql9abe70ad66\",\"createdTimestamp\":1595352823770,\"username\":\"campdemo1\",\"enabled\":true,\"totp\":false,\"emailVerified\":false,\"firstName\":\"Abimbola\",\"lastName\":\"Phillips\"}]";
+		doReturn(new ResponseEntity<String>(expected, HttpStatus.OK)).when(restTemplate).getForEntity(url, String.class,
+		    uriVariables);
+		Whitebox.setInternalState(userResource, "restTemplate", restTemplate);
+		MvcResult response = mockMvc
+		        .perform(
+		            get(BASE_URL).param("page_size", "100").param("start_index", "0").param("source", UserResource.KEYCLOAK))
+		        .andExpect(status().isOk()).andReturn();
+		verify(restTemplate).getForEntity(url, String.class, uriVariables);
+		assertEquals(expected, response.getResponse().getContentAsString());
+		
+	}
+	
+	@Test
+	public void testGetKeycloakUsersCount() throws Exception {
+		String authServer = "http://localhost:8080/auth/";
+		String realm = "opensrp";
+		String url = MessageFormat.format(usersURL, authServer, realm) + "/count";
+		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
+		when(keycloakDeployment.getRealm()).thenReturn(realm);
+		String expected = "120";
+		doReturn(new ResponseEntity<String>(expected, HttpStatus.OK)).when(restTemplate).getForEntity(url, String.class);
+		Whitebox.setInternalState(userResource, "restTemplate", restTemplate);
+		MvcResult response = mockMvc.perform(get(BASE_URL + "/count")).andExpect(status().isOk()).andReturn();
+		verify(restTemplate).getForEntity(url, String.class);
+		assertEquals(expected, response.getResponse().getContentAsString());
 		
 	}
 }

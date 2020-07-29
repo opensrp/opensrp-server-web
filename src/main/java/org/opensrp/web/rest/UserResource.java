@@ -34,7 +34,11 @@ public class UserResource {
 	
 	private static final String OPENMRS = "OpenMRS";
 	
-	private static final String KEYCLOAK = "Keycloak";
+	protected static final String KEYCLOAK = "Keycloak";
+	
+	private static final String FIRST = "first";
+	
+	private static final String MAX = "max";
 	
 	private OpenmrsUserService userService;
 	
@@ -79,8 +83,8 @@ public class UserResource {
 		
 		ResponseEntity<String> response = null;
 		Map<String, Integer> uriVariables = new HashMap<>();
-		uriVariables.put("first", offset);
-		uriVariables.put("max", limit);
+		uriVariables.put(FIRST, offset);
+		uriVariables.put(MAX, limit);
 		try {
 			
 			response = restTemplate.getForEntity(url, String.class, uriVariables);
