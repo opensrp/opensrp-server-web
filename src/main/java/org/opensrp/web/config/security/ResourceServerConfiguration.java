@@ -62,18 +62,16 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		/* @formatter:off */
-		http.cors().configurationSource(corsConfigurationSource)
-		.and()
-			.anonymous().disable()
+		http
 			.requestMatcher(new AndRequestMatcher(new AntPathRequestMatcher("/**"),
 		        new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/index.html")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/login*")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/logout.do")),
-		        new NegatedRequestMatcher(new AntPathRequestMatcher("/**",OPTIONS.name())),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**"))))
 			.authorizeRequests()
+				.mvcMatchers(OPTIONS,"/**").permitAll()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 				.mvcMatchers("/rest/plans/user/**").hasRole(Role.PLANS_FOR_USER)
 				.anyRequest().hasRole(Role.OPENMRS)
@@ -83,6 +81,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.httpBasic()
 		.and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		.and()
+			.cors().configurationSource(corsConfigurationSource)
 		.and()
 			.authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
