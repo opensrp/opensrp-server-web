@@ -384,4 +384,16 @@ public class ClientResourceTest {
 
 	}
 
+	@Test
+	public void testFindById() throws Exception {
+		Client expectedClient = createClient();
+		when(clientService.findById("clientid1"))
+				.thenReturn(expectedClient);
+		mockMvc
+				.perform(get(BASE_URL + "/findById?id=clientid1"))
+				.andExpect(status().isOk()).andReturn();
+		verify(clientService).findById("clientid1");
+
+	}
+
 }
