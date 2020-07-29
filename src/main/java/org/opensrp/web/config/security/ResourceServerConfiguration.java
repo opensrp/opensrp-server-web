@@ -64,11 +64,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		/* @formatter:off */
 		http
 			.requestMatcher(new AndRequestMatcher(new AntPathRequestMatcher("/**"),
-					new AntPathRequestMatcher("/rest/**"),
-					new AntPathRequestMatcher("/user-details"),
-		            new AntPathRequestMatcher("/security/**"),
-		        new AntPathRequestMatcher("/uniqueids/*"),
-		        new AntPathRequestMatcher("/location/**"),
 		        new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/index.html")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/")),
