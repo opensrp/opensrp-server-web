@@ -32,6 +32,10 @@ import org.springframework.web.client.HttpStatusCodeException;
 @RequestMapping(value = "/rest/user")
 public class UserResource {
 	
+	private static final String OPENMRS = "OpenMRS";
+	
+	private static final String KEYCLOAK = "Keycloak";
+	
 	private OpenmrsUserService userService;
 	
 	@Autowired
@@ -55,17 +59,20 @@ public class UserResource {
 	}
 	
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	private ResponseEntity<String> getAllUsers(@RequestParam("page_size") int limit,
-	        @RequestParam("start_index") int offset) {
-		
-		JSONObject users = userService.getUsers(limit, offset);
-		return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
+	private ResponseEntity<String> getAllUsers(@RequestParam("page_size") int limit, @RequestParam("start_index") int offset,
+	        @RequestParam(value = "source", required = false, defaultValue = OPENMRS) String source) {
+		if (OPENMRS.equals(source)) {
+			JSONObject users = userService.getUsers(limit, offset);
+			return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
+		} else if (KEYCLOAK.equals(source)) {
+			return getAllKeycloakUsers(limit, offset);
+		} else {
+			return new ResponseEntity<>("Invalid source", HttpStatus.BAD_REQUEST);
+		}
 		
 	}
 	
-	@GetMapping(value = "/keycloak")
-	private ResponseEntity<String> getAllKeycloakUsers(@RequestParam("page_size") int limit,
-	        @RequestParam("start_index") int offset) {
+	private ResponseEntity<String> getAllKeycloakUsers(int limit, int offset) {
 		
 		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(),
 		    keycloakDeployment.getRealm());
@@ -85,14 +92,13 @@ public class UserResource {
 		
 	}
 	
-	@GetMapping(value = "/keycloak/count")
-	private ResponseEntity<String> getKeycloakUsersCount(@RequestParam("page_size") int limit,
-	        @RequestParam("start_index") int offset) {
+	@GetMapping(value = "/count")
+	private ResponseEntity<String> getKeycloakUsersCount() {
 		
 		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(), keycloakDeployment.getRealm())
 		        + "/count";
 		ResponseEntity<String> response = null;
-		try {	
+		try {
 			response = restTemplate.getForEntity(url, String.class);
 		}
 		catch (HttpStatusCodeException e) {
