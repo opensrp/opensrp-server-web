@@ -4,6 +4,8 @@
 package org.opensrp.web.rest;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -16,9 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -28,6 +31,14 @@ import org.springframework.web.client.HttpStatusCodeException;
 @Controller
 @RequestMapping(value = "/rest/user")
 public class UserResource {
+	
+	private static final String OPENMRS = "OpenMRS";
+	
+	protected static final String KEYCLOAK = "Keycloak";
+	
+	private static final String FIRST = "first";
+	
+	private static final String MAX = "max";
 	
 	private OpenmrsUserService userService;
 	
@@ -40,6 +51,9 @@ public class UserResource {
 	@Value("#{opensrp['keycloak.password.reset.endpoint']}")
 	private String resetPasswordURL;
 	
+	@Value("#{opensrp['keycloak.users.endpoint']}")
+	private String usersURL;
+	
 	/**
 	 * @param userService the userService to set
 	 */
@@ -48,16 +62,57 @@ public class UserResource {
 		this.userService = userService;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	private ResponseEntity<String> getAllUsers(@RequestParam("page_size") int limit,
-	        @RequestParam("start_index") int offset) {
-		
-		JSONObject users = userService.getUsers(limit, offset);
-		return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	private ResponseEntity<String> getAllUsers(@RequestParam("page_size") int limit, @RequestParam("start_index") int offset,
+	        @RequestParam(value = "source", required = false, defaultValue = OPENMRS) String source) {
+		if (OPENMRS.equals(source)) {
+			JSONObject users = userService.getUsers(limit, offset);
+			return new ResponseEntity<>(users == null ? "{}" : users.toString(), HttpStatus.OK);
+		} else if (KEYCLOAK.equals(source)) {
+			return getAllKeycloakUsers(limit, offset);
+		} else {
+			return new ResponseEntity<>("Invalid source", HttpStatus.BAD_REQUEST);
+		}
 		
 	}
 	
-	@RequestMapping(value = "/reset-password", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	private ResponseEntity<String> getAllKeycloakUsers(int limit, int offset) {
+		
+		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(),
+		    keycloakDeployment.getRealm());
+		
+		ResponseEntity<String> response = null;
+		Map<String, Integer> uriVariables = new HashMap<>();
+		uriVariables.put(FIRST, offset);
+		uriVariables.put(MAX, limit);
+		try {
+			
+			response = restTemplate.getForEntity(url, String.class, uriVariables);
+		}
+		catch (HttpStatusCodeException e) {
+			return new ResponseEntity<String>(e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+		
+	}
+	
+	@GetMapping(value = "/count")
+	private ResponseEntity<String> getKeycloakUsersCount() {
+		
+		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(), keycloakDeployment.getRealm())
+		        + "/count";
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.getForEntity(url, String.class);
+		}
+		catch (HttpStatusCodeException e) {
+			return new ResponseEntity<String>(e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+		
+	}
+	
+	@PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	private ResponseEntity<String> changePassword(@RequestBody ResetPasswordBean resetPasswordBean) {
 		String url = MessageFormat.format(resetPasswordURL, keycloakDeployment.getAuthServerBaseUrl(),
 		    keycloakDeployment.getRealm());
