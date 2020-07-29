@@ -19,7 +19,7 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
 	@Autowired
 	private FetchLocationsHelper fetchLocationsHelper;
 	
-	@Value("#{opensrp['openmrs.location.cache.enabled] ?: false }")
+	@Value("#{opensrp['openmrs.location.cache.enabled'] ?: false }")
 	private boolean cacheLocationEnabled;
 	
 	@Override
