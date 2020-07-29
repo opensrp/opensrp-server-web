@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants;
+import org.opensrp.web.Constants;
 import org.smartregister.domain.Client;
 import org.opensrp.domain.postgres.HouseholdClient;
 import org.opensrp.search.AddressSearchBean;
@@ -360,24 +361,26 @@ public class ClientResourceTest {
 		Client expectedClient = createClient();
 
 		List<Client> clients = Collections.singletonList(expectedClient);
-		when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 		when(clientService.findByServerVersion(anyLong(),anyInt()))
 				.thenReturn(clients);
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=25"))
+				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=50"))
 				.andExpect(status().isOk()).andReturn();
-		verify(clientService).findByServerVersion(anyLong(), anyInt());
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			fail("Test case failed");
-		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		ClientSyncBean response = mapper.treeToValue(actualObj, ClientSyncBean.class);
+		verify(clientService).findByServerVersion(0, 50);
 
-		assertEquals(response.getClients().size(),1);
-		assertEquals(response.getTotal().intValue(), 1);
-		assertEquals(response.getClients().get(0).getFirstName(), "Test");
-		assertEquals(response.getClients().get(0).getLastName(), "User");
+	}
+
+	@Test
+	public void testGetAllUsesDefaultLimit() throws Exception {
+		Client expectedClient = createClient();
+
+		List<Client> clients = Collections.singletonList(expectedClient);
+		when(clientService.findByServerVersion(anyLong(),anyInt()))
+				.thenReturn(clients);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/getAll?serverVersion=0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(clientService).findByServerVersion(0, Constants.DEFAULT_LIMIT);
 
 	}
 
