@@ -356,12 +356,11 @@ public class ClientResource extends RestResource<Client> {
 	 * @return a response with clients
 	 */
 	@GetMapping(value = "/getAll", produces = {MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<Client>> getAll(
+	public List<Client> getAll(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
 
-		List<Client> clients = clientService.findByServerVersion(serverVersion, limit);
-		return new ResponseEntity<>((clients), HttpStatus.OK);
+		return clientService.findByServerVersion(serverVersion, limit);
 	}
 
 	/**
