@@ -72,17 +72,12 @@ public class LocationController {
 		return new ResponseEntity<>(openmrsLocationService.getLocationsByTeamIds(teamIds).toString(), HttpStatus.OK);
 	}
 	/**
-	 *This method clears the OpenMRS locations cache
-	 */
-	@ResponseStatus(code = HttpStatus.NO_CONTENT)
-	@RequestMapping(method = RequestMethod.GET, value = "/cache/clear")
-	public void clearLocationCache() {
-		openmrsLocationService.clearLocationsCache(); 
-     }
-	
+	 *This method clears and recreates the OpenMRS locations cache
+	 */ 
 	@ResponseStatus(code = HttpStatus.CREATED)
-	@RequestMapping(method = RequestMethod.GET, value = "/cache/create")
+	@RequestMapping(method = RequestMethod.GET, value = "/cache/refresh")
 	public void createLocationCache() {
+		openmrsLocationService.clearLocationsCache();
 		openmrsLocationService.createLocationsCache(); 
      }
 }
