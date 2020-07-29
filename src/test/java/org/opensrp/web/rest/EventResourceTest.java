@@ -7,17 +7,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,9 +31,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import org.opensrp.common.AllConstants;
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
@@ -57,7 +52,7 @@ import com.google.gson.reflect.TypeToken;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class EventResourceTest extends BaseResourceTest<Event> {
+public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
     private final static String BASE_URL = "/rest/event";
 
@@ -342,7 +337,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 	    Client client = createClient();
 	    Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class));
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
