@@ -72,7 +72,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/login*")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/logout.do")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/**",OPTIONS.name())),
-		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**"))))
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**")),
+				new NegatedRequestMatcher(new AntPathRequestMatcher("/user-details**"))	))
 			.authorizeRequests()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 				.mvcMatchers("/rest/plans/user/**").hasRole(Role.PLANS_FOR_USER)
