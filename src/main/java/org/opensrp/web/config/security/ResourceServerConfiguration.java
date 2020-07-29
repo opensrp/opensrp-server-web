@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.config.security;
 
+import static org.springframework.http.HttpMethod.OPTIONS;
+
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
@@ -38,6 +45,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Autowired
 	private OauthAuthenticationProvider opensrpAuthenticationProvider;
 	
+	@Autowired(required = false)
+	private AuthorizationServerEndpointsConfiguration endpoints;
+	
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
 		/* @formatter:off */
@@ -52,12 +62,16 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		/* @formatter:off */
-		http.cors().configurationSource(corsConfigurationSource)
-		.and()
-			.anonymous().disable()
-		.requestMatchers().mvcMatchers("/**")
-		.and()
+		http
+			.requestMatcher(new AndRequestMatcher(new AntPathRequestMatcher("/**"),
+		        new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()),
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("/index.html")),
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("/")),
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("/login*")),
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("/logout.do")),
+		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**"))))
 			.authorizeRequests()
+				.mvcMatchers(OPTIONS,"/**").permitAll()
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 				.mvcMatchers("/rest/plans/user/**").hasRole(Role.PLANS_FOR_USER)
 				.anyRequest().hasRole(Role.OPENMRS)
@@ -65,7 +79,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
 			.httpBasic()
-		.and().authenticationProvider(opensrpAuthenticationProvider);
+		.and()
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		.and()
+			.cors().configurationSource(corsConfigurationSource)
+		.and()
+			.authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
 	
