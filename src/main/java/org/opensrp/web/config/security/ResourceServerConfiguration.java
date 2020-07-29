@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -80,7 +81,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 			.exceptionHandling().accessDeniedHandler(accessDeniedHandler())
 		.and()
 			.httpBasic()
-		.and().authenticationProvider(opensrpAuthenticationProvider);
+		.and()
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+		.and()
+			.authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
 	
