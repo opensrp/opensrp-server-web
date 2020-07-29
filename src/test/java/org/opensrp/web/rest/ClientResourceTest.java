@@ -363,7 +363,7 @@ public class ClientResourceTest {
 		List<Client> clients = Collections.singletonList(expectedClient);
 		when(clientService.findByServerVersion(anyLong(),anyInt()))
 				.thenReturn(clients);
-		MvcResult result = mockMvc
+		mockMvc
 				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=50"))
 				.andExpect(status().isOk()).andReturn();
 		verify(clientService).findByServerVersion(0, 50);
@@ -377,7 +377,7 @@ public class ClientResourceTest {
 		List<Client> clients = Collections.singletonList(expectedClient);
 		when(clientService.findByServerVersion(anyLong(),anyInt()))
 				.thenReturn(clients);
-		MvcResult result = mockMvc
+		mockMvc
 				.perform(get(BASE_URL + "/getAll?serverVersion=0"))
 				.andExpect(status().isOk()).andReturn();
 		verify(clientService).findByServerVersion(0, Constants.DEFAULT_LIMIT);
