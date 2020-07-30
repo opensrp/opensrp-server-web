@@ -51,7 +51,7 @@ public class UserResource {
 	@Value("#{opensrp['keycloak.password.reset.endpoint']}")
 	private String resetPasswordURL;
 	
-	@Value("#{opensrp['keycloak.users.endpoint']}")
+	@Value("#{opensrp['keycloak.users.endpoint'] ?: '{0}/admin/realms/{1}/users'}")
 	private String usersURL;
 	
 	/**
