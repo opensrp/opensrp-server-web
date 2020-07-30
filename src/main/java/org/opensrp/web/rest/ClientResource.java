@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -346,6 +348,30 @@ public class ClientResource extends RestResource<Client> {
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
 		return new ResponseEntity<>(identifiers, HttpStatus.OK);
+	}
+	
+	/**
+	 * Fetch clients ordered by serverVersion ascending order
+	 *
+	 * @return a response with clients
+	 */
+	@GetMapping(value = "/getAll", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public List<Client> getAll(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
+
+		return clientService.findByServerVersion(serverVersion, limit);
+	}
+
+	/**
+	 * Get client using the client id
+	 *
+	 * @param clientId the event id
+	 * @return client with the client id
+	 */
+	@GetMapping(value = "/findById", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public Client getById(@RequestParam("id") String clientId) {
+		return clientService.findById(clientId);
 	}
 	
 }

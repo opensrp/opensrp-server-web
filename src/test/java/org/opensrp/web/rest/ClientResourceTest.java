@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.common.AllConstants;
+import org.opensrp.web.Constants;
 import org.smartregister.domain.Client;
 import org.opensrp.domain.postgres.HouseholdClient;
 import org.opensrp.search.AddressSearchBean;
@@ -355,5 +356,44 @@ public class ClientResourceTest {
         assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
     }
 
+	@Test
+	public void testGetAll() throws Exception {
+		Client expectedClient = createClient();
+
+		List<Client> clients = Collections.singletonList(expectedClient);
+		when(clientService.findByServerVersion(anyLong(),anyInt()))
+				.thenReturn(clients);
+		mockMvc
+				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=50"))
+				.andExpect(status().isOk()).andReturn();
+		verify(clientService).findByServerVersion(0, 50);
+
+	}
+
+	@Test
+	public void testGetAllUsesDefaultLimit() throws Exception {
+		Client expectedClient = createClient();
+
+		List<Client> clients = Collections.singletonList(expectedClient);
+		when(clientService.findByServerVersion(anyLong(),anyInt()))
+				.thenReturn(clients);
+		mockMvc
+				.perform(get(BASE_URL + "/getAll?serverVersion=0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(clientService).findByServerVersion(0, Constants.DEFAULT_LIMIT);
+
+	}
+
+	@Test
+	public void testFindById() throws Exception {
+		Client expectedClient = createClient();
+		when(clientService.findById("clientid1"))
+				.thenReturn(expectedClient);
+		mockMvc
+				.perform(get(BASE_URL + "/findById?id=clientid1"))
+				.andExpect(status().isOk()).andReturn();
+		verify(clientService).findById("clientid1");
+
+	}
 
 }
