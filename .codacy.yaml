@@ -1,4 +1,3 @@
 ---
 exclude_paths:
   - 'src/main/java/org/opensrp/web/utils/InitialFormConfigUploadUtil.java'
-  - 'batch_script_initial_upload.py'
