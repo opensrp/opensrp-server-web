@@ -593,12 +593,10 @@
             <!-- Remove the doc config properties file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <!-- This is where the exclusion occurs -->
-                        <exclude>**/doc_config_script_configs.properties</exclude>
-                    </excludes>
+                    <!-- This is where the exclusion occurs -->
+                    <packagingExcludes>**/doc_config_script_configs.properties</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
