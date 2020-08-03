@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+/* -------------------------------------------------------------------------------------------------
+ DO NOT DEPEND ON THIS FILE FOR RUNTIME TASKS. THIS FILE MAY BE EXCLUDED FROM THE FINAL WAR FILE
+------------------------------------------------------------------------------------------------- */
+
 public class InitialFormConfigUploadUtil {
 
 	private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
