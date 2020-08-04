@@ -102,12 +102,11 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	@GetMapping( value = "/logout.do")
+	@GetMapping(value = "/logout.do")
 	public ResponseEntity<HttpStatus> logoff(HttpServletRequest request) throws ServletException {
 		request.logout();
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
-	
 	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
@@ -150,7 +149,7 @@ public class UserController {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 			
-			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, 5000);
 			
 		}
 		catch (Exception e) {
@@ -161,8 +160,9 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = locationService.buildLocationHierachy(locationIds, false, true);
-
+		LocationTree l = locationService
+		        .buildLocationHierachy(jurisdictions.stream().map(j -> j.getId()).collect(Collectors.toSet()), false, true);
+		
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
