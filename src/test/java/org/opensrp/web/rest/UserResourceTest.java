@@ -167,7 +167,7 @@ public class UserResourceTest {
 	public void testGetAllKeycloakUsers() throws Exception {
 		String authServer = "http://localhost:8080/auth/";
 		String realm = "opensrp";
-		String url = MessageFormat.format(usersURL, authServer, realm);
+		String url = MessageFormat.format(usersURL, authServer, realm)+"?first={first}&max={max}";
 		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
 		when(keycloakDeployment.getRealm()).thenReturn(realm);
 		Map<String, Object> uriVariables = new HashMap<>();
