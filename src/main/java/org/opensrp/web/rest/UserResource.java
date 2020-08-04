@@ -78,15 +78,14 @@ public class UserResource {
 	
 	private ResponseEntity<String> getAllKeycloakUsers(int limit, int offset) {
 		
-		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(),
-		    keycloakDeployment.getRealm());
+		String url = MessageFormat.format(usersURL, keycloakDeployment.getAuthServerBaseUrl(), keycloakDeployment.getRealm())
+		        + "?first={first}&max={max}";
 		
 		ResponseEntity<String> response = null;
 		Map<String, Integer> uriVariables = new HashMap<>();
 		uriVariables.put(FIRST, offset);
 		uriVariables.put(MAX, limit);
 		try {
-			
 			response = restTemplate.getForEntity(url, String.class, uriVariables);
 		}
 		catch (HttpStatusCodeException e) {
