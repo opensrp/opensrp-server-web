@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.representations.AccessToken;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
@@ -50,6 +53,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -72,6 +76,15 @@ public class UserController {
 	
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
+	
+	@Value("#{opensrp['keycloak.configuration.endpoint']}")
+	protected String keycloakConfigurationURL;
+	
+	@Autowired
+	protected KeycloakRestTemplate restTemplate;
+	
+	@Autowired
+	protected KeycloakDeployment keycloakDeployment;
 	
 	/**
 	 * @param organizationService the organizationService to set
@@ -102,12 +115,16 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	@GetMapping( value = "/logout.do")
-	public ResponseEntity<HttpStatus> logoff(HttpServletRequest request) throws ServletException {
+	@GetMapping(value = "/logout.do")
+	public ResponseEntity<String> logoff(HttpServletRequest request) throws ServletException {
+		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
+		    keycloakDeployment.getRealm());
+		JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
+		ResponseEntity<String> response = restTemplate.getForEntity(configs.get("end_session_endpoint").textValue(),
+		    String.class);
 		request.logout();
-		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
+		return response;
 	}
-	
 	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
@@ -162,7 +179,7 @@ public class UserController {
 		}
 		
 		LocationTree l = locationService.buildLocationHierachy(locationIds, false, true);
-
+		
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
