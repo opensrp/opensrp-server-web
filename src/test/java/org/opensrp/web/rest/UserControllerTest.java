@@ -247,8 +247,8 @@ public class UserControllerTest {
 		    "{\"end_session_endpoint\": \"http://localhost:8080/auth/realms/opensrp/protocol/openid-connect/logout\"}");
 		doReturn(expected).when(restTemplate).getForObject(url, JsonNode.class);
 		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
-		doReturn(expectedResponse).when(restTemplate).getForEntity(expected.get("end_session_endpoint").textValue(),
-		    String.class);
+		doReturn(expectedResponse).when(restTemplate)
+		        .getForEntity(expected.get(UserController.END_SESSION_ENDPOINT).textValue(), String.class);
 		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
 		MvcResult result = mockMvc
 		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))

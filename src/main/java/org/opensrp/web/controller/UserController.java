@@ -62,6 +62,8 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
+	public static final String END_SESSION_ENDPOINT="end_session_endpoint"; 
+	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
 	
@@ -120,7 +122,7 @@ public class UserController {
 		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
 		    keycloakDeployment.getRealm());
 		JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
-		ResponseEntity<String> response = restTemplate.getForEntity(configs.get("end_session_endpoint").textValue(),
+		ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
 		    String.class);
 		request.logout();
 		return response;
