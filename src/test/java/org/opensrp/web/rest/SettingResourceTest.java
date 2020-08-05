@@ -230,7 +230,7 @@ public class SettingResourceTest {
 	@Test
 	public void testFindSettingsByVersionAndTeamId() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService("http://localhost:8080/openmrs/", "someuser", "somepass"));
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -251,7 +251,7 @@ public class SettingResourceTest {
 	@Test
 	public void testSaveSetting() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService("http://localhost:8080/openmrs/", "someuser", "somepass"));
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -268,7 +268,7 @@ public class SettingResourceTest {
 	@Test
 	public void testUpdateSetting() {
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService("http://localhost:8080/openmrs/", "someuser", "somepass"));
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
@@ -288,7 +288,7 @@ public class SettingResourceTest {
 	public void testAddServerVersion() {
 
 		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService());
+		OpenmrsLocationService openmrsLocationService = Mockito.spy(new OpenmrsLocationService("http://localhost:8080/openmrs/", "someuser", "somepass"));
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
 		settingService.setSettingRepository(settingRepository);
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
