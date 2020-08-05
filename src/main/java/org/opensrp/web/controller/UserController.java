@@ -61,7 +61,7 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
-	public static final String END_SESSION_ENDPOINT="end_session_endpoint"; 
+	public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -199,12 +199,14 @@ public class UserController {
 		
 		JSONArray locations = new JSONArray();
 		
+		Set<String> locationParents = new HashSet<>();
 		for (PhysicalLocation jurisdiction : jurisdictions) {
 			JSONObject teamLocation = new JSONObject();
 			teamLocation.put("uuid", locationIds.iterator().next());
 			teamLocation.put("name", jurisdiction.getProperties().getName());
 			teamLocation.put("display", jurisdiction.getProperties().getName());
 			locations.put(teamLocation);
+			locationParents.add(jurisdiction.getProperties().getParentId());
 		}
 		
 		//team location is still returned as 1 object
@@ -225,8 +227,12 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		map.put("jurisdictions",
-		    jurisdictions.stream().map(location -> location.getProperties().getName()).collect(Collectors.toSet()));
+		/** @formatter:off*/
+		map.put("jurisdictions", jurisdictions.stream()
+			.filter(location -> !locationParents.contains(location.getId()))
+			.map(location -> location.getProperties().getName())
+			.collect(Collectors.toSet()));
+		/**@formatter:on*/
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	
