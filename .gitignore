@@ -11,3 +11,4 @@ logfile
 *.log*
 .springBeans
 multimedia/
+*keycloak.json
