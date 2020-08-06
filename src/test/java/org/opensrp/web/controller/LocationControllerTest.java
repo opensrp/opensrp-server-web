@@ -1,14 +1,13 @@
 package org.opensrp.web.controller;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.opensrp.api.domain.Location;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -18,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.opensrp.api.domain.Location;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class LocationControllerTest {
         Mockito.doReturn(new JSONArray(teamLocations)).when(locationService).getAllTeamMemberLocations(Mockito.any(JSONArray.class), Mockito.anyInt());
         List<Location> allLocations = new Gson().fromJson(locationJson, new TypeToken<List<Location>>() {
         }.getType());
-        Mockito.doReturn(allLocations).when(locationService).getAllLocations(Mockito.anyList(), Mockito.anyInt());
+        Mockito.doReturn(allLocations).when(locationService).getLocationsByLevelAndTags(Mockito.anyString(), Mockito.anyString(), Mockito.any(JSONArray.class));
         locationController = new LocationController(locationService);
         mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(locationController)
                 .addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
