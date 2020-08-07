@@ -182,6 +182,8 @@ public class SettingResource {
 				setting.setSettingMetadataId(String.valueOf(id));
 			}
 			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
+			setting.setDocumentId(setting.getSettingsId());
+			setting.setSettingsId("");
 			settingService.addOrUpdateSettings(setting);
 			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
 					HttpStatus.CREATED);
