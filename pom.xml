@@ -24,11 +24,9 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-
 		<opensrp.core.version>2.5.19-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.1.5-SNAPSHOT</opensrp.connector.version>
+		<opensrp.connector.version>2.1.6-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
-
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
         <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
