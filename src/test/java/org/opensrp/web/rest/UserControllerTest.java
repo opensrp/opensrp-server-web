@@ -3,14 +3,16 @@ package org.opensrp.web.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -36,7 +40,6 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -46,10 +49,13 @@ import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -99,12 +105,21 @@ public class UserControllerTest {
 	@Mock
 	private PhysicalLocationService locationService;
 	
+	@Value("#{opensrp['keycloak.configuration.endpoint']}")
+	protected String keycloakConfigurationURL;
+	
+	@Autowired
+	private KeycloakDeployment keycloakDeployment;
+	
+	@Autowired
+	private KeycloakRestTemplate restTemplate;
+	
 	private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 	
 	@Before
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
-				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);
@@ -149,13 +164,13 @@ public class UserControllerTest {
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
 		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
-		authentication=authenticatedUser.getSecond();
+		authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
 		        .andExpect(status().isOk()).andReturn();
 		UserDetail userDetail = new ObjectMapper().readValue(result.getResponse().getContentAsString(), UserDetail.class);
 		
-		User user=authenticatedUser.getFirst();
+		User user = authenticatedUser.getFirst();
 		assertEquals(user.getUsername(), userDetail.getUserName());
 		assertEquals(user.getBaseEntityId(), userDetail.getIdentifier());
 		assertEquals(user.getRoles(), userDetail.getRoles());
@@ -179,7 +194,7 @@ public class UserControllerTest {
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
 		when(authentication.getName()).thenReturn(user.getBaseEntityId());
 		List<Long> ids = Collections.singletonList(12233l);
-
+		
 		when(organizationService.getOrganization(ids.get(0))).thenReturn(new Organization());
 		
 		Practitioner practitioner = new Practitioner();
@@ -191,12 +206,14 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
-		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId), false, true)).thenReturn(new LocationTree());
-
+		
+		
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
-		when(locationService.findLocationsByIds(false, Collections.singletonList(jurisdictionId)))
+		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId),5000))
 		        .thenReturn(Collections.singletonList(location));
+		when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))
+        .thenReturn(new LocationTree());
 		
 		String[] locations = new String[5];
 		locations[0] = "Test";
@@ -218,5 +235,33 @@ public class UserControllerTest {
 		assertTrue(actualObj.has("team"));
 		assertTrue(actualObj.has("time"));
 		assertTrue(actualObj.has("jurisdictions"));
+	}
+	
+	@Test
+	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
+		String authServer = "http://localhost:8080/auth/";
+		String realm = "opensrp";
+		String url = MessageFormat.format(keycloakConfigurationURL, authServer, realm);
+		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
+		when(keycloakDeployment.getRealm()).thenReturn(realm);
+		JsonNode expected = new ObjectMapper().readTree(
+		    "{\"end_session_endpoint\": \"http://localhost:8080/auth/realms/opensrp/protocol/openid-connect/logout\"}");
+		doReturn(expected).when(restTemplate).getForObject(url, JsonNode.class);
+		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
+		doReturn(expectedResponse).when(restTemplate)
+		        .getForEntity(expected.get(UserController.END_SESSION_ENDPOINT).textValue(), String.class);
+		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
+		MvcResult result = mockMvc
+		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
+		verify(restTemplate).getForObject(url, JsonNode.class);
+		verify(restTemplate).getForEntity(expected.get("end_session_endpoint").textValue(), String.class);
+		assertEquals(expectedResponse.getStatusCodeValue(), result.getResponse().getStatus());
+		assertEquals(expectedResponse.getBody(), result.getResponse().getContentAsString());
+		MockHttpServletRequest request = result.getRequest();
+		assertNull(request.getUserPrincipal());
+		assertNull(request.getRemoteUser());
+		assertNull(request.getAuthType());
+		
 	}
 }

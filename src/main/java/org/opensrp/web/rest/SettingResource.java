@@ -115,20 +115,20 @@ public class SettingResource {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 
-		JSONObject syncData = new JSONObject(data);
+		JSONObject settingObject = new JSONObject(data);
 
-		if (!syncData.has(SETTING_CONFIGURATIONS)) {
+		if (!settingObject.has(SETTING_CONFIGURATIONS)) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
 
-			JSONArray clientSettings = syncData.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
-			JSONArray dbSettingsArray = new JSONArray();
+			JSONArray clientSettings = settingObject.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
+			JSONArray settingsArray = new JSONArray();
 
 			for (int i = 0; i < clientSettings.length(); i++) {
-				dbSettingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
+				settingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
 			}
 
-			response.put("validated_records", dbSettingsArray);
+			response.put("validated_records", settingsArray);
 
 		}
 

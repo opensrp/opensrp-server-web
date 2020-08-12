@@ -2,6 +2,7 @@ package org.opensrp.web.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,16 +20,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.opensrp.api.domain.User;
+import org.opensrp.web.utils.TestData;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
+import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -46,6 +55,19 @@ public class XlsDataImportControllerTest {
 	@InjectMocks
 	private XlsDataImportController xlsDataImportController;
 
+	@Mock
+	private RefreshableKeycloakSecurityContext securityContext;
+
+	private Authentication authentication;
+
+	@Mock
+	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
+
+	@Mock
+	private AccessToken token;
+
+	protected Pair<User, Authentication> authenticatedUser;
+
 	private MockMvc mockMvc;
 
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
@@ -56,6 +78,10 @@ public class XlsDataImportControllerTest {
 		mockMvc = MockMvcBuilders.standaloneSetup(xlsDataImportController).
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(xlsDataImportController, "allowedMimeTypes", allowedMimeTypes);
+		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
+		when(securityContext.getToken()).thenReturn(token);
+		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		authentication = authenticatedUser.getSecond();
 	}
 
 	@Test
@@ -72,7 +98,7 @@ public class XlsDataImportControllerTest {
 
 		when(openmrsIDService.downloadOpenmrsIds(openmrsIds.size())).thenReturn(openmrsIds);
 
-		ResponseEntity<String> response = xlsDataImportController.importXlsData(file);
+		ResponseEntity<String> response = xlsDataImportController.importXlsData(file, authentication);
 		String responseBody = response.getBody();
 		JSONObject responseJson = new JSONObject(responseBody);
 		
@@ -82,6 +108,6 @@ public class XlsDataImportControllerTest {
 		assertEquals(summaryClientCount, 4);
 		assertEquals(summaryEventCount, 28);
 		verify(clientService, times(4)).addorUpdate(any(Client.class));
-		verify(eventService, times(28)).addEvent(any(Event.class));
+		verify(eventService, times(28)).addEvent(any(Event.class),nullable(String.class));
 	}
 }

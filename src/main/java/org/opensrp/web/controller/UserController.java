@@ -5,7 +5,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +25,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.KeycloakDeployment;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.representations.AccessToken;
 import org.opensrp.api.domain.Time;
 import org.opensrp.api.domain.User;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -57,6 +60,8 @@ import com.google.gson.reflect.TypeToken;
 public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
+	
+	public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -72,6 +77,15 @@ public class UserController {
 	
 	@Value("#{opensrp['use.opensrp.team.module']}")
 	protected boolean useOpenSRPTeamModule = false;
+	
+	@Value("#{opensrp['keycloak.configuration.endpoint']}")
+	protected String keycloakConfigurationURL;
+	
+	@Autowired
+	protected KeycloakRestTemplate restTemplate;
+	
+	@Autowired
+	protected KeycloakDeployment keycloakDeployment;
 	
 	/**
 	 * @param organizationService the organizationService to set
@@ -102,12 +116,16 @@ public class UserController {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
-	@GetMapping( value = "/logout.do")
-	public ResponseEntity<HttpStatus> logoff(HttpServletRequest request) throws ServletException {
+	@GetMapping(value = "/logout.do")
+	public ResponseEntity<String> logoff(HttpServletRequest request) throws ServletException {
+		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
+		    keycloakDeployment.getRealm());
+		JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
+		ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
+		    String.class);
 		request.logout();
-		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
+		return response;
 	}
-	
 	
 	public Time getServerTime() {
 		return new Time(Calendar.getInstance().getTime(), TimeZone.getDefault());
@@ -150,7 +168,7 @@ public class UserController {
 				locationIds.add(assignedLocation.getJurisdictionId());
 			}
 			
-			jurisdictions = locationService.findLocationsByIds(false, new ArrayList<>(locationIds));
+			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, 5000);
 			
 		}
 		catch (Exception e) {
@@ -161,8 +179,9 @@ public class UserController {
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
-		LocationTree l = locationService.buildLocationHierachy(locationIds, false, true);
-
+		LocationTree l = locationService
+		        .buildLocationHierachy(jurisdictions.stream().map(j -> j.getId()).collect(Collectors.toSet()), false, true);
+		
 		Map<String, Object> map = new HashMap<>();
 		map.put("user", u);
 		
@@ -180,12 +199,14 @@ public class UserController {
 		
 		JSONArray locations = new JSONArray();
 		
+		Set<String> locationParents = new HashSet<>();
 		for (PhysicalLocation jurisdiction : jurisdictions) {
 			JSONObject teamLocation = new JSONObject();
 			teamLocation.put("uuid", locationIds.iterator().next());
 			teamLocation.put("name", jurisdiction.getProperties().getName());
 			teamLocation.put("display", jurisdiction.getProperties().getName());
 			locations.put(teamLocation);
+			locationParents.add(jurisdiction.getProperties().getParentId());
 		}
 		
 		//team location is still returned as 1 object
@@ -206,8 +227,12 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		map.put("jurisdictions",
-		    jurisdictions.stream().map(location -> location.getProperties().getName()).collect(Collectors.toSet()));
+		/** @formatter:off*/
+		map.put("jurisdictions", jurisdictions.stream()
+			.filter(location -> !locationParents.contains(location.getId()))
+			.map(location -> location.getProperties().getName())
+			.collect(Collectors.toSet()));
+		/**@formatter:on*/
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	
