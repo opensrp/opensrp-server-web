@@ -86,7 +86,7 @@ public class UserResource {
 		uriVariables.put(FIRST, offset);
 		uriVariables.put(MAX, limit);
 		try {
-			response = restTemplate.getForEntity(url, String.class, uriVariables);
+			response = new ResponseEntity<String>(restTemplate.getForObject(url, String.class, uriVariables),HttpStatus.OK);
 		}
 		catch (HttpStatusCodeException e) {
 			return new ResponseEntity<String>(e.getResponseBodyAsString(), e.getStatusCode());
