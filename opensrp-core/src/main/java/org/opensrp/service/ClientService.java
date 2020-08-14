@@ -36,51 +36,51 @@ public class ClientService {
 	@Autowired
 	private ErrorTraceService errorTraceService;
 	
-	public Client getByBaseEntityId(String baseEntityId) {
-		return allClients.findByBaseEntityId(baseEntityId);
+	public Client getByBaseEntityId(String baseEntityId, String table) {
+		return allClients.findByBaseEntityId(baseEntityId, table);
 	}
 	
-	public List<Client> findAllClients() {
-		return allClients.findAllClients();
+	public List<Client> findAllClients(String table) {
+		return allClients.findAllClients(table);
 	}
 	
-	public List<Client> findAllByIdentifier(String identifier) {
-		return allClients.findAllByIdentifier(identifier);
+	public List<Client> findAllByIdentifier(String identifier, String table) {
+		return allClients.findAllByIdentifier(identifier, table);
 	}
 	
-	public List<Client> findAllByIdentifier(String identifierType, String identifier) {
-		return allClients.findAllByIdentifier(identifierType, identifier);
+	public List<Client> findAllByIdentifier(String identifierType, String identifier, String table) {
+		return allClients.findAllByIdentifier(identifierType, identifier, table);
 	}
 	
-	public List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo) {
-		return allClients.findByRelationshipIdAndDateCreated(relationalId, dateFrom, dateTo);
+	public List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo, String table) {
+		return allClients.findByRelationshipIdAndDateCreated(relationalId, dateFrom, dateTo, table);
 	}
 	
-	public List<Client> findByRelationship(String relationalId) {
-		return allClients.findByRelationShip(relationalId);
+	public List<Client> findByRelationship(String relationalId, String table) {
+		return allClients.findByRelationShip(relationalId, table);
 	}
 	
-	public List<Client> findAllByAttribute(String attributeType, String attribute) {
-		return allClients.findAllByAttribute(attributeType, attribute);
+	public List<Client> findAllByAttribute(String attributeType, String attribute, String table) {
+		return allClients.findAllByAttribute(attributeType, attribute, table);
 	}
 	
-	public List<Client> findAllByMatchingName(String nameMatches) {
-		return allClients.findAllByMatchingName(nameMatches);
+	public List<Client> findAllByMatchingName(String nameMatches, String table) {
+		return allClients.findAllByMatchingName(nameMatches, table);
 	}
 	
 	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean,
-	                                   DateTime lastEditFrom, DateTime lastEditTo) {
+	                                   DateTime lastEditFrom, DateTime lastEditTo, String table) {
 		clientSearchBean.setLastEditFrom(lastEditFrom);
 		clientSearchBean.setLastEditTo(lastEditTo);
-		return allClients.findByCriteria(clientSearchBean, addressSearchBean);//db.queryView(q.includeDocs(true), Client.class);
+		return allClients.findByCriteria(clientSearchBean, addressSearchBean, table);//db.queryView(q.includeDocs(true), Client.class);
 	}
 	
-	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, Long serverVersion) {
-		return allClients.findByCriteria(clientSearchBean, new AddressSearchBean());
+	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, Long serverVersion, String table) {
+		return allClients.findByCriteria(clientSearchBean, new AddressSearchBean(), table);
 	}
 	
-	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean) {
-		return allClients.findByCriteria(clientSearchBean, addressSearchBean);
+	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean, String table) {
+		return allClients.findByCriteria(clientSearchBean, addressSearchBean, table);
 	}
 	
 	/*	public List<Client> findByCriteria(String addressType, String country, String stateProvince, String cityVillage, String countyDistrict, 
@@ -92,14 +92,14 @@ public class ClientService {
 		return allClients.findByDynamicQuery(query);
 	}
 	
-	public Client addClient(Client client) {
+	public Client addClient(Client client, String table) {
 		if (client.getBaseEntityId() == null) {
 			throw new RuntimeException("No baseEntityId");
 		}
-		Client c = findClient(client);
+		Client c = findClient(client, table);
 		if (c != null) {
 			try {
-				updateClient(client);
+				updateClient(client, table);
 			}
 			catch (JSONException e) {
 				throw new IllegalArgumentException(
@@ -108,15 +108,15 @@ public class ClientService {
 		}
 		
 		client.setDateCreated(DateTime.now());
-		allClients.add(client);
+		allClients.add(client, table);
 		return client;
 	}
 	
-	public Client findClient(Client client) {
+	public Client findClient(Client client, String table) {
 		// find by auto assigned entity id
 		Client c = null;
 		try {
-			c = allClients.findByBaseEntityId(client.getBaseEntityId());
+			c = allClients.findByBaseEntityId(client.getBaseEntityId(), table);
 			if (c != null) {
 				return c;
 			}
@@ -144,15 +144,15 @@ public class ClientService {
 		return c;
 	}
 	
-	public Client find(String uniqueId) {
+	public Client find(String uniqueId, String table) {
 		// find by document id
-		Client c = allClients.findByBaseEntityId(uniqueId);
+		Client c = allClients.findByBaseEntityId(uniqueId, table);
 		if (c != null) {
 			return c;
 		}
 		
 		// if not found find if it is in any identifiers TODO refactor it later
-		List<Client> cl = allClients.findAllByIdentifier(uniqueId);
+		List<Client> cl = allClients.findAllByIdentifier(uniqueId, table);
 		if (cl.size() > 1) {
 			throw new IllegalArgumentException("Multiple clients with identifier " + uniqueId + " exist.");
 		} else if (cl.size() != 0) {
@@ -162,24 +162,24 @@ public class ClientService {
 		return c;
 	}
 	
-	public void updateClient(Client updatedClient) throws JSONException {
+	public void updateClient(Client updatedClient, String table) throws JSONException {
 		// If update is on original entity
 		if (updatedClient.isNew()) {
 			throw new IllegalArgumentException(
 			        "Client to be updated is not an existing and persisting domain object. Update database object instead of new pojo");
 		}
 		
-		if (findClient(updatedClient) == null) {
+		if (findClient(updatedClient, table) == null) {
 			throw new IllegalArgumentException("No client found with given list of identifiers. Consider adding new!");
 		}
 		
 		updatedClient.setDateEdited(DateTime.now());
-		allClients.update(updatedClient);
+		allClients.update(updatedClient, table);
 	}
 	
-	public Client mergeClient(Client updatedClient, JSONObject relationship) {
+	public Client mergeClient(Client updatedClient, JSONObject relationship, String table) {
 		try {
-			Client original = findClient(updatedClient);
+			Client original = findClient(updatedClient, table);
 			if (original == null) {
 				throw new IllegalArgumentException("No client found with given list of identifiers. Consider adding new!");
 			}
@@ -210,7 +210,7 @@ public class ClientService {
 			}
 			original.setDateEdited(DateTime.now());
 			original.setServerVersion(System.currentTimeMillis());
-			allClients.update(original);
+			allClients.update(original, table);
 			return original;
 		}
 		catch (JSONException e) {
@@ -218,23 +218,23 @@ public class ClientService {
 		}
 	}
 	
-	public List<Client> findByServerVersion(long serverVersion) {
-		return allClients.findByServerVersion(serverVersion);
+	public List<Client> findByServerVersion(long serverVersion, String table) {
+		return allClients.findByServerVersion(serverVersion, table);
 	}
 	
-	public List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar) {
-		return allClients.notInOpenMRSByServerVersion(serverVersion, calendar);
+	public List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table) {
+		return allClients.notInOpenMRSByServerVersion(serverVersion, calendar, table);
 	}
 	
-	public List<Client> findByFieldValue(String field, List<String> ids) {
-		return allClients.findByFieldValue(field, ids);
+	public List<Client> findByFieldValue(String field, List<String> ids, String table) {
+		return allClients.findByFieldValue(field, ids, table);
 	}
 	
-	public List<Client> findByFieldValue(String id) {
-		return allClients.findByRelationShip(id);
+	public List<Client> findByFieldValue(String id, String table) {
+		return allClients.findByRelationShip(id, table);
 	}
 	
-	public Client addOrUpdate(Client client) {
+	public Client addOrUpdate(Client client, String table) {
 		if (client.getBaseEntityId() == null) {
 			if (client != null) {
 				ErrorTrace errorTrace = new ErrorTrace();
@@ -250,9 +250,9 @@ public class ClientService {
 		}
 		//Client c = findClient(client);
 		try {
-			Integer clientId = allClients.findClientIdByBaseEntityId(client.getBaseEntityId());
+			Integer clientId = allClients.findClientIdByBaseEntityId(client.getBaseEntityId(), table);
 			if (clientId != null) {
-				Client c = allClients.findClientByClientId(clientId);
+				Client c = allClients.findClientByClientId(clientId, table);
 				if (c != null) {
 					client.setRevision(c.getRevision());
 					client.setId(c.getId());
@@ -260,14 +260,14 @@ public class ClientService {
 					client.setDateCreated(c.getDateCreated());
 					client.setServerVersion(System.currentTimeMillis());
 					client.addIdentifier("OPENMRS_UUID", c.getIdentifier("OPENMRS_UUID"));
-					allClients.update(client);
+					allClients.update(client, table);
 				}
 				
 			} else {
 				client.setServerVersion(System.currentTimeMillis());
 				client.setDateCreated(DateTime.now());
 				logger.info("\n\n\n Client in addOrUpdate before add :" + client.toString() + "\n\n");
-				allClients.add(client);
+				allClients.add(client, table);
 			}
 		}
 		catch (Exception e) {
@@ -286,12 +286,12 @@ public class ClientService {
 		return client;
 	}
 	
-	public Client addOrUpdate(Client client, boolean resetServerVersion) {
+	public Client addOrUpdate(Client client, boolean resetServerVersion, String table) {
 		if (client.getBaseEntityId() == null) {
 			throw new RuntimeException("No baseEntityId");
 		}
 		try {
-			Client c = findClient(client);
+			Client c = findClient(client, table);
 			if (c != null) {
 				client.setRevision(c.getRevision());
 				client.setId(c.getId());
@@ -300,12 +300,12 @@ public class ClientService {
 				if (resetServerVersion) {
 					client.setServerVersion(System.currentTimeMillis());
 				}
-				allClients.update(client);
+				allClients.update(client, table);
 				
 			} else {
 				
 				client.setDateCreated(DateTime.now());
-				allClients.add(client);
+				allClients.add(client, table);
 			}
 		}
 		catch (Exception e) {
@@ -315,8 +315,8 @@ public class ClientService {
 		return client;
 	}
 	
-	public List<Client> findAllClientByUpazila(String name) {
-		return allClients.findAllClientByUpazila(name);
+	public List<Client> findAllClientByUpazila(String name, String table) {
+		return allClients.findAllClientByUpazila(name, table);
 	}
 	
 	public CustomQuery findTeamInfo(String username) {
@@ -371,8 +371,8 @@ public class ClientService {
 		return response;
 	}
 	
-	public Integer findClientIdByBaseEntityId(String baseEntityId) {
-		return allClients.findClientIdByBaseEntityId(baseEntityId);
+	public Integer findClientIdByBaseEntityId(String baseEntityId, String table) {
+		return allClients.findClientIdByBaseEntityId(baseEntityId, table);
 	}
 	
 	public CustomQuery imeiCheck(String imeiNumber) {

@@ -12,21 +12,22 @@ import org.opensrp.search.ClientSearchBean;
 public interface CustomClientMetadataMapper extends ClientMetadataMapper {
 	
 	List<Client> selectMany(@Param("example") ClientMetadataExample example, @Param("offset") int offset,
-	                        @Param("limit") int limit);
+	                        @Param("limit") int limit, @Param("table") String table);
 	
-	Client selectOne(String baseEntityId);
+	Client selectOne(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
 	
-	Client selectByDocumentId(String documentId);
+	Client selectByDocumentId(@Param("documentId") String documentId, @Param("table") String table);
 	
 	List<Client> selectBySearchBean(@Param("clientBean") ClientSearchBean searchBean,
 	                                @Param("addressBean") AddressSearchBean addressSearchBean, @Param("offset") int offset,
-	                                @Param("limit") int limit);
+	                                @Param("limit") int limit, @Param("table") String table);
 	
-	List<Client> selectByName(@Param("name") String nameMatches, @Param("offset") int offset, @Param("limit") int limit);
+	List<Client> selectByName(@Param("name") String nameMatches, @Param("offset") int offset, @Param("limit") int limit,
+	                          @Param("table") String table);
 	
-	Integer findClientIdByBaseEntityId(String baseEntityId);
+	Integer findClientIdByBaseEntityId(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
 	
-	Client findClientByClientId(Integer clientId);
+	Client findClientByClientId(@Param("clientId") Integer clientId, @Param("table") String table);
 	
 	String selectIsResync(String username);
 }

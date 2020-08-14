@@ -8,8 +8,8 @@
 	</sql>
 	
 	<sql id="Base_Table_List">
-		from core.client_metadata cm
-		join core.client c on cm.client_id = c.id
+		from core.client_metadata{table} cm
+		join core.client{table} c on cm.client_id = c.id
 	</sql>
 	
 	<sql id="Example_Where_Clause">
@@ -74,7 +74,7 @@
 		LIMIT #{limit} OFFSET #{offset}
 	</select>	
 	
-	<select id="selectOne" parameterType="java.lang.String"
+	<select id="selectOne"
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
@@ -82,7 +82,7 @@
 		where cm.base_entity_id = #{baseEntityId,jdbcType=VARCHAR} and cm.date_deleted is null
 	</select>
 	
-	<select id="selectByDocumentId" parameterType="java.lang.String"
+	<select id="selectByDocumentId"
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="Base_Column_List" />
@@ -93,8 +93,8 @@
 	
 	<select id="selectBySearchBean"
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
-		select id,json from core.client where core.client.id=any(
-			select client_id from core.client_metadata where server_version::BIGINT >= #{clientBean.serverVersion,jdbcType=BIGINT}
+		select id,json from core.client{table} where core.client.id=any(
+			select client_id from core.client_metadata{table} where server_version::BIGINT >= #{clientBean.serverVersion,jdbcType=BIGINT}
 			
 			<if test="addressBean.address2 != null">
 					and address2 IN				
@@ -221,18 +221,18 @@
 		order by cm.serverVersion asc LIMIT #{limit}  -->
 	</select>	
 	
-	<select id="findClientIdByBaseEntityId" parameterType="java.lang.String"
+	<select id="findClientIdByBaseEntityId"
 		resultType="Integer">
 		select client_id
-		from core.client_metadata cm
+		from core.client_metadata{table} cm
 		where cm.base_entity_id = #{baseEntityId,jdbcType=VARCHAR} and cm.date_deleted is null limit 1
 	</select>
 	
-	<select id="findClientByClientId" parameterType="java.lang.Integer"
+	<select id="findClientByClientId"
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		c.id, c.json
-		from core.client c
+		from core.client{table} c
 		where c.id = #{clientId} limit 1
 	</select>
 	

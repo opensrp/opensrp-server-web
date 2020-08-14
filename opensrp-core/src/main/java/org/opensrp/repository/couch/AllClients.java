@@ -206,7 +206,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	@Override
-	public List<Client> findAllClientByUpazila(String name) {
+	public List<Client> findAllClientByUpazila(String name, String table) {
 		return null;
 	}
 	
@@ -302,13 +302,13 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	@Override
-	public Integer findClientIdByBaseEntityId(String baseEntityId) {
+	public Integer findClientIdByBaseEntityId(String baseEntityId, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Client findClientByClientId(Integer clientId) {
+	public Client findClientByClientId(Integer clientId, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -325,6 +325,121 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public String getIsResync(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void add(Client entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void update(Client entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public List<Client> getAll(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void safeRemove(Client entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public Client findByBaseEntityId(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findAllClients(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findAllByIdentifier(String identifierType, String identifier, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findAllByAttribute(String attributeType, String attribute, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findAllByMatchingName(String nameMatches, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByRelationshipId(String relationshipType, String entityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByCriteria(ClientSearchBean searchBean, AddressSearchBean addressSearchBean, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByCriteria(ClientSearchBean searchBean, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByCriteria(AddressSearchBean addressSearchBean, DateTime lastEditFrom, DateTime lastEditTo,
+	                                   String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByRelationShip(String relationIndentier, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByEmptyServerVersion(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByServerVersion(long serverVersion, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> findByFieldValue(String field, List<String> ids, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}

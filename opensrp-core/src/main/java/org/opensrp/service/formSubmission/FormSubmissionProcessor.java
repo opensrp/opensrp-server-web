@@ -150,19 +150,19 @@ public class FormSubmissionProcessor {
 		Event e = formEntityConverter.getEventFromFormSubmission(submission);
 		Map<String, Map<String, Object>> dep = formEntityConverter.getDependentClientsFromFormSubmission(submission);
 		
-		if (clientService.findClient(c) != null) {
-			clientService.mergeClient(c, null);
+		if (clientService.findClient(c, "") != null) {
+			clientService.mergeClient(c, null, "");
 		} else
-			clientService.addClient(c);
+			clientService.addClient(c, "");
 		
-		eventService.addEvent(e);
+		eventService.addEvent(e, "");
 		// TODO relationships b/w entities
 		
 		for (Map<String, Object> cm : dep.values()) {
 			Client cin = (Client) cm.get("client");
 			Event evin = (Event) cm.get("event");
-			clientService.addClient(cin);
-			eventService.addEvent(evin);
+			clientService.addClient(cin, "");
+			eventService.addEvent(evin, "");
 		}
 	}
 	
@@ -262,7 +262,7 @@ public class FormSubmissionProcessor {
 		Map<String, Map<String, Object>> dep = formEntityConverter.getDependentClientsFromFormSubmission(submission);
 		
 		if (findClient(targetDb, c) != null) {
-			clientService.mergeClient(c, null);
+			clientService.mergeClient(c, null, "");
 		} else
 			addClient(targetDb, c);
 		

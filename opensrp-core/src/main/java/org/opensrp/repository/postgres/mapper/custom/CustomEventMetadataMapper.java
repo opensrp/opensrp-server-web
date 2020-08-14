@@ -10,30 +10,30 @@ import org.opensrp.search.AddressSearchBean;
 
 public interface CustomEventMetadataMapper extends EventMetadataMapper {
 	
-	Event selectByDocumentId(String documentId);
+	Event selectByDocumentId(@Param("documentId") String documentId, @Param("table") String table);
 	
-	List<Event> selectMany(EventMetadataExample eventMetadataExample);
+	List<Event> selectMany(@Param("example") EventMetadataExample eventMetadataExample, @Param("table") String table);
 	
 	List<Event> selectManyWithRowBounds(@Param("example") EventMetadataExample example, @Param("offset") int offset,
-	                                    @Param("limit") int limit);
+	                                    @Param("limit") int limit, @Param("table") String table);
 	
 	List<Event> selectNotInOpenMRSByServerVersion(@Param("from") long serverVersion, @Param("to") long calendar,
-	                                              @Param("limit") int limit);
+	                                              @Param("limit") int limit, @Param("table") String table);
 	
 	List<Event> selectNotInOpenMRSByServerVersionAndType(@Param("eventType") String type, @Param("from") long serverVersion,
-	                                                     @Param("to") long calendar, @Param("limit") int limit);
-
-	List<Event> selectBySearchBean(@Param("addressBean") AddressSearchBean addressSearchBean,
-	                               @Param("serverVersion") long serverVersion,
-	                               @Param("providerId") String providerId,
-	                               @Param("limit") int limit);
+	                                                     @Param("to") long calendar, @Param("limit") int limit,
+	                                                     @Param("table") String table);
 	
-	Integer findEventIdByFormSubmissionId(String formSubmissionId);
-
-	Event findEventByEventId(Integer eventId);
-
+	List<Event> selectBySearchBean(@Param("addressBean") AddressSearchBean addressSearchBean,
+	                               @Param("serverVersion") long serverVersion, @Param("providerId") String providerId,
+	                               @Param("limit") int limit, @Param("table") String table);
+	
+	Integer findEventIdByFormSubmissionId(@Param("formSubmissionId") String formSubmissionId, @Param("table") String table);
+	
+	Event findEventByEventId(@Param("eventId") Integer eventId, @Param("table") String table);
+	
 	List<Event> selectByProvider(@Param("serverVersion") long serverVersion, @Param("providerId") String providerId,
-	                             @Param("limit") int limit);
-
+	                             @Param("limit") int limit, @Param("table") String table);
+	
 	List<String> getHouseholdId(@Param("maxId") Integer maxId, @Param("maxIdPlus") Integer maxIdPlus);
 }

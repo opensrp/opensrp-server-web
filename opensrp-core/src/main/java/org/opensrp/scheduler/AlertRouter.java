@@ -27,65 +27,67 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AlertRouter {
+	
 	@Autowired
 	ScheduleService scheduleService;
-
 	
 	@Autowired
 	ActionService actionService;
 	
 	@Autowired
 	EventService eventService;
-    private List<Route> routes;
-    private static Logger logger = LoggerFactory.getLogger(AlertRouter.class.toString());
-
-
-    public AlertRouter() {
-        routes = new ArrayList<>();
-    }
-
-    public Route addRoute(Matcher scheduleMatcher, Matcher milestoneMatcher, Matcher windowMatcher, HookedEvent action) {
-        Route route = new Route(scheduleMatcher, milestoneMatcher, windowMatcher, action);
-        routes.add(route);
-        return route;
-    }
-
-    public Route addRoute(Route route) {
-    	logger.info("ADDED ROUTE:"+route);
-        routes.add(route);
-        return route;
-    }
-    
-    @MotechListener(subjects = {EventSubjects.MILESTONE_ALERT, EventSubjects.DEFAULTMENT_CAPTURE})
-    public void handleAlerts(MotechEvent realEvent) {
+	
+	private List<Route> routes;
+	
+	private static Logger logger = LoggerFactory.getLogger(AlertRouter.class.toString());
+	
+	public AlertRouter() {
+		routes = new ArrayList<>();
+	}
+	
+	public Route addRoute(Matcher scheduleMatcher, Matcher milestoneMatcher, Matcher windowMatcher, HookedEvent action) {
+		Route route = new Route(scheduleMatcher, milestoneMatcher, windowMatcher, action);
+		routes.add(route);
+		return route;
+	}
+	
+	public Route addRoute(Route route) {
+		logger.info("ADDED ROUTE:" + route);
+		routes.add(route);
+		return route;
+	}
+	
+	@MotechListener(subjects = { EventSubjects.MILESTONE_ALERT, EventSubjects.DEFAULTMENT_CAPTURE })
+	public void handleAlerts(MotechEvent realEvent) {
 		logger.debug("Handling motech milestone alerts: " + realEvent);
 		MilestoneEvent milestoneEvent = new MilestoneEvent(realEvent);
 		
 		try {
-				for (Route route : routes) {
-					if (route.isSatisfiedBy(milestoneEvent.scheduleName(), milestoneEvent.milestoneName(),
-					    milestoneEvent.windowName())) {
-						route.invokeAction(milestoneEvent);
-						return;
-					}
+			for (Route route : routes) {
+				if (route.isSatisfiedBy(milestoneEvent.scheduleName(), milestoneEvent.milestoneName(),
+				    milestoneEvent.windowName())) {
+					route.invokeAction(milestoneEvent);
+					return;
 				}
-
-            throw new NoRoutesMatchException(milestoneEvent);
-		} catch (Exception e) {
-
-            logger.error("", e.getMessage());
-
-		    if(e.getClass() == NoRoutesMatchException.class) {
-                throw new NoRoutesMatchException(milestoneEvent);
-            }
-
+			}
+			
+			throw new NoRoutesMatchException(milestoneEvent);
+		}
+		catch (Exception e) {
+			
+			logger.error("", e.getMessage());
+			
+			if (e.getClass() == NoRoutesMatchException.class) {
+				throw new NoRoutesMatchException(milestoneEvent);
+			}
+			
 			String externalId = milestoneEvent.externalId();
 			DefaultmentCaptureEvent defaultmentEvent = new DefaultmentCaptureEvent(realEvent);
 			String enrollmentId = defaultmentEvent.getEnrollmentId();//9be0cca1be4969d7d104e14706ef81de
 			Enrollment enrollment = scheduleService.getEnrollment(enrollmentId);
 			
 			String eventId = enrollment.getMetadata().get(MetadataField.enrollmentEvent.name());
-			Event event = eventService.getById(eventId);
+			Event event = eventService.getById(eventId, "");
 			String entityType = event.getEntityType();
 			ActionData actionData = ActionData.createAlert(entityType, enrollment.getScheduleName(),
 			    enrollment.getCurrentMilestoneName(), AlertStatus.defaulted, enrollment.getCurrentMilestoneStartDate(),
@@ -93,7 +95,6 @@ public class AlertRouter {
 			Action action = new Action(externalId, event.getProviderId(), actionData);
 			actionService.alertForBeneficiary(action);
 			
-
 		}
-    }
+	}
 }

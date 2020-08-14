@@ -9,19 +9,19 @@ import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 
-public interface ClientsRepository extends BaseRepository<Client> {
+public interface ClientsRepository extends CustomBaseRepository<Client> {
 	
-	Client findByBaseEntityId(String baseEntityId);
+	Client findByBaseEntityId(String baseEntityId, String table);
 	
-	List<Client> findAllClients();
+	List<Client> findAllClients(String table);
 	
-	List<Client> findAllByIdentifier(String identifier);
+	List<Client> findAllByIdentifier(String identifier, String table);
 	
-	List<Client> findAllByIdentifier(String identifierType, String identifier);
+	List<Client> findAllByIdentifier(String identifierType, String identifier, String table);
 	
-	List<Client> findAllByAttribute(String attributeType, String attribute);
+	List<Client> findAllByAttribute(String attributeType, String attribute, String table);
 	
-	List<Client> findAllByMatchingName(String nameMatches);
+	List<Client> findAllByMatchingName(String nameMatches, String table);
 	
 	/**
 	 * Find a client based on the relationship id and between a range of date created dates e.g
@@ -32,29 +32,29 @@ public interface ClientsRepository extends BaseRepository<Client> {
 	 * @param dateTo
 	 * @return
 	 */
-	List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo);
+	List<Client> findByRelationshipIdAndDateCreated(String relationalId, String dateFrom, String dateTo, String table);
 	
-	List<Client> findByRelationshipId(String relationshipType, String entityId);
+	List<Client> findByRelationshipId(String relationshipType, String entityId, String table);
 	
-	List<Client> findByCriteria(ClientSearchBean searchBean, AddressSearchBean addressSearchBean);
+	List<Client> findByCriteria(ClientSearchBean searchBean, AddressSearchBean addressSearchBean, String table);
 	
 	List<Client> findByDynamicQuery(String query);
 	
-	List<Client> findByCriteria(ClientSearchBean searchBean);
+	List<Client> findByCriteria(ClientSearchBean searchBean, String table);
 	
-	List<Client> findByCriteria(AddressSearchBean addressSearchBean, DateTime lastEditFrom, DateTime lastEditTo);
+	List<Client> findByCriteria(AddressSearchBean addressSearchBean, DateTime lastEditFrom, DateTime lastEditTo, String table);
 	
-	List<Client> findByRelationShip(String relationIndentier);
+	List<Client> findByRelationShip(String relationIndentier, String table);
 	
-	List<Client> findByEmptyServerVersion();
+	List<Client> findByEmptyServerVersion(String table);
 	
-	List<Client> findByServerVersion(long serverVersion);
+	List<Client> findByServerVersion(long serverVersion, String table);
 	
-	List<Client> findByFieldValue(String field, List<String> ids);
+	List<Client> findByFieldValue(String field, List<String> ids, String table);
 	
-	List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar);
+	List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table);
 	
-	List<Client> findAllClientByUpazila(String name);
+	List<Client> findAllClientByUpazila(String name, String table);
 	
 	CustomQuery findTeamInfo(String username);
 	
@@ -72,9 +72,9 @@ public interface ClientsRepository extends BaseRepository<Client> {
 	
 	void updateAppVersion(String username, String version);
 	
-	Integer findClientIdByBaseEntityId(String baseEntityId);
+	Integer findClientIdByBaseEntityId(String baseEntityId, String table);
 	
-	Client findClientByClientId(Integer clientId);
+	Client findClientByClientId(Integer clientId, String table);
 	
 	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag);
 	

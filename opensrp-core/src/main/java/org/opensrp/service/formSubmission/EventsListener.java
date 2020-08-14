@@ -84,7 +84,7 @@ public class EventsListener {
 			logger.info("Fetching Events");
 			long version = getVersion();
 			
-			List<Event> events = allEvents.findByServerVersion(version);
+			List<Event> events = allEvents.findByServerVersion(version, "");
 			
 			if (events.isEmpty()) {
 				logger.info("No new events found. Export token: " + version);
@@ -97,7 +97,7 @@ public class EventsListener {
 			
 			for (Event event : events) {
 				try {
-					event = eventService.processOutOfArea(event);
+					event = eventService.processOutOfArea(event, "");
 					eventsRouter.route(event);
 					configService.updateAppStateToken(AllConstants.Config.EVENTS_PARSER_LAST_PROCESSED_EVENT,
 					    event.getServerVersion());
@@ -120,14 +120,14 @@ public class EventsListener {
 	
 	private synchronized void addServerVersion() {
 		try {
-			List<Client> clients = allClients.findByEmptyServerVersion();
+			List<Client> clients = allClients.findByEmptyServerVersion("");
 			long currentTimeMillis = getCurrentMilliseconds();
 			while (clients != null && !clients.isEmpty()) {
 				for (Client client : clients) {
 					try {
 						Thread.sleep(1);
 						client.setServerVersion(currentTimeMillis);
-						allClients.update(client);
+						allClients.update(client, "");
 						logger.debug("Add server_version: found new client " + client.getBaseEntityId());
 					}
 					catch (InterruptedException e) {
@@ -135,17 +135,17 @@ public class EventsListener {
 					}
 					currentTimeMillis += 1;
 				}
-				clients = allClients.findByEmptyServerVersion();
+				clients = allClients.findByEmptyServerVersion("");
 			}
 			
-			List<Event> events = allEvents.findByEmptyServerVersion();
+			List<Event> events = allEvents.findByEmptyServerVersion("");
 			while (events != null && !events.isEmpty()) {
 				for (Event event : events) {
 					try {
 						Thread.sleep(1);
-						event = eventService.processOutOfArea(event);
+						event = eventService.processOutOfArea(event, "");
 						event.setServerVersion(currentTimeMillis);
-						allEvents.update(event);
+						allEvents.update(event, "");
 						
 						logger.debug("Add server_version: found new event " + event.getBaseEntityId());
 					}
@@ -155,7 +155,7 @@ public class EventsListener {
 					currentTimeMillis += 1;
 				}
 				
-				events = allEvents.findByEmptyServerVersion();
+				events = allEvents.findByEmptyServerVersion("");
 			}
 		}
 		catch (Exception e) {

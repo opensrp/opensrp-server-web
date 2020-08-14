@@ -13,23 +13,25 @@ public interface CustomEventMapper extends EventMapper {
 	
 	int insertSelectiveAndSetId(Event record);
 	
-	Event selectByDocumentId(String documentId);
+	Event selectByDocumentId(@Param("documentId") String documentId, @Param("table") String table);
 	
-	List<Event> selectByIdentifier(String identifier);
+	List<Event> selectByIdentifier(@Param("identifier") String identifier, @Param("table") String table);
 	
 	List<Event> selectByIdentifierOfType(@Param("identifierType") String identifierType,
-	                                     @Param("identifier") String identifier);
+	                                     @Param("identifier") String identifier, @Param("table") String table);
 	
 	List<Event> selectByBaseEntityIdConceptAndDate(@Param("baseEntityId") String baseEntityId,
 	                                               @Param("concept") String concept,
 	                                               @Param("conceptValue") String conceptValue,
-	                                               @Param("dateFrom") Date dateFrom, @Param("dateTo") Date dateTo);
+	                                               @Param("dateFrom") Date dateFrom, @Param("dateTo") Date dateTo,
+	                                               @Param("table") String table);
 	
 	List<Event> selectByBaseEntityIdAndConceptParentCode(@Param("baseEntityId") String baseEntityId,
 	                                                     @Param("concept") String concept,
-	                                                     @Param("parentCode") String parentCode);
+	                                                     @Param("parentCode") String parentCode, @Param("table") String table);
 	
-	List<Event> selectByConceptAndValue(@Param("concept") String concept, @Param("conceptValue") String conceptValue);
+	List<Event> selectByConceptAndValue(@Param("concept") String concept, @Param("conceptValue") String conceptValue,
+	                                    @Param("table") String table);
 	
 	List<CustomQuery> getLocations(int userId);
 	

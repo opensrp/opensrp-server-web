@@ -47,47 +47,47 @@ public class EventService {
 		this.clientService = clientService;
 	}
 	
-	public List<Event> findAllByIdentifier(String identifier) {
-		return allEvents.findAllByIdentifier(identifier);
+	public List<Event> findAllByIdentifier(String identifier, String table) {
+		return allEvents.findAllByIdentifier(identifier, table);
 	}
 	
-	public List<Event> findAllByIdentifier(String identifierType, String identifier) {
-		return allEvents.findAllByIdentifier(identifierType, identifier);
+	public List<Event> findAllByIdentifier(String identifierType, String identifier, String table) {
+		return allEvents.findAllByIdentifier(identifierType, identifier, table);
 	}
 	
-	public Event getById(String id) {
-		return allEvents.findById(id);
+	public Event getById(String id, String table) {
+		return allEvents.findById(id, table);
 	}
 	
-	public Event getByBaseEntityAndFormSubmissionId(String baseEntityId, String formSubmissionId) {
-		return allEvents.findByBaseEntityAndFormSubmissionId(baseEntityId, formSubmissionId);
+	public Event getByBaseEntityAndFormSubmissionId(String baseEntityId, String formSubmissionId, String table) {
+		return allEvents.findByBaseEntityAndFormSubmissionId(baseEntityId, formSubmissionId, table);
 	}
 	
-	public List<Event> findByBaseEntityId(String baseEntityId) {
-		return allEvents.findByBaseEntityId(baseEntityId);
+	public List<Event> findByBaseEntityId(String baseEntityId, String table) {
+		return allEvents.findByBaseEntityId(baseEntityId, table);
 	}
 	
-	public Event findByFormSubmissionId(String formSubmissionId) {
-		return allEvents.findByFormSubmissionId(formSubmissionId);
+	public Event findByFormSubmissionId(String formSubmissionId, String table) {
+		return allEvents.findByFormSubmissionId(formSubmissionId, table);
 	}
 	
-	public List<Event> findByFieldValue(String field, List<String> ids, long serverVersion) {
-		return allEvents.findByFieldValue(field, ids, serverVersion);
+	public List<Event> findByFieldValue(String field, List<String> ids, long serverVersion, String table) {
+		return allEvents.findByFieldValue(field, ids, serverVersion, table);
 	}
 	
-	public List<Event> findEventsBy(EventSearchBean eventSearchBean) {
-		return allEvents.findEvents(eventSearchBean);
+	public List<Event> findEventsBy(EventSearchBean eventSearchBean, String table) {
+		return allEvents.findEvents(eventSearchBean, table);
 	}
 	
-	public List<Event> findEventsByDynamicQuery(String query) {
-		return allEvents.findEventsByDynamicQuery(query);
+	public List<Event> findEventsByDynamicQuery(String query, String table) {
+		return allEvents.findEventsByDynamicQuery(query, table);
 	}
 	
 	private static Logger logger = LoggerFactory.getLogger(EventService.class.toString());
 	
-	public Event find(String uniqueId) {
+	public Event find(String uniqueId, String table) {
 		try {
-			List<Event> el = allEvents.findAllByIdentifier(uniqueId);
+			List<Event> el = allEvents.findAllByIdentifier(uniqueId, table);
 			return getUniqueEventFromEventList(el);
 		}
 		catch (IllegalArgumentException e) {
@@ -95,10 +95,10 @@ public class EventService {
 		}
 	}
 	
-	public Event find(Event event) {
+	public Event find(Event event, String table) {
 		for (String idt : event.getIdentifiers().keySet()) {
 			try {
-				List<Event> el = allEvents.findAllByIdentifier(event.getIdentifier(idt));
+				List<Event> el = allEvents.findAllByIdentifier(event.getIdentifier(idt), table);
 				return getUniqueEventFromEventList(el);
 			}
 			catch (IllegalArgumentException e) {
@@ -109,12 +109,12 @@ public class EventService {
 		return null;
 	}
 	
-	public Event findById(String eventId) {
+	public Event findById(String eventId, String table) {
 		try {
 			if (eventId == null || eventId.isEmpty()) {
 				return null;
 			}
-			return allEvents.findById(eventId);
+			return allEvents.findById(eventId, table);
 		}
 		catch (Exception e) {
 			logger.error("", e);
@@ -122,21 +122,21 @@ public class EventService {
 		return null;
 	}
 	
-	public synchronized Event addEvent(Event event) {
-		Event e = find(event);
+	public synchronized Event addEvent(Event event, String table) {
+		Event e = find(event, table);
 		if (e != null) {
 			throw new IllegalArgumentException(
 			        "An event already exists with given list of identifiers. Consider updating data.[" + e + "]");
 		}
 		
 		if (event.getFormSubmissionId() != null
-		        && getByBaseEntityAndFormSubmissionId(event.getBaseEntityId(), event.getFormSubmissionId()) != null) {
+		        && getByBaseEntityAndFormSubmissionId(event.getBaseEntityId(), event.getFormSubmissionId(), table) != null) {
 			throw new IllegalArgumentException(
 			        "An event already exists with given baseEntity and formSubmission combination. Consider updating");
 		}
 		
 		event.setDateCreated(DateTime.now());
-		allEvents.add(event);
+		allEvents.add(event, table);
 		return event;
 	}
 	
@@ -149,7 +149,7 @@ public class EventService {
 	 * @param event
 	 * @return
 	 */
-	public synchronized Event processOutOfArea(Event event) {
+	public synchronized Event processOutOfArea(Event event, String table) {
 		if (event.getBaseEntityId() == null || event.getBaseEntityId().isEmpty()) {
 			//get events identifiers;
 			String identifier = event.getIdentifier(Client.ZEIR_ID);
@@ -158,7 +158,7 @@ public class EventService {
 			if (clients != null && !clients.isEmpty()) {
 				org.opensrp.domain.Client client = clients.get(0);
 				//set providerid to the last providerid who served this client in their catchment (assumption)
-				List<Event> existingEvents = findByBaseEntityAndType(client.getBaseEntityId(), "Birth Registration");
+				List<Event> existingEvents = findByBaseEntityAndType(client.getBaseEntityId(), "Birth Registration", table);
 				if (existingEvents != null && !existingEvents.isEmpty()) {
 					
 					event.getIdentifiers().remove(Client.ZEIR_ID.toUpperCase());
@@ -181,29 +181,29 @@ public class EventService {
 		return event;
 	}
 	
-	public synchronized Event addorUpdateEvent(Event event) {
-		Integer eventId = allEvents.findEventIdByFormSubmissionId(event.getFormSubmissionId());
+	public synchronized Event addorUpdateEvent(Event event, String table) {
+		Integer eventId = allEvents.findEventIdByFormSubmissionId(event.getFormSubmissionId(), table);
 		
 		//Event getEvent = findByFormSubmissionId(event.getFormSubmissionId());
 		if (eventId != null) {
-			Event getEvent = allEvents.findEventByEventId(eventId);
+			Event getEvent = allEvents.findEventByEventId(eventId, table);
 			if (getEvent != null) {
 				
 				event.setDateEdited(DateTime.now());
 				event.setServerVersion(System.currentTimeMillis());
 				event.setId(getEvent.getId());
 				event.setDateCreated(getEvent.getDateCreated());
-				allEvents.update(event);
+				allEvents.update(event, table);
 			}
 		} else {
 			event.setServerVersion(System.currentTimeMillis());
 			event.setDateCreated(DateTime.now());
-			allEvents.add(event);
+			allEvents.add(event, table);
 		}
 		return event;
 	}
 	
-	public void updateEvent(Event updatedEvent) {
+	public void updateEvent(Event updatedEvent, String table) {
 		// If update is on original entity
 		if (updatedEvent.isNew()) {
 			throw new IllegalArgumentException(
@@ -211,10 +211,10 @@ public class EventService {
 		}
 		
 		updatedEvent.setDateEdited(DateTime.now());
-		allEvents.update(updatedEvent);
+		allEvents.update(updatedEvent, table);
 	}
 	
-	public void updateEventServerVersion(Event updatedEvent) {
+	public void updateEventServerVersion(Event updatedEvent, String table) {
 		// If update is on original entity
 		if (updatedEvent.isNew()) {
 			throw new IllegalArgumentException(
@@ -223,13 +223,13 @@ public class EventService {
 		
 		updatedEvent.setDateEdited(DateTime.now());
 		updatedEvent.setServerVersion(System.currentTimeMillis());
-		allEvents.update(updatedEvent);
+		allEvents.update(updatedEvent, table);
 	}
 	
 	//TODO Review and add test cases as well
-	public Event mergeEvent(Event updatedEvent) {
+	public Event mergeEvent(Event updatedEvent, String table) {
 		try {
-			Event original = find(updatedEvent);
+			Event original = find(updatedEvent, table);
 			if (original == null) {
 				throw new IllegalArgumentException("No event found with given list of identifiers. Consider adding new!");
 			}
@@ -273,7 +273,7 @@ public class EventService {
 			}
 			original.setServerVersion(System.currentTimeMillis());
 			original.setDateEdited(DateTime.now());
-			allEvents.update(original);
+			allEvents.update(original, table);
 			return original;
 		}
 		catch (JSONException e) {
@@ -281,42 +281,42 @@ public class EventService {
 		}
 	}
 	
-	public List<Event> findByServerVersion(long serverVersion) {
-		return allEvents.findByServerVersion(serverVersion);
+	public List<Event> findByServerVersion(long serverVersion, String table) {
+		return allEvents.findByServerVersion(serverVersion, table);
 	}
 	
-	public List<Event> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar) {
-		return allEvents.notInOpenMRSByServerVersion(serverVersion, calendar);
+	public List<Event> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table) {
+		return allEvents.notInOpenMRSByServerVersion(serverVersion, calendar, table);
 	}
 	
-	public List<Event> notInOpenMRSByServerVersionAndType(String type, long serverVersion, Calendar calendar) {
-		return allEvents.notInOpenMRSByServerVersionAndType(type, serverVersion, calendar);
+	public List<Event> notInOpenMRSByServerVersionAndType(String type, long serverVersion, Calendar calendar, String table) {
+		return allEvents.notInOpenMRSByServerVersionAndType(type, serverVersion, calendar, table);
 	}
 	
-	public List<Event> getAll() {
-		return allEvents.getAll();
+	public List<Event> getAll(String table) {
+		return allEvents.getAll(table);
 	}
 	
-	public List<Event> findEvents(EventSearchBean eventSearchBean, String sortBy, String sortOrder, int limit) {
-		return allEvents.findEvents(eventSearchBean, sortBy, sortOrder, limit);
+	public List<Event> findEvents(EventSearchBean eventSearchBean, String sortBy, String sortOrder, int limit, String table) {
+		return allEvents.findEvents(eventSearchBean, sortBy, sortOrder, limit, table);
 	}
 	
-	public List<Event> findEvents(EventSearchBean eventSearchBean) {
-		return allEvents.findEvents(eventSearchBean);
+	public List<Event> findEvents(EventSearchBean eventSearchBean, String table) {
+		return allEvents.findEvents(eventSearchBean, table);
 	}
 	
-	public List<Event> findEventsByConceptAndValue(String concept, String conceptValue) {
-		return allEvents.findByConceptAndValue(concept, conceptValue);
+	public List<Event> findEventsByConceptAndValue(String concept, String conceptValue, String table) {
+		return allEvents.findByConceptAndValue(concept, conceptValue, table);
 		
 	}
 	
-	public List<Event> findByBaseEntityAndType(String baseEntityId, String eventType) {
-		return allEvents.findByBaseEntityAndType(baseEntityId, eventType);
+	public List<Event> findByBaseEntityAndType(String baseEntityId, String eventType, String table) {
+		return allEvents.findByBaseEntityAndType(baseEntityId, eventType, table);
 		
 	}
 	
-	public List<Event> findByBaseEntityAndEventTypeContaining(String baseEntityId, String eventType) {
-		return allEvents.findByBaseEntityAndEventTypeContaining(baseEntityId, eventType);
+	public List<Event> findByBaseEntityAndEventTypeContaining(String baseEntityId, String eventType, String table) {
+		return allEvents.findByBaseEntityAndEventTypeContaining(baseEntityId, eventType, table);
 		
 	}
 	
@@ -330,12 +330,12 @@ public class EventService {
 		return events.get(0);
 	}
 	
-	public List<Event> findByProviderAndEntityType(String provider) {
-		return allEvents.findByProvider(provider);
+	public List<Event> findByProviderAndEntityType(String provider, String table) {
+		return allEvents.findByProvider(provider, table);
 	}
 	
-	public void deleteByPrimaryKey(Event event) {
-		allEvents.deleteByPrimaryKey(event);
+	public void deleteByPrimaryKey(Event event, String table) {
+		allEvents.deleteByPrimaryKey(event, table);
 		
 	}
 	
@@ -378,16 +378,16 @@ public class EventService {
 	}
 	
 	public List<Event> selectBySearchBean(AddressSearchBean addressSearchBean, long serverVersion, String providerId,
-	                                      int limit) {
-		return allEvents.selectBySearchBean(addressSearchBean, serverVersion, providerId, limit);
+	                                      int limit, String table) {
+		return allEvents.selectBySearchBean(addressSearchBean, serverVersion, providerId, limit, table);
 	}
 	
-	public List<Event> findByProvider(long serverVersion, String providerId, int limit) {
-		return allEvents.selectByProvider(serverVersion, providerId, limit);
+	public List<Event> findByProvider(long serverVersion, String providerId, int limit, String table) {
+		return allEvents.selectByProvider(serverVersion, providerId, limit, table);
 	}
 	
-	public Integer findEventIdByFormSubmissionId(String formSubmissionId) {
-		return allEvents.findEventIdByFormSubmissionId(formSubmissionId);
+	public Integer findEventIdByFormSubmissionId(String formSubmissionId, String table) {
+		return allEvents.findEventIdByFormSubmissionId(formSubmissionId, table);
 	}
 	
 	public int insertHealthId(HealthId healthId) {

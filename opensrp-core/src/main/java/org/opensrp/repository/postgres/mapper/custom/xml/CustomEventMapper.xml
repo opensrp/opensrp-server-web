@@ -29,11 +29,11 @@
 		id, json
 	</sql>
 
-	<select id="selectByDocumentId" parameterType="java.lang.String"
+	<select id="selectByDocumentId"
 			resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event
+		from core.event{table}
 		WHERE json ->> 'id' = #{documentId,jdbcType=VARCHAR} and date_deleted is null
 	</select>
 
@@ -78,12 +78,12 @@
 		</trim>
 	</insert>
 
-	<select id="selectByIdentifier" parameterType="java.lang.String"
+	<select id="selectByIdentifier"
 			resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event
-		join jsonb_each_text(core.event.json ->
+		from core.event{table}
+		join jsonb_each_text(core.event{table}.json ->
 		'identifiers') j
 		on true
 		where j.value = #{identifier,jdbcType=VARCHAR} and date_deleted is null
@@ -93,7 +93,7 @@
 			resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event
+		from core.event{table}
 		where json -> 'identifiers' ->>
 		#{identifierType,jdbcType=VARCHAR} =
 		#{identifier,jdbcType=VARCHAR}
@@ -106,8 +106,8 @@
 		<include refid="Base_Event_Column_List" />
 		from (	select  id id_, json,jsonb_array_elements(json->'obs') as obs_object,
 		jsonb_array_elements_text(jsonb_array_elements(json->'obs')->'values') as obs_value
-		from core.event ) j
-		join core.event_metadata e on e.event_id=j.id_
+		from core.event{table} ) j
+		join core.event_metadata{table} e on e.event_id=j.id_
 		where e.base_entity_id= #{baseEntityId,jdbcType=VARCHAR}
 		<if test="dateFrom != null and dateTo != null">
 			and e.date_created between #{dateFrom,jdbcType=DATE} and #{dateTo,jdbcType=DATE}
@@ -122,8 +122,8 @@
 		select
 		<include refid="Base_Event_Column_List" />
 		from (	select  id id_, json,jsonb_array_elements(json->'obs') as obs_object
-		from core.event ) j
-		join core.event_metadata e on e.event_id=j.id_
+		from core.event{table} ) j
+		join core.event_metadata{table} e on e.event_id=j.id_
 		where e.base_entity_id= #{baseEntityId,jdbcType=VARCHAR}
 		and obs_object->>'fieldCode'=#{concept,jdbcType=VARCHAR}
 		and obs_object->>'parentCode'=#{parentCode,jdbcType=VARCHAR}
@@ -136,7 +136,7 @@
 		<include refid="Base_Event_Column_List" />
 		from (	select  id, json,date_deleted,jsonb_array_elements(json->'obs') as obs_object,
 		jsonb_array_elements_text(jsonb_array_elements(json->'obs')->'values') as obs_value
-		from core.event ) j
+		from core.event{table} ) j
 		where obs_object->>'fieldCode'=#{concept,jdbcType=VARCHAR}
 		and obs_value=#{conceptValue,jdbcType=VARCHAR}
 		and date_deleted is null

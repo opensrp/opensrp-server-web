@@ -256,19 +256,19 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 	}
 	
 	@Override
-	public List<Event> findByBaseEntityAndEventTypeContaining(String baseEntityId, String eventType) {
+	public List<Event> findByBaseEntityAndEventTypeContaining(String baseEntityId, String eventType, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public void deleteByPrimaryKey(Event event) {
+	public void deleteByPrimaryKey(Event event, String table) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public List<Event> findByFieldValue(String field, List<String> ids, long serverVersion) {
+	public List<Event> findByFieldValue(String field, List<String> ids, long serverVersion, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -304,24 +304,24 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 	
 	@Override
 	public List<Event> selectBySearchBean(AddressSearchBean addressSearchBean, long serverVersion, String providerId,
-	                                      int limit) {
+	                                      int limit, String table) {
 		return null;
 	}
 	
 	@Override
-	public Integer findEventIdByFormSubmissionId(String formSubmissionId) {
+	public Integer findEventIdByFormSubmissionId(String formSubmissionId, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Event findEventByEventId(Integer eventId) {
+	public Event findEventByEventId(Integer eventId, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public List<Event> selectByProvider(long serverVersion, String providerId, int limit) {
+	public List<Event> selectByProvider(long serverVersion, String providerId, int limit, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -339,6 +339,140 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 	
 	@Override
 	public List<CustomQuery> getRoles(int userId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void add(Event entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void update(Event entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public List<Event> getAll(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void safeRemove(Event entity, String table) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public List<Event> findAllByIdentifier(String identifierType, String identifier, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Event findById(String id, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Event findByFormSubmissionId(String formSubmissionId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByBaseEntityId(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Event findByBaseEntityAndFormSubmissionId(String baseEntityId, String formSubmissionId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByBaseEntityAndType(String baseEntityId, String eventType, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findEvents(EventSearchBean eventSearchBean, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findEventsByDynamicQuery(String query, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByServerVersion(long serverVersion, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> notInOpenMRSByServerVersionAndType(String type, long serverVersion, Calendar calendar, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByClientAndConceptAndDate(String baseEntityId, String concept, String conceptValue,
+	                                                 String dateFrom, String dateTo, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByBaseEntityIdAndConceptParentCode(String baseEntityId, String concept, String parentCode,
+	                                                          String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByConceptAndValue(String concept, String conceptValue, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByEmptyServerVersion(String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findEvents(EventSearchBean eventSearchBean, String sortBy, String sortOrder, int limit, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findEventByEventTypeBetweenTwoDates(String eventType, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findByProvider(String provider, String table) {
 		// TODO Auto-generated method stub
 		return null;
 	}
