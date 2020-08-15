@@ -176,4 +176,12 @@ public class Event {
 		this.division = division;
 	}
 	
+	public String getFormSubmissionId() {
+		return formSubmissionId;
+	}
+	
+	public void setFormSubmissionId(String formSubmissionId) {
+		this.formSubmissionId = formSubmissionId;
+	}
+	
 }

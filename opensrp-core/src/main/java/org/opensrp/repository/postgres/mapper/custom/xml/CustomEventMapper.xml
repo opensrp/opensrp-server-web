@@ -67,6 +67,33 @@
 			<if test="json != null">
 				json,
 			</if>
+			<if test="serverVersion != null">
+				server_version,
+			</if>
+			<if test="baseEntityId != null">
+				base_entity_id,
+			</if>
+			<if test="district != null">
+				district,
+			</if>
+			<if test="division != null">
+				division,
+			</if>
+			<if test="branch != null">
+				branch,
+			</if>
+			<if test="village != null">
+				village,
+			</if>
+			<if test="providerId != null">
+				provider_id,
+			</if>
+			<if test="eventType != null">
+				event_type,
+			</if>
+			<if test="formSubmissionId != null">
+				form_submission_id,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="id != null">
@@ -74,6 +101,33 @@
 			</if>
 			<if test="json != null">
 				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.EventTypeHandler},
+			</if>
+			<if test="serverVersion != null">
+				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.ClientTypeHandler},
+			</if>
+			<if test="baseEntityId != null">
+				#{baseEntityId,jdbcType=VARCHAR},
+			</if>
+			<if test="district != null">
+				#{district,jdbcType=VARCHAR},
+			</if>
+			<if test="division != null">
+				#{division,jdbcType=VARCHAR},
+			</if>
+			<if test="branch != null">
+				#{branch,jdbcType=VARCHAR},
+			</if>
+			<if test="village != null">
+				#{village,jdbcType=VARCHAR},
+			</if>
+			<if test="providerId != null">
+				#{providerId,jdbcType=VARCHAR},
+			</if>
+			<if test="eventType != null">
+				#{eventType,jdbcType=VARCHAR},
+			</if>
+			<if test="formSubmissionId != null">
+				#{formSubmissionId,jdbcType=VARCHAR},
 			</if>
 		</trim>
 	</insert>

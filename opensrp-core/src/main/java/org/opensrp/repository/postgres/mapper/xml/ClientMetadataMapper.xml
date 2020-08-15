@@ -481,8 +481,11 @@
       address1 = #{address1,jdbcType=VARCHAR},
       address2 = #{address2,jdbcType=VARCHAR},
       address3 = #{address3,jdbcType=VARCHAR},
-      village_id = #{villageId,jdbcType=BIGINT}
-
+      village_id = #{villageId,jdbcType=BIGINT},
+	  district = #{district,jdbcType=VARCHAR},
+      division = #{division,jdbcType=VARCHAR},
+      branch = #{branch,jdbcType=VARCHAR},
+      village = #{village,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>
