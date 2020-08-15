@@ -52,4 +52,10 @@ public class UserLocationTableName {
 		this.tableName = tableName;
 	}
 	
+	@Override
+	public String toString() {
+		return "UserLocationTableName [division=" + division + ", district=" + district + ", branch=" + branch
+		        + ", village=" + village + ", tableName=" + tableName + "]";
+	}
+	
 }

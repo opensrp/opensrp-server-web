@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -79,6 +80,8 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	public List<CustomQuery> getDistrictAndUpazila(Integer parentLocationTag);
 	
 	CustomQuery imeiCheck(String imeiNumber);
+	
+	UserLocationTableName getUserLocation(String username);
 	
 	String getIsResync(String username);
 }

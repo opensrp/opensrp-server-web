@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.motechproject.dao.MotechBaseRepository;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.lucene.LuceneClientRepository;
@@ -440,6 +441,12 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public List<Client> notInOpenMRSByServerVersion(long serverVersion, Calendar calendar, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public UserLocationTableName getUserLocation(String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}

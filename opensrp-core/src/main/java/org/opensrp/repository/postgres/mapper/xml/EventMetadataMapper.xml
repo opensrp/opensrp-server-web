@@ -494,7 +494,11 @@
       team_id = #{teamId,jdbcType=VARCHAR},
       date_created = #{dateCreated,jdbcType=TIMESTAMP},
       date_edited = #{dateEdited,jdbcType=TIMESTAMP},
-      date_deleted = #{dateDeleted,jdbcType=TIMESTAMP}
+      date_deleted = #{dateDeleted,jdbcType=TIMESTAMP},
+      district = #{district,jdbcType=VARCHAR},
+      division = #{division,jdbcType=VARCHAR},
+      branch = #{branch,jdbcType=VARCHAR},
+      village = #{village,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

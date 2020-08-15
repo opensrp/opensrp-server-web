@@ -18,6 +18,9 @@
 		<result column="last_name" jdbcType="VARCHAR" property="lastName"/>
 		<result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
 	</resultMap>
+	<resultMap id="userLocationMap" type="org.opensrp.domain.UserLocationTableName">
+		
+	</resultMap>
 
 	<insert id="insertSelectiveAndSetId" parameterType="org.opensrp.domain.postgres.Client"
 			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
@@ -197,6 +200,11 @@
 			(case when count(*) > 0 then true else false end) is_available
 		from
 		 	core.imei where imei1 = #{imeiNumber} or imei2 = #{imeiNumber};
+	</select>
+	
+	<select id="selectUserLocation" resultMap="userLocationMap">
+		select * from core.user_location as ul where ul.username = #{username} ; 
+		 	
 	</select>
 
 </mapper>

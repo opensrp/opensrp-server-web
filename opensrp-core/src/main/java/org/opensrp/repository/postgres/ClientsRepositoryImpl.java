@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.ClientMetadata;
 import org.opensrp.domain.postgres.ClientMetadataExample;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -559,7 +560,14 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	
 	@Override
 	public String getIsResync(String username) {
-		// TODO Auto-generated method stub
+		
 		return clientMetadataMapper.selectIsResync(username);
 	}
+	
+	@Override
+	public UserLocationTableName getUserLocation(String username) {
+		
+		return clientMapper.selectUserLocation(username);
+	}
+	
 }

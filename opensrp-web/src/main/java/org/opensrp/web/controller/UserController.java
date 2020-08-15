@@ -216,7 +216,7 @@ public class UserController {
 		JSONArray array = new JSONArray();
 		try {
 			array = locationService.convertLocationTreeToJSON(treeDTOS,
-			    (user.getEnable() == null) ? false : user.getEnable(),user.getFullName());
+			    (user.getEnable() == null) ? false : user.getEnable(), user.getFullName());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -315,7 +315,7 @@ public class UserController {
 			return new ResponseEntity<>(is_resync, HttpStatus.OK);
 		}
 		catch (Exception e) {
-			
+			e.printStackTrace();
 			return new ResponseEntity<>("", HttpStatus.OK);
 		}
 	}

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.Client;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.repository.postgres.mapper.ClientMapper;
@@ -56,4 +57,6 @@ public interface CustomClientMapper extends ClientMapper {
 	List<CustomQuery> getDistrictAndUpazila(@Param("locationTag") Integer locationTag);
 	
 	CustomQuery imeiCheck(@Param("imeiNumber") String imeiNumber);
+	
+	UserLocationTableName selectUserLocation(@Param("username") String username);
 }

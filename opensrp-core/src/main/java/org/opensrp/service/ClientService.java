@@ -394,6 +394,7 @@ public class ClientService {
 		UserLocationTableName userLocation = new UserLocationTableName();
 		String table = "";
 		if (!StringUtils.isBlank(district)) {
+			
 			table = "_" + district;
 			userLocation.setTableName(table);
 			userLocation.setBranch(branch);
@@ -401,13 +402,22 @@ public class ClientService {
 			userLocation.setDivision(division);
 			userLocation.setTableName(table);
 		} else {
-			//get from data base
+			userLocation = allClients.getUserLocation(username);
 			
-			userLocation.setBranch("");
-			userLocation.setDistrict("");
-			userLocation.setDivision("");
-			userLocation.setTableName(table);
+			if (userLocation != null) {
+				table = "_" + userLocation.getDistrict();
+				userLocation.setTableName(table);
+			} else {
+				userLocation = new UserLocationTableName();
+				userLocation.setTableName("");
+				userLocation.setBranch("");
+				userLocation.setDistrict("");
+				userLocation.setDivision("");
+				userLocation.setTableName("");
+			}
+			
 		}
+		
 		return userLocation;
 	}
 }
