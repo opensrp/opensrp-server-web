@@ -20,30 +20,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(value = "/rest/formSubmission")
 public class FormSubmissionResource extends RestResource<FormSubmission> {
-
+	
 	private FormSubmissionService fsService;
-
+	
 	@Autowired
 	public FormSubmissionResource(FormSubmissionService fsService) {
 		this.fsService = fsService;
+		
 	}
-
+	
 	@Override
-	public FormSubmission getByUniqueId(String uniqueId) {
+	public FormSubmission getByUniqueId(String uniqueId, String district) {
+		
 		return fsService.findByInstanceId(uniqueId);
 	}
 	
-/*	@RequestMapping(method=RequestMethod.GET)
-	@ResponseBody
-	public Event getByBaseEntityAndFormSubmissionId(@RequestParam String baseEntityId, @RequestParam String formSubmissionId) {
-		return eventService.getByBaseEntityAndFormSubmissionId(baseEntityId, formSubmissionId);
-	}*/
-
+	/*	@RequestMapping(method=RequestMethod.GET)
+		@ResponseBody
+		public Event getByBaseEntityAndFormSubmissionId(@RequestParam String baseEntityId, @RequestParam String formSubmissionId) {
+			return eventService.getByBaseEntityAndFormSubmissionId(baseEntityId, formSubmissionId);
+		}*/
+	
 	@Override
-	public FormSubmission create(FormSubmission o) {
+	public FormSubmission create(FormSubmission o, String district) {
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public List<String> requiredProperties() {
 		List<String> p = new ArrayList<>();
@@ -56,25 +58,25 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 		//p.add(ENTITY_TYPE);
 		return p;
 	}
-
+	
 	@Override
-	public FormSubmission update(FormSubmission entity) {
+	public FormSubmission update(FormSubmission entity, String district) {
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public List<FormSubmission> search(HttpServletRequest request) throws ParseException {
 		String formName = getStringFilter("formName", request);
 		//String entityId = getStringFilter("entityId", request);
 		String version = getStringFilter("version", request);//TODO
 		long v = version == null ? 0L : Long.parseLong(version);
-
+		
 		return fsService.findByFormName(formName, v);
 	}
-
+	
 	@Override
-	public List<FormSubmission> filter(String query) {
+	public List<FormSubmission> filter(String query, String district) {
 		throw new UnsupportedOperationException();
 	}
-
+	
 }

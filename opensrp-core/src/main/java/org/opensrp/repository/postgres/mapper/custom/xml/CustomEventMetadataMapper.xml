@@ -82,11 +82,11 @@
 
 	<select id="selectBySearchBean"
 			resultMap="BaseEventResultMap">
-		select core.event{table}.id,core.event{table}.json
-		FROM core.event{table} , core.event_metadata{table} where core.event{table}.id=core.event_metadata{table}.event_id
+		select core.event${table}.id,core.event${table}.json
+		FROM core.event${table} , core.event_metadata${table} where core.event${table}.id=core.event_metadata${table}.event_id
 		and server_version::BIGINT >= #{serverVersion,jdbcType=BIGINT}  and
 		base_entity_id=any(
-		select base_entity_id from core.client_metadata{table}
+		select base_entity_id from core.client_metadata${table}
 		where
 
 		<if test="addressBean.villageId != null">
@@ -97,7 +97,7 @@
 			)
 		</if>
 		)
-		order by core.event_metadata{table}.server_version asc
+		order by core.event_metadata${table}.server_version asc
 		LIMIT #{limit}
 
 	</select>
@@ -106,8 +106,8 @@
 		resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event_metadata{table} em
-		join core.event{table} e on em.event_id = e.id
+		from core.event_metadata${table} em
+		join core.event${table} e on em.event_id = e.id
 		where em.document_id = #{documentId,jdbcType=VARCHAR} and em.date_deleted is null
 	</select>
 
@@ -118,8 +118,8 @@
 			distinct
 		</if>
 		<include refid="Base_Event_Column_List" />
-		from core.event_metadata{table} em
-		join core.event{table} e on em.event_id = e.id
+		from core.event_metadata${table} em
+		join core.event${table} e on em.event_id = e.id
 		<if test="_parameter != null">
 			<include refid="Event_Example_Where_Clause" />
 		</if>
@@ -133,8 +133,8 @@
 		resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event_metadata{table} em
-		join core.event{table} e on em.event_id = e.id
+		from core.event_metadata${table} em
+		join core.event${table} e on em.event_id = e.id
 		where ( em.openmrs_uuid is null or em.openmrs_uuid ='' )
 			and em.server_version between #{from,jdbcType=BIGINT} and #{to,jdbcType=BIGINT} 
 			and em.date_deleted is null
@@ -145,8 +145,8 @@
 		resultMap="BaseEventResultMap">
 		select
 		<include refid="Base_Event_Column_List" />
-		from core.event_metadata{table} em
-		join core.event{table} e on em.event_id = e.id
+		from core.event_metadata${table} em
+		join core.event${table} e on em.event_id = e.id
 		where ( em.openmrs_uuid is null or em.openmrs_uuid ='' )
 			and em.event_type = #{eventType,jdbcType=VARCHAR}
 			and em.server_version between #{from,jdbcType=BIGINT} and #{to,jdbcType=BIGINT} 
@@ -161,8 +161,8 @@
 			distinct
 		</if>
 		<include refid="Base_Event_Column_List" />
-		from core.event_metadata{table} em
-		inner join core.event{table} e on em.event_id = e.id
+		from core.event_metadata${table} em
+		inner join core.event${table} e on em.event_id = e.id
 		<if test="_parameter != null">
 			<include refid="Rowbounds_Example_Where_Clause" />
 		</if>
@@ -175,7 +175,7 @@
 	<select id="findEventIdByFormSubmissionId" 
 		resultType="Integer">
 		select event_id
-		from core.event_metadata{table} em
+		from core.event_metadata${table} em
 		where em.form_submission_id = #{formSubmissionId,jdbcType=VARCHAR} and em.date_deleted is null limit 1
 	</select>
 	
@@ -183,7 +183,7 @@
 		resultMap="BaseEventResultMap">
 		select
 		e.id, e.json
-		from core.event{table} e
+		from core.event${table} e
 		where e.id = #{eventId} limit 1
 	</select>
 
@@ -193,18 +193,18 @@
 					select
 						event_id
 					from
-						core.event_metadata{table}
+						core.event_metadata${table}
 					where
 						provider_id=#{providerId,jdbcType=VARCHAR}
 						and server_version::BIGINT >= #{serverVersion,jdbcType=BIGINT}
 				)select
-				 	core.event{table}.id,core.event{table}.json
+				 	core.event${table}.id,core.event${table}.json
 				from
-				  	core.event{table}
+				  	core.event${table}
 				where
 				  	id=any(select event_id from em )
 				order by
-				 	core.event{table}.json->>'serverVersion' asc
+				 	core.event${table}.json->>'serverVersion' asc
 	</select>
 
 	<select id="getHouseholdId" parameterType="java.lang.Integer"

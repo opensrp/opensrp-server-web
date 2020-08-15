@@ -85,15 +85,15 @@ public class EncounterAtomfeed extends OpenmrsService implements EventWorker, At
 			}
 			
 			org.opensrp.domain.Event enc = encounterService.convertToEvent(e);
-			org.opensrp.domain.Event existing = eventService.find(e.getString("encounterUuid"));
+			org.opensrp.domain.Event existing = eventService.find(e.getString("encounterUuid"), "");
 			enc.withIsSendToOpenMRS("no");
 			log.info("EEEEEEE:" + e.toString());
 			if (existing == null) {
 				log.info("New Event");
-				eventService.addEvent(enc);
+				eventService.addEvent(enc, "");
 			} else {
 				log.info("Update existing Event");
-				eventService.addEvent(enc);
+				eventService.addEvent(enc, "");
 				//enc = eventService.mergeEvent(enc);
 			}
 		}

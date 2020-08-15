@@ -21,12 +21,12 @@ public class SearchRepositoryImpl implements SearchRepository {
 	
 	@Override
 	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, String firstName, String middleName,
-	                                   String lastName, Integer limit) {
+	                                   String lastName, Integer limit, String table) {
 		clientSearchBean.setFirstName(firstName);
 		clientSearchBean.setMiddleName(middleName);
 		clientSearchBean.setLastName(lastName);
 		List<org.opensrp.domain.postgres.Client> clients = clientMetadataMapper.selectBySearchBean(clientSearchBean,
-		    new AddressSearchBean(), 0, limit == null ? BaseRepositoryImpl.DEFAULT_FETCH_SIZE : limit);
+		    new AddressSearchBean(), 0, limit == null ? BaseRepositoryImpl.DEFAULT_FETCH_SIZE : limit, table);
 		return clientsRepository.convert(clients);
 	}
 	

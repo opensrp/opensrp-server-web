@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.motechproject.scheduler.domain.MotechEvent;
-import org.motechproject.server.event.annotations.MotechListener;
 import org.opensrp.common.AllConstants.DHIS2Constants;
 import org.opensrp.common.util.DateUtil;
 import org.opensrp.domain.Client;
@@ -61,14 +60,14 @@ public class DHIS2SyncerListener {
 				start = clientSync == null || clientSync.get(0).getValue() == null ? 0 : clientSync.get(0).getValue();
 			}
 			System.err.println("start:" + start);
-			List<Client> cl = clientService.findByServerVersion(start);
+			List<Client> cl = clientService.findByServerVersion(start, "");
 			if (eventSync.size() == 0) {
 				allDHIS2Marker.addEventMarker();
 				eventStart = 0l;
 			} else {
 				eventStart = eventSync == null || eventSync.get(0).getValue() == null ? 0 : eventSync.get(0).getValue();
 			}
-			List<Event> events = eventService.findByServerVersion(eventStart);
+			List<Event> events = eventService.findByServerVersion(eventStart, "");
 			for (Client c : cl) {
 				System.err.println("Name:" + c.fullName());
 				try {

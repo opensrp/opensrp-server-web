@@ -177,7 +177,7 @@ public class OpenmrsSyncerListener {
 	}
 	
 	public JSONObject pushClient(long start) throws JSONException {
-		List<Client> cl = clientService.findByServerVersion(start);
+		List<Client> cl = clientService.findByServerVersion(start, "");
 		logger.info("Clients list size " + cl.size());
 		JSONObject patient = new JSONObject();// only for test code purpose
 		JSONArray patientsJsonArray = new JSONArray();// only for test code purpose
@@ -234,7 +234,7 @@ public class OpenmrsSyncerListener {
 						patient = patientJson;
 						if (patientJson != null && patientJson.has("uuid")) {
 							c.addIdentifier(PatientService.OPENMRS_UUID_IDENTIFIER_TYPE, patientJson.getString("uuid"));
-							clientService.addOrUpdate(c, false);
+							clientService.addOrUpdate(c, false, "");
 							config.updateAppStateToken(SchedulerConfig.openmrs_syncer_sync_client_by_date_updated,
 							    c.getServerVersion());
 							if (multiMedia != null) {
@@ -314,7 +314,7 @@ public class OpenmrsSyncerListener {
 	}
 	
 	public JSONObject pushEvent(long start) {
-		List<Event> el = eventService.findByServerVersion(start);
+		List<Event> el = eventService.findByServerVersion(start, "");
 		logger.info("Event list size " + el.size() + " [start]" + start);
 		JSONObject encounter = null;
 		for (Event e : el) {
@@ -336,7 +336,7 @@ public class OpenmrsSyncerListener {
 						encounter = eventJson;
 						if (eventJson != null && eventJson.has("uuid")) {
 							e.addIdentifier(EncounterService.OPENMRS_UUID_IDENTIFIER_TYPE, eventJson.getString("uuid"));
-							eventService.updateEvent(e);
+							eventService.updateEvent(e, "");
 						}
 					}
 				}
@@ -363,7 +363,7 @@ public class OpenmrsSyncerListener {
 		JSONArray relationshipsArray = new JSONArray();// only for test code purpose
 		JSONObject returnJsonObject = new JSONObject();// only for test code purpose
 		for (org.opensrp.domain.ErrorTrace errorTrace : errorTraces) {
-			Client c = clientService.find(errorTrace.getRecordId());
+			Client c = clientService.find(errorTrace.getRecordId(), "");
 			if (c != null) {
 				try {
 					Multimedia multiMedia = multimediaService.findByCaseId(c.getBaseEntityId());
@@ -415,7 +415,7 @@ public class OpenmrsSyncerListener {
 							patient = patientJson;
 							if (patientJson != null && patientJson.has("uuid")) {
 								c.addIdentifier(PatientService.OPENMRS_UUID_IDENTIFIER_TYPE, patientJson.getString("uuid"));
-								clientService.addOrUpdate(c, false);
+								clientService.addOrUpdate(c, false, "");
 								config.updateAppStateToken(SchedulerConfig.openmrs_syncer_sync_client_by_date_updated,
 								    c.getServerVersion());
 								if (multiMedia != null) {

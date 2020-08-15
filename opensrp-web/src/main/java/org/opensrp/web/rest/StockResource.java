@@ -5,11 +5,11 @@ import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
 import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
 import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.opensrp.common.AllConstants.Stock.TO_FROM;
 import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
 import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
 import static org.opensrp.common.AllConstants.Stock.VALUE;
-import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -63,10 +63,12 @@ public class StockResource extends RestResource<Stock> {
 	@Autowired
 	public StockResource(StockService stockService) {
 		this.stockService = stockService;
+		
 	}
 	
 	@Override
-	public Stock getByUniqueId(String uniqueId) {
+	public Stock getByUniqueId(String uniqueId, String district) {
+		
 		return stockService.find(uniqueId);
 	}
 	
@@ -173,7 +175,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public Stock create(Stock stock) {
+	public Stock create(Stock stock, String district) {
 		return stockService.addStock(stock);
 	}
 	
@@ -186,7 +188,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public Stock update(Stock stock) {
+	public Stock update(Stock stock, String district) {
 		return stockService.mergeStock(stock);
 	}
 	
@@ -196,9 +198,8 @@ public class StockResource extends RestResource<Stock> {
 		StockSearchBean searchBean = populateSearchBean(request);
 		
 		String serverVersion = getStringFilter(TIMESTAMP, request);
-		if(serverVersion!=null)
-		searchBean.setServerVersion(Long.valueOf(serverVersion));
-		
+		if (serverVersion != null)
+			searchBean.setServerVersion(Long.valueOf(serverVersion));
 		
 		if (!StringUtils.isEmptyOrWhitespaceOnly(searchBean.getIdentifier())) {
 			Stock stock = stockService.find(searchBean.getIdentifier());
@@ -210,7 +211,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public List<Stock> filter(String query) {
+	public List<Stock> filter(String query, String district) {
 		return stockService.findAllStocks();
 	}
 	

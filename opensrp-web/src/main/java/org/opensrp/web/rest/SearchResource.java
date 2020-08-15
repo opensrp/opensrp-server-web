@@ -63,7 +63,8 @@ public class SearchResource extends RestResource<Client> {
 		
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
-		
+		String district = getStringFilter("district", request);
+		String table = clientService.getTableName(district);
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
@@ -99,7 +100,7 @@ public class SearchResource extends RestResource<Client> {
 		}
 		
 		searchBean.setIdentifiers(identifierMap);
-		return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
+		return searchService.searchClient(searchBean, firstName, middleName, lastName, null, table);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/path")
@@ -130,7 +131,8 @@ public class SearchResource extends RestResource<Client> {
 			searchBean.setGender(getStringFilter(GENDER, request));
 			String inActive = getStringFilter(INACTIVE, request);
 			String lostToFollowUp = getStringFilter(LOST_TO_FOLLOW_UP, request);
-			
+			String district = getStringFilter("district", request);
+			String table = clientService.getTableName(district);
 			DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 			DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
 			//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
@@ -172,7 +174,7 @@ public class SearchResource extends RestResource<Client> {
 				
 				searchBean.setIdentifiers(identifiers);
 				searchBean.setAttributes(attributes);
-				children = searchService.searchClient(searchBean, firstName, middleName, lastName, limit);
+				children = searchService.searchClient(searchBean, firstName, middleName, lastName, limit, table);
 				
 			}
 			
@@ -194,12 +196,12 @@ public class SearchResource extends RestResource<Client> {
 			}
 			
 			List<Client> mothers = new ArrayList<Client>();
-			if (!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName) || !StringUtils.isEmptyOrWhitespaceOnly(motherLastName)
-			        || !motherAttributes.isEmpty()) {
+			if (!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName)
+			        || !StringUtils.isEmptyOrWhitespaceOnly(motherLastName) || !motherAttributes.isEmpty()) {
 				
 				String nameLike = null;
-				if ((!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName)
-				        && !StringUtils.isEmptyOrWhitespaceOnly(motherLastName)) && motherFirstName.equals(motherLastName)) {
+				if ((!StringUtils.isEmptyOrWhitespaceOnly(motherFirstName) && !StringUtils
+				        .isEmptyOrWhitespaceOnly(motherLastName)) && motherFirstName.equals(motherLastName)) {
 					if (org.apache.commons.lang3.StringUtils.containsWhitespace(motherFirstName.trim())) {
 						String[] arr = motherFirstName.split("\\s+");
 						motherFirstName = arr[0];
@@ -215,14 +217,14 @@ public class SearchResource extends RestResource<Client> {
 				motherSearchBean.setAttributes(motherAttributes);
 				motherSearchBean.setLastEditFrom(searchBean.getLastEditFrom());
 				motherSearchBean.setLastEditTo(searchBean.getLastEditTo());
-				mothers = searchService.searchClient(motherSearchBean, motherFirstName, null, motherLastName, limit);
+				mothers = searchService.searchClient(motherSearchBean, motherFirstName, null, motherLastName, limit, table);
 				
 			}
 			
 			List<Client> eventChildren = new ArrayList<Client>();
 			if (!StringUtils.isEmptyOrWhitespaceOnly(motherGuardianPhoneNumber)) {
 				List<Event> events = eventService.findEventsByConceptAndValue("159635AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				    motherGuardianPhoneNumber);
+				    motherGuardianPhoneNumber, table);
 				if (events != null && !events.isEmpty()) {
 					List<String> clientIds = new ArrayList<String>();
 					for (Event event : events) {
@@ -232,7 +234,7 @@ public class SearchResource extends RestResource<Client> {
 						}
 					}
 					
-					eventChildren = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
+					eventChildren = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds, table);
 					
 				}
 			}
@@ -252,7 +254,7 @@ public class SearchResource extends RestResource<Client> {
 					}
 				}
 				
-				linkedMothers = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
+				linkedMothers = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds, table);
 				
 			}
 			
@@ -268,7 +270,7 @@ public class SearchResource extends RestResource<Client> {
 					}
 				}
 				
-				linkedChildren = clientService.findByFieldValue(ZEIR_ID_KEY, cIndentifers);
+				linkedChildren = clientService.findByFieldValue(ZEIR_ID_KEY, cIndentifers, table);
 				
 			}
 			
@@ -300,13 +302,13 @@ public class SearchResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public List<Client> filter(String query) {
+	public List<Client> filter(String query, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Client getByUniqueId(String uniqueId) {
+	public Client getByUniqueId(String uniqueId, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -318,13 +320,13 @@ public class SearchResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client create(Client entity) {
+	public Client create(Client entity, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Client update(Client entity) {
+	public Client update(Client entity, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -54,7 +54,7 @@ public class RapidproMessageListener {
 				for (Camp camp : camps) {
 					if (DateUtil.dateDiff(camp.getDate()) == 0) {
 						//List<Action> actions = actionService.findAllActionByProviderNotExpired(camp.getProviderName());
-						List<Event> events = eventService.findByProviderAndEntityType(camp.getProviderName());
+						List<Event> events = eventService.findByProviderAndEntityType(camp.getProviderName(), "");
 						logger.info("total events found for announcement eventSize: " + events.size() + " ,provider:"
 						        + camp.getProviderName());
 						messageService.sentMessageToClient(messageFactory, events, camp);
@@ -90,7 +90,7 @@ public class RapidproMessageListener {
 						} else {
 							logger.info("finding all events for provider:" + camp.getProviderName());
 							//actions = actionService.findAllActionByProviderNotExpired(camp.getProviderName());
-							List<Event> events = eventService.findByProviderAndEntityType(camp.getProviderName());
+							List<Event> events = eventService.findByProviderAndEntityType(camp.getProviderName(), "");
 							logger.info("total events found for reminder eventSize: " + events.size() + " ,provider:"
 							        + camp.getProviderName());
 							messageService.sentMessageToClient(messageFactory, events, camp);

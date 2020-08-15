@@ -18,9 +18,9 @@ public class SearchService {
 		this.search = search;
 	}
 	
-	public List<Client> searchClient(ClientSearchBean clientSearchBean, String firstName, String middleName, String lastName,
-	                                 Integer limit) {
-		return search.findByCriteria(clientSearchBean, firstName, middleName, lastName, limit);
+	public List<Client> searchClient(ClientSearchBean clientSearchBean, String firstName, String middleName,
+	                                 String lastName, Integer limit, String table) {
+		return search.findByCriteria(clientSearchBean, firstName, middleName, lastName, limit, table);
 	}
 	
 }

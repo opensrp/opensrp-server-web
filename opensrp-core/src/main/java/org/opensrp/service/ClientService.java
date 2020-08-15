@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -381,5 +382,13 @@ public class ClientService {
 	
 	public String getIsResync(String username) {
 		return allClients.getIsResync(username);
+	}
+	
+	public String getTableName(String district) {
+		String table = "";
+		if (!StringUtils.isBlank(district)) {
+			table = "_" + district;
+		}
+		return table;
 	}
 }

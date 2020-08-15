@@ -89,7 +89,7 @@ public class ChildTracker extends DHIS2Service implements DHIS2Tracker {
 		
 		/**** getting mother info from Client of Mother *******/
 		
-		List<Event> events = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "Birth Registration");
+		List<Event> events = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "Birth Registration", "");
 		if (events.size() != 0) {
 			List<Obs> observations = events.get(0).getObs();
 			// birth weight

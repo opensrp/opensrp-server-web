@@ -29,7 +29,7 @@ public class SearchRepositoryImpl extends MotechBaseRepository<Search> implement
 	}
 	
 	public List<Client> findByCriteria(ClientSearchBean clientSearchBean, String firstName, String middleName,
-	                                   String lastName, Integer limit) {
+	                                   String lastName, Integer limit, String table) {
 		return sr.getByCriteria(clientSearchBean, firstName, middleName, lastName, limit);
 	}
 	

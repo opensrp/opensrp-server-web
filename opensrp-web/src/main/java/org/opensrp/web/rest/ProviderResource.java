@@ -24,10 +24,10 @@ import com.mysql.jdbc.StringUtils;
 @Controller
 @RequestMapping("/rest/provider")
 public class ProviderResource extends RestResource<Provider> {
-
+	
 	@Autowired
 	private OpenmrsUserService userService;
-
+	
 	@RequestMapping(value = "authenticate", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> authenticate(HttpServletRequest request) throws JSONException {
@@ -35,7 +35,7 @@ public class ProviderResource extends RestResource<Provider> {
 		String u = request.getParameter("u");
 		String p = request.getParameter("p");
 		String id = request.getParameter("id");
-
+		
 		try {
 			if (StringUtils.isEmptyOrWhitespaceOnly(id)) {
 				if (StringUtils.isEmptyOrWhitespaceOnly(u) || StringUtils.isEmptyOrWhitespaceOnly(p)) {
@@ -80,41 +80,41 @@ public class ProviderResource extends RestResource<Provider> {
 		}
 		return resp;
 	}
-
+	
 	@Override
 	public List<Provider> search(HttpServletRequest request) throws ParseException {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public Provider getByUniqueId(String uniqueId) {
+	public Provider getByUniqueId(String uniqueId, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public List<String> requiredProperties() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public Provider create(Provider entity) {
+	public Provider create(Provider entity, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public Provider update(Provider entity) {
+	public Provider update(Provider entity, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public List<Provider> filter(String query) {
+	public List<Provider> filter(String query, String district) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 }

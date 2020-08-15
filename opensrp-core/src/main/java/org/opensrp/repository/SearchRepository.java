@@ -8,5 +8,5 @@ import org.opensrp.search.ClientSearchBean;
 public interface SearchRepository {
 	
 	List<Client> findByCriteria(ClientSearchBean clientSearchBean, String firstName, String middleName, String lastName,
-	                            Integer limit);
+	                            Integer limit, String table);
 }

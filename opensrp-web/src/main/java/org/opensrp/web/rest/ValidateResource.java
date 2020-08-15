@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import static java.text.MessageFormat.format;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -9,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.opensrp.domain.Client;
-import org.opensrp.domain.Event;
 import org.opensrp.repository.EventsRepository;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
@@ -41,7 +42,7 @@ public class ValidateResource {
 	private ClientService clientService;
 	
 	private EventService eventService;
-
+	
 	private EventsRepository eventsRepository;
 	
 	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -60,9 +61,10 @@ public class ValidateResource {
 	 * @return
 	 */
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/sync")
-	public ResponseEntity<String> validateSync(@RequestBody String data) {
+	public ResponseEntity<String> validateSync(@RequestBody String data, HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
-		
+		String district = getStringFilter("district", request);
+		String table = clientService.getTableName(district);
 		try {
 			if (StringUtils.isBlank(data)) {
 				return new ResponseEntity<>(BAD_REQUEST);
@@ -79,7 +81,7 @@ public class ValidateResource {
 				    new TypeToken<ArrayList<String>>() {}.getType());
 				for (String clientId : clientIds) {
 					try {
-						Integer clientIdFromDB = clientService.findClientIdByBaseEntityId(clientId);
+						Integer clientIdFromDB = clientService.findClientIdByBaseEntityId(clientId, table);
 						if (clientIdFromDB == null || clientIdFromDB == 0) {
 							missingClientIds.add(clientId);
 						}
@@ -96,7 +98,7 @@ public class ValidateResource {
 				    new TypeToken<ArrayList<String>>() {}.getType());
 				for (String eventId : eventIds) {
 					try {
-						Integer eventIdFromDB = eventService.findEventIdByFormSubmissionId(eventId);
+						Integer eventIdFromDB = eventService.findEventIdByFormSubmissionId(eventId, table);
 						if (eventIdFromDB == null || eventIdFromDB == 0) {
 							missingEventIds.add(eventId);
 						}

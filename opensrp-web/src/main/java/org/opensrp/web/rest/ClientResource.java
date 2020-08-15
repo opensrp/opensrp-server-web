@@ -66,13 +66,15 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client getByUniqueId(String uniqueId) {
-		return clientService.find(uniqueId);
+	public Client getByUniqueId(String uniqueId, String district) {
+		String table = clientService.getTableName(district);
+		return clientService.find(uniqueId, table);
 	}
 	
 	@Override
-	public Client create(Client o) {
-		return clientService.addClient(o);
+	public Client create(Client o, String district) {
+		String table = clientService.getTableName(district);
+		return clientService.addClient(o, table);
 	}
 	
 	@Override
@@ -86,8 +88,9 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client update(Client entity) {//TODO check if send property and id matches
-		return clientService.mergeClient(entity, null);//TODO update should only be based on baseEntityId
+	public Client update(Client entity, String district) {//TODO check if send property and id matches
+		String table = clientService.getTableName(district);
+		return clientService.mergeClient(entity, null, table);//TODO update should only be based on baseEntityId
 	}
 	
 	@Override
@@ -121,13 +124,16 @@ public class ClientResource extends RestResource<Client> {
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
-		
+		String district = getStringFilter("district", request);
+		String table = clientService.getTableName(district);
 		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
-		    lastEdit == null ? null : lastEdit[1]);
+		    lastEdit == null ? null : lastEdit[1], table);
 	}
 	
 	@Override
-	public List<Client> filter(String query) {
+	public List<Client> filter(String query, String district) {
+		String table = clientService.getTableName(district);
+		
 		return clientService.findByDynamicQuery(query);
 	}
 	
@@ -137,19 +143,22 @@ public class ClientResource extends RestResource<Client> {
 	    throws JSONException {
 		JSONObject jsonObj = new JSONObject();
 		try {
+			String district = getStringFilter("district", request);
+			String table = clientService.getTableName(district);
+			
 			boolean isApproved = true;
 			Gson jsonObject = new Gson();
 			DataApprove approvalData = jsonObject.fromJson(requestData, DataApprove.class);
 			String baseEntityId = approvalData.getBaseEntityId();
 			String comments = approvalData.getComment();
 			String status = approvalData.getStatus();
-			Client client = clientService.find(baseEntityId);
+			Client client = clientService.find(baseEntityId, table);
 			client.withDataApprovalComments(comments);
 			client.withDataApprovalStatus(status);
 			if (status.equalsIgnoreCase(AllConstants.APPROVED)) {
 				isApproved = false;
 			}
-			clientService.addOrUpdate(client, isApproved);
+			clientService.addOrUpdate(client, isApproved, table);
 			
 			/*List<Event> getEvents = eventService.findByBaseEntityAndEventTypeContaining(baseEntityId, "Registration");
 			if (getEvents.size() != 0) {
@@ -170,9 +179,10 @@ public class ClientResource extends RestResource<Client> {
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/update-union")
 	public ResponseEntity<String> updateClientByUpazila(@RequestParam("changeAbleField") String changeAbleField,
 	                                                    @RequestParam("currentName") String currentName,
-	                                                    @RequestParam("rightName") String rightName) throws JSONException {
+	                                                    @RequestParam("rightName") String rightName,
+	                                                    @RequestParam("district") String district) throws JSONException {
 		
-		List<Client> clients = clientService.findAllClientByUpazila(currentName);
+		List<Client> clients = clientService.findAllClientByUpazila(currentName, district);
 		
 		System.out.println("TOTAL SIZE:->");
 		System.out.println(clients.size());
@@ -182,7 +192,7 @@ public class ClientResource extends RestResource<Client> {
 				Map<String, String> addressFields = client.getAddresses().get(0).getAddressFields();
 				addressFields.put(changeAbleField, rightName);
 				client.getAddresses().get(0).setAddressFields(addressFields);
-				clientService.updateClient(client);
+				clientService.updateClient(client, district);
 			}
 		}
 		catch (Exception e) {

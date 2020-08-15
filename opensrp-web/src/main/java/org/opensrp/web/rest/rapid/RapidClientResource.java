@@ -196,7 +196,7 @@ public class RapidClientResource {
 			values.add(date);
 			e.addObs(new Obs("concept", "txt", "1025AAAAAAAAAAAAAAAA", null, values, "", vaccine));
 			
-			eventService.addEvent(e);
+			eventService.addEvent(e, "");
 			resp.put("SUCCESS", Boolean.toString(true));
 			return resp;
 		}
@@ -263,7 +263,7 @@ public class RapidClientResource {
 			
 			Event e = fec.getEventFromFormSubmission(fs);
 			
-			eventService.addEvent(e);
+			eventService.addEvent(e, "");
 			
 			try {
 				System.out.println("Creating Encounter");
@@ -304,7 +304,7 @@ public class RapidClientResource {
 		m.put("eligibleVaccines", ev);
 		Map<String, Object> receivedVacines = new HashMap<>();
 		try {
-			List<Event> el = eventService.findByBaseEntityId(c.getBaseEntityId()); //eventService.findEventsBy(c.getBaseEntityId(), null, null, eventType, null, null, null, null, null);
+			List<Event> el = eventService.findByBaseEntityId(c.getBaseEntityId(), ""); //eventService.findEventsBy(c.getBaseEntityId(), null, null, eventType, null, null, null, null, null);
 			m.put("vaccineCard", makeVaccineCard(el, ev));
 		}
 		catch (Exception e) {

@@ -22,7 +22,7 @@ public class DHIS2AggregateConnector extends DHIS2Service {
 	@Autowired
 	private EventsRepository allEvents;
 	
-	public DHIS2AggregateConnector(){
+	public DHIS2AggregateConnector() {
 		
 	}
 	
@@ -52,7 +52,7 @@ public class DHIS2AggregateConnector extends DHIS2Service {
 		Integer birthUnderWeightCount = 0;
 		Integer brtc = 0;
 		
-		List<Event> eventList = allEvents.findEventByEventTypeBetweenTwoDates("Birth Registration");
+		List<Event> eventList = allEvents.findEventByEventTypeBetweenTwoDates("Birth Registration", "");
 		if (eventList.isEmpty()) {
 			System.out.println("Empty:Data");
 		} else {
@@ -154,7 +154,7 @@ public class DHIS2AggregateConnector extends DHIS2Service {
 		int rota_2 = 0;
 		int penta_2 = 0;
 		
-		List<Event> vaccinetList = allEvents.findEventByEventTypeBetweenTwoDates("Vaccination");
+		List<Event> vaccinetList = allEvents.findEventByEventTypeBetweenTwoDates("Vaccination", "");
 		if (vaccinetList.isEmpty()) {
 			System.out.println("Empty:Data");
 		} else {

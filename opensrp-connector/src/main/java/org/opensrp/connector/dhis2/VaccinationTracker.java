@@ -48,7 +48,7 @@ public class VaccinationTracker extends DHIS2Service {
 			for (Obs obs : observations) {
 				
 				if (DHIS2Settings.VACCINATION.containsKey(obs.getFormSubmissionField())) {
-					Client client = clientService.find(event.getBaseEntityId());
+					Client client = clientService.find(event.getBaseEntityId(), "");
 					
 					if (client != null)
 						sendTrackCaptureData(prepareData(obs, client));

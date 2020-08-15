@@ -112,7 +112,7 @@ public class HouseholdTracker extends DHIS2Service implements DHIS2Tracker {
 		generateTrackCaptureData.put(data);*/
 		
 		/***** get information form Event ******/
-		List<Event> event = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "Household Registration");
+		List<Event> event = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "Household Registration", "");
 		if (event.size() != 0) {
 			List<Obs> observations = event.get(0).getObs();
 			/**** Member_Registration_No /Date_Of_Reg ***/

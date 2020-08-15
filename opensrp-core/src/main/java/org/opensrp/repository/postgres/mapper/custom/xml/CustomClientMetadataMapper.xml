@@ -8,8 +8,8 @@
 	</sql>
 	
 	<sql id="Base_Table_List">
-		from core.client_metadata{table} cm
-		join core.client{table} c on cm.client_id = c.id
+		from core.client_metadata${table} cm
+		join core.client${table} c on cm.client_id = c.id
 	</sql>
 	
 	<sql id="Example_Where_Clause">
@@ -93,8 +93,8 @@
 	
 	<select id="selectBySearchBean"
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
-		select id,json from core.client{table} where core.client.id=any(
-			select client_id from core.client_metadata{table} where server_version::BIGINT >= #{clientBean.serverVersion,jdbcType=BIGINT}
+		select id,json from core.client${table} where core.client.id=any(
+			select client_id from core.client_metadata${table} where server_version::BIGINT >= #{clientBean.serverVersion,jdbcType=BIGINT}
 			
 			<if test="addressBean.address2 != null">
 					and address2 IN				
@@ -224,7 +224,7 @@
 	<select id="findClientIdByBaseEntityId"
 		resultType="Integer">
 		select client_id
-		from core.client_metadata{table} cm
+		from core.client_metadata${table} cm
 		where cm.base_entity_id = #{baseEntityId,jdbcType=VARCHAR} and cm.date_deleted is null limit 1
 	</select>
 	
@@ -232,7 +232,7 @@
 		resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		c.id, c.json
-		from core.client{table} c
+		from core.client${table} c
 		where c.id = #{clientId} limit 1
 	</select>
 	

@@ -1,7 +1,6 @@
 package org.opensrp.connector.openmrs.service;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +17,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.util.HttpResponse;
 import org.opensrp.common.util.HttpUtil;
-import org.opensrp.connector.openmrs.schedule.OpenmrsSyncerListener;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.Obs;
-import org.opensrp.domain.User;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.slf4j.Logger;
@@ -153,7 +150,7 @@ public class EncounterService extends OpenmrsService {
 	private JSONObject createEncounterJson(Event e) throws JSONException {
 		JSONObject pt = patientService.getPatientByIdentifier(e.getBaseEntityId());
 		if (pt.has("uuid")) {
-			Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+			Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 			JSONObject enc = getStaticJsonObject("normalDisease");
 			enc.put("patientUuid", pt.getString("uuid"));
 			enc.put("locationUuid", e.getLocationId());
@@ -189,7 +186,7 @@ public class EncounterService extends OpenmrsService {
 	// get attribute value form client - may 12, 2019
 	private String getAttributeValueFromClientJSON(Event e, String key) throws JSONException {
 		String value = null;
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		if (client != null) {
 			if (client.getAttributes().containsKey(key)) {
 				value = (String) client.getAttributes().get(key);
@@ -365,7 +362,7 @@ public class EncounterService extends OpenmrsService {
 	private JSONArray createObservationFollowupPregnantStatus(Event e) throws JSONException {
 		JSONArray obar = new JSONArray();
 		String formFieldPath = "Pragnant_Status_MHV.5/5-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		if (client.getAttributes().containsKey("PregnancyStatus")) {
 			String pregnancyStatusString = (String) client.getAttributes().get("PregnancyStatus");
 			JSONObject pregnancyInfoJSONObject = getStaticJsonObjectWithFormFieldPath("pregnancyInfo", formFieldPath);
@@ -526,7 +523,7 @@ public class EncounterService extends OpenmrsService {
 		List<String> diseaseList = null;
 		//String formFieldPath = "শিশু (২ মাস থেকে ৫ বছর) স্বাস্থ্য সেবা.32/61-0";
 		String formFieldPath = "শিশু (২ মাস থেকে ৫ বছর) এমএইচভি.3/3-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		boolean hasDisease = false;
 		if (client.getAttributes().containsKey("has_disease")) {
 			String hasDiseaseStr = (String) client.getAttributes().get("has_disease");
@@ -600,7 +597,7 @@ public class EncounterService extends OpenmrsService {
 		List<String> diseaseList = null;
 		//String formFieldPath = "শিশু (০ থেকে ২ মাস) স্বাস্থ্য সেবা.35/73-0";
 		String formFieldPath = "শিশু (০ থেকে ২ মাস) এমএইচভি.4/4-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		
 		//may 12, 2019
 		JSONObject concept = new JSONObject();
@@ -684,7 +681,7 @@ public class EncounterService extends OpenmrsService {
 		JSONArray obar = new JSONArray();
 		//String formFieldPath = "প্রসব পরবর্তী সেবা.43/52-0";
 		String formFieldPath = "PNC_MHV.2/1-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		obar = addServiceDateAndNumberInObservationArray(e, obar, formFieldPath);
 		obar = addRefferedPlaceInObservationArray(e, obar, formFieldPath);
 		//obar = addPlaceOfServiceInObservationArray(e, obar,formFieldPath);
@@ -708,7 +705,7 @@ public class EncounterService extends OpenmrsService {
 	private JSONArray createObservationFollowupANC(Event e) throws JSONException {
 		JSONArray obar = new JSONArray();
 		String formFieldPath = "ANC_MHV.3/1-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		/*if(client.getAttributes().containsKey("Denger_Signs_During_Pregnancy")){
 			String dangerSignsDuringPregnancyString = (String)client.getAttributes().get("Denger_Signs_During_Pregnancy");
 			List<String> dangerSignsDuringPregnancyList = Arrays.asList(dangerSignsDuringPregnancyString.split(","));
@@ -887,7 +884,7 @@ public class EncounterService extends OpenmrsService {
 	
 	private JSONArray createObservationFamilyPlanning(Event e) throws JSONException {
 		JSONArray obar = new JSONArray();
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		if (client.getAttributes().containsKey("familyplanning")) {
 			String familyPlanning = (String) client.getAttributes().get("familyplanning");
 			familyPlanning = familyPlanning.trim();
@@ -954,7 +951,7 @@ public class EncounterService extends OpenmrsService {
 		JSONArray obar = new JSONArray();
 		//String formFieldPath = "সাধারন রোগীর সেবা.19/43-0";
 		String formFieldPath = "General_Disease_Femal_MHV.1/1-0";
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		if (client.getGender() != null && client.getGender().equals("M")) {
 			formFieldPath = "General_Disease_Male.6/14-0";
 		}
@@ -1024,7 +1021,7 @@ public class EncounterService extends OpenmrsService {
 	private JSONArray addDiseaseInObservationArray(Event e, JSONArray obar, String formFieldPath, JSONObject concept)
 	    throws JSONException {
 		List<String> diseaseList = new ArrayList<String>();
-		Client client = clientService.getByBaseEntityId(e.getBaseEntityId());
+		Client client = clientService.getByBaseEntityId(e.getBaseEntityId(), "");
 		boolean hasDisease = false;
 		if (client.getAttributes().containsKey("has_disease")) {
 			String hasDiseaseStr = (String) client.getAttributes().get("has_disease");
@@ -1263,7 +1260,7 @@ public class EncounterService extends OpenmrsService {
 			event.addObs(new Obs("formsubmissionField", "text", "HIE_FACILITIES", "" /*//TODO handle parent*/,
 			        addressFieldValue.toString(), ""/*comments*/, "HIE_FACILITIES"/*formSubmissionField*/));
 			
-			eventService.addorUpdateEvent(event);
+			eventService.addorUpdateEvent(event, "");
 		}
 		catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -1282,7 +1279,7 @@ public class EncounterService extends OpenmrsService {
 		Event e = new Event();
 		String patientId = encounter.getString("patientId");
 		String patientUuid = encounter.getString("patientUuid");
-		Client c = clientService.find(patientId);
+		Client c = clientService.find(patientId, "");
 		if (c == null || c.getBaseEntityId() == null) {
 			//try to get the client from openmrs based on the uuid
 			JSONObject openmrsPatient = patientService.getPatientByUuid(patientUuid, false);
@@ -1294,7 +1291,7 @@ public class EncounterService extends OpenmrsService {
 				//clientService.addClient(c);// currently not valid
 			}
 		}
-		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId());
+		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), "");
 		String providerId = "";
 		if (events.size() != 0) {
 			providerId = events.get(0).getProviderId();

@@ -101,7 +101,8 @@ public class MotherTracker extends DHIS2Service implements DHIS2Tracker {
 		generateTrackCaptureData.put(dhis2TrackerService.withKnownValue(DHIS2Settings.MOTHERIDMAPPING.get("base_entity_id")
 		        .toString(), client.getBaseEntityId()));
 		/***** get information form Event ******/
-		List<Event> event = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "New Woman Member Registration");
+		List<Event> event = eventService.findByBaseEntityAndType(client.getBaseEntityId(), "New Woman Member Registration",
+		    "");
 		if (event.size() != 0) {
 			List<Obs> observations = event.get(0).getObs();
 			

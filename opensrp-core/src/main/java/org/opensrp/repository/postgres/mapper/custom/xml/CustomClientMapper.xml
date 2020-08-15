@@ -45,7 +45,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		WHERE json ->> 'id' = #{documentId,jdbcType=VARCHAR} and date_deleted is null
 	</select>
 
@@ -54,7 +54,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		join jsonb_each_text(core.client.json -> 'identifiers') j on true
 		where j.value = #{identifier,jdbcType=VARCHAR} and date_deleted is null
 	</select>
@@ -64,7 +64,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		where json -> 'identifiers' ->> #{identifierType,jdbcType=VARCHAR} = #{identifier,jdbcType=VARCHAR}
 		and date_deleted is null
 	</select>
@@ -74,7 +74,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		where json -> 'attributes' ->> #{attributeType,jdbcType=VARCHAR} = #{attribute,jdbcType=VARCHAR}
 		and date_deleted is null
 	</select>
@@ -84,7 +84,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		join jsonb_each(json -> 'relationships') j on true
 		where j.value  ?? #{relationalId,jdbcType=VARCHAR}  and date_deleted is null
 		and (json ->> 'dateCreated')::date between #{dateFrom,jdbcType=DATE} and #{dateTo,jdbcType=DATE}
@@ -92,7 +92,7 @@
 
 	<select id="getClientByUpazila" parameterType="java.lang.String"
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
-		select * from core.client{table}
+		select * from core.client${table}
 		where json->'addresses'->0->'addressFields'->>'cityVillage' = #{name}
 	</select>
 
@@ -121,7 +121,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		where json -> 'relationships'->#{relationshipType,jdbcType=VARCHAR} ?? #{relationshipId,jdbcType=VARCHAR}
 		and date_deleted is null
 	</select>
@@ -131,7 +131,7 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select
 		<include refid="org.opensrp.repository.postgres.mapper.ClientMapper.Base_Column_List" />
-		from core.client{table}
+		from core.client${table}
 		join jsonb_each(json -> 'relationships') j on true
 		where j.value ??  #{relationshipId,jdbcType=VARCHAR}  and date_deleted is null
 	</select>
