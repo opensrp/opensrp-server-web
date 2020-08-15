@@ -64,7 +64,9 @@ public class ValidateResource {
 	public ResponseEntity<String> validateSync(@RequestBody String data, HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		String username = request.getRemoteUser();
+		String table = clientService.getUserLocationAndTable(username, district, "", "", "").getTableName();
+		
 		try {
 			if (StringUtils.isBlank(data)) {
 				return new ResponseEntity<>(BAD_REQUEST);

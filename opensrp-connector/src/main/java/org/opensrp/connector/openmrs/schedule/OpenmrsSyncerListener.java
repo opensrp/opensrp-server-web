@@ -234,7 +234,7 @@ public class OpenmrsSyncerListener {
 						patient = patientJson;
 						if (patientJson != null && patientJson.has("uuid")) {
 							c.addIdentifier(PatientService.OPENMRS_UUID_IDENTIFIER_TYPE, patientJson.getString("uuid"));
-							clientService.addOrUpdate(c, false, "");
+							clientService.addOrUpdate(c, false, "", "", "", "", "");
 							config.updateAppStateToken(SchedulerConfig.openmrs_syncer_sync_client_by_date_updated,
 							    c.getServerVersion());
 							if (multiMedia != null) {
@@ -336,7 +336,7 @@ public class OpenmrsSyncerListener {
 						encounter = eventJson;
 						if (eventJson != null && eventJson.has("uuid")) {
 							e.addIdentifier(EncounterService.OPENMRS_UUID_IDENTIFIER_TYPE, eventJson.getString("uuid"));
-							eventService.updateEvent(e, "");
+							eventService.updateEvent(e, "", "", "", "", "");
 						}
 					}
 				}
@@ -415,7 +415,7 @@ public class OpenmrsSyncerListener {
 							patient = patientJson;
 							if (patientJson != null && patientJson.has("uuid")) {
 								c.addIdentifier(PatientService.OPENMRS_UUID_IDENTIFIER_TYPE, patientJson.getString("uuid"));
-								clientService.addOrUpdate(c, false, "");
+								clientService.addOrUpdate(c, false, "", "", "", "", "");
 								config.updateAppStateToken(SchedulerConfig.openmrs_syncer_sync_client_by_date_updated,
 								    c.getServerVersion());
 								if (multiMedia != null) {

@@ -22,7 +22,11 @@ public abstract class RestResource<T> {
 	private T createNew(@RequestBody T entity, HttpServletRequest request) {
 		RestUtils.verifyRequiredProperties(requiredProperties(), entity);
 		String district = getStringFilter("district", request);
-		return create(entity, district);
+		String division = getStringFilter("division", request);
+		String branch = getStringFilter("branch", request);
+		String village = getStringFilter("village", request);
+		String username = request.getRemoteUser();
+		return create(entity, district, division, branch, village, username);
 	}
 	
 	@RequestMapping(value = "/{uniqueId}", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE })
@@ -30,15 +34,19 @@ public abstract class RestResource<T> {
 	private T updateExisting(@PathVariable("uniqueId") String uniqueId, @RequestBody T entity, HttpServletRequest request) {
 		RestUtils.verifyRequiredProperties(requiredProperties(), entity);
 		String district = getStringFilter("district", request);
-		return update(entity, district);//TODO
+		String division = getStringFilter("division", request);
+		String branch = getStringFilter("branch", request);
+		String village = getStringFilter("village", request);
+		String username = request.getRemoteUser();
+		return update(entity, district, division, branch, village, username);//TODO
 	}
 	
 	@RequestMapping(value = "/{uniqueId}", method = RequestMethod.GET)
 	@ResponseBody
 	private T getById(@PathVariable("uniqueId") String uniqueId, HttpServletRequest request) {
 		String district = getStringFilter("district", request);
-		
-		return getByUniqueId(uniqueId, district);
+		String username = request.getRemoteUser();
+		return getByUniqueId(uniqueId, district, username);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/search")
@@ -51,20 +59,21 @@ public abstract class RestResource<T> {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	private List<T> filterBy(@RequestParam(value = "q", required = true) String query,
-	                         @RequestParam("district") String district) {
-		return filter(query, district);
+	                         @RequestParam("district") String district, @RequestParam("username") String username) {
+		
+		return filter(query, district, username);
 	}
 	
-	public abstract List<T> filter(String query, String district);
+	public abstract List<T> filter(String query, String district, String username);
 	
 	public abstract List<T> search(HttpServletRequest request) throws ParseException;
 	
-	public abstract T getByUniqueId(String uniqueId, String district);
+	public abstract T getByUniqueId(String uniqueId, String district, String username);
 	
 	public abstract List<String> requiredProperties();
 	
-	public abstract T create(T entity, String district);
+	public abstract T create(T entity, String district, String division, String branch, String village, String username);
 	
-	public abstract T update(T entity, String district);
+	public abstract T update(T entity, String district, String division, String branch, String village, String username);
 	
 }

@@ -59,7 +59,7 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	}
 	
 	@Override
-	public void add(Client entity, String table) {
+	public void add(Client entity, String table, String district, String division, String branch, String village) {
 		if (entity == null || entity.getBaseEntityId() == null) {
 			return;
 		}
@@ -77,6 +77,15 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		if (pgClient == null) {
 			return;
 		}
+		pgClient.setDistrict(district);
+		pgClient.setDivision(division);
+		pgClient.setBranch(branch);
+		Map<String, String> addressFields = entity.getAddresses().get(0).getAddressFields();
+		if (addressFields != null) {
+			if (addressFields.containsKey("address8")) {
+				pgClient.setVillage(addressFields.get("address8"));
+			}
+		}
 		
 		int rowsAffected = clientMapper.insertSelectiveAndSetId(pgClient);
 		if (rowsAffected < 1 || pgClient.getId() == null) {
@@ -85,14 +94,17 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		
 		ClientMetadata clientMetadata = createMetadata(entity, pgClient.getId());
 		if (clientMetadata != null) {
-			System.out.println("<-client meta data->");
-			System.out.println(clientMetadata);
+			
+			clientMetadata.setDistrict(district);
+			clientMetadata.setDivision(division);
+			clientMetadata.setBranch(branch);
+			
 			clientMetadataMapper.insertSelective(clientMetadata);
 		}
 	}
 	
 	@Override
-	public void update(Client entity, String table) {
+	public void update(Client entity, String table, String district, String division, String branch, String village) {
 		
 		System.out.println("<-Entity->");
 		System.out.println(entity);
@@ -117,7 +129,15 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		if (clientMetadata == null) {
 			return;
 		}
-		
+		pgClient.setDistrict(district);
+		pgClient.setDivision(division);
+		pgClient.setBranch(branch);
+		Map<String, String> addressFields = entity.getAddresses().get(0).getAddressFields();
+		if (addressFields != null) {
+			if (addressFields.containsKey("address8")) {
+				pgClient.setVillage(addressFields.get("address8"));
+			}
+		}
 		int rowsAffected = clientMapper.updateByPrimaryKey(pgClient);
 		if (rowsAffected < 1) {
 			return;
@@ -126,6 +146,10 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		ClientMetadataExample clientMetadataExample = new ClientMetadataExample();
 		clientMetadataExample.createCriteria().andClientIdEqualTo(id).andDateDeletedIsNull();
 		clientMetadata.setId(clientMetadataMapper.selectByExample(clientMetadataExample).get(0).getId());
+		clientMetadata.setDistrict(district);
+		clientMetadata.setDivision(division);
+		clientMetadata.setBranch(branch);
+		
 		clientMetadataMapper.updateByPrimaryKey(clientMetadata);
 	}
 	
@@ -396,8 +420,10 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 					clientMetadata.setAddress1(requiredAddress.getAddressField("address1"));
 					clientMetadata.setAddress2(requiredAddress.getAddressField("address2"));
 					clientMetadata.setAddress3(requiredAddress.getCityVillage());
-					if (requiredAddress.getAddressField("address8") != null)
+					if (requiredAddress.getAddressField("address8") != null) {
 						clientMetadata.setVillageId(Long.valueOf(requiredAddress.getAddressField("address8")));
+						clientMetadata.setVillage(requiredAddress.getAddressField("address8"));
+					}
 				}
 			}
 			
@@ -407,7 +433,7 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 			clientMetadata.setUpazila(addressFields.get("upazila"));
 			clientMetadata.setCityUnion("union");
 			clientMetadata.setWard("ward");
-			clientMetadata.setVillage("village");
+			
 			String relationalId = null;
 			Map<String, List<String>> relationShips = client.getRelationships();
 			if (relationShips != null && !relationShips.isEmpty()) {

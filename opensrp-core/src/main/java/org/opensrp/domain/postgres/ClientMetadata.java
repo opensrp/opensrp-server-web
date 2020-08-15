@@ -120,23 +120,25 @@ public class ClientMetadata {
 	private String address1;
 	
 	private String address3;
-
+	
 	private String division;
-
+	
 	private String district;
-
+	
 	private String cityCorporation;
-
+	
 	private String upazila;
-
+	
 	private String cityUnion;
-
+	
 	private String ward;
-
+	
 	private String village;
-
+	
 	private Long villageId;
-
+	
+	private String branch;
+	
 	public String getAddress2() {
 		return address2;
 	}
@@ -439,81 +441,89 @@ public class ClientMetadata {
 	public void setDateDeleted(Date dateDeleted) {
 		this.dateDeleted = dateDeleted;
 	}
-
+	
 	public String getDivision() {
 		return division;
 	}
-
+	
 	public void setDivision(String division) {
 		this.division = division;
 	}
-
+	
 	public String getDistrict() {
 		return district;
 	}
-
+	
 	public void setDistrict(String district) {
 		this.district = district;
 	}
-
+	
 	public String getCityCorporation() {
 		return cityCorporation;
 	}
-
+	
 	public void setCityCorporation(String cityCorporation) {
 		this.cityCorporation = cityCorporation;
 	}
-
+	
 	public String getUpazila() {
 		return upazila;
 	}
-
+	
 	public void setUpazila(String upazila) {
 		this.upazila = upazila;
 	}
-
+	
 	public String getCityUnion() {
 		return cityUnion;
 	}
-
+	
 	public void setCityUnion(String cityUnion) {
 		this.cityUnion = cityUnion;
 	}
-
+	
 	public String getWard() {
 		return ward;
 	}
-
+	
 	public void setWard(String ward) {
 		this.ward = ward;
 	}
-
+	
 	public String getVillage() {
 		return village;
 	}
-
+	
 	public void setVillage(String village) {
 		this.village = village;
 	}
-
+	
 	public Long getVillageId() {
 		return villageId;
 	}
-
+	
 	public void setVillageId(Long villageId) {
 		this.villageId = villageId;
 	}
-
+	
+	public String getBranch() {
+		return branch;
+	}
+	
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+	
 	@Override
 	public String toString() {
 		return "ClientMetadata{" + "id=" + id + ", clientId=" + clientId + ", documentId='" + documentId + '\''
-				+ ", baseEntityId='" + baseEntityId + '\'' + ", relationalId='" + relationalId + '\'' + ", serverVersion="
-				+ serverVersion + ", openmrsUuid='" + openmrsUuid + '\'' + ", uniqueId='" + uniqueId + '\'' + ", firstName='"
-				+ firstName + '\'' + ", middleName='" + middleName + '\'' + ", lastName='" + lastName + '\'' + ", birthDate="
-				+ birthDate + ", dateDeleted=" + dateDeleted + ", address2='" + address2 + '\'' + ", address1='" + address1
-				+ '\'' + ", address3='" + address3 + '\'' + ", division='" + division + '\'' + ", district='" + district
-				+ '\'' + ", cityCorporation='" + cityCorporation + '\'' + ", upazila='" + upazila + '\'' + ", cityUnion='"
-				+ cityUnion + '\'' + ", ward='" + ward + '\'' + ", village='" + village + '\'' + ", villageId=" + villageId
-				+ '}';
+		        + ", baseEntityId='" + baseEntityId + '\'' + ", relationalId='" + relationalId + '\'' + ", serverVersion="
+		        + serverVersion + ", openmrsUuid='" + openmrsUuid + '\'' + ", uniqueId='" + uniqueId + '\''
+		        + ", firstName='" + firstName + '\'' + ", middleName='" + middleName + '\'' + ", lastName='" + lastName
+		        + '\'' + ", birthDate=" + birthDate + ", dateDeleted=" + dateDeleted + ", address2='" + address2 + '\''
+		        + ", address1='" + address1 + '\'' + ", address3='" + address3 + '\'' + ", division='" + division + '\''
+		        + ", district='" + district + '\'' + ", cityCorporation='" + cityCorporation + '\'' + ", upazila='"
+		        + upazila + '\'' + ", cityUnion='" + cityUnion + '\'' + ", ward='" + ward + '\'' + ", village='" + village
+		        + '\'' + ", villageId=" + villageId + '}';
 	}
 }

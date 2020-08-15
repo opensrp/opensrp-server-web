@@ -129,7 +129,7 @@ public class PatientAtomfeed extends OpenmrsService implements EventWorker, Atom
 						c.addRelationship("household", clients.get(0).getBaseEntityId());
 					}
 				}
-				clientService.addClient(c, "");
+				clientService.addClient(c, "", "", "", "", "");
 				JSONObject newId = patientService.addThriveId(c.getBaseEntityId(), p);
 				log.info("New Client -> Posted Thrive ID back to OpenMRS : " + newId);
 				encounterService.makeNewEventForNewClient(c, eventType, entityType);
@@ -138,10 +138,10 @@ public class PatientAtomfeed extends OpenmrsService implements EventWorker, Atom
 					List<org.opensrp.domain.Event> events = eventService.findByBaseEntityAndEventTypeContaining(
 					    c.getBaseEntityId(), "Registration", "");
 					if (events.size() != 0) {
-						eventService.updateEventServerVersion(events.get(0), "");
+						eventService.updateEventServerVersion(events.get(0), "", "", "", "", "'");
 					}
 					String srpIdInOpenmrs = c.getBaseEntityId();
-					Client cmerged = clientService.mergeClient(c, relationship, "");
+					Client cmerged = clientService.mergeClient(c, relationship, "", "", "", "", "");
 					//TODO what if in any case thrive id is assigned to some other patient 
 					if (StringUtils.isBlank(srpIdInOpenmrs) || !srpIdInOpenmrs.equalsIgnoreCase(cmerged.getBaseEntityId())) {
 						// if openmrs doesnot have openSRP UID or have a different UID then update

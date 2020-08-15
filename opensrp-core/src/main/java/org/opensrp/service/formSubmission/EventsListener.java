@@ -127,7 +127,7 @@ public class EventsListener {
 					try {
 						Thread.sleep(1);
 						client.setServerVersion(currentTimeMillis);
-						allClients.update(client, "");
+						allClients.update(client, "", "", "", "", "");
 						logger.debug("Add server_version: found new client " + client.getBaseEntityId());
 					}
 					catch (InterruptedException e) {
@@ -145,7 +145,7 @@ public class EventsListener {
 						Thread.sleep(1);
 						event = eventService.processOutOfArea(event, "");
 						event.setServerVersion(currentTimeMillis);
-						allEvents.update(event, "");
+						allEvents.update(event, "", "", "", "", "");
 						
 						logger.debug("Add server_version: found new event " + event.getBaseEntityId());
 					}

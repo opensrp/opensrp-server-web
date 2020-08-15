@@ -229,6 +229,18 @@
       <if test="villageId != null">
         village_id,
       </if>
+      <if test="district != null">
+		district,
+	  </if>
+	  <if test="division != null">
+		division,
+	  </if>
+	  <if test="branch != null">
+		branch,
+	  </if>
+	  <if test="village != null">
+		village,
+	  </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -282,6 +294,18 @@
       <if test="villageId != null">
         #{villageId,jdbcType=BIGINT},
       </if>
+      <if test="district != null">
+		#{district,jdbcType=VARCHAR},
+	  </if>
+	  <if test="division != null">
+		#{division,jdbcType=VARCHAR},
+	  </if>
+	  <if test="branch != null">
+		#{branch,jdbcType=VARCHAR},
+	  </if>
+	  <if test="village != null">
+		#{village,jdbcType=VARCHAR},
+	  </if>
     </trim>
   </insert>
   <select id="countByExample" parameterType="org.opensrp.domain.postgres.ClientMetadataExample" resultType="java.lang.Long">

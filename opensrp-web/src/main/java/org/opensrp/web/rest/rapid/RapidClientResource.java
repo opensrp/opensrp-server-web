@@ -103,7 +103,7 @@ public class RapidClientResource {
 		c.setGender(gender);
 		c.setBirthdate(new DateTime(birthdate));
 		
-		clientService.addClient(c, "");
+		clientService.addClient(c, "", "", "", "", "");
 		
 		res.put("SUCESS", true);
 		res.put("SUCCESS", true);
@@ -196,7 +196,7 @@ public class RapidClientResource {
 			values.add(date);
 			e.addObs(new Obs("concept", "txt", "1025AAAAAAAAAAAAAAAA", null, values, "", vaccine));
 			
-			eventService.addEvent(e, "");
+			eventService.addEvent(e, "", "", "", "", "");
 			resp.put("SUCCESS", Boolean.toString(true));
 			return resp;
 		}
@@ -263,7 +263,7 @@ public class RapidClientResource {
 			
 			Event e = fec.getEventFromFormSubmission(fs);
 			
-			eventService.addEvent(e, "");
+			eventService.addEvent(e, "", "", "", "", "");
 			
 			try {
 				System.out.println("Creating Encounter");

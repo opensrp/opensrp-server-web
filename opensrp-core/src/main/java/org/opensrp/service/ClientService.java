@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.search.AddressSearchBean;
@@ -93,14 +94,14 @@ public class ClientService {
 		return allClients.findByDynamicQuery(query);
 	}
 	
-	public Client addClient(Client client, String table) {
+	public Client addClient(Client client, String table, String district, String division, String branch, String village) {
 		if (client.getBaseEntityId() == null) {
 			throw new RuntimeException("No baseEntityId");
 		}
 		Client c = findClient(client, table);
 		if (c != null) {
 			try {
-				updateClient(client, table);
+				updateClient(client, table, district, division, branch, village);
 			}
 			catch (JSONException e) {
 				throw new IllegalArgumentException(
@@ -109,7 +110,8 @@ public class ClientService {
 		}
 		
 		client.setDateCreated(DateTime.now());
-		allClients.add(client, table);
+		allClients.add(client, table, district, division, branch, village);
+		
 		return client;
 	}
 	
@@ -163,7 +165,8 @@ public class ClientService {
 		return c;
 	}
 	
-	public void updateClient(Client updatedClient, String table) throws JSONException {
+	public void updateClient(Client updatedClient, String table, String district, String division, String branch,
+	                         String village) throws JSONException {
 		// If update is on original entity
 		if (updatedClient.isNew()) {
 			throw new IllegalArgumentException(
@@ -175,10 +178,11 @@ public class ClientService {
 		}
 		
 		updatedClient.setDateEdited(DateTime.now());
-		allClients.update(updatedClient, table);
+		allClients.update(updatedClient, table, district, division, branch, village);
 	}
 	
-	public Client mergeClient(Client updatedClient, JSONObject relationship, String table) {
+	public Client mergeClient(Client updatedClient, JSONObject relationship, String table, String district, String division,
+	                          String branch, String village) {
 		try {
 			Client original = findClient(updatedClient, table);
 			if (original == null) {
@@ -211,7 +215,7 @@ public class ClientService {
 			}
 			original.setDateEdited(DateTime.now());
 			original.setServerVersion(System.currentTimeMillis());
-			allClients.update(original, table);
+			allClients.update(original, table, district, division, branch, village);
 			return original;
 		}
 		catch (JSONException e) {
@@ -235,7 +239,7 @@ public class ClientService {
 		return allClients.findByRelationShip(id, table);
 	}
 	
-	public Client addOrUpdate(Client client, String table) {
+	public Client addOrUpdate(Client client, String table, String district, String division, String branch, String village) {
 		if (client.getBaseEntityId() == null) {
 			if (client != null) {
 				ErrorTrace errorTrace = new ErrorTrace();
@@ -261,14 +265,14 @@ public class ClientService {
 					client.setDateCreated(c.getDateCreated());
 					client.setServerVersion(System.currentTimeMillis());
 					client.addIdentifier("OPENMRS_UUID", c.getIdentifier("OPENMRS_UUID"));
-					allClients.update(client, table);
+					allClients.update(client, table, district, division, branch, village);
 				}
 				
 			} else {
 				client.setServerVersion(System.currentTimeMillis());
 				client.setDateCreated(DateTime.now());
 				logger.info("\n\n\n Client in addOrUpdate before add :" + client.toString() + "\n\n");
-				allClients.add(client, table);
+				allClients.add(client, table, district, division, branch, village);
 			}
 		}
 		catch (Exception e) {
@@ -287,7 +291,8 @@ public class ClientService {
 		return client;
 	}
 	
-	public Client addOrUpdate(Client client, boolean resetServerVersion, String table) {
+	public Client addOrUpdate(Client client, boolean resetServerVersion, String table, String district, String division,
+	                          String branch, String village) {
 		if (client.getBaseEntityId() == null) {
 			throw new RuntimeException("No baseEntityId");
 		}
@@ -301,12 +306,12 @@ public class ClientService {
 				if (resetServerVersion) {
 					client.setServerVersion(System.currentTimeMillis());
 				}
-				allClients.update(client, table);
+				allClients.update(client, table, district, division, branch, village);
 				
 			} else {
 				
 				client.setDateCreated(DateTime.now());
-				allClients.add(client, table);
+				allClients.add(client, table, district, division, branch, village);
 			}
 		}
 		catch (Exception e) {
@@ -384,11 +389,25 @@ public class ClientService {
 		return allClients.getIsResync(username);
 	}
 	
-	public String getTableName(String district) {
+	public UserLocationTableName getUserLocationAndTable(String username, String district, String division, String branch,
+	                                                     String village) {
+		UserLocationTableName userLocation = new UserLocationTableName();
 		String table = "";
 		if (!StringUtils.isBlank(district)) {
 			table = "_" + district;
+			userLocation.setTableName(table);
+			userLocation.setBranch(branch);
+			userLocation.setDistrict(district);
+			userLocation.setDivision(division);
+			userLocation.setTableName(table);
+		} else {
+			//get from data base
+			
+			userLocation.setBranch("");
+			userLocation.setDistrict("");
+			userLocation.setDivision("");
+			userLocation.setTableName(table);
 		}
-		return table;
+		return userLocation;
 	}
 }

@@ -88,7 +88,7 @@ public class ProviderResource extends RestResource<Provider> {
 	}
 	
 	@Override
-	public Provider getByUniqueId(String uniqueId, String district) {
+	public Provider getByUniqueId(String uniqueId, String district, String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -100,19 +100,19 @@ public class ProviderResource extends RestResource<Provider> {
 	}
 	
 	@Override
-	public Provider create(Provider entity, String district) {
+	public Provider create(Provider entity, String district, String division, String branch, String village, String u) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Provider update(Provider entity, String district) {
+	public Provider update(Provider entity, String district, String division, String branch, String village, String u) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public List<Provider> filter(String query, String district) {
+	public List<Provider> filter(String query, String district, String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}

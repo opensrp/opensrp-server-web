@@ -67,7 +67,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public Stock getByUniqueId(String uniqueId, String district) {
+	public Stock getByUniqueId(String uniqueId, String district, String username) {
 		
 		return stockService.find(uniqueId);
 	}
@@ -175,7 +175,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public Stock create(Stock stock, String district) {
+	public Stock create(Stock stock, String district, String division, String branch, String village, String u) {
 		return stockService.addStock(stock);
 	}
 	
@@ -188,7 +188,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public Stock update(Stock stock, String district) {
+	public Stock update(Stock stock, String district, String division, String branch, String village, String u) {
 		return stockService.mergeStock(stock);
 	}
 	
@@ -211,7 +211,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 	
 	@Override
-	public List<Stock> filter(String query, String district) {
+	public List<Stock> filter(String query, String district, String username) {
 		return stockService.findAllStocks();
 	}
 	

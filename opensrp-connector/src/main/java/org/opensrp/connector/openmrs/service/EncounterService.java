@@ -1260,7 +1260,7 @@ public class EncounterService extends OpenmrsService {
 			event.addObs(new Obs("formsubmissionField", "text", "HIE_FACILITIES", "" /*//TODO handle parent*/,
 			        addressFieldValue.toString(), ""/*comments*/, "HIE_FACILITIES"/*formSubmissionField*/));
 			
-			eventService.addorUpdateEvent(event, "");
+			eventService.addorUpdateEvent(event, "", "", "", "", "");
 		}
 		catch (JSONException e) {
 			// TODO Auto-generated catch block

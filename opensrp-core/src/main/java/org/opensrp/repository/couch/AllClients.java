@@ -330,13 +330,13 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	@Override
-	public void add(Client entity, String table) {
+	public void add(Client entity, String table, String dist, String div, String branch, String vill) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public void update(Client entity, String table) {
+	public void update(Client entity, String table, String dist, String div, String branch, String vill) {
 		// TODO Auto-generated method stub
 		
 	}

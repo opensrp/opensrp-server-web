@@ -122,7 +122,8 @@ public class EventService {
 		return null;
 	}
 	
-	public synchronized Event addEvent(Event event, String table) {
+	public synchronized Event addEvent(Event event, String table, String district, String division, String branch,
+	                                   String village) {
 		Event e = find(event, table);
 		if (e != null) {
 			throw new IllegalArgumentException(
@@ -136,7 +137,8 @@ public class EventService {
 		}
 		
 		event.setDateCreated(DateTime.now());
-		allEvents.add(event, table);
+		allEvents.add(event, table, district, division, branch, village);
+		
 		return event;
 	}
 	
@@ -181,7 +183,8 @@ public class EventService {
 		return event;
 	}
 	
-	public synchronized Event addorUpdateEvent(Event event, String table) {
+	public synchronized Event addorUpdateEvent(Event event, String table, String district, String division, String branch,
+	                                           String village) {
 		Integer eventId = allEvents.findEventIdByFormSubmissionId(event.getFormSubmissionId(), table);
 		
 		//Event getEvent = findByFormSubmissionId(event.getFormSubmissionId());
@@ -193,17 +196,18 @@ public class EventService {
 				event.setServerVersion(System.currentTimeMillis());
 				event.setId(getEvent.getId());
 				event.setDateCreated(getEvent.getDateCreated());
-				allEvents.update(event, table);
+				allEvents.update(event, table, district, division, branch, village);
+				
 			}
 		} else {
 			event.setServerVersion(System.currentTimeMillis());
 			event.setDateCreated(DateTime.now());
-			allEvents.add(event, table);
+			allEvents.add(event, table, district, division, branch, village);
 		}
 		return event;
 	}
 	
-	public void updateEvent(Event updatedEvent, String table) {
+	public void updateEvent(Event updatedEvent, String table, String district, String division, String branch, String village) {
 		// If update is on original entity
 		if (updatedEvent.isNew()) {
 			throw new IllegalArgumentException(
@@ -211,10 +215,11 @@ public class EventService {
 		}
 		
 		updatedEvent.setDateEdited(DateTime.now());
-		allEvents.update(updatedEvent, table);
+		allEvents.update(updatedEvent, table, district, division, branch, village);
 	}
 	
-	public void updateEventServerVersion(Event updatedEvent, String table) {
+	public void updateEventServerVersion(Event updatedEvent, String table, String district, String division, String branch,
+	                                     String village) {
 		// If update is on original entity
 		if (updatedEvent.isNew()) {
 			throw new IllegalArgumentException(
@@ -223,11 +228,11 @@ public class EventService {
 		
 		updatedEvent.setDateEdited(DateTime.now());
 		updatedEvent.setServerVersion(System.currentTimeMillis());
-		allEvents.update(updatedEvent, table);
+		allEvents.update(updatedEvent, table, district, division, branch, village);
 	}
 	
 	//TODO Review and add test cases as well
-	public Event mergeEvent(Event updatedEvent, String table) {
+	public Event mergeEvent(Event updatedEvent, String table, String district, String division, String branch, String village) {
 		try {
 			Event original = find(updatedEvent, table);
 			if (original == null) {
@@ -273,7 +278,7 @@ public class EventService {
 			}
 			original.setServerVersion(System.currentTimeMillis());
 			original.setDateEdited(DateTime.now());
-			allEvents.update(original, table);
+			allEvents.update(original, table, district, division, branch, village);
 			return original;
 		}
 		catch (JSONException e) {

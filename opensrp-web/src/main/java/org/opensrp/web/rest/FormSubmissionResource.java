@@ -30,7 +30,7 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 	}
 	
 	@Override
-	public FormSubmission getByUniqueId(String uniqueId, String district) {
+	public FormSubmission getByUniqueId(String uniqueId, String district, String username) {
 		
 		return fsService.findByInstanceId(uniqueId);
 	}
@@ -42,7 +42,7 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 		}*/
 	
 	@Override
-	public FormSubmission create(FormSubmission o, String district) {
+	public FormSubmission create(FormSubmission o, String district, String division, String branch, String village, String u) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -60,7 +60,8 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 	}
 	
 	@Override
-	public FormSubmission update(FormSubmission entity, String district) {
+	public FormSubmission update(FormSubmission entity, String district, String division, String branch, String village,
+	                             String u) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -75,7 +76,7 @@ public class FormSubmissionResource extends RestResource<FormSubmission> {
 	}
 	
 	@Override
-	public List<FormSubmission> filter(String query, String district) {
+	public List<FormSubmission> filter(String query, String district, String username) {
 		throw new UnsupportedOperationException();
 	}
 	

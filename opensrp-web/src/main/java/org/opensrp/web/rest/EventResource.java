@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -100,8 +101,10 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@Override
-	public Event getByUniqueId(String uniqueId, String district) {
-		String table = clientService.getTableName(district);
+	public Event getByUniqueId(String uniqueId, String district, String username) {
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		
+		String table = userLocation.getTableName();
 		return eventService.find(uniqueId, table);
 	}
 	
@@ -109,7 +112,10 @@ public class EventResource extends RestResource<Event> {
 	@ResponseBody
 	protected List<Event> getAll(HttpServletRequest request) {
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		String username = request.getRemoteUser();
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		
+		String table = userLocation.getTableName();
 		return eventService.getAll(table);
 	}
 	
@@ -125,13 +131,16 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
 		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		
 		if (org.apache.commons.lang3.StringUtils.isBlank(isEmptyToAdd)) {
 			isEmptyToAdd = "true";
 		}
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
 			String dataProvider = request.getRemoteUser();
+			UserLocationTableName userLocation = clientService.getUserLocationAndTable(dataProvider, district, "", "", "");
+			
+			String table = userLocation.getTableName();
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
 			if (customQuery != null && !customQuery.getEnable()) {
@@ -343,10 +352,18 @@ public class EventResource extends RestResource<Event> {
 		
 		try {
 			String district = getStringFilter("district", request);
-			String table = clientService.getTableName(district);
+			
 			String dataProvider = request.getRemoteUser();
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
+			String division = getStringFilter("division", request);
+			String branch = getStringFilter("branch", request);
+			String village = getStringFilter("village", request);
+			String username = request.getRemoteUser();
+			
+			UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+			    village);
+			String table = userLocation.getTableName();
 			if (customQuery != null && !customQuery.getEnable()) {
 				return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 			}
@@ -365,14 +382,11 @@ public class EventResource extends RestResource<Event> {
 				System.out.println(dataProvider + ": received event size:" + events.size());
 				for (Event event : events) {
 					try {
-						event = eventService.processOutOfArea(event, table);
+						//event = eventService.processOutOfArea(event, table);
 						event.withIsSendToOpenMRS("yes");
-						eventService.addorUpdateEvent(event, table);
-						//						Client client = clientService.find(event.getBaseEntityId());
-						//						if (client != null) {
-						//							client.setServerVersion(System.currentTimeMillis());
-						//							clientService.addOrUpdate(client);
-						//						}
+						eventService.addorUpdateEvent(event, table, userLocation.getDistrict(), userLocation.getDivision(),
+						    userLocation.getBranch(), userLocation.getVillage());
+						
 					}
 					catch (Exception e) {
 						logger.error(
@@ -391,7 +405,8 @@ public class EventResource extends RestResource<Event> {
 				for (Client client : clients) {
 					try {
 						client.withIsSendToOpenMRS("yes");
-						clientService.addOrUpdate(client, table);
+						clientService.addOrUpdate(client, table, userLocation.getDistrict(), userLocation.getDivision(),
+						    userLocation.getBranch(), userLocation.getVillage());
 					}
 					catch (Exception e) {
 						logger.error("Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId()
@@ -416,9 +431,13 @@ public class EventResource extends RestResource<Event> {
 		}*/
 	
 	@Override
-	public Event create(Event o, String district) {
-		String table = clientService.getTableName(district);
-		return eventService.addEvent(o, table);
+	public Event create(Event o, String district, String division, String branch, String village, String username) {//TODO check if send property and id matches
+	
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+		    village);
+		String table = userLocation.getTableName();
+		return eventService.addEvent(o, table, userLocation.getDistrict(), userLocation.getDivision(),
+		    userLocation.getBranch(), userLocation.getVillage());
 	}
 	
 	@Override
@@ -435,9 +454,13 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@Override
-	public Event update(Event entity, String district) {
-		String table = clientService.getTableName(district);
-		return eventService.mergeEvent(entity, table);
+	public Event update(Event entity, String district, String division, String branch, String village, String username) {
+		
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+		    village);
+		String table = userLocation.getTableName();
+		return eventService.mergeEvent(entity, table, userLocation.getDistrict(), userLocation.getDivision(),
+		    userLocation.getBranch(), userLocation.getVillage());
 	}
 	
 	public static void main(String[] args) {
@@ -456,7 +479,9 @@ public class EventResource extends RestResource<Event> {
 		String team = getStringFilter(TEAM, request);
 		String teamId = getStringFilter(TEAM_ID, request);
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		String username = request.getRemoteUser();
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		String table = userLocation.getTableName();
 		if (!StringUtils.isEmptyOrWhitespaceOnly(clientId)) {
 			Client c = clientService.find(clientId, table);
 			if (c == null) {
@@ -482,8 +507,11 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@Override
-	public List<Event> filter(String query, String district) {
-		String table = clientService.getTableName(district);
+	public List<Event> filter(String query, String district, String username) {
+		
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		
+		String table = userLocation.getTableName();
 		return eventService.findEventsByDynamicQuery(query, table);
 	}
 	

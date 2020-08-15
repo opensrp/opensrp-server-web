@@ -46,7 +46,7 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 	}
 	
 	@Override
-	public void add(Event entity, String table) {
+	public void add(Event entity, String table, String district, String division, String branch, String village) {
 		if (entity == null || entity.getBaseEntityId() == null) {
 			return;
 		}
@@ -63,7 +63,10 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		if (pgEvent == null) {
 			return;
 		}
-		
+		pgEvent.setDistrict(district);
+		pgEvent.setDivision(division);
+		pgEvent.setBranch(branch);
+		pgEvent.setVillage(village);
 		int rowsAffected = eventMapper.insertSelectiveAndSetId(pgEvent);
 		if (rowsAffected < 1 || pgEvent.getId() == null) {
 			return;
@@ -71,13 +74,17 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		
 		EventMetadata eventMetadata = createMetadata(entity, pgEvent.getId());
 		if (eventMetadata != null) {
+			eventMetadata.setDistrict(district);
+			eventMetadata.setDivision(division);
+			eventMetadata.setBranch(branch);
+			
 			eventMetadataMapper.insertSelective(eventMetadata);
 		}
 		
 	}
 	
 	@Override
-	public void update(Event entity, String table) {
+	public void update(Event entity, String table, String district, String division, String branch, String village) {
 		if (entity == null || entity.getBaseEntityId() == null) {
 			return;
 		}
@@ -90,10 +97,14 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		setRevision(entity);
 		
 		org.opensrp.domain.postgres.Event pgEvent = convert(entity, id);
+		
 		if (pgEvent == null) {
 			return;
 		}
-		
+		pgEvent.setDistrict(district);
+		pgEvent.setDivision(division);
+		pgEvent.setBranch(branch);
+		pgEvent.setVillage(village);
 		EventMetadata eventMetadata = createMetadata(entity, id);
 		if (eventMetadata == null) {
 			return;
@@ -107,6 +118,10 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		EventMetadataExample eventMetadataExample = new EventMetadataExample();
 		eventMetadataExample.createCriteria().andEventIdEqualTo(id).andDateDeletedIsNull();
 		eventMetadata.setId(eventMetadataMapper.selectByExample(eventMetadataExample).get(0).getId());
+		eventMetadata.setDistrict(district);
+		eventMetadata.setDivision(division);
+		eventMetadata.setBranch(branch);
+		
 		eventMetadataMapper.updateByPrimaryKey(eventMetadata);
 		
 	}
@@ -438,6 +453,10 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		org.opensrp.domain.postgres.Event pgEvent = new org.opensrp.domain.postgres.Event();
 		pgEvent.setId(primaryKey);
 		pgEvent.setJson(event);
+		pgEvent.setBaseEntityId(event.getBaseEntityId());
+		pgEvent.setServerVersion(event.getServerVersion());
+		pgEvent.setEventType(event.getEventType());
+		pgEvent.setProviderId(event.getProviderId());
 		
 		return pgEvent;
 	}

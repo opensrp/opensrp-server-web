@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.DataApprove;
+import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
@@ -66,15 +67,19 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client getByUniqueId(String uniqueId, String district) {
-		String table = clientService.getTableName(district);
+	public Client getByUniqueId(String uniqueId, String district, String username) {
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		String table = userLocation.getTableName();
 		return clientService.find(uniqueId, table);
 	}
 	
 	@Override
-	public Client create(Client o, String district) {
-		String table = clientService.getTableName(district);
-		return clientService.addClient(o, table);
+	public Client create(Client o, String district, String division, String branch, String village, String username) {
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+		    village);
+		String table = userLocation.getTableName();
+		return clientService.addClient(o, table, userLocation.getDistrict(), userLocation.getDivision(),
+		    userLocation.getBranch(), userLocation.getVillage());
 	}
 	
 	@Override
@@ -88,9 +93,13 @@ public class ClientResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client update(Client entity, String district) {//TODO check if send property and id matches
-		String table = clientService.getTableName(district);
-		return clientService.mergeClient(entity, null, table);//TODO update should only be based on baseEntityId
+	public Client update(Client entity, String district, String division, String branch, String village, String username) {//TODO check if send property and id matches
+	
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+		    village);
+		String table = userLocation.getTableName();
+		return clientService.mergeClient(entity, null, table, userLocation.getDistrict(), userLocation.getDivision(),
+		    userLocation.getBranch(), userLocation.getVillage());//TODO update should only be based on baseEntityId
 	}
 	
 	@Override
@@ -125,14 +134,15 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isEmptyOrWhitespaceOnly(attributes) ? null : attributes.split(":", -1)[1]);
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		String username = request.getRemoteUser();
+		UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, "", "", "");
+		String table = userLocation.getTableName();
 		return clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 		    lastEdit == null ? null : lastEdit[1], table);
 	}
 	
 	@Override
-	public List<Client> filter(String query, String district) {
-		String table = clientService.getTableName(district);
+	public List<Client> filter(String query, String district, String username) {
 		
 		return clientService.findByDynamicQuery(query);
 	}
@@ -144,8 +154,15 @@ public class ClientResource extends RestResource<Client> {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			String district = getStringFilter("district", request);
-			String table = clientService.getTableName(district);
 			
+			String division = getStringFilter("division", request);
+			String branch = getStringFilter("branch", request);
+			String village = getStringFilter("village", request);
+			String username = request.getRemoteUser();
+			
+			UserLocationTableName userLocation = clientService.getUserLocationAndTable(username, district, division, branch,
+			    village);
+			String table = userLocation.getTableName();
 			boolean isApproved = true;
 			Gson jsonObject = new Gson();
 			DataApprove approvalData = jsonObject.fromJson(requestData, DataApprove.class);
@@ -158,7 +175,8 @@ public class ClientResource extends RestResource<Client> {
 			if (status.equalsIgnoreCase(AllConstants.APPROVED)) {
 				isApproved = false;
 			}
-			clientService.addOrUpdate(client, isApproved, table);
+			clientService.addOrUpdate(client, isApproved, table, userLocation.getDistrict(), userLocation.getDivision(),
+			    userLocation.getBranch(), userLocation.getVillage());
 			
 			/*List<Event> getEvents = eventService.findByBaseEntityAndEventTypeContaining(baseEntityId, "Registration");
 			if (getEvents.size() != 0) {
@@ -192,7 +210,7 @@ public class ClientResource extends RestResource<Client> {
 				Map<String, String> addressFields = client.getAddresses().get(0).getAddressFields();
 				addressFields.put(changeAbleField, rightName);
 				client.getAddresses().get(0).setAddressFields(addressFields);
-				clientService.updateClient(client, district);
+				clientService.updateClient(client, district, "", "", "", "");
 			}
 		}
 		catch (Exception e) {

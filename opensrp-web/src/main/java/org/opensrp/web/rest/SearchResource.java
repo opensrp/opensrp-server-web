@@ -64,7 +64,8 @@ public class SearchResource extends RestResource<Client> {
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		String district = getStringFilter("district", request);
-		String table = clientService.getTableName(district);
+		String username = request.getRemoteUser();
+		String table = clientService.getUserLocationAndTable(username, district, "", "", "").getTableName();
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
@@ -132,7 +133,9 @@ public class SearchResource extends RestResource<Client> {
 			String inActive = getStringFilter(INACTIVE, request);
 			String lostToFollowUp = getStringFilter(LOST_TO_FOLLOW_UP, request);
 			String district = getStringFilter("district", request);
-			String table = clientService.getTableName(district);
+			String username = request.getRemoteUser();
+			String table = clientService.getUserLocationAndTable(username, district, "", "", "").getTableName();
+			
 			DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 			DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
 			//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
@@ -302,13 +305,13 @@ public class SearchResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public List<Client> filter(String query, String district) {
+	public List<Client> filter(String query, String district, String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Client getByUniqueId(String uniqueId, String district) {
+	public Client getByUniqueId(String uniqueId, String district, String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -320,13 +323,13 @@ public class SearchResource extends RestResource<Client> {
 	}
 	
 	@Override
-	public Client create(Client entity, String district) {
+	public Client create(Client entity, String district, String division, String branch, String village, String u) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public Client update(Client entity, String district) {
+	public Client update(Client entity, String district, String division, String branch, String village, String u) {
 		// TODO Auto-generated method stub
 		return null;
 	}
