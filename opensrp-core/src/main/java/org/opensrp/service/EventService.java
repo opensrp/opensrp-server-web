@@ -437,4 +437,8 @@ public class EventService {
 		return listOfInteger.stream().map(function).collect(Collectors.toList());
 	}
 	
+	public Event findEventByEventId(Integer eventId, String table) {
+		
+		return allEvents.findEventByEventId(eventId, table);
+	}
 }

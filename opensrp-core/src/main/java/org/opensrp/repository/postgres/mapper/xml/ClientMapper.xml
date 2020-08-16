@@ -289,7 +289,7 @@
     update core.client
     set json = #{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.ClientTypeHandler},
       date_deleted = #{dateDeleted,jdbcType=TIMESTAMP},
-      server_version = #{serverVersion,jdbcType=VARCHAR},
+      server_version = #{serverVersion,jdbcType=BIGINT},
       base_entity_id = #{baseEntityId,jdbcType=VARCHAR},
       district = #{district,jdbcType=VARCHAR},
       division = #{division,jdbcType=VARCHAR},

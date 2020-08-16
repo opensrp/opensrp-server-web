@@ -420,4 +420,8 @@ public class ClientService {
 		
 		return userLocation;
 	}
+	
+	public Client findClientByClientId(Integer clientId, String table) {
+		return allClients.findClientByClientId(clientId, table);
+	}
 }

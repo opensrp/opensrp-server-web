@@ -109,9 +109,6 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	@Override
 	public void update(Client entity, String table, String district, String division, String branch, String village) {
 		
-		System.out.println("<-Entity->");
-		System.out.println(entity);
-		
 		if (entity == null || entity.getBaseEntityId() == null) {
 			return;
 		}
@@ -135,6 +132,8 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		pgClient.setDistrict(district);
 		pgClient.setDivision(division);
 		pgClient.setBranch(branch);
+		pgClient.setBaseEntityId(entity.getBaseEntityId());
+		pgClient.setServerVersion(entity.getServerVersion());
 		Map<String, String> addressFields = entity.getAddresses().get(0).getAddressFields();
 		if (addressFields != null) {
 			if (addressFields.containsKey("address8")) {

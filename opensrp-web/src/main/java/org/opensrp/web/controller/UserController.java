@@ -309,9 +309,7 @@ public class UserController {
 	    throws JSONException {
 		
 		try {
-			
 			String is_resync = clientService.getIsResync(username);
-			
 			return new ResponseEntity<>(is_resync, HttpStatus.OK);
 		}
 		catch (Exception e) {

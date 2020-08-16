@@ -144,7 +144,8 @@ public class EventResource extends RestResource<Event> {
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
 			if (customQuery != null && !customQuery.getEnable()) {
-				return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+				response.put("msg", "user may be inactive or not present");
+				return new ResponseEntity<>(new Gson().toJson(response), INTERNAL_SERVER_ERROR);
 			}
 			CustomQuery user = eventService.getUser(request.getRemoteUser());
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
@@ -247,101 +248,6 @@ public class EventResource extends RestResource<Event> {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			e.printStackTrace();
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/client-list-to-delete", method = RequestMethod.GET)
-	@ResponseBody
-	protected ResponseEntity<String> clientListToDeleteFromAPP(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<String, Object>();
-		try {
-			System.err.println("");
-			/*List<CustomQuery> locations = eventService.getLocations(request.getRemoteUser());
-			String location = "";
-			String userType = "";
-			List<String> address = new ArrayList<String>();
-			if (locations.size() != 0) {
-				for (CustomQuery locName : locations) {
-					address.add(locName.getName());
-				}
-				userType = "Provider";
-				String providerId = getStringFilter(PROVIDER_ID, request);
-				String requestProviderName = request.getRemoteUser();
-				String locationId = getStringFilter(LOCATION_ID, request);
-				String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-				String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-				String team = getStringFilter(TEAM, request);
-				String teamId = getStringFilter(TEAM_ID, request);
-				logger.info("synced user " + providerId + locationId + teamId + ", timestamp : " + serverVersion);
-				Long lastSyncedServerVersion = null;
-				if (serverVersion != null) {
-					lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
-				}
-				Integer limit = getIntegerFilter("limit", request);
-				if (limit == null || limit.intValue() == 0) {
-					limit = 25;
-				}
-				String getProviderName = "";
-				List<Event> eventList = new ArrayList<Event>();
-				
-				List<String> clientIds = new ArrayList<String>();
-				List<String> clients = new ArrayList<String>();
-				List<Client> clientList = new ArrayList<Client>();
-				
-				long startTime = System.currentTimeMillis();
-				EventSearchBean eventSearchBean = new EventSearchBean();
-				eventSearchBean.setTeam(team);
-				eventSearchBean.setTeamId(teamId);
-				eventSearchBean.setProviderId(providerId);
-				eventSearchBean.setLocationId(locationId);
-				eventSearchBean.setBaseEntityId(baseEntityId);
-				eventSearchBean.setServerVersion(lastSyncedServerVersion);
-				eventList = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
-				ClientSearchBean searchBean = new ClientSearchBean();
-				searchBean.setServerVersion(lastSyncedServerVersion);
-				AddressSearchBean addressSearchBean = new AddressSearchBean();
-				if (userType.equalsIgnoreCase(provider)) {
-					addressSearchBean.setAddress2(address);
-				} else if (userType.equalsIgnoreCase(HA)) {
-					addressSearchBean.setAddress3(address);
-				}
-				clientList = clientService.findByCriteria(searchBean, addressSearchBean);
-				for (Client client : clientList) {
-					clientIds.add(client.getBaseEntityId());
-				}
-				
-				List<String> ids = new ArrayList<String>();
-				ids.addAll(clientIds);
-				String field = "baseEntityId";
-				eventList = eventService.findByFieldValue(field, ids, lastSyncedServerVersion);
-				logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
-				logger.info("Initial Size:" + eventList.size());
-				if (!eventList.isEmpty()) {
-					for (Event event : eventList) {
-						getProviderName = event.getProviderId();
-						logger.info("getProviderName:" + getProviderName + ": request provider name" + requestProviderName);
-						if (getProviderName.isEmpty()) {
-
-						} else if (!getProviderName.equalsIgnoreCase(requestProviderName)) {
-							clients.add(event.getBaseEntityId());
-						} else {
-
-						}
-					}
-				}
-				return new ResponseEntity<>(gson.toJson(clients), HttpStatus.OK);
-				
-			} else {
-				logger.info("No location found..");
-				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		catch (Exception e) {
-			response.put("msg", "Error occurred");
-			e.printStackTrace();
-			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

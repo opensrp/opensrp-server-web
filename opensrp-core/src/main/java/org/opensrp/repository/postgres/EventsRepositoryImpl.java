@@ -82,7 +82,7 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 			eventMetadata.setDistrict(district);
 			eventMetadata.setDivision(division);
 			eventMetadata.setBranch(branch);
-			
+			eventMetadata.setVillage(village);
 			eventMetadataMapper.insertSelective(eventMetadata);
 		}
 		
@@ -131,7 +131,7 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		eventMetadata.setDistrict(district);
 		eventMetadata.setDivision(division);
 		eventMetadata.setBranch(branch);
-		
+		eventMetadata.setVillage(village);
 		eventMetadataMapper.updateByPrimaryKey(eventMetadata);
 		
 	}
