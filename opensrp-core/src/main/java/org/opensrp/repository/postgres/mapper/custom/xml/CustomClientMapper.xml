@@ -55,8 +55,11 @@
 			<if test="id != null">
 				#{id,jdbcType=BIGINT},
 			</if>
-			<if test="serverVersion != null">
+			<if test="json != null">
 				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.ClientTypeHandler},
+			</if>
+			<if test="serverVersion != null">
+				#{serverVersion,jdbcType=BIGINT},
 			</if>
 			<if test="baseEntityId != null">
 				#{baseEntityId,jdbcType=VARCHAR},

@@ -103,7 +103,7 @@
 				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.EventTypeHandler},
 			</if>
 			<if test="serverVersion != null">
-				#{json,jdbcType=OTHER,typeHandler=org.opensrp.repository.postgres.handler.ClientTypeHandler},
+				#{serverVersion,jdbcType=BIGINT},
 			</if>
 			<if test="baseEntityId != null">
 				#{baseEntityId,jdbcType=VARCHAR},

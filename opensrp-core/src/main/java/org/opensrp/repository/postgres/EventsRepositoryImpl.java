@@ -67,6 +67,11 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		pgEvent.setDivision(division);
 		pgEvent.setBranch(branch);
 		pgEvent.setVillage(village);
+		pgEvent.setServerVersion(entity.getServerVersion());
+		pgEvent.setProviderId(entity.getProviderId());
+		pgEvent.setBaseEntityId(entity.getBaseEntityId());
+		pgEvent.setFormSubmissionId(entity.getFormSubmissionId());
+		pgEvent.setEventType(entity.getEntityType());
 		int rowsAffected = eventMapper.insertSelectiveAndSetId(pgEvent);
 		if (rowsAffected < 1 || pgEvent.getId() == null) {
 			return;
@@ -105,6 +110,11 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		pgEvent.setDivision(division);
 		pgEvent.setBranch(branch);
 		pgEvent.setVillage(village);
+		pgEvent.setServerVersion(entity.getServerVersion());
+		pgEvent.setProviderId(entity.getProviderId());
+		pgEvent.setBaseEntityId(entity.getBaseEntityId());
+		pgEvent.setFormSubmissionId(entity.getFormSubmissionId());
+		pgEvent.setEventType(entity.getEntityType());
 		EventMetadata eventMetadata = createMetadata(entity, id);
 		if (eventMetadata == null) {
 			return;

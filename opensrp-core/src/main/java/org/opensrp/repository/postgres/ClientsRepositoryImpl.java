@@ -81,6 +81,8 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		pgClient.setDistrict(district);
 		pgClient.setDivision(division);
 		pgClient.setBranch(branch);
+		pgClient.setBaseEntityId(entity.getBaseEntityId());
+		pgClient.setServerVersion(entity.getServerVersion());
 		Map<String, String> addressFields = entity.getAddresses().get(0).getAddressFields();
 		if (addressFields != null) {
 			if (addressFields.containsKey("address8")) {
@@ -391,9 +393,6 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	
 	private ClientMetadata createMetadata(Client client, Long clientId) {
 		try {
-			
-			System.out.println("Client DATA:->");
-			System.out.println(client);
 			
 			ClientMetadata clientMetadata = new ClientMetadata();
 			clientMetadata.setDocumentId(client.getId());
