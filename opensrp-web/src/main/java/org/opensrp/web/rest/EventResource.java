@@ -144,7 +144,7 @@ public class EventResource extends RestResource<Event> {
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
 			if (customQuery != null && !customQuery.getEnable()) {
-				response.put("msg", "user may be inactive or not present");
+				response.put("msg", "user is inactive or not present");
 				return new ResponseEntity<>(new Gson().toJson(response), INTERNAL_SERVER_ERROR);
 			}
 			CustomQuery user = eventService.getUser(request.getRemoteUser());

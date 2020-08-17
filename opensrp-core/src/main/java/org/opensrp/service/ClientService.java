@@ -409,7 +409,7 @@ public class ClientService {
 				userLocation.setTableName(table);
 			} else {
 				userLocation = new UserLocationTableName();
-				userLocation.setTableName("");
+				userLocation.setTableName("_others");
 				userLocation.setBranch("");
 				userLocation.setDistrict("");
 				userLocation.setDivision("");

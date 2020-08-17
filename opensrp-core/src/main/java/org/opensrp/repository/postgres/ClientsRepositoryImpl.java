@@ -426,13 +426,6 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 				}
 			}
 			
-			clientMetadata.setDivision(addressFields.get("division"));
-			clientMetadata.setDistrict(addressFields.get("district"));
-			clientMetadata.setCityCorporation(addressFields.get("cityCorporation"));
-			clientMetadata.setUpazila(addressFields.get("upazila"));
-			clientMetadata.setCityUnion("union");
-			clientMetadata.setWard("ward");
-			
 			String relationalId = null;
 			Map<String, List<String>> relationShips = client.getRelationships();
 			if (relationShips != null && !relationShips.isEmpty()) {

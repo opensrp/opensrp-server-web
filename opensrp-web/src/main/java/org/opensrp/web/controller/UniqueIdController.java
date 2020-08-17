@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.util.HttpResponse;
 import org.opensrp.common.util.HttpUtil;
-import org.opensrp.common.util.TurnOffCertificateValidation;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.OpenmrsIDService;
@@ -156,16 +156,25 @@ public class UniqueIdController {
 	@ResponseBody
 	protected ResponseEntity<String> get(HttpServletRequest request) throws JSONException, KeyManagementException,
 	    NoSuchAlgorithmException, KeyStoreException {
-		
+		/*
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
-		String source = getStringFilter("source", request);
+		String source = getStringFilter("source", request);*/
 		Map<String, Object> map = new HashMap<>();
+		List<String> uniqueIds = new ArrayList<>();
+		for (int i = 0; i < 200; i++) {
+			
+			String id = System.currentTimeMillis() + "" + i;
+			
+			uniqueIds.add(id);
+		}
 		
-		map.put(
+		map.put("identifiers", uniqueIds);
+		
+		/*map.put(
 		    "identifiers",
 		    openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate, SecurityContextHolder.getContext()
 		            .getAuthentication().getName(), userController.getAuthenticationAdvisor(request).getCredentials()
-		            .toString()));
+		            .toString()));*/
 		
 		return new ResponseEntity<>(new Gson().toJson(map), HttpStatus.OK);
 	}
@@ -173,7 +182,7 @@ public class UniqueIdController {
 	@RequestMapping(value = "/get/health-id", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> getHealthId(HttpServletRequest request) throws JSONException, KeyManagementException,
-	    NoSuchAlgorithmException, KeyStoreException {		
+	    NoSuchAlgorithmException, KeyStoreException {
 		/*System.err.println("getHealthId:"+eventService.getHealthId());*/
 		HttpResponse op = HttpUtil.get(opensrpWebUurl + "/rest/api/v1/health-id/reserved", "", opensrpWebUsername,
 		    opensrpWebPassword);
