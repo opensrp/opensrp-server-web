@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -165,7 +166,8 @@ public class UserController {
 			
 			for (AssignedLocations assignedLocation : organizationService
 			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
-				locationIds.add(assignedLocation.getJurisdictionId());
+				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
+					locationIds.add(assignedLocation.getJurisdictionId());
 			}
 			
 			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, 5000);
