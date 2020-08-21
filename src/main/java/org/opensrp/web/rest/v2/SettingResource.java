@@ -185,7 +185,8 @@ public class SettingResource {
 			String responseSettings = settingService.addOrUpdateSettings(setting);
 			String response = "Settings created or updated successfully.";
 			if (StringUtils.isNotBlank(responseSettings)) {
-				response = String.format("%s%s", "The following settings might not be saved", responseSettings);
+				response = responseSettings + String.format("%s%s", "The following settings might not be saved",
+					responseSettings);
 			}
 
 			return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.CREATED);
