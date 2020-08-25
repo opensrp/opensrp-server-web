@@ -815,5 +815,18 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		<profile>
+			<id>rabbitmq</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>opensrp.queuing.service</name>
+					<value>rabbitmq</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.queuing.service.profile>rabbitmq</opensrp.queuing.service.profile>
+			</properties>
+		</profile>
 	</profiles>
 </project>
