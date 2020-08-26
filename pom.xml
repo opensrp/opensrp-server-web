@@ -626,6 +626,7 @@
 				<dhis2.sync.enabled>default</dhis2.sync.enabled>
 				<atomfeed.enabled>default</atomfeed.enabled>
 				<rapidpro.enabled>default</rapidpro.enabled>
+				<opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
 			</properties>
 		</profile>
 		<profile>
