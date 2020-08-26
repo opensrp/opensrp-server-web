@@ -170,10 +170,12 @@ public class ClientResource extends RestResource<Client> {
             String relationships = getStringFilter(RELATIONSHIPS, request);
             List<String> allowedRelationShips = StringUtils.isBlank(relationships) ? new ArrayList<>() : Arrays.asList(relationships.split(","));
             if (!allowedRelationShips.isEmpty()) {
-                clients.addAll(getRelationships(clients, allowedRelationShips));
+                List<Client> clientRelationships = getRelationships(clients, allowedRelationShips);
+                clients.addAll(clientRelationships);
             }
         } else {
-            clients.addAll(getDependants(clients, searchRelationship));
+            List<Client> dependants = getDependants(clients, searchRelationship);
+            clients.addAll(dependants);
         }
 
         return clients;
@@ -183,28 +185,32 @@ public class ClientResource extends RestResource<Client> {
      * This method is used to get all the dependants for the the provided clients. Example when you you want to return all
      * the children for the list of mothers that you provided. The query expects each of the clients to at least have
      * one dependant otherwise we are not fetching the correct dependants hence the client will be removed from the final clients list
-     * @param clients List of clients to fetch their dependants
+     *
+     * @param clients            List of clients to fetch their dependants
      * @param searchRelationship The type of relationship used for querying e.g. "mother" or "father" as defined in the "relationships" attribute
      *                           of the dependant.
-     * @return A list of dependants beloging to the clients
+     * @return A list of dependants belonging to the clients
      */
     private List<Client> getDependants(List<Client> clients, String searchRelationship) {
         List<Client> dependantClients = new ArrayList<>();
+        List<Client> clientsToRemove = new ArrayList<>();
         for (Client client : clients) {
             List<Client> dependants = clientService.findByRelationshipIdAndType(client.getBaseEntityId(), searchRelationship);
-            if(dependants.size() > 0){
+            if (dependants.size() > 0) {
                 dependantClients.addAll(dependants);
-            }else {
-                clients.remove(client);
+            } else {
+                clientsToRemove.add(client);
             }
         }
+        clients.removeIf(clientsToRemove::contains);
         return dependantClients;
     }
 
     /**
      * Get all the relationship for the provided clients. For example when you have a list of children and you want to get all their mothers and
      * father. The objects for the related clients will be included in the final list returned by the query.
-     * @param clients list of clients which you want to use to fetch their relations
+     *
+     * @param clients              list of clients which you want to use to fetch their relations
      * @param allowedRelationships the type of relationships you want to include in the final list
      * @return a list client relationship objects
      */
@@ -215,7 +221,7 @@ public class ClientResource extends RestResource<Client> {
             for (String entityType : client.getRelationships().keySet()) {
                 if (allowedRelationships.contains(entityType)) {
                     for (String baseEntityId : client.getRelationships(entityType)) {
-                        if(!fetchedBaseEntityIds.contains(baseEntityId)) {
+                        if (!fetchedBaseEntityIds.contains(baseEntityId)) {
                             relationshipClients.add(clientService.find(baseEntityId));
                             fetchedBaseEntityIds.add(baseEntityId);
                         }
