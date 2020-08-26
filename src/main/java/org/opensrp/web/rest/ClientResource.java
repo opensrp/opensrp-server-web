@@ -225,7 +225,8 @@ public class ClientResource extends RestResource<Client> {
                     if (relationshipTypes.contains(relationshipEntry.getKey())) {
                         relationshipEntry.getValue().forEach(relationalId -> {
                                     if (!fetchedRelationships.contains(relationalId)) {
-                                        relationshipClients.add(clientService.find(relationalId));
+                                        Client clientRelative = clientService.find(relationalId);
+                                        if (!clients.contains(clientRelative)) relationshipClients.add(clientRelative);
                                         fetchedRelationships.add(relationalId);
                                     }
                                 }
