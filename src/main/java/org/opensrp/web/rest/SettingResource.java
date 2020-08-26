@@ -37,15 +37,17 @@ import javax.servlet.http.HttpServletRequest;
 import static java.text.MessageFormat.format;
 
 @Controller
-@RequestMapping (value = "/rest/settings")
+@RequestMapping(value = "/rest/settings")
 public class SettingResource {
-	
+
 	public static final String SETTING_CONFIGURATIONS = "settingConfigurations";
+
 	private SettingService settingService;
+
 	private OpenmrsLocationService openmrsLocationService;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
-	
+
 	@Autowired
 	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {
 		this.settingService = settingService;
@@ -62,13 +64,13 @@ public class SettingResource {
 
 		return treeNodeHashMap;
 	}
-	
-	@RequestMapping (method = RequestMethod.GET, value = "/sync")
+
+	@RequestMapping(method = RequestMethod.GET, value = "/sync")
 	public @ResponseBody
 	ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
 		ResponseEntity responseEntity;
-		
+
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
 		try {
@@ -78,13 +80,14 @@ public class SettingResource {
 			String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
 			String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 			boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+			String identifier = RestUtils.getStringFilter(AllConstants.Stock.IDENTIFIER, request);
 			List<SettingConfiguration> SettingConfigurations = null;
 			Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
-			
+
 			if (StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
-			
+
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
 			settingQueryBean.setTeamId(teamId);
@@ -96,45 +99,52 @@ public class SettingResource {
 				settingQueryBean.setResolveSettings(resolveSettings);
 				treeNodeHashMap = getChildParentLocationTree(locationId);
 			}
-			
+
+			if (StringUtils.isNotBlank(identifier)) {
+				settingQueryBean.setIdentifier(identifier);
+			}
+
 			SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
-			
+
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
-			
-			responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders, HttpStatus.OK); // todo: why is this conversion to json array necessary?
-		} catch (Exception e) {
+
+			responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,
+					HttpStatus.OK); // todo: why is this conversion to json array necessary?
+		}
+		catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			responseEntity = new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		return responseEntity;
 	}
-	
-	@RequestMapping (headers = {"Accept=application/json"}, method = RequestMethod.POST, value = "/sync", consumes = {MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE})
+
+	@RequestMapping(headers = { "Accept=application/json" }, method = RequestMethod.POST, value = "/sync", consumes = {
+			MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> saveSetting(@RequestBody String data) {
 		JSONObject response = new JSONObject();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-		
+
 		JSONObject settingObject = new JSONObject(data);
-		
+
 		if (!settingObject.has(SETTING_CONFIGURATIONS)) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} else {
-			
+
 			JSONArray clientSettings = settingObject.getJSONArray(AllConstants.Event.SETTING_CONFIGURATIONS);
 			JSONArray settingsArray = new JSONArray();
-			
+
 			for (int i = 0; i < clientSettings.length(); i++) {
 				settingsArray.put(settingService.saveSetting(clientSettings.get(i).toString()));
 			}
-			
+
 			response.put("validated_records", settingsArray);
-			
+
 		}
-		
+
 		return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.OK);
 	}
 }
