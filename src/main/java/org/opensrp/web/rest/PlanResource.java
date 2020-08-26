@@ -55,7 +55,7 @@ import com.google.gson.annotations.SerializedName;
 @RequestMapping(value = "/rest/plans")
 public class PlanResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(PlanResource.class.toString());
+	private static final Logger logger = LoggerFactory.getLogger(PlanResource.class.toString());
 	
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();

@@ -153,16 +153,16 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
             "  \"serverVersion\": 0\n" +
             "}";
 
-    private ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
+    private final ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
 
-    private Class<ArrayList<String>> listClass =
+    private final Class<ArrayList<String>> listClass =
             (Class<ArrayList<String>>)(Class)ArrayList.class;
 
     @Captor
-    private ArgumentCaptor<ArrayList<String>> listArgumentCaptor = ArgumentCaptor.forClass(listClass);
+    private final ArgumentCaptor<ArrayList<String>> listArgumentCaptor = ArgumentCaptor.forClass(listClass);
 
     @Captor
-    private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+    private final ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
     
     @Captor
     private ArgumentCaptor<List<Long>> orgsArgumentCaptor;
