@@ -57,9 +57,9 @@ import static org.opensrp.web.rest.RestUtils.*;
 public class ClientResource extends RestResource<Client> {
 
 
-    private static Logger logger = LoggerFactory.getLogger(ClientResource.class.toString());
+    private static final Logger logger = LoggerFactory.getLogger(ClientResource.class.toString());
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
     public static final String RELATIONSHIPS = "relationships";
 
@@ -218,18 +218,17 @@ public class ClientResource extends RestResource<Client> {
      */
     private List<Client> getRelationships(List<Client> clients, List<String> relationshipTypes) {
         List<Client> relationshipClients = new ArrayList<>();
-        HashSet<String> fetchedBaseEntityIds = new HashSet<>();
+        HashSet<String> fetchedRelationships = new HashSet<>();
         for (Client client : clients) {
-            for (String entityType : client.getRelationships().keySet()) {
-                if (relationshipTypes.contains(entityType)) {
-                    for (String relationshipId : client.getRelationships(entityType)) {
-                        if (!fetchedBaseEntityIds.contains(relationshipId)) {
-                            relationshipClients.add(clientService.find(relationshipId));
-                            fetchedBaseEntityIds.add(relationshipId);
+            client.getRelationships().values().stream().collect(ArrayList::new, List::addAll, List::addAll)
+                    .forEach(relationIdObject -> {
+                        String relationId = (String) relationIdObject;
+                        if(!fetchedRelationships.contains(relationId)){
+                            relationshipClients.add(clientService.find(relationId));
+                            fetchedRelationships.add(relationId);
                         }
                     }
-                }
-            }
+            );
         }
         return relationshipClients;
     }
