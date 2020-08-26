@@ -220,15 +220,18 @@ public class ClientResource extends RestResource<Client> {
         List<Client> relationshipClients = new ArrayList<>();
         HashSet<String> fetchedRelationships = new HashSet<>();
         for (Client client : clients) {
-            client.getRelationships().values().stream().collect(ArrayList::new, List::addAll, List::addAll)
-                    .forEach(relationIdObject -> {
-                        String relationId = (String) relationIdObject;
-                        if(!fetchedRelationships.contains(relationId)){
-                            relationshipClients.add(clientService.find(relationId));
-                            fetchedRelationships.add(relationId);
-                        }
+            if (client.getRelationships() != null) {
+                for (Map.Entry<String, List<String>> relationshipEntry : client.getRelationships().entrySet())
+                    if (relationshipTypes.contains(relationshipEntry.getKey())) {
+                        relationshipEntry.getValue().forEach(relationalId -> {
+                                    if (!fetchedRelationships.contains(relationalId)) {
+                                        relationshipClients.add(clientService.find(relationalId));
+                                        fetchedRelationships.add(relationalId);
+                                    }
+                                }
+                        );
                     }
-            );
+            }
         }
         return relationshipClients;
     }
