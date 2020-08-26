@@ -166,11 +166,13 @@ public class ClientResource extends RestResource<Client> {
                 lastEdit == null ? null : lastEdit[1]);
 
         String searchRelationship = getStringFilter(SEARCH_RELATIONSHIP, request);
+        logger.info("Search relationship: " + searchRelationship);
         if (StringUtils.isBlank(searchRelationship)) {
             String relationships = getStringFilter(RELATIONSHIPS, request);
-            List<String> allowedRelationShips = StringUtils.isBlank(relationships) ? new ArrayList<>() : Arrays.asList(relationships.split(","));
-            if (!allowedRelationShips.isEmpty()) {
-                List<Client> clientRelationships = getRelationships(clients, allowedRelationShips);
+            List<String> relationshipTypes = StringUtils.isBlank(relationships) ? new ArrayList<>() : Arrays.asList(relationships.split(","));
+            logger.info("Relationship types: " + relationshipTypes.toString());
+            if (!relationshipTypes.isEmpty()) {
+                List<Client> clientRelationships = getRelationships(clients, relationshipTypes);
                 clients.addAll(clientRelationships);
             }
         } else {
@@ -195,7 +197,7 @@ public class ClientResource extends RestResource<Client> {
         List<Client> dependantClients = new ArrayList<>();
         List<Client> clientsToRemove = new ArrayList<>();
         for (Client client : clients) {
-            List<Client> dependants = clientService.findByRelationshipIdAndType(client.getBaseEntityId(), searchRelationship);
+            List<Client> dependants = clientService.findByRelationshipIdAndType(searchRelationship, client.getBaseEntityId());
             if (dependants.size() > 0) {
                 dependantClients.addAll(dependants);
             } else {
@@ -210,20 +212,20 @@ public class ClientResource extends RestResource<Client> {
      * Get all the relationship for the provided clients. For example when you have a list of children and you want to get all their mothers and
      * father. The objects for the related clients will be included in the final list returned by the query.
      *
-     * @param clients              list of clients which you want to use to fetch their relations
-     * @param allowedRelationships the type of relationships you want to include in the final list
+     * @param clients           list of clients which you want to use to fetch their relations
+     * @param relationshipTypes the type of relationships you want to include in the final list
      * @return a list client relationship objects
      */
-    private List<Client> getRelationships(List<Client> clients, List<String> allowedRelationships) {
+    private List<Client> getRelationships(List<Client> clients, List<String> relationshipTypes) {
         List<Client> relationshipClients = new ArrayList<>();
         HashSet<String> fetchedBaseEntityIds = new HashSet<>();
         for (Client client : clients) {
             for (String entityType : client.getRelationships().keySet()) {
-                if (allowedRelationships.contains(entityType)) {
-                    for (String baseEntityId : client.getRelationships(entityType)) {
-                        if (!fetchedBaseEntityIds.contains(baseEntityId)) {
-                            relationshipClients.add(clientService.find(baseEntityId));
-                            fetchedBaseEntityIds.add(baseEntityId);
+                if (relationshipTypes.contains(entityType)) {
+                    for (String relationshipId : client.getRelationships(entityType)) {
+                        if (!fetchedBaseEntityIds.contains(relationshipId)) {
+                            relationshipClients.add(clientService.find(relationshipId));
+                            fetchedBaseEntityIds.add(relationshipId);
                         }
                     }
                 }
