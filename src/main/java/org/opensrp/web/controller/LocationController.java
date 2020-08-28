@@ -1,7 +1,7 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping("/location/")
@@ -69,4 +71,14 @@ public class LocationController {
 		List<String> teamIds = new Gson().fromJson(payload,  new TypeToken<List<String>>(){}.getType());
 		return new ResponseEntity<>(openmrsLocationService.getLocationsByTeamIds(teamIds).toString(), HttpStatus.OK);
 	}
+	/**
+	 *This method clears and recreates the OpenMRS locations cache
+	 */ 
+	@ResponseStatus(code = HttpStatus.CREATED)
+	@RequestMapping(method = RequestMethod.GET, value = "/cache/refresh")
+	public void createLocationCache() {
+		openmrsLocationService.clearLocationsCache();
+		openmrsLocationService.createLocationsCache(); 
+     }
 }
+
