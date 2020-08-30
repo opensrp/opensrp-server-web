@@ -127,7 +127,7 @@ public class ClientResource extends RestResource<Client> {
     public List<Client> search(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
         List<Client> clients = new ArrayList<>();
         ClientSearchBean searchBean = new ClientSearchBean();
-        searchBean.setNameLike(getStringFilter("name", request));
+        searchBean.setNameLike(getStringFilter("name", request, true));
         searchBean.setGender(getStringFilter(GENDER, request));
         DateTime[] birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
         DateTime[] deathdate = getDateRangeFilter(DEATH_DATE, request);
@@ -148,14 +148,14 @@ public class ClientResource extends RestResource<Client> {
         }
 
         AddressSearchBean addressSearchBean = new AddressSearchBean();
-        addressSearchBean.setAddressType(getStringFilter(ADDRESS_TYPE, request));
-        addressSearchBean.setCountry(getStringFilter(COUNTRY, request));
-        addressSearchBean.setStateProvince(getStringFilter(STATE_PROVINCE, request));
-        addressSearchBean.setCityVillage(getStringFilter(CITY_VILLAGE, request));
-        addressSearchBean.setCountyDistrict(getStringFilter(COUNTY_DISTRICT, request));
-        addressSearchBean.setSubDistrict(getStringFilter(SUB_DISTRICT, request));
-        addressSearchBean.setTown(getStringFilter(TOWN, request));
-        addressSearchBean.setSubTown(getStringFilter(SUB_TOWN, request));
+        addressSearchBean.setAddressType(getStringFilter(ADDRESS_TYPE, request, true));
+        addressSearchBean.setCountry(getStringFilter(COUNTRY, request, true));
+        addressSearchBean.setStateProvince(getStringFilter(STATE_PROVINCE, request, true));
+        addressSearchBean.setCityVillage(getStringFilter(CITY_VILLAGE, request, true));
+        addressSearchBean.setCountyDistrict(getStringFilter(COUNTY_DISTRICT, request, true));
+        addressSearchBean.setSubDistrict(getStringFilter(SUB_DISTRICT, request, true));
+        addressSearchBean.setTown(getStringFilter(TOWN, request, true));
+        addressSearchBean.setSubTown(getStringFilter(SUB_TOWN, request, true));
         DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
         //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
         String attributes = getStringFilter("attribute", request);

@@ -1,11 +1,9 @@
 package org.opensrp.web.rest;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,7 +18,6 @@ import org.joda.time.DateTime;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.ObjectStorageMultimediaFileManager;
-import org.opensrp.service.multimedia.S3MultimediaFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -34,11 +31,22 @@ public class RestUtils {
 	private static final Logger logger = LoggerFactory.getLogger(RestUtils.class.toString());
 
 
-	public static String getStringFilter(String filter, HttpServletRequest req)
-	{
+	public static String getStringFilter(String filter, HttpServletRequest req) {
 	  return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
 	}
-	
+
+	public static String getStringFilter(String filter, HttpServletRequest req, boolean decode) {
+		if (decode && StringUtils.isNoneBlank(req.getParameter(filter))) {
+			try {
+				return URLDecoder.decode(req.getParameter(filter), StandardCharsets.UTF_8.toString());
+			} catch (UnsupportedEncodingException ex) {
+				logger.error(ex.getMessage(), ex.getCause());
+			}
+		}
+		return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
+	}
+
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Enum getEnumFilter(String filter, Class cls, HttpServletRequest req)
 	{
