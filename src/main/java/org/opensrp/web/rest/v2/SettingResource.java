@@ -182,9 +182,14 @@ public class SettingResource {
 				setting.setSettingMetadataId(String.valueOf(id));
 			}
 			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
-			settingService.addOrUpdateSettings(setting);
-			return new ResponseEntity<>("Settings created or updated successfully", RestUtils.getJSONUTF8Headers(),
-					HttpStatus.CREATED);
+			String responseSettings = settingService.addOrUpdateSettings(setting);
+			String response = "Settings created or updated successfully.";
+			if (StringUtils.isNotBlank(responseSettings)) {
+				response = responseSettings + String.format("%s%s", " The following settings might not be saved ",
+					responseSettings);
+			}
+
+			return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.CREATED);
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage(), e);
