@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -21,6 +22,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.common.AllConstants.Event;
 import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.SettingRepository;
+import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
@@ -260,16 +262,16 @@ public class SettingResourceTest {
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
 		settingResource.setSettingService(settingService, openmrsLocationService);
 		String documentId = "1";
-		Mockito.doNothing().when(settingRepository).add(any(SettingConfiguration.class));
+		Mockito.doReturn("").when(settingRepository).addSettings(any(SettingConfiguration.class));
 		settingService.saveSetting(settingJson);
 
-		verify(settingRepository, Mockito.times(1)).add(settingConfigurationArgumentCaptor.capture());
+		verify(settingRepository, Mockito.times(1)).addSettings(settingConfigurationArgumentCaptor.capture());
 		verify(settingRepository, Mockito.times(1)).get(documentId);
 		verifyNoMoreInteractions(settingRepository);
 	}
 
 	@Test
-	public void testUpdateSetting() {
+	public void testUpdateSetting() throws JsonProcessingException {
 		SettingService settingService = Mockito.spy(new SettingService());
 		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
 		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
@@ -277,9 +279,10 @@ public class SettingResourceTest {
 		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
 		settingResource.setSettingService(settingService, openmrsLocationService);
 		String documentId = "settings-document-id-2";
-		SettingConfiguration setting = new SettingConfiguration();
-		setting.setSettings(new ArrayList<>());
-		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(setting);
+		SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
+		SettingConfiguration settingConfigurations = settingTypeHandler.mapper
+				.readValue(settingJsonUpdate, SettingConfiguration.class);
+		Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(settingConfigurations);
 		Mockito.doNothing().when(settingRepository).update(any(SettingConfiguration.class));
 
 		settingService.saveSetting(settingJsonUpdate);
