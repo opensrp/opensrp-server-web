@@ -16,7 +16,10 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -118,14 +121,33 @@ public class UserController {
 	}
 	
 	@GetMapping(value = "/logout.do")
-	public ResponseEntity<String> logoff(HttpServletRequest request) throws ServletException {
+	public ResponseEntity<String> logoff(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+	        Authentication authentication) throws ServletException {
 		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
 		    keycloakDeployment.getRealm());
-		JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
-		ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
-		    String.class);
-		request.logout();
-		return response;
+		if (authentication != null) {
+			JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
+			ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
+			    String.class);
+			
+			servletRequest.logout();
+			HttpSession session = servletRequest.getSession(false);
+			if (session != null) {
+				session.invalidate();
+			}
+			Cookie[] cookies = servletRequest.getCookies();
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					cookie.setValue("");
+					cookie.setMaxAge(0);
+					servletResponse.addCookie(cookie);
+				}
+			}
+			return response;
+		} else {
+			return new ResponseEntity<>("Not logged in", HttpStatus.UNAUTHORIZED);
+		}
+		
 	}
 	
 	public Time getServerTime() {
