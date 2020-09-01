@@ -5,7 +5,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +55,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -64,8 +62,6 @@ import com.google.gson.reflect.TypeToken;
 public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
-	
-	public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -123,13 +119,7 @@ public class UserController {
 	@GetMapping(value = "/logout.do")
 	public ResponseEntity<String> logoff(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
 	        Authentication authentication) throws ServletException {
-		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
-		    keycloakDeployment.getRealm());
 		if (authentication != null) {
-			JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
-			ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
-			    String.class);
-			
 			servletRequest.logout();
 			HttpSession session = servletRequest.getSession(false);
 			if (session != null) {
@@ -143,7 +133,7 @@ public class UserController {
 					servletResponse.addCookie(cookie);
 				}
 			}
-			return response;
+			return new ResponseEntity<>("Logged off", HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>("Not logged in", HttpStatus.UNAUTHORIZED);
 		}
