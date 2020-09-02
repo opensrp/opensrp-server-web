@@ -2,6 +2,7 @@ package org.opensrp.web.controller;
 
 import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -133,9 +134,9 @@ public class UserController {
 					servletResponse.addCookie(cookie);
 				}
 			}
-			return new ResponseEntity<>("Logged off", HttpStatus.OK);
+			return new ResponseEntity<>("User Logged out", OK);
 		} else {
-			return new ResponseEntity<>("Not logged in", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("Not logged in", UNAUTHORIZED);
 		}
 		
 	}
