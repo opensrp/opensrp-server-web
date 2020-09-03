@@ -136,7 +136,7 @@ public class UserController {
 			}
 			return new ResponseEntity<>("User Logged out", OK);
 		} else {
-			return new ResponseEntity<>("Not logged in", UNAUTHORIZED);
+			return new ResponseEntity<>("User not logged in", UNAUTHORIZED);
 		}
 		
 	}
