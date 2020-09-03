@@ -292,21 +292,6 @@ public class SettingResourceTest {
 		verifyNoMoreInteractions(settingRepository);
 	}
 
-	@Test
-	public void testAddServerVersion() {
-
-		SettingService settingService = Mockito.spy(new SettingService());
-		OpenmrsLocationService openmrsLocationService = Mockito
-				.spy(new OpenmrsLocationService("http://localhost:8080/openmrs/", "someuser", "somepass"));
-		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
-		settingService.setSettingRepository(settingRepository);
-		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService, openmrsLocationService);
-		settingService.addServerVersion();
-		verify(settingRepository, Mockito.times(1)).findByEmptyServerVersion();
-		verifyNoMoreInteractions(settingRepository);
-	}
-
 	private SettingConfiguration getSettingConfigurationObject() {
 		return gson.fromJson(settingJson, new TypeToken<SettingConfiguration>() {
 
