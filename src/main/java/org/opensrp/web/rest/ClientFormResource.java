@@ -249,7 +249,7 @@ public class ClientFormResource {
         String identifier = getIdentifier(formIdentifier, jsonFile);
         String version = getFormVersion(formVersion);
 
-        logger.info(fileContentString);
+        logger.debug(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
                 formName, module, isJsonValidator, identifier, relation));
