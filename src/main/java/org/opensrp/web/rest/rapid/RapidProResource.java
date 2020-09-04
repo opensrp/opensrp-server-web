@@ -97,7 +97,7 @@ public class RapidProResource {
 				eventSearchBean.setEventType(eventType);
 				events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
 
-				if (!events.isEmpty() && events != null) {
+				if (events != null && !events.isEmpty()) {
 					for (Event event : events) {
 						try {
 							rapidProContacts = addNewContacts(event);
@@ -185,10 +185,10 @@ public class RapidProResource {
 
 			obs = event.getObs();
 			for (Obs obs2 : obs) {
-				if (obs2 != null && obs2.getFieldType().equals("concept") && obs2.getFormSubmissionField().equals("Mother_Guardian_Number") && obs2.getValue() != null) {
+				if (obs2 != null && "concept".equals(obs2.getFieldType()) && "Mother_Guardian_Number".equals(obs2.getFormSubmissionField()) && obs2.getValue() != null) {
 					rapidProContact.setMotherTel(obs2.getValue().toString());
 				}
-				if (obs2 != null && obs2.getFieldType().equals("formsubmissionField") && obs2.getFormSubmissionField().equals("Home_Facility") && obs2.getValue() != null) {
+				if (obs2 != null && "formsubmissionField".equals(obs2.getFieldType()) && "Home_Facility".equals(obs2.getFormSubmissionField()) && obs2.getValue() != null) {
 					rapidProContact.setHomeFacility(getLocationNameIfId(obs2.getValue().toString()));
 				}
 			}

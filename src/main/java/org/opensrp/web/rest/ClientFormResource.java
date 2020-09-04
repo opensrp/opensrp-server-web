@@ -157,7 +157,7 @@ public class ClientFormResource {
             }
         }
 
-        if (highestVersion == null) {
+        if (highestIdVersionTuple == null) {
             return null;
         } else {
             long formId = highestIdVersionTuple.getId();
