@@ -92,7 +92,7 @@ public class RestUtils {
 		System.out.println(new DateTime("​1458932400000"));
 	}
 	
-	public static String setDateFilter(Date date) throws ParseException
+	public static synchronized String setDateFilter(Date date) throws ParseException
 	{
 	  return date == null ? null : SDF.format(date);
 	}

@@ -66,7 +66,7 @@ public class PractitionerResource {
             practitionerService.addOrUpdatePractitioner(practitioner);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner representation" + entity);
+            logger.error("The request doesn't contain a valid practitioner representation",e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
@@ -82,7 +82,7 @@ public class PractitionerResource {
             practitionerService.addOrUpdatePractitioner(practitioner);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner representation" + entity);
+            logger.error("The request doesn't contain a valid practitioner representation",e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
