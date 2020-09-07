@@ -214,4 +214,8 @@
 		from
 		 	generate_series(${maxId}, ${maxIdPlus}) as x(n) order by x.n
 	</select>
+	<select id="selectBySearchBeanFromFunction"
+			resultMap="BaseEventResultMap">	
+		select id,json from core.sync_data(#{table,jdbcType=VARCHAR},#{serverVersion,jdbcType=BIGINT},#{userId}) ; 
+	</select>
 </mapper>

@@ -476,4 +476,10 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -69,6 +69,8 @@ public interface EventsRepository extends CustomBaseRepository<Event> {
 	List<Event> selectBySearchBean(AddressSearchBean addressSearchBean, long serverVersion, String providerId, int limit,
 	                               String table);
 	
+	List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table);
+	
 	Integer findEventIdByFormSubmissionId(String formSubmissionId, String table);
 	
 	Event findEventByEventId(Integer eventId, String table);

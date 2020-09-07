@@ -441,4 +441,8 @@ public class EventService {
 		
 		return allEvents.findEventByEventId(eventId, table);
 	}
+	
+	public List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table) {
+		return allEvents.selectBySearchBean(userId, serverVersion, providerId, limit, table);
+	}
 }

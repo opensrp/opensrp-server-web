@@ -36,4 +36,8 @@ public interface CustomEventMetadataMapper extends EventMetadataMapper {
 	                             @Param("limit") int limit, @Param("table") String table);
 	
 	List<String> getHouseholdId(@Param("maxId") Integer maxId, @Param("maxIdPlus") Integer maxIdPlus);
+	
+	List<Event> selectBySearchBeanFromFunction(@Param("userId") int userId, @Param("serverVersion") long serverVersion,
+	                                           @Param("providerId") String providerId, @Param("limit") int limit,
+	                                           @Param("table") String table);
 }

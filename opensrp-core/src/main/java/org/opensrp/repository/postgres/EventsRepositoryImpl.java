@@ -630,4 +630,11 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		// TODO Auto-generated method stub
 		return eventMapper.getRoles(userId);
 	}
+	
+	@Override
+	public List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table) {
+		
+		return convert(eventMetadataMapper.selectBySearchBeanFromFunction(userId, serverVersion, providerId, limit, table));
+	}
+	
 }
