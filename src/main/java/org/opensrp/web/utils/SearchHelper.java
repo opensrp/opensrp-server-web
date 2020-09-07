@@ -238,13 +238,13 @@ public class SearchHelper {
 	}
 	
 	public static boolean contains(List<Client> clients, Client c) {
-		if (clients == null || clients.isEmpty() || c == null) {
+		if (clients == null || clients.isEmpty() || c == null || c.getBaseEntityId() == null) {
 			return false;
 		}
 		for (Client client : clients) {
 			
-			if (client != null && client.getBaseEntityId() != null && c.getBaseEntityId() != null
-			        && client.getBaseEntityId().equals(c.getBaseEntityId())) {
+			if (client != null && client.getBaseEntityId() != null
+			        && c.getBaseEntityId().equals(client.getBaseEntityId())) {
 				
 				return true;
 				
@@ -272,7 +272,7 @@ public class SearchHelper {
 			for (Client mother : mothers) {
 				String relationalId = getRelationalId(child, RELATIONSHIP_KEY);
 				String motherEntityId = mother.getBaseEntityId();
-				if (relationalId != null && motherEntityId != null && relationalId.equalsIgnoreCase(motherEntityId)) {
+				if (relationalId != null && relationalId.equalsIgnoreCase(motherEntityId)) {
 					childMotherList.add(new ChildMother(child, mother));
 				}
 			}

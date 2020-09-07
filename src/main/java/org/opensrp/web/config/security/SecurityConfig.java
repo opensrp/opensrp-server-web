@@ -11,6 +11,7 @@ import static org.springframework.http.HttpMethod.PUT;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import org.keycloak.adapters.KeycloakDeployment;
@@ -141,7 +142,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			    keycloakConfigFileResource.getFilename()));
 		}
 		
-		return KeycloakDeploymentBuilder.build(keycloakConfigFileResource.getInputStream());
+		try(InputStream inputStream=keycloakConfigFileResource.getInputStream()){
+			return KeycloakDeploymentBuilder.build(inputStream);
+		}
+		
 	}
 	
 }

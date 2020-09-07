@@ -115,7 +115,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -129,7 +129,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
