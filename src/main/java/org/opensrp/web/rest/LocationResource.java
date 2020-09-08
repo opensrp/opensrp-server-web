@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.dhis2.DHIS2ImportLocationsStatusService;
 import org.opensrp.connector.dhis2.DHIS2ImportOrganizationUnits;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
@@ -53,7 +54,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -103,6 +104,9 @@ public class LocationResource {
 
 	@Autowired
 	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
+
+	@Autowired
+	private DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService;
 
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
@@ -518,6 +522,10 @@ public class LocationResource {
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage",required = false) String startPage,
 			@RequestParam("beginning") Boolean beginning) {
+
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+				+ "/rest/location/status-of-dhis-locations-job";
+
 		if (beginning == false && StringUtils.isBlank(startPage)) {
 			return new ResponseEntity<>("Start page must be specified", HttpStatus.BAD_REQUEST);
 		} else if (beginning == true && !StringUtils.isBlank(startPage)) {
@@ -525,13 +533,21 @@ public class LocationResource {
 					"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
 					HttpStatus.BAD_REQUEST);
 		} else if (beginning == true && StringUtils.isBlank(startPage)) {
-			 dhis2ImportOrganizationUnits.importOrganizationUnits("1");
-			 return null;
+			dhis2ImportOrganizationUnits.importOrganizationUnits("1");
+			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
 		} else {
-			 dhis2ImportOrganizationUnits.importOrganizationUnits(startPage);
-			 return null;
+			dhis2ImportOrganizationUnits.importOrganizationUnits(startPage);
+			return new ResponseEntity<>("Check status of the job at" + baseUrl, HttpStatus.OK);
+
 		}
 
+	}
+
+	@GetMapping(value = "/status-of-dhis-locations-job", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getStatusOfJob() {
+		return new ResponseEntity<>(
+				gson.toJson(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens()),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	static class LocationSyncRequestWrapper {
