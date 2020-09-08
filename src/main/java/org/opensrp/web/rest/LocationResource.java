@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
@@ -41,11 +42,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -104,6 +101,9 @@ public class LocationResource {
 	private PhysicalLocationService locationService;
 	
 	private PlanService planService;
+
+	@Autowired
+	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
 
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
@@ -520,6 +520,26 @@ public class LocationResource {
 		return new ResponseEntity<>(
 				gson.toJson(locationTree),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+	}
+
+	@PostMapping(value = "/import-locations-from-dhis2", consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage",required = false) String startPage,
+			@RequestParam("beginning") Boolean beginning) {
+		if (beginning == false && StringUtils.isBlank(startPage)) {
+			return new ResponseEntity<>("Start page must be specified", HttpStatus.BAD_REQUEST);
+		} else if (beginning == true && !StringUtils.isBlank(startPage)) {
+			return new ResponseEntity<>(
+					"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
+					HttpStatus.BAD_REQUEST);
+		} else if (beginning == true && StringUtils.isBlank(startPage)) {
+			 dhis2ImportOrganizationUnits.importOrganizationUnits("1");
+			 return null;
+		} else {
+			 dhis2ImportOrganizationUnits.importOrganizationUnits(startPage);
+			 return null;
+		}
 
 	}
 
