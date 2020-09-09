@@ -44,7 +44,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -529,13 +535,15 @@ public class LocationResource {
 
 	}
 
-	@PostMapping(value = "/import-locations-from-dhis2", consumes = { MediaType.APPLICATION_JSON_VALUE,
+	@PostMapping(value = "/dhis2/import", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage",required = false) String startPage,
 			@RequestParam("beginning") Boolean beginning) {
 
+		final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
+
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-				+ "/rest/location/status-of-dhis-locations-job";
+				+ DHIS_IMPORT_JOB_STATUS_END_POINT;
 
 		if (beginning == false && StringUtils.isBlank(startPage)) {
 			return new ResponseEntity<>("Start page must be specified", HttpStatus.BAD_REQUEST);
@@ -548,13 +556,13 @@ public class LocationResource {
 			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
 		} else {
 			dhis2ImportOrganizationUnits.importOrganizationUnits(startPage);
-			return new ResponseEntity<>("Check status of the job at" + baseUrl, HttpStatus.OK);
+			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
 
 		}
 
 	}
 
-	@GetMapping(value = "/status-of-dhis-locations-job", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/dhis2/status", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getStatusOfJob() {
 		return new ResponseEntity<>(
 				gson.toJson(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens()),
