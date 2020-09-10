@@ -61,7 +61,7 @@ public class CampaignResource {
 			campaignService.addCampaign(campaign);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid campaign representation" + entity);
+			logger.error("The request doesnt contain a valid campaign representation",e );
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -75,7 +75,7 @@ public class CampaignResource {
 			campaignService.updateCampaign(campaign);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		} catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid campaign representation" + entity);
+			logger.error("The request doesnt contain a valid campaign representation" , e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}

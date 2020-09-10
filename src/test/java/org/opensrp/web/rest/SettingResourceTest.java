@@ -267,6 +267,7 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).addSettings(settingConfigurationArgumentCaptor.capture());
 		verify(settingRepository, Mockito.times(1)).get(documentId);
+		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 
@@ -289,20 +290,7 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).get(documentId);
 		verify(settingRepository, Mockito.times(1)).update(settingConfigurationArgumentCaptor.capture());
-		verifyNoMoreInteractions(settingRepository);
-	}
-
-	@Test
-	public void testAddServerVersion() {
-
-		SettingService settingService = Mockito.spy(new SettingService());
-		PhysicalLocationService openmrsLocationService = Mockito.spy(new PhysicalLocationService());
-		SettingRepository settingRepository = Mockito.mock(SettingRepository.class);
-		settingService.setSettingRepository(settingRepository);
-		SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
-		settingResource.setSettingService(settingService, openmrsLocationService);
-		settingService.addServerVersion();
-		verify(settingRepository, Mockito.times(1)).findByEmptyServerVersion();
+		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 

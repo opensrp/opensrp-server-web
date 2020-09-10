@@ -243,7 +243,7 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation" + entity);
+			logger.error("The request doesnt contain a valid location representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -259,7 +259,7 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation" + entity);
+			logger.error("The request doesnt contain a valid location representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -282,7 +282,7 @@ public class LocationResource {
 
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation" + entity);
+			logger.error("The request doesnt contain a valid location representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
