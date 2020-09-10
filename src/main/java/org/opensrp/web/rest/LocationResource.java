@@ -24,7 +24,6 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
-
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
