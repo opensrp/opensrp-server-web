@@ -5,9 +5,13 @@ package org.opensrp.web.rest;
 
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
@@ -15,6 +19,7 @@ import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
+import org.opensrp.web.bean.UserAssignmentBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -162,6 +168,34 @@ public class OrganizationResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
+	}
+	
+	
+
+	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
+	        MediaType.APPLICATION_JSON_VALUE })
+	public UserAssignmentBean getUserAssignedLocationsAndPlans(Authentication authentication) {
+		User user = RestUtils.currentUser(authentication);
+		String userId = user.getBaseEntityId();
+		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = practitionerService
+		        .getOrganizationsByUserId(userId);
+		Set<String> jurisdictions= new HashSet<>();
+		Set<String> plans= new HashSet<>();
+		/**@formatter:off*/
+		organizationService
+		        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)
+		        .stream()
+		        .filter(a->StringUtils.isNotBlank(a.getJurisdictionId()))
+		        .forEach(a ->{
+		        	jurisdictions.add(a.getJurisdictionId());
+		        	plans.add(a.getPlanId());
+		        });
+		return UserAssignmentBean.builder()
+				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
+				.jurisdictions(jurisdictions)
+				.plans(plans)
+				.build();
+		/**@formatter:on*/
 	}
 	
 	@RequestMapping(value = "/practitioner/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
