@@ -172,7 +172,7 @@ public class OrganizationResource {
 	
 	
 
-	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/user-assignment", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	public UserAssignmentBean getUserAssignedLocationsAndPlans(Authentication authentication) {
 		User user = RestUtils.currentUser(authentication);
