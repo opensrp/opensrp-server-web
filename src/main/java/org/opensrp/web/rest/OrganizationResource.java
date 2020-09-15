@@ -37,8 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -53,7 +52,8 @@ public class OrganizationResource {
 	
 	private PractitionerService practitionerService;
 	
-	public static Gson gson = new GsonBuilder().create();
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	/**
 	 * Set the organizationService
@@ -81,13 +81,11 @@ public class OrganizationResource {
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
+	public List<Organization> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
 		if (StringUtils.isNotBlank(locationID)) {
-			return new ResponseEntity<>(gson.toJson(organizationService.selectOrganizationsEncompassLocations(locationID)),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return organizationService.selectOrganizationsEncompassLocations(locationID);
 		} else {
-			return new ResponseEntity<>(gson.toJson(organizationService.getAllOrganizations()),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return organizationService.getAllOrganizations();
 		}
 	}
 	
@@ -98,9 +96,8 @@ public class OrganizationResource {
 	 * @return the organization
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(organizationService.getOrganization(identifier)),
-		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public Organization getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
+		return  organizationService.getOrganization(identifier);
 	}
 	
 	/**
@@ -229,20 +226,14 @@ public class OrganizationResource {
 		
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
-		List<Organization> organizations;
-		try {
-			int total = 0;
-			if (pageNumber != null && pageNumber == 1) {
-				total = organizationService.findOrganizationCount(organizationSearchBean);
-			}
-			organizations = organizationService.getSearchOrganizations(organizationSearchBean);
-			
-			headers.add(TOTAL_RECORDS, String.valueOf(total));
+		int total = 0;
+		if (pageNumber != null && pageNumber == 1) {
+			total = organizationService.findOrganizationCount(organizationSearchBean);
 		}
-		catch (IllegalArgumentException e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-		return new ResponseEntity<>(gson.toJson(organizations), headers, HttpStatus.OK);
+		List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
+		
+		headers.add(TOTAL_RECORDS, String.valueOf(total));
+		return new ResponseEntity<>(objectMapper.writeValueAsString(organizations), headers, HttpStatus.OK);
 		
 	}
 	

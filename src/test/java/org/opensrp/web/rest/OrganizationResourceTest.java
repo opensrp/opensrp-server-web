@@ -66,6 +66,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -108,7 +110,7 @@ public class OrganizationResourceTest {
 	
 	private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]}}";
 	
-	private static ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper;
 	
 	private String MESSAGE = "The server encountered an error processing the request.";
 	
@@ -120,7 +122,7 @@ public class OrganizationResourceTest {
 		organizationResource = webApplicationContext.getBean(OrganizationResource.class);
 		organizationResource.setOrganizationService(organizationService);
 		organizationResource.setPractitionerService(practitionerService);
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		objectMapper = new ObjectMapper();
 	}
 	
 	@Test
@@ -162,7 +164,8 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isCreated());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -194,7 +197,8 @@ public class OrganizationResourceTest {
 		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isCreated());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -378,7 +382,7 @@ public class OrganizationResourceTest {
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
 		assertEquals(assignments.size(), userAssignment.getJurisdictions().size());
 		assertEquals(assignments.size(), userAssignment.getPlans().size());
-		for(AssignedLocations assignment: assignments) {
+		for (AssignedLocations assignment : assignments) {
 			assertTrue(userAssignment.getJurisdictions().contains(assignment.getJurisdictionId()));
 			assertTrue(userAssignment.getPlans().contains(assignment.getPlanId()));
 		}
@@ -448,13 +452,14 @@ public class OrganizationResourceTest {
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
-		assertEquals(OrganizationResource.gson.toJson(expected), result.getResponse().getContentAsString());
+		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
+		    result.getResponse().getContentAsString());
 	}
 	
-	private Organization createSearchOrganization() {
+	private Organization createSearchOrganization() throws JsonMappingException, JsonProcessingException {
 		String searchResponseJson = "{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}";
 		
-		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
+		Organization searchOrganization = objectMapper.readValue(searchResponseJson, Organization.class);
 		
 		return searchOrganization;
 	}

@@ -38,6 +38,15 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ResponseBody
+	@ExceptionHandler(IllegalArgumentException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> exceptionHandler(IllegalArgumentException exception) {
+		logger.error("IllegalArgumentException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
+	}
+	
+	
+	@ResponseBody
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseDto<?> exceptionHandler(RuntimeException exception) {
