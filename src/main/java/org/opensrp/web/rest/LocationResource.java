@@ -56,6 +56,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Data;
 
 
 @Controller
@@ -141,27 +142,35 @@ public class LocationResource {
 		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
+		List<String> locationIds=locationSyncRequestWrapper.getLocationIds();
 		boolean returnCount = locationSyncRequestWrapper.isReturnCount();
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 		Long locationCount = 0l;
-	if (isJurisdiction) {
-			if (StringUtils.isBlank(locationNames)) {
-				String locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
-				if (returnCount){
+		if (isJurisdiction) {
+			String locations="[]";
+			if (locationIds != null && !locationIds.isEmpty()) {
+				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds,currentServerVersion);
+				if (returnCount) {
+					locationCount = locationService.countLocationsByIds(locationIds, currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
+			} else if (StringUtils.isBlank(locationNames)) {
+				locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
+				if (returnCount) {
 					locationCount = locationService.countLocationsByServerVersion(currentServerVersion);
 					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
 				}
-				return new ResponseEntity<>(locations, headers, HttpStatus.OK);
-			}
-
-			String locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
-			if (returnCount){
-				locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
-				headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+			} else {
+				
+				locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
+				if (returnCount) {
+					locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
 			}
 			return new ResponseEntity<>(locations, headers, HttpStatus.OK);
-
+			
 		} else {
 			if (StringUtils.isBlank(parentIds)) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -514,6 +523,7 @@ public class LocationResource {
 
 	}
 
+	@Data
 	static class LocationSyncRequestWrapper {
 
 		@JsonProperty("is_jurisdiction")
@@ -521,6 +531,9 @@ public class LocationResource {
 
 		@JsonProperty("location_names")
 		private List<String> locationNames;
+		
+		@JsonProperty("location_ids")
+		private List<String> locationIds;
 
 		@JsonProperty("parent_id")
 		private List<String> parentId;
@@ -530,27 +543,6 @@ public class LocationResource {
 
 		@JsonProperty(RETURN_COUNT)
 		private boolean returnCount;
-
-		public Boolean getIsJurisdiction() {
-			return isJurisdiction;
-		}
-
-		public List<String> getLocationNames() {
-			return locationNames;
-		}
-
-		public List<String> getParentId() {
-			return parentId;
-		}
-
-		public long getServerVersion() {
-			return serverVersion;
-		}
-
-
-		public boolean isReturnCount() {
-			return returnCount;
-		}
 
 	}
 
