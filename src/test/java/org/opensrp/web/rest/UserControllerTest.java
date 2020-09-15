@@ -156,7 +156,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
 		authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
@@ -230,7 +230,7 @@ public class UserControllerTest {
 	
 	@Test
 	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
 		authentication = authenticatedUser.getSecond();
 		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
 		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
