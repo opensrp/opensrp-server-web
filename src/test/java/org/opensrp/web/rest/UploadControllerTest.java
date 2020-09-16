@@ -42,7 +42,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.util.NestedServletException;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -176,7 +175,7 @@ public class UploadControllerTest {
 		assertTrue(result.getResponse().getContentAsString().contains("updated"));
 	}
 
-	@Test(expected = NestedServletException.class)
+	@Test
 	public void testUploadCSVWithErrors() throws Exception {
 		String path = "src/test/resources/sample/childregistration.csv";
 		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
@@ -202,7 +201,7 @@ public class UploadControllerTest {
 				.andExpect(status().isBadRequest())
 				.andReturn();
 		verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
-		assertTrue(result.getResponse().getContentAsString().contains("A number of errors were found during validation"));
+		assertTrue(result.getResponse().getContentAsString().contains("errors"));
 	}
 
 	@Test

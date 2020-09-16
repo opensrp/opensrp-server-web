@@ -80,7 +80,7 @@ public class XlsDataImportControllerTest {
 		ReflectionTestUtils.setField(xlsDataImportController, "allowedMimeTypes", allowedMimeTypes);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
-		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
 		authentication = authenticatedUser.getSecond();
 	}
 
