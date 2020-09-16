@@ -150,7 +150,7 @@ public class LocationResource {
 		if (isJurisdiction) {
 			String locations="[]";
 			if (locationIds != null && !locationIds.isEmpty()) {
-				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds,currentServerVersion);
+				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds,currentServerVersion));
 				if (returnCount) {
 					locationCount = locationService.countLocationsByIds(locationIds, currentServerVersion);
 					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
