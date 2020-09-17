@@ -375,11 +375,6 @@
 			<version>2.4.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.smartregister</groupId>
-			<artifactId>opensrp-server-openlmis-stock</artifactId>
-			<version>${opensrp-server-openlmis-stock-version}</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -634,6 +629,7 @@
 				<atomfeed.enabled>default</atomfeed.enabled>
 				<rapidpro.enabled>default</rapidpro.enabled>
 				<opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
+				<openlmis.stock.profile>default</openlmis.stock.profile>
 			</properties>
 		</profile>
 		<profile>
@@ -835,6 +831,19 @@
 			<properties>
 				<opensrp.queuing.service.profile>rabbitmq</opensrp.queuing.service.profile>
 			</properties>
+		</profile>
+		<profile>
+			<id>openlmis-stock</id>
+			<properties>
+				<openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.smartregister</groupId>
+					<artifactId>opensrp-server-openlmis-stock</artifactId>
+					<version>${opensrp-server-openlmis-stock-version}</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>
