@@ -51,6 +51,8 @@
 
 	<bean class="org.opensrp.TestSecurityConfig"/>
 	
+	<bean class="org.opensrp.web.GlobalExceptionHandler"/>
+	
 	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
 
 	<sec:http  request-matcher="mvc" auto-config="true" >

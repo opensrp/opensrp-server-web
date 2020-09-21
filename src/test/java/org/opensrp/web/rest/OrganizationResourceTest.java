@@ -4,11 +4,13 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,42 +18,56 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
-import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
+import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.opensrp.web.utils.TestData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -76,27 +92,37 @@ public class OrganizationResourceTest {
 	@Mock
 	private PractitionerService practitionerService;
 	
+	@Mock
+	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
+	
+	@Mock
+	private RefreshableKeycloakSecurityContext securityContext;
+	
+	@Mock
+	private AccessToken token;
+	
 	@Captor
 	private ArgumentCaptor<Organization> organizationArgumentCaptor;
 	
-	@InjectMocks
 	private OrganizationResource organizationResource;
 	
 	private String BASE_URL = "/rest/organization/";
 	
 	private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]}}";
 	
-	private static ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper;
 	
 	private String MESSAGE = "The server encountered an error processing the request.";
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(organizationResource)
-		        .setControllerAdvice(new GlobalExceptionHandler()).addFilter(new CrossSiteScriptingPreventionFilter(), "/*")
-		        .build();
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		organizationResource = webApplicationContext.getBean(OrganizationResource.class);
+		organizationResource.setOrganizationService(organizationService);
+		organizationResource.setPractitionerService(practitionerService);
+		objectMapper = new ObjectMapper();
 	}
 	
 	@Test
@@ -138,7 +164,8 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isCreated());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -166,11 +193,12 @@ public class OrganizationResourceTest {
 	@Test
 	public void testUpdateOrganization() throws Exception {
 		
-		mockMvc.perform(
-		    put(BASE_URL + "/{identifier}", getOrganization().getIdentifier()).contentType(MediaType.APPLICATION_JSON)
-		            .content(organizationJSON.getBytes())).andExpect(status().isCreated());
+		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isCreated());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -178,9 +206,9 @@ public class OrganizationResourceTest {
 	@Test
 	public void testUpdateOrganizationWithoutIdentifier() throws Exception {
 		doThrow(new IllegalArgumentException()).when(organizationService).updateOrganization(any(Organization.class));
-		mockMvc.perform(
-		    put(BASE_URL + "/{identifier}", getOrganization().getIdentifier()).contentType(MediaType.APPLICATION_JSON)
-		            .content(organizationJSON.getBytes())).andExpect(status().isBadRequest());
+		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isBadRequest());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 		
@@ -189,9 +217,9 @@ public class OrganizationResourceTest {
 	@Test
 	public void testUpdateOrganizationWithError() throws Exception {
 		doThrow(new IllegalStateException()).when(organizationService).updateOrganization(any(Organization.class));
-		mockMvc.perform(
-		    put(BASE_URL + "/{identifier}", getOrganization().getIdentifier()).contentType(MediaType.APPLICATION_JSON)
-		            .content(organizationJSON.getBytes())).andExpect(status().isInternalServerError());
+		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isInternalServerError());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 		
@@ -199,27 +227,25 @@ public class OrganizationResourceTest {
 	
 	@Test
 	public void testAssignLocationAndPlan() throws Exception {
-		mockMvc.perform(
-		    post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON).content(
-		        objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
+		        .content(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
 		for (OrganizationAssigmentBean bean : getOrganizationAssignment())
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
-			    bean.getPlan(), bean.getFromDate(), bean.getToDate());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 		
 	}
 	
 	@Test
 	public void testAssignLocationAndPlanWithMissingParams() throws Exception {
-		doThrow(new IllegalArgumentException()).when(organizationService)
-		        .assignLocationAndPlan(null, null, null, null, null);
+		doThrow(new IllegalArgumentException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
+		    null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
-		mockMvc.perform(
-		    post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON).content(
-		        objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
+		        .content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
 		for (OrganizationAssigmentBean bean : beans)
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
-			    bean.getPlan(), bean.getFromDate(), bean.getToDate());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -228,12 +254,11 @@ public class OrganizationResourceTest {
 	public void testAssignLocationAndPlanWithInternalError() throws Exception {
 		doThrow(new IllegalStateException()).when(organizationService).assignLocationAndPlan(null, null, null, null, null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
-		mockMvc.perform(
-		    post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON).content(
-		        objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
+		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
+		        .content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
 		for (OrganizationAssigmentBean bean : beans)
-			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(),
-			    bean.getPlan(), bean.getFromDate(), bean.getToDate());
+			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 		
 	}
@@ -336,6 +361,34 @@ public class OrganizationResourceTest {
 		assertEquals(actualObj.get("message").asText(), MESSAGE);
 	}
 	
+	@Test
+	public void testgetUserAssignedLocationsAndPlansShouldReturnUserAssignment() throws Exception {
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		List<Long> ids = Arrays.asList(123l, 124l);
+		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
+		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
+		List<AssignedLocations> assignments = getOrganizationLocationsAssigned();
+		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
+		
+		Authentication authentication = authenticatedUser.getSecond();
+		MvcResult result = mockMvc
+		        .perform(get(BASE_URL + "/user-assignment")
+		                .with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
+		
+		UserAssignmentBean userAssignment = objectMapper.readValue(result.getResponse().getContentAsString(),
+		    UserAssignmentBean.class);
+		
+		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
+		assertEquals(assignments.size(), userAssignment.getJurisdictions().size());
+		assertEquals(assignments.size(), userAssignment.getPlans().size());
+		for (AssignedLocations assignment : assignments) {
+			assertTrue(userAssignment.getJurisdictions().contains(assignment.getJurisdictionId()));
+			assertTrue(userAssignment.getPlans().contains(assignment.getPlanId()));
+		}
+		
+	}
+	
 	private Organization getOrganization() throws Exception {
 		return objectMapper.readValue(organizationJSON, Organization.class);
 	}
@@ -362,14 +415,15 @@ public class OrganizationResourceTest {
 		List<AssignedLocations> organizationAssigmentBeans = new ArrayList<>();
 		Random random = new Random();
 		for (int i = 0; i < 5; i++) {
-			OrganizationAssigmentBean bean = new OrganizationAssigmentBean();
-			bean.setOrganization("org" + i);
-			bean.setJurisdiction("loc" + i);
-			bean.setPlan("plan" + i);
+			AssignedLocations bean = new AssignedLocations();
+			bean.setOrganizationId("org" + i);
+			bean.setJurisdictionId("loc" + i);
+			bean.setPlanId("plan" + i);
 			if (random.nextBoolean())
 				bean.setFromDate(new Date());
 			if (random.nextBoolean())
 				bean.setToDate(new Date());
+			organizationAssigmentBeans.add(bean);
 			
 		}
 		return organizationAssigmentBeans;
@@ -391,21 +445,21 @@ public class OrganizationResourceTest {
 		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
 		when(organizationService.findOrganizationCount((OrganizationSearchBean) any())).thenReturn(1);
 		MvcResult result = mockMvc
-		        .perform(
-		            get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
-		                    .param("pageNumber", "1").param("pageSize", "10").param("orderByType", "ASC"))
+		        .perform(get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
+		                .param("pageNumber", "1").param("pageSize", "10").param("orderByType", "ASC"))
 		        .andExpect(status().isOk()).andReturn();
 		
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
-		assertEquals(OrganizationResource.gson.toJson(expected), result.getResponse().getContentAsString());
+		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
+		    result.getResponse().getContentAsString());
 	}
 	
-	private Organization createSearchOrganization() {
+	private Organization createSearchOrganization() throws JsonMappingException, JsonProcessingException {
 		String searchResponseJson = "{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}";
 		
-		Organization searchOrganization = OrganizationResource.gson.fromJson(searchResponseJson, Organization.class);
+		Organization searchOrganization = objectMapper.readValue(searchResponseJson, Organization.class);
 		
 		return searchOrganization;
 	}

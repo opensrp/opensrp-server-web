@@ -26,12 +26,13 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.7.0.0-SNAPSHOT</opensrp.core.version>
+		<opensrp.core.version>2.7.5-SNAPSHOT</opensrp.core.version>
 		<opensrp.connector.version>2.2.0-PREVIEW-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
+		<opensrp-server-openlmis-stock-version>1.0.3-SNAPSHOT</opensrp-server-openlmis-stock-version>
 		<lombok.version>1.18.12</lombok.version>
 	</properties>
 
@@ -373,6 +374,7 @@
 			<artifactId>json-path</artifactId>
 			<version>2.4.0</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -627,6 +629,7 @@
 				<atomfeed.enabled>default</atomfeed.enabled>
 				<rapidpro.enabled>default</rapidpro.enabled>
 				<opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
+				<openlmis.stock.profile>default</openlmis.stock.profile>
 			</properties>
 		</profile>
 		<profile>
@@ -819,7 +822,7 @@
 		<profile>
 			<id>rabbitmq</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 				<property>
 					<name>opensrp.queuing.service</name>
 					<value>rabbitmq</value>
@@ -828,6 +831,19 @@
 			<properties>
 				<opensrp.queuing.service.profile>rabbitmq</opensrp.queuing.service.profile>
 			</properties>
+		</profile>
+		<profile>
+			<id>openlmis-stock</id>
+			<properties>
+				<openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.smartregister</groupId>
+					<artifactId>opensrp-server-openlmis-stock</artifactId>
+					<version>${opensrp-server-openlmis-stock-version}</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>

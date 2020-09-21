@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.opensrp.api.domain.User;
 import org.springframework.data.util.Pair;
@@ -25,10 +26,12 @@ import org.springframework.security.core.GrantedAuthority;
 public class TestData {
 	
 	public static Pair<User, Authentication> getAuthentication(AccessToken token,
-	        KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal) {
+	        KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal,RefreshableKeycloakSecurityContext securityContext) {
 		List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
+		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
+		when(securityContext.getToken()).thenReturn(token);
 		Authentication authentication = new Authentication() {
 			
 			private static final long serialVersionUID = 1L;
