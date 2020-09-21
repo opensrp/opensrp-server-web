@@ -534,13 +534,13 @@ public class LocationResource {
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
 				+ DHIS_IMPORT_JOB_STATUS_END_POINT;
 
-		if (beginning == false && StringUtils.isBlank(startPage)) {
+		if (!beginning && StringUtils.isBlank(startPage)) {
 			return new ResponseEntity<>("Start page must be specified", HttpStatus.BAD_REQUEST);
-		} else if (beginning == true && !StringUtils.isBlank(startPage)) {
+		} else if (beginning && !StringUtils.isBlank(startPage)) {
 			return new ResponseEntity<>(
 					"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
 					HttpStatus.BAD_REQUEST);
-		} else if (beginning == true && StringUtils.isBlank(startPage)) {
+		} else if (beginning && StringUtils.isBlank(startPage)) {
 			dhis2ImportOrganizationUnits.importOrganizationUnits("1");
 			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
 		} else {
