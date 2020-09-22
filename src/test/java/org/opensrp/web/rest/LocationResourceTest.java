@@ -46,10 +46,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.smartregister.domain.Geometry;
-import org.smartregister.domain.Jurisdiction;
-import org.smartregister.domain.PhysicalLocation;
-import org.smartregister.domain.PlanDefinition;
+import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -61,6 +59,10 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.smartregister.domain.Geometry;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -114,9 +116,15 @@ public class LocationResourceTest {
 	private PhysicalLocationService locationService;
 	
 	@Mock
+	private DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService;
+	
+	@Mock
+	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
+	
+	@Mock
 	private PlanService planService;
 
-	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+	protected ObjectMapper mapper = new ObjectMapper();
 	private String MESSAGE = "The server encountered an error processing the request.";
 
 	private String BASE_URL = "/rest/location/";
@@ -580,7 +588,6 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void saveBatchShouldReturnServerError() throws Exception {
 

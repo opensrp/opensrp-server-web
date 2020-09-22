@@ -110,10 +110,8 @@ public class LocationResource {
 	
 	private PlanService planService;
 
-	@Autowired
 	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
 
-	@Autowired
 	private DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService;
 
 	@Autowired
@@ -124,6 +122,16 @@ public class LocationResource {
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
+	}
+	
+	@Autowired
+	public void setDhis2ImportOrganizationUnits(DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits) {
+		this.dhis2ImportOrganizationUnits = dhis2ImportOrganizationUnits;
+	}
+	
+	@Autowired
+	public void setDhis2ImportLocationsStatusService(DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService) {
+		this.dhis2ImportLocationsStatusService = dhis2ImportLocationsStatusService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
