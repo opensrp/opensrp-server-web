@@ -242,6 +242,8 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
+		
+		map.put("jurisdictionIds", locationIds);
 		/** @formatter:off*/
 		map.put("jurisdictions", jurisdictions.stream()
 			.filter(location -> !locationParents.contains(location.getId()))
