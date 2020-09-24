@@ -2,11 +2,15 @@ package org.opensrp.web.rest;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.opensrp.dto.CsvBulkImportDataSummary;
+import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.service.ImportBulkDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,10 @@ public class ImportBulkDataController {
 
 	private ImportBulkDataService importBulkDataService;
 
+	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
+
+	private static Logger logger = LoggerFactory.getLogger(ImportBulkDataController.class.toString());
+
 	@Autowired
 	public void setImportBulkDataService(ImportBulkDataService importBulkDataService) {
 		this.importBulkDataService = importBulkDataService;
@@ -35,22 +43,40 @@ public class ImportBulkDataController {
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, value = "/organizations")
-	public ResponseEntity<CsvBulkImportDataSummary> importOrganizationsData(@RequestParam("file") MultipartFile file)
+	public ResponseEntity importOrganizationsData(@RequestParam("file") MultipartFile file)
 			throws IOException {
 
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		return new ResponseEntity<>(importBulkDataService.convertandPersistOrganizationdata(csvClients),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = importBulkDataService
+				.convertandPersistPractitionerdata(csvClients);
+
+		generateCSV(csvBulkImportDataSummary);
+		File csvFile = new File(SAMPLE_CSV_FILE);
+
+		return ResponseEntity.ok()
+				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+				.contentLength(csvFile.length())
+				.contentType(MediaType.parseMediaType("text/csv"))
+				.body(new FileSystemResource(csvFile));
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, value = "/practitioners")
-	public ResponseEntity<CsvBulkImportDataSummary> importPractitionersData(@RequestParam("file") MultipartFile file) throws
+	public ResponseEntity importPractitionersData(@RequestParam("file") MultipartFile file) throws
 			IOException {
 
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		return new ResponseEntity<>(importBulkDataService.convertandPersistPractitionerdata(csvClients),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = importBulkDataService
+				.convertandPersistPractitionerdata(csvClients);
+
+		generateCSV(csvBulkImportDataSummary);
+		File csvFile = new File(SAMPLE_CSV_FILE);
+
+		return ResponseEntity.ok()
+				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+				.contentLength(csvFile.length())
+				.contentType(MediaType.parseMediaType("text/csv"))
+				.body(new FileSystemResource(csvFile));
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
@@ -64,6 +90,26 @@ public class ImportBulkDataController {
 			}
 		}
 		return csvClients;
+	}
+
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary) {
+		try (
+				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE));
+				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		) {
+			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+			csvPrinter.printRecord("\n");
+
+			csvPrinter.printRecord("Row Number", "Reason of Failure");
+			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
+			}
+			csvPrinter.flush();
+		}
+		catch (Exception e) {
+			logger.error("Failed to generate CSV " + e.getMessage());
+		}
 	}
 
 }
