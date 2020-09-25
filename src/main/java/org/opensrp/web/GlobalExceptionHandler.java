@@ -8,6 +8,7 @@ import org.opensrp.web.dto.ResponseDto;
 import org.opensrp.web.exceptions.UploadValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -69,6 +70,15 @@ public class GlobalExceptionHandler {
 	public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
 		logger.error("UploadValidationException occurred : ", exception);
 		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
+	}
+	
+
+	@ResponseBody
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> exceptionHandler(DataIntegrityViolationException  exception) {
+		logger.error("DataIntegrityViolationException:  occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST," DataIntegrityViolationException");
 	}
 	
 	@ResponseBody

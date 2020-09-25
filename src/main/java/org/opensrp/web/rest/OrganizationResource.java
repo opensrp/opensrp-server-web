@@ -159,7 +159,7 @@ public class OrganizationResource {
 	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier),
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier,true),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
