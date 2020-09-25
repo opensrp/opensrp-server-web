@@ -48,7 +48,7 @@ public class ImportBulkDataController {
 
 		List<Map<String, String>> csvClients = readCSVFile(file);
 		CsvBulkImportDataSummary csvBulkImportDataSummary = importBulkDataService
-				.convertandPersistPractitionerdata(csvClients);
+				.convertandPersistOrganizationdata(csvClients);
 
 		generateCSV(csvBulkImportDataSummary);
 		File csvFile = new File(SAMPLE_CSV_FILE);
