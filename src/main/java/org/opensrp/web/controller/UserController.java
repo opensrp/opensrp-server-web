@@ -178,7 +178,7 @@ public class UserController {
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
 			
 			for (AssignedLocations assignedLocation : organizationService
-			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
+			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right,false)) {
 				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
 					locationIds.add(assignedLocation.getJurisdictionId());
 			}
