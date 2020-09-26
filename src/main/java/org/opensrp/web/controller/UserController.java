@@ -243,12 +243,16 @@ public class UserController {
 		Time t = getServerTime();
 		map.put("time", t);
 		
-		map.put("jurisdictionIds", locationIds);
-		/** @formatter:off*/
-		map.put("jurisdictions", jurisdictions.stream()
+		
+		
+		Map<String,String> leafJurisdictions=jurisdictions.stream()
 			.filter(location -> !locationParents.contains(location.getId()))
-			.map(location -> location.getProperties().getName())
-			.collect(Collectors.toSet()));
+			.collect(Collectors.toMap(PhysicalLocation::getId, (location)->location.getProperties().getName()));
+			
+			
+		map.put("jurisdictionIds", leafJurisdictions.keySet());
+		/** @formatter:off*/
+		map.put("jurisdictions", leafJurisdictions.values());
 		/**@formatter:on*/
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
