@@ -242,14 +242,17 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
-		
-		map.put("jurisdictionIds", locationIds);
+			
 		/** @formatter:off*/
-		map.put("jurisdictions", jurisdictions.stream()
+		Map<String,String> leafJurisdictions=jurisdictions.stream()
 			.filter(location -> !locationParents.contains(location.getId()))
-			.map(location -> location.getProperties().getName())
-			.collect(Collectors.toSet()));
+			.collect(Collectors.toMap(PhysicalLocation::getId, (location)->location.getProperties().getName()));
 		/**@formatter:on*/
+			
+		map.put("jurisdictionIds", leafJurisdictions.keySet());
+		
+		map.put("jurisdictions", leafJurisdictions.values());
+	
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	
