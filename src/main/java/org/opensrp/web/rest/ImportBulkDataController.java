@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/rest/import/bulk-data")
+@RequestMapping("/rest/import")
 public class ImportBulkDataController {
 
 	private ImportBulkDataService importBulkDataService;
@@ -108,7 +108,8 @@ public class ImportBulkDataController {
 			csvPrinter.flush();
 		}
 		catch (Exception e) {
-			logger.error("Failed to generate CSV " + e.getMessage());
+			logger.error("Failed to generate CSV " + e.getMessage(), e);
+			throw new RuntimeException("Failed to generate CSV : " + e.getMessage());
 		}
 	}
 
