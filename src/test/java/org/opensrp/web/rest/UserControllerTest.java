@@ -156,7 +156,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
@@ -200,7 +200,7 @@ public class UserControllerTest {
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
-		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
+		location.getProperties().setName("OA123");
 		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId), 5000))
 		        .thenReturn(Collections.singletonList(location));
 		when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))
@@ -219,18 +219,24 @@ public class UserControllerTest {
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
 		}
-		JsonNode actualObj = new ObjectMapper().readTree(responseString);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode actualObj = objectMapper.readTree(responseString);
 		assertEquals(result.getStatusCode(), HttpStatus.OK);
 		assertEquals(actualObj.get("user").get("username").asText(), user.getUsername());
 		assertTrue(actualObj.has("locations"));
 		assertTrue(actualObj.has("team"));
 		assertTrue(actualObj.has("time"));
 		assertTrue(actualObj.has("jurisdictions"));
+		assertTrue(actualObj.has("jurisdictionIds"));
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getProperties().getName() }),
+		    actualObj.get("jurisdictions").toString());
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getId() }),
+		    actualObj.get("jurisdictionIds").toString());
 	}
 	
 	@Test
 	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		authentication = authenticatedUser.getSecond();
 		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
 		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
