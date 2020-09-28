@@ -245,7 +245,7 @@ public class UserController {
 			
 		/** @formatter:off*/
 		Map<String,String> leafJurisdictions=jurisdictions.stream()
-			.filter(location -> !locationParents.contains(location.getId()))
+			.filter(location -> !locationParents.contains(location.getId()) && location.getProperties().getName()!=null)
 			.collect(Collectors.toMap(PhysicalLocation::getId, (location)->location.getProperties().getName()));
 		/**@formatter:on*/
 			
