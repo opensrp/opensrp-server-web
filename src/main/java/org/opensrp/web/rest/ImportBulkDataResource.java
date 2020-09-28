@@ -28,13 +28,13 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/rest/import")
-public class ImportBulkDataController {
+public class ImportBulkDataResource {
 
 	private ImportBulkDataService importBulkDataService;
 
 	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
 
-	private static Logger logger = LoggerFactory.getLogger(ImportBulkDataController.class.toString());
+	private static Logger logger = LoggerFactory.getLogger(ImportBulkDataResource.class.toString());
 
 	@Autowired
 	public void setImportBulkDataService(ImportBulkDataService importBulkDataService) {
