@@ -12,7 +12,6 @@ import org.opensrp.util.DateTimeSerializer;
 import org.opensrp.util.LocalDateDeserializer;
 import org.opensrp.util.LocalDateSerializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -30,7 +29,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Configuration
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = { "org.opensrp.connector.dhis2.location" })
 public class WebConfig {
 	
 	@Bean

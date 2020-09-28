@@ -48,6 +48,8 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
+import org.opensrp.connector.dhis2.location.DHIS2LocationsImportSummary;
+import org.opensrp.connector.dhis2.location.DHISImportLocationsJobStatus;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -137,6 +139,8 @@ public class LocationResourceTest {
 	public String searchResponseJson = "{\"locations\":[{\"type\":\"Feature\",\"id\":\"7\",\"properties\":{\"uid\":\"694e0f30-d9ac-4576-b50a-38a3ef13ebcr\",\"type\":\"Residential Structure\",\"status\":\"PENDING_REVIEW\",\"parentId\":\"22\",\"name\":\"Faridpur\",\"geographicLevel\":0,\"effectiveStartDate\":\"Jan 1, 2015, 12:00:00 AM\",\"version\":0,\"customProperties\":{}},\"serverVersion\":1586160969806,\"locationTags\":[{\"id\":3,\"active\":true,\"name\":\"District\",\"description\":\"District\"}],\"customProperties\":{\"parent\":\"Dhaka\",\"tag_name\":\"District\",\"name\":\"Faridpur\"},\"jurisdiction\":false}],\"total\":0}";
 
 	public String locationTree = "{\"locationsHierarchy\":{\"map\":{\"1\":{\"id\":\"1\",\"label\":\"Kenya\",\"node\":{\"locationId\":\"1\",\"name\":\"Kenya\",\"tags\":[\"Country\"],\"voided\":false},\"children\":{\"2\":{\"id\":\"2\",\"label\":\"Coast\",\"node\":{\"locationId\":\"2\",\"name\":\"Coast\",\"parentLocation\":{\"locationId\":\"1\",\"voided\":false},\"tags\":[\"Province\"],\"voided\":false},\"parent\":\"1\"}}}},\"parentChildren\":{\"1\":[\"2\"]}}}";
+
+	private final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
 
 	@Before
 	public void setUp() {
@@ -974,6 +978,61 @@ public class LocationResourceTest {
 		assertFalse(booleanCaptor.getAllValues().get(0));
 		assertEquals(1, stringSetCaptor.getValue().size());
 		assertTrue(stringSetCaptor.getValue().contains(locationId));
+	}
+
+	@Test
+	public void testImportLocationsWithBeginning() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?beginning=true").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(dhis2ImportOrganizationUnits).importOrganizationUnits("1");
+		String actualString = result.getResponse().getContentAsString();
+		assertTrue(actualString.contains(DHIS_IMPORT_JOB_STATUS_END_POINT));
+	}
+
+	@Test
+	public void testImportLocationsWithStartPageParam() throws Exception {
+		MvcResult result = mockMvc.perform(
+				post(BASE_URL + "/dhis2/import?startPage=2&beginning=false").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(dhis2ImportOrganizationUnits).importOrganizationUnits("2");
+		String actualString = result.getResponse().getContentAsString();
+		assertTrue(actualString.contains(DHIS_IMPORT_JOB_STATUS_END_POINT));
+	}
+
+	@Test
+	public void testImportLocationsWithInvalidParams() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?startPage=2&beginning=true").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		String actualString = result.getResponse().getContentAsString();
+		assertEquals(
+				"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
+				actualString);
+	}
+
+	@Test
+	public void testGetStatusOfJob() throws Exception {
+		DHIS2LocationsImportSummary dhis2LocationsImportSummary = new DHIS2LocationsImportSummary();
+		dhis2LocationsImportSummary.setDhisImportLocationsJobStatus(DHISImportLocationsJobStatus.RUNNING);
+		dhis2LocationsImportSummary.setDhisLocationsCount(1000);
+		dhis2LocationsImportSummary.setDhisPageCount(10);
+		dhis2LocationsImportSummary.setLastPageSynced(2);
+		dhis2LocationsImportSummary.setNumberOfRowsProcessed(200);
+		when(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens())
+				.thenReturn(dhis2LocationsImportSummary);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/dhis2/status")).andExpect(status().isOk()).andReturn();
+		String actualString = result.getResponse().getContentAsString();
+		DHIS2LocationsImportSummary summary = LocationResource.gson.fromJson(actualString,
+				DHIS2LocationsImportSummary.class);
+		assertEquals(DHISImportLocationsJobStatus.RUNNING, summary.getDhisImportLocationsJobStatus());
+		assertEquals(new Integer(1000), summary.getDhisLocationsCount());
+		assertEquals(new Integer(10), summary.getDhisPageCount());
+		assertEquals(new Integer(2), summary.getLastPageSynced());
+		assertEquals(new Integer(200), summary.getNumberOfRowsProcessed());
 	}
 
 }
