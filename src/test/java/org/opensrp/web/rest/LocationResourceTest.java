@@ -1015,6 +1015,16 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testImportLocationsWithMissingParam() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?beginning=false").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		String actualString = result.getResponse().getContentAsString();
+		assertEquals("Start page must be specified", actualString);
+	}
+
+	@Test
 	public void testGetStatusOfJob() throws Exception {
 		DHIS2LocationsImportSummary dhis2LocationsImportSummary = new DHIS2LocationsImportSummary();
 		dhis2LocationsImportSummary.setDhisImportLocationsJobStatus(DHISImportLocationsJobStatus.RUNNING);
