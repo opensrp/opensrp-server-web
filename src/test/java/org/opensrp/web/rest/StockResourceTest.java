@@ -55,8 +55,8 @@ public class StockResourceTest {
 
 	private final String BASE_URL = "/rest/stockresource/";
 	
-	private final String SYNC_PAYLOAD = "{\n"
-			+ "\t\"stocks\": \"[{\\\"identifier\\\":123,\\\"providerid\\\":\\\"test-id\\\"}]\"\n"
+	private final String SYNC_PAYLOAD = "{"
+			+ "\"stocks\": [{\"identifier\":123,\"providerid\":\"test-id\"}]"
 			+ "}";
 	
 	@Before
