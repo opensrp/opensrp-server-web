@@ -4,8 +4,10 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -47,12 +49,15 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
@@ -93,6 +98,9 @@ public class OrganizationResourceTest {
 	private PractitionerService practitionerService;
 	
 	@Mock
+	private PhysicalLocationService locationService;
+	
+	@Mock
 	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
 	
 	@Mock
@@ -122,6 +130,7 @@ public class OrganizationResourceTest {
 		organizationResource = webApplicationContext.getBean(OrganizationResource.class);
 		organizationResource.setOrganizationService(organizationService);
 		organizationResource.setPractitionerService(practitionerService);
+		organizationResource.setLocationService(locationService);
 		objectMapper = new ObjectMapper();
 	}
 	
@@ -369,6 +378,21 @@ public class OrganizationResourceTest {
 		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
 		List<AssignedLocations> assignments = getOrganizationLocationsAssigned();
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
+		PhysicalLocation location = LocationResourceTest.createStructure();
+		location.getProperties().setName("Vilage123");
+		PhysicalLocation location2 = new PhysicalLocation();
+		location2.setId(UUID.randomUUID().toString());
+		location2.setProperties(new LocationProperty());
+		location2.getProperties().setName("OA1");
+		location2.getProperties().setParentId(location.getId());
+		
+		PhysicalLocation location3 = new PhysicalLocation();
+		location3.setId(UUID.randomUUID().toString());
+		location3.setProperties(new LocationProperty());
+		location3.getProperties().setName("Oa3");
+		location3.getProperties().setParentId(location.getId());
+		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(5000)))
+		        .thenReturn(Arrays.asList(location, location2, location3));
 		
 		Authentication authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
@@ -380,10 +404,12 @@ public class OrganizationResourceTest {
 		    UserAssignmentBean.class);
 		
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
-		assertEquals(assignments.size(), userAssignment.getJurisdictions().size());
+		assertEquals(2, userAssignment.getJurisdictions().size());
 		assertEquals(assignments.size(), userAssignment.getPlans().size());
 		for (AssignedLocations assignment : assignments) {
-			assertTrue(userAssignment.getJurisdictions().contains(assignment.getJurisdictionId()));
+			assertFalse(userAssignment.getJurisdictions().contains(location.getId()));
+			assertTrue(userAssignment.getJurisdictions().contains(location2.getId()));
+			assertTrue(userAssignment.getJurisdictions().contains(location3.getId()));
 			assertTrue(userAssignment.getPlans().contains(assignment.getPlanId()));
 		}
 		
