@@ -153,7 +153,7 @@ public class OrganizationResource {
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
 			@PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier),
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier,false),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
