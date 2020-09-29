@@ -201,18 +201,18 @@ public class OrganizationResource {
 		        	jurisdictions.add(a.getJurisdictionId());
 		        	plans.add(a.getPlanId());
 		        });
-		Set<String> locationParents = new HashSet<>();
-		List<PhysicalLocation> jurisdictionLocations = locationService.findLocationByIdsWithChildren(false, jurisdictions, 5000);
 		
+		List<PhysicalLocation> jurisdictionLocations = locationService.findLocationByIdsWithChildren(false, jurisdictions, 5000);
+		Set<String> locationParents = jurisdictionLocations.stream()
+				.map(l->l.getProperties().getParentId())
+				.collect(Collectors.toSet());
+				
 		return UserAssignmentBean.builder()
 				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
 				.jurisdictions(jurisdictionLocations
 					.stream()
-		                .map(l -> {
-			                locationParents.add(l.getProperties().getParentId());
-			                return l.getId();
-		                })
-					.filter(l->!locationParents.contains(l))
+					.filter(l->!locationParents.contains(l.getId()))
+		            .map(PhysicalLocation::getId)
 					.collect(Collectors.toSet()))
 				.plans(plans)
 				.build();
