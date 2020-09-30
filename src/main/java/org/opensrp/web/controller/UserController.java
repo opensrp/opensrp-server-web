@@ -191,7 +191,7 @@ public class UserController {
 		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
-		List<PhysicalLocation> jurisdictions = null;
+		Set<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
 		Set<String> plansIdentifiers = new HashSet<>();
 		try {
@@ -206,7 +206,7 @@ public class UserController {
 					plansIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, LOCATION_LIMIT);
+			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, LOCATION_LIMIT));
 			
 			if (!plansIdentifiers.isEmpty()) {
 				/** @formatter:off*/
@@ -218,7 +218,7 @@ public class UserController {
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
 				/** @formatter:on*/	
-				List<PhysicalLocation> planLocations =locationService.findLocationByIdsWithChildren(false, planLocationIds, LOCATION_LIMIT);
+				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, LOCATION_LIMIT));
 				jurisdictions.retainAll(planLocations);		
 			}
 			
