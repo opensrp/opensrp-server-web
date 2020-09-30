@@ -226,7 +226,7 @@ public class UserController {
 		catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
 		}
-		if (jurisdictions.isEmpty()) {
+		if (jurisdictions == null || jurisdictions.isEmpty()) {
 			throw new MissingTeamAssignmentException(
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}

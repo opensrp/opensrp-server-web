@@ -42,6 +42,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
@@ -169,7 +170,7 @@ public class UserControllerTest {
 		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = MissingTeamAssignmentException.class)
 	public void testAuthenticateIfUserIsNotMapped() throws Exception {
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
