@@ -5,6 +5,7 @@ import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 import java.net.ConnectException;
 
 import org.opensrp.web.dto.ResponseDto;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.exceptions.UploadValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +41,20 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ResponseBody
-	@ExceptionHandler(IllegalArgumentException.class)
+	@ExceptionHandler(value= {IllegalArgumentException.class,IllegalStateException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseDto<?> exceptionHandler(IllegalArgumentException exception) {
+	public ResponseDto<?> IllegalExceptionHandler(RuntimeException exception) {
 		logger.error("IllegalArgumentException occurred : ", exception);
 		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
+	}
+	
+	
+	@ResponseBody
+	@ExceptionHandler(MissingTeamAssignmentException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseDto<?> exceptionHandler(MissingTeamAssignmentException exception) {
+		logger.error("MissingTeamAssignmentException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.FORBIDDEN, exception.getMessage());
 	}
 	
 	

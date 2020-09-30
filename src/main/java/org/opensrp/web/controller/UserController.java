@@ -6,7 +6,9 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,10 +43,13 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +69,10 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
+	private static final int LOCATION_LIMIT=5000;
+	
+	private static final String JURISDICTION="jurisdiction";
+	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
 	
@@ -72,6 +81,8 @@ public class UserController {
 	private PractitionerService practitionerService;
 	
 	private PhysicalLocationService locationService;
+	
+	private PlanService planService;
 	
 	@Value("#{opensrp['openmrs.version']}")
 	protected String OPENMRS_VERSION;
@@ -110,6 +121,15 @@ public class UserController {
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
+	}
+	
+	
+	/**
+	 * @param planService the planService to set
+	 */
+	@Autowired
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
@@ -173,6 +193,7 @@ public class UserController {
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		List<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
+		Set<String> plansIdentifiers = new HashSet<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -181,16 +202,32 @@ public class UserController {
 			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
 				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
 					locationIds.add(assignedLocation.getJurisdictionId());
+				if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
+					plansIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, 5000);
+			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, LOCATION_LIMIT);
+			
+			if (!plansIdentifiers.isEmpty()) {
+				/** @formatter:off*/
+				Set<String> planLocationIds = planService
+				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(plansIdentifiers),
+				            Collections.singletonList(JURISDICTION), false)
+				        .stream()
+				        .flatMap(plan -> plan.getJurisdiction().stream())
+				        .map(Jurisdiction::getCode)
+				        .collect(Collectors.toSet());
+				/** @formatter:on*/	
+				List<PhysicalLocation> planLocations =locationService.findLocationByIdsWithChildren(false, planLocationIds, LOCATION_LIMIT);
+				jurisdictions.retainAll(planLocations);		
+			}
 			
 		}
 		catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
 		}
-		if (locationIds.isEmpty()) {
-			throw new IllegalStateException(
+		if (jurisdictions.isEmpty()) {
+			throw new MissingTeamAssignmentException(
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
