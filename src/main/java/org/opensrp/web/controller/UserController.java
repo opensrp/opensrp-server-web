@@ -71,7 +71,7 @@ public class UserController {
 	
 	public static final int LOCATION_LIMIT=5000;
 	
-	private static final String JURISDICTION="jurisdiction";
+	public static final String JURISDICTION="jurisdiction";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -193,7 +193,7 @@ public class UserController {
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
 		Set<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
-		Set<String> plansIdentifiers = new HashSet<>();
+		Set<String> planIdentifiers = new HashSet<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
@@ -203,15 +203,15 @@ public class UserController {
 				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
 					locationIds.add(assignedLocation.getJurisdictionId());
 				if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
-					plansIdentifiers.add(assignedLocation.getPlanId());
+					planIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
 			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, LOCATION_LIMIT));
 			
-			if (!plansIdentifiers.isEmpty()) {
+			if (!planIdentifiers.isEmpty()) {
 				/** @formatter:off*/
 				Set<String> planLocationIds = planService
-				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(plansIdentifiers),
+				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
 				            Collections.singletonList(JURISDICTION), false)
 				        .stream()
 				        .flatMap(plan -> plan.getJurisdiction().stream())
