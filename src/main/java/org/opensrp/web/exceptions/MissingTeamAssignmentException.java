@@ -9,10 +9,9 @@ package org.opensrp.web.exceptions;
  */
 public class MissingTeamAssignmentException extends IllegalStateException {
 
+	private static final long serialVersionUID = 6550109338327092528L;
+	
 	public MissingTeamAssignmentException(String string) {
 		super(string);
 	}
-
-	private static final long serialVersionUID = 6550109338327092528L;
-	
 }
