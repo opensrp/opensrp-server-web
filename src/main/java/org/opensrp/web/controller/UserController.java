@@ -69,7 +69,7 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
-	private static final int LOCATION_LIMIT=5000;
+	public static final int LOCATION_LIMIT=5000;
 	
 	private static final String JURISDICTION="jurisdiction";
 	

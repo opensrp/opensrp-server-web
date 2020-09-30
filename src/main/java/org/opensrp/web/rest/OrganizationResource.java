@@ -22,6 +22,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
+import org.opensrp.web.controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.PhysicalLocation;
@@ -202,7 +203,7 @@ public class OrganizationResource {
 		        	plans.add(a.getPlanId());
 		        });
 		
-		List<PhysicalLocation> jurisdictionLocations = locationService.findLocationByIdsWithChildren(false, jurisdictions, 5000);
+		List<PhysicalLocation> jurisdictionLocations = locationService.findLocationByIdsWithChildren(false, jurisdictions, UserController.LOCATION_LIMIT);
 		Set<String> locationParents = jurisdictionLocations.stream()
 				.map(l->l.getProperties().getParentId())
 				.collect(Collectors.toSet());
