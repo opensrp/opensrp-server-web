@@ -397,7 +397,7 @@ public class OrganizationResourceTest {
 		location3.setProperties(new LocationProperty());
 		location3.getProperties().setName("Oa3");
 		location3.getProperties().setParentId(location.getId());
-		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(5000)))
+		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
 		        .thenReturn(Arrays.asList(location, location2, location3));
 		
 		Authentication authentication = authenticatedUser.getSecond();
