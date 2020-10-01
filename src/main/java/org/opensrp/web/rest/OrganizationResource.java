@@ -221,7 +221,7 @@ public class OrganizationResource {
 		        	}
 		        });
 		Set<PhysicalLocation> jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false,
-		    jurisdictionIdentifiers, UserController.LOCATION_LIMIT));
+		    jurisdictionIdentifiers, Integer.MAX_VALUE));
 		
 		if (!planIdentifiers.isEmpty()) {
 			Set<String> planLocationIds = planService
@@ -233,7 +233,7 @@ public class OrganizationResource {
 			        .collect(Collectors.toSet());
 		
 			Set<PhysicalLocation> planLocations = new HashSet<>(
-			        locationService.findLocationByIdsWithChildren(false, planLocationIds, UserController.LOCATION_LIMIT));
+			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
 		}
 		

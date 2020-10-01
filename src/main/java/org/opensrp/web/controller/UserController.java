@@ -69,8 +69,6 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
-	public static final int LOCATION_LIMIT=5000;
-	
 	public static final String JURISDICTION="jurisdiction";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
@@ -206,7 +204,7 @@ public class UserController {
 					planIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, LOCATION_LIMIT));
+			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
 			
 			if (!planIdentifiers.isEmpty()) {
 				/** @formatter:off*/
@@ -218,7 +216,7 @@ public class UserController {
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
 				/** @formatter:on*/	
-				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, LOCATION_LIMIT));
+				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 				jurisdictions.retainAll(planLocations);		
 			}
 			
