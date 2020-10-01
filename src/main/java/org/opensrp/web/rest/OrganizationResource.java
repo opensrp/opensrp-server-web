@@ -5,6 +5,8 @@ package org.opensrp.web.rest;
 
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,11 +21,14 @@ import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
+import org.opensrp.web.controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -57,6 +62,8 @@ public class OrganizationResource {
 	
 	private PhysicalLocationService locationService;
 	
+	private PlanService planService;
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 	
@@ -86,6 +93,14 @@ public class OrganizationResource {
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
+	}
+	
+	/**
+	 * @param planService the planService to set
+	 */
+	@Autowired
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
 	}
 	
 	/**
@@ -190,31 +205,50 @@ public class OrganizationResource {
 		String userId = user.getBaseEntityId();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = practitionerService
 		        .getOrganizationsByUserId(userId);
-		Set<String> jurisdictions = new HashSet<>();
-		Set<String> plans = new HashSet<>();
+		Set<String> jurisdictionIdentifiers = new HashSet<>();
+		Set<String> planIdentifiers = new HashSet<>();
 		/**@formatter:off*/
 		organizationService
 		        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)
 		        .stream()
 		        .filter(a->StringUtils.isNotBlank(a.getJurisdictionId()))
 		        .forEach(a ->{
-		        	jurisdictions.add(a.getJurisdictionId());
-		        	plans.add(a.getPlanId());
+		        	if(StringUtils.isNotBlank(a.getJurisdictionId())) {
+		        		jurisdictionIdentifiers.add(a.getJurisdictionId());
+		        	}
+		        	if(StringUtils.isNotBlank(a.getPlanId())) {
+		        		planIdentifiers.add(a.getPlanId());
+		        	}
 		        });
+		Set<PhysicalLocation> jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false,
+		    jurisdictionIdentifiers, Integer.MAX_VALUE));
 		
-		List<PhysicalLocation> jurisdictionLocations = locationService.findLocationByIdsWithChildren(false, jurisdictions, 5000);
-		Set<String> locationParents = jurisdictionLocations.stream()
+		if (!planIdentifiers.isEmpty()) {
+			Set<String> planLocationIds = planService
+			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
+			            Collections.singletonList(UserController.JURISDICTION), false)
+			        .stream()
+			        .flatMap(plan -> plan.getJurisdiction().stream())
+			        .map(Jurisdiction::getCode)
+			        .collect(Collectors.toSet());
+		
+			Set<PhysicalLocation> planLocations = new HashSet<>(
+			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+			jurisdictions.retainAll(planLocations);
+		}
+		
+		Set<String> locationParents = jurisdictions.stream()
 				.map(l->l.getProperties().getParentId())
 				.collect(Collectors.toSet());
 				
 		return UserAssignmentBean.builder()
 				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
-				.jurisdictions(jurisdictionLocations
+				.jurisdictions(jurisdictions
 					.stream()
 					.filter(l->!locationParents.contains(l.getId()))
 		            .map(PhysicalLocation::getId)
 					.collect(Collectors.toSet()))
-				.plans(plans)
+				.plans(planIdentifiers)
 				.build();
 		/**@formatter:on*/
 		
