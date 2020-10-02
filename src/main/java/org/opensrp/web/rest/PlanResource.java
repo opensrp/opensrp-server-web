@@ -269,8 +269,8 @@ public class PlanResource {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
 	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
-											  @RequestParam(value = "min_time", required = false) Date fromDate,
-											  @RequestParam(value = "max_time", required = false) Date toDate) {
+											  @RequestParam(value = "fromDate", required = false) Date fromDate,
+											  @RequestParam(value = "toDate", required = false) Date toDate) {
 		
 		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted, fromDate, toDate);
 		Identifier identifiers = new Identifier();

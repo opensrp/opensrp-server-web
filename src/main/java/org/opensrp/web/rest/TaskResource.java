@@ -223,8 +223,8 @@ public class TaskResource {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSION)  long serverVersion,
-			@RequestParam(value = "min_time", required = false) Date fromDate,
-			@RequestParam(value = "max_time", required = false) Date toDate) {
+			@RequestParam(value = "fromDate", required = false) Date fromDate,
+			@RequestParam(value = "toDate", required = false) Date toDate) {
 
 		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
 				fromDate, toDate);

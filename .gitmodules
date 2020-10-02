@@ -1,4 +1,4 @@
 [submodule "configs"]
 	path = configs
 	url = https://github.com/OpenSRP/opensrp-server-configs
-	branch = add-timestamp-columns
+	branch = master

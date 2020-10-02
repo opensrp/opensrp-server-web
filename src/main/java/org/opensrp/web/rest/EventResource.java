@@ -473,8 +473,8 @@ public class EventResource extends RestResource<Event> {
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 	        @RequestParam(value = SERVER_VERSION) long serverVersion,
 	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
-			@RequestParam(value = "min_time", required = false) Date fromDate,
-			@RequestParam(value = "max_time", required = false) Date toDate){
+			@RequestParam(value = "fromDate", required = false) Date fromDate,
+			@RequestParam(value = "toDate", required = false) Date toDate){
 
 		try {
 
