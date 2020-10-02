@@ -10,6 +10,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -221,9 +222,12 @@ public class TaskResource {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = "min_time", required = false) Date fromDate,
+			@RequestParam(value = "max_time", required = false) Date toDate) {
 
-		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+				fromDate, toDate);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());

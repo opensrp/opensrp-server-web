@@ -27,6 +27,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -339,9 +340,11 @@ public class ClientResource extends RestResource<Client> {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
+			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
+			@RequestParam(value = "min_time", required = false) Date fromDate,
+			@RequestParam(value = "max_time", required = false) Date toDate) {
 
-		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
+		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived, fromDate, toDate);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());

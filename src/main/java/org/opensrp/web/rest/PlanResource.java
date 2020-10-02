@@ -10,6 +10,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -267,9 +268,11 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+											  @RequestParam(value = "min_time", required = false) Date fromDate,
+											  @RequestParam(value = "max_time", required = false) Date toDate) {
 		
-		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted, fromDate, toDate);
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());

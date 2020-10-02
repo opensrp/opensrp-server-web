@@ -24,6 +24,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -471,12 +472,14 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 	        @RequestParam(value = SERVER_VERSION) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+			@RequestParam(value = "min_time", required = false) Date fromDate,
+			@RequestParam(value = "max_time", required = false) Date toDate){
 
 		try {
 
 			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
-			    Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			    Constants.DEFAULT_GET_ALL_IDS_LIMIT,fromDate,toDate);
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
