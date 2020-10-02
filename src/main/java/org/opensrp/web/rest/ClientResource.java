@@ -347,7 +347,7 @@ public class ClientResource extends RestResource<Client> {
 			@RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
 
 		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived,
-				Timestamp.valueOf(fromDate), Timestamp.valueOf(toDate));
+				fromDate == null ? null : Timestamp.valueOf(fromDate), toDate == null ? null : Timestamp.valueOf(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());

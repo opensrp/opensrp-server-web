@@ -482,7 +482,7 @@ public class EventResource extends RestResource<Event> {
 		try {
 
 			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
-			    Constants.DEFAULT_GET_ALL_IDS_LIMIT, Timestamp.valueOf(fromDate), Timestamp.valueOf(toDate));
+			    Constants.DEFAULT_GET_ALL_IDS_LIMIT, fromDate == null ? null : Timestamp.valueOf(fromDate), toDate == null ? null : Timestamp.valueOf(toDate));
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
