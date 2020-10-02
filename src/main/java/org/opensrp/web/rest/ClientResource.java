@@ -44,6 +44,7 @@ import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -341,8 +342,8 @@ public class ClientResource extends RestResource<Client> {
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
-			@RequestParam(value = "fromDate", required = false) Date fromDate,
-			@RequestParam(value = "toDate", required = false) Date toDate) {
+			@RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date fromDate,
+			@RequestParam(value = "toDate", required = false) @DateTimeFormat Date toDate) {
 
 		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived, fromDate, toDate);
 		Identifier identifiers = new Identifier();
