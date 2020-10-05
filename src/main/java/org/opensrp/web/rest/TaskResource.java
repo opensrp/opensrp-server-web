@@ -149,7 +149,7 @@ public class TaskResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid task representation",e );
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -163,7 +163,7 @@ public class TaskResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid task representation" , e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -183,7 +183,7 @@ public class TaskResource {
 				        HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid task representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -205,7 +205,7 @@ public class TaskResource {
 			}
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task update representation" + entity);
+			logger.error("The request doesnt contain a valid task update representation" , e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 

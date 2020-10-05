@@ -3,15 +3,12 @@ package org.opensrp.web.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.representations.AccessToken;
@@ -46,6 +42,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
@@ -109,9 +106,6 @@ public class UserControllerTest {
 	protected String keycloakConfigurationURL;
 	
 	@Autowired
-	private KeycloakDeployment keycloakDeployment;
-	
-	@Autowired
 	private KeycloakRestTemplate restTemplate;
 	
 	private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
@@ -163,7 +157,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
@@ -176,7 +170,7 @@ public class UserControllerTest {
 		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = MissingTeamAssignmentException.class)
 	public void testAuthenticateIfUserIsNotMapped() throws Exception {
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
@@ -206,14 +200,12 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
-		
-		
 		PhysicalLocation location = LocationResourceTest.createStructure();
-		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
-		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId),5000))
+		location.getProperties().setName("OA123");
+		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId), Integer.MAX_VALUE))
 		        .thenReturn(Collections.singletonList(location));
 		when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))
-        .thenReturn(new LocationTree());
+		        .thenReturn(new LocationTree());
 		
 		String[] locations = new String[5];
 		locations[0] = "Test";
@@ -228,34 +220,46 @@ public class UserControllerTest {
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
 		}
-		JsonNode actualObj = new ObjectMapper().readTree(responseString);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode actualObj = objectMapper.readTree(responseString);
 		assertEquals(result.getStatusCode(), HttpStatus.OK);
 		assertEquals(actualObj.get("user").get("username").asText(), user.getUsername());
 		assertTrue(actualObj.has("locations"));
 		assertTrue(actualObj.has("team"));
 		assertTrue(actualObj.has("time"));
 		assertTrue(actualObj.has("jurisdictions"));
+		assertTrue(actualObj.has("jurisdictionIds"));
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getProperties().getName() }),
+		    actualObj.get("jurisdictions").toString());
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getId() }),
+		    actualObj.get("jurisdictionIds").toString());
 	}
 	
 	@Test
 	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
-		String authServer = "http://localhost:8080/auth/";
-		String realm = "opensrp";
-		String url = MessageFormat.format(keycloakConfigurationURL, authServer, realm);
-		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
-		when(keycloakDeployment.getRealm()).thenReturn(realm);
-		JsonNode expected = new ObjectMapper().readTree(
-		    "{\"end_session_endpoint\": \"http://localhost:8080/auth/realms/opensrp/protocol/openid-connect/logout\"}");
-		doReturn(expected).when(restTemplate).getForObject(url, JsonNode.class);
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		authentication = authenticatedUser.getSecond();
 		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
-		doReturn(expectedResponse).when(restTemplate)
-		        .getForEntity(expected.get(UserController.END_SESSION_ENDPOINT).textValue(), String.class);
 		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
 		MvcResult result = mockMvc
 		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
 		        .andExpect(status().isOk()).andReturn();
-		verify(restTemplate).getForObject(url, JsonNode.class);
-		verify(restTemplate).getForEntity(expected.get("end_session_endpoint").textValue(), String.class);
+		assertEquals(expectedResponse.getStatusCodeValue(), result.getResponse().getStatus());
+		assertEquals(expectedResponse.getBody(), result.getResponse().getContentAsString());
+		MockHttpServletRequest request = result.getRequest();
+		assertNull(request.getUserPrincipal());
+		assertNull(request.getRemoteUser());
+		assertNull(request.getAuthType());
+		
+	}
+	
+	@Test
+	public void testLogoutShouldReturnUnAuthorizedIfNotLoggedIn() throws Exception {
+		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User not logged in", HttpStatus.UNAUTHORIZED);
+		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
+		MvcResult result = mockMvc
+		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isUnauthorized()).andReturn();
 		assertEquals(expectedResponse.getStatusCodeValue(), result.getResponse().getStatus());
 		assertEquals(expectedResponse.getBody(), result.getResponse().getContentAsString());
 		MockHttpServletRequest request = result.getRequest();

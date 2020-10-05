@@ -100,7 +100,7 @@ public abstract class BaseSecureResourceTest<T> {
 		mapper.registerModule(dateTimeModule);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
-		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
+		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal,securityContext);
 		authentication = authenticatedUser.getSecond();
 		requestPostProcessors = SecurityMockMvcRequestPostProcessors.authentication(authentication);
 	}
