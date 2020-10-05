@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import org.opensrp.domain.Multimedia;
 import org.opensrp.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
@@ -63,24 +64,27 @@ public class ProductCatalogueResource {
 			ProductCatalogue catalogue = productCatalogueService
 					.getProductCatalogueByName(productCatalogue.getProductName());
 			if (catalogue != null && file != null) {
-				MultimediaDTO multimediaDTO = new MultimediaDTO(catalogue.getUniqueId().toString(), userName.trim(),
-						file.getContentType().trim(), null, "catalog_image");
-				multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
+				Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(catalogue.getUniqueId()));
+				if (multimedia == null) {
+					MultimediaDTO multimediaDTO = new MultimediaDTO(catalogue.getUniqueId().toString(), userName.trim(),
+							file.getContentType().trim(), null, "catalog_image");
+					multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
 
-				logger.info("Saving multimedia file...");
-				String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+					logger.info("Saving multimedia file...");
+					String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+				}
 			}
 
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (IOException e) {
 			logger.error(
-					String.format("Exception occurred while persisting image of Product Catalogue: %s", e.getMessage(), e));
+					String.format("Exception occurred while persisting image of Product Catalogue" + e.getMessage() + e));
 			return new ResponseEntity<String>("Exception occurred while persisting image of Product Catalogue",
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		catch (IllegalArgumentException e) {
-			logger.error(String.format("Exception occurred while adding product catalogue: %s", e.getMessage(), e));
+			logger.error(String.format("Exception occurred while adding product catalogue: %s,%s", e.getMessage(), e));
 			return new ResponseEntity<String>("The request contain illegal argument ", HttpStatus.BAD_REQUEST);
 		}
 	}
