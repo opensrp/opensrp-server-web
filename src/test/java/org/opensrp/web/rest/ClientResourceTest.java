@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -357,5 +358,72 @@ public class ClientResourceTest {
         assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
     }
 
+	@Test
+	public void testSearchClientsWithRelationships() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		expected.add(client);
+
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Jared");
+		when(httpServletRequest.getParameter("relationships")).thenReturn("mother");
+
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class),
+				nullable(DateTime.class))).thenReturn(expected);
+		when(clientService.find("client-rel-base-entity-id")).thenReturn(clientRelationship);
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),client.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), clientRelationship.getFirstName());
+	}
+
+	@Test
+	public void testSearchClientRelationshipWithDependants() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+		expected.add(clientRelationship);
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Milka");
+		when(httpServletRequest.getParameter("searchRelationship")).thenReturn("mother");
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class),
+				nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		when(clientService.findByRelationshipIdAndType("mother", "client-rel-base-entity-id"))
+				.thenReturn(Collections.singletonList(client));
+
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),clientRelationship.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), client.getFirstName());
+	}
 
 }
