@@ -60,7 +60,7 @@ public class ProductCatalogueResource {
 		try {
 			productCatalogueService.add(productCatalogue);
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String userName = RestUtils.currentUser(authentication).getUsername();
+			String userName = authentication.getName();
 			ProductCatalogue catalogue = productCatalogueService
 					.getProductCatalogueByName(productCatalogue.getProductName());
 			if (catalogue != null && file != null) {
