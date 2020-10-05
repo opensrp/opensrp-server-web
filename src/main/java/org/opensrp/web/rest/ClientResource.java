@@ -212,8 +212,7 @@ public class ClientResource extends RestResource<Client> {
 		List<Client> dependantClients = new ArrayList<>();
 		List<Client> clientsToRemove = new ArrayList<>();
 		for (Client client : clients) {
-			List<Client> dependants = clientService
-					.findByRelationshipIdAndType(searchRelationship, client.getBaseEntityId());
+			List<Client> dependants = clientService.findByRelationshipIdAndType(searchRelationship, client.getBaseEntityId());
 			if (dependants.size() > 0) {
 				dependantClients.addAll(dependants);
 			} else {
