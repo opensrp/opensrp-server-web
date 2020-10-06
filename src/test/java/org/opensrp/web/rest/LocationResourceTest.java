@@ -33,6 +33,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -800,6 +801,38 @@ public class LocationResourceTest {
 				anyInt());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
+	}
+
+	@Test
+	public void testCountAllLocations() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/countAll")
+						.param(LocationResource.IS_JURISDICTION, "false")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
+	}
+
+	@Test
+	public void testCountAllStructures() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/countAll")
+						.param(LocationResource.IS_JURISDICTION, "false")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
+				anyInt());
+		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
 	}
 
 	@Test

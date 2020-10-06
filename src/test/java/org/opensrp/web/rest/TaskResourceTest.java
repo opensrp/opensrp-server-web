@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -383,6 +384,19 @@ public class TaskResourceTest {
 		verify(taskService).getAllTasks(anyLong(), anyInt());
 		assertEquals(TaskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
+	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		Task expectedTask = getTask();
+		List<Task> planDefinitions = Collections.singletonList(expectedTask);
+		when(taskService.getAllTasks(anyLong(), anyInt()))
+				.thenReturn(planDefinitions);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=25"))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService).getAllTasks(anyLong(), anyInt());
+		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
 	}
 	
 	@Test
