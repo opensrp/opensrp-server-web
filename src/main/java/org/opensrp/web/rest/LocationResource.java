@@ -43,6 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -452,6 +453,43 @@ public class LocationResource {
 					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
+
+	}
+
+	/**
+	 * Fetch count of structures or jurisdictions ordered by serverVersion ascending
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
+	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param returnGeometry boolean which controls if geometry is returned
+	 * @param serverVersion  serverVersion using to filter by
+	 * @param limit          upper limit on number os plas to fetch
+	 * @return the structures or jurisdictions matching the params
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = LIMIT, required = false) Integer limit) {
+
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+
+		ModelMap modelMap = new ModelMap();
+		List<PhysicalLocation> physicalLocations;
+		if (isJurisdiction) {
+			physicalLocations = locationService.findAllLocations(returnGeometry, serverVersion, pageLimit);
+			int physicalLocationsCount = physicalLocations != null ? physicalLocations.size() : 0;
+			modelMap.put("count", physicalLocationsCount);
+		} else {
+			physicalLocations = locationService.findAllStructures(returnGeometry, serverVersion, pageLimit);
+			int physicalLocationsCount = physicalLocations != null ? physicalLocations.size() : 0;
+			modelMap.put("count", physicalLocationsCount);
+		}
+		return new ResponseEntity<>(
+				modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
 	}
 

@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -361,6 +362,21 @@ public class ClientResource extends RestResource<Client> {
 			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
 
 		return clientService.findByServerVersion(serverVersion, limit);
+	}
+
+	/**
+	 * Fetch clients ordered by serverVersion ascending order
+	 *
+	 * @return a response with clients
+	 */
+	@GetMapping(value = "/countAll", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
+		List<Client> clients = clientService.findByServerVersion(serverVersion, limit);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", clients != null ? clients.size() : 0);
+		return ResponseEntity.ok(modelMap);
 	}
 
 	/**

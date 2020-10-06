@@ -55,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -346,6 +347,39 @@ public class EventResource extends RestResource<Event> {
 			response.setMsg("Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Fetch count of events
+	 *
+	 * @return a map response with events, clients and optionally msg when an error occurs
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	protected ResponseEntity<ModelMap> countAll(@RequestParam long serverVersion,
+			@RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit)
+			throws JsonProcessingException {
+
+		try {
+			EventSearchBean eventSearchBean = new EventSearchBean();
+			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
+			eventSearchBean.setEventType(eventType);
+			EventSyncBean eventSyncBean = getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false);
+
+			ModelMap modelMap = new ModelMap();
+			modelMap.put("no_of_events", eventSyncBean.getEvents() == null ? 0 : eventSyncBean.getEvents().size());
+			modelMap.put("no_of_clients", eventSyncBean.getClients() == null ? 0 : eventSyncBean.getClients().size());
+
+			return new ResponseEntity<>(
+					modelMap,
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		}
+		catch (Exception e) {
+			ModelMap modelMap = new ModelMap();
+			modelMap.put("message", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(modelMap, INTERNAL_SERVER_ERROR);
 		}
 	}
 
