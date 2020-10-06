@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
@@ -326,7 +327,7 @@ public class TaskResourceTest {
 	@Test
 	public void testFindAllTaskIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("task-id-1"), 12345l);
-		when(taskService.findAllTaskIds(anyLong(), anyInt())).thenReturn(idsModel);
+		when(taskService.findAllTaskIds(anyLong(), anyInt(), isNull(), isNull())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
 
@@ -334,7 +335,7 @@ public class TaskResourceTest {
 		Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
 		List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
-		verify(taskService, times(1)).findAllTaskIds(anyLong(), anyInt());
+		verify(taskService, times(1)).findAllTaskIds(anyLong(), anyInt(), isNull(), isNull());
 		verifyNoMoreInteractions(taskService);
 		assertEquals("{\"identifiers\":[\"task-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
 		assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));

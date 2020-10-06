@@ -39,6 +39,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -340,7 +341,7 @@ public class ClientResourceTest {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
-        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
+        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull())).thenReturn(idsModel);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
                 .andReturn();
 
@@ -349,7 +350,7 @@ public class ClientResourceTest {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean());
+        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull());
         verifyNoMoreInteractions(clientService);
         assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
