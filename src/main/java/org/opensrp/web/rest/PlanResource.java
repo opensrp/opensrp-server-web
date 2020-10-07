@@ -9,8 +9,6 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -26,12 +24,12 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -268,11 +266,11 @@ public class PlanResource {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
 	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
-											  @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
-											  @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
+											  @RequestParam(value = "fromDate", required = false) String fromDate,
+											  @RequestParam(value = "toDate", required = false) String toDate) {
 
 		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted,
-				fromDate == null ? null : Timestamp.valueOf(fromDate), toDate == null ? null : Timestamp.valueOf(toDate));
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());
