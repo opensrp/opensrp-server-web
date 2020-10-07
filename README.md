@@ -18,7 +18,7 @@ Generic web application
 * [OpenSRP Load Testing](https://smartregister.atlassian.net/wiki/spaces/Documentation/pages/268075009/OpenSRP+Load+Testing)
 
 **Date/Time Filters** 
-Endpoints supporting date/time filters have the following optional parameters  `fromDate` and `toDate` support [DateTimeFormat.ISO](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/format/annotation/DateTimeFormat.ISO.html "enum in org.springframework.format.annotation") i.e `yyyy-MM-dd'T'HH:mm:ss.SSSXXX`.
+Endpoints supporting date/time filters have the following optional parameters  `fromDate` and `toDate` support [DateTimeFormat.ISO](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/format/annotation/DateTimeFormat.ISO.html "enum in org.springframework.format.annotation") i.e `yyyy-MM-dd'T'HH:mm:ss.SSSXXX`and unix timestamp will millisecond precision
  * yyyy - year
  * MM - month
  * dd - date
@@ -34,9 +34,11 @@ Sample Request
 
 ``/opensrp/rest/event/findIdsByEventType?fromDate=2000-10-31T01:30&serverVersion=0``
 
+``/opensrp/rest/event/findIdsByEventType?fromDate=1602068945000&serverVersion=0``
+
 ``/opensrp/rest/event/findIdsByEventType?fromDate=2000-10-31T01:30&serverVersion=0``
 
 ``/opensrp/rest/event/findIdsByEventType?fromDate=2000-10-31T01:30:00.000%2B05:00&serverVersion=0``
 
 **NOTE:** 
-Keep in mind timezone of server to know which timezone to use 
+Use your timezone 
