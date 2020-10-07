@@ -259,7 +259,8 @@ public class ClientResource extends RestResource<Client> {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws JsonProcessingException {
+	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws JsonProcessingException,
+			ParseException {
 		ClientSyncBean response = new ClientSyncBean();
 		List<Client> clientList;
 
@@ -269,6 +270,9 @@ public class ClientResource extends RestResource<Client> {
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
+		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);
+		searchBean.setLastEditFrom(lastEdit == null ? null : lastEdit[0]);
+		searchBean.setLastEditTo(lastEdit == null ? null : lastEdit[1]);
 		int pageNumber = 1; // default page number
 		int pageSize = 0; // default page size
 		String clientType = getStringFilter(CLIENTTYPE, request);
@@ -344,7 +348,7 @@ public class ClientResource extends RestResource<Client> {
 			throws JsonProcessingException {
 		ClientSyncBean response = new ClientSyncBean();
 		List<Client> clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
-				null, null);
+				clientSearchBean.getLastEditFrom(), clientSearchBean.getLastEditTo());
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
