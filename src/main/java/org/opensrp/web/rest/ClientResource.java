@@ -24,12 +24,9 @@ import static org.opensrp.web.rest.RestUtils.getDateFilter;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +44,6 @@ import org.opensrp.web.bean.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -345,8 +341,8 @@ public class ClientResource extends RestResource<Client> {
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
 			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
-			@RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) String fromDate,
-			@RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) String toDate) {
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
 		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived,
 				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();

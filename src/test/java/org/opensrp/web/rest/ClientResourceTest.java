@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -342,8 +343,8 @@ public class ClientResourceTest {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
-        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull())).thenReturn(idsModel);
-        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
+        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull())).thenReturn(idsModel);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0&fromDate=2020-10-06T15:37:47.000-03:00", "")).andExpect(status().isOk())
                 .andReturn();
 
         String actualTaskIdString = result.getResponse().getContentAsString();
@@ -351,7 +352,7 @@ public class ClientResourceTest {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull());
+        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull());
         verifyNoMoreInteractions(clientService);
         assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
