@@ -342,13 +342,9 @@ public class ClientResource extends RestResource<Client> {
 
 	public ResponseEntity<String> getHouseholds(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
 			throws JsonProcessingException {
-
-		DateTime[] lastEdit = null;
 		ClientSyncBean response = new ClientSyncBean();
-		List<Client> clients;
-
-		clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
-				lastEdit == null ? null : lastEdit[0], lastEdit == null ? null : lastEdit[1]);
+		List<Client> clients = clientService.findHouseholdByCriteria(clientSearchBean, addressSearchBean,
+				null, null);
 		total = getTotal(clientSearchBean, addressSearchBean);
 		response.setClients(clients);
 		response.setTotal(total);
@@ -360,14 +356,14 @@ public class ClientResource extends RestResource<Client> {
 		String clientType = clientSearchBean.getClientType();
 		int pageNumber = clientSearchBean.getPageNumber();
 		if (pageNumber == FIRST_PAGE) {
-			if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
+			if (HOUSEHOLD.equalsIgnoreCase(clientType)) {
 				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-			} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
+			} else if (ALLCLIENTS.equalsIgnoreCase(clientType)) {
 				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-			} else if (clientType.equalsIgnoreCase(ANC)) {
+			} else if (ANC.equalsIgnoreCase(clientType)) {
 				clientSearchBean.setClientType(null);
 				total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
-			} else if (clientType.equalsIgnoreCase(CHILD)) {
+			} else if (CHILD.equalsIgnoreCase(clientType)) {
 				clientSearchBean.setClientType(null);
 				total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
 			} else {
