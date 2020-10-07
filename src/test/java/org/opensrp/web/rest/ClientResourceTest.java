@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -370,6 +371,21 @@ public class ClientResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		verify(clientService).findByServerVersion(0, 50);
 
+	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		Client expectedClient = createClient();
+		List<Client> clients = Collections.singletonList(expectedClient);
+		when(clientService.findByServerVersion(anyLong(),anyInt()))
+				.thenReturn(clients);
+		MvcResult mvcResult = mockMvc
+				.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=50"))
+				.andExpect(status().isOk()).andReturn();
+		String strResponse = mvcResult.getResponse().getContentAsString();
+		JSONObject jsonObject = new JSONObject(strResponse);
+		verify(clientService).findByServerVersion(0, 50);
+		assertEquals(1, jsonObject.optInt("count"));
 	}
 
 	@Test

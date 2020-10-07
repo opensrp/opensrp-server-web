@@ -34,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -249,6 +250,26 @@ public class TaskResource {
 		return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
+	}
+
+	/**
+	 * Fetch count of tasks
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number of tasks to fetch
+	 * @return A list of tasks
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSION) long serverVersion,
+			@RequestParam(value = LIMIT, required = false) Integer limit) {
+
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+		List<Task> tasks = taskService.getAllTasks(serverVersion, pageLimit);
+		int tasksCount = tasks != null ? tasks.size() : 0;
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", tasksCount);
+		return new ResponseEntity<>(modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	static class TaskSyncRequestWrapper {

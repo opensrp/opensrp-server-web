@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -469,6 +470,26 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		verify(planService).getAllPlans(anyLong(), anyInt(), anyBoolean());
 		assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 		
+	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		List<Jurisdiction> operationalAreas = new ArrayList<>();
+		Jurisdiction operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area");
+		operationalAreas.add(operationalArea);
+
+		PlanDefinition expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_1");
+		expectedPlan.setJurisdiction(operationalAreas);
+
+		List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
+		when(planService.getAllPlans(anyLong(), anyInt(), anyBoolean())).thenReturn(planDefinitions);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=25")).andExpect(status().isOk())
+				.andReturn();
+		verify(planService).getAllPlans(anyLong(), anyInt(), anyBoolean());
+		assertEquals(1 , new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
+
 	}
 	
 	@Test

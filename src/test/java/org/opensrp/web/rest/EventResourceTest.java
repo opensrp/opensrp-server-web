@@ -369,6 +369,25 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(actualObj.get("clients").size(),1);
 		assertEquals(actualObj.get("events").size(),1);
     }
+
+
+	@Test
+	public void testCountAll() throws Exception {
+		List<Event> expectedEvents = new ArrayList<>();
+		expectedEvents.add(createEvent());
+		List<Client> expectedClients = new ArrayList<>();
+		expectedClients.add(createClient());
+
+		doReturn(expectedEvents).when(eventService).findEvents(any(EventSearchBean.class), anyString(), anyString(), any(int.class));
+		doReturn(expectedClients).when(clientService).findByFieldValue(anyString(),anyList());
+		doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
+
+		String parameter = SERVER_VERSIOIN + "=15421904649873";
+		String response = getResponseAsString(BASE_URL + "/countAll", parameter, status().isOk());
+		JSONObject responseJsonObject = new JSONObject(response);
+		assertEquals(1, responseJsonObject.optInt("no_of_events"));
+		assertEquals(1, responseJsonObject.optInt("no_of_clients"));
+	}
     
     @Test
     public void testGetSync() throws Exception{

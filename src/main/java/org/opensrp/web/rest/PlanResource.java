@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -256,6 +257,26 @@ public class PlanResource {
 		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(serverVersion, pageLimit, isTemplateParam)),
 		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 
+	}
+
+	/**
+	 * Fetch count of plans
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @param limit upper limit on number os plas to fetch
+	 * @return A list of plan definitions
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = LIMIT, required = false) Integer limit, @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+
+		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
+		List<PlanDefinition> planDefinitions = planService.getAllPlans(serverVersion, pageLimit, isTemplateParam);
+		int planDefinitionsCount = planDefinitions != null ? planDefinitions.size() : 0;
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", planDefinitionsCount);
+		return new ResponseEntity<>(modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	/**
