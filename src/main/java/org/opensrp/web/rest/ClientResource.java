@@ -363,15 +363,15 @@ public class ClientResource extends RestResource<Client> {
 		String clientType = clientSearchBean.getClientType();
 		int pageNumber = clientSearchBean.getPageNumber();
 		if (pageNumber == FIRST_PAGE) {
-			if (clientType.equalsIgnoreCase(HOUSEHOLD)) {
+			if (HOUSEHOLD.equalsIgnoreCase(clientType)) {
 				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
-			} else if (clientType.equalsIgnoreCase(ALLCLIENTS)) {
+			} else if (ALLCLIENTS.equalsIgnoreCase(clientType)) {
 				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean)
 						.getTotalCount();
-			} else if (clientType.equalsIgnoreCase(ANC)) {
+			} else if (ANC.equalsIgnoreCase(clientType)) {
 				clientSearchBean.setClientType(null);
 				total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
-			} else if (clientType.equalsIgnoreCase(CHILD)) {
+			} else if (CHILD.equalsIgnoreCase(clientType)) {
 				clientSearchBean.setClientType(null);
 				total = clientService.findCountChildByCriteria(clientSearchBean, addressSearchBean);
 			} else {
