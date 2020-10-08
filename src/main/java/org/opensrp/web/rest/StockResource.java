@@ -27,19 +27,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.Inventory;
 import org.opensrp.domain.Stock;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
+import org.opensrp.web.Constants;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -201,6 +204,56 @@ public class StockResource extends RestResource<Stock> {
 	@Override
 	public List<Stock> filter(String query) {
 		return stockService.findAllStocks();
+	}
+
+	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> create(@RequestBody Inventory inventory) {
+		try {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userName = authentication.getName();
+			stockService.addInventory(inventory, userName);
+			return new ResponseEntity<>(HttpStatus.CREATED);
+		}
+		catch (IllegalArgumentException e) {
+			logger.error(String.format("Exception occurred while updating Inventory: %s", e.getMessage(), e));
+			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PutMapping(consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> update(@RequestBody Inventory inventory) {
+		try {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userName = authentication.getName();
+			stockService.updateInventory(inventory, userName);
+			return new ResponseEntity<>(HttpStatus.CREATED);
+		}
+		catch (IllegalArgumentException e) {
+			logger.error(String.format("Exception occurred while updating Inventory: %s", e.getMessage()));
+			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
+		if (id == null) {
+			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			stockService.deleteStock(id);
+			return new ResponseEntity<>("Stock deleted successfully", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.NO_CONTENT);
+		}
+	}
+
+	@GetMapping(value = "/servicePointId/{servicePointId}", produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<Stock>> getStockItemsByServicePoint(@PathVariable String servicePointId) {
+		return new ResponseEntity<>(stockService.getStocksByServicePointId(servicePointId),
+				RestUtils.getJSONUTF8Headers(),
+				HttpStatus.OK);
 	}
 
 }
