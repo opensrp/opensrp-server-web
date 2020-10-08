@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
+import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Client;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -47,6 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -341,9 +343,12 @@ public class ClientResource extends RestResource<Client> {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
 			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
+			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
+		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
@@ -361,6 +366,21 @@ public class ClientResource extends RestResource<Client> {
 			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
 
 		return clientService.findByServerVersion(serverVersion, limit);
+	}
+
+	/**
+	 * Fetch clients ordered by serverVersion ascending order
+	 *
+	 * @return a response with clients
+	 */
+	@GetMapping(value = "/countAll", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
+		List<Client> clients = clientService.findByServerVersion(serverVersion, limit);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", clients != null ? clients.size() : 0);
+		return ResponseEntity.ok(modelMap);
 	}
 
 	/**

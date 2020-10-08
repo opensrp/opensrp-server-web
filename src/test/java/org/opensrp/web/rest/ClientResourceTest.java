@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +36,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -340,8 +343,8 @@ public class ClientResourceTest {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
-        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
-        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
+        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull())).thenReturn(idsModel);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0&fromDate=2020-10-0614:35:00.000+03:00", "")).andExpect(status().isOk())
                 .andReturn();
 
         String actualTaskIdString = result.getResponse().getContentAsString();
@@ -349,7 +352,7 @@ public class ClientResourceTest {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean());
+        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull());
         verifyNoMoreInteractions(clientService);
         assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
@@ -368,6 +371,21 @@ public class ClientResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		verify(clientService).findByServerVersion(0, 50);
 
+	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		Client expectedClient = createClient();
+		List<Client> clients = Collections.singletonList(expectedClient);
+		when(clientService.findByServerVersion(anyLong(),anyInt()))
+				.thenReturn(clients);
+		MvcResult mvcResult = mockMvc
+				.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=50"))
+				.andExpect(status().isOk()).andReturn();
+		String strResponse = mvcResult.getResponse().getContentAsString();
+		JSONObject jsonObject = new JSONObject(strResponse);
+		verify(clientService).findByServerVersion(0, 50);
+		assertEquals(1, jsonObject.optInt("count"));
 	}
 
 	@Test
