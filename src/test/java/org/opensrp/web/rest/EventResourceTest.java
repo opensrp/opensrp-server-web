@@ -7,9 +7,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
@@ -373,20 +373,11 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
 	@Test
 	public void testCountAll() throws Exception {
-		List<Event> expectedEvents = new ArrayList<>();
-		expectedEvents.add(createEvent());
-		List<Client> expectedClients = new ArrayList<>();
-		expectedClients.add(createClient());
-
-		doReturn(expectedEvents).when(eventService).findEvents(any(EventSearchBean.class), anyString(), anyString(), any(int.class));
-		doReturn(expectedClients).when(clientService).findByFieldValue(anyString(),anyList());
-		doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
-
+		doReturn(1L).when(eventService).countEvents(any(EventSearchBean.class));
 		String parameter = SERVER_VERSIOIN + "=15421904649873";
 		String response = getResponseAsString(BASE_URL + "/countAll", parameter, status().isOk());
 		JSONObject responseJsonObject = new JSONObject(response);
-		assertEquals(1, responseJsonObject.optInt("no_of_events"));
-		assertEquals(1, responseJsonObject.optInt("no_of_clients"));
+		assertEquals(1, responseJsonObject.optInt("count"));
 	}
     
     @Test

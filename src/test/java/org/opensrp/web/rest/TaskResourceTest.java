@@ -389,14 +389,12 @@ public class TaskResourceTest {
 
 	@Test
 	public void testCountAll() throws Exception {
-		Task expectedTask = getTask();
-		List<Task> planDefinitions = Collections.singletonList(expectedTask);
-		when(taskService.getAllTasks(anyLong(), anyInt()))
-				.thenReturn(planDefinitions);
+		when(taskService.countAllTasks(anyLong()))
+				.thenReturn(1L);
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=25"))
+				.perform(get(BASE_URL + "/countAll?serverVersion=0"))
 				.andExpect(status().isOk()).andReturn();
-		verify(taskService).getAllTasks(anyLong(), anyInt());
+		verify(taskService).countAllTasks(anyLong());
 		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
 	}
 	

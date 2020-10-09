@@ -806,33 +806,27 @@ public class LocationResourceTest {
 
 	@Test
 	public void testCountAllLocations() throws Exception {
-		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
-		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
-				.thenReturn(locations);
+		when(locationService.countAllLocations(anyLong()))
+				.thenReturn(1L);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/countAll")
-						.param(LocationResource.IS_JURISDICTION, "false")
-						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.IS_JURISDICTION, "true")
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
-				anyInt());
+		verify(locationService).countAllLocations(anyLong());
 		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
 	}
 
 	@Test
 	public void testCountAllStructures() throws Exception {
-		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
-		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
-				.thenReturn(locations);
+		when(locationService.countAllStructures(anyLong()))
+				.thenReturn(1L);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/countAll")
 						.param(LocationResource.IS_JURISDICTION, "false")
-						.param(LocationResource.RETURN_GEOMETRY, "true")
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
-				anyInt());
+		verify(locationService).countAllStructures(anyLong());
 		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
 	}
 
