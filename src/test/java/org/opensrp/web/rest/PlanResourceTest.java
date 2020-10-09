@@ -474,22 +474,11 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	@Test
 	public void testCountAll() throws Exception {
-		List<Jurisdiction> operationalAreas = new ArrayList<>();
-		Jurisdiction operationalArea = new Jurisdiction();
-		operationalArea.setCode("operational_area");
-		operationalAreas.add(operationalArea);
-
-		PlanDefinition expectedPlan = new PlanDefinition();
-		expectedPlan.setIdentifier("plan_1");
-		expectedPlan.setJurisdiction(operationalAreas);
-
-		List<PlanDefinition> planDefinitions = Collections.singletonList(expectedPlan);
-		when(planService.getAllPlans(anyLong(), anyInt(), anyBoolean())).thenReturn(planDefinitions);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=25")).andExpect(status().isOk())
+		when(planService.countAllPlans(anyLong(), anyBoolean())).thenReturn(1l);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/countAll?serverVersion=0")).andExpect(status().isOk())
 				.andReturn();
-		verify(planService).getAllPlans(anyLong(), anyInt(), anyBoolean());
+		verify(planService).countAllPlans(anyLong(), anyBoolean());
 		assertEquals(1 , new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
-
 	}
 	
 	@Test

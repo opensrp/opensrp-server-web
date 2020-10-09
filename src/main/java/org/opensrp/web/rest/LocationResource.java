@@ -462,32 +462,22 @@ public class LocationResource {
 	 * It returns the Geometry optionally if @param returnGeometry is set to true.
 	 *
 	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
-	 * @param returnGeometry boolean which controls if geometry is returned
 	 * @param serverVersion  serverVersion using to filter by
-	 * @param limit          upper limit on number os plas to fetch
 	 * @return the structures or jurisdictions matching the params
 	 */
 	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<ModelMap> countAll(
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
-			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
-			@RequestParam(value = LIMIT, required = false) Integer limit) {
-
-		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion) {
 		ModelMap modelMap = new ModelMap();
-		List<PhysicalLocation> physicalLocations;
+		Long count;
 		if (isJurisdiction) {
-			physicalLocations = locationService.findAllLocations(returnGeometry, serverVersion, pageLimit);
-			int physicalLocationsCount = physicalLocations != null ? physicalLocations.size() : 0;
-			modelMap.put("count", physicalLocationsCount);
+			count = locationService.countAllLocations(serverVersion);
 		} else {
-			physicalLocations = locationService.findAllStructures(returnGeometry, serverVersion, pageLimit);
-			int physicalLocationsCount = physicalLocations != null ? physicalLocations.size() : 0;
-			modelMap.put("count", physicalLocationsCount);
+			count = locationService.countAllStructures(serverVersion);
 		}
+		modelMap.put("count", count != null ? count : 0);
 		return new ResponseEntity<>(
 				modelMap,
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);

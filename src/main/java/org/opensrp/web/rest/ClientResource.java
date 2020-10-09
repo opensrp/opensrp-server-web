@@ -375,11 +375,10 @@ public class ClientResource extends RestResource<Client> {
 	 */
 	@GetMapping(value = "/countAll", produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<ModelMap> countAll(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
-		List<Client> clients = clientService.findByServerVersion(serverVersion, limit);
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion){
+		Long countOfClients = clientService.countAll(serverVersion);
 		ModelMap modelMap = new ModelMap();
-		modelMap.put("count", clients != null ? clients.size() : 0);
+		modelMap.put("count", countOfClients != null ? countOfClients : 0);
 		return ResponseEntity.ok(modelMap);
 	}
 

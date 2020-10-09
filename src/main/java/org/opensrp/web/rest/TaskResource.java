@@ -256,18 +256,13 @@ public class TaskResource {
 	 * Fetch count of tasks
 	 *
 	 * @param serverVersion serverVersion using to filter by
-	 * @param limit upper limit on number of tasks to fetch
 	 * @return A list of tasks
 	 */
 	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSION) long serverVersion,
-			@RequestParam(value = LIMIT, required = false) Integer limit) {
-
-		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-		List<Task> tasks = taskService.getAllTasks(serverVersion, pageLimit);
-		int tasksCount = tasks != null ? tasks.size() : 0;
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSION) long serverVersion) {
+		Long countOfTasks = taskService.countAllTasks(serverVersion);
 		ModelMap modelMap = new ModelMap();
-		modelMap.put("count", tasksCount);
+		modelMap.put("count", countOfTasks != null ? countOfTasks : 0);
 		return new ResponseEntity<>(modelMap,
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}

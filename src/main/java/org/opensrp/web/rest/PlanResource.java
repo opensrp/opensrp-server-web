@@ -263,18 +263,14 @@ public class PlanResource {
 	 * Fetch count of plans
 	 *
 	 * @param serverVersion serverVersion using to filter by
-	 * @param limit upper limit on number os plas to fetch
 	 * @return A list of plan definitions
 	 */
 	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
-			@RequestParam(value = LIMIT, required = false) Integer limit, @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-
-		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-		List<PlanDefinition> planDefinitions = planService.getAllPlans(serverVersion, pageLimit, isTemplateParam);
-		int planDefinitionsCount = planDefinitions != null ? planDefinitions.size() : 0;
+			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		Long countOfPlanDefinitions = planService.countAllPlans(serverVersion, isTemplateParam);
 		ModelMap modelMap = new ModelMap();
-		modelMap.put("count", planDefinitionsCount);
+		modelMap.put("count", countOfPlanDefinitions != null ? countOfPlanDefinitions : 0);
 		return new ResponseEntity<>(modelMap,
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}

@@ -357,18 +357,17 @@ public class EventResource extends RestResource<Event> {
 	 */
 	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<ModelMap> countAll(@RequestParam long serverVersion,
-			@RequestParam(required = false) String eventType, @RequestParam(required = false) Integer limit)
+			@RequestParam(required = false) String eventType)
 			throws JsonProcessingException {
 
 		try {
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
-			EventSyncBean eventSyncBean = getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false);
 
+			Long countOfEvents = eventService.countEvents(eventSearchBean);
 			ModelMap modelMap = new ModelMap();
-			modelMap.put("no_of_events", eventSyncBean.getEvents() == null ? 0 : eventSyncBean.getEvents().size());
-			modelMap.put("no_of_clients", eventSyncBean.getClients() == null ? 0 : eventSyncBean.getClients().size());
+			modelMap.put("count", countOfEvents != null ? countOfEvents : 0);
 
 			return new ResponseEntity<>(
 					modelMap,
