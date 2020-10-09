@@ -375,16 +375,14 @@ public class ClientResourceTest {
 
 	@Test
 	public void testCountAll() throws Exception {
-		Client expectedClient = createClient();
-		List<Client> clients = Collections.singletonList(expectedClient);
-		when(clientService.findByServerVersion(anyLong(),anyInt()))
-				.thenReturn(clients);
+		when(clientService.countAll(anyLong()))
+				.thenReturn(1L);
 		MvcResult mvcResult = mockMvc
-				.perform(get(BASE_URL + "/countAll?serverVersion=0&limit=50"))
+				.perform(get(BASE_URL + "/countAll?serverVersion=0"))
 				.andExpect(status().isOk()).andReturn();
 		String strResponse = mvcResult.getResponse().getContentAsString();
 		JSONObject jsonObject = new JSONObject(strResponse);
-		verify(clientService).findByServerVersion(0, 50);
+		verify(clientService).countAll(0);
 		assertEquals(1, jsonObject.optInt("count"));
 	}
 
