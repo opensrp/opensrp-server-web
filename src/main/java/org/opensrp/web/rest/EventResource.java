@@ -367,7 +367,7 @@ public class EventResource extends RestResource<Event> {
 
 			Long countOfEvents = eventService.countEvents(eventSearchBean);
 			ModelMap modelMap = new ModelMap();
-			modelMap.put("count", countOfEvents);
+			modelMap.put("count", countOfEvents != null ? countOfEvents : 0);
 
 			return new ResponseEntity<>(
 					modelMap,
