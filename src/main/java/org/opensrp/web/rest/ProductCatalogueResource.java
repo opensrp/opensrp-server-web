@@ -85,20 +85,45 @@ public class ProductCatalogueResource {
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(String.format("Exception occurred while adding product catalogue: %s,%s", e.getMessage(), e));
-			return new ResponseEntity<String>("The request contain illegal argument ", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(),
+					HttpStatus.BAD_REQUEST);
 		}
 	}
 
-	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> update(@PathVariable("id") Long uniqueId, @RequestBody ProductCatalogue productCatalogue) {
+	@PutMapping(value = "/{id}", headers = { "Accept=multipart/form-data" })
+	public ResponseEntity<String> update(@PathVariable("id") Long uniqueId,
+			@RequestPart(required = false) MultipartFile file,
+			@RequestPart ProductCatalogue productCatalogue) {
 		try {
 			productCatalogueService.update(productCatalogue);
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userName = authentication.getName();
+			ProductCatalogue catalogue = productCatalogueService
+					.getProductCatalogueByName(productCatalogue.getProductName());
+			if (catalogue != null && file != null) {
+				Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(catalogue.getUniqueId()));
+				if (multimedia != null) {
+					multimediaService.deleteMultimedia(multimedia); //remove old image
+				}
+				MultimediaDTO multimediaDTO = new MultimediaDTO(catalogue.getUniqueId().toString(), userName.trim(),
+						file.getContentType().trim(), null, "catalog_image");
+				multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
+
+				logger.info("Saving multimedia file...");
+				String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+			}
 			return new ResponseEntity<>(HttpStatus.CREATED);
+		}
+		catch (IOException e) {
+			logger.error(
+					String.format("Exception occurred while persisting image of Product Catalogue" + e.getMessage() + e));
+			return new ResponseEntity<String>("Exception occurred while persisting image of Product Catalogue",
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(String.format("Exception occurred while updating product catalogue: %s", e.getMessage()));
-			return new ResponseEntity<String>("The request contain illegal argument ", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(),
+					HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -110,7 +135,7 @@ public class ProductCatalogueResource {
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 
 	}

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.opensrp.domain.Multimedia;
 import org.opensrp.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
@@ -135,6 +136,45 @@ public class ProductCatalogueResourceTest {
 		assertEquals("Scale", catalogue.getProductName());
 	}
 
+	@Test
+	public void testUpdate() throws Exception {
+
+		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		ProductCatalogue productCatalogue = createProductCatalog();
+		productCatalogue.setUniqueId(1l);
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		byte[] bytes = new byte[10];
+		Multimedia multimedia = new Multimedia();
+		multimedia.setCaseId("1");
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+
+		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+		when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
+		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+		Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
+		when(multipartFile.getContentType()).thenReturn("");
+		when(multipartFile.getBytes()).thenReturn(bytes);
+		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+
+		productCatalogueResource.update(1l,multipartFile,productCatalogue);
+
+		verify(productCatalogueService).update(argumentCaptor.capture());
+
+		Mockito.verify(multimediaService).findByCaseId(anyString());
+
+		Mockito.verify(multimediaService).deleteMultimedia(any(Multimedia.class));
+
+		Mockito.verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+				anyString());
+
+		ProductCatalogue catalogue = argumentCaptor.getValue();
+		assertEquals("Scale", catalogue.getProductName());
+	}
 
 	@Test
 	public void testGetByUniqueId() throws Exception {
