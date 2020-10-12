@@ -263,7 +263,6 @@ public class ClientResource extends RestResource<Client> {
 	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws JsonProcessingException,
 			ParseException {
 
-		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
@@ -278,34 +277,23 @@ public class ClientResource extends RestResource<Client> {
 		String locationId = getStringFilter(LOCATION_ID, request);
 
 		if (locationId != null) {
-			String[] locationIds = locationId.split(",");
-			List<String> locationIdList = Arrays.asList(locationIds);
-			searchBean.setLocations(locationIdList);
+			searchBean.setLocations(Arrays.asList(locationId.split(",")));
 		}
 
 		setSearchBeanPageNumberAndSize(request, searchBean);
-
-		AddressSearchBean addressSearchBean = new AddressSearchBean();
 
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 
-		try {
-			DateTime startDate = getDateFilter(STARTDATE, request);
-			searchBean.setStartDate(startDate);
-			DateTime endDate = getDateFilter(ENDDATE, request);
-			searchBean.setEndDate(endDate);
-		}
-		catch (ParseException e) {
-			logger.error(e.getMessage());
-		}
+		setSearchCriteriaStartEndDates(request, searchBean);
 
 		ClientSyncBean response = new ClientSyncBean();
+		AddressSearchBean addressSearchBean = new AddressSearchBean();
 		if (HOUSEHOLD.equalsIgnoreCase(clientType)) {
 			return getHouseholds(searchBean, addressSearchBean);
 		} else if (HOUSEHOLDMEMEBR.equalsIgnoreCase(clientType)) {
-			response.setClients(clientService.findMembersByRelationshipId(baseEntityId));
+			response.setClients(clientService.findMembersByRelationshipId(getStringFilter(BASE_ENTITY_ID, request)));
 		} else if (ALLCLIENTS.equalsIgnoreCase(clientType)) {
 			searchBean.setClientType(HOUSEHOLD);
 			return getAllClients(searchBean, addressSearchBean);
@@ -318,6 +306,17 @@ public class ClientResource extends RestResource<Client> {
 		}
 
 		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+	}
+
+	private void setSearchCriteriaStartEndDates(HttpServletRequest request, ClientSearchBean searchBean) {
+		try {
+			DateTime startDate = getDateFilter(STARTDATE, request);
+			searchBean.setStartDate(startDate);
+			DateTime endDate = getDateFilter(ENDDATE, request);
+			searchBean.setEndDate(endDate);
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+		}
 	}
 
 	private void setSearchBeanPageNumberAndSize(HttpServletRequest request, ClientSearchBean searchBean) {
