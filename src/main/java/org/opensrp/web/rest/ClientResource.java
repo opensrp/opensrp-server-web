@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
+import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Client;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -261,20 +262,14 @@ public class ClientResource extends RestResource<Client> {
 	@RequestMapping(method = RequestMethod.GET, value = "/searchByCriteria", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> searchByCriteria(HttpServletRequest request) throws JsonProcessingException,
 			ParseException {
-		ClientSyncBean response = new ClientSyncBean();
-		List<Client> clientList;
 
 		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
-		String pageNumberParam = getStringFilter(PAGE_NUMBER, request);
-		String pageSizeParam = getStringFilter(PAGE_SIZE, request);
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(SEARCHTEXT, request));
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] lastEdit = getDateRangeFilter(LAST_UPDATE, request);
 		searchBean.setLastEditFrom( lastEdit == null ? null : lastEdit[0]);
 		searchBean.setLastEditTo( lastEdit == null ? null : lastEdit[1]);
-		int pageNumber = 1; // default page number
-		int pageSize = 0; // default page size
 		String clientType = getStringFilter(CLIENTTYPE, request);
 		searchBean.setOrderByField(getStringFilter(ORDERBYFIELDNAAME, request));
 		searchBean.setOrderByType(getStringFilter(ORDERBYTYPE, request));
@@ -288,38 +283,29 @@ public class ClientResource extends RestResource<Client> {
 			searchBean.setLocations(locationIdList);
 		}
 
-		if (pageNumberParam != null) {
-			pageNumber = Integer.parseInt(pageNumberParam) - 1;
-		}
-		if (pageSizeParam != null) {
-			pageSize = Integer.parseInt(pageSizeParam);
-		}
+		setSearchBeanPageNumberAndSize(request, searchBean);
 
-		searchBean.setPageNumber(pageNumber);
-		searchBean.setPageSize(pageSize);
 		AddressSearchBean addressSearchBean = new AddressSearchBean();
 
 		String attributes = getStringFilter("attribute", request);
 		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 
-		DateTime startDate = null;
-		DateTime endDate = null;
 		try {
-			startDate = getDateFilter(STARTDATE, request);
+			DateTime startDate = getDateFilter(STARTDATE, request);
 			searchBean.setStartDate(startDate);
-			endDate = getDateFilter(ENDDATE, request);
+			DateTime endDate = getDateFilter(ENDDATE, request);
 			searchBean.setEndDate(endDate);
 		}
 		catch (ParseException e) {
 			logger.error(e.getMessage());
 		}
 
+		ClientSyncBean response = new ClientSyncBean();
 		if (HOUSEHOLD.equalsIgnoreCase(clientType)) {
 			return getHouseholds(searchBean, addressSearchBean);
 		} else if (HOUSEHOLDMEMEBR.equalsIgnoreCase(clientType)) {
-			clientList = clientService.findMembersByRelationshipId(baseEntityId);
-			response.setClients(clientList);
+			response.setClients(clientService.findMembersByRelationshipId(baseEntityId));
 		} else if (ALLCLIENTS.equalsIgnoreCase(clientType)) {
 			searchBean.setClientType(HOUSEHOLD);
 			return getAllClients(searchBean, addressSearchBean);
@@ -332,6 +318,22 @@ public class ClientResource extends RestResource<Client> {
 		}
 
 		return new ResponseEntity<>(objectMapper.writeValueAsString((response)), HttpStatus.OK);
+	}
+
+	private void setSearchBeanPageNumberAndSize(HttpServletRequest request, ClientSearchBean searchBean) {
+		int pageNumber = 1; // default page number
+		int pageSize = 0; // default page size
+		String pageNumberParam = getStringFilter(PAGE_NUMBER, request);
+		String pageSizeParam = getStringFilter(PAGE_SIZE, request);
+		if (pageNumberParam != null) {
+			pageNumber = Integer.parseInt(pageNumberParam) - 1;
+		}
+		if (pageSizeParam != null) {
+			pageSize = Integer.parseInt(pageSizeParam);
+		}
+
+		searchBean.setPageNumber(pageNumber);
+		searchBean.setPageSize(pageSize);
 	}
 
 	public ResponseEntity<String> getAllClients(ClientSearchBean clientSearchBean, AddressSearchBean addressSearchBean)
@@ -419,11 +421,12 @@ public class ClientResource extends RestResource<Client> {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
-			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived) {
-
-		Pair<List<String>, Long> taskIdsPair = clientService
-				.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived);
+			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
+		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());

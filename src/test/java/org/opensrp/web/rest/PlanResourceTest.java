@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -525,7 +526,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("plan-id-1"), 12345l);
-        when(planService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
+        when(planService.findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull())).thenReturn(idsModel);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
                 .andReturn();
 
@@ -534,7 +535,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(planService).findAllIds(anyLong(), anyInt(), anyBoolean());
+        verify(planService).findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull());
         verifyNoMoreInteractions(planService);
         assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));

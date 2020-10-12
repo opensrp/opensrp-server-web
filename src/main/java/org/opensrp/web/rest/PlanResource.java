@@ -20,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.PlanDefinition;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
@@ -267,9 +268,12 @@ public class PlanResource {
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+											  @RequestParam(value = "fromDate", required = false) String fromDate,
+											  @RequestParam(value = "toDate", required = false) String toDate) {
 		
-		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());

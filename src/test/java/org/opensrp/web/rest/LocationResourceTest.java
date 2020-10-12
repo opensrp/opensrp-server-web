@@ -11,6 +11,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -744,15 +747,15 @@ public class LocationResourceTest {
 	@Test
 	public void testFindStructureIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("structure-id-1"), 12345l);
-		when(locationService.findAllStructureIds(anyLong(), anyInt())).thenReturn(idsModel);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0", "")).andExpect(status().isOk())
+		when(locationService.findAllStructureIds(anyLong(), anyInt(), isNull(), isNull())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0&fromDate=2020-10-1019:32:13", "")).andExpect(status().isOk())
 				.andReturn();
 
 		String actualStructureIdString = result.getResponse().getContentAsString();
 		Identifier actualIdModels = new Gson().fromJson(actualStructureIdString, new TypeToken<Identifier>(){}.getType());
 		List<String> actualStructureIdList = actualIdModels.getIdentifiers();
 
-		verify(locationService).findAllStructureIds(anyLong(), anyInt());
+		verify(locationService).findAllStructureIds(anyLong(), anyInt(), isNull(), isNull());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"structure-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
 		assertEquals((idsModel.getLeft()).get(0), actualStructureIdList.get(0));
@@ -796,15 +799,15 @@ public class LocationResourceTest {
 	@Test
 	public void testFindLocationIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("location-id-1"), 12345l);
-		when(locationService.findAllLocationIds(anyLong(), anyInt())).thenReturn(idsModel);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0", "")).andExpect(status().isOk())
+		when(locationService.findAllLocationIds(anyLong(), anyInt(), nullable(Date.class), isNull())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0&fromDate=1602068945000", "")).andExpect(status().isOk())
 				.andReturn();
 
 		String actualLocationIdString = result.getResponse().getContentAsString();
 		Identifier actualIdModels = new Gson().fromJson(actualLocationIdString, new TypeToken<Identifier>(){}.getType());
 		List<String> actualLocationIdList = actualIdModels.getIdentifiers();
 
-		verify(locationService).findAllLocationIds(anyLong(), anyInt());
+		verify(locationService).findAllLocationIds(anyLong(), anyInt(), nullable(Date.class), isNull());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"location-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
 		assertEquals((idsModel.getLeft()).get(0), actualLocationIdList.get(0));
