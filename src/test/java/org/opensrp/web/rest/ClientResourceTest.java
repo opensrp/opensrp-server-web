@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
 
@@ -121,7 +122,7 @@ public class ClientResourceTest {
 		assertTrue(requiredProperties.contains(BIRTH_DATE));
 		assertTrue(requiredProperties.contains(BASE_ENTITY_ID));
 	}
-	
+
 	@Test
 	public void testGetByUniqueId() {
 		Client expected = createClient();
@@ -152,12 +153,12 @@ public class ClientResourceTest {
 		assertEquals(actual.getId(),expected.getId());
 		assertEquals(actual.getDateEdited(),expected.getDateEdited());
 	}
-	
+
 	@Test
 	public void testFilter() {
 		List<Client> expected = new ArrayList<>();
 		expected.add(createClient());
-		
+
 		when(clientService.findByDynamicQuery(anyString())).thenReturn(expected);
 		List<Client> actual = clientResource.filter("");
 		assertEquals(actual.size(),expected.size());
@@ -317,13 +318,13 @@ public class ClientResourceTest {
 		assertEquals(response.getClients().get(0).getLastName(), "User");
 
 	}
-	
+
 	@Test
 	public void testSearch() throws ParseException {
 		List<Client> expected = new ArrayList<>();
 		expected.add(createClient());
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-		
+
 		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
 		List<Client> clients = clientResource.search(httpServletRequest);
 		assertEquals(clients.size(),expected.size());
@@ -339,25 +340,92 @@ public class ClientResourceTest {
 		client.setDateEdited(new DateTime());
 		return client;
 	}
-	
-    @Test
-    public void testFindAllIds() throws Exception {
-        Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
-        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull())).thenReturn(idsModel);
-        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0&fromDate=2020-10-06T15:37:47.000-03:00", "")).andExpect(status().isOk())
-                .andReturn();
 
-        String actualTaskIdString = result.getResponse().getContentAsString();
-        Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
-        List<String> actualTaskIdList = actualIdModels.getIdentifiers();
+	@Test
+	public void testFindAllIds() throws Exception {
+		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
+		when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull())).thenReturn(idsModel);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0&fromDate=2020-10-06T15:37:47.000-03:00", "")).andExpect(status().isOk())
+				.andReturn();
+
+		String actualTaskIdString = result.getResponse().getContentAsString();
+		Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>(){}.getType());
+		List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull());
-        verifyNoMoreInteractions(clientService);
-        assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
-        assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
-        assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
-    }
+		verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull());
+		verifyNoMoreInteractions(clientService);
+		assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
+		assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
+		assertEquals(idsModel.getRight(), actualIdModels.getLastServerVersion());
+	}
 
+	@Test
+	public void testSearchClientsWithRelationships() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		expected.add(client);
+
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Jared");
+		when(httpServletRequest.getParameter("relationships")).thenReturn("mother");
+
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class),
+				nullable(DateTime.class))).thenReturn(expected);
+		when(clientService.find("client-rel-base-entity-id")).thenReturn(clientRelationship);
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),client.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), clientRelationship.getFirstName());
+	}
+
+	@Test
+	public void testSearchClientRelationshipWithDependants() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+		expected.add(clientRelationship);
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Milka");
+		when(httpServletRequest.getParameter("searchRelationship")).thenReturn("mother");
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class),
+				nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		when(clientService.findByRelationshipIdAndType("mother", "client-rel-base-entity-id"))
+				.thenReturn(Collections.singletonList(client));
+
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),clientRelationship.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), client.getFirstName());
+	}
 
 }
