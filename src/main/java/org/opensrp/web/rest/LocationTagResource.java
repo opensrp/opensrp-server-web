@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.opensrp.domain.postgres.LocationTagExample;
 import org.opensrp.service.LocationTagService;
 import org.opensrp.web.Constants;
 import org.slf4j.Logger;
@@ -43,13 +42,10 @@ public class LocationTagResource {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getLocationTagById(@PathVariable(Constants.RestPartVariables.ID) int identifier)
+	public ResponseEntity<String> getLocationTagById(@PathVariable(Constants.RestPartVariables.ID) String id)
 			throws JsonProcessingException {
-		LocationTagExample locationTagExample = new LocationTagExample();
-		LocationTagExample.Criteria criteria = locationTagExample.createCriteria();
-		criteria.andIdEqualTo(Long.valueOf(identifier));
-		List<LocationTag> locationTags = locationTagService.findByLocationTagExample(locationTagExample, 0, 1000);
-		return new ResponseEntity<>(objectMapper.writeValueAsString(locationTags), RestUtils.getJSONUTF8Headers(),
+		LocationTag locationTag = locationTagService.getLocationTagById(id);
+		return new ResponseEntity<>(objectMapper.writeValueAsString(locationTag), RestUtils.getJSONUTF8Headers(),
 				HttpStatus.OK);
 	}
 
