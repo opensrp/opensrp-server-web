@@ -51,20 +51,13 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
 	@Test
 	public void testGetLocationTagById() throws Exception {
-		List<LocationTag> expectedLocationTags = new ArrayList<>();
 		LocationTag expectedLocationTag = initTestLocationTag1();
-		expectedLocationTags.add(expectedLocationTag);
-
-		doReturn(expectedLocationTags).when(locationTagService).getLocationTagById(ArgumentMatchers.anyString());
+		doReturn(expectedLocationTag).when(locationTagService).getLocationTagById(ArgumentMatchers.anyString());
 
 		String actualLocationTagsString = getResponseAsString(BASE_URL + "/1", null, MockMvcResultMatchers.status().isOk());
-		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
-				new TypeToken<List<LocationTag>>() {
+		LocationTag actualLocationTag = new Gson().fromJson(actualLocationTagsString, new TypeToken<LocationTag>() {}.getType());
 
-				}.getType());
-
-		Assert.assertEquals( 1, actualLocationTags.size());
-		Assert.assertEquals( "Country",actualLocationTags.get(0).getName());
+		Assert.assertEquals( "Country", actualLocationTag.getName());
 	}
 
 	@Test
