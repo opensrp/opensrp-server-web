@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
-import org.opensrp.domain.postgres.LocationTagExample;
 import org.opensrp.service.LocationTagService;
 import org.smartregister.domain.LocationTag;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
@@ -55,9 +54,11 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		doReturn(expectedLocationTag).when(locationTagService).getLocationTagById(ArgumentMatchers.anyString());
 
 		String actualLocationTagsString = getResponseAsString(BASE_URL + "/1", null, MockMvcResultMatchers.status().isOk());
-		LocationTag actualLocationTag = new Gson().fromJson(actualLocationTagsString, new TypeToken<LocationTag>() {}.getType());
+		LocationTag actualLocationTag = new Gson().fromJson(actualLocationTagsString, new TypeToken<LocationTag>() {
 
-		Assert.assertEquals( "Country", actualLocationTag.getName());
+		}.getType());
+
+		Assert.assertEquals("Country", actualLocationTag.getName());
 	}
 
 	@Test
@@ -74,8 +75,10 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
 		String actualLocationTagsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
 		List<LocationTag> actualLocationTags = new Gson().fromJson(actualLocationTagsString,
-		    new TypeToken<List<LocationTag>>() {}.getType());
-		
+				new TypeToken<List<LocationTag>>() {
+
+				}.getType());
+
 		assertListsAreSameIgnoringOrder(actualLocationTags, expectedLocationTags);
 	}
 
