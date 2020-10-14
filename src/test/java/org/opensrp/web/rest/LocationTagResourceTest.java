@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -58,7 +57,7 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
 		}.getType());
 
-		Assert.assertEquals("Country", actualLocationTag.getName());
+		assertEquals("Country", actualLocationTag.getName());
 	}
 
 	@Test
