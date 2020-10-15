@@ -22,6 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
+import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
@@ -41,11 +44,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -56,7 +62,8 @@ import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
+import lombok.Data;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -104,6 +111,10 @@ public class LocationResource {
 	
 	private PlanService planService;
 
+	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
+
+	private DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService;
+
 	@Autowired
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
@@ -112,6 +123,16 @@ public class LocationResource {
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
+	}
+
+	@Autowired
+	public void setDhis2ImportOrganizationUnits(DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits) {
+		this.dhis2ImportOrganizationUnits = dhis2ImportOrganizationUnits;
+	}
+
+	@Autowired
+	public void setDhis2ImportLocationsStatusService(DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService) {
+		this.dhis2ImportLocationsStatusService = dhis2ImportLocationsStatusService;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -141,24 +162,32 @@ public class LocationResource {
 		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
+		List<String> locationIds=locationSyncRequestWrapper.getLocationIds();
 		boolean returnCount = locationSyncRequestWrapper.isReturnCount();
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 		Long locationCount = 0l;
-	if (isJurisdiction) {
-			if (StringUtils.isBlank(locationNames)) {
-				String locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
-				if (returnCount){
+		if (isJurisdiction) {
+			String locations="[]";
+			if (locationIds != null && !locationIds.isEmpty()) {
+				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds,currentServerVersion));
+				if (returnCount) {
+					locationCount = locationService.countLocationsByIds(locationIds, currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
+			} else if (StringUtils.isBlank(locationNames)) {
+				locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
+				if (returnCount) {
 					locationCount = locationService.countLocationsByServerVersion(currentServerVersion);
 					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
 				}
-				return new ResponseEntity<>(locations, headers, HttpStatus.OK);
-			}
+			} else {
 
-			String locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
-			if (returnCount){
-				locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
-				headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
+				if (returnCount) {
+					locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
+					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
+				}
 			}
 			return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 
@@ -383,10 +412,12 @@ public class LocationResource {
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION) long serverVersion) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> structureIdsPair = locationService
-				.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(structureIdsPair.getLeft());
 		identifiers.setLastServerVersion(structureIdsPair.getRight());
@@ -427,6 +458,33 @@ public class LocationResource {
 	}
 
 	/**
+	 * Fetch count of structures or jurisdictions ordered by serverVersion ascending
+	 * It returns the Geometry optionally if @param returnGeometry is set to true.
+	 *
+	 * @param isJurisdiction boolean which when true the search is done on jurisdictions and when false search is on structures
+	 * @param serverVersion  serverVersion using to filter by
+	 * @return the structures or jurisdictions matching the params
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(
+			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion) {
+		ModelMap modelMap = new ModelMap();
+		Long count;
+		if (isJurisdiction) {
+			count = locationService.countAllLocations(serverVersion);
+		} else {
+			count = locationService.countAllStructures(serverVersion);
+		}
+		modelMap.put("count", count != null ? count : 0);
+		return new ResponseEntity<>(
+				modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+	}
+
+	/**
 	 * This methods provides an API endpoint that searches for all location ids
 	 * sorted by server  version ascending
 	 *
@@ -435,10 +493,12 @@ public class LocationResource {
 	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findLocationIds(
-			@RequestParam(value = SERVER_VERSION) long serverVersion) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> locationIdsPair = locationService
-				.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(locationIdsPair.getLeft());
 		identifiers.setLastServerVersion(locationIdsPair.getRight());
@@ -514,6 +574,41 @@ public class LocationResource {
 
 	}
 
+	@PostMapping(value = "/dhis2/import", consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage",required = false) String startPage,
+			@RequestParam("beginning") Boolean beginning) {
+
+		final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
+
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+				+ DHIS_IMPORT_JOB_STATUS_END_POINT;
+
+		if (!beginning && StringUtils.isBlank(startPage)) {
+			return new ResponseEntity<>("Start page must be specified", HttpStatus.BAD_REQUEST);
+		} else if (beginning && !StringUtils.isBlank(startPage)) {
+			return new ResponseEntity<>(
+					"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
+					HttpStatus.BAD_REQUEST);
+		} else if (beginning && StringUtils.isBlank(startPage)) {
+			dhis2ImportOrganizationUnits.importOrganizationUnits("1");
+			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
+		} else {
+			dhis2ImportOrganizationUnits.importOrganizationUnits(startPage);
+			return new ResponseEntity<>("Check status of the job at " + baseUrl, HttpStatus.OK);
+
+		}
+
+	}
+
+	@GetMapping(value = "/dhis2/status", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getStatusOfJob() {
+		return new ResponseEntity<>(
+				gson.toJson(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens()),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
+	@Data
 	static class LocationSyncRequestWrapper {
 
 		@JsonProperty("is_jurisdiction")
@@ -521,6 +616,9 @@ public class LocationResource {
 
 		@JsonProperty("location_names")
 		private List<String> locationNames;
+
+		@JsonProperty("location_ids")
+		private List<String> locationIds;
 
 		@JsonProperty("parent_id")
 		private List<String> parentId;
@@ -530,27 +628,6 @@ public class LocationResource {
 
 		@JsonProperty(RETURN_COUNT)
 		private boolean returnCount;
-
-		public Boolean getIsJurisdiction() {
-			return isJurisdiction;
-		}
-
-		public List<String> getLocationNames() {
-			return locationNames;
-		}
-
-		public List<String> getParentId() {
-			return parentId;
-		}
-
-		public long getServerVersion() {
-			return serverVersion;
-		}
-
-
-		public boolean isReturnCount() {
-			return returnCount;
-		}
 
 	}
 

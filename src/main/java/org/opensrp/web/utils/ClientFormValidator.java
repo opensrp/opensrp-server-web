@@ -1,12 +1,16 @@
 package org.opensrp.web.utils;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
@@ -17,7 +21,11 @@ import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class ClientFormValidator {
 
@@ -144,7 +152,19 @@ public class ClientFormValidator {
         ClientForm formValidator = clientFormService.getMostRecentFormValidator(formIdentifier);
         HashSet<String> fieldsMap = new HashSet<>();
         if (formValidator != null && formValidator.getJson() != null && !((String) formValidator.getJson()).isEmpty()) {
-            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue((String) formValidator.getJson(), JsonWidgetValidatorDefinition.class);
+            logger.info((String) formValidator.getJson());
+            objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
+            objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
+            String formValidatorString = (String) formValidator.getJson();
+            formValidatorString = formValidatorString.substring(1, formValidatorString.length() - 1);
+
+            formValidatorString = StringEscapeUtils.unescapeJava(formValidatorString);
+            logger.info(formValidatorString);
+
+            JsonWidgetValidatorDefinition jsonWidgetValidatorDefinition = objectMapper.readValue(formValidatorString,
+                    JsonWidgetValidatorDefinition.class);
             JsonWidgetValidatorDefinition.WidgetCannotRemove widgetCannotRemove = jsonWidgetValidatorDefinition.getCannotRemove();
             if (widgetCannotRemove != null && widgetCannotRemove.getFields() != null && widgetCannotRemove.getFields().size() > 0) {
                 JsonNode jsonNode = objectMapper.readTree(clientFormContent);

@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,10 +48,10 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.smartregister.domain.Geometry;
-import org.smartregister.domain.Jurisdiction;
-import org.smartregister.domain.PhysicalLocation;
-import org.smartregister.domain.PlanDefinition;
+import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
+import org.opensrp.connector.dhis2.location.DHIS2LocationsImportSummary;
+import org.opensrp.connector.dhis2.location.DHISImportLocationsJobStatus;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -61,6 +63,10 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.smartregister.domain.Geometry;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -114,9 +120,15 @@ public class LocationResourceTest {
 	private PhysicalLocationService locationService;
 	
 	@Mock
+	private DHIS2ImportLocationsStatusService dhis2ImportLocationsStatusService;
+	
+	@Mock
+	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
+	
+	@Mock
 	private PlanService planService;
 
-	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+	protected ObjectMapper mapper = new ObjectMapper();
 	private String MESSAGE = "The server encountered an error processing the request.";
 
 	private String BASE_URL = "/rest/location/";
@@ -129,6 +141,8 @@ public class LocationResourceTest {
 	public String searchResponseJson = "{\"locations\":[{\"type\":\"Feature\",\"id\":\"7\",\"properties\":{\"uid\":\"694e0f30-d9ac-4576-b50a-38a3ef13ebcr\",\"type\":\"Residential Structure\",\"status\":\"PENDING_REVIEW\",\"parentId\":\"22\",\"name\":\"Faridpur\",\"geographicLevel\":0,\"effectiveStartDate\":\"Jan 1, 2015, 12:00:00 AM\",\"version\":0,\"customProperties\":{}},\"serverVersion\":1586160969806,\"locationTags\":[{\"id\":3,\"active\":true,\"name\":\"District\",\"description\":\"District\"}],\"customProperties\":{\"parent\":\"Dhaka\",\"tag_name\":\"District\",\"name\":\"Faridpur\"},\"jurisdiction\":false}],\"total\":0}";
 
 	public String locationTree = "{\"locationsHierarchy\":{\"map\":{\"1\":{\"id\":\"1\",\"label\":\"Kenya\",\"node\":{\"locationId\":\"1\",\"name\":\"Kenya\",\"tags\":[\"Country\"],\"voided\":false},\"children\":{\"2\":{\"id\":\"2\",\"label\":\"Coast\",\"node\":{\"locationId\":\"2\",\"name\":\"Coast\",\"parentLocation\":{\"locationId\":\"1\",\"voided\":false},\"tags\":[\"Province\"],\"voided\":false},\"parent\":\"1\"}}}},\"parentChildren\":{\"1\":[\"2\"]}}}";
+
+	private final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
 
 	@Before
 	public void setUp() {
@@ -580,7 +594,6 @@ public class LocationResourceTest {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void saveBatchShouldReturnServerError() throws Exception {
 
@@ -742,7 +755,7 @@ public class LocationResourceTest {
 	@Test
 	public void testFindStructureIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("structure-id-1"), 12345l);
-		when(locationService.findAllStructureIds(anyLong(), anyInt())).thenReturn(idsModel);
+		when(locationService.findAllStructureIds(anyLong(), anyInt(), isNull(), isNull())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findStructureIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
 
@@ -750,7 +763,7 @@ public class LocationResourceTest {
 		Identifier actualIdModels = new Gson().fromJson(actualStructureIdString, new TypeToken<Identifier>(){}.getType());
 		List<String> actualStructureIdList = actualIdModels.getIdentifiers();
 
-		verify(locationService).findAllStructureIds(anyLong(), anyInt());
+		verify(locationService).findAllStructureIds(anyLong(), anyInt(), isNull(), isNull());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"structure-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
 		assertEquals((idsModel.getLeft()).get(0), actualStructureIdList.get(0));
@@ -792,9 +805,35 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testCountAllLocations() throws Exception {
+		when(locationService.countAllLocations(anyLong()))
+				.thenReturn(1L);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/countAll")
+						.param(LocationResource.IS_JURISDICTION, "true")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).countAllLocations(anyLong());
+		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
+	}
+
+	@Test
+	public void testCountAllStructures() throws Exception {
+		when(locationService.countAllStructures(anyLong()))
+				.thenReturn(1L);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/countAll")
+						.param(LocationResource.IS_JURISDICTION, "false")
+						.param(BaseEntity.SERVER_VERSIOIN, "0"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).countAllStructures(anyLong());
+		assertEquals(1, new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
+	}
+
+	@Test
 	public void testFindLocationIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("location-id-1"), 12345l);
-		when(locationService.findAllLocationIds(anyLong(), anyInt())).thenReturn(idsModel);
+		when(locationService.findAllLocationIds(anyLong(), anyInt(), isNull(), isNull())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findLocationIds?serverVersion=0", "")).andExpect(status().isOk())
 				.andReturn();
 
@@ -802,7 +841,7 @@ public class LocationResourceTest {
 		Identifier actualIdModels = new Gson().fromJson(actualLocationIdString, new TypeToken<Identifier>(){}.getType());
 		List<String> actualLocationIdList = actualIdModels.getIdentifiers();
 
-		verify(locationService).findAllLocationIds(anyLong(), anyInt());
+		verify(locationService).findAllLocationIds(anyLong(), anyInt(), isNull(), isNull());
 		verifyNoMoreInteractions(locationService);
 		assertEquals("{\"identifiers\":[\"location-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
 		assertEquals((idsModel.getLeft()).get(0), actualLocationIdList.get(0));
@@ -967,6 +1006,71 @@ public class LocationResourceTest {
 		assertFalse(booleanCaptor.getAllValues().get(0));
 		assertEquals(1, stringSetCaptor.getValue().size());
 		assertTrue(stringSetCaptor.getValue().contains(locationId));
+	}
+
+	@Test
+	public void testImportLocationsWithBeginning() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?beginning=true").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(dhis2ImportOrganizationUnits).importOrganizationUnits("1");
+		String actualString = result.getResponse().getContentAsString();
+		assertTrue(actualString.contains(DHIS_IMPORT_JOB_STATUS_END_POINT));
+	}
+
+	@Test
+	public void testImportLocationsWithStartPageParam() throws Exception {
+		MvcResult result = mockMvc.perform(
+				post(BASE_URL + "/dhis2/import?startPage=2&beginning=false").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(dhis2ImportOrganizationUnits).importOrganizationUnits("2");
+		String actualString = result.getResponse().getContentAsString();
+		assertTrue(actualString.contains(DHIS_IMPORT_JOB_STATUS_END_POINT));
+	}
+
+	@Test
+	public void testImportLocationsWithInvalidParams() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?startPage=2&beginning=true").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		String actualString = result.getResponse().getContentAsString();
+		assertEquals(
+				"Both the parameters are conflicting. Please make sure you want to start from beginning or from a particular page number",
+				actualString);
+	}
+
+	@Test
+	public void testImportLocationsWithMissingParam() throws Exception {
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/dhis2/import?beginning=false").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andReturn();
+
+		String actualString = result.getResponse().getContentAsString();
+		assertEquals("Start page must be specified", actualString);
+	}
+
+	@Test
+	public void testGetStatusOfJob() throws Exception {
+		DHIS2LocationsImportSummary dhis2LocationsImportSummary = new DHIS2LocationsImportSummary();
+		dhis2LocationsImportSummary.setDhisImportLocationsJobStatus(DHISImportLocationsJobStatus.RUNNING);
+		dhis2LocationsImportSummary.setDhisLocationsCount(1000);
+		dhis2LocationsImportSummary.setDhisPageCount(10);
+		dhis2LocationsImportSummary.setLastPageSynced(2);
+		dhis2LocationsImportSummary.setNumberOfRowsProcessed(200);
+		when(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens())
+				.thenReturn(dhis2LocationsImportSummary);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/dhis2/status")).andExpect(status().isOk()).andReturn();
+		String actualString = result.getResponse().getContentAsString();
+		DHIS2LocationsImportSummary summary = LocationResource.gson.fromJson(actualString,
+				DHIS2LocationsImportSummary.class);
+		assertEquals(DHISImportLocationsJobStatus.RUNNING, summary.getDhisImportLocationsJobStatus());
+		assertEquals(new Integer(1000), summary.getDhisLocationsCount());
+		assertEquals(new Integer(10), summary.getDhisPageCount());
+		assertEquals(new Integer(2), summary.getLastPageSynced());
+		assertEquals(new Integer(200), summary.getNumberOfRowsProcessed());
 	}
 
 }

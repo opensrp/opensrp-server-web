@@ -5,9 +5,12 @@ package org.opensrp.web.rest;
 
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -17,11 +20,16 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
+import org.opensrp.web.controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,6 +60,10 @@ public class OrganizationResource {
 	
 	private PractitionerService practitionerService;
 	
+	private PhysicalLocationService locationService;
+	
+	private PlanService planService;
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 	
@@ -76,6 +88,22 @@ public class OrganizationResource {
 	}
 	
 	/**
+	 * @param locationService the locationService to set
+	 */
+	@Autowired
+	public void setLocationService(PhysicalLocationService locationService) {
+		this.locationService = locationService;
+	}
+	
+	/**
+	 * @param planService the planService to set
+	 */
+	@Autowired
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+	
+	/**
 	 * Gets all the organizations
 	 * 
 	 * @return all the organizations
@@ -97,7 +125,7 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public Organization getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
-		return  organizationService.getOrganization(identifier);
+		return organizationService.getOrganization(identifier);
 	}
 	
 	/**
@@ -127,7 +155,7 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> updateOrganization(@PathVariable("identifier") String identifier,
-	                                                 @RequestBody Organization organization) {
+	        @RequestBody Organization organization) {
 		try {
 			organizationService.updateOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -139,9 +167,10 @@ public class OrganizationResource {
 		
 	}
 	
-	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
-	        MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> assignLocationAndPlan(@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
+	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = {
+	        MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> assignLocationAndPlan(
+	        @RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
 				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganization(),
@@ -156,10 +185,12 @@ public class OrganizationResource {
 		}
 	}
 	
-	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(@PathVariable("identifier") String identifier) {
+	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = {
+	        MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
+	        @PathVariable("identifier") String identifier) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier),
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier, true),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
@@ -168,35 +199,62 @@ public class OrganizationResource {
 		}
 	}
 	
-	
-
-	@RequestMapping(value = "/user-assignment", method = RequestMethod.GET, produces = {
-	        MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/user-assignment", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public UserAssignmentBean getUserAssignedLocationsAndPlans(Authentication authentication) {
 		User user = RestUtils.currentUser(authentication);
 		String userId = user.getBaseEntityId();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = practitionerService
 		        .getOrganizationsByUserId(userId);
-		Set<String> jurisdictions= new HashSet<>();
-		Set<String> plans= new HashSet<>();
+		Set<String> jurisdictionIdentifiers = new HashSet<>();
+		Set<String> planIdentifiers = new HashSet<>();
 		/**@formatter:off*/
 		organizationService
 		        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)
 		        .stream()
 		        .filter(a->StringUtils.isNotBlank(a.getJurisdictionId()))
 		        .forEach(a ->{
-		        	jurisdictions.add(a.getJurisdictionId());
-		        	plans.add(a.getPlanId());
+		        	if(StringUtils.isNotBlank(a.getJurisdictionId())) {
+		        		jurisdictionIdentifiers.add(a.getJurisdictionId());
+		        	}
+		        	if(StringUtils.isNotBlank(a.getPlanId())) {
+		        		planIdentifiers.add(a.getPlanId());
+		        	}
 		        });
+		Set<PhysicalLocation> jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false,
+		    jurisdictionIdentifiers, Integer.MAX_VALUE));
+		
+		if (!planIdentifiers.isEmpty()) {
+			Set<String> planLocationIds = planService
+			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
+			            Collections.singletonList(UserController.JURISDICTION), false)
+			        .stream()
+			        .flatMap(plan -> plan.getJurisdiction().stream())
+			        .map(Jurisdiction::getCode)
+			        .collect(Collectors.toSet());
+		
+			Set<PhysicalLocation> planLocations = new HashSet<>(
+			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+			jurisdictions.retainAll(planLocations);
+		}
+		
+		Set<String> locationParents = jurisdictions.stream()
+				.map(l->l.getProperties().getParentId())
+				.collect(Collectors.toSet());
+				
 		return UserAssignmentBean.builder()
 				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
-				.jurisdictions(jurisdictions)
-				.plans(plans)
+				.jurisdictions(jurisdictions
+					.stream()
+					.filter(l->!locationParents.contains(l.getId()))
+		            .map(PhysicalLocation::getId)
+					.collect(Collectors.toSet()))
+				.plans(planIdentifiers)
 				.build();
 		/**@formatter:on*/
+		
 	}
 	
-	@GetMapping(value = "/practitioner/{identifier}",produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/practitioner/{identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<Practitioner>> getOrgPractitioners(@PathVariable("identifier") String identifier) {
 		try {
 			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier),
@@ -208,8 +266,10 @@ public class OrganizationResource {
 		}
 	}
 	
-	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(@RequestParam(value = "plan") String planIdentifier) {
+	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
+	        MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
+	        @RequestParam(value = "plan") String planIdentifier) {
 		try {
 			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
@@ -222,7 +282,7 @@ public class OrganizationResource {
 	
 	@RequestMapping(value = "/search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
-	    throws JsonProcessingException {
+	        throws JsonProcessingException {
 		
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();

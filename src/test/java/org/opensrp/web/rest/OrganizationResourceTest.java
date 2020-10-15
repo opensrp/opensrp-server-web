@@ -4,10 +4,13 @@
 package org.opensrp.web.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -47,12 +50,16 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
@@ -93,6 +100,12 @@ public class OrganizationResourceTest {
 	private PractitionerService practitionerService;
 	
 	@Mock
+	private PhysicalLocationService locationService;
+	
+	@Mock
+	private PlanService planService;
+	
+	@Mock
 	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
 	
 	@Mock
@@ -122,6 +135,8 @@ public class OrganizationResourceTest {
 		organizationResource = webApplicationContext.getBean(OrganizationResource.class);
 		organizationResource.setOrganizationService(organizationService);
 		organizationResource.setPractitionerService(practitionerService);
+		organizationResource.setLocationService(locationService);
+		organizationResource.setPlanService(planService);
 		objectMapper = new ObjectMapper();
 	}
 	
@@ -182,7 +197,7 @@ public class OrganizationResourceTest {
 	
 	@Test
 	public void testCreateOrganizationWithError() throws Exception {
-		doThrow(IllegalStateException.class).when(organizationService).addOrganization(any(Organization.class));
+		doThrow(RuntimeException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isInternalServerError());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
@@ -216,7 +231,7 @@ public class OrganizationResourceTest {
 	
 	@Test
 	public void testUpdateOrganizationWithError() throws Exception {
-		doThrow(new IllegalStateException()).when(organizationService).updateOrganization(any(Organization.class));
+		doThrow(new RuntimeException()).when(organizationService).updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
 		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 		        .andExpect(status().isInternalServerError());
@@ -252,7 +267,7 @@ public class OrganizationResourceTest {
 	
 	@Test
 	public void testAssignLocationAndPlanWithInternalError() throws Exception {
-		doThrow(new IllegalStateException()).when(organizationService).assignLocationAndPlan(null, null, null, null, null);
+		doThrow(new RuntimeException()).when(organizationService).assignLocationAndPlan(null, null, null, null, null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
 		        .content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
@@ -266,12 +281,12 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlan() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
-		when(organizationService.findAssignedLocationsAndPlans(identifier)).thenReturn(expected);
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
+		when(organizationService.findAssignedLocationsAndPlans(identifier,true)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isOk()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
 		
@@ -280,12 +295,12 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
+		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isBadRequest()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals("", result.getResponse().getContentAsString());
 		
@@ -294,12 +309,12 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new IllegalStateException()).when(organizationService).findAssignedLocationsAndPlans(identifier);
+		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isInternalServerError()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
 		verifyNoMoreInteractions(organizationService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -313,7 +328,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
 		        .andExpect(status().isOk()).andReturn();
@@ -346,7 +361,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetOrgPractitionersWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new IllegalStateException()).when(practitionerService).getPractitionersByOrgIdentifier(any(String.class));
+		doThrow(new RuntimeException()).when(practitionerService).getPractitionersByOrgIdentifier(any(String.class));
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/practitioner/{identifier}", identifier))
 		        .andExpect(status().isInternalServerError()).andReturn();
@@ -362,13 +377,28 @@ public class OrganizationResourceTest {
 	}
 	
 	@Test
-	public void testgetUserAssignedLocationsAndPlansShouldReturnUserAssignment() throws Exception {
+	public void testgetUserAssignedLocationsAndPlansWithoutPlansShouldReturnUserAssignment() throws Exception {
 		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		List<Long> ids = Arrays.asList(123l, 124l);
 		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
 		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
-		List<AssignedLocations> assignments = getOrganizationLocationsAssigned();
+		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(false);
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
+		PhysicalLocation location = LocationResourceTest.createStructure();
+		location.getProperties().setName("Vilage123");
+		PhysicalLocation location2 = new PhysicalLocation();
+		location2.setId(UUID.randomUUID().toString());
+		location2.setProperties(new LocationProperty());
+		location2.getProperties().setName("OA1");
+		location2.getProperties().setParentId(location.getId());
+		
+		PhysicalLocation location3 = new PhysicalLocation();
+		location3.setId(UUID.randomUUID().toString());
+		location3.setProperties(new LocationProperty());
+		location3.getProperties().setName("Oa3");
+		location3.getProperties().setParentId(location.getId());
+		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
+		        .thenReturn(Arrays.asList(location, location2, location3));
 		
 		Authentication authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
@@ -380,12 +410,15 @@ public class OrganizationResourceTest {
 		    UserAssignmentBean.class);
 		
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
-		assertEquals(assignments.size(), userAssignment.getJurisdictions().size());
-		assertEquals(assignments.size(), userAssignment.getPlans().size());
+		assertEquals(2, userAssignment.getJurisdictions().size());
+		assertEquals(0, userAssignment.getPlans().size());
 		for (AssignedLocations assignment : assignments) {
-			assertTrue(userAssignment.getJurisdictions().contains(assignment.getJurisdictionId()));
-			assertTrue(userAssignment.getPlans().contains(assignment.getPlanId()));
+			assertFalse(userAssignment.getJurisdictions().contains(location.getId()));
+			assertTrue(userAssignment.getJurisdictions().contains(location2.getId()));
+			assertTrue(userAssignment.getJurisdictions().contains(location3.getId()));
+			assertFalse(userAssignment.getPlans().contains(assignment.getPlanId()));
 		}
+		verifyNoInteractions(planService);
 		
 	}
 	
@@ -411,14 +444,16 @@ public class OrganizationResourceTest {
 		
 	}
 	
-	private List<AssignedLocations> getOrganizationLocationsAssigned() {
+	private List<AssignedLocations> getOrganizationLocationsAssigned(boolean includePlans) {
 		List<AssignedLocations> organizationAssigmentBeans = new ArrayList<>();
 		Random random = new Random();
 		for (int i = 0; i < 5; i++) {
 			AssignedLocations bean = new AssignedLocations();
 			bean.setOrganizationId("org" + i);
 			bean.setJurisdictionId("loc" + i);
-			bean.setPlanId("plan" + i);
+			if (includePlans) {
+				bean.setPlanId("plan" + i);
+			}
 			if (random.nextBoolean())
 				bean.setFromDate(new Date());
 			if (random.nextBoolean())

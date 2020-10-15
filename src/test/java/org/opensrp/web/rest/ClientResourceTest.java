@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +36,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -327,6 +331,74 @@ public class ClientResourceTest {
 		assertEquals(clients.get(0).getFirstName(),expected.get(0).getFirstName());
 	}
 
+	@Test
+	public void testSearchClientsWithRelationships() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		expected.add(client);
+
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Jared");
+		when(httpServletRequest.getParameter("relationships")).thenReturn("mother");
+
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class),
+				nullable(DateTime.class))).thenReturn(expected);
+		when(clientService.find("client-rel-base-entity-id")).thenReturn(clientRelationship);
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),client.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), clientRelationship.getFirstName());
+	}
+
+	@Test
+	public void testSearchClientRelationshipWithDependants() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+		//Create client relationship object
+		Client clientRelationship = new Client("client-rel-base-entity-id");
+		clientRelationship.setFirstName("Milka");
+		clientRelationship.setLastName("Madonna");
+		clientRelationship.setId("2");
+		clientRelationship.setDateCreated(new DateTime());
+		expected.add(clientRelationship);
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("name")).thenReturn("Milka");
+		when(httpServletRequest.getParameter("searchRelationship")).thenReturn("mother");
+		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class),
+				nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Jared");
+		client.setLastName("Odinga");
+		client.setId("1");
+		client.setDateCreated(new DateTime());
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList("client-rel-base-entity-id"));
+		}});
+		when(clientService.findByRelationshipIdAndType("mother", "client-rel-base-entity-id"))
+				.thenReturn(Collections.singletonList(client));
+
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),clientRelationship.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), client.getFirstName());
+	}
+
 	private Client createClient() {
 		Client client = new Client("base-entity-id");
 		client.setFirstName("Test");
@@ -340,8 +412,8 @@ public class ClientResourceTest {
     @Test
     public void testFindAllIds() throws Exception {
         Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("client-id-1"), 12345l);
-        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
-        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
+        when(clientService.findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull())).thenReturn(idsModel);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0&fromDate=2020-10-0614:35:00.000+03:00", "")).andExpect(status().isOk())
                 .andReturn();
 
         String actualTaskIdString = result.getResponse().getContentAsString();
@@ -349,7 +421,7 @@ public class ClientResourceTest {
         List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 
 
-        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean());
+        verify(clientService).findAllIds(anyLong(), anyInt(), anyBoolean(), nullable(Date.class), isNull());
         verifyNoMoreInteractions(clientService);
         assertEquals("{\"identifiers\":[\"client-id-1\"],\"lastServerVersion\":12345}", result.getResponse().getContentAsString());
         assertEquals((idsModel.getLeft()).get(0), actualTaskIdList.get(0));
@@ -368,6 +440,19 @@ public class ClientResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		verify(clientService).findByServerVersion(0, 50);
 
+	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		when(clientService.countAll(anyLong()))
+				.thenReturn(1L);
+		MvcResult mvcResult = mockMvc
+				.perform(get(BASE_URL + "/countAll?serverVersion=0"))
+				.andExpect(status().isOk()).andReturn();
+		String strResponse = mvcResult.getResponse().getContentAsString();
+		JSONObject jsonObject = new JSONObject(strResponse);
+		verify(clientService).countAll(0);
+		assertEquals(1, jsonObject.optInt("count"));
 	}
 
 	@Test
