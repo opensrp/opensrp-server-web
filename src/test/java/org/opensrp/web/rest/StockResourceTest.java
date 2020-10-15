@@ -2,13 +2,13 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.Inventory;
 import org.opensrp.domain.Stock;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
@@ -16,24 +16,33 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.AssertionErrors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,7 +67,18 @@ public class StockResourceTest {
 	private final String SYNC_PAYLOAD = "{"
 			+ "\"stocks\": [{\"identifier\":123,\"providerid\":\"test-id\"}]"
 			+ "}";
-	
+
+	private final String INVENTORY_PAYLOAD = "{\n"
+			+ "    \"productName\" : \"Midwifery Kit\",\n"
+			+ "    \"unicefSection\" : \"Health Worker\",\n"
+			+ "    \"quantity\" : 10,\n"
+			+ "    \"deliveryDate\" : \"2019-12-12\",\n"
+			+ "    \"donor\" : \"XYZ donor\",\n"
+			+ "    \"servicePointId\":\"loc-1\",\n"
+			+ "    \"poNumber\":111,\n"
+			+ "    \"serialNumber\":\"1234serial\"\n"
+			+ "}";
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -190,11 +210,118 @@ public class StockResourceTest {
 		assertEquals(expected.size(),actual.size());
 		assertEquals(expected.get(0).getIdentifier(),actual.get(0).getIdentifier());
 	}
+
+	@Test
+	public void testCreateInventory() throws Exception {
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		Mockito.doNothing().when(stockService).addInventory(any(Inventory.class), anyString());
+		MvcResult result = mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+				.content(INVENTORY_PAYLOAD.getBytes()))
+				.andExpect(status().isCreated()).andReturn();
+		assertEquals(result.getResponse().getContentAsString(), "");
+	}
+
+	@Test
+	public void testUpdateInventory() throws Exception {
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		Mockito.doNothing().when(stockService).updateInventory(any(Inventory.class), anyString());
+		MvcResult result = mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+				.content(INVENTORY_PAYLOAD.getBytes()))
+				.andExpect(status().isCreated()).andReturn();
+		assertEquals(result.getResponse().getContentAsString(), "");
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
+		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
+				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
+		Mockito.verify(stockService, Mockito.times(1)).deleteStock(argumentCaptor.capture());
+		Assert.assertEquals(argumentCaptor.getValue().longValue(), 1);
+	}
+
+	@Test
+	public void testGetStockItemsByServicePoint() throws Exception {
+		List<Stock> stocks = new ArrayList<>();
+		stocks.add(createStock());
+		when(stockService.getStocksByServicePointId(anyString())).thenReturn(stocks);
+		MvcResult result =
+				mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/servicePointId/{servicePointId}", "loc-1"))
+						.andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+		Mockito.verify(stockService)
+				.getStocksByServicePointId(ArgumentMatchers.any(String.class));
+		Mockito.verifyNoMoreInteractions(stockService);
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			AssertionErrors.fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+        assertEquals(1, actualObj.size());
+		Assert.assertEquals(12345l, actualObj.get(0).get("identifier").asLong());
+
+	}
 	
 	private Stock createStock() {
 		Stock stock = new Stock();
 		stock.setIdentifier(12345l);
 		stock.setId("ID-123");
 		return stock;
+	}
+
+	private Authentication getMockedAuthentication() {
+		Authentication authentication = new Authentication() {
+
+			/**
+			 *
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Collection<? extends GrantedAuthority> getAuthorities() {
+				return null;
+			}
+
+			@Override
+			public Object getCredentials() {
+				return "";
+			}
+
+			@Override
+			public Object getDetails() {
+				return null;
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return "Test User";
+			}
+
+			@Override
+			public boolean isAuthenticated() {
+				return false;
+			}
+
+			@Override
+			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+			}
+
+			@Override
+			public String getName() {
+				return "admin";
+			}
+		};
+
+		return authentication;
 	}
 }
