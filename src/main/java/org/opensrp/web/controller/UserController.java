@@ -2,11 +2,13 @@ package org.opensrp.web.controller;
 
 import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +18,12 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -37,10 +43,13 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +61,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -61,7 +69,7 @@ public class UserController {
 	
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
-	public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
+	public static final String JURISDICTION="jurisdiction";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -71,6 +79,8 @@ public class UserController {
 	private PractitionerService practitionerService;
 	
 	private PhysicalLocationService locationService;
+	
+	private PlanService planService;
 	
 	@Value("#{opensrp['openmrs.version']}")
 	protected String OPENMRS_VERSION;
@@ -111,20 +121,42 @@ public class UserController {
 		this.locationService = locationService;
 	}
 	
+	
+	/**
+	 * @param planService the planService to set
+	 */
+	@Autowired
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/authenticate-user")
 	public ResponseEntity<HttpStatus> authenticateUser() {
 		return new ResponseEntity<>(null, allowOrigin(opensrpAllowedSources), OK);
 	}
 	
 	@GetMapping(value = "/logout.do")
-	public ResponseEntity<String> logoff(HttpServletRequest request) throws ServletException {
-		String url = MessageFormat.format(keycloakConfigurationURL, keycloakDeployment.getAuthServerBaseUrl(),
-		    keycloakDeployment.getRealm());
-		JsonNode configs = restTemplate.getForObject(url, JsonNode.class);
-		ResponseEntity<String> response = restTemplate.getForEntity(configs.get(END_SESSION_ENDPOINT).textValue(),
-		    String.class);
-		request.logout();
-		return response;
+	public ResponseEntity<String> logoff(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+	        Authentication authentication) throws ServletException {
+		if (authentication != null) {
+			servletRequest.logout();
+			HttpSession session = servletRequest.getSession(false);
+			if (session != null) {
+				session.invalidate();
+			}
+			Cookie[] cookies = servletRequest.getCookies();
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					cookie.setValue("");
+					cookie.setMaxAge(0);
+					servletResponse.addCookie(cookie);
+				}
+			}
+			return new ResponseEntity<>("User Logged out", OK);
+		} else {
+			return new ResponseEntity<>("User not logged in", UNAUTHORIZED);
+		}
+		
 	}
 	
 	public Time getServerTime() {
@@ -157,25 +189,43 @@ public class UserController {
 		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
-		List<PhysicalLocation> jurisdictions = null;
+		Set<PhysicalLocation> jurisdictions = null;
 		Set<String> locationIds = new HashSet<>();
+		Set<String> planIdentifiers = new HashSet<>();
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
 			
 			for (AssignedLocations assignedLocation : organizationService
 			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
-				locationIds.add(assignedLocation.getJurisdictionId());
+				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
+					locationIds.add(assignedLocation.getJurisdictionId());
+				if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
+					planIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = locationService.findLocationByIdsWithChildren(false, locationIds, 5000);
+			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
+			
+			if (!planIdentifiers.isEmpty()) {
+				/** @formatter:off*/
+				Set<String> planLocationIds = planService
+				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
+				            Collections.singletonList(JURISDICTION), false)
+				        .stream()
+				        .flatMap(plan -> plan.getJurisdiction().stream())
+				        .map(Jurisdiction::getCode)
+				        .collect(Collectors.toSet());
+				/** @formatter:on*/	
+				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+				jurisdictions.retainAll(planLocations);		
+			}
 			
 		}
 		catch (Exception e) {
 			logger.error("USER Location info not mapped to an organization", e);
 		}
-		if (locationIds.isEmpty()) {
-			throw new IllegalStateException(
+		if (jurisdictions == null || jurisdictions.isEmpty()) {
+			throw new MissingTeamAssignmentException(
 			        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 		}
 		
@@ -227,12 +277,17 @@ public class UserController {
 		map.put("locations", l);
 		Time t = getServerTime();
 		map.put("time", t);
+			
 		/** @formatter:off*/
-		map.put("jurisdictions", jurisdictions.stream()
-			.filter(location -> !locationParents.contains(location.getId()))
-			.map(location -> location.getProperties().getName())
-			.collect(Collectors.toSet()));
+		Map<String,String> leafJurisdictions=jurisdictions.stream()
+			.filter(location -> !locationParents.contains(location.getId()) && location.getProperties().getName()!=null)
+			.collect(Collectors.toMap(PhysicalLocation::getId, (location)->location.getProperties().getName()));
 		/**@formatter:on*/
+			
+		map.put("jurisdictionIds", leafJurisdictions.keySet());
+		
+		map.put("jurisdictions", leafJurisdictions.values());
+	
 		return new ResponseEntity<>(new Gson().toJson(map), RestUtils.getJSONUTF8Headers(), OK);
 	}
 	

@@ -24,6 +24,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.PlanDefinition;
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -115,7 +117,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -129,7 +131,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -258,15 +260,34 @@ public class PlanResource {
 	}
 
 	/**
+	 * Fetch count of plans
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of plan definitions
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		Long countOfPlanDefinitions = planService.countAllPlans(serverVersion, isTemplateParam);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", countOfPlanDefinitions != null ? countOfPlanDefinitions : 0);
+		return new ResponseEntity<>(modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
+	/**
 	 * This methods provides an API endpoint that searches for all plan Identifiers
 	 *
 	 * @return A list of plan Identifiers
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+											  @RequestParam(value = "fromDate", required = false) String fromDate,
+											  @RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());

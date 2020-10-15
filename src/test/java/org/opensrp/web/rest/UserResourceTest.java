@@ -167,21 +167,20 @@ public class UserResourceTest {
 	public void testGetAllKeycloakUsers() throws Exception {
 		String authServer = "http://localhost:8080/auth/";
 		String realm = "opensrp";
-		String url = MessageFormat.format(usersURL, authServer, realm)+"?first={first}&max={max}";
+		String url = MessageFormat.format(usersURL, authServer, realm) + "?first={first}&max={max}";
 		when(keycloakDeployment.getAuthServerBaseUrl()).thenReturn(authServer);
 		when(keycloakDeployment.getRealm()).thenReturn(realm);
 		Map<String, Object> uriVariables = new HashMap<>();
 		uriVariables.put("first", 0);
 		uriVariables.put("max", 100);
 		String expected = "[{\"id\":\"wewql9abe70ad66\",\"createdTimestamp\":1595352823770,\"username\":\"campdemo1\",\"enabled\":true,\"totp\":false,\"emailVerified\":false,\"firstName\":\"Abimbola\",\"lastName\":\"Phillips\"}]";
-		doReturn(new ResponseEntity<String>(expected, HttpStatus.OK)).when(restTemplate).getForEntity(url, String.class,
-		    uriVariables);
+		doReturn(expected).when(restTemplate).getForObject(url, String.class, uriVariables);
 		Whitebox.setInternalState(userResource, "restTemplate", restTemplate);
 		MvcResult response = mockMvc
 		        .perform(
 		            get(BASE_URL).param("page_size", "100").param("start_index", "0").param("source", UserResource.KEYCLOAK))
 		        .andExpect(status().isOk()).andReturn();
-		verify(restTemplate).getForEntity(url, String.class, uriVariables);
+		verify(restTemplate).getForObject(url, String.class, uriVariables);
 		assertEquals(expected, response.getResponse().getContentAsString());
 		
 	}

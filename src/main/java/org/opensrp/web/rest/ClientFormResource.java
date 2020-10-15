@@ -157,7 +157,7 @@ public class ClientFormResource {
             }
         }
 
-        if (highestVersion == null) {
+        if (highestIdVersionTuple == null) {
             return null;
         } else {
             long formId = highestIdVersionTuple.getId();
@@ -249,7 +249,7 @@ public class ClientFormResource {
             return errorMessage;
 
 
-        logger.info(fileContentString);
+        logger.debug(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
                 formName, module, isJsonValidator, identifier, relation));
