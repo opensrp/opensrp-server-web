@@ -302,7 +302,7 @@ public class PlanResource {
 	 * @param username
 	 * @return plan definitions whose identifiers match the provided param
 	 */
-	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/user/{username:.+}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> fetchPlansForUser(@PathVariable(USERNAME) String username,
 	        @RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion,
 			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
