@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Event.LOCATION_ID;
 import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
 import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
 import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
@@ -104,6 +105,7 @@ public class StockResource extends RestResource<Stock> {
 		searchBean.setDateCreated(getStringFilter(DATE_CREATED, request));
 		searchBean.setToFrom(getStringFilter(TO_FROM, request));
 		searchBean.setDateUpdated(getStringFilter(DATE_UPDATED, request));
+		searchBean.setLocationId(getStringFilter(LOCATION_ID, request));
 		return searchBean;
 	}
 
