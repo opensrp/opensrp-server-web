@@ -2,11 +2,9 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
@@ -27,17 +25,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
+import org.mockito.Captor;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.InjectMocks;
 
-import java.nio.charset.StandardCharsets;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -62,8 +69,6 @@ public class ProductCatalogueResourceTest {
 	private MockMvc mockMvc;
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
-
-	private Gson gson = new Gson().newBuilder().create();
 
 	private String BASE_URL = "/rest/product-catalogue";
 
@@ -245,7 +250,7 @@ public class ProductCatalogueResourceTest {
 
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+				// TODO Auto-generated method stub
 			}
 
 			@Override

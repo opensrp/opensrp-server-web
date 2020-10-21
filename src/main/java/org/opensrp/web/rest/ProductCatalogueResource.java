@@ -15,7 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -71,7 +78,7 @@ public class ProductCatalogueResource {
 					multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
 
 					logger.info("Saving multimedia file...");
-					String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+					multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 				}
 			}
 
@@ -110,7 +117,7 @@ public class ProductCatalogueResource {
 				multimediaDTO.withOriginalFileName(file.getOriginalFilename()).withDateUploaded(new Date());
 
 				logger.info("Saving multimedia file...");
-				String status = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+				multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 			}
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}

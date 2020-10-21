@@ -16,12 +16,9 @@ public class PostAndPutCommonsMultipartResolver extends CommonsMultipartResolver
 
 		boolean isMultipartRequest = false;
 
-		if (request != null) {
-
-			if (POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD.equalsIgnoreCase(request.getMethod())) {
-
-				isMultipartRequest = FileUploadBase.isMultipartContent(new ServletRequestContext(request));
-			}
+		if (request != null && POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD
+				.equalsIgnoreCase(request.getMethod())) {
+			isMultipartRequest = FileUploadBase.isMultipartContent(new ServletRequestContext(request));
 		}
 
 		return isMultipartRequest;
