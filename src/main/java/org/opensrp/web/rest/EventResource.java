@@ -55,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -349,6 +350,38 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 
+	/**
+	 * Fetch count of events
+	 *
+	 * @return a map response with events, clients and optionally msg when an error occurs
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	protected ResponseEntity<ModelMap> countAll(@RequestParam long serverVersion,
+			@RequestParam(required = false) String eventType)
+			throws JsonProcessingException {
+
+		try {
+			EventSearchBean eventSearchBean = new EventSearchBean();
+			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
+			eventSearchBean.setEventType(eventType);
+
+			Long countOfEvents = eventService.countEvents(eventSearchBean);
+			ModelMap modelMap = new ModelMap();
+			modelMap.put("count", countOfEvents != null ? countOfEvents : 0);
+
+			return new ResponseEntity<>(
+					modelMap,
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		}
+		catch (Exception e) {
+			ModelMap modelMap = new ModelMap();
+			modelMap.put("message", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(modelMap, INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
 		try {
@@ -471,12 +504,14 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<Identifier> getAllIdsByEventType(
 	        @RequestParam(value = EVENT_TYPE, required = false) String eventType,
 	        @RequestParam(value = SERVER_VERSION) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate){
 
 		try {
 
 			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
-			    Constants.DEFAULT_GET_ALL_IDS_LIMIT);
+			    Constants.DEFAULT_GET_ALL_IDS_LIMIT, Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());

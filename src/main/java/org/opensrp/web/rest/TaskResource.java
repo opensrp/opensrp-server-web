@@ -20,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
@@ -33,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -221,9 +223,12 @@ public class TaskResource {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion) {
+			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT);
+		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
@@ -245,6 +250,21 @@ public class TaskResource {
 		return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
+	}
+
+	/**
+	 * Fetch count of tasks
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of tasks
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSION) long serverVersion) {
+		Long countOfTasks = taskService.countAllTasks(serverVersion);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", countOfTasks != null ? countOfTasks : 0);
+		return new ResponseEntity<>(modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	static class TaskSyncRequestWrapper {
