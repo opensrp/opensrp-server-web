@@ -16,6 +16,8 @@
 		<result column="person_uuid" jdbcType="VARCHAR" property="personUUID"/>
 		<result column="uuid" jdbcType="VARCHAR" property="userUUID"/>
 		<result column="full_name" jdbcType="VARCHAR" property="fullName"/>
+		<result column="roleName" jdbcType="VARCHAR" property="roleName"/>
+		<result column="roleId" jdbcType="VARCHAR" property="roleId"/>
 	</resultMap>
 
 	<resultMap id="healthIdMap" type="org.opensrp.domain.postgres.HealthId">
@@ -45,12 +47,45 @@
 		WHERE team_member.person_id = #{userId}
 	</select>
 
+
+<!-- create or replace
+function core.user_info(_username text) 
+returns table(id integer,name text,password text,person_uuid text,uuid text,full_name text,enable boolean,roleName text,roleId int) 
+language plpgsql as $function$
+begin
+return query
+select
+	u.id as id,
+	u.username::text as username,
+	u.password::text,
+	u.person_uuid::text,
+	u.uuid::text,
+	concat(trim(u.first_name), ' ', trim(u.last_name))::text as full_name,
+	u.enable_sim_print as enable,
+	case
+		when ur.role_id = 32 then 'SK'
+		when ur.role_id = 30 then 'PK'
+		else 'PA'
+	end as roleName,
+	ur.role_id roleId
+from
+	core.users u
+join core.user_role ur on
+	u.id = ur.user_id
+where
+	username = _username
+limit 1;
+end;
+
+$function$ ;
+
+select * from core.user_info('01730349362'); -->
+
 	<select id="getUser" parameterType="java.lang.String" resultMap="customQueryMap">
-	select id as id, username as name,password,person_uuid, uuid,concat(trim(first_name),' ',trim(last_name)) as full_name,enable_sim_print as enable  from core.users
-		WHERE username = #{userName,jdbcType=VARCHAR}
-		
-		<!-- select id as id, username as name, enable_sim_print as enable from core.users
+	<!-- select id as id, username as name,password,person_uuid, uuid,concat(trim(first_name),' ',trim(last_name)) as full_name,enable_sim_print as enable  from core.users
 		WHERE username = #{userName,jdbcType=VARCHAR} -->
+		
+		select id ,name, password ,person_uuid ,uuid ,full_name ,enable ,roleName ,roleId  from core.user_info(#{userName,jdbcType=VARCHAR}) ;
 	</select>
 
 	<select id="getTeamMemberId" parameterType="int" resultMap="customQueryMap">

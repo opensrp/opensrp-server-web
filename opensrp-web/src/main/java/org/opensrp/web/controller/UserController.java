@@ -184,10 +184,10 @@ public class UserController {
 		JSONObject uss = new JSONObject();
 		uss.put("username", u.getUsername());
 		uss.put("preferredName", u.getPreferredName());
-		JSONArray roles = new JSONArray();
+		/*JSONArray roles = new JSONArray();
 		roles.put("Provider");
-		
-		uss.put("roles", roles);
+		*/
+		uss.put("roles", u.getRoles());
 		JSONObject attri = new JSONObject();
 		attri.put("_PERSON_UUID", u.getAttribute("_PERSON_UUID"));
 		uss.put("attributes", attri);

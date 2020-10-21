@@ -192,7 +192,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 			        userInfo.getFullName(), null, null);
 			
 			user.addAttribute("_PERSON_UUID", userInfo.getPersonUUID());
-			user.addRole("Provider");
+			user.addRole(userInfo.getRoleName());
 			user.addPermission(null);
 			
 			System.out.println("user:" + user);
