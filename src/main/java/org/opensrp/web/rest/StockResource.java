@@ -16,6 +16,9 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,12 +27,18 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Inventory;
 import org.opensrp.domain.Stock;
+import org.opensrp.dto.CsvBulkImportDataSummary;
+import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.Constants;
@@ -37,6 +46,7 @@ import org.smartregister.utils.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +59,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
@@ -60,6 +71,8 @@ public class StockResource extends RestResource<Stock> {
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+
+	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
 
 	@Autowired
 	public StockResource(StockService stockService) {
@@ -257,5 +270,60 @@ public class StockResource extends RestResource<Stock> {
 				RestUtils.getJSONUTF8Headers(),
 				HttpStatus.OK);
 	}
+
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, value = "/import/inventory")
+	public ResponseEntity importInventoryData(@RequestParam("file") MultipartFile file)
+			throws IOException {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userName = authentication.getName();
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
+				.convertandPersistInventorydata(csvClients, userName);
+
+		generateCSV(csvBulkImportDataSummary);
+		File csvFile = new File(SAMPLE_CSV_FILE);
+
+		return ResponseEntity.ok()
+				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+				.contentLength(csvFile.length())
+				.contentType(MediaType.parseMediaType("text/csv"))
+				.body(new FileSystemResource(csvFile));
+	}
+
+	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
+		List<Map<String, String>> csvClients = new ArrayList<>();
+		try (Reader reader = new InputStreamReader(file.getInputStream());
+		     CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader())) {
+
+			List<CSVRecord> records = parser.getRecords();
+			for (CSVRecord record : records) {
+				csvClients.add(record.toMap());
+			}
+		}
+		return csvClients;
+	}
+
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary) {
+		try (
+				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE));
+				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		) {
+			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+			csvPrinter.printRecord("\n");
+
+			csvPrinter.printRecord("Row Number", "Reason of Failure");
+			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
+			}
+			csvPrinter.flush();
+		}
+		catch (Exception e) {
+			logger.error("Failed to generate CSV " + e.getMessage(), e);
+			throw new RuntimeException("Failed to generate CSV : " + e.getMessage());
+		}
+	}
+
 
 }
