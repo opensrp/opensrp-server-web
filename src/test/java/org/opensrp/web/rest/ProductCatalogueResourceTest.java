@@ -2,11 +2,10 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.opensrp.domain.Multimedia;
 import org.opensrp.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
@@ -16,6 +15,8 @@ import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,17 +27,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
+import org.mockito.Captor;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.InjectMocks;
 
-import java.nio.charset.StandardCharsets;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,8 +71,6 @@ public class ProductCatalogueResourceTest {
 	private MockMvc mockMvc;
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
-
-	private Gson gson = new Gson().newBuilder().create();
 
 	private String BASE_URL = "/rest/product-catalogue";
 
@@ -101,7 +109,7 @@ public class ProductCatalogueResourceTest {
 	@Test
 	public void testCreate() throws Exception {
 
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		MultipartFile multipartFile = mock(MultipartFile.class);
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
 		Authentication authentication = mock(Authentication.class);
@@ -126,15 +134,109 @@ public class ProductCatalogueResourceTest {
 
 		// verify call
 
-		Mockito.verify(multimediaService).findByCaseId(anyString());
+		verify(multimediaService).findByCaseId(anyString());
 
-		Mockito.verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
 				anyString());
 
 		ProductCatalogue catalogue = argumentCaptor.getValue();
 		assertEquals("Scale", catalogue.getProductName());
 	}
 
+	@Test
+	public void testCreateWithIllegalArgumentException() throws Exception {
+
+		MultipartFile multipartFile = mock(MultipartFile.class);
+		ProductCatalogue productCatalogue = createProductCatalog();
+		productCatalogue.setUniqueId(1l);
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		byte[] bytes = new byte[10];
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+
+		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+		when(productCatalogueService.getProductCatalogueByName(anyString())).thenThrow(new IllegalArgumentException(""));
+		when(multimediaService.findByCaseId(anyString())).thenReturn(null);
+		when(multipartFile.getContentType()).thenReturn("");
+		when(multipartFile.getBytes()).thenReturn(bytes);
+		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+
+		ResponseEntity<String> response = productCatalogueResource.create(multipartFile,productCatalogue);
+		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+	}
+
+	@Test
+	public void testUpdate() throws Exception {
+
+		MultipartFile multipartFile = mock(MultipartFile.class);
+		ProductCatalogue productCatalogue = createProductCatalog();
+		productCatalogue.setUniqueId(1l);
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		byte[] bytes = new byte[10];
+		Multimedia multimedia = new Multimedia();
+		multimedia.setCaseId("1");
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+
+		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+		when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
+		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+		Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
+		when(multipartFile.getContentType()).thenReturn("");
+		when(multipartFile.getBytes()).thenReturn(bytes);
+		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+
+		productCatalogueResource.update(1l,multipartFile,productCatalogue);
+
+		verify(productCatalogueService).update(argumentCaptor.capture());
+
+		verify(multimediaService).findByCaseId(anyString());
+
+		verify(multimediaService).deleteMultimedia(any(Multimedia.class));
+
+		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+				anyString());
+
+		ProductCatalogue catalogue = argumentCaptor.getValue();
+		assertEquals("Scale", catalogue.getProductName());
+	}
+
+	@Test
+	public void testUpdateWithIllegalArgumentException() throws Exception {
+
+		MultipartFile multipartFile = mock(MultipartFile.class);
+		ProductCatalogue productCatalogue = createProductCatalog();
+		productCatalogue.setUniqueId(1l);
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+		byte[] bytes = new byte[10];
+		Multimedia multimedia = new Multimedia();
+		multimedia.setCaseId("1");
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+
+		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+		when(productCatalogueService.getProductCatalogueByName(anyString())).thenThrow(new IllegalArgumentException(""));
+		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+		Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
+		when(multipartFile.getContentType()).thenReturn("");
+		when(multipartFile.getBytes()).thenReturn(bytes);
+		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+
+		ResponseEntity<String> response = productCatalogueResource.update(1l,multipartFile,productCatalogue);
+		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+	}
 
 	@Test
 	public void testGetByUniqueId() throws Exception {
@@ -205,7 +307,7 @@ public class ProductCatalogueResourceTest {
 
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+				// TODO Auto-generated method stub
 			}
 
 			@Override
