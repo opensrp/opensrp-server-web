@@ -107,7 +107,7 @@ public class ProductCatalogueResourceTest {
 	@Test
 	public void testCreate() throws Exception {
 
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		MultipartFile multipartFile = mock(MultipartFile.class);
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
 		Authentication authentication = mock(Authentication.class);
@@ -132,9 +132,9 @@ public class ProductCatalogueResourceTest {
 
 		// verify call
 
-		Mockito.verify(multimediaService).findByCaseId(anyString());
+		verify(multimediaService).findByCaseId(anyString());
 
-		Mockito.verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
 				anyString());
 
 		ProductCatalogue catalogue = argumentCaptor.getValue();
@@ -144,7 +144,7 @@ public class ProductCatalogueResourceTest {
 	@Test
 	public void testUpdate() throws Exception {
 
-		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		MultipartFile multipartFile = mock(MultipartFile.class);
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
 		Authentication authentication = mock(Authentication.class);
@@ -170,11 +170,11 @@ public class ProductCatalogueResourceTest {
 
 		verify(productCatalogueService).update(argumentCaptor.capture());
 
-		Mockito.verify(multimediaService).findByCaseId(anyString());
+		verify(multimediaService).findByCaseId(anyString());
 
-		Mockito.verify(multimediaService).deleteMultimedia(any(Multimedia.class));
+		verify(multimediaService).deleteMultimedia(any(Multimedia.class));
 
-		Mockito.verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
 				anyString());
 
 		ProductCatalogue catalogue = argumentCaptor.getValue();
