@@ -42,7 +42,7 @@ public class ProductCatalogueResource {
 	private static Logger logger = LoggerFactory.getLogger(ProductCatalogueResource.class.toString());
 
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<ProductCatalogue>> getAll(
+	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
 			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
 			@RequestParam(value = "serverVersion", required = false) String serverVersion) {
@@ -57,8 +57,7 @@ public class ProductCatalogueResource {
 		productCatalogueSearchBean.setUniqueId(uniqueId);
 		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return new ResponseEntity<>(productCatalogueService.getProductCatalogues(productCatalogueSearchBean),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" })
@@ -89,11 +88,6 @@ public class ProductCatalogueResource {
 					String.format("Exception occurred while persisting image of Product Catalogue" + e.getMessage() + e));
 			return new ResponseEntity<String>("Exception occurred while persisting image of Product Catalogue",
 					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		catch (IllegalArgumentException e) {
-			logger.error(String.format("Exception occurred while adding product catalogue: %s,%s", e.getMessage(), e));
-			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(),
-					HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -127,31 +121,18 @@ public class ProductCatalogueResource {
 			return new ResponseEntity<String>("Exception occurred while persisting image of Product Catalogue",
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		catch (IllegalArgumentException e) {
-			logger.error(String.format("Exception occurred while updating product catalogue: %s", e.getMessage()));
-			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(),
-					HttpStatus.BAD_REQUEST);
-		}
 	}
 
 	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> delete(@PathVariable("id") Long uniqueId) {
-		try {
-			productCatalogueService.deleteProductCatalogueById(uniqueId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		catch (IllegalArgumentException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
+		productCatalogueService.deleteProductCatalogueById(uniqueId);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 	}
 
 	@GetMapping(value = "/{id}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<ProductCatalogue> getByUniqueId(@PathVariable("id") Long uniqueId) {
-		return new ResponseEntity<>(productCatalogueService.getProductCatalogue(uniqueId),
-				RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
+	public ProductCatalogue getByUniqueId(@PathVariable("id") Long uniqueId) {
+		return productCatalogueService.getProductCatalogue(uniqueId);
 	}
 }
