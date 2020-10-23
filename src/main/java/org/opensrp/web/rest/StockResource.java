@@ -20,10 +20,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -284,11 +281,19 @@ public class StockResource extends RestResource<Stock> {
 		generateCSV(csvBulkImportDataSummary);
 		File csvFile = new File(SAMPLE_CSV_FILE);
 
-		return ResponseEntity.ok()
-				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
-				.contentLength(csvFile.length())
-				.contentType(MediaType.parseMediaType("text/csv"))
-				.body(new FileSystemResource(csvFile));
+		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
+			return ResponseEntity.badRequest()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		} else {
+			return ResponseEntity.ok()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		}
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
@@ -317,6 +322,7 @@ public class StockResource extends RestResource<Stock> {
 			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
 				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
 			}
+			writer.flush();
 			csvPrinter.flush();
 		}
 		catch (Exception e) {
