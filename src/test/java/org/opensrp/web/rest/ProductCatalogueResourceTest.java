@@ -15,8 +15,6 @@ import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -95,15 +93,16 @@ public class ProductCatalogueResourceTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
+		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel().get("productCatalogueList");
+
+		if (response.size() == 0) {
 			fail("Test case failed");
 		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		assertEquals(actualObj.size(), 1);
-		assertEquals(1, actualObj.get(0).get("uniqueId").asLong());
-		assertEquals("Scale", actualObj.get(0).get("productName").asText());
-		assertEquals("MT-123", actualObj.get(0).get("materialNumber").asText());
+
+		assertEquals(response.size(), 1);
+		assertEquals(new Long(1), response.get(0).getUniqueId());
+		assertEquals("Scale", response.get(0).getProductName());
+		assertEquals("MT-123", response.get(0).getMaterialNumber());
 	}
 
 	@Test
@@ -141,32 +140,6 @@ public class ProductCatalogueResourceTest {
 
 		ProductCatalogue catalogue = argumentCaptor.getValue();
 		assertEquals("Scale", catalogue.getProductName());
-	}
-
-	@Test
-	public void testCreateWithIllegalArgumentException() throws Exception {
-
-		MultipartFile multipartFile = mock(MultipartFile.class);
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		Authentication authentication = mock(Authentication.class);
-		authentication.setAuthenticated(Boolean.TRUE);
-		SecurityContext securityContext = mock(SecurityContext.class);
-		SecurityContextHolder.setContext(securityContext);
-		byte[] bytes = new byte[10];
-
-		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
-
-		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
-		when(productCatalogueService.getProductCatalogueByName(anyString())).thenThrow(new IllegalArgumentException(""));
-		when(multimediaService.findByCaseId(anyString())).thenReturn(null);
-		when(multipartFile.getContentType()).thenReturn("");
-		when(multipartFile.getBytes()).thenReturn(bytes);
-		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
-
-		ResponseEntity<String> response = productCatalogueResource.create(multipartFile,productCatalogue);
-		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
@@ -210,35 +183,6 @@ public class ProductCatalogueResourceTest {
 	}
 
 	@Test
-	public void testUpdateWithIllegalArgumentException() throws Exception {
-
-		MultipartFile multipartFile = mock(MultipartFile.class);
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		Authentication authentication = mock(Authentication.class);
-		authentication.setAuthenticated(Boolean.TRUE);
-		SecurityContext securityContext = mock(SecurityContext.class);
-		SecurityContextHolder.setContext(securityContext);
-		byte[] bytes = new byte[10];
-		Multimedia multimedia = new Multimedia();
-		multimedia.setCaseId("1");
-
-		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
-
-		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
-		when(productCatalogueService.getProductCatalogueByName(anyString())).thenThrow(new IllegalArgumentException(""));
-		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
-		Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
-		when(multipartFile.getContentType()).thenReturn("");
-		when(multipartFile.getBytes()).thenReturn(bytes);
-		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
-
-		ResponseEntity<String> response = productCatalogueResource.update(1l,multipartFile,productCatalogue);
-		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-	}
-
-	@Test
 	public void testGetByUniqueId() throws Exception {
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
@@ -248,14 +192,15 @@ public class ProductCatalogueResourceTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
+		ProductCatalogue response = (ProductCatalogue) result.getModelAndView().getModel().get("productCatalogue");
+
+		if (response == null) {
 			fail("Test case failed");
 		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		assertEquals(1, actualObj.get("uniqueId").asLong());
-		assertEquals("Scale", actualObj.get("productName").asText());
-		assertEquals("MT-123", actualObj.get("materialNumber").asText());
+
+		assertEquals(new Long(1), response.getUniqueId());
+		assertEquals("Scale", response.getProductName());
+		assertEquals("MT-123", response.getMaterialNumber());
 	}
 
 
