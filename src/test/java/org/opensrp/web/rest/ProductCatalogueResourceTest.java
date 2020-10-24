@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import org.mockito.Captor;
@@ -200,6 +203,15 @@ public class ProductCatalogueResourceTest {
 		assertEquals(new Long(1), response.getUniqueId());
 		assertEquals("Scale", response.getProductName());
 		assertEquals("MT-123", response.getMaterialNumber());
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
+		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
+				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
+		Mockito.verify(productCatalogueService, Mockito.times(1)).deleteProductCatalogueById(argumentCaptor.capture());
+		Assert.assertEquals(argumentCaptor.getValue().longValue(), 1);
 	}
 
 
