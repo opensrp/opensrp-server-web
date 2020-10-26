@@ -221,36 +221,23 @@ public class StockResource extends RestResource<Stock> {
 	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> create(@RequestBody Inventory inventory) {
-		try {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String userName = authentication.getName();
-			stockService.addInventory(inventory, userName);
-			return new ResponseEntity<>(HttpStatus.CREATED);
-		}
-		catch (IllegalArgumentException e) {
-			logger.error(String.format("Exception occurred while updating Inventory: %s", e.getMessage(), e));
-			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userName = authentication.getName();
+		stockService.addInventory(inventory, userName);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> update(@PathVariable("id") String stockId, @RequestBody Inventory inventory) {
-		try {
-			if (stockId == null) {
-				return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
-						HttpStatus.BAD_REQUEST);
-			}
-			else {
-				Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-				String userName = authentication.getName();
-				stockService.updateInventory(inventory, userName);
-				return new ResponseEntity<>(HttpStatus.CREATED);
-			}
-		}
-		catch (IllegalArgumentException e) {
-			logger.error(String.format("Exception occurred while updating Inventory: %s", e.getMessage()));
-			return new ResponseEntity<String>("The request contain illegal argument : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+		if (stockId == null) {
+			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userName = authentication.getName();
+			stockService.updateInventory(inventory, userName);
+			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 	}
 

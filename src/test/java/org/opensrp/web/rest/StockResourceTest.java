@@ -10,12 +10,15 @@ import org.mockito.*;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Inventory;
 import org.opensrp.domain.Stock;
+import org.opensrp.dto.CsvBulkImportDataSummary;
+import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -29,14 +32,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
@@ -233,7 +237,7 @@ public class StockResourceTest {
 		SecurityContextHolder.setContext(securityContext);
 		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 		Mockito.doNothing().when(stockService).updateInventory(any(Inventory.class), anyString());
-		MvcResult result = mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+		MvcResult result = mockMvc.perform(put(BASE_URL +"/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
 				.content(INVENTORY_PAYLOAD.getBytes()))
 				.andExpect(status().isCreated()).andReturn();
 		assertEquals(result.getResponse().getContentAsString(), "");
@@ -268,6 +272,41 @@ public class StockResourceTest {
 		JsonNode actualObj = mapper.readTree(responseString);
         assertEquals(1, actualObj.size());
 		Assert.assertEquals(12345l, actualObj.get(0).get("identifier").asLong());
+
+	}
+
+	@Test
+	public void testImportInventoryData() throws Exception {
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		String path = "src/test/resources/sample/inventory.csv";
+		MockMultipartFile file = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+				Files.readAllBytes(Paths.get(path)));
+
+		CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
+		csvBulkImportDataSummary.setNumberOfCsvRows(2);
+		csvBulkImportDataSummary.setNumberOfRowsProcessed(1);
+		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
+		FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
+		List<String> reasons = new ArrayList<>();
+		reasons.add("PO Number should be a whole number");
+		failedRecordSummary.setReasonOfFailure(reasons);
+		failedRecordSummary.setRowNumber(1);
+		failedRecordSummaryList.add(failedRecordSummary);
+		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
+
+		when(stockService.convertandPersistInventorydata(anyList(), anyString())).thenReturn(csvBulkImportDataSummary);
+
+		mockMvc.perform(
+				MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
+						.file(file)
+		)
+				.andExpect(status().isBadRequest())
+				.andReturn();
 
 	}
 	
