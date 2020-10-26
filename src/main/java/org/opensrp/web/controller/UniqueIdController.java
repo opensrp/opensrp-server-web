@@ -15,8 +15,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.opensrp.api.domain.User;
@@ -40,6 +38,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 @Controller
@@ -62,7 +62,7 @@ public class UniqueIdController extends OpenmrsService {
 	
 	@Autowired
 	private UniqueIdentifierService uniqueIdentifierService;
-
+	
 	@Autowired
 	protected ObjectMapper objectMapper;
 	
@@ -76,8 +76,8 @@ public class UniqueIdController extends OpenmrsService {
 	 * @throws JSONException
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/print", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> thisMonthDataSendTODHIS2(HttpServletRequest request, HttpServletResponse response){
-
+	public ResponseEntity<String> thisMonthDataSendTODHIS2(HttpServletRequest request, HttpServletResponse response) {
+		
 		String message;
 		User user;
 		Integer numberToGenerate = Integer.valueOf(getStringFilter("batchSize", request));
@@ -131,9 +131,9 @@ public class UniqueIdController extends OpenmrsService {
 	 *
 	 * @return json array object with ids
 	 */
-
+	
 	@RequestMapping(value = "/get", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	protected ResponseEntity<String> get(HttpServletRequest request,Authentication authentication) throws JSONException {
+	protected ResponseEntity<String> get(HttpServletRequest request, Authentication authentication) throws JSONException {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
@@ -143,19 +143,18 @@ public class UniqueIdController extends OpenmrsService {
 		try {
 			if (identifierSource != null) {
 				List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
-						Integer.parseInt(numberToGenerate), usedBy);
+				    Integer.parseInt(numberToGenerate), usedBy);
 				if (identifiers != null) {
 					map.put("identifiers", identifiers);
+					return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
 				}
-			} else {
-				map.put("identifiers",
-						openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate));
 			}
-			return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
+			
+			return new ResponseEntity<>("Unique Identifiers not found", HttpStatus.NOT_FOUND);
 		}
 		catch (IllegalArgumentException | JsonProcessingException exception) {
 			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	
 }
