@@ -133,28 +133,28 @@ public class UniqueIdController extends OpenmrsService {
 	 */
 	
 	@RequestMapping(value = "/get", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	protected ResponseEntity<String> get(HttpServletRequest request, Authentication authentication) throws JSONException {
+	protected ResponseEntity<String> get(HttpServletRequest request, Authentication authentication)
+	    throws JsonProcessingException, JSONException {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
 		String usedBy = authentication.getName();
 		Map<String, Object> map = new HashMap<>();
 		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
-		try {
-			if (identifierSource != null) {
-				List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
-				    Integer.parseInt(numberToGenerate), usedBy);
-				if (identifiers != null) {
-					map.put("identifiers", identifiers);
-					return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
-				}
-			}
+		
+		if (identifierSource != null) {
+			List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
+			    Integer.parseInt(numberToGenerate), usedBy);
+			map.put("identifiers", identifiers);
 			
-			return new ResponseEntity<>("Unique Identifiers not found", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
+			
+		} else {
+			
+			return new ResponseEntity<>(String.format("Unique identifier source %d not found", identifierSource),
+			        HttpStatus.NOT_FOUND);
 		}
-		catch (IllegalArgumentException | JsonProcessingException exception) {
-			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
-		}
+		
 	}
 	
 }
