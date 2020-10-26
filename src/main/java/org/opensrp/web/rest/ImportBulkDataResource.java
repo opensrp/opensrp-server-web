@@ -23,6 +23,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -50,11 +51,12 @@ public class ImportBulkDataResource {
 		CsvBulkImportDataSummary csvBulkImportDataSummary = importBulkDataService
 				.convertandPersistOrganizationdata(csvClients);
 
-		generateCSV(csvBulkImportDataSummary);
-		File csvFile = new File(SAMPLE_CSV_FILE);
+		String timestamp = String.valueOf(new Date().getTime());
+		generateCSV(csvBulkImportDataSummary, timestamp);
+		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
 
 		return ResponseEntity.ok()
-				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
 				.contentLength(csvFile.length())
 				.contentType(MediaType.parseMediaType("text/csv"))
 				.body(new FileSystemResource(csvFile));
@@ -69,11 +71,12 @@ public class ImportBulkDataResource {
 		CsvBulkImportDataSummary csvBulkImportDataSummary = importBulkDataService
 				.convertandPersistPractitionerdata(csvClients);
 
-		generateCSV(csvBulkImportDataSummary);
-		File csvFile = new File(SAMPLE_CSV_FILE);
+		String timestamp = String.valueOf(new Date().getTime());
+		generateCSV(csvBulkImportDataSummary,timestamp);
+		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
 
 		return ResponseEntity.ok()
-				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
 				.contentLength(csvFile.length())
 				.contentType(MediaType.parseMediaType("text/csv"))
 				.body(new FileSystemResource(csvFile));
@@ -92,25 +95,20 @@ public class ImportBulkDataResource {
 		return csvClients;
 	}
 
-	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary) {
-		try (
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE));
-				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-		) {
-			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
-			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
-			csvPrinter.printRecord("\n");
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, String timestamp) throws IOException {
 
-			csvPrinter.printRecord("Row Number", "Reason of Failure");
-			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
-				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
-			}
-			csvPrinter.flush();
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE + "-" + timestamp));
+		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+
+		csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+		csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+		csvPrinter.printRecord("\n");
+
+		csvPrinter.printRecord("Row Number", "Reason of Failure");
+		for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+			csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
 		}
-		catch (Exception e) {
-			logger.error("Failed to generate CSV " + e.getMessage(), e);
-			throw new RuntimeException("Failed to generate CSV : " + e.getMessage());
-		}
+		csvPrinter.flush();
 	}
 
 }
