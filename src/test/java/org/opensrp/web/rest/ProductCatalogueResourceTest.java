@@ -209,9 +209,9 @@ public class ProductCatalogueResourceTest {
 	public void testDelete() throws Exception {
 		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
-				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
-		Mockito.verify(productCatalogueService, Mockito.times(1)).deleteProductCatalogueById(argumentCaptor.capture());
-		Assert.assertEquals(argumentCaptor.getValue().longValue(), 1);
+				.andExpect(status().isNoContent()).andReturn();
+		verify(productCatalogueService, Mockito.times(1)).deleteProductCatalogueById(argumentCaptor.capture());
+		assertEquals(argumentCaptor.getValue().longValue(), 1);
 	}
 
 
