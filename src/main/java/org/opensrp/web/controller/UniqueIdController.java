@@ -122,7 +122,7 @@ public class UniqueIdController extends OpenmrsService {
 	boolean checkRoleIfRoleExitst(List<String> roleList, String role) {
 		for (String roleName : roleList)
 			if (StringUtils.containsIgnoreCase(roleName, role))
-				return true;
+				return true;	
 		return false;
 	}
 	
@@ -151,7 +151,7 @@ public class UniqueIdController extends OpenmrsService {
 			
 		} else {
 			
-			return new ResponseEntity<>(String.format("Unique identifier source %d not found", identifierSource),
+			return new ResponseEntity<>(String.format("Unique Identifier source %s not found", source),
 			        HttpStatus.NOT_FOUND);
 		}
 		
