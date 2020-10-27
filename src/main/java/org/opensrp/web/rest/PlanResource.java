@@ -20,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
@@ -80,6 +81,16 @@ public class PlanResource {
 
 	public static final String IS_TEMPLATE = "is_template";
 
+	public static final String PAGE_NUMBER = "pageNumber";
+
+	public static final String PAGE_SIZE = "pageSize";
+
+	public static final String PLAN_STATUS = "planStatus";
+
+	public static final String ORDER_BY_TYPE = "orderByType";
+
+	public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
 
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -105,8 +116,15 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(isTemplateParam)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = PLAN_STATUS, required = false) String planStatus) {
+
+		PlanSearchBean planSearchBean = createPlanSearchBean(isTemplateParam, pageNumber, pageSize, orderByType, orderByFieldName, planStatus);
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(planSearchBean)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -371,6 +389,28 @@ public class PlanResource {
 			return returnCount;
 		}
 
+	}
+
+	private PlanSearchBean createPlanSearchBean(boolean isTemplateParam, Integer pageNumber, Integer pageSize, String orderByType,
+			String orderByFieldName, String planStatus) {
+		PlanSearchBean planSearchBean = new PlanSearchBean();
+		planSearchBean.setExperimental(isTemplateParam);
+		if(pageNumber != null) {
+			planSearchBean.setPageNumber(pageNumber);
+		}
+		if(pageSize != null) {
+			planSearchBean.setPageSize(pageSize);
+		}
+		if (orderByType != null) {
+			planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if (orderByType != null) {
+			planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		if (orderByType != null) {
+			planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		}
+		return planSearchBean;
 	}
 	
 }
