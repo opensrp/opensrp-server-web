@@ -7,8 +7,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.service.ImportBulkDataService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
@@ -34,8 +32,6 @@ public class ImportBulkDataResource {
 	private ImportBulkDataService importBulkDataService;
 
 	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
-
-	private static Logger logger = LoggerFactory.getLogger(ImportBulkDataResource.class.toString());
 
 	@Autowired
 	public void setImportBulkDataService(ImportBulkDataService importBulkDataService) {
@@ -72,7 +68,7 @@ public class ImportBulkDataResource {
 				.convertandPersistPractitionerdata(csvClients);
 
 		String timestamp = String.valueOf(new Date().getTime());
-		generateCSV(csvBulkImportDataSummary,timestamp);
+		generateCSV(csvBulkImportDataSummary, timestamp);
 		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
 
 		return ResponseEntity.ok()
