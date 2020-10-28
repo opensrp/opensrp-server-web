@@ -242,6 +242,7 @@ public class StockResourceTest {
 		MvcResult result = mockMvc.perform(put(BASE_URL +"/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
 				.content(INVENTORY_PAYLOAD.getBytes()))
 				.andExpect(status().isCreated()).andReturn();
+		verify(stockService).updateInventory(any(Inventory.class),anyString());
 		assertEquals(result.getResponse().getContentAsString(), "");
 	}
 
