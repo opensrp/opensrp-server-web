@@ -1,9 +1,12 @@
 package org.opensrp.web.utils;
 
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 public class MaskingUtils {
 	
@@ -35,6 +38,86 @@ public class MaskingUtils {
 			
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(date);
+			
+			cal.set(Calendar.MONTH, 0);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			
+			return cal.getTime();
+			
+		}
+		
+		return null;
+		
+	}
+	
+	/**
+	 * @param date joda LocalDate object
+	 * @return Masked date e.g. 1980-01-01
+	 */
+	public Date maskDate(LocalDate date) {
+		
+		if (date != null) {
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date.toDate());
+			
+			cal.set(Calendar.MONTH, 0);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			
+			return cal.getTime();
+			
+		}
+		
+		return null;
+		
+	}
+	
+	/**
+	 * @param date java LocalDate object
+	 * @return Masked date e.g. 1980-01-01
+	 */
+	public Date maskDate(java.time.LocalDate date) {
+		
+		if (date != null) {
+			
+			ZoneId defaultZoneId = ZoneId.systemDefault();
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(Date.from(date.atStartOfDay(defaultZoneId).toInstant()));
+			
+			cal.set(Calendar.MONTH, 0);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			
+			return cal.getTime();
+			
+		}
+		
+		return null;
+		
+	}
+	
+	/**
+	 * @param date joda DateTime object
+	 * @return Masked date e.g. 1980-01-01
+	 */
+	public Date maskDate(DateTime date) {
+		
+		if (date != null) {
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date.toDate());
 			
 			cal.set(Calendar.MONTH, 0);
 			cal.set(Calendar.DAY_OF_MONTH, 1);
