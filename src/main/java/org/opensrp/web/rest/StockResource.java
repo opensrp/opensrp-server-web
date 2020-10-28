@@ -50,7 +50,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -224,20 +231,19 @@ public class StockResource extends RestResource<Stock> {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		stockService.addInventory(inventory, userName);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		return new ResponseEntity<>(CREATED);
 	}
 
 	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> update(@PathVariable("id") String stockId, @RequestBody Inventory inventory) {
 		if (stockId == null) {
-			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
-					HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(), BAD_REQUEST);
 		} else {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
 			stockService.updateInventory(inventory, userName);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return new ResponseEntity<>(CREATED);
 		}
 	}
 
