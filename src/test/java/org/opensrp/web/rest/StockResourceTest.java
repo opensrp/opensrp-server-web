@@ -6,7 +6,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Inventory;
 import org.opensrp.domain.Stock;
@@ -40,13 +48,16 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -252,7 +263,7 @@ public class StockResourceTest {
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
 				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
 		Mockito.verify(stockService, Mockito.times(1)).deleteStock(argumentCaptor.capture());
-		Assert.assertEquals(1, argumentCaptor.getValue().longValue());
+		assertEquals(1, argumentCaptor.getValue().longValue());
 	}
 
 	@Test
@@ -275,7 +286,7 @@ public class StockResourceTest {
 		}
 
 		assertEquals(1, response.size());
-		Assert.assertEquals(new Long(12345), response.get(0).getIdentifier());
+		assertEquals(new Long(12345), response.get(0).getIdentifier());
 
 	}
 
@@ -358,7 +369,7 @@ public class StockResourceTest {
 
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+				// TODO Auto-generated method stub
 			}
 
 			@Override
