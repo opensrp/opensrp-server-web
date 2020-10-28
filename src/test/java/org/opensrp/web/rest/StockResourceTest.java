@@ -41,8 +41,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
@@ -226,7 +225,8 @@ public class StockResourceTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
 				.content(INVENTORY_PAYLOAD.getBytes()))
 				.andExpect(status().isCreated()).andReturn();
-		assertEquals(result.getResponse().getContentAsString(), "");
+		verify(stockService).addInventory(any(Inventory.class),anyString());
+		assertEquals("", result.getResponse().getContentAsString());
 	}
 
 	@Test
@@ -249,7 +249,7 @@ public class StockResourceTest {
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
 				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
 		Mockito.verify(stockService, Mockito.times(1)).deleteStock(argumentCaptor.capture());
-		Assert.assertEquals(argumentCaptor.getValue().longValue(), 1);
+		Assert.assertEquals(1, argumentCaptor.getValue().longValue());
 	}
 
 	@Test
@@ -265,13 +265,14 @@ public class StockResourceTest {
 				.getStocksByServicePointId(ArgumentMatchers.any(String.class));
 		Mockito.verifyNoMoreInteractions(stockService);
 
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
+		List<Stock> response = (List<Stock>) result.getModelAndView().getModel().get("stockList");
+
+		if (response.size() == 0) {
 			AssertionErrors.fail("Test case failed");
 		}
-		JsonNode actualObj = mapper.readTree(responseString);
-        assertEquals(1, actualObj.size());
-		Assert.assertEquals(12345l, actualObj.get(0).get("identifier").asLong());
+
+		assertEquals(1, response.size());
+		Assert.assertEquals(new Long(12345), response.get(0).getIdentifier());
 
 	}
 
@@ -301,13 +302,14 @@ public class StockResourceTest {
 
 		when(stockService.convertandPersistInventorydata(anyList(), anyString())).thenReturn(csvBulkImportDataSummary);
 
-		mockMvc.perform(
+		MvcResult result = mockMvc.perform(
 				MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
 						.file(file)
 		)
 				.andExpect(status().isBadRequest())
 				.andReturn();
 
+		System.out.println(result);
 	}
 	
 	private Stock createStock() {

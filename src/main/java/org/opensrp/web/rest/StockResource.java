@@ -255,10 +255,8 @@ public class StockResource extends RestResource<Stock> {
 
 	@GetMapping(value = "/servicePointId/{servicePointId}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<Stock>> getStockItemsByServicePoint(@PathVariable String servicePointId) {
-		return new ResponseEntity<>(stockService.getStocksByServicePointId(servicePointId),
-				RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
+	public List<Stock> getStockItemsByServicePoint(@PathVariable String servicePointId) {
+		return stockService.getStocksByServicePointId(servicePointId);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
@@ -271,18 +269,19 @@ public class StockResource extends RestResource<Stock> {
 		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
 				.convertandPersistInventorydata(csvClients, userName);
 
-		generateCSV(csvBulkImportDataSummary);
-		File csvFile = new File(SAMPLE_CSV_FILE);
+		String timestamp = String.valueOf(new Date().getTime());
+		generateCSV(csvBulkImportDataSummary, timestamp);
+		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
 
 		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
 			return ResponseEntity.badRequest()
-					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
 					.contentLength(csvFile.length())
 					.contentType(MediaType.parseMediaType("text/csv"))
 					.body(new FileSystemResource(csvFile));
 		} else {
 			return ResponseEntity.ok()
-					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport" + ".csv")
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
 					.contentLength(csvFile.length())
 					.contentType(MediaType.parseMediaType("text/csv"))
 					.body(new FileSystemResource(csvFile));
@@ -302,11 +301,9 @@ public class StockResource extends RestResource<Stock> {
 		return csvClients;
 	}
 
-	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary) {
-		try (
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE));
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, String timestamp) throws IOException {
+				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE + "-" + timestamp));
 				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-		) {
 			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
 			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
 			csvPrinter.printRecord("\n");
@@ -317,12 +314,6 @@ public class StockResource extends RestResource<Stock> {
 			}
 			writer.flush();
 			csvPrinter.flush();
-		}
-		catch (Exception e) {
-			logger.error("Failed to generate CSV " + e.getMessage(), e);
-			throw new RuntimeException("Failed to generate CSV : " + e.getMessage());
-		}
 	}
-
 
 }
