@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -33,11 +31,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.AssertionErrors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.file.Files;
@@ -261,8 +257,8 @@ public class StockResourceTest {
 	public void testDelete() throws Exception {
 		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
-				.andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
-		Mockito.verify(stockService, Mockito.times(1)).deleteStock(argumentCaptor.capture());
+				.andExpect(status().isNoContent()).andReturn();
+		verify(stockService, Mockito.times(1)).deleteStock(argumentCaptor.capture());
 		assertEquals(1, argumentCaptor.getValue().longValue());
 	}
 
@@ -272,17 +268,17 @@ public class StockResourceTest {
 		stocks.add(createStock());
 		when(stockService.getStocksByServicePointId(anyString())).thenReturn(stocks);
 		MvcResult result =
-				mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/servicePointId/{servicePointId}", "loc-1"))
-						.andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+				mockMvc.perform(get(BASE_URL + "/servicePointId/{servicePointId}", "loc-1"))
+						.andExpect(status().isOk()).andReturn();
 
-		Mockito.verify(stockService)
-				.getStocksByServicePointId(ArgumentMatchers.any(String.class));
+		verify(stockService)
+				.getStocksByServicePointId(any(String.class));
 		Mockito.verifyNoMoreInteractions(stockService);
 
 		List<Stock> response = (List<Stock>) result.getModelAndView().getModel().get("stockList");
 
 		if (response.size() == 0) {
-			AssertionErrors.fail("Test case failed");
+			fail("Test case failed");
 		}
 
 		assertEquals(1, response.size());

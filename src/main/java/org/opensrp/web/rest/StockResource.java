@@ -251,7 +251,7 @@ public class StockResource extends RestResource<Stock> {
 	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
 		if (id == null) {
 			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
-					HttpStatus.BAD_REQUEST);
+					BAD_REQUEST);
 		} else {
 			stockService.deleteStock(id);
 			return new ResponseEntity<>("Stock deleted successfully", RestUtils.getJSONUTF8Headers(),
