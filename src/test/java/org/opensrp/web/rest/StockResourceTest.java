@@ -82,6 +82,8 @@ public class StockResourceTest {
 			+ "    \"serialNumber\":\"1234serial\"\n"
 			+ "}";
 
+	private final String IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS = "\"Total Number of Rows in the CSV \",2\r\n\"Rows processed \",1\r\n\"\n\"\r\nRow Number,Reason of Failure\r\n1,[PO Number should be a whole number]\r\n";
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -277,7 +279,7 @@ public class StockResourceTest {
 	}
 
 	@Test
-	public void testImportInventoryData() throws Exception {
+	public void testImportInventoryDataWithErrors() throws Exception {
 		Authentication authentication = mock(Authentication.class);
 		authentication.setAuthenticated(Boolean.TRUE);
 		SecurityContext securityContext = mock(SecurityContext.class);
@@ -309,7 +311,8 @@ public class StockResourceTest {
 				.andExpect(status().isBadRequest())
 				.andReturn();
 
-		System.out.println(result);
+		String responseString = result.getResponse().getContentAsString();
+		assertEquals(IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS, responseString);
 	}
 	
 	private Stock createStock() {
