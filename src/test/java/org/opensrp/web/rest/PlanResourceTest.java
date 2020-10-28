@@ -40,6 +40,7 @@ import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.web.bean.Identifier;
@@ -136,8 +137,8 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setJurisdiction(operationalAreas);
 		
 		expectedPlans.add(expectedPlan);
-		
-		doReturn(expectedPlans).when(planService).getAllPlans(false);
+
+		doReturn(expectedPlans).when(planService).getAllPlans(any(PlanSearchBean.class));
 		
 		String actualPlansString = getResponseAsString(BASE_URL, null, status().isOk());
 		List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString,
