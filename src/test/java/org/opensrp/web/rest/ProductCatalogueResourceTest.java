@@ -72,8 +72,6 @@ public class ProductCatalogueResourceTest {
 
 	private MockMvc mockMvc;
 
-	private MockHttpServletRequest mockRequest;
-
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 
 	private String BASE_URL = "/rest/product-catalogue";
@@ -85,6 +83,8 @@ public class ProductCatalogueResourceTest {
 				.setControllerAdvice(new GlobalExceptionHandler()).
 						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
 						build();
+
+		MockHttpServletRequest mockRequest;
 		mockRequest = new MockHttpServletRequest();
 		mockRequest.setContextPath("/opensrp");
 		ServletRequestAttributes attrs = new ServletRequestAttributes(mockRequest);
