@@ -3,8 +3,6 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.opensrp.web.dto.ResponseDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class CustomErrorResource {
-
-	private static Logger logger = LoggerFactory.getLogger(CustomErrorResource.class.toString());
-
+	
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm").create();
 
 	@RequestMapping(value = "error", produces = { MediaType.APPLICATION_JSON_VALUE })
