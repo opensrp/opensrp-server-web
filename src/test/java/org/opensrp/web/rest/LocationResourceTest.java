@@ -1125,13 +1125,13 @@ public class LocationResourceTest {
 	public void testGenerateLocationTreeWithDirectParents() throws Exception {
 		LocationTree tree = LocationResource.gson.fromJson(locationTreeWithParents, LocationTree.class);
 
-		when(locationService.buildLocationHeirarchyWithParentLocation(anyString())).thenReturn(tree);
+		when(locationService.buildLocationHeirarchyWithAncestors(anyString())).thenReturn(tree);
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/hairarchy/ancestors/" + 1))
 				.andExpect(status().isOk()).andReturn();
 
-		verify(locationService).buildLocationHeirarchyWithParentLocation(stringCaptor.capture());
+		verify(locationService).buildLocationHeirarchyWithAncestors(stringCaptor.capture());
 
 		String actualTreeString = result.getResponse().getContentAsString();
 		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);

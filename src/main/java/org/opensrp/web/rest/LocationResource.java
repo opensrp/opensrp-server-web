@@ -610,10 +610,10 @@ public class LocationResource {
 
 	@RequestMapping(value = "/hairarchy/ancestors/{locationId}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> generateLocationTreeWithDirectParents(
+	public ResponseEntity<String> generateLocationTreeWithAncestors(
 			@PathVariable("locationId") String locationId) {
 
-		LocationTree tree = locationService.buildLocationHeirarchyWithParentLocation(locationId);
+		LocationTree tree = locationService.buildLocationHeirarchyWithAncestors(locationId);
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
