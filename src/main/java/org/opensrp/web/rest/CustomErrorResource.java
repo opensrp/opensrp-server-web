@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class CustomErrorResource {
-	
+
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm").create();
 
 	@RequestMapping(value = "error", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -25,6 +25,10 @@ public class CustomErrorResource {
 		ResponseDto<Object> dto = new ResponseDto<>().makeFailureResponse(httpStatus);
 		dto.setData(null);
 		dto.setMessage(message);
+
+		if (status == 200) {
+			dto.setSuccess(true);
+		}
 
 		return dto;
 	}
