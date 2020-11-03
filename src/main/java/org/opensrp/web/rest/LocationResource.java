@@ -608,6 +608,16 @@ public class LocationResource {
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/hairarchy/ancestors/{locationId}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> generateLocationTreeWithDirectParents(
+			@PathVariable("locationId") String locationId) {
+
+		LocationTree tree = locationService.buildLocationHeirarchyWithParentLocation(locationId);
+		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
+
 	@Data
 	static class LocationSyncRequestWrapper {
 
