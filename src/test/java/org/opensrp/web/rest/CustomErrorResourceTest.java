@@ -11,10 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -39,9 +40,12 @@ public class CustomErrorResourceTest {
 
 	@Test
 	public void testErrorEndpointReturnsJsonString() throws Exception {
-		mockMvc.perform(get(ERROR_ENDPOINT)
+		MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(content().json("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}"));
+				.andReturn();
+
+		String responseString = mvcResult.getResponse().getContentAsString();
+		assertEquals("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}", responseString);
 	}
 }
