@@ -142,6 +142,54 @@ public class LocationResourceTest {
 
 	public String locationTree = "{\"locationsHierarchy\":{\"map\":{\"1\":{\"id\":\"1\",\"label\":\"Kenya\",\"node\":{\"locationId\":\"1\",\"name\":\"Kenya\",\"tags\":[\"Country\"],\"voided\":false},\"children\":{\"2\":{\"id\":\"2\",\"label\":\"Coast\",\"node\":{\"locationId\":\"2\",\"name\":\"Coast\",\"parentLocation\":{\"locationId\":\"1\",\"voided\":false},\"tags\":[\"Province\"],\"voided\":false},\"parent\":\"1\"}}}},\"parentChildren\":{\"1\":[\"2\"]}}}";
 
+	public String locationTreeWithParents = "{\n"
+			+ "    \"locationsHierarchy\": {\n"
+			+ "        \"map\": {\n"
+			+ "            \"3734\": {\n"
+			+ "                \"id\": \"3734\",\n"
+			+ "                \"label\": \"Bangladesh\",\n"
+			+ "                \"node\": {\n"
+			+ "                    \"locationId\": \"3734\",\n"
+			+ "                    \"name\": \"Bangladesh\",\n"
+			+ "                    \"attributes\": {\n"
+			+ "                        \"structureCount\": 1,\n"
+			+ "                        \"geographicLevel\": 4\n"
+			+ "                    },\n"
+			+ "                    \"voided\": false\n"
+			+ "                },\n"
+			+ "                \"children\": {\n"
+			+ "                    \"3735\": {\n"
+			+ "                        \"id\": \"3735\",\n"
+			+ "                        \"label\": \"Dhaka\",\n"
+			+ "                        \"node\": {\n"
+			+ "                            \"locationId\": \"3735\",\n"
+			+ "                            \"name\": \"Dhaka\",\n"
+			+ "                            \"parentLocation\": {\n"
+			+ "                                \"locationId\": \"3734\",\n"
+			+ "                                \"voided\": false\n"
+			+ "                            },\n"
+			+ "                            \"tags\": [\n"
+			+ "                                \"Ward\"\n"
+			+ "                            ],\n"
+			+ "                            \"attributes\": {\n"
+			+ "                                \"structureCount\": 0,\n"
+			+ "                                \"geographicLevel\": 4\n"
+			+ "                            },\n"
+			+ "                            \"voided\": false\n"
+			+ "                        },\n"
+			+ "                        \"parent\": \"3734\"\n"
+			+ "                    }\n"
+			+ "                }\n"
+			+ "            }\n"
+			+ "        },\n"
+			+ "        \"parentChildren\": {\n"
+			+ "            \"3734\": [\n"
+			+ "                \"3735\"\n"
+			+ "            ]\n"
+			+ "        }\n"
+			+ "    }\n"
+			+ "}";
+
 	private final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
 
 	@Before
@@ -1071,6 +1119,23 @@ public class LocationResourceTest {
 		assertEquals(new Integer(10), summary.getDhisPageCount());
 		assertEquals(new Integer(2), summary.getLastPageSynced());
 		assertEquals(new Integer(200), summary.getNumberOfRowsProcessed());
+	}
+
+	@Test
+	public void testGenerateLocationTreeWithDirectParents() throws Exception {
+		LocationTree tree = LocationResource.gson.fromJson(locationTreeWithParents, LocationTree.class);
+
+		when(locationService.buildLocationHeirarchyWithParentLocation(anyString())).thenReturn(tree);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/hairarchy/ancestors/" + 1))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(locationService).buildLocationHeirarchyWithParentLocation(stringCaptor.capture());
+
+		String actualTreeString = result.getResponse().getContentAsString();
+		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
+		assertEquals("1", stringCaptor.getValue());
 	}
 
 }
