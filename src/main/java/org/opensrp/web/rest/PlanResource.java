@@ -402,28 +402,18 @@ public class PlanResource {
 
 	}
 
-	private PlanSearchBean createPlanSearchBean(boolean isTemplateParam, Integer pageNumber, Integer pageSize, String orderByType,
+	private PlanSearchBean createPlanSearchBean(boolean isTemplateParam, Integer pageNumber, Integer pageSize,
+			String orderByType,
 			String orderByFieldName, String planStatus, Map<String, String> useContextFilters) {
 		PlanSearchBean planSearchBean = new PlanSearchBean();
 		planSearchBean.setExperimental(isTemplateParam);
-		if(pageNumber != null) {
-			planSearchBean.setPageNumber(pageNumber);
-		}
-		if(pageSize != null) {
-			planSearchBean.setPageSize(pageSize);
-		}
-		if (orderByType != null) {
-			planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
-		}
-		if (orderByFieldName != null) {
-			planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
-		}
-		if (planStatus != null) {
-			planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
-		}
-		if (useContextFilters != null) {
-			planSearchBean.setUseContexts(useContextFilters);
-		}
+		planSearchBean.setPageNumber(pageNumber);
+		planSearchBean.setPageSize(pageSize);
+		planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
+		planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
+		planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		planSearchBean.setUseContexts(useContextFilters);
+
 		return planSearchBean;
 	}
 	
