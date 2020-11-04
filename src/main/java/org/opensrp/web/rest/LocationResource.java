@@ -24,6 +24,7 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
@@ -608,13 +609,10 @@ public class LocationResource {
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/hairarchy/ancestors/{locationId}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/heirarchy/ancestors/{locationId}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> generateLocationTreeWithAncestors(
-			@PathVariable("locationId") String locationId) {
-
-		LocationTree tree = locationService.buildLocationHeirarchyWithAncestors(locationId);
-		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public Set<LocationDetail> generateLocationTreeWithAncestors(@PathVariable("locationId") String locationId) {
+		return locationService.buildLocationHeirarchyWithAncestors(locationId);
 	}
 
 
