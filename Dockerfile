@@ -9,6 +9,7 @@ ARG opensrp_maven_package_profiles="postgres,jedis,oauth2"
 RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server-web/pom.xml
 
 # Explode WAR file
+RUN mkdir /tmp/opensrp-server-web-exploded
 RUN jar -uvf /tmp/opensrp-server-web/opensrp-web/target/opensrp.war /tmp/opensrp-server-web-exploded
 
 FROM tomcat:9.0
