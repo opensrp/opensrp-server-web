@@ -179,7 +179,7 @@ public class ProductCatalogueResourceTest {
 
 		productCatalogueResource.update(1l,multipartFile,productCatalogue);
 
-		verify(productCatalogueService, times(2)).update(argumentCaptor.capture());
+		verify(productCatalogueService).update(argumentCaptor.capture());
 
 		verify(multimediaService).findByCaseId(anyString());
 
