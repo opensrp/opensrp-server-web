@@ -17,6 +17,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -77,7 +78,7 @@ public class StockResource extends RestResource<Stock> {
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
+	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
 	@Autowired
 	public StockResource(StockService stockService) {
@@ -277,8 +278,9 @@ public class StockResource extends RestResource<Stock> {
 				.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
-		generateCSV(csvBulkImportDataSummary, timestamp);
-		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
 
 		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
 			return ResponseEntity.badRequest()
@@ -308,8 +310,8 @@ public class StockResource extends RestResource<Stock> {
 		return csvClients;
 	}
 
-	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, String timestamp) throws IOException {
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE + "-" + timestamp));
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, URI uri) throws IOException {
+				BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
 				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
 			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
