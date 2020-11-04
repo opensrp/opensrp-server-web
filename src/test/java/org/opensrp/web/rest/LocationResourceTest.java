@@ -52,6 +52,7 @@ import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2LocationsImportSummary;
 import org.opensrp.connector.dhis2.location.DHISImportLocationsJobStatus;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -141,54 +142,6 @@ public class LocationResourceTest {
 	public String searchResponseJson = "{\"locations\":[{\"type\":\"Feature\",\"id\":\"7\",\"properties\":{\"uid\":\"694e0f30-d9ac-4576-b50a-38a3ef13ebcr\",\"type\":\"Residential Structure\",\"status\":\"PENDING_REVIEW\",\"parentId\":\"22\",\"name\":\"Faridpur\",\"geographicLevel\":0,\"effectiveStartDate\":\"Jan 1, 2015, 12:00:00 AM\",\"version\":0,\"customProperties\":{}},\"serverVersion\":1586160969806,\"locationTags\":[{\"id\":3,\"active\":true,\"name\":\"District\",\"description\":\"District\"}],\"customProperties\":{\"parent\":\"Dhaka\",\"tag_name\":\"District\",\"name\":\"Faridpur\"},\"jurisdiction\":false}],\"total\":0}";
 
 	public String locationTree = "{\"locationsHierarchy\":{\"map\":{\"1\":{\"id\":\"1\",\"label\":\"Kenya\",\"node\":{\"locationId\":\"1\",\"name\":\"Kenya\",\"tags\":[\"Country\"],\"voided\":false},\"children\":{\"2\":{\"id\":\"2\",\"label\":\"Coast\",\"node\":{\"locationId\":\"2\",\"name\":\"Coast\",\"parentLocation\":{\"locationId\":\"1\",\"voided\":false},\"tags\":[\"Province\"],\"voided\":false},\"parent\":\"1\"}}}},\"parentChildren\":{\"1\":[\"2\"]}}}";
-
-	public String locationTreeWithParents = "{\n"
-			+ "    \"locationsHierarchy\": {\n"
-			+ "        \"map\": {\n"
-			+ "            \"3734\": {\n"
-			+ "                \"id\": \"3734\",\n"
-			+ "                \"label\": \"Bangladesh\",\n"
-			+ "                \"node\": {\n"
-			+ "                    \"locationId\": \"3734\",\n"
-			+ "                    \"name\": \"Bangladesh\",\n"
-			+ "                    \"attributes\": {\n"
-			+ "                        \"structureCount\": 1,\n"
-			+ "                        \"geographicLevel\": 4\n"
-			+ "                    },\n"
-			+ "                    \"voided\": false\n"
-			+ "                },\n"
-			+ "                \"children\": {\n"
-			+ "                    \"3735\": {\n"
-			+ "                        \"id\": \"3735\",\n"
-			+ "                        \"label\": \"Dhaka\",\n"
-			+ "                        \"node\": {\n"
-			+ "                            \"locationId\": \"3735\",\n"
-			+ "                            \"name\": \"Dhaka\",\n"
-			+ "                            \"parentLocation\": {\n"
-			+ "                                \"locationId\": \"3734\",\n"
-			+ "                                \"voided\": false\n"
-			+ "                            },\n"
-			+ "                            \"tags\": [\n"
-			+ "                                \"Ward\"\n"
-			+ "                            ],\n"
-			+ "                            \"attributes\": {\n"
-			+ "                                \"structureCount\": 0,\n"
-			+ "                                \"geographicLevel\": 4\n"
-			+ "                            },\n"
-			+ "                            \"voided\": false\n"
-			+ "                        },\n"
-			+ "                        \"parent\": \"3734\"\n"
-			+ "                    }\n"
-			+ "                }\n"
-			+ "            }\n"
-			+ "        },\n"
-			+ "        \"parentChildren\": {\n"
-			+ "            \"3734\": [\n"
-			+ "                \"3735\"\n"
-			+ "            ]\n"
-			+ "        }\n"
-			+ "    }\n"
-			+ "}";
 
 	private final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
 
@@ -1122,20 +1075,41 @@ public class LocationResourceTest {
 	}
 
 	@Test
-	public void testGenerateLocationTreeWithDirectParents() throws Exception {
-		LocationTree tree = LocationResource.gson.fromJson(locationTreeWithParents, LocationTree.class);
+	public void testGenerateLocationTreeWithAncestors() throws Exception {
+		Set<LocationDetail> locationDetails = new HashSet<>();
 
-		when(locationService.buildLocationHeirarchyWithAncestors(anyString())).thenReturn(tree);
+		LocationDetail country = LocationDetail.builder().name("Country 1").id(2l).identifier("1").tags("Country").build();
+		LocationDetail province1 = LocationDetail.builder().name("Province 1").id(3l).identifier("11").parentId("1")
+				.tags("Province").build();
+		LocationDetail province2 = LocationDetail.builder().name("Province 2").id(4l).identifier("12").parentId("1")
+				.tags("Province").build();
+		LocationDetail district1 = LocationDetail.builder().name("District 1").id(5l).identifier("111").parentId("11")
+				.tags("District").build();
+		LocationDetail district2 = LocationDetail.builder().name("District 2").id(6l).identifier("121").parentId("12")
+				.tags("District").build();
+		LocationDetail district3 = LocationDetail.builder().name("District 3").id(7l).identifier("122").parentId("12")
+				.tags("District").build();
+
+		locationDetails.add(country);
+		locationDetails.add(province1);
+		locationDetails.add(province2);
+		locationDetails.add(district1);
+		locationDetails.add(district2);
+		locationDetails.add(district3);
+
+		when(locationService.buildLocationHeirarchyWithAncestors(anyString())).thenReturn(locationDetails);
 
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/hairarchy/ancestors/" + 1))
+				.perform(get(BASE_URL + "/heirarchy/ancestors/" + 1))
 				.andExpect(status().isOk()).andReturn();
 
 		verify(locationService).buildLocationHeirarchyWithAncestors(stringCaptor.capture());
 
-		String actualTreeString = result.getResponse().getContentAsString();
-		assertEquals(LocationResource.gson.toJson(tree), actualTreeString);
-		assertEquals("1", stringCaptor.getValue());
+		Set<LocationDetail> locationDetailsSet = (Set<LocationDetail>) result.getModelAndView().getModel().get("locationDetailList");
+		assertEquals(6, locationDetailsSet.size());
+		LocationDetail actuallocationDetail = locationDetailsSet.iterator().next();
+		assertEquals("Province 1", actuallocationDetail.getName());
+		assertEquals("Province", actuallocationDetail.getTags());
 	}
 
 }
