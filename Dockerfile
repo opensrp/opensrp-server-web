@@ -1,25 +1,25 @@
 FROM tomcat:9.0 AS build
 
 # Copy OpenSRP Source
-COPY . /tmp/opensrp-server
+COPY . /tmp/opensrp-server-web
 
 # Build WAR file
 ARG opensrp_maven_package_profiles="postgres,jedis,oauth2"
 RUN apt-get update \
   && apt-get install -y maven
 
-RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server/pom.xml
+RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server-web/pom.xml
 
 
 # Explode WAR file ()
-RUN jar -uvf /tmp/opensrp-server/opensrp-web/target/opensrp.war /tmp/opensrp-server-exploded
+RUN jar -uvf /tmp/opensrp-server-web/opensrp-web/target/opensrp.war /tmp/opensrp-server-web-exploded
 
 FROM tomcat:9.0
 # Copy the exploded directory
-COPY --from=build /tmp/opensrp-server-exploded /app
+COPY --from=build /tmp/opensrp-server-web-exploded /app
 
 # copy the migration files
-COPY --from=build /tmp/opensrp-server/configs/assets/migrations/* /migrate
+COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations/* /migrate
 
 # Download mybatis
 RUN mkdir -p /opt/mybatis
