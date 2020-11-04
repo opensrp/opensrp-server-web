@@ -113,6 +113,10 @@ public class ProductCatalogueResource {
 				DOWNLOAD_PHOTO_END_POINT;
 
 		try {
+			if(file != null) {
+				productCatalogue.setPhotoURL(baseUrl + productCatalogue.getUniqueId());
+			}
+
 			productCatalogueService.update(productCatalogue);
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
@@ -129,8 +133,6 @@ public class ProductCatalogueResource {
 
 				logger.info("Saving multimedia file...");
 				multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
-				productCatalogue.setPhotoURL(baseUrl + productCatalogue.getUniqueId());
-				productCatalogueService.update(productCatalogue);
 			}
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
