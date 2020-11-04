@@ -1,17 +1,14 @@
-FROM tomcat:9.0 AS build
+FROM maven:3-openjdk-11 AS build
 
 # Copy OpenSRP Source
 COPY . /tmp/opensrp-server-web
 
 # Build WAR file
 ARG opensrp_maven_package_profiles="postgres,jedis,oauth2"
-RUN apt-get update \
-  && apt-get install -y maven
 
 RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server-web/pom.xml
 
-
-# Explode WAR file ()
+# Explode WAR file
 RUN jar -uvf /tmp/opensrp-server-web/opensrp-web/target/opensrp.war /tmp/opensrp-server-web-exploded
 
 FROM tomcat:9.0
