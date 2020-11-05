@@ -80,6 +80,14 @@ public class StockResource extends RestResource<Stock> {
 
 	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
+	public static final String PAGE_NUMBER = "pageNumber";
+
+	public static final String PAGE_SIZE = "pageSize";
+
+	public static final String ORDER_BY_TYPE = "orderByType";
+
+	public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
 	@Autowired
 	public StockResource(StockService stockService) {
 		this.stockService = stockService;
@@ -263,8 +271,17 @@ public class StockResource extends RestResource<Stock> {
 
 	@GetMapping(value = "/servicePointId/{servicePointId}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public List<Stock> getStockItemsByServicePoint(@PathVariable String servicePointId) {
-		return stockService.getStocksByServicePointId(servicePointId);
+	public List<Stock> getStockItemsByServicePoint(@PathVariable String servicePointId,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+
+		StockSearchBean stockSearchBean =
+				createSearchBeanToGetStocksOfServicePoint(pageNumber, pageSize, orderByType, orderByFieldName,
+						servicePointId);
+
+		return stockService.getStocksByServicePointId(stockSearchBean);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
@@ -323,6 +340,21 @@ public class StockResource extends RestResource<Stock> {
 			}
 			writer.flush();
 			csvPrinter.flush();
+	}
+
+	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
+			String orderByFieldName, String locationId) {
+		StockSearchBean stockSearchBean = new StockSearchBean();
+		stockSearchBean.setPageNumber(pageNumber);
+		stockSearchBean.setPageSize(pageSize);
+		if(orderByType != null) {
+			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if(orderByFieldName != null) {
+			stockSearchBean.setOrderByFieldName(StockSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		stockSearchBean.setLocationId(locationId);
+		return stockSearchBean;
 	}
 
 }
