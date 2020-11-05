@@ -409,9 +409,15 @@ public class PlanResource {
 		planSearchBean.setExperimental(isTemplateParam);
 		planSearchBean.setPageNumber(pageNumber);
 		planSearchBean.setPageSize(pageSize);
-		planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
-		planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
-		planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		if (orderByType != null) {
+			planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if (orderByFieldName != null) {
+			planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		if (planStatus != null) {
+			planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		}
 		planSearchBean.setUseContexts(useContextFilters);
 
 		return planSearchBean;
