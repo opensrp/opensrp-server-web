@@ -18,7 +18,7 @@ FROM tomcat:9.0
 COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
 
 # copy the migration files
-COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations/* /migrate/
+COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations /migrations
 
 # Download mybatis
 RUN mkdir -p /opt/mybatis
