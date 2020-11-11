@@ -266,13 +266,13 @@ public class StockResourceTest {
 	public void testGetStockItemsByServicePoint() throws Exception {
 		List<Stock> stocks = new ArrayList<>();
 		stocks.add(createStock());
-		when(stockService.getStocksByServicePointId(anyString())).thenReturn(stocks);
+		when(stockService.getStocksByServicePointId(any(StockSearchBean.class))).thenReturn(stocks);
 		MvcResult result =
 				mockMvc.perform(get(BASE_URL + "/servicePointId/{servicePointId}", "loc-1"))
 						.andExpect(status().isOk()).andReturn();
 
 		verify(stockService)
-				.getStocksByServicePointId(any(String.class));
+				.getStocksByServicePointId(any(StockSearchBean.class));
 		Mockito.verifyNoMoreInteractions(stockService);
 
 		List<Stock> response = (List<Stock>) result.getModelAndView().getModel().get("stockList");
