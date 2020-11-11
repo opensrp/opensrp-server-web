@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Date;
@@ -63,8 +64,16 @@ public class ProductCatalogueResource {
 	@PostMapping(headers = { "Accept=multipart/form-data" })
 	public ResponseEntity<String> create(@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
+
+		final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
+
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
+				DOWNLOAD_PHOTO_END_POINT;
+
 		try {
 			productCatalogueService.add(productCatalogue);
+			ProductCatalogue createdProductCatalogue = productCatalogueService.getProductCatalogueByName(productCatalogue.getProductName());
+
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
 			ProductCatalogue catalogue = productCatalogueService
@@ -79,6 +88,8 @@ public class ProductCatalogueResource {
 					logger.info("Saving multimedia file...");
 					multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 				}
+				createdProductCatalogue.setPhotoURL(baseUrl + createdProductCatalogue.getUniqueId());
+				productCatalogueService.update(createdProductCatalogue);
 			}
 
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -95,7 +106,17 @@ public class ProductCatalogueResource {
 	public ResponseEntity<String> update(@PathVariable("id") Long uniqueId,
 			@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
+
+		final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
+
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
+				DOWNLOAD_PHOTO_END_POINT;
+
 		try {
+			if(file != null) {
+				productCatalogue.setPhotoURL(baseUrl + productCatalogue.getUniqueId());
+			}
+
 			productCatalogueService.update(productCatalogue);
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
