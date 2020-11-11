@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsService;
@@ -24,7 +23,9 @@ import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UniqueIdentifierService;
+import org.opensrp.web.Constants;
 import org.opensrp.web.utils.PdfUtil;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,7 @@ public class UniqueIdController extends OpenmrsService {
 		        FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
 		        OutputStream os = response.getOutputStream();) {
 			user = openmrsUserService.getUser(currentPrincipalName);
-			if (!checkRoleIfRoleExitst(user.getRoles(), "opensrp-generate-qr-code")) {
+			if (!Utils.checkRoleIfRoleExists(user.getRoles(), Constants.OPENSRP_ROLE.OPENSRP_GENERATE_QR_CODE)) {
 				return new ResponseEntity<>("Sorry, insufficient privileges to generate ID QR codes", HttpStatus.OK);
 			}
 			
@@ -117,15 +118,7 @@ public class UniqueIdController extends OpenmrsService {
 		}
 		
 		return new ResponseEntity<>(new Gson().toJson("" + message), HttpStatus.OK);
-	}
-	
-	boolean checkRoleIfRoleExitst(List<String> roleList, String role) {
-		for (String roleName : roleList)
-			if (StringUtils.containsIgnoreCase(roleName, role))
-				return true;	
-		return false;
-	}
-	
+	} 
 	/**
 	 * Fetch unique Ids from OMRS
 	 *

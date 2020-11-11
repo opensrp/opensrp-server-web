@@ -1,6 +1,6 @@
 package org.opensrp.web;
 
-public interface Constants {
+public interface Constants { 
 
     String LIMIT = "limit";
 
@@ -62,5 +62,10 @@ public interface Constants {
             String KEY = "key";
         }
     }
-
+    interface OPENSRP_ROLE {
+		
+		String OPENSRP_GENERATE_QR_CODE = "opensrp-generate-qr-code";
+		
+		String PII_DATA_MASK = "PII_DATA_MASK";
+	}
 }

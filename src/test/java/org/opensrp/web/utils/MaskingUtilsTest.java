@@ -149,10 +149,10 @@ public class MaskingUtilsTest {
 		
 		DateTime dateTime = new DateTime(2010, 4, 2, 0, 0, 0, 0);
 		
-		Date result = util.maskDate(dateTime);
+		DateTime result = util.maskDate(dateTime);
 		
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(result);
+		cal.setTime(result.toDate());
 		
 		Assert.assertEquals(2010, cal.get(Calendar.YEAR));
 		Assert.assertEquals(1, cal.get(Calendar.MONTH));

@@ -110,9 +110,9 @@ public class MaskingUtils {
 	
 	/**
 	 * @param date joda DateTime object
-	 * @return Masked date e.g. 1980-01-01
+	 * @return Masked DateTime e.g. 1980-01-01
 	 */
-	public Date maskDate(DateTime date) {
+	public DateTime maskDate(DateTime date) {
 		
 		if (date != null) {
 			
@@ -126,7 +126,7 @@ public class MaskingUtils {
 			cal.set(Calendar.SECOND, 0);
 			cal.set(Calendar.MILLISECOND, 0);
 			
-			return cal.getTime();
+			return new DateTime(cal.getTime());
 			
 		}
 		
