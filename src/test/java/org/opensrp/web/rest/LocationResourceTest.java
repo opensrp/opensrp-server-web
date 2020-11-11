@@ -52,6 +52,7 @@ import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2LocationsImportSummary;
 import org.opensrp.connector.dhis2.location.DHISImportLocationsJobStatus;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -1071,6 +1072,44 @@ public class LocationResourceTest {
 		assertEquals(new Integer(10), summary.getDhisPageCount());
 		assertEquals(new Integer(2), summary.getLastPageSynced());
 		assertEquals(new Integer(200), summary.getNumberOfRowsProcessed());
+	}
+
+	@Test
+	public void testGenerateLocationTreeWithAncestors() throws Exception {
+		Set<LocationDetail> locationDetails = new HashSet<>();
+
+		LocationDetail country = LocationDetail.builder().name("Country 1").id(2l).identifier("1").tags("Country").build();
+		LocationDetail province1 = LocationDetail.builder().name("Province 1").id(3l).identifier("11").parentId("1")
+				.tags("Province").build();
+		LocationDetail province2 = LocationDetail.builder().name("Province 2").id(4l).identifier("12").parentId("1")
+				.tags("Province").build();
+		LocationDetail district1 = LocationDetail.builder().name("District 1").id(5l).identifier("111").parentId("11")
+				.tags("District").build();
+		LocationDetail district2 = LocationDetail.builder().name("District 2").id(6l).identifier("121").parentId("12")
+				.tags("District").build();
+		LocationDetail district3 = LocationDetail.builder().name("District 3").id(7l).identifier("122").parentId("12")
+				.tags("District").build();
+
+		locationDetails.add(country);
+		locationDetails.add(province1);
+		locationDetails.add(province2);
+		locationDetails.add(district1);
+		locationDetails.add(district2);
+		locationDetails.add(district3);
+
+		when(locationService.buildLocationHeirarchyWithAncestors(anyString())).thenReturn(locationDetails);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/heirarchy/ancestors/" + 1))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(locationService).buildLocationHeirarchyWithAncestors(stringCaptor.capture());
+
+		Set<LocationDetail> locationDetailsSet = (Set<LocationDetail>) result.getModelAndView().getModel().get("locationDetailList");
+		assertEquals(6, locationDetailsSet.size());
+		LocationDetail actuallocationDetail = locationDetailsSet.iterator().next();
+		assertEquals("Province 1", actuallocationDetail.getName());
+		assertEquals("Province", actuallocationDetail.getTags());
 	}
 
 }
