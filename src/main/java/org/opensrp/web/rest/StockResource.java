@@ -10,6 +10,10 @@ import static org.opensrp.common.AllConstants.Stock.TO_FROM;
 import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
 import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
 import static org.opensrp.common.AllConstants.Stock.VALUE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -263,8 +267,17 @@ public class StockResource extends RestResource<Stock> {
 
 	@GetMapping(value = "/servicePointId/{servicePointId}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public List<Stock> getStockItemsByServicePoint(@PathVariable String servicePointId) {
-		return stockService.getStocksByServicePointId(servicePointId);
+	public List<Stock> getStockItemsByServicePoint(@PathVariable String servicePointId,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+
+		StockSearchBean stockSearchBean =
+				createSearchBeanToGetStocksOfServicePoint(pageNumber, pageSize, orderByType, orderByFieldName,
+						servicePointId);
+
+		return stockService.getStocksByServicePointId(stockSearchBean);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
@@ -323,6 +336,21 @@ public class StockResource extends RestResource<Stock> {
 			}
 			writer.flush();
 			csvPrinter.flush();
+	}
+
+	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
+			String orderByFieldName, String locationId) {
+		StockSearchBean stockSearchBean = new StockSearchBean();
+		stockSearchBean.setPageNumber(pageNumber);
+		stockSearchBean.setPageSize(pageSize);
+		if(orderByType != null) {
+			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if(orderByFieldName != null) {
+			stockSearchBean.setOrderByFieldName(StockSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		stockSearchBean.setLocationId(locationId);
+		return stockSearchBean;
 	}
 
 }

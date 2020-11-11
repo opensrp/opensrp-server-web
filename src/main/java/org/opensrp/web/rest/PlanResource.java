@@ -6,12 +6,14 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,6 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
@@ -80,6 +83,9 @@ public class PlanResource {
 
 	public static final String IS_TEMPLATE = "is_template";
 
+	public static final String PLAN_STATUS = "planStatus";
+
+	public static final String USE_CONTEXT = "useContext";
 
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -105,8 +111,26 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(isTemplateParam)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = PLAN_STATUS, required = false) String planStatus,
+			@RequestParam(value = USE_CONTEXT, required = false)  List<String> useContextList) {
+
+		Map<String, String> useContextFilters = null;
+		if (useContextList != null) {
+			useContextFilters = new HashMap<>();
+			for (String useContext : useContextList) {
+				String[] filterArray = useContext.split(":");
+				if (filterArray.length == 2) {
+					useContextFilters.put(filterArray[0], filterArray[1]);
+				}
+			}
+		}
+		PlanSearchBean planSearchBean = createPlanSearchBean(isTemplateParam, pageNumber, pageSize, orderByType, orderByFieldName, planStatus, useContextFilters);
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(planSearchBean)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -371,6 +395,27 @@ public class PlanResource {
 			return returnCount;
 		}
 
+	}
+
+	private PlanSearchBean createPlanSearchBean(boolean isTemplateParam, Integer pageNumber, Integer pageSize,
+			String orderByType,
+			String orderByFieldName, String planStatus, Map<String, String> useContextFilters) {
+		PlanSearchBean planSearchBean = new PlanSearchBean();
+		planSearchBean.setExperimental(isTemplateParam);
+		planSearchBean.setPageNumber(pageNumber);
+		planSearchBean.setPageSize(pageSize);
+		if (orderByType != null) {
+			planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if (orderByFieldName != null) {
+			planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		if (planStatus != null) {
+			planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		}
+		planSearchBean.setUseContexts(useContextFilters);
+
+		return planSearchBean;
 	}
 	
 }
