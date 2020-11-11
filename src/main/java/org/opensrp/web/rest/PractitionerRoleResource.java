@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.PractitionerRole;
+import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
@@ -39,6 +40,14 @@ public class PractitionerRoleResource {
 
     public static final String IDENTIFIER ="identifier";
 
+    public static final String PAGE_NUMBER = "pageNumber";
+
+    public static final String PAGE_SIZE = "pageSize";
+
+    public static final String ORDER_BY_TYPE = "orderByType";
+
+    public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
     @Autowired
     public void setPractitionerRoleService(PractitionerRoleService practitionerRoleService) {
         this.practitionerRoleService = practitionerRoleService;
@@ -57,9 +66,14 @@ public class PractitionerRoleResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> getPractitionerRoles() {
+    public ResponseEntity<String> getPractitionerRoles(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+
+        PractitionerRoleSearchBean practitionerRoleSearchBean = createPractitionerRoleSearchBean(pageNumber,pageSize,orderByType,orderByFieldName);
         return new ResponseEntity<>(gson.toJson(
-                practitionerRoleService.getAllPractitionerRoles()),
+                practitionerRoleService.getAllPractitionerRoles(practitionerRoleSearchBean)),
                 RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
@@ -141,6 +155,21 @@ public class PractitionerRoleResource {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private PractitionerRoleSearchBean createPractitionerRoleSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
+            String orderByFieldName) {
+        PractitionerRoleSearchBean practitionerRoleSearchBean = new PractitionerRoleSearchBean();
+        practitionerRoleSearchBean.setPageNumber(pageNumber);
+        practitionerRoleSearchBean.setPageSize(pageSize);
+        if (orderByType != null) {
+            practitionerRoleSearchBean.setOrderByType(PractitionerRoleSearchBean.OrderByType.valueOf(orderByType));
+        }
+        if (orderByFieldName != null) {
+            practitionerRoleSearchBean.setOrderByFieldName(PractitionerRoleSearchBean.FieldName.valueOf(orderByFieldName));
+        }
+
+        return practitionerRoleSearchBean;
     }
 
 }
