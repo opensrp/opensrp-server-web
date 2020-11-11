@@ -42,6 +42,8 @@ public class ProductCatalogueResource {
 
 	private static Logger logger = LoggerFactory.getLogger(ProductCatalogueResource.class.toString());
 
+	private static final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
+
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
@@ -64,8 +66,6 @@ public class ProductCatalogueResource {
 	@PostMapping(headers = { "Accept=multipart/form-data" })
 	public ResponseEntity<String> create(@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
-
-		final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
 
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
 				DOWNLOAD_PHOTO_END_POINT;
@@ -106,8 +106,6 @@ public class ProductCatalogueResource {
 	public ResponseEntity<String> update(@PathVariable("id") Long uniqueId,
 			@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
-
-		final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
 
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
 				DOWNLOAD_PHOTO_END_POINT;

@@ -6,6 +6,10 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
@@ -79,18 +83,9 @@ public class PlanResource {
 
 	public static final String IS_TEMPLATE = "is_template";
 
-	public static final String PAGE_NUMBER = "pageNumber";
-
-	public static final String PAGE_SIZE = "pageSize";
-
 	public static final String PLAN_STATUS = "planStatus";
 
 	public static final String USE_CONTEXT = "useContext";
-
-	public static final String ORDER_BY_TYPE = "orderByType";
-
-	public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
-
 
 	@Autowired
 	public void setPlanService(PlanService planService) {

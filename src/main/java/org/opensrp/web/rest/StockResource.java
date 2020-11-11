@@ -10,6 +10,10 @@ import static org.opensrp.common.AllConstants.Stock.TO_FROM;
 import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
 import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
 import static org.opensrp.common.AllConstants.Stock.VALUE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -79,14 +83,6 @@ public class StockResource extends RestResource<Stock> {
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
 	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
-
-	public static final String PAGE_NUMBER = "pageNumber";
-
-	public static final String PAGE_SIZE = "pageSize";
-
-	public static final String ORDER_BY_TYPE = "orderByType";
-
-	public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
 
 	@Autowired
 	public StockResource(StockService stockService) {
