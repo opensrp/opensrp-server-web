@@ -34,7 +34,6 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
@@ -42,6 +41,7 @@ import org.opensrp.web.Constants;
 import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
+import org.opensrp.web.config.Role;
 import org.opensrp.web.utils.MaskingUtils;
 import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
@@ -78,9 +78,6 @@ public class EventResource extends RestResource<Event> {
 	private EventService eventService;
 	
 	private ClientService clientService;
-	
-	@Autowired
-	private OpenmrsUserService openmrsUserService;
 	
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -301,19 +298,14 @@ public class EventResource extends RestResource<Event> {
 		
 		//PII Data masking 
 		//TO DO research on ways to improve this
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String currentPrincipalName = authentication.getName();
-		User user = openmrsUserService.getUser(currentPrincipalName);
-		MaskingUtils maskingUtil = new MaskingUtils();
 		
-		if (Utils.checkRoleIfRoleExists(user.getRoles(), Constants.OPENSRP_ROLE.PII_DATA_MASK)) {
-			for (Client client : clients) {
-				
-				client.setFirstName(maskingUtil.maskString(client.getFirstName()));
-				client.setMiddleName(maskingUtil.maskString(client.getMiddleName()));
-				client.setLastName(maskingUtil.maskString(client.getLastName()));
-				client.setBirthdate(maskingUtil.maskDate(client.getBirthdate()));
-			}
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		User user = RestUtils.currentUser(authentication);
+		
+		if (Utils.checkRoleIfRoleExists(user.getRoles(), Role.PII_DATA_MASK)) {
+			
+			MaskingUtils maskingUtil = new MaskingUtils();
+			clients = maskingUtil.processDataMasking(clients);
 		}
 		
 		EventSyncBean eventSyncBean = new EventSyncBean();

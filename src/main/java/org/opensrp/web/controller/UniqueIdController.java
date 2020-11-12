@@ -23,7 +23,7 @@ import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UniqueIdentifierService;
-import org.opensrp.web.Constants;
+import org.opensrp.web.config.Role;
 import org.opensrp.web.utils.PdfUtil;
 import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class UniqueIdController extends OpenmrsService {
 		        FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
 		        OutputStream os = response.getOutputStream();) {
 			user = openmrsUserService.getUser(currentPrincipalName);
-			if (!Utils.checkRoleIfRoleExists(user.getRoles(), Constants.OPENSRP_ROLE.OPENSRP_GENERATE_QR_CODE)) {
+			if (!Utils.checkRoleIfRoleExists(user.getRoles(), Role.OPENSRP_GENERATE_QR_CODE)) {
 				return new ResponseEntity<>("Sorry, insufficient privileges to generate ID QR codes", HttpStatus.OK);
 			}
 			
@@ -120,34 +120,34 @@ public class UniqueIdController extends OpenmrsService {
 		return new ResponseEntity<>(new Gson().toJson("" + message), HttpStatus.OK);
 	} 
 	/**
-	 * Fetch unique Ids from OMRS
+	 * Fetch unique Ids
 	 *
 	 * @return json array object with ids
 	 */
-	
 	@RequestMapping(value = "/get", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	protected ResponseEntity<String> get(HttpServletRequest request, Authentication authentication)
-	    throws JsonProcessingException, JSONException {
+	protected ResponseEntity<String> get(HttpServletRequest request, Authentication authentication) throws JSONException {
 		
 		String numberToGenerate = getStringFilter("numberToGenerate", request);
 		String source = getStringFilter("source", request);
 		String usedBy = authentication.getName();
 		Map<String, Object> map = new HashMap<>();
 		IdentifierSource identifierSource = identifierSourceService.findByIdentifier(source);
-		
-		if (identifierSource != null) {
-			List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
-			    Integer.parseInt(numberToGenerate), usedBy);
-			map.put("identifiers", identifiers);
-			
+		try {
+			if (identifierSource != null) {
+				List<String> identifiers = uniqueIdentifierService.generateIdentifiers(identifierSource,
+				    Integer.parseInt(numberToGenerate), usedBy);
+				if (identifiers != null) {
+					map.put("identifiers", identifiers);
+				}
+			} else {
+				map.put("identifiers", openmrsIdService.getOpenMRSIdentifiers(source, numberToGenerate));
+			}
 			return new ResponseEntity<>(objectMapper.writeValueAsString(map), HttpStatus.OK);
-			
-		} else {
-			
-			return new ResponseEntity<>(String.format("Unique Identifier source %s not found", source),
-			        HttpStatus.NOT_FOUND);
 		}
-		
+		catch (IllegalArgumentException | JsonProcessingException exception) {
+			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+		}
 	}
+	
 	
 }

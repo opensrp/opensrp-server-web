@@ -1,12 +1,17 @@
 package org.opensrp.web.utils;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.smartregister.domain.Address;
+import org.smartregister.domain.Client;
 
 public class MaskingUtils {
 	
@@ -34,77 +39,17 @@ public class MaskingUtils {
 	 */
 	public Date maskDate(Date date) {
 		
-		if (date != null) {
-			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			
-			return cal.getTime();
-			
-		}
-		
-		return null;
+		return date != null ? maskDateCore(date) : null;
 		
 	}
 	
 	/**
 	 * @param date joda LocalDate object
-	 * @return Masked date e.g. 1980-01-01
+	 * @return Masked LocalDate e.g. 1980-01-01
 	 */
-	public Date maskDate(LocalDate date) {
+	public LocalDate maskDate(LocalDate date) {
 		
-		if (date != null) {
-			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date.toDate());
-			
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			
-			return cal.getTime();
-			
-		}
-		
-		return null;
-		
-	}
-	
-	/**
-	 * @param date java LocalDate object
-	 * @return Masked date e.g. 1980-01-01
-	 */
-	public Date maskDate(java.time.LocalDate date) {
-		
-		if (date != null) {
-			
-			ZoneId defaultZoneId = ZoneId.systemDefault();
-			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(Date.from(date.atStartOfDay(defaultZoneId).toInstant()));
-			
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			
-			return cal.getTime();
-			
-		}
-		
-		return null;
+		return date != null ? new LocalDate(maskDateCore(date.toDate())) : null;
 		
 	}
 	
@@ -114,24 +59,46 @@ public class MaskingUtils {
 	 */
 	public DateTime maskDate(DateTime date) {
 		
+		return date != null ? new DateTime(maskDateCore(date.toDate())) : null;
+		
+	}
+	
+	/**
+	 * @param date java LocalDate object
+	 * @return Masked date e.g. 1980-01-01
+	 */
+	public java.time.LocalDate maskDate(java.time.LocalDate date) {
+		
 		if (date != null) {
 			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date.toDate());
+			ZoneId defaultZoneId = ZoneId.systemDefault();
+			Date newDate = maskDateCore(Date.from(date.atStartOfDay(defaultZoneId).toInstant()));
 			
-			cal.set(Calendar.MONTH, 0);
-			cal.set(Calendar.DAY_OF_MONTH, 1);
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 0);
-			cal.set(Calendar.MILLISECOND, 0);
-			
-			return new DateTime(cal.getTime());
+			return Instant.ofEpochMilli(newDate.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 			
 		}
 		
 		return null;
 		
+	}
+	
+	/**
+	 * @param T generic date object
+	 * @return Masked Date object
+	 */
+	private <T> Date maskDateCore(T date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime((Date) date);
+		
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		
+		Date newDate = cal.getTime();
+		return newDate;
 	}
 	
 	/**
@@ -142,6 +109,59 @@ public class MaskingUtils {
 		
 		return "xxxxxxxxxx";
 		
+	}
+	
+	public List<Client> processDataMasking(List<Client> clients) {
+		
+		for (Client client : clients) {
+			
+			processDataMaskingForClient(client);
+		}
+		
+		return clients;
+		
+	}
+	
+	/**
+	 * Process PII data masking for a single client
+	 * 
+	 * @param Client
+	 */
+	public void processDataMaskingForClient(Client client) {
+		//Mask Demographics
+		client.setFirstName(maskString(client.getFirstName()));
+		client.setMiddleName(maskString(client.getMiddleName()));
+		client.setLastName(maskString(client.getLastName()));
+		client.setBirthdate(maskDate(client.getBirthdate()));
+		client.setBaseEntityId(maskString(client.getBaseEntityId()));
+		
+		//Mask Identifiers
+		Map<String, String> clientIdentifiers = client.getIdentifiers();
+		for (Map.Entry<String, String> entry : clientIdentifiers.entrySet()) {
+			entry.setValue(maskString(entry.getValue()));
+		}
+		
+		client.setIdentifiers(clientIdentifiers);
+		
+		//Mask Addresses
+		List<Address> addresses = client.getAddresses();
+		for (Address address : addresses) {
+			Map<String, String> fields = address.getAddressFields();
+			
+			for (Map.Entry<String, String> entry : fields.entrySet()) {
+				entry.setValue(maskString(entry.getValue()));
+			}
+		}
+		
+		client.setAddresses(addresses);
+		
+		//Mask Attributes
+		Map<String, Object> attributes = client.getAttributes();
+		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+			entry.setValue(maskString(entry.getValue().toString()));
+		}
+		
+		client.setAttributes(attributes);
 	}
 	
 }
