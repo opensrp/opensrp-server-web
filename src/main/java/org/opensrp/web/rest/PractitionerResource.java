@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.util.DateTypeConverter;
@@ -18,7 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
@@ -114,18 +119,24 @@ public class PractitionerResource {
         }
     }
 
-    private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType, String orderByFieldName) {
-        PractitionerSearchBean practitionerSearchBean = new PractitionerSearchBean();
-        practitionerSearchBean.setPageNumber(pageNumber);
-        practitionerSearchBean.setPageSize(pageSize);
+    private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
+            String orderByFieldName) {
+
+        BaseSearchBean.OrderByType orderByTypeEnum = null;
+        BaseSearchBean.FieldName fieldName = null;
         if (orderByType != null) {
-            practitionerSearchBean.setOrderByType(PractitionerSearchBean.OrderByType.valueOf(orderByType));
+            orderByTypeEnum = BaseSearchBean.OrderByType.valueOf(orderByType);
         }
         if (orderByFieldName != null) {
-            practitionerSearchBean.setOrderByFieldName(PractitionerSearchBean.FieldName.valueOf(orderByFieldName));
+            fieldName = BaseSearchBean.FieldName.valueOf(orderByFieldName);
         }
 
-        return practitionerSearchBean;
+        return PractitionerSearchBean.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .orderByType(orderByTypeEnum)
+                .orderByFieldName(fieldName).build();
+
     }
 
 }

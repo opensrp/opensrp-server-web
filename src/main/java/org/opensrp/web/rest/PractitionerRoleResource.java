@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.PractitionerRole;
+import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.util.DateTypeConverter;
@@ -159,17 +160,20 @@ public class PractitionerRoleResource {
 
     private PractitionerRoleSearchBean createPractitionerRoleSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
             String orderByFieldName) {
-        PractitionerRoleSearchBean practitionerRoleSearchBean = new PractitionerRoleSearchBean();
-        practitionerRoleSearchBean.setPageNumber(pageNumber);
-        practitionerRoleSearchBean.setPageSize(pageSize);
+        BaseSearchBean.OrderByType orderByTypeEnum = null;
+        BaseSearchBean.FieldName fieldName = null;
         if (orderByType != null) {
-            practitionerRoleSearchBean.setOrderByType(PractitionerRoleSearchBean.OrderByType.valueOf(orderByType));
+            orderByTypeEnum = BaseSearchBean.OrderByType.valueOf(orderByType);
         }
         if (orderByFieldName != null) {
-            practitionerRoleSearchBean.setOrderByFieldName(PractitionerRoleSearchBean.FieldName.valueOf(orderByFieldName));
+            fieldName = BaseSearchBean.FieldName.valueOf(orderByFieldName);
         }
 
-        return practitionerRoleSearchBean;
+        return PractitionerRoleSearchBean.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .orderByType(orderByTypeEnum)
+                .orderByFieldName(fieldName).build();
     }
 
 }
