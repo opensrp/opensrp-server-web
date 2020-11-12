@@ -10,6 +10,7 @@ import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.AssignedLocationAndPlanSearchBean;
+import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -257,23 +258,27 @@ public class OrganizationResource {
 		return organizationSearchBean;
 	}
 
-
 	private AssignedLocationAndPlanSearchBean createAssignedLocationAndPlanSearchBean(Integer pageNumber, Integer pageSize,
-			String orderByType, String orderByFieldName, String planIdentifier, String organizationIdentifier, boolean returnFutureAssignments) {
-		AssignedLocationAndPlanSearchBean assignedLocationAndPlanSearchBean = new AssignedLocationAndPlanSearchBean();
-		assignedLocationAndPlanSearchBean.setPageNumber(pageNumber);
-		assignedLocationAndPlanSearchBean.setPageSize(pageSize);
+			String orderByType, String orderByFieldName, String planIdentifier, String organizationIdentifier,
+			boolean returnFutureAssignments) {
+
+		BaseSearchBean.OrderByType orderByTypeEnum = null;
+		BaseSearchBean.FieldName fieldName = null;
 		if (orderByType != null) {
-			assignedLocationAndPlanSearchBean.setOrderByType(AssignedLocationAndPlanSearchBean.OrderByType.valueOf(orderByType));
+			orderByTypeEnum = BaseSearchBean.OrderByType.valueOf(orderByType);
 		}
 		if (orderByFieldName != null) {
-			assignedLocationAndPlanSearchBean.setOrderByFieldName(AssignedLocationAndPlanSearchBean.FieldName.valueOf(orderByFieldName));
+			fieldName = BaseSearchBean.FieldName.valueOf(orderByFieldName);
 		}
-		assignedLocationAndPlanSearchBean.setOrganizationIdentifier(organizationIdentifier);
-		assignedLocationAndPlanSearchBean.setPlanIdentifier(planIdentifier);
-		assignedLocationAndPlanSearchBean.setReturnFutureAssignments(returnFutureAssignments);
 
-		return assignedLocationAndPlanSearchBean;
+		return AssignedLocationAndPlanSearchBean.builder()
+				.pageNumber(pageNumber)
+				.pageSize(pageSize)
+				.orderByType(orderByTypeEnum)
+				.orderByFieldName(fieldName)
+				.planIdentifier(planIdentifier)
+				.organizationIdentifier(organizationIdentifier)
+				.returnFutureAssignments(returnFutureAssignments).build();
 	}
 	
 }
