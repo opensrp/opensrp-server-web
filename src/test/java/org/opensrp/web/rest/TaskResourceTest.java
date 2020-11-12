@@ -76,7 +76,9 @@ public class TaskResourceTest {
 	@Mock
 	private TaskService taskService;
 
-	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"planIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionStartDate\":\"2018-11-10T2200\",\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879,\"reasonReference\":\"reasonreferenceuuid\"}";
+
+	private String taskJson = "{\"identifier\":\"tsk11231jh22\",\"planIdentifier\":\"IRS_2018_S1\",\"groupIdentifier\":\"2018_IRS-3734\",\"status\":\"Ready\",\"businessStatus\":\"Not Visited\",\"priority\":3,\"code\":\"IRS\",\"description\":\"Spray House\",\"focus\":\"IRS Visit\",\"for\":\"location.properties.uid:41587456-b7c8-4c4e-b433-23a786f742fc\",\"executionPeriod\":{\"start\":\"2018-11-10T2200\",\"end\":null},\"authoredOn\":\"2018-10-31T0700\",\"lastModified\":\"2018-10-31T0700\",\"owner\":\"demouser\",\"note\":[{\"authorString\":\"demouser\",\"time\":\"2018-01-01T0800\",\"text\":\"This should be assigned to patrick.\"}],\"serverVersion\":15421904649879,\"reasonReference\":\"reasonreferenceuuid\"}";
+
 	private String taskUpdateJson = "{\"businessStatus\": \"Not Sprayed\", \"identifier\": \"tsk11231jh22\", \"status\": \"completed\" }";
 
 	private String BASE_URL = "/rest/task/";
@@ -244,7 +246,7 @@ public class TaskResourceTest {
 				.andExpect(status().isCreated());
 		verify(taskService, times(1)).addTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
-		assertEquals(taskJson, TaskResource.gson.toJson(argumentCaptor.getValue()));
+		assertEquals(taskJson, taskResource.gson.toJson(argumentCaptor.getValue()));
 	}
 
 	@Test
@@ -270,7 +272,7 @@ public class TaskResourceTest {
 				.andExpect(status().isCreated());
 		verify(taskService, times(1)).updateTask(argumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
-		assertEquals(taskJson, TaskResource.gson.toJson(argumentCaptor.getValue()));
+		assertEquals(taskJson, taskResource.gson.toJson(argumentCaptor.getValue()));
 	}
 
 	@Test
@@ -295,11 +297,11 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.content(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isCreated());
+				.content(taskResource.gson.toJson(tasks).getBytes())).andExpect(status().isCreated());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 		assertEquals(1, listArgumentCaptor.getValue().size());
-		assertEquals(taskJson, TaskResource.gson.toJson(listArgumentCaptor.getValue().get(0)));
+		assertEquals(taskJson, taskResource.gson.toJson(listArgumentCaptor.getValue().get(0)));
 	}
 
 	@Test
@@ -307,7 +309,7 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.content(TaskResource.gson.toJson(tasks).substring(1).getBytes())).andExpect(status().isBadRequest());
+				.content(taskResource.gson.toJson(tasks).substring(1).getBytes())).andExpect(status().isBadRequest());
 		verify(taskService, never()).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 	}
@@ -318,7 +320,7 @@ public class TaskResourceTest {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-				.content(TaskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
+				.content(taskResource.gson.toJson(tasks).getBytes())).andExpect(status().isInternalServerError());
 		verify(taskService).saveTasks(listArgumentCaptor.capture());
 		verifyNoMoreInteractions(taskService);
 	}
@@ -342,7 +344,7 @@ public class TaskResourceTest {
 	}
 
 	private Task getTask() {
-		return TaskResource.gson.fromJson(taskJson, Task.class);
+		return taskResource.gson.fromJson(taskJson, Task.class);
 	}
 
 	private TaskUpdate getTaskUpdates() {
@@ -381,7 +383,7 @@ public class TaskResourceTest {
 				.perform(get(BASE_URL + "/getAll?serverVersion=0&limit=25"))
 				.andExpect(status().isOk()).andReturn();
 		verify(taskService).getAllTasks(anyLong(), anyInt());
-		assertEquals(TaskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
+		assertEquals(taskResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 
 	}
 	

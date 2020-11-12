@@ -20,14 +20,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.web.utils.Utils;
-import org.smartregister.domain.Task;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
-import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Task;
+import org.smartregister.domain.Task.TaskPriority;
+import org.smartregister.utils.PriorityOrdinalConverter;
+import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,7 +54,8 @@ public class TaskResource {
 	
 	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
 	
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+	public Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+			.registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter())
 	        .create();
 	
 	public static final String PLAN = "plan";
