@@ -143,9 +143,9 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAllOrganizations() throws Exception {
 		List<Organization> expected = Collections.singletonList(getOrganization());
-		when(organizationService.getAllOrganizations()).thenReturn(expected);
+		when(organizationService.getAllOrganizations(any(OrganizationSearchBean.class))).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL)).andExpect(status().isOk()).andReturn();
-		verify(organizationService).getAllOrganizations();
+		verify(organizationService).getAllOrganizations(any(OrganizationSearchBean.class));
 		verifyNoMoreInteractions(organizationService);
 		assertEquals("[" + organizationJSON + "]", result.getResponse().getContentAsString());
 		
@@ -154,7 +154,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAllOrganizationsUnderLocation() throws Exception {
 		List<Organization> expected = Collections.singletonList(getOrganization());
-		when(organizationService.getAllOrganizations()).thenReturn(expected);
+		when(organizationService.getAllOrganizations(any(OrganizationSearchBean.class))).thenReturn(expected);
 		mockMvc.perform(get(BASE_URL).param("location_id", "12345")).andExpect(status().isOk()).andReturn();
 		verify(organizationService).selectOrganizationsEncompassLocations("12345");
 		verifyNoMoreInteractions(organizationService);
@@ -282,11 +282,11 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationAndPlan() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
-		when(organizationService.findAssignedLocationsAndPlans(identifier,true)).thenReturn(expected);
+		when(organizationService.findAssignedLocationsAndPlans(identifier,true, null, null,null,null)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isOk()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
 		
@@ -295,26 +295,26 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true);
+		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isBadRequest()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals("", result.getResponse().getContentAsString());
 		
 	}
-	
+
 	@Test
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true);
+		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isInternalServerError()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
 		verifyNoMoreInteractions(organizationService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -329,11 +329,11 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
-		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier)).thenReturn(expected);
+		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null,null,null)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
 		        .andExpect(status().isOk()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier);
+		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null,null,null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
 		
