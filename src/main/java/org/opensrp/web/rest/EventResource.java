@@ -305,7 +305,7 @@ public class EventResource extends RestResource<Event> {
 		if (Utils.checkRoleIfRoleExists(user.getRoles(), Role.PII_DATA_MASK)) {
 			
 			MaskingUtils maskingUtil = new MaskingUtils();
-			clients = maskingUtil.processDataMasking(clients);
+			maskingUtil.processDataMasking(clients);
 		}
 		
 		EventSyncBean eventSyncBean = new EventSyncBean();

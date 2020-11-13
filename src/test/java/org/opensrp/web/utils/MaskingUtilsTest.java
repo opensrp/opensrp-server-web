@@ -175,11 +175,9 @@ public class MaskingUtilsTest {
 		
 		Mockito.doNothing().when(maskUtil).processDataMaskingForClient(client);
 		
-		List<Client> maskedClientList = maskUtil.processDataMasking(clientList);
+		maskUtil.processDataMasking(clientList);
 		
 		Mockito.verify(maskUtil, Mockito.times(1)).processDataMaskingForClient(client);
-		
-		Assert.assertNotNull(maskedClientList);
 	}
 	
 	@Test

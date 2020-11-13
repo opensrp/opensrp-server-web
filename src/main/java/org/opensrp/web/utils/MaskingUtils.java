@@ -111,14 +111,12 @@ public class MaskingUtils {
 		
 	}
 	
-	public List<Client> processDataMasking(List<Client> clients) {
+	public void processDataMasking(List<Client> clients) {
 		
 		for (Client client : clients) {
 			
 			processDataMaskingForClient(client);
 		}
-		
-		return clients;
 		
 	}
 	
@@ -141,8 +139,6 @@ public class MaskingUtils {
 			entry.setValue(maskString(entry.getValue()));
 		}
 		
-		client.setIdentifiers(clientIdentifiers);
-		
 		//Mask Addresses
 		List<Address> addresses = client.getAddresses();
 		for (Address address : addresses) {
@@ -153,15 +149,11 @@ public class MaskingUtils {
 			}
 		}
 		
-		client.setAddresses(addresses);
-		
 		//Mask Attributes
 		Map<String, Object> attributes = client.getAttributes();
 		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
 			entry.setValue(maskString(entry.getValue().toString()));
 		}
-		
-		client.setAttributes(attributes);
 	}
 	
 }
