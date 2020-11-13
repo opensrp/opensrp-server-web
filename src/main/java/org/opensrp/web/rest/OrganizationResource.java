@@ -33,6 +33,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -55,14 +59,6 @@ public class OrganizationResource {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	public static final String PAGE_NUMBER = "pageNumber";
-
-	public static final String PAGE_SIZE = "pageSize";
-
-	public static final String ORDER_BY_TYPE = "orderByType";
-
-	public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
 	
 	/**
 	 * Set the organizationService

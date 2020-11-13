@@ -24,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
@@ -37,15 +41,6 @@ public class PractitionerResource {
     private PractitionerService practitionerService;
 
     public static final String IDENTIFIER ="identifier";
-
-    public static final String PAGE_NUMBER = "pageNumber";
-
-    public static final String PAGE_SIZE = "pageSize";
-
-    public static final String ORDER_BY_TYPE = "orderByType";
-
-    public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
-
 
     @Autowired
     public void setPractitionerService(PractitionerService practitionerService) {
