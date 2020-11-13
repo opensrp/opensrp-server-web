@@ -122,7 +122,7 @@ public class UniqueIdController extends OpenmrsService {
 	boolean checkRoleIfRoleExitst(List<String> roleList, String role) {
 		for (String roleName : roleList)
 			if (StringUtils.containsIgnoreCase(roleName, role))
-				return true;	
+				return true;
 		return false;
 	}
 	
