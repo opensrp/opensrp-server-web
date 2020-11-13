@@ -18,8 +18,6 @@ import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
-import org.opensrp.search.AssignedLocationAndPlanSearchBean;
-import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -211,9 +209,9 @@ public class OrganizationResource {
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
 			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 		try {
-			AssignedLocationAndPlanSearchBean assignedLocationAndPlanSearchBean = createAssignedLocationAndPlanSearchBean(pageNumber,pageSize,orderByType,orderByFieldName,null,identifier,true);
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(assignedLocationAndPlanSearchBean),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(organizationService
+					.findAssignedLocationsAndPlans(identifier, true, pageNumber, pageSize, orderByType, orderByFieldName),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
@@ -296,8 +294,8 @@ public class OrganizationResource {
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
 			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 		try {
-			AssignedLocationAndPlanSearchBean assignedLocationAndPlanSearchBean = createAssignedLocationAndPlanSearchBean(pageNumber,pageSize,orderByType,orderByFieldName,planIdentifier,null,false);
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(assignedLocationAndPlanSearchBean),
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier,
+					pageNumber, pageSize, orderByType, orderByFieldName),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
@@ -326,39 +324,14 @@ public class OrganizationResource {
 	private OrganizationSearchBean createOrganizationSearchBeanForPagination(Integer pageNumber, Integer pageSize,
 			String orderByType, String orderByFieldName) {
 		OrganizationSearchBean organizationSearchBean = new OrganizationSearchBean();
+		OrganizationSearchBean.OrderByType orderByTypeEnum = orderByType != null ? OrganizationSearchBean.OrderByType.valueOf(orderByType) : OrganizationSearchBean.OrderByType.DESC;
+		OrganizationSearchBean.FieldName fieldName = orderByFieldName != null ? OrganizationSearchBean.FieldName.valueOf(orderByFieldName) : OrganizationSearchBean.FieldName.id;
 		organizationSearchBean.setPageNumber(pageNumber);
 		organizationSearchBean.setPageSize(pageSize);
-		if (orderByType != null) {
-			organizationSearchBean.setOrderByType(OrganizationSearchBean.OrderByType.valueOf(orderByType));
-		}
-		if (orderByFieldName != null) {
-			organizationSearchBean.setOrderByFieldName(OrganizationSearchBean.FieldName.valueOf(orderByFieldName));
-		}
+		organizationSearchBean.setOrderByFieldName(fieldName);
+        organizationSearchBean.setOrderByType(orderByTypeEnum);
 
 		return organizationSearchBean;
-	}
-
-	private AssignedLocationAndPlanSearchBean createAssignedLocationAndPlanSearchBean(Integer pageNumber, Integer pageSize,
-			String orderByType, String orderByFieldName, String planIdentifier, String organizationIdentifier,
-			boolean returnFutureAssignments) {
-
-		BaseSearchBean.OrderByType orderByTypeEnum = null;
-		BaseSearchBean.FieldName fieldName = null;
-		if (orderByType != null) {
-			orderByTypeEnum = BaseSearchBean.OrderByType.valueOf(orderByType);
-		}
-		if (orderByFieldName != null) {
-			fieldName = BaseSearchBean.FieldName.valueOf(orderByFieldName);
-		}
-
-		return AssignedLocationAndPlanSearchBean.builder()
-				.pageNumber(pageNumber)
-				.pageSize(pageSize)
-				.orderByType(orderByTypeEnum)
-				.orderByFieldName(fieldName)
-				.planIdentifier(planIdentifier)
-				.organizationIdentifier(organizationIdentifier)
-				.returnFutureAssignments(returnFutureAssignments).build();
 	}
 	
 }
