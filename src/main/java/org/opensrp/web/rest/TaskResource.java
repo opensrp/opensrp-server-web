@@ -49,6 +49,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
+/**
+ * Task  V1 API that returns {@link TaskPriority} as enum ordinal 
+ * 
+ */
 @Controller
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
