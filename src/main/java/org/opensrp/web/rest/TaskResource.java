@@ -76,6 +76,13 @@ public class TaskResource {
 		this.taskService = taskService;
 	}
 	
+	/**
+	 * @param gson the gson to set
+	 */
+	public void setGson(Gson gson) {
+		this.gson = gson;
+	}
+	
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
 		return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), RestUtils.getJSONUTF8Headers(),
