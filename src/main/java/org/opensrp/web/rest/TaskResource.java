@@ -61,7 +61,7 @@ public class TaskResource {
 	
 	public Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 			.registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter())
-	        .serializeNulls().create();
+	        .create();
 	
 	public static final String PLAN = "plan";
 	
