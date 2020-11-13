@@ -122,14 +122,10 @@ public class PractitionerResource {
     private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
             String orderByFieldName) {
 
-        BaseSearchBean.OrderByType orderByTypeEnum = null;
-        BaseSearchBean.FieldName fieldName = null;
-        if (orderByType != null) {
-            orderByTypeEnum = BaseSearchBean.OrderByType.valueOf(orderByType);
-        }
-        if (orderByFieldName != null) {
-            fieldName = BaseSearchBean.FieldName.valueOf(orderByFieldName);
-        }
+        BaseSearchBean.OrderByType orderByTypeEnum;
+        BaseSearchBean.FieldName fieldName;
+        orderByTypeEnum = orderByType != null ? BaseSearchBean.OrderByType.valueOf(orderByType) : BaseSearchBean.OrderByType.DESC;
+        fieldName = orderByFieldName != null ? BaseSearchBean.FieldName.valueOf(orderByFieldName) : BaseSearchBean.FieldName.id;
 
         return PractitionerSearchBean.builder()
                 .pageNumber(pageNumber)
