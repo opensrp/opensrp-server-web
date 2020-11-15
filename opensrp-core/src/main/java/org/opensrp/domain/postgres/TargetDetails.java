@@ -18,9 +18,11 @@ public class TargetDetails {
 
     private String day;
 
-    private Date startDate;
+    private String startDate;
 
-    private Date endDate;
+    private String endDate;
+
+    private Long timestamp;
 
 
     public String getUsername() {
@@ -79,19 +81,27 @@ public class TargetDetails {
         this.day = day;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -20,12 +20,13 @@
 	</resultMap>
 	<resultMap id="targetDetails" type="org.opensrp.domain.postgres.TargetDetails">
 		<id column="username" jdbcType="VARCHAR" property="username" />
-		<result column="target_id" jdbcType="BIGINT" property="targetId"/>
-		<result column="target_name" jdbcType="VARCHAR" property="targetName"/>
-		<result column="target_count" jdbcType="BIGINT" property="targetCount"/>
+		<result column="targetid" jdbcType="BIGINT" property="targetId"/>
+		<result column="targetname" jdbcType="VARCHAR" property="targetName"/>
+		<result column="targetcount" jdbcType="BIGINT" property="targetCount"/>
 		<result column="year" jdbcType="VARCHAR" property="year"/>
 		<result column="month" jdbcType="VARCHAR" property="month"/>
 		<result column="day" jdbcType="VARCHAR" property="day"/>
+		<result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
 		<result column="start_date" jdbcType="VARCHAR" property="startDate"/>
 		<result column="end_date" jdbcType="VARCHAR" property="endDate"/>
 	</resultMap>
@@ -176,8 +177,8 @@
 		td."year",
 		td."day",
 		td."timestamp",
-		td.start_date,
-		td.end_date
+		TO_CHAR(td.start_date, 'DD-MM-YYYY') start_date,
+		TO_CHAR(td.end_date, 'DD-MM-YYYY') end_date
 	from
 		core.target_details td
 		join core.product p on td.product_id = p.id
