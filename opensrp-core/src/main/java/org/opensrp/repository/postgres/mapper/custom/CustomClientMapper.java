@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.Client;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.TargetDetails;
 import org.opensrp.repository.postgres.mapper.ClientMapper;
 
 public interface CustomClientMapper extends ClientMapper {
@@ -38,6 +39,9 @@ public interface CustomClientMapper extends ClientMapper {
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(@Param("memberId") int memberId,
 	                                                     @Param("childRoleId") int childRoleId);
+
+	List<TargetDetails> selectTargetDetails(@Param("username") String username,
+											@Param("targetTimestamp") Long timestamp);
 	
 	List<CustomQuery> getVillageByProviderId(@Param("memberId") int memberId, @Param("childRoleId") int childRoleId,
 	                                         @Param("locationTagId") int locationTagId);

@@ -23,6 +23,7 @@ import org.opensrp.common.domain.UserDetail;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.TargetDetails;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.LocationService;
@@ -223,6 +224,15 @@ public class UserController {
 		}
 		
 		return new ResponseEntity<>(array.toString(), OK);
+	}
+
+	@RequestMapping(value = "/gettarget", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public List<TargetDetails> getTargetDetails(
+			@RequestParam("username") String username,
+			@RequestParam("timestamp") Long timestamp) {
+
+		return clientService.getTargetDetails(username, timestamp);
 	}
 	
 	@RequestMapping(value = "/deviceverify/get")

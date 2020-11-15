@@ -14,6 +14,7 @@ import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.TargetDetails;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -331,6 +332,10 @@ public class ClientService {
 	
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
+	}
+
+	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
+		return allClients.getTargetDetails(username, timestamp);
 	}
 	
 	public List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId) {

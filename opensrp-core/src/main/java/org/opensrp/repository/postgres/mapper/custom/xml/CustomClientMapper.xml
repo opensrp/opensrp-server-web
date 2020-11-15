@@ -18,6 +18,17 @@
 		<result column="last_name" jdbcType="VARCHAR" property="lastName"/>
 		<result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
 	</resultMap>
+	<resultMap id="targetDetails" type="org.opensrp.domain.postgres.TargetDetails">
+		<id column="username" jdbcType="VARCHAR" property="username" />
+		<result column="target_id" jdbcType="BIGINT" property="targetId"/>
+		<result column="target_name" jdbcType="VARCHAR" property="targetName"/>
+		<result column="target_count" jdbcType="BIGINT" property="targetCount"/>
+		<result column="year" jdbcType="VARCHAR" property="year"/>
+		<result column="month" jdbcType="VARCHAR" property="month"/>
+		<result column="day" jdbcType="VARCHAR" property="day"/>
+		<result column="start_date" jdbcType="VARCHAR" property="startDate"/>
+		<result column="end_date" jdbcType="VARCHAR" property="endDate"/>
+	</resultMap>
 	<resultMap id="userLocationMap" type="org.opensrp.domain.UserLocationTableName">
 		
 	</resultMap>
@@ -144,6 +155,40 @@
 	<select id="getProviderLocationTreeByChildRole" parameterType="map"
 			resultMap="customQueryLocationTreeMap">
 		select * from core.get_location_tree(#{memberId}, #{childRoleId});
+	</select>
+
+	<select id="selectTargetDetails" parameterType="map" resultMap="targetDetails">
+	select
+		u.username,
+		p.id targetId,
+		case
+			when lower(p."name") = 'household visit' then 'HH visit'
+			when lower(p."name") = 'elco visit' then 'ELCO Registration'
+			when lower(p."name") = 'pnc service' then 'PNC Registration'
+			when lower(p."name") = 'anc service' then 'ANC Registration'
+			when lower(p."name") = 'women service' then 'Women package'
+			when lower(p."name") = 'adolescent service' then 'Adolescent package'
+			when lower(p."name") = 'ncd service' then 'NCD package'
+			else p."name"
+		end targetName,
+		td.quantity targetCount,
+		td."month",
+		td."year",
+		td."day",
+		td."timestamp",
+		td.start_date,
+		td.end_date
+	from
+		core.target_details td
+		join core.product p on td.product_id = p.id
+		join core.users u on u.id = td.user_id
+	where
+		u.username = #{username}
+		and td."timestamp" > #{targetTimestamp}
+	order by td."timestamp";
+
+
+
 	</select>
 
 	<select id="getVillageByProviderId" parameterType="map"

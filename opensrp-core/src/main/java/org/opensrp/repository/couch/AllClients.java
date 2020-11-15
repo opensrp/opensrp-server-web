@@ -16,6 +16,7 @@ import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.TargetDetails;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.lucene.LuceneClientRepository;
 import org.opensrp.search.AddressSearchBean;
@@ -218,6 +219,11 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
+		return null;
+	}
+
+	@Override
+	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
 		return null;
 	}
 	
