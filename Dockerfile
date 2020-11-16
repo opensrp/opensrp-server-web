@@ -9,11 +9,10 @@ ARG opensrp_maven_package_profiles="postgres,jedis,oauth2"
 RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server-web/pom.xml
 
 # Explode WAR file
-RUN mkdir /tmp/opensrp-server-web-exploded && \
-  cd /tmp/opensrp-server-web-exploded && \
-  jar -xvf /tmp/opensrp-server-web/target/opensrp.war
+WORKDIR /tmp/opensrp-server-web-exploded && \
+RUN jar -xvf /tmp/opensrp-server-web/target/opensrp.war
 
-FROM tomcat:9.0
+FROM tomcat:9-jdk11-openjdk-slim
 # Copy the exploded directory
 COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
 
@@ -21,6 +20,7 @@ COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/ope
 COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations /migrations
 
 # Download mybatis
+RUN apt update && apt install -y unzip wget
 RUN mkdir -p /opt/mybatis
 RUN wget --quiet --no-cookies https://github.com/mybatis/migrations/releases/download/mybatis-migrations-3.3.4/mybatis-migrations-3.3.4-bundle.zip -O /opt/mybatis/mybatis-migrations-3.3.4.zip
 RUN unzip /opt/mybatis/mybatis-migrations-3.3.4.zip -d /opt/mybatis/
