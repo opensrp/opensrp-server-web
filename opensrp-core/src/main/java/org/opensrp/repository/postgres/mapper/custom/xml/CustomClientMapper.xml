@@ -170,6 +170,7 @@
 			when lower(p."name") = 'women service' then 'Women package'
 			when lower(p."name") = 'adolescent service' then 'Adolescent package'
 			when lower(p."name") = 'ncd service' then 'NCD package'
+			when lower(p."name") = 'delivery' then 'Pregnancy Outcome'
 			else p."name"
 		end targetName,
 		td.quantity targetCount,
