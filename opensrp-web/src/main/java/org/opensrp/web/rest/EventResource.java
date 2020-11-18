@@ -126,7 +126,7 @@ public class EventResource extends RestResource<Event> {
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
-	/*@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/syncs", method = RequestMethod.GET)
+	/*@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/sync", method = RequestMethod.GET)
 	@ResponseBody
 	protected ResponseEntity<String> syncByfunction(HttpServletRequest request) {
 		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
