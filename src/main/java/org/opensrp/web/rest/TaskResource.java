@@ -145,7 +145,7 @@ public class TaskResource {
 			
 			return new ResponseEntity<>(tasks, headers, HttpStatus.OK);
 		} else if (!StringUtils.isBlank(owner)) {
-			String tasks = gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion));
+			String tasks = gson.toJson(convertToDTO(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion)));
 			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 			if (returnCount) {
 				Long taskCount = taskService.countTasksByPlanAndOwner(plan, owner, currentServerVersion);
