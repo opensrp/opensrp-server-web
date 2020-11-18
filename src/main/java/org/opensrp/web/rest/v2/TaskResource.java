@@ -29,7 +29,7 @@ public class TaskResource extends org.opensrp.web.rest.TaskResource {
 	
 	@PostConstruct
 	@VisibleForTesting
-	protected void init() {
+	public void init() {
 		setGson(new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter()).create());
 	}
 	
