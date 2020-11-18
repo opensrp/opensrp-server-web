@@ -126,9 +126,9 @@ public class EventResource extends RestResource<Event> {
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error occurs
 	 */
-	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/sync", method = RequestMethod.GET)
+	/*@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/syncs", method = RequestMethod.GET)
 	@ResponseBody
-	protected ResponseEntity<String> sync(HttpServletRequest request) {
+	protected ResponseEntity<String> syncByfunction(HttpServletRequest request) {
 		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
 		String district = getStringFilter("district", request);
 		
@@ -149,17 +149,17 @@ public class EventResource extends RestResource<Event> {
 			}
 			CustomQuery user = eventService.getUser(request.getRemoteUser());
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
-			/*List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
-			    user.getId(), ss, village) : new ArrayList<CustomQuery>();*/
+			List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
+			    user.getId(), ss, village) : new ArrayList<CustomQuery>();
 			logger.info("request.getRemoteUser():" + request.getRemoteUser());
 			
 			String location = "";
 			String userType = "";
 			List<Long> address = new ArrayList<Long>();
-			/*if (locations.size() != 0) {
+			if (locations.size() != 0) {
 				for (CustomQuery locName : locations) {
 					address.add(Long.valueOf(locName.getId()));
-				}*/
+				}
 			userType = "Provider";
 			String providerId = request.getRemoteUser();//getStringFilter(PROVIDER_ID, request);
 			String requestProviderName = request.getRemoteUser();
@@ -198,8 +198,8 @@ public class EventResource extends RestResource<Event> {
 			addressSearchBean.setVillageId(address);
 			
 			if (isEmptyToAdd.equalsIgnoreCase("true")) {
-				/*events = eventService.selectBySearchBean(addressSearchBean, lastSyncedServerVersion, providerId, 0,
-				    table);*/
+				events = eventService.selectBySearchBean(addressSearchBean, lastSyncedServerVersion, providerId, 0,
+				    table);
 				events = eventService.selectBySearchBean(user.getId(), lastSyncedServerVersion, providerId, limit, table);
 				
 			} else {
@@ -238,12 +238,146 @@ public class EventResource extends RestResource<Event> {
 			
 			return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
 			
-			/*} else {
+			} else {
 				logger.info("No location found..");
 				System.err.println("NO LOCation found .....................");
 				response.put("msg", "Error occurred");
 				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
+			}
+			
+		}
+		catch (Exception e) {
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			e.printStackTrace();
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	*/
+	
+	/**
+	 * Fetch events ordered by serverVersion ascending order and return the clients associated with
+	 * the events
+	 * 
+	 * @param request
+	 * @return a map response with events, clients and optionally msg when an error occurs
+	 */
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/sync", method = RequestMethod.GET)
+	@ResponseBody
+	protected ResponseEntity<String> sync(HttpServletRequest request) {
+		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
+		String district = getStringFilter("district", request);
+		
+		if (org.apache.commons.lang3.StringUtils.isBlank(isEmptyToAdd)) {
+			isEmptyToAdd = "true";
+		}
+		Map<String, Object> response = new HashMap<String, Object>();
+		try {
+			String dataProvider = request.getRemoteUser();
+			UserLocationTableName userLocation = clientService.getUserLocationAndTable(dataProvider, district, "", "", "");
+			
+			String table = userLocation.getTableName();
+			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
+			
+			if (customQuery != null && !customQuery.getEnable()) {
+				response.put("msg", "user is inactive or not present");
+				return new ResponseEntity<>(new Gson().toJson(response), INTERNAL_SERVER_ERROR);
+			}
+			CustomQuery user = eventService.getUser(request.getRemoteUser());
+			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
+			List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
+			    user.getId(), ss, village) : new ArrayList<CustomQuery>();
+			logger.info("request.getRemoteUser():" + request.getRemoteUser());
+			
+			String location = "";
+			String userType = "";
+			List<Long> address = new ArrayList<Long>();
+			if (locations.size() != 0) {
+				for (CustomQuery locName : locations) {
+					address.add(Long.valueOf(locName.getId()));
+				}
+				userType = "Provider";
+				String providerId = request.getRemoteUser();//getStringFilter(PROVIDER_ID, request);
+				String requestProviderName = request.getRemoteUser();
+				String locationId = getStringFilter(LOCATION_ID, request);
+				String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+				String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+				String team = getStringFilter(TEAM, request);
+				String teamId = getStringFilter(TEAM_ID, request);
+				logger.info("synced user " + providerId + locationId + teamId + ", timestamp : " + serverVersion);
+				Long lastSyncedServerVersion = null;
+				if (serverVersion != null) {
+					lastSyncedServerVersion = Long.valueOf(serverVersion) + 1;
+				}
+				Integer limit = getIntegerFilter("limit", request);
+				if (limit == null || limit.intValue() == 0) {
+					limit = 25;
+				}
+				
+				List<Event> events = new ArrayList<Event>();
+				List<String> clientIds = new ArrayList<String>();
+				List<Client> clients = new ArrayList<Client>();
+				
+				long startTime = System.currentTimeMillis();
+				EventSearchBean eventSearchBean = new EventSearchBean();
+				eventSearchBean.setTeam(team);
+				eventSearchBean.setTeamId(teamId);
+				eventSearchBean.setProviderId(providerId);
+				eventSearchBean.setLocationId(locationId);
+				eventSearchBean.setBaseEntityId(baseEntityId);
+				eventSearchBean.setServerVersion(lastSyncedServerVersion);
+				
+				ClientSearchBean searchBean = new ClientSearchBean();
+				searchBean.setServerVersion(lastSyncedServerVersion);
+				AddressSearchBean addressSearchBean = new AddressSearchBean();
+				
+				addressSearchBean.setVillageId(address);
+				
+				if (isEmptyToAdd.equalsIgnoreCase("true")) {
+					events = eventService.selectBySearchBean(addressSearchBean, lastSyncedServerVersion, providerId, 0,
+					    table);
+				} else {
+					events = eventService.findByProvider(lastSyncedServerVersion, providerId, 0, table);
+				}
+				
+				List<String> ids = new ArrayList<String>();
+				
+				String field = "baseEntityId";
+				
+				logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
+				logger.info("Initial Size:" + events.size());
+				if (!events.isEmpty()) {
+					for (Event event : events) {
+						
+						if (!clientIds.contains(event.getBaseEntityId())) {
+							clientIds.add(event.getBaseEntityId());
+						}
+						
+					}
+					
+					logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
+				}
+				
+				logger.info("ids size" + clientIds.size() + "IDs:" + clientIds.toString());
+				ids.addAll(clientIds);
+				clients = clientService.findByFieldValue(field, ids, table);
+				
+				JsonArray eventsArray = (JsonArray) gson.toJsonTree(events, new TypeToken<List<Event>>() {}.getType());
+				
+				JsonArray clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
+				
+				response.put("events", eventsArray);
+				response.put("clients", clientsArray);
+				response.put("no_of_events", events.size());
+				
+				return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
+				
+			} else {
+				logger.info("No location found..");
+				System.err.println("NO LOCation found .....................");
+				response.put("msg", "Error occurred");
+				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 			
 		}
 		catch (Exception e) {
