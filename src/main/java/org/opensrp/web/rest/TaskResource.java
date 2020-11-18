@@ -9,9 +9,9 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,34 +23,37 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.TaskUpdate;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.dto.TaskDto;
+import org.opensrp.web.dto.TaskSyncRequestWrapper;
 import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartregister.domain.Period;
 import org.smartregister.domain.Task;
 import org.smartregister.domain.Task.TaskPriority;
 import org.smartregister.utils.PriorityOrdinalConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Task  V1 API that returns {@link TaskPriority} as enum ordinal 
- * 
+ * Task V1 API that returns {@link TaskPriority} as enum ordinal and execution collapsed
  */
 @Controller
 @RequestMapping(value = "/rest/task")
@@ -59,15 +62,14 @@ public class TaskResource {
 	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
 	
 	public Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-			.registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter())
-	        .create();
+	        .registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter()).create();
 	
 	public static final String PLAN = "plan";
 	
 	public static final String GROUP = "group";
-
-	public static final String OWNER= "owner";
-
+	
+	public static final String OWNER = "owner";
+	
 	private TaskService taskService;
 	
 	@Autowired
@@ -84,8 +86,8 @@ public class TaskResource {
 	
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getByUniqueId(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(taskService.getTask(identifier)), RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(convertToDTO(taskService.getTask(identifier))),
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = {
@@ -115,7 +117,7 @@ public class TaskResource {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		String owner = getStringFilter(OWNER, request);
 		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
-
+		
 		long currentServerVersion = 0;
 		try {
 			currentServerVersion = Long.parseLong(serverVersion);
@@ -125,30 +127,31 @@ public class TaskResource {
 		}
 		return getTaskSyncResponse(plan, group, owner, currentServerVersion, returnCount);
 	}
-
-	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion, boolean returnCount) {
+	
+	private ResponseEntity<String> getTaskSyncResponse(String plan, String group, String owner, long currentServerVersion,
+	        boolean returnCount) {
 		if (StringUtils.isBlank(plan)) {
 			logger.error("Plan Identifier is missing");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 		if (!StringUtils.isBlank(group)) {
-			String tasks = gson.toJson(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion));
+			String tasks = gson.toJson(convertToDTO(taskService.getTasksByTaskAndGroup(plan, group, currentServerVersion)));
 			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
-			if (returnCount){
+			if (returnCount) {
 				Long taskCount = taskService.countTasksByPlanAndGroup(plan, group, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 			}
-
+			
 			return new ResponseEntity<>(tasks, headers, HttpStatus.OK);
 		} else if (!StringUtils.isBlank(owner)) {
 			String tasks = gson.toJson(taskService.getTasksByPlanAndOwner(plan, owner, currentServerVersion));
 			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
-			if (returnCount){
+			if (returnCount) {
 				Long taskCount = taskService.countTasksByPlanAndOwner(plan, owner, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 			}
-
+			
 			return new ResponseEntity<>(tasks, headers, HttpStatus.OK);
 		} else {
 			logger.error("Either owner or group identifier field is missing");
@@ -159,38 +162,38 @@ public class TaskResource {
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> create(@RequestBody String entity) {
 		try {
-			Task task = gson.fromJson(entity, Task.class);
+			Task task = convertToDomain(gson.fromJson(entity, TaskDto.class));
 			taskService.addTask(task);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid task representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<HttpStatus> update(@RequestBody String entity) {
 		try {
-			Task task = gson.fromJson(entity, Task.class);
+			Task task = convertToDomain(gson.fromJson(entity, TaskDto.class));
 			taskService.updateTask(task);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task representation" + entity);
+			logger.error("The request doesnt contain a valid task representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
 	
 	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
 	        MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> batchSave(@RequestBody String entity) {
 		try {
-			Type listType = new TypeToken<List<Task>>() {}.getType();
-			List<Task> tasks = gson.fromJson(entity, listType);
-			Set<String> tasksWithErrors = taskService.saveTasks(tasks);
+			Type listType = new TypeToken<List<TaskDto>>() {}.getType();
+			List<TaskDto> tasks = gson.fromJson(entity, listType);
+			Set<String> tasksWithErrors = taskService.saveTasks(convertToDomain(tasks));
 			if (tasksWithErrors.isEmpty())
 				return new ResponseEntity<>("All Tasks  processed", HttpStatus.CREATED);
 			else
@@ -201,7 +204,7 @@ public class TaskResource {
 			logger.error("The request doesnt contain a valid task representation" + entity);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
 	
 	@RequestMapping(value = "/update_status", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -220,28 +223,26 @@ public class TaskResource {
 			}
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid task update representation" + entity);
+			logger.error("The request doesnt contain a valid task update representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
+		
 	}
 	
 	/**
-	 * This methods provides an API endpoint that searches for all task Ids
-	 * ordered by server version ascending
+	 * This methods provides an API endpoint that searches for all task Ids ordered by server
+	 * version ascending
 	 *
 	 * @param serverVersion serverVersion using to filter by
 	 * @return A list of task Ids
 	 */
-	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
-			@RequestParam(value = "fromDate", required = false) String fromDate,
-			@RequestParam(value = "toDate", required = false) String toDate) {
-
+	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSION) long serverVersion,
+	        @RequestParam(value = "fromDate", required = false) String fromDate,
+	        @RequestParam(value = "toDate", required = false) String toDate) {
+		
 		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+		    Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
@@ -258,51 +259,73 @@ public class TaskResource {
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getAll(@RequestParam(value = SERVER_VERSION) long serverVersion,
 	        @RequestParam(value = LIMIT, required = false) Integer limit) {
-
+		
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
-		return new ResponseEntity<>(gson.toJson(taskService.getAllTasks(serverVersion, pageLimit)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		return new ResponseEntity<>(gson.toJson(convertToDTO(taskService.getAllTasks(serverVersion, pageLimit))),
+		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		
 	}
 	
-	static class TaskSyncRequestWrapper {
-		
-		@JsonProperty
-		private List<String> plan = new ArrayList<>();
-		
-		@JsonProperty
-		private List<String> group = new ArrayList<>();
-		
-		@JsonProperty
-		private long serverVersion;
-
-		@JsonProperty
-		private String owner;
-		
-		@JsonProperty(RETURN_COUNT)
-		private boolean returnCount;
-
-		public List<String> getPlan() {
-			return plan;
+	/**
+	 * Fetch count of tasks
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of tasks
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSION) long serverVersion) {
+		Long countOfTasks = taskService.countAllTasks(serverVersion);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", countOfTasks != null ? countOfTasks : 0);
+		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+	
+	/**
+	 * Converts a Task to DTO object so that data model for V1 API is maintained
+	 * @param task the task to convert
+	 * @return TaskDTO v1 task contract
+	 */
+	public Task convertToDTO(Task task) {
+		TaskDto taskDto = new TaskDto();
+		BeanUtils.copyProperties(task, taskDto);
+		if (task.getExecutionPeriod() != null) {
+			taskDto.setExecutionStartDate(task.getExecutionPeriod().getStart());
+			taskDto.setExecutionEndDate(task.getExecutionPeriod().getEnd());
 		}
-		
-		public List<String> getGroup() {
-			return group;
+		taskDto.setExecutionPeriod(null);
+		return taskDto;
+	}
+	
+	/**
+	 * Converts a list of Tasks to DTO objects so that data model for V1 API is maintained
+	 * @param list of  tasks to convert
+	 * @return list of TaskDTO objects
+	 */
+	public List<Task> convertToDTO(List<Task> taskList) {
+		return taskList.stream().map(t -> convertToDTO(t)).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Converts a  TaskDTO to domain object for persistence
+	 * @param  the TaskDTO object to convert
+	 * @return the converted task domain objects
+	 */
+	public Task convertToDomain(TaskDto taskDto) {
+		Task task = new Task();
+		BeanUtils.copyProperties(taskDto, task);
+		if(taskDto.getExecutionStartDate()!=null || taskDto.getExecutionEndDate()!=null) {
+			task.setExecutionPeriod(new Period(taskDto.getExecutionStartDate(),taskDto.getExecutionEndDate()));
 		}
-		
-		public long getServerVersion() {
-			return serverVersion;
-		}
-
-		public String getOwner() {
-			return owner;
-		}
-
-		
-		public boolean isReturnCount() {
-			return returnCount;
-		}
-		
+		return task;
+	}
+	
+	/**
+	 * Converts a list of TaskDTO to domain objects for persistence
+	 * @param list of  TaskDTO objects to convert
+	 * @return list of converted task domain objects
+	 */
+	public List<Task> convertToDomain(List<TaskDto> taskList) {
+		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
 	}
 	
 }
