@@ -165,12 +165,14 @@
 		case
 			when lower(p."name") = 'household visit' then 'HH visit'
 			when lower(p."name") = 'elco visit' then 'ELCO Registration'
-			when lower(p."name") = 'pnc service' then 'PNC Registration'
-			when lower(p."name") = 'anc service' then 'ANC Registration'
+			when lower(p."name") = 'iycf forum' then 'Child Forum'
+			when lower(p."name") = 'women forum' then 'WOMEN Forum'
+			when lower(p."name") = 'adult forum' then 'ADULT Forum'
 			when lower(p."name") = 'women service' then 'Women package'
 			when lower(p."name") = 'adolescent service' then 'Adolescent package'
 			when lower(p."name") = 'ncd service' then 'NCD package'
 			when lower(p."name") = 'delivery' then 'Pregnancy Outcome'
+			when lower(p."name") = 'iycf service' then 'IYCF package'
 			else p."name"
 		end targetName,
 		td.quantity targetCount,
