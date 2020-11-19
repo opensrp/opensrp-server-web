@@ -35,6 +35,7 @@ import org.smartregister.utils.PriorityOrdinalConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,6 +57,7 @@ import com.google.gson.reflect.TypeToken;
  * Task V1 API that returns {@link TaskPriority} as enum ordinal and execution collapsed
  */
 @Controller
+@Primary
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
 	
