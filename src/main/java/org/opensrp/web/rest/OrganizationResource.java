@@ -35,8 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -50,7 +48,6 @@ public class OrganizationResource {
 	private OrganizationService organizationService;
 
 	private PractitionerService practitionerService;
-	public static Gson gson = new GsonBuilder().create();
 
 
 	@Autowired
@@ -78,10 +75,10 @@ public class OrganizationResource {
 	/**
 	 * Gets all the organizations
 	 * 
-	 * @return all the organizations
+	 * @return all the organizationsorganizationService.getAllOrganizations(organizationSearchBean)
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<Organization> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID,
+	public ResponseEntity<List<Organization>> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID,
 			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
@@ -89,11 +86,14 @@ public class OrganizationResource {
 			) {
 		OrganizationSearchBean organizationSearchBean = createOrganizationSearchBeanForPagination(pageNumber, pageSize, orderByType, orderByFieldName);
 
+		List<Organization> organizations;
 		if (StringUtils.isNotBlank(locationID)) {
-			return organizationService.selectOrganizationsEncompassLocations(locationID);
+			organizations= organizationService.selectOrganizationsEncompassLocations(locationID);
 		} else {
-			return organizationService.getAllOrganizations(organizationSearchBean);
+			organizations= organizationService.getAllOrganizations(organizationSearchBean);
 		}
+		
+		return new ResponseEntity<>(organizations, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	/**
@@ -104,8 +104,8 @@ public class OrganizationResource {
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
-		return new ResponseEntity<>(gson.toJson(organizationService.getOrganization(identifier)),
+	public ResponseEntity<Organization> getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
+		return new ResponseEntity<>(organizationService.getOrganization(identifier),
 		        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 

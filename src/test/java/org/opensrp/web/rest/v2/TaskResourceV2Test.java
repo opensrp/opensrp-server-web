@@ -48,6 +48,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.smartregister.domain.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -59,6 +60,7 @@ import com.google.gson.reflect.TypeToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
 public class TaskResourceV2Test {
 
 	@Rule

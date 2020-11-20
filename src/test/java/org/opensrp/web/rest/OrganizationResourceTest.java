@@ -82,8 +82,7 @@ public class OrganizationResourceTest {
 
 	private String BASE_URL = "/rest/organization/";
 
-	private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]}}";
-
+	private String organizationJSON = "{\"id\":null,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"assignedLocations\":null,\"memberCount\":null}";
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	private String MESSAGE = "The server encountered an error processing the request.";
 
@@ -93,7 +92,7 @@ public class OrganizationResourceTest {
 		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(organizationResource)
 				.setControllerAdvice(new GlobalExceptionHandler()).
 						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
 	}
 
 	@Test
