@@ -62,7 +62,7 @@ public class PlanResource {
 	
 	private static Logger logger = LoggerFactory.getLogger(PlanResource.class.toString());
 	
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 	
 	private PlanService planService;
