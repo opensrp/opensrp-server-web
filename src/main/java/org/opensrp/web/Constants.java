@@ -18,8 +18,18 @@ public interface Constants {
     String FAILURE = "Failure occurred";
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request.";
     
-    String RETURN_COUNT = "return_count";
-    String TOTAL_RECORDS = "total_records";
+
+	String RETURN_COUNT = "return_count";
+	
+	String TOTAL_RECORDS = "total_records";
+	
+	String PAGE_NUMBER = "pageNumber";
+	
+	String PAGE_SIZE = "pageSize";
+	
+	String ORDER_BY_TYPE = "orderByType";
+	
+	String ORDER_BY_FIELD_NAME = "orderByFieldName";
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";

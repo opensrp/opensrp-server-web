@@ -3,6 +3,12 @@
  */
 package org.opensrp.web.rest;
 
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +17,6 @@ import org.opensrp.domain.Organization;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.slf4j.Logger;
@@ -33,10 +37,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -52,11 +52,7 @@ public class OrganizationResource {
 	private PractitionerService practitionerService;
 	public static Gson gson = new GsonBuilder().create();
 
-	
-	private PhysicalLocationService locationService;
-	
-	private PlanService planService;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 	

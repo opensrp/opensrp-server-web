@@ -239,7 +239,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlan() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
 		when(organizationService.findAssignedLocationsAndPlans(identifier,true, null, null,null,null)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isOk()).andReturn();
@@ -287,7 +287,7 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
+		List<AssignedLocations> expected = getOrganizationLocationsAssigned();
 		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null,null,null)).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
 		        .andExpect(status().isOk()).andReturn();
