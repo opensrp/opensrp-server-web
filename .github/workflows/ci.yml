@@ -22,10 +22,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Start Redis
-      uses: supercharge/redis-github-action@1.1.0
+    - name: Setup  Redis
+      uses: getong/redis-action@v1
       with:
-        redis-version: 5
+        redis password: 'RedI$P@S5'
     - name: Run Unit tests with Maven
       run: mvn -B clean test jacoco:report --file pom.xml --no-transfer-progress
     - name: Set Branch name Environment variable 
