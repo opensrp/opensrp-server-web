@@ -324,7 +324,7 @@ public class ClientResourceTest {
 		List<Client> expected = new ArrayList<>();
 		expected.add(createClient());
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-		
+		when(httpServletRequest.getParameter("locationIds")).thenReturn("123,345");
 		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
 		List<Client> clients = clientResource.search(httpServletRequest);
 		assertEquals(clients.size(),expected.size());
