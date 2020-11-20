@@ -150,6 +150,12 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 
+		String locationIds = getStringFilter("locationIds", request);
+		List<String> locations = StringUtils.isBlank(locationIds) ? new ArrayList<>() :
+				Arrays.asList(locationIds.split(","));
+		if (locations.size() != 0) {
+			searchBean.setLocations(locations);
+		}
 		clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 				lastEdit == null ? null : lastEdit[1]);
 
