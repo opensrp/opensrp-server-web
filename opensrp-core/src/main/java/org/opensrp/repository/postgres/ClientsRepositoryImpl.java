@@ -18,7 +18,9 @@ import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.ClientMetadata;
 import org.opensrp.domain.postgres.ClientMetadataExample;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.StockInfo;
 import org.opensrp.domain.postgres.TargetDetails;
+import org.opensrp.domain.postgres.WebNotification;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.postgres.mapper.custom.CustomClientMapper;
 import org.opensrp.repository.postgres.mapper.custom.CustomClientMetadataMapper;
@@ -343,7 +345,7 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return clientMapper.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
-
+	
 	@Override
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
 		return clientMapper.selectTargetDetails(username, timestamp);
@@ -565,6 +567,17 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public UserLocationTableName getUserLocation(String username) {
 		
 		return clientMapper.selectUserLocation(username);
+	}
+	
+	@Override
+	public List<WebNotification> getWebNotifications(String username, Long timestamp) {
+		
+		return clientMetadataMapper.selectWebNotifications(username, timestamp);
+	}
+	
+	@Override
+	public List<StockInfo> getStockInfos(String username, Long timestamp) {
+		return clientMetadataMapper.selectStockInfos(username, timestamp);
 	}
 	
 }

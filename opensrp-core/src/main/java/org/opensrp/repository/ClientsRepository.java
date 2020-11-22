@@ -7,7 +7,9 @@ import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.StockInfo;
 import org.opensrp.domain.postgres.TargetDetails;
+import org.opensrp.domain.postgres.WebNotification;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 
@@ -61,7 +63,7 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	CustomQuery findTeamInfo(String username);
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId);
-
+	
 	List<TargetDetails> getTargetDetails(String username, Long timestamp);
 	
 	List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId);
@@ -87,4 +89,9 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	UserLocationTableName getUserLocation(String username);
 	
 	String getIsResync(String username);
+	
+	List<WebNotification> getWebNotifications(String username, Long timestamp);
+	
+	List<StockInfo> getStockInfos(String username, Long timestamp);
+	
 }

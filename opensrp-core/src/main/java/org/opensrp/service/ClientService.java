@@ -14,7 +14,9 @@ import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.StockInfo;
 import org.opensrp.domain.postgres.TargetDetails;
+import org.opensrp.domain.postgres.WebNotification;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -333,7 +335,7 @@ public class ClientService {
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
-
+	
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
 		return allClients.getTargetDetails(username, timestamp);
 	}
@@ -428,5 +430,14 @@ public class ClientService {
 	
 	public Client findClientByClientId(Integer clientId, String table) {
 		return allClients.findClientByClientId(clientId, table);
+	}
+	
+	public List<WebNotification> getWebNotifications(String username, Long timestamp) {
+		
+		return allClients.getWebNotifications(username, timestamp);
+	}
+	
+	public List<StockInfo> getStockInfos(String username, Long timestamp) {
+		return allClients.getStockInfos(username, timestamp);
 	}
 }

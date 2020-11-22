@@ -12,6 +12,28 @@
 		join core.client${table} c on cm.client_id = c.id
 	</sql>
 	
+	
+	<resultMap id="webNotification" type="org.opensrp.domain.postgres.WebNotification">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="notification_type" jdbcType="VARCHAR" property="notificationType"/>
+		<result column="title" jdbcType="VARCHAR" property="title"/>
+		<result column="notification" jdbcType="VARCHAR" property="details"/>
+		<result column="send_date" jdbcType="VARCHAR" property="sendDate"/>		
+		<result column="send_time_hour" jdbcType="BIGINT" property="hour"/>
+		<result column="send_time_minute" jdbcType="BIGINT" property="minute"/>
+		<result column="time_stamp" jdbcType="BIGINT" property="timestamp"/>
+	</resultMap>
+	<resultMap id="stockInfo" type="org.opensrp.domain.postgres.StockInfo">
+		<id column="stock_id" jdbcType="BIGINT" property="stockId" />
+		<result column="product_id" jdbcType="BIGINT" property="productId"/>
+		<result column="expirey_date" jdbcType="VARCHAR" property="expireyDate"/>
+		<result column="product_name" jdbcType="VARCHAR" property="productName"/>
+		<result column="quantity" jdbcType="BIGINT" property="quantity"/>		
+		<result column="receive_date" jdbcType="VARCHAR" property="receiveDate"/>		
+		<result column="year_" jdbcType="BIGINT" property="year"/>		
+		<result column="month_" jdbcType="BIGINT" property="month"/>
+		<result column="time_stamp" jdbcType="BIGINT" property="timestamp"/>
+	</resultMap>
 	<sql id="Example_Where_Clause">
 		<where>
 			<foreach collection="example.oredCriteria" item="criteria" separator="or">
@@ -239,5 +261,15 @@
 	<select id="selectIsResync" parameterType="java.lang.String"
 		resultType="String">
 		select u.is_resync from core.users as u where u.username =#{username,jdbcType=VARCHAR}  limit 1
+	</select>
+	
+	<select id="selectWebNotifications"
+		resultMap="webNotification">
+		select * from core.get_web_notification_for_mobile(#{username,jdbcType=VARCHAR},#{timestamp,jdbcType=BIGINT})
+	</select>
+	
+	<select id="selectStockInfos"
+		resultMap="stockInfo">
+		select * from core.get_stok_for_mobile(#{username,jdbcType=VARCHAR},#{timestamp,jdbcType=BIGINT})
 	</select>
 </mapper>
