@@ -23,7 +23,10 @@ jobs:
       with:
         java-version: 11
     - name: Setup  Redis
-      uses: getong/redis-action@v1
+      uses: supercharge/redis-github-action@1.1.0
+      
+    - name: Show running services
+      run: sudo netstat -tuplen # listing all the port for debug purpose.
       
     - name: Run Unit tests with Maven
       run: mvn -B clean test jacoco:report --file pom.xml --no-transfer-progress
