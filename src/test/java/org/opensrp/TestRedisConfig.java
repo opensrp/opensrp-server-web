@@ -15,9 +15,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
@@ -72,7 +69,7 @@ public class TestRedisConfig {
 
 	@Profile("jedis")
 	@Bean
-	CacheManager cacheManager() {
+	private CacheManager cacheManager() {
 		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
 		        .fromConnectionFactory(jedisConnectionFactory());
 		return builder.build();
