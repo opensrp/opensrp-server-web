@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -30,12 +31,16 @@ import org.smartregister.domain.Task.TaskPriority;
 import org.smartregister.domain.Task.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author Samuel Githengi created on 11/23/20
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-it-config.xml", })
 public class TaskResourceIntegrationTest {
 	
 	@Rule
@@ -68,7 +73,7 @@ public class TaskResourceIntegrationTest {
 	@Test
 	public void testCreateBatchShouldGenerateServerVersionWithCorrectOrder() throws Exception {
 		List<Task> tasks = getTasks(1);
-		tasks.parallelStream().forEach(task -> {
+		tasks.stream().forEach(task -> {
 			try {
 				mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
 				        .content(taskResource.gson.toJson(task).getBytes())).andExpect(status().isCreated());
@@ -86,7 +91,8 @@ public class TaskResourceIntegrationTest {
 		List<Task> tasks = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
 			Task task = new Task();
-			task.setGroupIdentifier("groupIdentifier");
+			task.setGroupIdentifier("oa1");
+			task.setPlanIdentifier("plan1");
 			task.setStatus(TaskStatus.READY);
 			task.setPriority(TaskPriority.ROUTINE);
 			task.setIdentifier("id" + i);

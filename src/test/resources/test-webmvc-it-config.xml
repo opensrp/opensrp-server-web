@@ -1,0 +1,72 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd           
+	   http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd   
+	   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<bean id="mvcContentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="true" />
+		<property name="ignoreAcceptHeader" value="true" />
+		<property name="defaultContentType" value="text/html" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="html" value="text/html" />
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+	</bean>
+
+	<util:properties id="opensrp"
+		location="classpath:/opensrp.properties" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="contentNegotiationManager"
+			ref="mvcContentNegotiationManager" />
+		<property name="viewResolvers">
+			<bean
+				class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+				p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+		</property>
+		<property name="defaultViews">
+			<ref bean="mappingJackson2JsonView" />
+		</property>
+	</bean>
+
+	<bean class="org.opensrp.web.config.security.WebConfig" />
+
+	<util:properties id="opensrp"
+		location="classpath:/opensrp.properties" />
+
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+
+	<bean class="org.opensrp.TestSecurityConfig"/>
+	
+	<bean class="org.opensrp.web.GlobalExceptionHandler"/>
+	
+	<context:component-scan base-package="org.opensrp.web" >
+	<context:exclude-filter type="regex" expression="org.opensrp.web.rest.shadow"/>
+	</context:component-scan>
+
+	<sec:http  request-matcher="mvc" auto-config="true" >
+		<sec:csrf disabled="true"/> 
+	</sec:http>
+	
+	 <sec:authentication-manager>  
+      <sec:authentication-provider>  
+        <sec:user-service>  
+        <sec:user name="admin" password="1234" authorities="hasRole(ROLE_USER)" />  
+        </sec:user-service>  
+      </sec:authentication-provider>  
+    </sec:authentication-manager>  
+
+</beans>
