@@ -23,7 +23,7 @@ import com.google.gson.GsonBuilder;
  * @author Samuel Githengi created on 11/12/20 Task V2 API that returns {@link TaskPriority} as enum
  *         name
  */
-@Controller
+@Controller("TaskResourceV2")
 @RequestMapping(value = "/rest/v2/task")
 public class TaskResource extends org.opensrp.web.rest.TaskResource {
 	

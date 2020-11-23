@@ -69,7 +69,7 @@ public class TestRedisConfig {
 
 	@Profile("jedis")
 	@Bean
-	private CacheManager cacheManager() {
+	public CacheManager cacheManager() {
 		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
 		        .fromConnectionFactory(jedisConnectionFactory());
 		return builder.build();
