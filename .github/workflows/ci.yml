@@ -26,6 +26,10 @@ jobs:
       uses: getong/redis-action@v1
       with:
         redis password: 'RedI$P@S5'
+        redis version: '5.0.7'
+    - name: Confirm Redis pass
+      run: docker exec -u 0 `docker ps -q --filter ancestor=redis:5.0.7` bash -c  "grep -r pass /etc/redis"
+      
     - name: Run Unit tests with Maven
       run: mvn -B clean test jacoco:report --file pom.xml --no-transfer-progress
     - name: Set Branch name Environment variable 
