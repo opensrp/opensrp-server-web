@@ -580,4 +580,10 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		return clientMetadataMapper.selectStockInfos(username, timestamp);
 	}
 	
+	@Override
+	public CustomQuery getGuestMaxHealthId(Integer locationId) {
+		
+		return clientMapper.selectGuestMaxHealthId(locationId);
+	}
+	
 }

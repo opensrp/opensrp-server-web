@@ -49,4 +49,7 @@ public interface CustomEventMapper extends EventMapper {
 	int insertHealthId(HealthId healthId);
 	
 	List<CustomQuery> getRoles(@Param("userId") int userId);
+	
+	int insertGuestHealthId(HealthId healthId);
+	
 }

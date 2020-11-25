@@ -637,4 +637,16 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		return convert(eventMetadataMapper.selectBySearchBeanFromFunction(userId, serverVersion, providerId, limit, table));
 	}
 	
+	@Override
+	public List<String> getGuestHouseholdId(Integer maxId) {
+		
+		return eventMetadataMapper.selectGuestHouseholdId(maxId, maxId + 200);
+	}
+	
+	@Override
+	public int insertGuestHealthId(HealthId healthId) {
+		
+		return eventMapper.insertGuestHealthId(healthId);
+	}
+	
 }

@@ -363,6 +363,11 @@ public class ClientService {
 		return allClients.getMaxHealthId(locationId);
 	}
 	
+	public CustomQuery getGuestMaxHealthId(Integer locationId) {
+		// TODO Auto-generated method stub
+		return allClients.getGuestMaxHealthId(locationId);
+	}
+	
 	public void updateAppVersion(String username, String version) {
 		allClients.updateAppVersion(username, version);
 	}

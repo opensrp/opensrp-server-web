@@ -276,6 +276,30 @@ public class UserController {
 		return new ResponseEntity<>(array.toString(), OK);
 	}
 	
+	@RequestMapping(value = "/household/guest/generated-code", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<String> getguestHouseholdUniqueId(@RequestParam("username") String username,
+	                                                        @RequestParam("villageId") String villageId) throws Exception {
+		int[] villageIds = new int[1000];
+		String[] ids = villageId.split(",");
+		for (int i = 0; i < ids.length; i++) {
+			villageIds[i] = Integer.parseInt(ids[i]);
+		}
+		
+		if (villageIds[0] == 0) {
+			CustomQuery user = clientService.getUserId(username);
+			List<CustomQuery> locationIds = clientService.getVillageByProviderId(user.getId(), childRoleId, locationTagId);
+			int i = 0;
+			for (CustomQuery locationId : locationIds) {
+				villageIds[i++] = locationId.getId();
+			}
+		}
+		JSONArray array = new JSONArray();
+		array = eventService.generateGuestHouseholdId(villageIds);
+		
+		return new ResponseEntity<>(array.toString(), OK);
+	}
+	
 	@RequestMapping(value = "/user/status")
 	@ResponseBody
 	public ResponseEntity<String> userStatus(HttpServletRequest request) {

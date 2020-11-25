@@ -258,5 +258,10 @@
 		select * from core.user_location as ul where ul.username = #{username} ; 
 		 	
 	</select>
+	
+	<select id="selectGuestMaxHealthId" parameterType="java.lang.Integer"
+			resultMap="customQueryMap">
+		select coalesce(max(cast(h_id as integer)), 0) as  max_health_id from core.health_id_guest where location_id = #{locationId};
+	</select>
 
 </mapper>

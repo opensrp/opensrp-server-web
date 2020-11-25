@@ -482,4 +482,16 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public List<String> getGuestHouseholdId(Integer maxid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public int insertGuestHealthId(HealthId healthId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

@@ -94,4 +94,6 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	
 	List<StockInfo> getStockInfos(String username, Long timestamp);
 	
+	CustomQuery getGuestMaxHealthId(Integer locationId);
+	
 }

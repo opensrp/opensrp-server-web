@@ -399,6 +399,10 @@ public class EventService {
 		return allEvents.insertHealthId(healthId);
 	}
 	
+	public int insertGuestHealthId(HealthId healthId) {
+		return allEvents.insertGuestHealthId(healthId);
+	}
+	
 	public JSONArray generateHouseholdId(int[] villageIds) throws Exception {
 		JSONArray villageCodes = new JSONArray();
 		for (int i = 0; i < villageIds.length; i++) {
@@ -409,7 +413,6 @@ public class EventService {
 			//List<Integer> listOfInteger = IntStream.rangeClosed(number.getMaxHealthId()+1, number.getMaxHealthId()+HEALTH_ID_LIMIT).boxed().collect(Collectors.toList());
 			//List<String> listOfString = convertIntListToStringList( listOfInteger, s -> StringUtils.leftPad(String.valueOf(s), 4, "0"));
 			List<String> listOfString = allEvents.getHouseholdId(number.getMaxHealthId() + 1);
-			System.err.println(listOfString);
 			
 			HealthId healthId = new HealthId();
 			
@@ -419,6 +422,37 @@ public class EventService {
 			healthId.setStatus(true);
 			
 			long isSaved = insertHealthId(healthId);
+			if (isSaved > 0) {
+				JSONObject villageCode = new JSONObject();
+				villageCode.put("village_id", villageIds[i]);
+				JSONArray ids = new JSONArray();
+				for (String healthId1 : listOfString) {
+					ids.put(healthId1);
+				}
+				villageCode.put("generated_code", ids);
+				villageCodes.put(villageCode);
+			}
+		}
+		return villageCodes;
+	}
+	
+	public JSONArray generateGuestHouseholdId(int[] villageIds) throws Exception {
+		JSONArray villageCodes = new JSONArray();
+		for (int i = 0; i < villageIds.length; i++) {
+			if (villageIds[i] == 0)
+				break;
+			CustomQuery number = clientService.getGuestMaxHealthId(villageIds[i]);
+			
+			List<String> listOfString = allEvents.getGuestHouseholdId(number.getMaxHealthId() + 1);
+			
+			HealthId healthId = new HealthId();
+			
+			healthId.setCreated(new Date());
+			healthId.sethId(String.valueOf(number.getMaxHealthId() + HEALTH_ID_LIMIT));
+			healthId.setLocationId(villageIds[i]);
+			healthId.setStatus(true);
+			
+			long isSaved = insertGuestHealthId(healthId);
 			if (isSaved > 0) {
 				JSONObject villageCode = new JSONObject();
 				villageCode.put("village_id", villageIds[i]);
