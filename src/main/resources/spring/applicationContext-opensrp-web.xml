@@ -19,47 +19,6 @@
     <import resource="classpath:applicationContext-opensrp.xml"/>
 	<import resource="classpath:applicationContext-connector.xml"/>
 
-    <mvc:default-servlet-handler/>
-    <!--     <tx:annotation-driven proxy-target-class="true" />
-        <aop:aspectj-autoproxy proxy-target-class="true"/>-->
-
-    <context:annotation-config/>
-
-    <context:component-scan base-package="org.opensrp.web"/>
-
-    <mvc:annotation-driven/>
-    <bean id="multipartResolver"
-          class="org.opensrp.web.config.multipartresolver.PostAndPutCommonsMultipartResolver">
-        <!-- max upload size in bytes -->
-        <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
-    </bean>
-       
-   <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-        <property name="favorPathExtension" value="true" />
-        <property name="ignoreAcceptHeader" value="true"/>
-        <property name="defaultContentType" value="text/html" />
-        <property name="mediaTypes">
-            <map>
-               <entry key="html" value="text/html"/>
-               <entry key="json" value="application/json"/>
-           </map>
-        </property>
-    </bean>
-   
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-      	<property name="contentNegotiationManager" ref="mvcContentNegotiationManager"/>
-        <property name="viewResolvers">
-            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-                  p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp"/>
-        </property>
-        <property name="defaultViews">
-                   <ref bean="mappingJackson2JsonView"/>
-        </property>
-    </bean>
-    <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
-	<mvc:annotation-driven/>
-
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
     <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
