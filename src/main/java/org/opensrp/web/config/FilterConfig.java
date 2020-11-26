@@ -39,31 +39,13 @@ public class FilterConfig {
 	}
 
 	@Bean
-	public FilterRegistrationBean springSessionRepositoryFilter() {
-		return createFilterRegistration(new DelegatingFilterProxy(), new HashMap<>(), null);
-	}
-
-	@Bean
 	public FilterRegistrationBean httpMethodFilter() {
 		return createFilterRegistration(new HiddenHttpMethodFilter(), new HashMap<>(), null);
 	}
 
 	@Bean
-	public FilterRegistrationBean characterEncodingFilter() {
-		return createFilterRegistration(new CharacterEncodingFilter(), new HashMap<>(){{
-			put("encoding", "UTF-8");
-			put("forceEncoding", "true");
-		}}, null);
-	}
-
-	@Bean
 	public FilterRegistrationBean authenticationFilter() {
 		return createFilterRegistration(new AuthenticationFilter(), new HashMap<>(), "/authenticate-user/");
-	}
-
-	@Bean
-	public FilterRegistrationBean springSecurityFilterChain() {
-		return createFilterRegistration(new DelegatingFilterProxy(), new HashMap<>(), null);
 	}
 
 	private FilterRegistrationBean createFilterRegistration(Filter filter, Map<String, String> initParams, String urlPattern) {
