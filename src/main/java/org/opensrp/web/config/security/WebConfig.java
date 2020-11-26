@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * @author Samuel Githengi created on 03/18/20
  */
 @Configuration
-@EnableWebMvc
 @EnableAsync
 public class WebConfig {
 	
