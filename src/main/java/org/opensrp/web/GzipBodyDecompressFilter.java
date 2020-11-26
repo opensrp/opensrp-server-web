@@ -15,6 +15,7 @@ import java.util.zip.GZIPInputStream;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
@@ -130,7 +131,22 @@ public class GzipBodyDecompressFilter implements Filter {
 		public ServletInputStream getInputStream() throws IOException {
 			final ByteArrayInputStream sourceStream = new ByteArrayInputStream(bytes);
 			return new ServletInputStream() {
-				
+
+				@Override
+				public boolean isFinished() {
+					return sourceStream.available() == 0;
+				}
+
+				@Override
+				public boolean isReady() {
+					return true;
+				}
+
+				@Override
+				public void setReadListener(ReadListener readListener) {
+
+				}
+
 				public int read() throws IOException {
 					return sourceStream.read();
 				}

@@ -8,8 +8,6 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.filter.CharacterEncodingFilter;
-import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import javax.servlet.Filter;
