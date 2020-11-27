@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -182,4 +183,20 @@ public class RestUtils {
 		}
 		return null;
 	}
+
+	public static void writeToZipFile(URI uri, ZipOutputStream zipStream) throws FileNotFoundException, IOException {
+		System.out.println("Writing file : '" + uri + "' to zip file");
+		File aFile = new File(uri);
+		FileInputStream fis = new FileInputStream(aFile);
+		ZipEntry zipEntry = new ZipEntry(uri.getPath());
+		zipStream.putNextEntry(zipEntry);
+		byte[] bytes = new byte[1024];
+		int length;
+		while ((length = fis.read(bytes)) >= 0) {
+			zipStream.write(bytes, 0, length);
+		}
+		zipStream.closeEntry();
+		fis.close();
+	}
+
 }

@@ -12,28 +12,42 @@ import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.rest.RestUtils.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.IdentifierSource;
+import org.opensrp.dto.CsvBulkImportDataSummary;
+import org.opensrp.dto.ExportEventDataSummary;
+import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
@@ -51,6 +65,9 @@ import org.smartregister.domain.Event;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,10 +76,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
@@ -88,6 +102,8 @@ public class EventResource extends RestResource<Event> {
 	private static final String IS_DELETED = "is_deleted";
 	
 	private static final String FALSE = "false";
+
+	private static final String SAMPLE_CSV_FILE = "/";
 	
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
@@ -537,6 +553,65 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@GetMapping(value = "/export-data", produces = "application/zip")
+	public ResponseEntity<ByteArrayResource> exportEventData(@RequestParam List<String> eventTypes,
+			@RequestParam String planIdentifier,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) throws IOException {
+
+		FileOutputStream fos = null;
+		ZipOutputStream zipOS = null;
+		String exportDataFileName;
+		String missionName = "";
+		String eventTypeName;
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		String formatted = "";
+		String zipFileName = "";
+		boolean firstTime = true;
+
+		for (String eventType : eventTypes) {
+			ExportEventDataSummary exportEventDataSummary = eventService
+					.exportEventData(planIdentifier, eventType, null, null);
+			missionName = exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase();
+			eventTypeName = eventType.replaceAll("\\s+", "_");
+
+			formatted = df.format(new Date());
+			File csvFile = null;
+			zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
+			if (firstTime) {
+				fos = new FileOutputStream(zipFileName);
+				zipOS = new ZipOutputStream(fos);
+			}
+			try {
+				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted;
+				csvFile = new File(exportDataFileName);
+				URI uri = csvFile.toURI();
+				generateCSV(exportEventDataSummary, uri);
+				writeToZipFile(uri, zipOS);
+				firstTime = false;
+			}
+
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		zipOS.close();
+		fos.close();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+		Path path = Paths.get(zipFileName);
+		byte[] data = Files.readAllBytes(path);
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + path.getFileName().toString())
+				.contentType(MediaType.parseMediaType("application/zip"))
+				.contentLength(data.length)
+				.body(resource);
+	}
 	
 	public void setEventService(EventService eventService) {
 		this.eventService = eventService;
@@ -545,5 +620,18 @@ public class EventResource extends RestResource<Event> {
 	public void setClientService(ClientService clientService) {
 		this.clientService = clientService;
 	}
-	
+
+	private void generateCSV(ExportEventDataSummary exportEventDataSummary, URI uri) throws IOException {
+
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
+		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+
+		for (List<Object> rows : exportEventDataSummary.getRowsData()) {
+				csvPrinter.printRecord(rows);
+			csvPrinter.printRecord("\n");
+		}
+		csvPrinter.flush();
+	}
+
+
 }
