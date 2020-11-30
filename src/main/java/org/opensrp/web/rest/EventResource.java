@@ -571,8 +571,8 @@ public class EventResource extends RestResource<Event> {
 		boolean firstTime = true;
 
 		for (String eventType : eventTypes) {
-			ExportEventDataSummary exportEventDataSummary = eventService
-					.exportEventData(planIdentifier, eventType, null, null);
+			ExportEventDataSummary exportEventDataSummary = eventService.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+
 			missionName = exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase();
 			eventTypeName = eventType.replaceAll("\\s+", "_");
 
@@ -587,13 +587,15 @@ public class EventResource extends RestResource<Event> {
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted;
 				csvFile = new File(exportDataFileName);
 				URI uri = csvFile.toURI();
-				generateCSV(exportEventDataSummary, uri);
+				if(exportEventDataSummary != null) {
+					generateCSV(exportEventDataSummary, uri);
+				}
 				writeToZipFile(uri, zipOS);
 				firstTime = false;
 			}
 
 			catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Exception occurred ");
 			}
 		}
 		zipOS.close();
