@@ -476,7 +476,7 @@ public class TaskResourceTest {
 		int totalRecords = 5;
 		when(taskService.getTasksBySearchBean(any(TaskSearchBean.class))).thenReturn(tasks);
 		when(taskService.findTaskCountBySearchBean(any(TaskSearchBean.class))).thenReturn(totalRecords);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/search/tasks-and-count")
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/search")
 				.param("planIdentifier", "d92851b2-e01b-5176-a24c-33635e3fe056")
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andReturn();
