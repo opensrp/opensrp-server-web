@@ -6,9 +6,14 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +26,7 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.TaskUpdate;
+import org.opensrp.search.TaskSearchBean;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.dto.TaskDto;
@@ -281,6 +287,35 @@ public class TaskResource {
 		modelMap.put("count", countOfTasks != null ? countOfTasks : 0);
 		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
+
+	@RequestMapping(value = "/search/tasks-and-count", method = RequestMethod.GET, consumes = {
+			MediaType.APPLICATION_JSON_VALUE },
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getOptionalTasksWithCount(@RequestParam(value = "planIdentifier") String planIdentifier,
+			@RequestParam(value = "groupIdentifiers", required = false) List<String> groupIdentifiers,
+			@RequestParam(value = "code", required = false) String code,
+			@RequestParam(value = "status", required = false) String status,
+			@RequestParam(value = "businessStatus", required = false) String businessStatus,
+			@RequestParam(value = "returnTaskCountOnly", required = false) boolean returnTaskCountOnly,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		TaskSearchBean taskSearchBean = createTaskSearchBean(planIdentifier, groupIdentifiers, code, status, businessStatus,
+				pageNumber, pageSize, orderByType, orderByFieldName);
+		int taskCount = taskService.findTaskCountBySearchBean(taskSearchBean);
+		headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
+		List<Task> tasks;
+		if (returnTaskCountOnly) {
+			tasks = new ArrayList<>();
+		} else {
+			tasks = taskService.getTasksBySearchBean(taskSearchBean);
+		}
+
+		return new ResponseEntity<>(gson.toJson(tasks), headers, HttpStatus.OK);
+	}
 	
 	/**
 	 * Converts a Task to DTO object so that data model for V1 API is maintained
@@ -328,6 +363,26 @@ public class TaskResource {
 	 */
 	public List<Task> convertToDomain(List<TaskDto> taskList) {
 		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
+	}
+
+	private TaskSearchBean createTaskSearchBean(String planIdentifier, List<String> groupIdentifiers, String code,
+			String status, String businessStatus, Integer pageNumber,Integer pageSize, String orderByType,
+			String orderByFieldName) {
+		TaskSearchBean taskSearchBean = new TaskSearchBean();
+		taskSearchBean.setPlanIdentifier(planIdentifier);
+		taskSearchBean.setGroupIdentifiers(groupIdentifiers);
+		taskSearchBean.setCode(code);
+		taskSearchBean.setStatus(status);
+		taskSearchBean.setBusinessStatus(businessStatus);
+		taskSearchBean.setPageNumber(pageNumber);
+		taskSearchBean.setPageSize(pageSize);
+		if(orderByType != null) {
+			taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if(orderByFieldName != null) {
+			taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		return taskSearchBean;
 	}
 	
 }
