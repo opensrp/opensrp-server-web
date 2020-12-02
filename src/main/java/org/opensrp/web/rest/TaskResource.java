@@ -288,7 +288,7 @@ public class TaskResource {
 		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/search/tasks-and-count", method = RequestMethod.GET, consumes = {
+	@RequestMapping(value = "/search", method = RequestMethod.GET, consumes = {
 			MediaType.APPLICATION_JSON_VALUE },
 			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getOptionalTasksWithCount(@RequestParam(value = "planIdentifier") String planIdentifier,
