@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +31,7 @@ import org.opensrp.search.TaskSearchBean;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.dto.TaskDto;
+import org.opensrp.web.dto.TaskSearchCriteria;
 import org.opensrp.web.dto.TaskSyncRequestWrapper;
 import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
@@ -48,6 +50,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +67,7 @@ import com.google.gson.reflect.TypeToken;
  */
 @Controller
 @Primary
+@Validated
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
 	
@@ -288,27 +292,17 @@ public class TaskResource {
 		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/search", method = RequestMethod.GET, consumes = {
+	@RequestMapping(value = "/search/byCriteria", method = RequestMethod.GET, consumes = {
 			MediaType.APPLICATION_JSON_VALUE },
 			produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getOptionalTasksWithCount(@RequestParam(value = "planIdentifier") String planIdentifier,
-			@RequestParam(value = "groupIdentifiers", required = false) List<String> groupIdentifiers,
-			@RequestParam(value = "code", required = false) String code,
-			@RequestParam(value = "status", required = false) String status,
-			@RequestParam(value = "businessStatus", required = false) String businessStatus,
-			@RequestParam(value = "returnTaskCountOnly", required = false) boolean returnTaskCountOnly,
-			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
-			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
-			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchCriteria taskSearchCriteria) {
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
-		TaskSearchBean taskSearchBean = createTaskSearchBean(planIdentifier, groupIdentifiers, code, status, businessStatus,
-				pageNumber, pageSize, orderByType, orderByFieldName);
+		TaskSearchBean taskSearchBean = createTaskSearchBean(taskSearchCriteria);
 		int taskCount = taskService.findTaskCountBySearchBean(taskSearchBean);
 		headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 		List<Task> tasks;
-		if (returnTaskCountOnly) {
+		if (taskSearchCriteria != null && taskSearchCriteria.isReturnTaskCountOnly()) {
 			tasks = new ArrayList<>();
 		} else {
 			tasks = taskService.getTasksBySearchBean(taskSearchBean);
@@ -365,23 +359,24 @@ public class TaskResource {
 		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
 	}
 
-	private TaskSearchBean createTaskSearchBean(String planIdentifier, List<String> groupIdentifiers, String code,
-			String status, String businessStatus, Integer pageNumber,Integer pageSize, String orderByType,
-			String orderByFieldName) {
+	private TaskSearchBean createTaskSearchBean(TaskSearchCriteria taskSearchCriteria) {
 		TaskSearchBean taskSearchBean = new TaskSearchBean();
-		taskSearchBean.setPlanIdentifier(planIdentifier);
-		taskSearchBean.setGroupIdentifiers(groupIdentifiers);
-		taskSearchBean.setCode(code);
-		taskSearchBean.setStatus(status);
-		taskSearchBean.setBusinessStatus(businessStatus);
-		taskSearchBean.setPageNumber(pageNumber);
-		taskSearchBean.setPageSize(pageSize);
-		if(orderByType != null) {
-			taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(orderByType));
+		if(taskSearchCriteria != null) {
+			taskSearchBean.setPlanIdentifier(taskSearchCriteria.getPlanIdentifier());
+			taskSearchBean.setGroupIdentifiers(taskSearchCriteria.getGroupIdentifiers());
+			taskSearchBean.setCode(taskSearchCriteria.getCode());
+			taskSearchBean.setStatus(taskSearchCriteria.getStatus());
+			taskSearchBean.setBusinessStatus(taskSearchCriteria.getBusinessStatus());
+			taskSearchBean.setPageNumber(taskSearchCriteria.getPageNumber());
+			taskSearchBean.setPageSize(taskSearchCriteria.getPageSize());
+			if(taskSearchCriteria.getOrderByType() != null) {
+				taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(taskSearchCriteria.getOrderByType()));
+			}
+			if(taskSearchCriteria.getOrderByFieldName() != null) {
+				taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(taskSearchCriteria.getOrderByFieldName()));
+			}
 		}
-		if(orderByFieldName != null) {
-			taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(orderByFieldName));
-		}
+
 		return taskSearchBean;
 	}
 	
