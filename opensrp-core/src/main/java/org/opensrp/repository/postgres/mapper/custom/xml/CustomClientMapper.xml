@@ -17,6 +17,8 @@
 		<result column="first_name" jdbcType="VARCHAR" property="firstName"/>
 		<result column="last_name" jdbcType="VARCHAR" property="lastName"/>
 		<result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
+		<result column="provider_username" jdbcType="VARCHAR" property="providerUsername"/>
+		<result column="provider_fullname" jdbcType="VARCHAR" property="providerFullname"/>
 	</resultMap>
 	<resultMap id="targetDetails" type="org.opensrp.domain.postgres.TargetDetails">
 		<id column="username" jdbcType="VARCHAR" property="username" />

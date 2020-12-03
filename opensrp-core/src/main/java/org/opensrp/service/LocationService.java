@@ -90,8 +90,8 @@ public class LocationService {
 		JSONArray locations = new JSONArray();
 		JSONObject fullLocation = new JSONObject();
 
-		int counter = 0, limit = 0;
-		String username = "";
+		int counter = 0, limit = 0, ssId = 0;
+		String username = "", providerName = "", ssfullName = "", providerUsername = "";
 
 		for (CustomQuery treeDTO: treeDTOS) {
 			counter++;
@@ -102,7 +102,10 @@ public class LocationService {
 					locations.put(fullLocation);
 					object.put("username", username.trim());
 					object.put("locations", locations);
-					object.put("full_name", fullName);
+					object.put("full_name", providerName);
+					object.put("sk_username", providerUsername);
+					object.put("ss_id", ssId);
+					object.put("ss_fullname", ssfullName);
 					object.put("simprints_enable", enable);
 					locationTree.put(object);
 					locations = new JSONArray();
@@ -114,6 +117,10 @@ public class LocationService {
 			}
 
 			username = treeDTO.getFirstName();
+			providerName = treeDTO.getProviderFullname();
+			providerUsername = treeDTO.getProviderUsername();
+			ssId = treeDTO.getMemberId();
+			ssfullName = (treeDTO.getFirstName().substring(0, treeDTO.getFirstName().indexOf("(")) + " " +treeDTO.getLastName()).trim();
 
 			if (treeDTO.getLocationTagName().equalsIgnoreCase("country")) {
 				if (counter > 1) {
@@ -138,7 +145,10 @@ public class LocationService {
 				locations.put(fullLocation);
 				object.put("username", username.trim());
 				object.put("locations", locations);
-				object.put("full_name", fullName);
+				object.put("full_name", providerName);
+				object.put("sk_username", providerUsername);
+				object.put("ss_full_name", ssfullName);
+				object.put("ss_id", ssId);
 				object.put("simprints_enable", enable);
 				locationTree.put(object);
 				object = new JSONObject();
