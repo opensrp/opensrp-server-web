@@ -218,4 +218,12 @@
 			resultMap="BaseEventResultMap">	
 		select id,json from core.sync_data(#{table,jdbcType=VARCHAR},#{serverVersion,jdbcType=BIGINT},#{userId}) ; 
 	</select>
+	
+	<select id="selectGuestHouseholdId" parameterType="java.lang.Integer"
+		resultType="java.lang.String">
+		select
+		 	LPAD(n::text, (case when length(n::text)>=5 then length(n::text) else 5 end), '0')
+		from
+		 	generate_series(${maxId}, ${maxIdPlus}) as x(n) order by x.n
+	</select>
 </mapper>

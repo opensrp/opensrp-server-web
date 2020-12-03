@@ -39,9 +39,8 @@ public interface CustomClientMapper extends ClientMapper {
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(@Param("memberId") int memberId,
 	                                                     @Param("childRoleId") int childRoleId);
-
-	List<TargetDetails> selectTargetDetails(@Param("username") String username,
-											@Param("targetTimestamp") Long timestamp);
+	
+	List<TargetDetails> selectTargetDetails(@Param("username") String username, @Param("targetTimestamp") Long timestamp);
 	
 	List<CustomQuery> getVillageByProviderId(@Param("memberId") int memberId, @Param("childRoleId") int childRoleId,
 	                                         @Param("locationTagId") int locationTagId);
@@ -63,4 +62,6 @@ public interface CustomClientMapper extends ClientMapper {
 	CustomQuery imeiCheck(@Param("imeiNumber") String imeiNumber);
 	
 	UserLocationTableName selectUserLocation(@Param("username") String username);
+	
+	CustomQuery selectGuestMaxHealthId(@Param("locationId") Integer locationId);
 }

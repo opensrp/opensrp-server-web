@@ -16,7 +16,9 @@ import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
+import org.opensrp.domain.postgres.StockInfo;
 import org.opensrp.domain.postgres.TargetDetails;
+import org.opensrp.domain.postgres.WebNotification;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.lucene.LuceneClientRepository;
 import org.opensrp.search.AddressSearchBean;
@@ -221,7 +223,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return null;
 	}
-
+	
 	@Override
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
 		return null;
@@ -453,6 +455,24 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public UserLocationTableName getUserLocation(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<WebNotification> getWebNotifications(String username, Long timestamp) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<StockInfo> getStockInfos(String username, Long timestamp) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public CustomQuery getGuestMaxHealthId(Integer locationId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

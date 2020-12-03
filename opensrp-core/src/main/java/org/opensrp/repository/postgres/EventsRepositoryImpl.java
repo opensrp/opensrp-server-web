@@ -71,7 +71,7 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		pgEvent.setProviderId(entity.getProviderId());
 		pgEvent.setBaseEntityId(entity.getBaseEntityId());
 		pgEvent.setFormSubmissionId(entity.getFormSubmissionId());
-		pgEvent.setEventType(entity.getEntityType());
+		pgEvent.setEventType(entity.getEventType());
 		int rowsAffected = eventMapper.insertSelectiveAndSetId(pgEvent);
 		if (rowsAffected < 1 || pgEvent.getId() == null) {
 			return;
@@ -114,7 +114,7 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		pgEvent.setProviderId(entity.getProviderId());
 		pgEvent.setBaseEntityId(entity.getBaseEntityId());
 		pgEvent.setFormSubmissionId(entity.getFormSubmissionId());
-		pgEvent.setEventType(entity.getEntityType());
+		pgEvent.setEventType(entity.getEventType());
 		EventMetadata eventMetadata = createMetadata(entity, id);
 		if (eventMetadata == null) {
 			return;
@@ -635,6 +635,18 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 	public List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table) {
 		
 		return convert(eventMetadataMapper.selectBySearchBeanFromFunction(userId, serverVersion, providerId, limit, table));
+	}
+	
+	@Override
+	public List<String> getGuestHouseholdId(Integer maxId) {
+		
+		return eventMetadataMapper.selectGuestHouseholdId(maxId, maxId + 200);
+	}
+	
+	@Override
+	public int insertGuestHealthId(HealthId healthId) {
+		
+		return eventMapper.insertGuestHealthId(healthId);
 	}
 	
 }

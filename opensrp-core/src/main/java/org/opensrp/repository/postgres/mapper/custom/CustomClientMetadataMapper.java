@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.opensrp.domain.postgres.Client;
 import org.opensrp.domain.postgres.ClientMetadataExample;
+import org.opensrp.domain.postgres.StockInfo;
+import org.opensrp.domain.postgres.WebNotification;
 import org.opensrp.repository.postgres.mapper.ClientMetadataMapper;
 import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
@@ -30,4 +32,9 @@ public interface CustomClientMetadataMapper extends ClientMetadataMapper {
 	Client findClientByClientId(@Param("clientId") Integer clientId, @Param("table") String table);
 	
 	String selectIsResync(String username);
+	
+	List<WebNotification> selectWebNotifications(@Param("username") String username, @Param("timestamp") Long timestamp);
+	
+	List<StockInfo> selectStockInfos(@Param("username") String username, @Param("timestamp") Long timestamp);
+	
 }
