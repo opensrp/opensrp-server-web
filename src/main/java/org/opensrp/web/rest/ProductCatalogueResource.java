@@ -50,6 +50,8 @@ public class ProductCatalogueResource {
 			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
 			@RequestParam(value = "serverVersion", required = false) String serverVersion) {
 
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
@@ -60,15 +62,12 @@ public class ProductCatalogueResource {
 		productCatalogueSearchBean.setUniqueId(uniqueId);
 		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean);
+		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, baseUrl);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" })
 	public ResponseEntity<String> create(@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
-
-		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
-				DOWNLOAD_PHOTO_END_POINT;
 
 		try {
 			productCatalogueService.add(productCatalogue);
@@ -88,7 +87,7 @@ public class ProductCatalogueResource {
 					logger.info("Saving multimedia file...");
 					multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 				}
-				createdProductCatalogue.setPhotoURL(baseUrl + createdProductCatalogue.getUniqueId());
+				createdProductCatalogue.setPhotoURL(DOWNLOAD_PHOTO_END_POINT + createdProductCatalogue.getUniqueId());
 				productCatalogueService.update(createdProductCatalogue);
 			}
 
@@ -107,12 +106,9 @@ public class ProductCatalogueResource {
 			@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
 
-		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
-				DOWNLOAD_PHOTO_END_POINT;
-
 		try {
 			if(file != null) {
-				productCatalogue.setPhotoURL(baseUrl + productCatalogue.getUniqueId());
+				productCatalogue.setPhotoURL(DOWNLOAD_PHOTO_END_POINT + productCatalogue.getUniqueId());
 			}
 
 			productCatalogueService.update(productCatalogue);
@@ -152,6 +148,7 @@ public class ProductCatalogueResource {
 	@GetMapping(value = "/{id}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ProductCatalogue getByUniqueId(@PathVariable("id") Long uniqueId) {
-		return productCatalogueService.getProductCatalogue(uniqueId);
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+		return productCatalogueService.getProductCatalogue(uniqueId, baseUrl);
 	}
 }
