@@ -288,8 +288,7 @@ public class TaskResource {
 		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/search/byCriteria", method = RequestMethod.GET, consumes = {
-			MediaType.APPLICATION_JSON_VALUE },
+	@RequestMapping(value = "/search", method = RequestMethod.GET,
 			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchCriteria taskSearchCriteria) {
 
