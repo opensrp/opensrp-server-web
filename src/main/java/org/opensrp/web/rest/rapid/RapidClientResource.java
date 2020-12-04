@@ -246,11 +246,5 @@ static Map<String, String[]> vs = new HashMap<String, String[]>(){{
 
 	    return null;
 	}
-	
-public static void main(String[] args) {
-	System.out.println(new DateTime(new Date()));
-	System.out.println("vp".substring("vp".length()-1).matches("[0-9]"));
-	System.out.println(makeVaccineCard(new ArrayList<Event>(), eligibleVaccines(8)));
-}
 }
 

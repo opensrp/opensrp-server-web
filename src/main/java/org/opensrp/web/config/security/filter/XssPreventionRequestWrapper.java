@@ -12,6 +12,7 @@ import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -116,6 +117,27 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		@Override
 		public int read() throws IOException {
 			return stream.read();
+		}
+
+		@Override
+		public boolean isFinished() {
+			try {
+				return stream.available() == 0;
+			}
+			catch (IOException e) {
+				logger.error("Error checking if stream is available", e);
+			}
+			return true;
+		}
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+
 		}
 	}
 

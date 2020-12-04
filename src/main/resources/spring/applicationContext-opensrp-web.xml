@@ -2,63 +2,16 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
-       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
-       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
-       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+	   xmlns:util="http://www.springframework.org/schema/util">
+
     <context:property-placeholder
             location="classpath*:maven.properties,classpath*:opensrp.properties"/>
+	<util:properties id="opensrp" location="classpath:/opensrp.properties" />
 
-    <import resource="classpath:applicationContext-opensrp.xml"/>
+<!--    <import resource="classpath:applicationContext-opensrp.xml"/>-->
 	<import resource="classpath:applicationContext-connector.xml"/>
-
-    <mvc:default-servlet-handler/>
-    <!--     <tx:annotation-driven proxy-target-class="true" />
-        <aop:aspectj-autoproxy proxy-target-class="true"/>-->
-
-    <context:annotation-config/>
-
-    <context:component-scan base-package="org.opensrp.web"/>
-
-    <mvc:annotation-driven/>
-    <bean id="multipartResolver"
-          class="org.opensrp.web.config.multipartresolver.PostAndPutCommonsMultipartResolver">
-        <!-- max upload size in bytes -->
-        <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
-    </bean>
-       
-   <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-        <property name="favorPathExtension" value="true" />
-        <property name="ignoreAcceptHeader" value="true"/>
-        <property name="defaultContentType" value="text/html" />
-        <property name="mediaTypes">
-            <map>
-               <entry key="html" value="text/html"/>
-               <entry key="json" value="application/json"/>
-           </map>
-        </property>
-    </bean>
-   
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-      	<property name="contentNegotiationManager" ref="mvcContentNegotiationManager"/>
-        <property name="viewResolvers">
-            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-                  p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp"/>
-        </property>
-        <property name="defaultViews">
-                   <ref bean="mappingJackson2JsonView"/>
-        </property>
-    </bean>
-    <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
-	<mvc:annotation-driven/>
 
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
