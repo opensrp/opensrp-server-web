@@ -352,25 +352,4 @@ public class TaskResource {
 		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
 	}
 
-//	private TaskSearchBean createTaskSearchBean(TaskSearchCriteria taskSearchCriteria) {
-//		TaskSearchBean taskSearchBean = new TaskSearchBean();
-//		if(taskSearchCriteria != null) {
-//			taskSearchBean.setPlanIdentifier(taskSearchCriteria.getPlanIdentifier());
-//			taskSearchBean.setGroupIdentifiers(taskSearchCriteria.getGroupIdentifiers());
-//			taskSearchBean.setCode(taskSearchCriteria.getCode());
-//			taskSearchBean.setStatus(taskSearchCriteria.getStatus());
-//			taskSearchBean.setBusinessStatus(taskSearchCriteria.getBusinessStatus());
-//			taskSearchBean.setPageNumber(taskSearchCriteria.getPageNumber());
-//			taskSearchBean.setPageSize(taskSearchCriteria.getPageSize());
-//			if(taskSearchCriteria.getOrderByType() != null) {
-//				taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(taskSearchCriteria.getOrderByType()));
-//			}
-//			if(taskSearchCriteria.getOrderByFieldName() != null) {
-//				taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(taskSearchCriteria.getOrderByFieldName()));
-//			}
-//		}
-//
-//		return taskSearchBean;
-//	}
-	
 }
