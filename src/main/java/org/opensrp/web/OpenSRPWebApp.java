@@ -23,7 +23,9 @@ import org.springframework.context.annotation.ImportResource;
 				"org.opensrp.service.FormSubmissionDataMigrationService",
 				"org.opensrp.referrals.*",
 				"org.opensrp.connector.dhis2.DHIS2SyncerListener",
-				"org.opensrp.connector.dhis2.VaccinationTracker"
+				"org.opensrp.connector.dhis2.VaccinationTracker",
+				"org.opensrp.connector.openmrs.schedule.OpenmrsSyncerListener",
+				"org.opensrp.connector.openmrs.schedule.OpenmrsValidateDataSync"
 		})})
 @ImportResource({"classpath:spring/applicationContext-opensrp-web.xml"})
 public class OpenSRPWebApp {
