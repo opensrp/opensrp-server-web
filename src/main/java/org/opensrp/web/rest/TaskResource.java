@@ -27,7 +27,6 @@ import org.opensrp.search.TaskSearchBean;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.dto.TaskDto;
-import org.opensrp.web.dto.TaskSearchCriteria;
 import org.opensrp.web.dto.TaskSyncRequestWrapper;
 import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
@@ -290,14 +289,13 @@ public class TaskResource {
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET,
 			produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchCriteria taskSearchCriteria) {
+	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchBean taskSearchBean) {
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
-		TaskSearchBean taskSearchBean = createTaskSearchBean(taskSearchCriteria);
 		int taskCount = taskService.findTaskCountBySearchBean(taskSearchBean);
 		headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 		List<Task> tasks;
-		if (taskSearchCriteria != null && taskSearchCriteria.isReturnTaskCountOnly()) {
+		if (taskSearchBean != null && taskSearchBean.isReturnTaskCountOnly()) {
 			tasks = new ArrayList<>();
 		} else {
 			tasks = taskService.getTasksBySearchBean(taskSearchBean);
@@ -354,25 +352,25 @@ public class TaskResource {
 		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
 	}
 
-	private TaskSearchBean createTaskSearchBean(TaskSearchCriteria taskSearchCriteria) {
-		TaskSearchBean taskSearchBean = new TaskSearchBean();
-		if(taskSearchCriteria != null) {
-			taskSearchBean.setPlanIdentifier(taskSearchCriteria.getPlanIdentifier());
-			taskSearchBean.setGroupIdentifiers(taskSearchCriteria.getGroupIdentifiers());
-			taskSearchBean.setCode(taskSearchCriteria.getCode());
-			taskSearchBean.setStatus(taskSearchCriteria.getStatus());
-			taskSearchBean.setBusinessStatus(taskSearchCriteria.getBusinessStatus());
-			taskSearchBean.setPageNumber(taskSearchCriteria.getPageNumber());
-			taskSearchBean.setPageSize(taskSearchCriteria.getPageSize());
-			if(taskSearchCriteria.getOrderByType() != null) {
-				taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(taskSearchCriteria.getOrderByType()));
-			}
-			if(taskSearchCriteria.getOrderByFieldName() != null) {
-				taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(taskSearchCriteria.getOrderByFieldName()));
-			}
-		}
-
-		return taskSearchBean;
-	}
+//	private TaskSearchBean createTaskSearchBean(TaskSearchCriteria taskSearchCriteria) {
+//		TaskSearchBean taskSearchBean = new TaskSearchBean();
+//		if(taskSearchCriteria != null) {
+//			taskSearchBean.setPlanIdentifier(taskSearchCriteria.getPlanIdentifier());
+//			taskSearchBean.setGroupIdentifiers(taskSearchCriteria.getGroupIdentifiers());
+//			taskSearchBean.setCode(taskSearchCriteria.getCode());
+//			taskSearchBean.setStatus(taskSearchCriteria.getStatus());
+//			taskSearchBean.setBusinessStatus(taskSearchCriteria.getBusinessStatus());
+//			taskSearchBean.setPageNumber(taskSearchCriteria.getPageNumber());
+//			taskSearchBean.setPageSize(taskSearchCriteria.getPageSize());
+//			if(taskSearchCriteria.getOrderByType() != null) {
+//				taskSearchBean.setOrderByType(TaskSearchBean.OrderByType.valueOf(taskSearchCriteria.getOrderByType()));
+//			}
+//			if(taskSearchCriteria.getOrderByFieldName() != null) {
+//				taskSearchBean.setOrderByFieldName(TaskSearchBean.FieldName.valueOf(taskSearchCriteria.getOrderByFieldName()));
+//			}
+//		}
+//
+//		return taskSearchBean;
+//	}
 	
 }
