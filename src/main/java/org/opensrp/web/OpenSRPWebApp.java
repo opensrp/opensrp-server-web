@@ -2,6 +2,8 @@ package org.opensrp.web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ImportResource;
 
 /**
@@ -9,6 +11,18 @@ import org.springframework.context.annotation.ImportResource;
  */
 
 @SpringBootApplication
+@ComponentScan(basePackages = {"org.opensrp"}, excludeFilters={
+		@ComponentScan.Filter(type= FilterType.REGEX, pattern={
+				"org.opensrp.repository.couch.*",
+				"org.opensrp.repository.lucene.*",
+				"org.opensrp.scheduler.repository.couch.*",
+				"org.opensrp.service.formSubmission.FormSubmission..*",
+				"org.opensrp.service.formSubmission.*",
+				"org.opensrp.service.FormSubmissionDataMigrationService",
+				"org.opensrp.referrals.*",
+				"org.opensrp.connector.dhis2.DHIS2SyncerListener",
+				"org.opensrp.connector.dhis2.VaccinationTracker"
+		})})
 @ImportResource({"classpath:spring/applicationContext-opensrp-web.xml"})
 public class OpenSRPWebApp {
 	public static void main(String[] args) {
