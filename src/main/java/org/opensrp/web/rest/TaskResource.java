@@ -9,11 +9,13 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +23,7 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.TaskUpdate;
+import org.opensrp.search.TaskSearchBean;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.dto.TaskDto;
@@ -42,6 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +62,7 @@ import com.google.gson.reflect.TypeToken;
  */
 @Controller
 @Primary
+@Validated
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
 	
@@ -281,6 +286,23 @@ public class TaskResource {
 		modelMap.put("count", countOfTasks != null ? countOfTasks : 0);
 		return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
+
+	@RequestMapping(value = "/search", method = RequestMethod.GET,
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchBean taskSearchBean) {
+
+		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		int taskCount = taskService.findTaskCountBySearchBean(taskSearchBean);
+		headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
+		List<Task> tasks;
+		if (taskSearchBean != null && taskSearchBean.isReturnTaskCountOnly()) {
+			tasks = new ArrayList<>();
+		} else {
+			tasks = taskService.getTasksBySearchBean(taskSearchBean);
+		}
+
+		return new ResponseEntity<>(gson.toJson(tasks), headers, HttpStatus.OK);
+	}
 	
 	/**
 	 * Converts a Task to DTO object so that data model for V1 API is maintained
@@ -329,5 +351,5 @@ public class TaskResource {
 	public List<Task> convertToDomain(List<TaskDto> taskList) {
 		return taskList.stream().map(t -> convertToDomain(t)).collect(Collectors.toList());
 	}
-	
+
 }

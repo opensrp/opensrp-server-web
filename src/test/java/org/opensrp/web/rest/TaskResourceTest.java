@@ -41,6 +41,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.TaskUpdate;
+import org.opensrp.search.TaskSearchBean;
 import org.opensrp.service.TaskService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.Identifier;
@@ -466,6 +467,26 @@ public class TaskResourceTest {
 		JSONAssert.assertEquals(taskJson, jsonreponse.get(0).toString(), JSONCompareMode.STRICT_ORDER);
 		Long actualTotalRecords = Long.parseLong(result.getResponse().getHeader("total_records"));
 		assertEquals(totalRecords, actualTotalRecords.longValue());
+	}
+
+	@Test
+	public void testGetOptionalTasksWithCount() throws Exception {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(getTask());
+		int totalRecords = 5;
+		when(taskService.getTasksBySearchBean(any(TaskSearchBean.class))).thenReturn(tasks);
+		when(taskService.findTaskCountBySearchBean(any(TaskSearchBean.class))).thenReturn(totalRecords);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/search")
+				.param("planIdentifier", "d92851b2-e01b-5176-a24c-33635e3fe056")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+		verify(taskService, times(1)).getTasksBySearchBean(any(TaskSearchBean.class));
+		verify(taskService, times(1)).findTaskCountBySearchBean(any(TaskSearchBean.class));
+		verifyNoMoreInteractions(taskService);
+		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
+		assertEquals(1, jsonreponse.length());
+		int actualTotalRecords = Integer.parseInt(result.getResponse().getHeader("total_records"));
+		assertEquals(totalRecords, actualTotalRecords);
 	}
 	
 }
