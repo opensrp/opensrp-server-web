@@ -6,12 +6,14 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,10 +22,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.PlanDefinition;
@@ -35,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +62,7 @@ public class PlanResource {
 	
 	private static Logger logger = LoggerFactory.getLogger(PlanResource.class.toString());
 	
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
+	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
 	
 	private PlanService planService;
@@ -78,6 +83,9 @@ public class PlanResource {
 
 	public static final String IS_TEMPLATE = "is_template";
 
+	public static final String PLAN_STATUS = "planStatus";
+
+	public static final String USE_CONTEXT = "useContext";
 
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -103,8 +111,26 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
-		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(isTemplateParam)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	public ResponseEntity<String> getPlans(@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = PLAN_STATUS, required = false) String planStatus,
+			@RequestParam(value = USE_CONTEXT, required = false)  List<String> useContextList) {
+
+		Map<String, String> useContextFilters = null;
+		if (useContextList != null) {
+			useContextFilters = new HashMap<>();
+			for (String useContext : useContextList) {
+				String[] filterArray = useContext.split(":");
+				if (filterArray.length == 2) {
+					useContextFilters.put(filterArray[0], filterArray[1]);
+				}
+			}
+		}
+		PlanSearchBean planSearchBean = createPlanSearchBean(isTemplateParam, pageNumber, pageSize, orderByType, orderByFieldName, planStatus, useContextFilters);
+		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(planSearchBean)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
@@ -115,7 +141,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation",e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -129,7 +155,7 @@ public class PlanResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesn't contain a valid plan representation" + entity);
+			logger.error("The request doesn't contain a valid plan representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -258,15 +284,34 @@ public class PlanResource {
 	}
 
 	/**
+	 * Fetch count of plans
+	 *
+	 * @param serverVersion serverVersion using to filter by
+	 * @return A list of plan definitions
+	 */
+	@RequestMapping(value = "/countAll", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<ModelMap> countAll(@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
+		Long countOfPlanDefinitions = planService.countAllPlans(serverVersion, isTemplateParam);
+		ModelMap modelMap = new ModelMap();
+		modelMap.put("count", countOfPlanDefinitions != null ? countOfPlanDefinitions : 0);
+		return new ResponseEntity<>(modelMap,
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
+	/**
 	 * This methods provides an API endpoint that searches for all plan Identifiers
 	 *
 	 * @return A list of plan Identifiers
 	 */
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(@RequestParam(value = SERVER_VERSIOIN, required = false) long serverVersion,
-	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted) {
+	        @RequestParam(value = IS_DELETED, defaultValue = FALSE, required = false) boolean isDeleted,
+											  @RequestParam(value = "fromDate", required = false) String fromDate,
+											  @RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted);
+		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());
@@ -281,7 +326,7 @@ public class PlanResource {
 	 * @param username
 	 * @return plan definitions whose identifiers match the provided param
 	 */
-	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/user/{username:.+}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> fetchPlansForUser(@PathVariable(USERNAME) String username,
 	        @RequestParam(value = SERVER_VERSIOIN, required = false) String serverVersion,
 			@RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
@@ -350,6 +395,27 @@ public class PlanResource {
 			return returnCount;
 		}
 
+	}
+
+	private PlanSearchBean createPlanSearchBean(boolean isTemplateParam, Integer pageNumber, Integer pageSize,
+			String orderByType,
+			String orderByFieldName, String planStatus, Map<String, String> useContextFilters) {
+		PlanSearchBean planSearchBean = new PlanSearchBean();
+		planSearchBean.setExperimental(isTemplateParam);
+		planSearchBean.setPageNumber(pageNumber);
+		planSearchBean.setPageSize(pageSize);
+		if (orderByType != null) {
+			planSearchBean.setOrderByType(PlanSearchBean.OrderByType.valueOf(orderByType));
+		}
+		if (orderByFieldName != null) {
+			planSearchBean.setOrderByFieldName(PlanSearchBean.FieldName.valueOf(orderByFieldName));
+		}
+		if (planStatus != null) {
+			planSearchBean.setPlanStatus(PlanDefinition.PlanStatus.valueOf(planStatus));
+		}
+		planSearchBean.setUseContexts(useContextFilters);
+
+		return planSearchBean;
 	}
 	
 }

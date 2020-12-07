@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,6 +40,7 @@ import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.web.bean.Identifier;
@@ -134,8 +137,8 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		expectedPlan.setJurisdiction(operationalAreas);
 		
 		expectedPlans.add(expectedPlan);
-		
-		doReturn(expectedPlans).when(planService).getAllPlans(false);
+
+		doReturn(expectedPlans).when(planService).getAllPlans(any(PlanSearchBean.class));
 		
 		String actualPlansString = getResponseAsString(BASE_URL, null, status().isOk());
 		List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString,
@@ -469,11 +472,20 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		assertEquals(PlanResource.gson.toJson(planDefinitions), result.getResponse().getContentAsString());
 		
 	}
+
+	@Test
+	public void testCountAll() throws Exception {
+		when(planService.countAllPlans(anyLong(), anyBoolean())).thenReturn(1l);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/countAll?serverVersion=0")).andExpect(status().isOk())
+				.andReturn();
+		verify(planService).countAllPlans(anyLong(), anyBoolean());
+		assertEquals(1 , new JSONObject(result.getResponse().getContentAsString()).optInt("count"));
+	}
 	
 	@Test
 	public void testFindAllIds() throws Exception {
 		Pair<List<String>, Long> idsModel = Pair.of(Collections.singletonList("plan-id-1"), 12345l);
-		when(planService.findAllIds(anyLong(), anyInt(), anyBoolean())).thenReturn(idsModel);
+		when(planService.findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull())).thenReturn(idsModel);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findIds?serverVersion=0", "")).andExpect(status().isOk())
 		        .andReturn();
 		
@@ -481,7 +493,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		Identifier actualIdModels = new Gson().fromJson(actualTaskIdString, new TypeToken<Identifier>() {}.getType());
 		List<String> actualTaskIdList = actualIdModels.getIdentifiers();
 		
-		verify(planService).findAllIds(anyLong(), anyInt(), anyBoolean());
+		verify(planService).findAllIds(anyLong(), anyInt(), anyBoolean(), isNull(), isNull());
 		verifyNoMoreInteractions(planService);
 		assertEquals("{\"identifiers\":[\"plan-id-1\"],\"lastServerVersion\":12345}",
 		    result.getResponse().getContentAsString());

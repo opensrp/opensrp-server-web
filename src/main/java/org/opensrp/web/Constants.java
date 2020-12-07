@@ -22,6 +22,16 @@ public interface Constants {
     public static final String RETURN_COUNT= "return_count";
     public static final String TOTAL_RECORDS = "total_records";
 
+    public static final String PAGE_NUMBER = "pageNumber";
+
+    public static final String PAGE_SIZE = "pageSize";
+
+    public static final String ORDER_BY_TYPE = "orderByType";
+
+    public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
+    String LOCATIONS = "locations";
+
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
@@ -54,4 +64,5 @@ public interface Constants {
             String KEY = "key";
         }
     }
+
 }

@@ -7,7 +7,7 @@
 
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
-	<version>2.2.18-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -26,12 +26,13 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.6.0-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.1.1-SNAPSHOT</opensrp.connector.version>
+		<opensrp.core.version>3.0.0-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.2.0-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
 		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
+		<opensrp-server-openlmis-stock-version>1.0.3-SNAPSHOT</opensrp-server-openlmis-stock-version>
 		<lombok.version>1.18.12</lombok.version>
 	</properties>
 
@@ -305,11 +306,16 @@
 			<artifactId>jedis</artifactId>
 			<version>${redis.jedis.version}</version>
 		</dependency>
+			<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.10</version>
+		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -368,6 +374,18 @@
 			<artifactId>json-path</artifactId>
 			<version>2.4.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.13.Final</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -621,6 +639,8 @@
 				<dhis2.sync.enabled>default</dhis2.sync.enabled>
 				<atomfeed.enabled>default</atomfeed.enabled>
 				<rapidpro.enabled>default</rapidpro.enabled>
+				<opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
+				<openlmis.stock.profile>default</openlmis.stock.profile>
 			</properties>
 		</profile>
 		<profile>
@@ -807,6 +827,32 @@
 					<groupId>org.smartregister</groupId>
 					<artifactId>opensrp-server-referral</artifactId>
 					<version>${opensrp.server.referral}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>rabbitmq</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>opensrp.queuing.service</name>
+					<value>rabbitmq</value>
+				</property>
+			</activation>
+			<properties>
+				<opensrp.queuing.service.profile>rabbitmq</opensrp.queuing.service.profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>openlmis-stock</id>
+			<properties>
+				<openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.smartregister</groupId>
+					<artifactId>opensrp-server-openlmis-stock</artifactId>
+					<version>${opensrp-server-openlmis-stock-version}</version>
 				</dependency>
 			</dependencies>
 		</profile>

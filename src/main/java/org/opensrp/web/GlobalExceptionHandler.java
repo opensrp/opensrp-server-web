@@ -5,12 +5,16 @@ import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 import java.net.ConnectException;
 
 import org.opensrp.web.dto.ResponseDto;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.exceptions.UploadValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,6 +43,40 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ResponseBody
+	@ExceptionHandler(BindException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> exceptionHandler(BindException exception) {
+		logger.error("BindException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
+	}
+	
+	@ResponseBody
+	@ExceptionHandler(value= {IllegalArgumentException.class,IllegalStateException.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> illegalExceptionsHandler(RuntimeException exception) {
+		logger.error("IllegalArgumentException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, "");
+	}
+	
+	
+	@ResponseBody
+	@ExceptionHandler(MissingTeamAssignmentException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseDto<?> exceptionHandler(MissingTeamAssignmentException exception) {
+		logger.error("MissingTeamAssignmentException occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.FORBIDDEN, exception.getMessage());
+	}
+	
+	
+	@ResponseBody
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+	public ResponseDto<?> exceptionHandler(HttpRequestMethodNotSupportedException exception) {
+		logger.error("Method not allowed occurred : ", exception);
+		return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED);
+	}
+	
+	@ResponseBody
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseDto<?> exceptionHandler(RuntimeException exception) {
@@ -52,6 +90,15 @@ public class GlobalExceptionHandler {
 	public ResponseDto<?> exceptionHandler(UploadValidationException exception) {
 		logger.error("UploadValidationException occurred : ", exception);
 		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST, exception.getMessage());
+	}
+	
+
+	@ResponseBody
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseDto<?> exceptionHandler(DataIntegrityViolationException  exception) {
+		logger.error("DataIntegrityViolationException:  occurred : ", exception);
+		return buildErrorResponseForBadRequest(HttpStatus.BAD_REQUEST," DataIntegrityViolationException");
 	}
 	
 	@ResponseBody

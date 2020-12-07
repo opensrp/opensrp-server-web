@@ -4,23 +4,22 @@
 package org.opensrp.web.config.security;
 
 import java.text.DateFormat;
-import java.time.Duration;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.util.DateTimeDeserializer;
 import org.opensrp.util.DateTimeSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
 import org.opensrp.util.LocalDateDeserializer;
 import org.opensrp.util.LocalDateSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
@@ -35,10 +34,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Configuration
 @EnableWebMvc
 @EnableCaching
+@EnableAsync
 public class WebConfig {
-
-	@Value("#{opensrp['redis.ttl']}")
-	private long redisEntryTtl;
 
 	@Autowired
 	RedisConnectionFactory redisConnectionFactory;
@@ -57,7 +54,7 @@ public class WebConfig {
 		SimpleModule dateModule = new SimpleModule("LocalDateModule");
 		dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
 		dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
-		objectMapper.registerModules(dateTimeModule,dateModule);
+		objectMapper.registerModules(dateTimeModule, dateModule);
 		return objectMapper;
 	}
 	
@@ -79,8 +76,6 @@ public class WebConfig {
 	@Bean
 	public RedisCacheManager cacheManager() {
 		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
-		config = config.entryTtl(Duration.ofSeconds(redisEntryTtl))
-				.disableCachingNullValues();
 
 		return RedisCacheManager.builder(redisConnectionFactory)
 				.cacheDefaults(config)

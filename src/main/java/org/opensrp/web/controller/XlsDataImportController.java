@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.opensrp.web.rest.RestUtils;
 import org.smartregister.domain.Address;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -80,7 +82,7 @@ public class XlsDataImportController {
 	}
 	
 	@RequestMapping(headers = { "Accept=multipart/form-data" }, method = POST, value = "/file")
-	public ResponseEntity<String> importXlsData(@RequestParam("file") MultipartFile file) throws SQLException {
+	public ResponseEntity<String> importXlsData(@RequestParam("file") MultipartFile file, Authentication authentication) throws SQLException {
 
 		String mimeType = file.getContentType();
 		if (!allowedMimeTypes.contains(mimeType)) {
@@ -155,27 +157,27 @@ public class XlsDataImportController {
 				    Event birthRegistrationEvent = this.buildBirthRegistrationEvent(record, childClient);
 				    this.addMultipleObs(birthRegistrationEvent, defaultObs);
 
-				    eventService.addEvent(birthRegistrationEvent);
+				    eventService.addEvent(birthRegistrationEvent, RestUtils.currentUser(authentication).getUsername());
 				    eventCounter++;
 
 				    // Create New Woman Registration Event
 				    Event womanRegistrationEvent = this.buildNewWomanRegistrationEvent(record, motherClient);
 				    this.addMultipleObs(womanRegistrationEvent, defaultObs);
 
-				    eventService.addEvent(womanRegistrationEvent);
+				    eventService.addEvent(womanRegistrationEvent, RestUtils.currentUser(authentication).getUsername());
 				    eventCounter++;
 
 				    // Create vaccination events
 				    for(Event e: this.buildVaccinationEvents(record, childClient)) {
 						this.addMultipleObs(e, defaultObs);
-				    	eventService.addEvent(e);
+				    	eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
 				    	eventCounter++;
 				    }
 				    
 				    //Create growth monitoring events
 				    for(Event e: this.buildGrowthMonitoringEvents(record, childClient)) {
 				    	this.addMultipleObs(e, defaultObs);
-				    	eventService.addEvent(e);
+				    	eventService.addEvent(e, RestUtils.currentUser(authentication).getUsername());
 				    	eventCounter++;
 				    }
 

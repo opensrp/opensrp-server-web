@@ -7,17 +7,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,9 +32,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import org.opensrp.common.AllConstants;
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
@@ -57,7 +53,7 @@ import com.google.gson.reflect.TypeToken;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class EventResourceTest extends BaseResourceTest<Event> {
+public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
     private final static String BASE_URL = "/rest/event";
 
@@ -127,13 +123,13 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 
         Pair idsModel = Pair.of(expectedEventIdList, 1234l);
 
-        doReturn(idsModel).when(eventService).findAllIdsByEventType(null, false, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
+        doReturn(idsModel).when(eventService).findAllIdsByEventType(null, false, 0l, DEFAULT_GET_ALL_IDS_LIMIT, null, null);
 
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType?serverVersion=0", null, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
-        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
+        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture(), isNull(), isNull());
         assertNull(stringArgumentCaptor.getValue());
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(0l, longArgumentCaptor.getValue().longValue());
@@ -154,14 +150,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         expectedEventIdList.add("event_2");
         Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
-        doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, false, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
+        doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, false, 0l, DEFAULT_GET_ALL_IDS_LIMIT, null, null);
 
         String parameter = EVENT_TYPE + "=" + eventType + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
-        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture() ,integerArgumentCaptor.capture());
+        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture() ,integerArgumentCaptor.capture(), isNull(), isNull());
         assertEquals(stringArgumentCaptor.getValue(), eventType);
         assertFalse(booleanArgumentCaptor.getValue());
         assertEquals(0l, longArgumentCaptor.getValue().longValue());
@@ -182,14 +178,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         expectedEventIdList.add("event_2");
         Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
-        doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
+        doReturn(idsModel).when(eventService).findAllIdsByEventType(eventType, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT, null, null);
 
         String parameter = EVENT_TYPE + "=" + eventType + "&is_deleted=" + true + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
-        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
+        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture(), isNull(), isNull());
         assertEquals(stringArgumentCaptor.getValue(), eventType);
         assertTrue(booleanArgumentCaptor.getValue());
         assertEquals(0l, longArgumentCaptor.getValue().longValue());
@@ -210,14 +206,14 @@ public class EventResourceTest extends BaseResourceTest<Event> {
         expectedEventIdList.add("event_2");
         Pair<List<String>, Long> idsModel = Pair.of(expectedEventIdList, 1234l);
 
-        doReturn(idsModel).when(eventService).findAllIdsByEventType(null, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT);
+        doReturn(idsModel).when(eventService).findAllIdsByEventType(null, true, 0l, DEFAULT_GET_ALL_IDS_LIMIT, null, null);
 
         String parameter = "is_deleted=" + true + "&serverVersion=0";
         String actualEventIdString = getResponseAsString(BASE_URL + "/findIdsByEventType", parameter, status().isOk());
         Identifier actualIdModels = new Gson().fromJson(actualEventIdString, new TypeToken<Identifier>(){}.getType());
         List<String> actualEventIdList = actualIdModels.getIdentifiers();
 
-        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture());
+        verify(eventService).findAllIdsByEventType(stringArgumentCaptor.capture(), booleanArgumentCaptor.capture(), longArgumentCaptor.capture(), integerArgumentCaptor.capture(), isNull(), isNull());
         assertNull(stringArgumentCaptor.getValue());
         assertTrue(booleanArgumentCaptor.getValue());
         assertEquals(0l, longArgumentCaptor.getValue().longValue());
@@ -342,7 +338,7 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 	    Client client = createClient();
 	    Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class));
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
@@ -373,6 +369,16 @@ public class EventResourceTest extends BaseResourceTest<Event> {
 		assertEquals(actualObj.get("clients").size(),1);
 		assertEquals(actualObj.get("events").size(),1);
     }
+
+
+	@Test
+	public void testCountAll() throws Exception {
+		doReturn(1L).when(eventService).countEvents(any(EventSearchBean.class));
+		String parameter = SERVER_VERSIOIN + "=15421904649873";
+		String response = getResponseAsString(BASE_URL + "/countAll", parameter, status().isOk());
+		JSONObject responseJsonObject = new JSONObject(response);
+		assertEquals(1, responseJsonObject.optInt("count"));
+	}
     
     @Test
     public void testGetSync() throws Exception{

@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -36,20 +36,23 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.smartregister.domain.PhysicalLocation;
 import org.opensrp.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.controller.UserController;
+import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -99,12 +102,18 @@ public class UserControllerTest {
 	@Mock
 	private PhysicalLocationService locationService;
 	
+	@Value("#{opensrp['keycloak.configuration.endpoint']}")
+	protected String keycloakConfigurationURL;
+	
+	@Autowired
+	private KeycloakRestTemplate restTemplate;
+	
 	private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 	
 	@Before
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
-				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		userController = webApplicationContext.getBean(UserController.class);
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);
@@ -148,20 +157,20 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser(username = "admin", roles = { "ADMIN" })
 	public void testGetUserDetailsIntegrationTest() throws Exception {
-		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal);
-		authentication=authenticatedUser.getSecond();
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
 		        .perform(get("/user-details").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
 		        .andExpect(status().isOk()).andReturn();
 		UserDetail userDetail = new ObjectMapper().readValue(result.getResponse().getContentAsString(), UserDetail.class);
 		
-		User user=authenticatedUser.getFirst();
+		User user = authenticatedUser.getFirst();
 		assertEquals(user.getUsername(), userDetail.getUserName());
 		assertEquals(user.getBaseEntityId(), userDetail.getIdentifier());
 		assertEquals(user.getRoles(), userDetail.getRoles());
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = MissingTeamAssignmentException.class)
 	public void testAuthenticateIfUserIsNotMapped() throws Exception {
 		when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
@@ -179,7 +188,7 @@ public class UserControllerTest {
 		when(token.getPreferredUsername()).thenReturn(user.getUsername());
 		when(authentication.getName()).thenReturn(user.getBaseEntityId());
 		List<Long> ids = Collections.singletonList(12233l);
-
+		
 		when(organizationService.getOrganization(ids.get(0))).thenReturn(new Organization());
 		
 		Practitioner practitioner = new Practitioner();
@@ -191,12 +200,12 @@ public class UserControllerTest {
 		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
 		
-		when(locationService.buildLocationHierachy(Collections.singleton(jurisdictionId), false, true)).thenReturn(new LocationTree());
-
 		PhysicalLocation location = LocationResourceTest.createStructure();
-		location.getProperties().getCustomProperties().put("OpenMRS_Id", "OpenMRS_Id1222");
-		when(locationService.findLocationsByIds(false, Collections.singletonList(jurisdictionId)))
+		location.getProperties().setName("OA123");
+		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId), Integer.MAX_VALUE))
 		        .thenReturn(Collections.singletonList(location));
+		when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))
+		        .thenReturn(new LocationTree());
 		
 		String[] locations = new String[5];
 		locations[0] = "Test";
@@ -211,12 +220,52 @@ public class UserControllerTest {
 		if (responseString.isEmpty()) {
 			fail("Test case failed");
 		}
-		JsonNode actualObj = new ObjectMapper().readTree(responseString);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode actualObj = objectMapper.readTree(responseString);
 		assertEquals(result.getStatusCode(), HttpStatus.OK);
 		assertEquals(actualObj.get("user").get("username").asText(), user.getUsername());
 		assertTrue(actualObj.has("locations"));
 		assertTrue(actualObj.has("team"));
 		assertTrue(actualObj.has("time"));
 		assertTrue(actualObj.has("jurisdictions"));
+		assertTrue(actualObj.has("jurisdictionIds"));
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getProperties().getName() }),
+		    actualObj.get("jurisdictions").toString());
+		assertEquals(objectMapper.writeValueAsString(new String[] { location.getId() }),
+		    actualObj.get("jurisdictionIds").toString());
+	}
+	
+	@Test
+	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		authentication = authenticatedUser.getSecond();
+		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User Logged out", HttpStatus.OK);
+		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
+		MvcResult result = mockMvc
+		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
+		assertEquals(expectedResponse.getStatusCodeValue(), result.getResponse().getStatus());
+		assertEquals(expectedResponse.getBody(), result.getResponse().getContentAsString());
+		MockHttpServletRequest request = result.getRequest();
+		assertNull(request.getUserPrincipal());
+		assertNull(request.getRemoteUser());
+		assertNull(request.getAuthType());
+		
+	}
+	
+	@Test
+	public void testLogoutShouldReturnUnAuthorizedIfNotLoggedIn() throws Exception {
+		ResponseEntity<String> expectedResponse = new ResponseEntity<>("User not logged in", HttpStatus.UNAUTHORIZED);
+		Whitebox.setInternalState(userController, "restTemplate", restTemplate);
+		MvcResult result = mockMvc
+		        .perform(get("/logout.do").with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isUnauthorized()).andReturn();
+		assertEquals(expectedResponse.getStatusCodeValue(), result.getResponse().getStatus());
+		assertEquals(expectedResponse.getBody(), result.getResponse().getContentAsString());
+		MockHttpServletRequest request = result.getRequest();
+		assertNull(request.getUserPrincipal());
+		assertNull(request.getRemoteUser());
+		assertNull(request.getAuthType());
+		
 	}
 }
