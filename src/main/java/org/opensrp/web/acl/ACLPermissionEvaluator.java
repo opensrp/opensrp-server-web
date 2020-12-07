@@ -5,7 +5,12 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 
-import org.opensrp.domain.*;
+import lombok.Setter;
+import org.opensrp.domain.Organization;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author Samuel Githengi created on 06/03/20
  */
+@Setter
 @Component
 public class ACLPermissionEvaluator implements PermissionEvaluator {
 	
@@ -82,4 +88,5 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 		        .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + permission));
 		/* @formatter:off */
 	}
+
 }

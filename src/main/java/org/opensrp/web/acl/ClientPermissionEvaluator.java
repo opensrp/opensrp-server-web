@@ -1,6 +1,6 @@
 package org.opensrp.web.acl;
 
-import org.opensrp.domain.Client;
+import org.smartregister.domain.Client;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
