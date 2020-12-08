@@ -341,22 +341,13 @@ public class EventResource extends RestResource<Event> {
 	                                        @RequestParam(required = false) String eventType,
 	                                        @RequestParam(required = false) Integer limit)
 	    throws JsonProcessingException {
-		
-		try {
+
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
 			return new ResponseEntity<>(
 			        objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false)),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			
-		}
-		catch (Exception e) {
-			EventSyncBean response = new EventSyncBean();
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
-		}
 	}
 	
 	/**
