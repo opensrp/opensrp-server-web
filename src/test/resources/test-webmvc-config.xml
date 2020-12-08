@@ -39,7 +39,7 @@
 	</bean>
 
 	<bean class="org.opensrp.web.config.security.WebConfig" />
-	<bean class="org.opensrp.web.config.RedisConfig" />
+	<bean class="org.opensrp.TestRedisConfig" />
 	<!-- Added for V2.1 only -->
 	<bean class="org.opensrp.web.security.OauthAuthenticationProvider" />
 	<bean class="org.opensrp.connector.openmrs.service.OpenmrsUserService"/>

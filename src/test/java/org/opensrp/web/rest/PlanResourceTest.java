@@ -198,7 +198,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
         expectedPlans.add(expectedPlan);
 
-        doReturn(expectedPlans).when(planService).getAllPlans(anyBoolean());
+        doReturn(expectedPlans).when(planService).getAllPlans(any());
 
         String actualPlansString = getResponseAsString(BASE_URL, null, status().isOk());
         List<PlanDefinition> actualPlans = new Gson().fromJson(actualPlansString, new TypeToken<List<PlanDefinition>>(){}.getType());

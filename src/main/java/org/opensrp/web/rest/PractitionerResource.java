@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.search.BaseSearchBean;
+import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
@@ -21,6 +23,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
@@ -52,9 +59,14 @@ public class PractitionerResource {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> getPractitioners() {
+    public ResponseEntity<String> getPractitioners(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+
+        PractitionerSearchBean practitionerSearchBean = createPractitionerSearchBean(pageNumber, pageSize, orderByType, orderByFieldName);
         return new ResponseEntity<>(gson.toJson(
-                practitionerService.getAllPractitioners()),
+                practitionerService.getAllPractitioners(practitionerSearchBean)),
                 RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
@@ -100,6 +112,22 @@ public class PractitionerResource {
             logger.error(e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
+            String orderByFieldName) {
+
+        BaseSearchBean.OrderByType orderByTypeEnum;
+        BaseSearchBean.FieldName fieldName;
+        orderByTypeEnum = orderByType != null ? BaseSearchBean.OrderByType.valueOf(orderByType) : BaseSearchBean.OrderByType.DESC;
+        fieldName = orderByFieldName != null ? BaseSearchBean.FieldName.valueOf(orderByFieldName) : BaseSearchBean.FieldName.id;
+
+        return PractitionerSearchBean.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .orderByType(orderByTypeEnum)
+                .orderByFieldName(fieldName).build();
+
     }
 
 }
