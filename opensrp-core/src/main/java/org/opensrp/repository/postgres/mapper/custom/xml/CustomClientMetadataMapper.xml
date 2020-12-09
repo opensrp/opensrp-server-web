@@ -272,4 +272,11 @@
 		resultMap="stockInfo">
 		select * from core.get_stok_for_mobile(#{username,jdbcType=VARCHAR},#{timestamp,jdbcType=BIGINT})
 	</select>
+	
+	<select id="selectBranchId" parameterType="java.lang.String"
+		resultType="String">
+		select cm.branch
+		from core.client_metadata${table} cm
+		where cm.base_entity_id = #{baseEntityId,jdbcType=VARCHAR} limit 1
+	</select>
 </mapper>

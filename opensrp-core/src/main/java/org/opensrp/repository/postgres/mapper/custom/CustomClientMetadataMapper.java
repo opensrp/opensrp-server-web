@@ -37,4 +37,5 @@ public interface CustomClientMetadataMapper extends ClientMetadataMapper {
 	
 	List<StockInfo> selectStockInfos(@Param("username") String username, @Param("timestamp") Long timestamp);
 	
+	String selectBranchId(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
 }

@@ -65,9 +65,9 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	CustomQuery findTeamInfo(String username);
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId);
-
+	
 	List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId);
-
+	
 	List<TargetDetails> getTargetDetails(String username, Long timestamp);
 	
 	List<CustomQuery> getVillageByProviderId(int memberId, int childRoleId, int locationTagId);
@@ -99,5 +99,7 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	List<StockInfo> getStockInfos(String username, Long timestamp);
 	
 	CustomQuery getGuestMaxHealthId(Integer locationId);
+	
+	String findBranchId(String baseEntityId, String table);
 	
 }

@@ -345,7 +345,7 @@ public class ClientService {
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
-
+	
 	public List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getPALocationTreeByChildRole(memberId, childRoleId);
 	}
@@ -465,11 +465,12 @@ public class ClientService {
 	}
 	
 	/***
-	 * @param inClient means after migrated
-	 * @param outClient means before migrated
+	 * @param inClient means after migrated client
+	 * @param outClient means before migrated client
 	 **/
 	public Migration addMigration(Client inClient, Client outClient, Client inHhousehold, Client outHhousehold,
-	                              String inProvider, String outProvider, String inHHrelationalId, String outHHrelationalId) {
+	                              String inProvider, String outProvider, String inHHrelationalId, String outHHrelationalId,
+	                              String branchIdIn, String branchIdOut, String type) {
 		
 		Address inAddressa = inClient.getAddress("usual_residence");
 		Migration migration = new Migration();
@@ -497,34 +498,42 @@ public class ClientService {
 		
 		migration.setMemberIDIn(inClient.getIdentifier("opensrp_id"));
 		migration.setMemberIDOut(outClient.getIdentifier("opensrp_id"));
-		
-		migration.setHHNameIn(inHhousehold.getFirstName());
-		migration.setHHNameOut(outHhousehold.getFirstName());
-		
-		migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
-		migration.setHHContactOut(outHhousehold.getAttribute("HOH_Phone_Number") + "");
-		
-		migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
-		migration.setNumberOfMemberOut(outHhousehold.getAttribute("Number_of_HH_Member") + "");
-		
 		migration.setSKIn(inProvider);
 		migration.setSKOut(outProvider);
 		migration.setSSIn(inClient.getAttribute("SS_Name") + "");
 		migration.setSSOut(outClient.getAttribute("SS_Name") + "");
 		
-		migration.setRelationalIdIn(inHHrelationalId);
-		migration.setRelationalIdOut(outHHrelationalId);
+		if (inHhousehold != null) {
+			migration.setHHNameIn(inHhousehold.getFirstName());
+			migration.setHHNameOut(outHhousehold.getFirstName());
+			
+			migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
+			migration.setHHContactOut(outHhousehold.getAttribute("HOH_Phone_Number") + "");
+			
+			migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
+			migration.setNumberOfMemberOut(outHhousehold.getAttribute("Number_of_HH_Member") + "");
+			migration.setRelationalIdIn(inHHrelationalId);
+			migration.setRelationalIdOut(outHHrelationalId);
+			
+			migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
+			migration.setRelationWithHHOut(outHhousehold.getAttribute("Relation_with_HOH") + "");
+		}
+		migration.setBranchIDIn(branchIdIn);
+		migration.setBranchIDOut(branchIdOut);
 		
-		migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
-		migration.setRelationWithHHOut(outHhousehold.getAttribute("Relation_with_HOH") + "");
 		migration.setStatus("Pending");
 		
 		if (outClient.getBirthdate() != null) {
 			migration.setDob(outClient.getBirthdate().toDate());
 		}
 		migration.setMigrationDate(new DateTime().toDate());
+		migration.setMemberType(type);
 		
-		return null;
+		return migration;
 		
+	}
+	
+	public String findBranchId(String baseEntityId, String table) {
+		return allClients.findBranchId(baseEntityId, table);
 	}
 }

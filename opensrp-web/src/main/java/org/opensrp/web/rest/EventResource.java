@@ -645,6 +645,9 @@ public class EventResource extends RestResource<Event> {
 		UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
 		    branch, village);
 		
+		String branchIdIn = clientService.findBranchId(client.getBaseEntityId(), newUserLocation.getTableName());
+		String branchIdOut = clientService.findBranchId(c.getBaseEntityId(), oldUserLocation.getTableName());
+		
 		System.err.println("newUserLocation:::" + newUserLocation);
 		clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
 		    newUserLocation.getBranch(), newUserLocation.getVillage());
@@ -683,7 +686,12 @@ public class EventResource extends RestResource<Event> {
 			client.setAddresses(memberNewAddress);
 			clientService.addOrUpdate(client, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
 			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
-			
+			List<Event> clinetsEvents = eventService.findByBaseEntityId(client.getBaseEntityId(),
+			    oldUserLocation.getTableName());
+			for (Event event : clinetsEvents) {
+				eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+				    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+			}
 			//migrateChildAndEvents(client, newUserLocation, oldUserLocation, c);
 			
 		}
