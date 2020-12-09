@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.StockInfo;
@@ -242,6 +243,15 @@ public class ClientService {
 		return allClients.findByRelationShip(id, table);
 	}
 	
+	public Client findClientByBaseEntityId(String baseEntityId, String table) {
+		Integer clientId = allClients.findClientIdByBaseEntityId(baseEntityId, table);
+		if (clientId != null) {
+			Client c = allClients.findClientByClientId(clientId, table);
+			return c;
+		}
+		return null;
+	}
+	
 	public Client addOrUpdate(Client client, String table, String district, String division, String branch, String village) {
 		if (client.getBaseEntityId() == null) {
 			if (client != null) {
@@ -444,5 +454,73 @@ public class ClientService {
 	
 	public List<StockInfo> getStockInfos(String username, Long timestamp) {
 		return allClients.getStockInfos(username, timestamp);
+	}
+	
+	public List<Client> findByRelationshipId(String relationshipId, String table) {
+		return allClients.findByRelationshipId(relationshipId, table);
+	}
+	
+	/***
+	 * @param inClient means after migrated
+	 * @param outClient means before migrated
+	 **/
+	public Migration addMigration(Client inClient, Client outClient, Client inHhousehold, Client outHhousehold,
+	                              String inProvider, String outProvider, String inHHrelationalId, String outHHrelationalId) {
+		
+		Address inAddressa = inClient.getAddress("usual_residence");
+		Migration migration = new Migration();
+		migration.setDistrictIn(inAddressa.getCountyDistrict());
+		migration.setDivisionIn(inAddressa.getStateProvince());
+		migration.setVillageIDIn(inAddressa.getCityVillage());
+		migration.setUpazilaIn(inAddressa.getAddressField("address2"));
+		migration.setPourasavaIn(inAddressa.getAddressField("address3"));
+		migration.setUnionIn(inAddressa.getAddressField("address1"));
+		migration.setVillageIDIn(inAddressa.getAddressField("address8"));
+		
+		Address outAddressa = outClient.getAddress("usual_residence");
+		
+		migration.setDistrictOut(outAddressa.getCountyDistrict());
+		migration.setDivisionOut(outAddressa.getStateProvince());
+		migration.setVillageIDOut(outAddressa.getCityVillage());
+		migration.setUpazilaOut(outAddressa.getAddressField("address2"));
+		migration.setPourasavaOut(outAddressa.getAddressField("address3"));
+		migration.setUnionOut(outAddressa.getAddressField("address1"));
+		migration.setVillageIDOut(outAddressa.getAddressField("address8"));
+		
+		migration.setMemberName(outClient.getFirstName());
+		
+		migration.setMemberContact(outClient.getAttribute("Mobile_Number") + "");
+		
+		migration.setMemberIDIn(inClient.getIdentifier("opensrp_id"));
+		migration.setMemberIDOut(outClient.getIdentifier("opensrp_id"));
+		
+		migration.setHHNameIn(inHhousehold.getFirstName());
+		migration.setHHNameOut(outHhousehold.getFirstName());
+		
+		migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
+		migration.setHHContactOut(outHhousehold.getAttribute("HOH_Phone_Number") + "");
+		
+		migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
+		migration.setNumberOfMemberOut(outHhousehold.getAttribute("Number_of_HH_Member") + "");
+		
+		migration.setSKIn(inProvider);
+		migration.setSKOut(outProvider);
+		migration.setSSIn(inClient.getAttribute("SS_Name") + "");
+		migration.setSSOut(outClient.getAttribute("SS_Name") + "");
+		
+		migration.setRelationalIdIn(inHHrelationalId);
+		migration.setRelationalIdOut(outHHrelationalId);
+		
+		migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
+		migration.setRelationWithHHOut(outHhousehold.getAttribute("Relation_with_HOH") + "");
+		migration.setStatus("Pending");
+		
+		if (outClient.getBirthdate() != null) {
+			migration.setDob(outClient.getBirthdate().toDate());
+		}
+		migration.setMigrationDate(new DateTime().toDate());
+		
+		return null;
+		
 	}
 }

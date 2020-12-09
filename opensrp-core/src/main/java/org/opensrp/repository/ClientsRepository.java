@@ -40,6 +40,8 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	
 	List<Client> findByRelationshipId(String relationshipType, String entityId, String table);
 	
+	List<Client> findByRelationshipId(String entityId, String table);
+	
 	List<Client> findByCriteria(ClientSearchBean searchBean, AddressSearchBean addressSearchBean, String table);
 	
 	List<Client> findByDynamicQuery(String query);

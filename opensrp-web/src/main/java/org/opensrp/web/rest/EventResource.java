@@ -27,8 +27,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.UserLocationTableName;
@@ -394,7 +397,7 @@ public class EventResource extends RestResource<Event> {
 		
 		try {
 			String district = getStringFilter("district", request);
-			
+			System.err.println("data:" + data);
 			String dataProvider = request.getRemoteUser();
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
@@ -555,6 +558,173 @@ public class EventResource extends RestResource<Event> {
 		
 		String table = userLocation.getTableName();
 		return eventService.findEventsByDynamicQuery(query, table);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/migrate")
+	public ResponseEntity<HttpStatus> migrate(@RequestBody String data, HttpServletRequest request) throws JSONException {
+		JSONObject syncData = new JSONObject(data);
+		ArrayList<Client> clients = new ArrayList<Client>();
+		if (syncData.has("clients")) {
+			
+			clients = (ArrayList<Client>) gson.fromJson(syncData.getString("clients"),
+			    new TypeToken<ArrayList<Client>>() {}.getType());
+			logger.info("received client size:" + clients.size());
+		}
+		Client client = clients.get(0);
+		Map<String, List<String>> inHHrelationShips = client.getRelationships();
+		String inHHrelationalId = "";
+		if (inHHrelationShips.containsKey("family")) {
+			inHHrelationalId = inHHrelationShips.get("family").get(0);
+		} else if (inHHrelationShips.containsKey("family_head")) {
+			inHHrelationalId = inHHrelationShips.get("family_head").get(0);
+		}
+		
+		JSONArray cls = new JSONArray(syncData.getString("clients"));
+		JSONObject json = cls.getJSONObject(0);
+		String baseEntityId = client.getBaseEntityId();
+		String outPprovider = getStringFilter("provider", request);
+		String type = getStringFilter("type", request);
+		JSONObject attributes = json.getJSONObject("attributes");
+		JSONObject identifiers = json.getJSONObject("identifiers");
+		
+		UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outPprovider, "", "", "", "");
+		
+		String oldTable = oldUserLocation.getTableName();
+		Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);
+		
+		Map<String, List<String>> outrelationShips = c.getRelationships();
+		String outHHrelationalId = "";
+		if (outrelationShips.containsKey("family")) {
+			outHHrelationalId = outrelationShips.get("family").get(0);
+		} else if (outrelationShips.containsKey("family_head")) {
+			outHHrelationalId = outrelationShips.get("family_head").get(0);
+		}
+		
+		c.getAddresses().remove(0);
+		Address clientAddres = client.getAddress("usual_residence");
+		List<Address> clientNewAddres = new ArrayList<>();
+		c.getAddresses().clear();
+		clientNewAddres.add(clientAddres);
+		c.setAddresses(clientNewAddres);
+		Map<String, Object> att = c.getAttributes();
+		System.err.println("att" + att);
+		for (int i = 0; i < attributes.names().length(); i++) {
+			att.put(attributes.names().getString(i), attributes.get(attributes.names().getString(i)));
+			
+		}
+		System.err.println("att" + att);
+		c.withAttributes(att);
+		for (int i = 0; i < identifiers.names().length(); i++) {
+			c.addIdentifier(identifiers.names().getString(i), identifiers.get(identifiers.names().getString(i)) + "");
+		}
+		
+		/*identifiers.keys().forEachRemaining(key -> {
+			Object value = attributes.opt(key + "");
+			c.addIdentifier(key + "", value + "");
+		});	*/
+		
+		c.withRelationships(client.getRelationships());
+		System.err.println(c.getAddress("usual_residence"));
+		System.err.println(c.getAttributes());
+		
+		String district = getStringFilter("district", request);
+		String inProvider = request.getRemoteUser();
+		String division = getStringFilter("division", request);
+		String branch = getStringFilter("branch", request);
+		String village = getStringFilter("village", request);
+		UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
+		    branch, village);
+		
+		System.err.println("newUserLocation:::" + newUserLocation);
+		clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
+		    newUserLocation.getBranch(), newUserLocation.getVillage());
+		
+		if (type.equalsIgnoreCase("HH")) {
+			migrateHHEventsClients(client, newUserLocation, oldUserLocation);
+		} else if (type.equalsIgnoreCase("Member")) {
+			migrateMemberEvents(client, newUserLocation, oldUserLocation);
+			Client inHhousehold = clientService.findClientByBaseEntityId(inHHrelationalId, oldUserLocation.getTableName());
+			Client outHhousehold = clientService.findClientByBaseEntityId(outHHrelationalId, oldUserLocation.getTableName());
+			
+		} else {
+			
+		}
+		return null;
+		
+	}
+	
+	public boolean migrateHHEventsClients(Client c, UserLocationTableName newUserLocation,
+	                                      UserLocationTableName oldUserLocation) {
+		
+		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), oldUserLocation.getTableName());
+		for (Event event : events) {
+			eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+		}
+		List<Client> householdmembers = clientService.findByRelationshipId(c.getBaseEntityId(),
+		    oldUserLocation.getTableName());
+		
+		for (Client client : householdmembers) {
+			client.getAddresses().remove(0);
+			Address memberAddress = c.getAddress("usual_residence");
+			List<Address> memberNewAddress = new ArrayList<>();
+			client.getAddresses().clear();
+			memberNewAddress.add(memberAddress);
+			client.setAddresses(memberNewAddress);
+			clientService.addOrUpdate(client, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+			
+			//migrateChildAndEvents(client, newUserLocation, oldUserLocation, c);
+			
+		}
+		return false;
+		
+	}
+	
+	public boolean migrateMemberEvents(Client c, UserLocationTableName newUserLocation, UserLocationTableName oldUserLocation) {
+		Map<String, List<String>> relationShips = c.getRelationships();
+		
+		String relationalId = "";
+		if (relationShips.containsKey("family")) {
+			relationalId = relationShips.get("family").get(0);
+		} else if (relationShips.containsKey("family_head")) {
+			relationalId = relationShips.get("family_head").get(0);
+		}
+		Client household = clientService.findClientByBaseEntityId(relationalId, oldUserLocation.getTableName());
+		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), oldUserLocation.getTableName());
+		for (Event event : events) {
+			eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+		}
+		//migrateChildAndEvents(c, newUserLocation, oldUserLocation, household);
+		return false;
+		
+	}
+	
+	public boolean migrateChildAndEvents(Client c, UserLocationTableName newUserLocation,
+	                                     UserLocationTableName oldUserLocation, Client household) {
+		
+		List<Client> childs = clientService.findByRelationshipId(c.getBaseEntityId(), oldUserLocation.getTableName());
+		
+		for (Client client2 : childs) {
+			client2.getAddresses().remove(0);
+			Address newAddress = c.getAddress("usual_residence");
+			List<Address> childAddress = new ArrayList<>();
+			client2.getAddresses().clear();
+			childAddress.add(newAddress);
+			client2.setAddresses(childAddress);
+			clientService.addOrUpdate(client2, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+			
+			List<Event> events = eventService.findByBaseEntityId(client2.getBaseEntityId(), oldUserLocation.getTableName());
+			for (Event event : events) {
+				eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
+				    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
+			}
+			
+		}
+		return true;
 	}
 	
 }

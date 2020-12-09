@@ -263,5 +263,11 @@
 			resultMap="customQueryMap">
 		select coalesce(max(cast(h_id as integer)), 0) as  max_health_id from core.health_id_guest where location_id = #{locationId};
 	</select>
+	
+	<select id="selectByRelationshipId" 
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select id,json from core.client${table} where id=any(select client_id from core.client_metadata${table} as cm
+		where relational_id = #{relationshipId,jdbcType=VARCHAR})		
+	</select>
 
 </mapper>

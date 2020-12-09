@@ -86,4 +86,5 @@ public interface EventsRepository extends CustomBaseRepository<Event> {
 	List<String> getGuestHouseholdId(Integer maxid);
 	
 	int insertGuestHealthId(HealthId healthId);
+	
 }

@@ -435,8 +435,16 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 			}
 			
 			String relationalId = null;
+			
 			Map<String, List<String>> relationShips = client.getRelationships();
-			if (relationShips != null && !relationShips.isEmpty()) {
+			
+			if (relationShips.containsKey("family")) {
+				relationalId = relationShips.get("family").get(0);
+			} else if (relationShips.containsKey("family_head")) {
+				relationalId = relationShips.get("family_head").get(0);
+			}
+			
+			/*if (relationShips != null && !relationShips.isEmpty()) {
 				for (Map.Entry<String, List<String>> maEntry : relationShips.entrySet()) {
 					List<String> values = maEntry.getValue();
 					if (values != null && !values.isEmpty()) {
@@ -444,7 +452,7 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 						break;
 					}
 				}
-			}
+			}*/
 			clientMetadata.setRelationalId(relationalId);
 			
 			String uniqueId = null;
@@ -584,6 +592,13 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public CustomQuery getGuestMaxHealthId(Integer locationId) {
 		
 		return clientMapper.selectGuestMaxHealthId(locationId);
+	}
+	
+	@Override
+	public List<Client> findByRelationshipId(String relationshipId, String table) {
+		List<org.opensrp.domain.postgres.Client> clients = clientMapper.selectByRelationshipId(relationshipId, table);
+		return convert(clients);
+		
 	}
 	
 }

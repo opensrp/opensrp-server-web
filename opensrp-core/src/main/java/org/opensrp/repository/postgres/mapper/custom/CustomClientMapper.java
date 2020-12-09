@@ -64,4 +64,6 @@ public interface CustomClientMapper extends ClientMapper {
 	UserLocationTableName selectUserLocation(@Param("username") String username);
 	
 	CustomQuery selectGuestMaxHealthId(@Param("locationId") Integer locationId);
+	
+	List<Client> selectByRelationshipId(@Param("relationshipId") String relationshipId, @Param("table") String table);
 }

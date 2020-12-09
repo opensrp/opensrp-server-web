@@ -476,4 +476,5 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 }

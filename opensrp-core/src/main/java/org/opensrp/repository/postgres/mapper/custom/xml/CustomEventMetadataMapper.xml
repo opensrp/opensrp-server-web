@@ -114,18 +114,18 @@
 	<select id="selectMany"
 		resultMap="BaseEventResultMap">
 		select
-		<if test="distinct">
+		<!-- <if test="distinct"> -->
 			distinct
-		</if>
+		<!-- </if> -->
 		<include refid="Base_Event_Column_List" />
 		from core.event_metadata${table} em
 		join core.event${table} e on em.event_id = e.id
 		<if test="_parameter != null">
 			<include refid="Event_Example_Where_Clause" />
 		</if>
-		<if test="orderByClause != null">
+		<!-- <if test="orderByClause != null">
 			order by em.${example.orderByClause}
-		</if>
+		</if> -->
 	</select>
 
 
