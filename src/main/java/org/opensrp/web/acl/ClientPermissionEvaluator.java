@@ -13,14 +13,17 @@ import java.util.Set;
 public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
 
 	public boolean hasPermission(Authentication authentication, Client targetDomainObject) {
-		return hasPermissionOnClient(authentication, targetDomainObject.getLocationId());
+		return hasPermissionOnClient(authentication, targetDomainObject);
 	}
 
-	private boolean hasPermissionOnClient(Authentication authentication, String identifier) {
+	private boolean hasPermissionOnClient(Authentication authentication, Client client) {
 		/* @formatter:off */
 		return getAssignedLocations(authentication.getName())
 				.stream()
-				.anyMatch(a -> a.getPlanId().equals(identifier));
+				.anyMatch( (a) -> {
+							return a.getJurisdictionId().equals(client.getLocationId()) ||
+							a.getOrganizationId().equals(client.getTeamId());
+				});
 		/* @formatter:on */
 	}
 
