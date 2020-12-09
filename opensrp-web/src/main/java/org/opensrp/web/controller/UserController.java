@@ -227,6 +227,24 @@ public class UserController {
 		
 		return new ResponseEntity<>(array.toString(), OK);
 	}
+
+	@RequestMapping(value = "/pa-provider/location-tree", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<String> getPALocationTree(@RequestParam("username") String username) throws JSONException {
+
+		CustomQuery user = eventService.getUser(username);
+		List<CustomQuery> treeDTOS = clientService.getPALocationTreeByChildRole(user.getId(), childRoleId);
+		JSONArray array = new JSONArray();
+		try {
+			array = locationService.convertPALocationTreeToJSON(treeDTOS,
+					(user.getEnable() == null) ? false : user.getEnable(), user.getFullName());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new ResponseEntity<>(array.toString(), OK);
+	}
 	
 	@RequestMapping(value = "/gettarget", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody

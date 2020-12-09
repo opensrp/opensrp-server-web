@@ -223,6 +223,11 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return null;
 	}
+
+	@Override
+	public List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId) {
+		return null;
+	}
 	
 	@Override
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {

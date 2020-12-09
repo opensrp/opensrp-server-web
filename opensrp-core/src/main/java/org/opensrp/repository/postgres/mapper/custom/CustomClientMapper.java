@@ -39,6 +39,9 @@ public interface CustomClientMapper extends ClientMapper {
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(@Param("memberId") int memberId,
 	                                                     @Param("childRoleId") int childRoleId);
+
+	List<CustomQuery> getPALocationTreeByChildRole(@Param("memberId") int memberId,
+														 @Param("childRoleId") int childRoleId);
 	
 	List<TargetDetails> selectTargetDetails(@Param("username") String username, @Param("targetTimestamp") Long timestamp);
 	

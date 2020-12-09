@@ -335,6 +335,10 @@ public class ClientService {
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return allClients.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
+
+	public List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId) {
+		return allClients.getPALocationTreeByChildRole(memberId, childRoleId);
+	}
 	
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
 		return allClients.getTargetDetails(username, timestamp);
