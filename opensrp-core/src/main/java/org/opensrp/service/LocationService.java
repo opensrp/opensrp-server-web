@@ -148,6 +148,83 @@ public class LocationService {
 		return locationTree;
 	}
 
+	public JSONArray convertPALocationTreeToJSON(List<CustomQuery> treeDTOS, Boolean enable,String fullName) throws JSONException {
+		JSONArray locationTree = new JSONArray();
+
+		Map<String, Boolean> mp = new HashMap<>();
+		JSONObject object = new JSONObject();
+		JSONArray locations = new JSONArray();
+		JSONObject fullLocation = new JSONObject();
+
+		int counter = 0, limit = 0, ssId = 0;
+		String username = "", providerName = "", ssfullName = "", providerUsername = "";
+
+		for (CustomQuery treeDTO: treeDTOS) {
+			counter++;
+			limit++;
+			if (mp.get(treeDTO.getUsername()) == null || !mp.get(treeDTO.getUsername())) {
+				if (counter > 1) {
+					fullLocation = setEmptyValues(fullLocation);
+					locations.put(fullLocation);
+					object.put("username", username.trim());
+					object.put("locations", locations);
+					object.put("full_name", providerName);
+					object.put("sk_username", providerUsername);
+					object.put("ss_id", ssId);
+					object.put("ss_fullname", ssfullName);
+					object.put("simprints_enable", enable);
+					locationTree.put(object);
+					locations = new JSONArray();
+					object = new JSONObject();
+					fullLocation = new JSONObject();
+					counter = 1;
+				}
+				mp.put(treeDTO.getUsername(), true);
+			}
+
+			username = treeDTO.getFirstName();
+			providerName = treeDTO.getProviderFullname();
+			providerUsername = treeDTO.getProviderUsername();
+			ssId = treeDTO.getMemberId();
+			ssfullName = (treeDTO.getFirstName().substring(0, treeDTO.getFirstName().indexOf("(")) + " " +treeDTO.getLastName()).trim();
+
+			if (treeDTO.getLocationTagName().equalsIgnoreCase("country")) {
+				if (counter > 1) {
+					fullLocation = setEmptyValues(fullLocation);
+					locations.put(fullLocation);
+					fullLocation = new JSONObject();
+				}
+			}
+
+			String[] names = treeDTO.getName().split(":");
+			String locationName = names[0];
+
+			JSONObject location = new JSONObject();
+			location.put("code", treeDTO.getCode().trim());
+			location.put("id", treeDTO.getId());
+			location.put("name", locationName.trim());
+			String name = treeDTO.getLocationTagName().toLowerCase().replaceAll(" ", "_");
+			fullLocation.put(name, location);
+
+			if (limit == treeDTOS.size()) {
+				fullLocation = setEmptyValues(fullLocation);
+				locations.put(fullLocation);
+				object.put("username", username.trim());
+				object.put("locations", locations);
+				object.put("full_name", providerName);
+				object.put("sk_username", providerUsername);
+				object.put("ss_full_name", ssfullName);
+				object.put("ss_id", ssId);
+				object.put("simprints_enable", enable);
+				locationTree.put(object);
+				object = new JSONObject();
+				locations = new JSONArray();
+			}
+		}
+		return locationTree;
+	}
+
+
 	private JSONObject getLocationProperty() throws JSONException {
 		JSONObject property = new JSONObject();
 		property.put("name", "");

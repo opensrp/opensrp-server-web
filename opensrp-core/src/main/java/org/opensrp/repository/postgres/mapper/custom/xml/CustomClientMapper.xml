@@ -18,6 +18,16 @@
 		<result column="last_name" jdbcType="VARCHAR" property="lastName"/>
 		<result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
 	</resultMap>
+    <resultMap id="customQueryPALocationTreeMap" type="org.opensrp.domain.postgres.CustomQuery">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="leaf_loc_id" jdbcType="BIGINT" property="leafLocationId"/>
+        <result column="member_id" jdbcType="BIGINT" property="memberId"/>
+        <result column="first_name" jdbcType="VARCHAR" property="firstName"/>
+        <result column="last_name" jdbcType="VARCHAR" property="lastName"/>
+        <result column="loc_tag_name" jdbcType="VARCHAR" property="locationTagName"/>
+        <result column="provider_username" jdbcType="VARCHAR" property="providerUsername"/>
+        <result column="provider_fullname" jdbcType="VARCHAR" property="providerFullname"/>
+    </resultMap>
 	<resultMap id="targetDetails" type="org.opensrp.domain.postgres.TargetDetails">
 		<id column="username" jdbcType="VARCHAR" property="username" />
 		<result column="targetid" jdbcType="BIGINT" property="targetId"/>
@@ -156,6 +166,11 @@
 	<select id="getProviderLocationTreeByChildRole" parameterType="map"
 			resultMap="customQueryLocationTreeMap">
 		select * from core.get_location_tree(#{memberId}, #{childRoleId});
+	</select>
+
+    <select id="getPALocationTreeByChildRole" parameterType="map"
+            resultMap="customQueryPALocationTreeMap">
+		select * from core.get_pa_location_tree(#{memberId}, #{childRoleId});
 	</select>
 
 	<select id="selectTargetDetails" parameterType="map" resultMap="targetDetails">

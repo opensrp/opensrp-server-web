@@ -270,6 +270,7 @@ public class EventResource extends RestResource<Event> {
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
 		String isEmptyToAdd = getStringFilter("isEmptyToAdd", request);
 		String district = getStringFilter("district", request);
+		String villageIds = getStringFilter("villageIds", request);
 		
 		if (org.apache.commons.lang3.StringUtils.isBlank(isEmptyToAdd)) {
 			isEmptyToAdd = "true";
@@ -288,17 +289,25 @@ public class EventResource extends RestResource<Event> {
 			}
 			CustomQuery user = eventService.getUser(request.getRemoteUser());
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
-			List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
-			    user.getId(), ss, village) : new ArrayList<CustomQuery>();
+			List<Long> address = new ArrayList<Long>();
+			if (villageIds == null || org.apache.commons.lang3.StringUtils.isBlank(villageIds)) {
+				List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
+				    user.getId(), ss, village) : new ArrayList<CustomQuery>();
+				
+				for (CustomQuery locName : locations) {
+					address.add(Long.valueOf(locName.getId()));
+				}
+			} else {
+				for (String locId : villageIds.split(",")) {
+					address.add(Long.valueOf(locId));
+				}
+			}
 			logger.info("request.getRemoteUser():" + request.getRemoteUser());
 			
 			String location = "";
 			String userType = "";
-			List<Long> address = new ArrayList<Long>();
-			if (locations.size() != 0) {
-				for (CustomQuery locName : locations) {
-					address.add(Long.valueOf(locName.getId()));
-				}
+			if (address.size() != 0) {
+				System.out.println("====> address: " + address);
 				userType = "Provider";
 				String providerId = request.getRemoteUser();//getStringFilter(PROVIDER_ID, request);
 				String requestProviderName = request.getRemoteUser();

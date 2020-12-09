@@ -203,7 +203,7 @@ public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 	private Boolean isProvider(List<CustomQuery> roles) {
 		if (roles != null) {
 			for (CustomQuery role : roles) {
-				if (role.getName().equalsIgnoreCase(provider) || role.getName().equalsIgnoreCase("PK")) {
+				if (role.getName().equalsIgnoreCase(provider) || role.getName().equalsIgnoreCase("PK")|| role.getName().equalsIgnoreCase("PA")) {
 					return true;
 				}
 			}

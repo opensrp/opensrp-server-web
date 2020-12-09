@@ -37,6 +37,10 @@ public class CustomQuery {
 	private String fullName;
 	
 	private String roleName;
+
+	private String providerUsername;
+
+	private String providerFullname;
 	
 	private int roleId;
 	
@@ -191,7 +195,23 @@ public class CustomQuery {
 	public void setRoleId(int roleId) {
 		this.roleId = roleId;
 	}
-	
+
+	public String getProviderUsername() {
+		return providerUsername;
+	}
+
+	public void setProviderUsername(String providerUsername) {
+		this.providerUsername = providerUsername;
+	}
+
+	public String getProviderFullname() {
+		return providerFullname;
+	}
+
+	public void setProviderFullname(String providerFullname) {
+		this.providerFullname = providerFullname;
+	}
+
 	@Override
 	public String toString() {
 		return "CustomQuery [id=" + id + ", uuid=" + uuid + ", name=" + name + ", code=" + code + ", leafLocationId="

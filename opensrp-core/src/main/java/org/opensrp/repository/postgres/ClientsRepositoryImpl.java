@@ -345,6 +345,11 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return clientMapper.getProviderLocationTreeByChildRole(memberId, childRoleId);
 	}
+
+	@Override
+	public List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId) {
+		return clientMapper.getPALocationTreeByChildRole(memberId, childRoleId);
+	}
 	
 	@Override
 	public List<TargetDetails> getTargetDetails(String username, Long timestamp) {
