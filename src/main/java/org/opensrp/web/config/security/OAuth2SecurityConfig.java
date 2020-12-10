@@ -62,7 +62,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
 		        	.csrf()
-		        	.ignoringAntMatchers("/rest/**")
+		        	.ignoringAntMatchers("/rest/**","/oauth/*")
 		        .and().authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
