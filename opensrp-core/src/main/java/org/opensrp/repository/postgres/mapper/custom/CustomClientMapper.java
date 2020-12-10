@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.Client;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -39,9 +40,8 @@ public interface CustomClientMapper extends ClientMapper {
 	
 	List<CustomQuery> getProviderLocationTreeByChildRole(@Param("memberId") int memberId,
 	                                                     @Param("childRoleId") int childRoleId);
-
-	List<CustomQuery> getPALocationTreeByChildRole(@Param("memberId") int memberId,
-														 @Param("childRoleId") int childRoleId);
+	
+	List<CustomQuery> getPALocationTreeByChildRole(@Param("memberId") int memberId, @Param("childRoleId") int childRoleId);
 	
 	List<TargetDetails> selectTargetDetails(@Param("username") String username, @Param("targetTimestamp") Long timestamp);
 	
@@ -69,4 +69,10 @@ public interface CustomClientMapper extends ClientMapper {
 	CustomQuery selectGuestMaxHealthId(@Param("locationId") Integer locationId);
 	
 	List<Client> selectByRelationshipId(@Param("relationshipId") String relationshipId, @Param("table") String table);
+	
+	Integer insertMigration(Migration migration);
+	
+	Migration selectMigrationById(Long id);
+	
+	List<Migration> selectMigrationByIdRelationId(String relationalId);
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Migration {
 	
-	private int id;
+	private Long id;
 	
 	private Date migrationDate;
 	
@@ -84,11 +84,25 @@ public class Migration {
 	
 	private Date dob;
 	
-	public int getId() {
+	private String baseEntityId;
+	
+	private String districtIdOut;
+	
+	private String districtIdIn;
+	
+	private String motherId;
+	
+	private String divisionIdOut;
+	
+	private String divisionIdIn;
+	
+	private Long timestamp;
+	
+	public Long getId() {
 		return id;
 	}
 	
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	
@@ -402,6 +416,81 @@ public class Migration {
 	
 	public void setDob(Date dob) {
 		this.dob = dob;
+	}
+	
+	public String getBaseEntityId() {
+		return baseEntityId;
+	}
+	
+	public void setBaseEntityId(String baseEntityId) {
+		this.baseEntityId = baseEntityId;
+	}
+	
+	public String getDistrictIdOut() {
+		return districtIdOut;
+	}
+	
+	public void setDistrictIdOut(String districtIdOut) {
+		this.districtIdOut = districtIdOut;
+	}
+	
+	public String getDistrictIdIn() {
+		return districtIdIn;
+	}
+	
+	public void setDistrictIdIn(String districtIdIn) {
+		this.districtIdIn = districtIdIn;
+	}
+	
+	public String getMotherId() {
+		return motherId;
+	}
+	
+	public void setMotherId(String motherId) {
+		this.motherId = motherId;
+	}
+	
+	public String getDivisionIdOut() {
+		return divisionIdOut;
+	}
+	
+	public void setDivisionIdOut(String divisionIdOut) {
+		this.divisionIdOut = divisionIdOut;
+	}
+	
+	public String getDivisionIdIn() {
+		return divisionIdIn;
+	}
+	
+	public void setDivisionIdIn(String divisionIdIn) {
+		this.divisionIdIn = divisionIdIn;
+	}
+	
+	public Long getTimestamp() {
+		return timestamp;
+	}
+	
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+	
+	@Override
+	public String toString() {
+		return "Migration [id=" + id + ", migrationDate=" + migrationDate + ", memberName=" + memberName
+		        + ", memberContact=" + memberContact + ", memberIDIn=" + memberIDIn + ", memberIDOut=" + memberIDOut
+		        + ", HHNameIn=" + HHNameIn + ", HHNameOut=" + HHNameOut + ", HHContactOut=" + HHContactOut
+		        + ", HHContactIn=" + HHContactIn + ", divisionOut=" + divisionOut + ", divisionIn=" + divisionIn
+		        + ", districtOut=" + districtOut + ", districtIn=" + districtIn + ", upazilaOut=" + upazilaOut
+		        + ", upazilaIn=" + upazilaIn + ", pourasavaOut=" + pourasavaOut + ", pourasavaIn=" + pourasavaIn
+		        + ", unionOut=" + unionOut + ", unionIn=" + unionIn + ", villageOut=" + villageOut + ", villageIn="
+		        + villageIn + ", villageIDOut=" + villageIDOut + ", villageIDIn=" + villageIDIn + ", BranchIDOut="
+		        + BranchIDOut + ", branchIDIn=" + branchIDIn + ", SKOut=" + SKOut + ", SKIn=" + SKIn + ", SSOut=" + SSOut
+		        + ", SSIn=" + SSIn + ", numberOfMemberOut=" + numberOfMemberOut + ", numberOfMemberIn=" + numberOfMemberIn
+		        + ", relationWithHHOut=" + relationWithHHOut + ", relationWithHHIn=" + relationWithHHIn + ", status="
+		        + status + ", isMember=" + isMember + ", relationalIdIn=" + relationalIdIn + ", relationalIdOut="
+		        + relationalIdOut + ", memberType=" + memberType + ", dob=" + dob + ", baseEntityId=" + baseEntityId
+		        + ", districtIdOut=" + districtIdOut + ", districtIdIn=" + districtIdIn + ", motherId=" + motherId
+		        + ", divisionIdOut=" + divisionIdOut + ", divisionIdIn=" + divisionIdIn + ", timestamp=" + timestamp + "]";
 	}
 	
 }

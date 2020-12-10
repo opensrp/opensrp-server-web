@@ -43,7 +43,59 @@
 	<resultMap id="userLocationMap" type="org.opensrp.domain.UserLocationTableName">
 		
 	</resultMap>
-
+	
+	<resultMap id="migrationMap" type="org.opensrp.domain.Migration">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="migration_date" jdbcType="DATE" property="migrationDate"/>
+		<result column="member_name" jdbcType="VARCHAR" property="memberName"/>
+		<result column="member_contact" jdbcType="VARCHAR" property="memberContact"/>
+		<result column="member_id_in" jdbcType="VARCHAR" property="memberIDIn"/>
+		<result column="member_id_out" jdbcType="VARCHAR" property="memberIDOut"/>
+		
+		<result column="hh_name_in" jdbcType="VARCHAR" property="HHNameIn"/>
+		<result column="hh_name_out" jdbcType="VARCHAR" property="HHNameOut"/>
+		<result column="hh_contact_out" jdbcType="VARCHAR" property="HHContactOut"/>
+		<result column="hh_contact_in" jdbcType="VARCHAR" property="HHContactIn"/>
+		<result column="division_out" jdbcType="VARCHAR" property="divisionOut"/>
+		<result column="division_in" jdbcType="VARCHAR" property="divisionIn"/>
+		<result column="district_out" jdbcType="VARCHAR" property="districtOut"/>
+		<result column="district_in" jdbcType="VARCHAR" property="districtIn"/>
+		<result column="upazila_out" jdbcType="VARCHAR" property="upazilaOut"/>
+		<result column="upazila_in" jdbcType="VARCHAR" property="upazilaIn"/>
+		<result column="pourasava_out" jdbcType="VARCHAR" property="pourasavaOut"/>
+		<result column="pourasava_in" jdbcType="VARCHAR" property="pourasavaIn"/>
+		<result column="union_out" jdbcType="VARCHAR" property="unionOut"/>
+		<result column="union_in" jdbcType="VARCHAR" property="unionIn"/>
+		<result column="village_out" jdbcType="VARCHAR" property="villageOut"/>
+		<result column="village_in" jdbcType="VARCHAR" property="villageIn"/>
+		<result column="village_id_out" jdbcType="VARCHAR" property="villageIDOut"/>
+		<result column="village_id_in" jdbcType="VARCHAR" property="villageIDIn"/>
+		<result column="branch_id_out" jdbcType="VARCHAR" property="BranchIDOut"/>
+		<result column="branch_id_in" jdbcType="VARCHAR" property="branchIDIn"/>
+		<result column="sk_out" jdbcType="VARCHAR" property="SKOut"/>
+		<result column="sk_in" jdbcType="VARCHAR" property="SKIn"/>
+		<result column="ss_out" jdbcType="VARCHAR" property="SSOut"/>
+		<result column="ss_in" jdbcType="VARCHAR" property="SSIn"/>
+		<result column="number_of_member_out" jdbcType="VARCHAR" property="numberOfMemberOut"/>
+		<result column="number_of_member_in" jdbcType="VARCHAR" property="numberOfMemberIn"/>
+		<result column="relation_with_hh_out" jdbcType="VARCHAR" property="relationWithHHOut"/>
+		<result column="relation_with_hh_in" jdbcType="VARCHAR" property="relationWithHHIn"/>
+		<result column="status" jdbcType="VARCHAR" property="status"/>
+		<result column="is_member" jdbcType="VARCHAR" property="is_member"/>
+		<result column="relational_id_in" jdbcType="VARCHAR" property="relationalIdIn"/>
+		<result column="relational_id_out" jdbcType="VARCHAR" property="relationalIdOut"/>
+		<result column="member_type" jdbcType="VARCHAR" property="memberType"/>
+		<result column="dob" jdbcType="DATE" property="dob"/>
+		<result column="base_entity_id" jdbcType="VARCHAR" property="baseEntityId"/>
+		<result column="district_id_out" jdbcType="VARCHAR" property="districtIdOut"/>
+		<result column="district_id_in" jdbcType="VARCHAR" property="districtIdIn"/>
+		<result column="mother_id" jdbcType="VARCHAR" property="motherId"/>
+		<result column="division_id_out" jdbcType="VARCHAR" property="divisionIdOut"/>
+		<result column="division_id_in" jdbcType="VARCHAR" property="divisionIdIn"/>
+		<result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
+	
+	</resultMap>
+	
 	<insert id="insertSelectiveAndSetId" parameterType="org.opensrp.domain.postgres.Client"
 			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
 		insert into core.client
@@ -283,6 +335,326 @@
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select id,json from core.client${table} where id=any(select client_id from core.client_metadata${table} as cm
 		where relational_id = #{relationshipId,jdbcType=VARCHAR})		
+	</select>
+	
+	<insert id="insertMigration" parameterType="org.opensrp.domain.Migration"
+			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into core.migration
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			
+			<if test="migrationDate != null">
+				migration_date,
+			</if>
+			<if test="memberName != null">
+				member_name,
+			</if>
+			<if test="memberContact != null">
+				member_contact,
+			</if>
+			<if test="memberIDIn != null">
+				member_id_in,
+			</if>
+			<if test="memberIDOut != null">
+				member_id_out,
+			</if>
+			<if test="HHNameIn != null">
+				hh_name_in,
+			</if>
+			<if test="HHNameOut != null">
+				hh_name_out,
+			</if>
+			<if test="HHContactOut != null">
+				hh_contact_out,
+			</if>
+			<if test="HHContactIn != null">
+				hh_contact_in,
+			</if>
+			
+			<if test="divisionOut != null">
+				division_out,
+			</if>
+			
+			<if test="divisionIn != null">
+				division_in,
+			</if>
+			<if test="districtOut != null">
+				district_out,
+			</if>
+			<if test="districtIn != null">
+				district_in,
+			</if>
+			
+			<if test="upazilaOut != null">
+				upazila_out,
+			</if>
+			<if test="upazilaIn != null">
+				upazila_in,
+			</if>
+			
+			<if test="pourasavaOut != null">
+				pourasava_out,
+			</if>
+			<if test="pourasavaIn != null">
+				pourasava_in,
+			</if>
+			<if test="unionOut != null">
+				union_out,
+			</if>			
+			<if test="unionIn != null">
+				union_in,
+			</if>
+			<if test="villageOut != null">
+				village_out,
+			</if>
+			
+			<if test="villageIn != null">
+				village_in,
+			</if>
+			<if test="villageIDOut != null">
+				village_id_out,
+			</if>
+			<if test="villageIDIn != null">
+				village_id_in,
+			</if>
+			<if test="BranchIDOut != null">
+				branch_id_out,
+			</if>
+			
+			<if test="branchIDIn != null">
+				branch_id_in,
+			</if>
+			<if test="SKOut != null">
+				sk_out,
+			</if>
+			
+			<if test="SKIn != null">
+				sk_in,
+			</if>
+			<if test="SSOut != null">
+				ss_out,
+			</if>
+			<if test="SSIn != null">
+				ss_in,
+			</if>
+			<if test="numberOfMemberOut != null">
+				number_of_member_out,
+			</if>
+			
+			<if test="numberOfMemberIn != null">
+				number_of_member_in,
+			</if>
+			
+			<if test="relationWithHHOut != null">
+				relation_with_hh_out,
+			</if>
+			<if test="relationWithHHIn != null">
+				relation_with_hh_in,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			
+			<if test="isMember != null">
+				is_member,
+			</if>
+			<if test="relationalIdIn != null">
+				relational_id_in,
+			</if>
+			<if test="relationalIdOut != null">
+				relational_id_out,
+			</if>
+			
+			<if test="memberType != null">
+				member_type,
+			</if>
+			<if test="dob != null">
+				dob,
+			</if>
+			<if test="baseEntityId != null">
+				base_entity_id,
+			</if>
+			
+			<if test="districtIdOut != null">
+				district_id_out,
+			</if>
+			<if test="districtIdIn != null">
+				district_id_in,
+			</if>
+			<if test="motherId != null">
+				mother_id,
+			</if>
+			<if test="divisionIdOut != null">
+				division_id_out,
+			</if>
+			<if test="divisionIdIn != null">
+				division_id_in,
+			</if>
+			<if test="timestamp != null">
+				timestamp,
+			</if>
+			
+			
+			
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			
+			<if test="migrationDate != null">
+				#{migrationDate,jdbcType=DATE},
+			</if>
+			<if test="memberName != null">
+				#{memberName,jdbcType=VARCHAR},
+			</if>
+			<if test="memberContact != null">
+				#{memberContact,jdbcType=VARCHAR},
+			</if>
+			<if test="memberIDIn != null">
+				#{memberIDIn,jdbcType=VARCHAR},
+			</if>
+			<if test="memberIDOut != null">
+				#{memberIDOut,jdbcType=VARCHAR},
+			</if>
+			<if test="HHNameIn != null">
+				#{HHNameIn,jdbcType=VARCHAR},
+			</if>
+			<if test="HHNameOut != null">
+				#{HHNameOut,jdbcType=VARCHAR},
+			</if>
+			<if test="HHContactOut != null">
+				#{HHContactOut,jdbcType=VARCHAR},
+			</if>
+			<if test="HHContactIn != null">
+				#{HHContactIn,jdbcType=VARCHAR},
+			</if>
+			<if test="divisionOut != null">
+				#{divisionOut,jdbcType=VARCHAR},
+			</if>
+			<if test="divisionIn != null">
+				#{divisionIn,jdbcType=VARCHAR},
+			</if>
+			<if test="districtOut != null">
+				#{districtOut,jdbcType=VARCHAR},
+			</if>
+			<if test="districtIn != null">
+				#{districtIn,jdbcType=VARCHAR},
+			</if>
+			<if test="upazilaOut != null">
+				#{upazilaOut,jdbcType=VARCHAR},
+			</if>
+			<if test="upazilaIn != null">
+				#{upazilaIn,jdbcType=VARCHAR},
+			</if>
+			<if test="pourasavaOut != null">
+				#{pourasavaOut,jdbcType=VARCHAR},
+			</if>
+			<if test="pourasavaIn != null">
+				#{pourasavaIn,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="unionOut != null">
+				#{unionOut,jdbcType=VARCHAR},
+			</if>
+			<if test="unionIn != null">
+				#{unionIn,jdbcType=VARCHAR},
+			</if>
+			<if test="villageOut != null">
+				#{villageOut,jdbcType=VARCHAR},
+			</if>
+			<if test="villageIn != null">
+				#{villageIn,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="villageIDOut != null">
+				#{villageIDOut,jdbcType=VARCHAR},
+			</if>
+			<if test="villageIDOut != null">
+				#{villageIDOut,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="BranchIDOut != null">
+				#{BranchIDOut,jdbcType=VARCHAR},
+			</if>
+			<if test="branchIDIn != null">
+				#{branchIDIn,jdbcType=VARCHAR},
+			</if>
+			<if test="SKOut != null">
+				#{SKOut,jdbcType=VARCHAR},
+			</if>
+			<if test="SKIn != null">
+				#{SKIn,jdbcType=VARCHAR},
+			</if>
+			<if test="SSOut != null">
+				#{SSOut,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="SSIn != null">
+				#{SSIn,jdbcType=VARCHAR},
+			</if>
+			<if test="numberOfMemberOut != null">
+				#{numberOfMemberOut,jdbcType=VARCHAR},
+			</if>
+			<if test="numberOfMemberIn != null">
+				#{numberOfMemberIn,jdbcType=VARCHAR},
+			</if>
+			<if test="relationWithHHOut != null">
+				#{relationWithHHOut,jdbcType=VARCHAR},
+			</if>
+			<if test="relationWithHHIn != null">
+				#{relationWithHHIn,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=VARCHAR},
+			</if>
+			<if test="isMember != null">
+				#{isMember,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="relationalIdIn != null">
+				#{relationalIdIn,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="relationalIdOut != null">
+				#{relationalIdOut,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="memberType != null">
+				#{memberType,jdbcType=VARCHAR},
+			</if>
+			<if test="dob != null">
+				#{dob,jdbcType=DATE},
+			</if>
+			<if test="baseEntityId != null">
+				#{baseEntityId,jdbcType=VARCHAR},
+			</if>
+			<if test="districtIdOut != null">
+				#{districtIdOut,jdbcType=VARCHAR},
+			</if>
+			<if test="districtIdIn != null">
+				#{districtIdIn,jdbcType=VARCHAR},
+			</if>
+			<if test="motherId != null">
+				#{motherId,jdbcType=VARCHAR},
+			</if>
+			<if test="divisionIdOut != null">
+				#{divisionIdOut,jdbcType=VARCHAR},
+			</if>
+			<if test="divisionIdIn != null">
+				#{divisionIdIn,jdbcType=VARCHAR},
+			</if>
+			<if test="timestamp != null">
+				#{timestamp,jdbcType=BIGINT},
+			</if>
+			
+		</trim>
+	</insert>
+	
+	<select id="selectMigrationById" resultMap="migrationMap">
+		select * from core.migration as m where m.id = #{id} ; 
+		 	
+	</select>
+	
+	<select id="selectMigrationByIdRelationId" resultMap="migrationMap">
+		select * from core.migration as m where m.relational_id_out = #{relationalId} ; 
+		 	
 	</select>
 
 </mapper>

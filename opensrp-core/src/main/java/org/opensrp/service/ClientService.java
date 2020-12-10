@@ -2,7 +2,9 @@ package org.opensrp.service;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -468,15 +470,16 @@ public class ClientService {
 	 * @param inClient means after migrated client
 	 * @param outClient means before migrated client
 	 **/
-	public Migration addMigration(Client inClient, Client outClient, Client inHhousehold, Client outHhousehold,
+	public Migration setMigration(Client inClient, Client outClient, Client inHhousehold, Client outHhousehold,
 	                              String inProvider, String outProvider, String inHHrelationalId, String outHHrelationalId,
-	                              String branchIdIn, String branchIdOut, String type) {
+	                              String branchIdIn, String branchIdOut, String type, UserLocationTableName oldUserLocation,
+	                              UserLocationTableName newUserLocation) {
 		
 		Address inAddressa = inClient.getAddress("usual_residence");
 		Migration migration = new Migration();
 		migration.setDistrictIn(inAddressa.getCountyDistrict());
 		migration.setDivisionIn(inAddressa.getStateProvince());
-		migration.setVillageIDIn(inAddressa.getCityVillage());
+		migration.setVillageIn(inAddressa.getCityVillage());
 		migration.setUpazilaIn(inAddressa.getAddressField("address2"));
 		migration.setPourasavaIn(inAddressa.getAddressField("address3"));
 		migration.setUnionIn(inAddressa.getAddressField("address1"));
@@ -486,7 +489,7 @@ public class ClientService {
 		
 		migration.setDistrictOut(outAddressa.getCountyDistrict());
 		migration.setDivisionOut(outAddressa.getStateProvince());
-		migration.setVillageIDOut(outAddressa.getCityVillage());
+		migration.setVillageOut(outAddressa.getCityVillage());
 		migration.setUpazilaOut(outAddressa.getAddressField("address2"));
 		migration.setPourasavaOut(outAddressa.getAddressField("address3"));
 		migration.setUnionOut(outAddressa.getAddressField("address1"));
@@ -528,12 +531,49 @@ public class ClientService {
 		}
 		migration.setMigrationDate(new DateTime().toDate());
 		migration.setMemberType(type);
+		migration.setBaseEntityId(outClient.getBaseEntityId());
+		migration.setDistrictIdOut(oldUserLocation.getTableName());
+		migration.setDistrictIdIn(newUserLocation.getTableName());
 		
+		migration.setDivisionIdOut(oldUserLocation.getDivision());
+		migration.setDivisionIdIn(newUserLocation.getDivision());
+		migration.setTimestamp(System.currentTimeMillis());
 		return migration;
 		
 	}
 	
 	public String findBranchId(String baseEntityId, String table) {
 		return allClients.findBranchId(baseEntityId, table);
+	}
+	
+	public Integer addMigration(Migration migration) {
+		return allClients.addMigration(migration);
+		
+	}
+	
+	public Migration findMigrationById(Long id) {
+		
+		return allClients.findMigrationById(id);
+	}
+	
+	public List<Migration> findMigrationByIdRelationId(String relationalId) {
+		
+		return allClients.findMigrationByIdRelationId(relationalId);
+	}
+	
+	public Address setAddress(Client c, Migration migration) {
+		Map<String, String> addressFields = new HashMap<String, String>();
+		addressFields.put("address1", migration.getUnionOut());
+		addressFields.put("address2", migration.getUpazilaOut());
+		addressFields.put("address3", migration.getPourasavaOut());
+		addressFields.put("address8", migration.getVillageIDOut());
+		Address address = new Address();
+		address.setCityVillage(migration.getVillageOut());
+		address.setCountry("BANGLADESH");
+		address.setCountyDistrict(migration.getDistrictOut());
+		address.setAddressType("usual_residence");
+		address.setStateProvince(migration.getDivisionOut());
+		address.setAddressFields(addressFields);
+		return address;
 	}
 }

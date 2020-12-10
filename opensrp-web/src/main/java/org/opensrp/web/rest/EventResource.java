@@ -34,6 +34,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.search.AddressSearchBean;
@@ -592,12 +593,12 @@ public class EventResource extends RestResource<Event> {
 		JSONArray cls = new JSONArray(syncData.getString("clients"));
 		JSONObject json = cls.getJSONObject(0);
 		String baseEntityId = client.getBaseEntityId();
-		String outPprovider = getStringFilter("provider", request);
+		String outProvider = getStringFilter("provider", request);
 		String type = getStringFilter("type", request);
 		JSONObject attributes = json.getJSONObject("attributes");
 		JSONObject identifiers = json.getJSONObject("identifiers");
 		
-		UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outPprovider, "", "", "", "");
+		UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
 		
 		String oldTable = oldUserLocation.getTableName();
 		Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);
@@ -654,10 +655,16 @@ public class EventResource extends RestResource<Event> {
 		
 		if (type.equalsIgnoreCase("HH")) {
 			migrateHHEventsClients(client, newUserLocation, oldUserLocation);
+			Migration migration = clientService.setMigration(client, c, null, null, inProvider, outProvider,
+			    inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation, newUserLocation);
+			clientService.addMigration(migration);
 		} else if (type.equalsIgnoreCase("Member")) {
 			migrateMemberEvents(client, newUserLocation, oldUserLocation);
 			Client inHhousehold = clientService.findClientByBaseEntityId(inHHrelationalId, oldUserLocation.getTableName());
 			Client outHhousehold = clientService.findClientByBaseEntityId(outHHrelationalId, oldUserLocation.getTableName());
+			Migration migration = clientService.setMigration(client, c, inHhousehold, outHhousehold, inProvider,
+			    outProvider, inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation,
+			    newUserLocation);
 			
 		} else {
 			
@@ -744,4 +751,81 @@ public class EventResource extends RestResource<Event> {
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/reject-migration")
+	public ResponseEntity<HttpStatus> rejectMigration(HttpServletRequest request) throws JSONException {
+		Long id = getIntegerFilter("id", request).longValue();
+		String relationalId = getStringFilter("relationalId", request);
+		String type = getStringFilter("type", request);
+		Migration migration = clientService.findMigrationById(id);
+		
+		if (type.equalsIgnoreCase("HH")) {
+			
+			Client household = clientService.findClientByBaseEntityId(migration.getBaseEntityId(),
+			    migration.getDistrictIdIn());
+			household.getAddresses().clear();
+			
+			household.addAddress(clientService.setAddress(household, migration));
+			household.addIdentifier("opensrp_id", migration.getMemberIDOut());
+			Map<String, Object> att = household.getAttributes();
+			att.put("SS_Name", migration.getSSOut());
+			att.put("village_id", migration.getVillageIDOut());
+			household.getRelationships().clear();
+			List<String> family = new ArrayList<>();
+			family.add(migration.getRelationalIdOut());
+			Map<String, List<String>> relationships = new HashMap<>();
+			relationships.put("family_head", family);
+			relationships.put("primary_caregiver", family);
+			household.setRelationships(relationships);
+			System.err.println("migration:" + household);
+			rejectEvent(household, migration);
+			List<Migration> migrations = clientService.findMigrationByIdRelationId(relationalId);
+			for (Migration migration2 : migrations) {
+				Client c = clientService
+				        .findClientByBaseEntityId(migration2.getBaseEntityId(), migration2.getDistrictIdIn());
+				rejectClient(c, migration2);
+			}
+			
+		} else if (type.equalsIgnoreCase("Member")) {
+			
+			Client member = clientService.findClientByBaseEntityId(migration.getBaseEntityId(), migration.getDistrictIdIn());
+			rejectClient(member, migration);
+		}
+		
+		return null;
+		
+	}
+	
+	private void rejectClient(Client c, Migration migration) {
+		c.getAddresses().clear();
+		c.addAddress(clientService.setAddress(c, migration));
+		Map<String, Object> att = c.getAttributes();
+		att.put("Relation_with_HOH", migration.getRelationWithHHOut());
+		c.addIdentifier("opensrp_id", migration.getMemberIDOut());
+		c.getRelationships().clear();
+		List<String> family = new ArrayList<>();
+		family.add(migration.getRelationalIdOut());
+		List<String> mother = new ArrayList<>();
+		mother.add(migration.getMotherId());
+		Map<String, List<String>> relationships = new HashMap<>();
+		relationships.put("family", family);
+		relationships.put("mother", mother);
+		c.setRelationships(relationships);
+		rejectEvent(c, migration);
+		String divisionId = migration.getDistrictIdOut().replace("_", "");
+		
+		clientService.addOrUpdate(c, migration.getDistrictIdIn(), divisionId, migration.getDivisionIdOut(),
+		    migration.getBranchIDOut(), migration.getVillageIDIn());
+		
+	}
+	
+	private void rejectEvent(Client c, Migration migration) {
+		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), migration.getDistrictIdIn());
+		String divisionId = migration.getDistrictIdOut().replace("_", "");
+		
+		for (Event event : events) {
+			eventService.addorUpdateEvent(event, migration.getDistrictIdIn(), divisionId, migration.getDivisionIdOut(),
+			    migration.getBranchIDOut(), migration.getVillageIDIn());
+		}
+	}
 }

@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.motechproject.dao.MotechBaseRepository;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.StockInfo;
@@ -223,7 +224,7 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	public List<CustomQuery> getProviderLocationTreeByChildRole(int memberId, int childRoleId) {
 		return null;
 	}
-
+	
 	@Override
 	public List<CustomQuery> getPALocationTreeByChildRole(int memberId, int childRoleId) {
 		return null;
@@ -478,6 +479,30 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public CustomQuery getGuestMaxHealthId(Integer locationId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String findBranchId(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Integer addMigration(Migration migration) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Migration findMigrationById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Migration> findMigrationByIdRelationId(String relationalId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

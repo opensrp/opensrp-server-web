@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.ClientMetadata;
 import org.opensrp.domain.postgres.ClientMetadataExample;
@@ -610,6 +611,24 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public String findBranchId(String baseEntityId, String table) {
 		
 		return clientMetadataMapper.selectBranchId(baseEntityId, table);
+	}
+	
+	@Override
+	public Integer addMigration(Migration migration) {
+		return clientMapper.insertMigration(migration);
+		
+	}
+	
+	@Override
+	public Migration findMigrationById(Long id) {
+		
+		return clientMapper.selectMigrationById(id);
+	}
+	
+	@Override
+	public List<Migration> findMigrationByIdRelationId(String relationalId) {
+		
+		return clientMapper.selectMigrationByIdRelationId(relationalId);
 	}
 	
 }

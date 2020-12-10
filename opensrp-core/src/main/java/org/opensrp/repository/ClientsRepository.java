@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.StockInfo;
@@ -102,4 +103,9 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	
 	String findBranchId(String baseEntityId, String table);
 	
+	Integer addMigration(Migration migration);
+	
+	Migration findMigrationById(Long id);
+	
+	List<Migration> findMigrationByIdRelationId(String relationalId);
 }
