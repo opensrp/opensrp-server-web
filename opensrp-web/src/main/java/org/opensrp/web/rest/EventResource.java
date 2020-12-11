@@ -31,6 +31,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.common.MigrationStatus;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.Event;
@@ -49,7 +50,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -97,6 +101,9 @@ public class EventResource extends RestResource<Event> {
 	
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
+	
+	@Autowired
+	private DataSourceTransactionManager transactionManager;
 	
 	@Autowired
 	public EventResource(ClientService clientService, EventService eventService) {
@@ -573,107 +580,121 @@ public class EventResource extends RestResource<Event> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/migrate")
 	public ResponseEntity<HttpStatus> migrate(@RequestBody String data, HttpServletRequest request) throws JSONException {
-		JSONObject syncData = new JSONObject(data);
-		ArrayList<Client> clients = new ArrayList<Client>();
-		if (syncData.has("clients")) {
+		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+		try {
+			JSONObject syncData = new JSONObject(data);
+			ArrayList<Client> clients = new ArrayList<Client>();
+			if (syncData.has("clients")) {
+				
+				clients = (ArrayList<Client>) gson.fromJson(syncData.getString("clients"),
+				    new TypeToken<ArrayList<Client>>() {}.getType());
+				logger.info("received client size:" + clients.size());
+			}
+			Client client = clients.get(0);
+			Map<String, List<String>> inHHrelationShips = client.getRelationships();
+			String inHHrelationalId = "";
+			if (inHHrelationShips.containsKey("family")) {
+				inHHrelationalId = inHHrelationShips.get("family").get(0);
+			} else if (inHHrelationShips.containsKey("family_head")) {
+				inHHrelationalId = inHHrelationShips.get("family_head").get(0);
+			}
+			System.err.println("inHHrelationalId>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:" + inHHrelationalId);
+			JSONArray cls = new JSONArray(syncData.getString("clients"));
+			JSONObject json = cls.getJSONObject(0);
+			String baseEntityId = client.getBaseEntityId();
+			String outProvider = getStringFilter("provider", request);
+			String type = getStringFilter("type", request);
+			JSONObject attributes = json.getJSONObject("attributes");
+			JSONObject identifiers = json.getJSONObject("identifiers");
 			
-			clients = (ArrayList<Client>) gson.fromJson(syncData.getString("clients"),
-			    new TypeToken<ArrayList<Client>>() {}.getType());
-			logger.info("received client size:" + clients.size());
-		}
-		Client client = clients.get(0);
-		Map<String, List<String>> inHHrelationShips = client.getRelationships();
-		String inHHrelationalId = "";
-		if (inHHrelationShips.containsKey("family")) {
-			inHHrelationalId = inHHrelationShips.get("family").get(0);
-		} else if (inHHrelationShips.containsKey("family_head")) {
-			inHHrelationalId = inHHrelationShips.get("family_head").get(0);
-		}
-		
-		JSONArray cls = new JSONArray(syncData.getString("clients"));
-		JSONObject json = cls.getJSONObject(0);
-		String baseEntityId = client.getBaseEntityId();
-		String outProvider = getStringFilter("provider", request);
-		String type = getStringFilter("type", request);
-		JSONObject attributes = json.getJSONObject("attributes");
-		JSONObject identifiers = json.getJSONObject("identifiers");
-		
-		UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
-		
-		String oldTable = oldUserLocation.getTableName();
-		Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);
-		
-		Map<String, List<String>> outrelationShips = c.getRelationships();
-		String outHHrelationalId = "";
-		if (outrelationShips.containsKey("family")) {
-			outHHrelationalId = outrelationShips.get("family").get(0);
-		} else if (outrelationShips.containsKey("family_head")) {
-			outHHrelationalId = outrelationShips.get("family_head").get(0);
-		}
-		
-		c.getAddresses().remove(0);
-		Address clientAddres = client.getAddress("usual_residence");
-		List<Address> clientNewAddres = new ArrayList<>();
-		c.getAddresses().clear();
-		clientNewAddres.add(clientAddres);
-		c.setAddresses(clientNewAddres);
-		Map<String, Object> att = c.getAttributes();
-		System.err.println("att" + att);
-		for (int i = 0; i < attributes.names().length(); i++) {
-			att.put(attributes.names().getString(i), attributes.get(attributes.names().getString(i)));
+			UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
 			
-		}
-		System.err.println("att" + att);
-		c.withAttributes(att);
-		for (int i = 0; i < identifiers.names().length(); i++) {
-			c.addIdentifier(identifiers.names().getString(i), identifiers.get(identifiers.names().getString(i)) + "");
-		}
-		
-		/*identifiers.keys().forEachRemaining(key -> {
-			Object value = attributes.opt(key + "");
-			c.addIdentifier(key + "", value + "");
-		});	*/
-		
-		c.withRelationships(client.getRelationships());
-		System.err.println(c.getAddress("usual_residence"));
-		System.err.println(c.getAttributes());
-		
-		String district = getStringFilter("district", request);
-		String inProvider = request.getRemoteUser();
-		String division = getStringFilter("division", request);
-		String branch = getStringFilter("branch", request);
-		String village = getStringFilter("village", request);
-		UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
-		    branch, village);
-		
-		String branchIdIn = clientService.findBranchId(client.getBaseEntityId(), newUserLocation.getTableName());
-		String branchIdOut = clientService.findBranchId(c.getBaseEntityId(), oldUserLocation.getTableName());
-		
-		System.err.println("newUserLocation:::" + newUserLocation);
-		clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
-		    newUserLocation.getBranch(), newUserLocation.getVillage());
-		
-		if (type.equalsIgnoreCase("HH")) {
-			migrateHHEventsClients(client, newUserLocation, oldUserLocation);
-			Migration migration = clientService.setMigration(client, c, null, null, inProvider, outProvider,
-			    inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation, newUserLocation);
-			clientService.addMigration(migration);
-		} else if (type.equalsIgnoreCase("Member")) {
-			migrateMemberEvents(client, newUserLocation, oldUserLocation);
-			Client inHhousehold = clientService.findClientByBaseEntityId(inHHrelationalId, oldUserLocation.getTableName());
-			Client outHhousehold = clientService.findClientByBaseEntityId(outHHrelationalId, oldUserLocation.getTableName());
-			Migration migration = clientService.setMigration(client, c, inHhousehold, outHhousehold, inProvider,
-			    outProvider, inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation,
-			    newUserLocation);
+			String oldTable = oldUserLocation.getTableName();
+			Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);
 			
-		} else {
+			Map<String, List<String>> outrelationShips = c.getRelationships();
+			String outHHrelationalId = "";
+			if (outrelationShips.containsKey("family")) {
+				outHHrelationalId = outrelationShips.get("family").get(0);
+			} else if (outrelationShips.containsKey("family_head")) {
+				outHHrelationalId = outrelationShips.get("family_head").get(0);
+			}
+			System.err.println("outHHrelationalId>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:" + outHHrelationalId);
 			
+			c.getAddresses().remove(0);
+			Address clientAddres = client.getAddress("usual_residence");
+			List<Address> clientNewAddres = new ArrayList<>();
+			c.getAddresses().clear();
+			clientNewAddres.add(clientAddres);
+			c.setAddresses(clientNewAddres);
+			Map<String, Object> att = c.getAttributes();
+			
+			for (int i = 0; i < attributes.names().length(); i++) {
+				att.put(attributes.names().getString(i), attributes.get(attributes.names().getString(i)));
+				
+			}
+			
+			c.withAttributes(att);
+			for (int i = 0; i < identifiers.names().length(); i++) {
+				c.addIdentifier(identifiers.names().getString(i), identifiers.get(identifiers.names().getString(i)) + "");
+			}
+			
+			/*identifiers.keys().forEachRemaining(key -> {
+				Object value = attributes.opt(key + "");
+				c.addIdentifier(key + "", value + "");
+			});	*/
+			
+			c.withRelationships(client.getRelationships());
+			
+			String district = getStringFilter("district", request);
+			String inProvider = request.getRemoteUser();
+			String division = getStringFilter("division", request);
+			String branch = getStringFilter("branch", request);
+			String village = getStringFilter("village", request);
+			UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
+			    branch, village);
+			
+			String branchIdIn = newUserLocation.getBranch();
+			String branchIdOut = clientService.findBranchId(c.getBaseEntityId(), oldUserLocation.getTableName());
+			
+			clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
+			    newUserLocation.getBranch(), newUserLocation.getVillage());
+			
+			if (type.equalsIgnoreCase("HH")) {
+				migrateHHEventsClients(client, inProvider, outProvider, outHHrelationalId, branchIdIn, branchIdOut,
+				    newUserLocation, oldUserLocation);
+				Migration migration = clientService.setMigration(client, c, client, client, inProvider, outProvider,
+				    inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation, newUserLocation);
+				clientService.addMigration(migration);
+			} else if (type.equalsIgnoreCase("Member")) {
+				migrateMemberEvents(client, newUserLocation, oldUserLocation);
+				Client inHhousehold = clientService.findClientByBaseEntityId(inHHrelationalId,
+				    oldUserLocation.getTableName());
+				Client outHhousehold = clientService.findClientByBaseEntityId(outHHrelationalId,
+				    oldUserLocation.getTableName());
+				Migration migration = clientService.setMigration(client, c, inHhousehold, outHhousehold, inProvider,
+				    outProvider, inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation,
+				    newUserLocation);
+				clientService.addMigration(migration);
+				
+			} else {
+				
+			}
 		}
-		return null;
+		catch (Exception e) {
+			transactionManager.rollback(txStatus);
+			e.printStackTrace();
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		}
+		finally {
+			transactionManager.commit(txStatus);
+		}
+		return new ResponseEntity<>(CREATED);
 		
 	}
 	
-	public boolean migrateHHEventsClients(Client c, UserLocationTableName newUserLocation,
+	public boolean migrateHHEventsClients(Client c, String inProvider, String outProvider, String HHrelationalId,
+	                                      String branchIdIn, String branchIdOut, UserLocationTableName newUserLocation,
 	                                      UserLocationTableName oldUserLocation) {
 		
 		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), oldUserLocation.getTableName());
@@ -695,6 +716,10 @@ public class EventResource extends RestResource<Event> {
 			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
 			List<Event> clinetsEvents = eventService.findByBaseEntityId(client.getBaseEntityId(),
 			    oldUserLocation.getTableName());
+			
+			Migration migration = clientService.setMigration(client, client, c, c, inProvider, outProvider, HHrelationalId,
+			    HHrelationalId, branchIdIn, branchIdOut, "Member", oldUserLocation, newUserLocation);
+			clientService.addMigration(migration);
 			for (Event event : clinetsEvents) {
 				eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
 				    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
@@ -752,47 +777,70 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/reject-migration")
-	public ResponseEntity<HttpStatus> rejectMigration(HttpServletRequest request) throws JSONException {
-		Long id = getIntegerFilter("id", request).longValue();
-		String relationalId = getStringFilter("relationalId", request);
-		String type = getStringFilter("type", request);
-		Migration migration = clientService.findMigrationById(id);
-		
-		if (type.equalsIgnoreCase("HH")) {
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/accept-reject-migration")
+	public ResponseEntity<HttpStatus> acceptRejectMigration(HttpServletRequest request) throws JSONException {
+		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+		try {
+			Long id = getIntegerFilter("id", request).longValue();
+			String relationalId = getStringFilter("relationalId", request);
+			String type = getStringFilter("type", request);
+			String status = getStringFilter("status", request);
 			
-			Client household = clientService.findClientByBaseEntityId(migration.getBaseEntityId(),
-			    migration.getDistrictIdIn());
-			household.getAddresses().clear();
-			
-			household.addAddress(clientService.setAddress(household, migration));
-			household.addIdentifier("opensrp_id", migration.getMemberIDOut());
-			Map<String, Object> att = household.getAttributes();
-			att.put("SS_Name", migration.getSSOut());
-			att.put("village_id", migration.getVillageIDOut());
-			household.getRelationships().clear();
-			List<String> family = new ArrayList<>();
-			family.add(migration.getRelationalIdOut());
-			Map<String, List<String>> relationships = new HashMap<>();
-			relationships.put("family_head", family);
-			relationships.put("primary_caregiver", family);
-			household.setRelationships(relationships);
-			System.err.println("migration:" + household);
-			rejectEvent(household, migration);
-			List<Migration> migrations = clientService.findMigrationByIdRelationId(relationalId);
-			for (Migration migration2 : migrations) {
-				Client c = clientService
-				        .findClientByBaseEntityId(migration2.getBaseEntityId(), migration2.getDistrictIdIn());
-				rejectClient(c, migration2);
+			if (status.equalsIgnoreCase(MigrationStatus.ACCEPT.name())) {
+				clientService.updateMigrationStatusById(id, MigrationStatus.ACCEPT.name());
+				clientService.updateMigrationStatusByRelationalId(relationalId, MigrationStatus.ACCEPT.name());
+			} else if (status.equalsIgnoreCase(MigrationStatus.REJECT.name())) {
+				Migration migration = clientService.findMigrationById(id);
+				
+				if (type.equalsIgnoreCase("HH")) {
+					
+					Client household = clientService.findClientByBaseEntityId(migration.getBaseEntityId(),
+					    migration.getDistrictIdIn());
+					household.getAddresses().clear();
+					
+					household.addAddress(clientService.setAddress(household, migration));
+					household.addIdentifier("opensrp_id", migration.getMemberIDOut());
+					Map<String, Object> att = household.getAttributes();
+					att.put("SS_Name", migration.getSSOut());
+					att.put("village_id", migration.getVillageIDOut());
+					household.getRelationships().clear();
+					List<String> family = new ArrayList<>();
+					family.add(migration.getRelationalIdOut());
+					Map<String, List<String>> relationships = new HashMap<>();
+					relationships.put("family_head", family);
+					relationships.put("primary_caregiver", family);
+					household.setRelationships(relationships);
+					System.err.println("migration:" + household);
+					rejectEvent(household, migration);
+					List<Migration> migrations = clientService.findMigrationByIdRelationId(relationalId,
+					    MigrationStatus.PENDING.name());
+					String districtId = migration.getDistrictIdOut().replace("_", "");
+					clientService.addOrUpdate(household, migration.getDistrictIdIn(), districtId,
+					    migration.getDivisionIdOut(), migration.getBranchIDOut(), migration.getVillageIDIn());
+					clientService.updateMigrationStatusById(id, MigrationStatus.REJECT.name());
+					for (Migration migration2 : migrations) {
+						Client c = clientService.findClientByBaseEntityId(migration2.getBaseEntityId(),
+						    migration2.getDistrictIdIn());
+						rejectClient(c, migration2);
+					}
+					
+				} else if (type.equalsIgnoreCase("Member")) {
+					
+					Client member = clientService.findClientByBaseEntityId(migration.getBaseEntityId(),
+					    migration.getDistrictIdIn());
+					rejectClient(member, migration);
+				}
 			}
-			
-		} else if (type.equalsIgnoreCase("Member")) {
-			
-			Client member = clientService.findClientByBaseEntityId(migration.getBaseEntityId(), migration.getDistrictIdIn());
-			rejectClient(member, migration);
 		}
-		
-		return null;
+		catch (Exception e) {
+			transactionManager.rollback(txStatus);
+			e.printStackTrace();
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		}
+		finally {
+			transactionManager.commit(txStatus);
+		}
+		return new ResponseEntity<>(CREATED);
 		
 	}
 	
@@ -812,10 +860,13 @@ public class EventResource extends RestResource<Event> {
 		relationships.put("mother", mother);
 		c.setRelationships(relationships);
 		rejectEvent(c, migration);
-		String divisionId = migration.getDistrictIdOut().replace("_", "");
+		String districtId = migration.getDistrictIdOut().replace("_", "");
 		
-		clientService.addOrUpdate(c, migration.getDistrictIdIn(), divisionId, migration.getDivisionIdOut(),
+		clientService.addOrUpdate(c, migration.getDistrictIdIn(), districtId, migration.getDivisionIdOut(),
 		    migration.getBranchIDOut(), migration.getVillageIDIn());
+		
+		rejectEvent(c, migration);
+		clientService.updateMigrationStatusById(migration.getId(), MigrationStatus.REJECT.name());
 		
 	}
 	

@@ -502,7 +502,25 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	@Override
-	public List<Migration> findMigrationByIdRelationId(String relationalId) {
+	public List<Migration> findMigrationByIdRelationId(String relationalId, String status) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Integer updateMigration(Migration migration, String baseEntityId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Integer updateMigrationStatusById(Long id, String status) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
 		// TODO Auto-generated method stub
 		return null;
 	}

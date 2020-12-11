@@ -107,5 +107,11 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	
 	Migration findMigrationById(Long id);
 	
-	List<Migration> findMigrationByIdRelationId(String relationalId);
+	List<Migration> findMigrationByIdRelationId(String relationalId, String status);
+	
+	Integer updateMigration(Migration migration, String baseEntityId);
+	
+	Integer updateMigrationStatusById(Long id, String status);
+	
+	Integer updateMigrationStatusByRelationalId(String relationalId, String status);
 }

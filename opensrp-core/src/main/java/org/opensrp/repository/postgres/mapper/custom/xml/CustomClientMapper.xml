@@ -566,8 +566,8 @@
 			<if test="villageIDOut != null">
 				#{villageIDOut,jdbcType=VARCHAR},
 			</if>
-			<if test="villageIDOut != null">
-				#{villageIDOut,jdbcType=VARCHAR},
+			<if test="villageIDIn != null">
+				#{villageIDIn,jdbcType=VARCHAR},
 			</if>
 			
 			<if test="BranchIDOut != null">
@@ -653,8 +653,183 @@
 	</select>
 	
 	<select id="selectMigrationByIdRelationId" resultMap="migrationMap">
-		select * from core.migration as m where m.relational_id_out = #{relationalId} ; 
+		select * from core.migration as m where m.relational_id_in = #{relationalId} and member_type='Member'
+		and status=#{status,jdbcType=VARCHAR}; 
 		 	
 	</select>
-
+	<update id="updateMigrationStatusById">    
+    	update core.migration
+	    <set>      
+	        status = #{status,jdbcType=VARCHAR}
+	    </set>
+	    <where>
+	    	id=#{id,jdbcType=BIGINT}
+	    </where>
+  	</update>
+  	
+  	<update id="updateMigration" parameterType="org.opensrp.domain.Migration">
+    
+	    update core.migration
+	    <set>
+	    	<trim prefix="values (" suffix=")" suffixOverrides=",">
+		    	<if test="migrationDate != null">
+					migration_date = #{migrationDate,jdbcType=DATE},
+				</if>
+				<if test="memberName != null">
+					member_name = #{memberName,jdbcType=VARCHAR},
+				</if>
+				<if test="memberContact != null">
+					member_contact = #{memberContact,jdbcType=VARCHAR},
+				</if>
+				<if test="memberIDIn != null">
+					member_id_in = #{memberIDIn,jdbcType=VARCHAR},
+				</if>
+				<if test="memberIDOut != null">
+					member_id_out = #{memberIDOut,jdbcType=VARCHAR},
+				</if>
+				<if test="HHNameIn != null">
+					hh_name_in = #{HHNameIn,jdbcType=VARCHAR},
+				</if>
+				<if test="HHNameOut != null">
+					hh_name_out = #{HHNameOut,jdbcType=VARCHAR},
+				</if>
+				<if test="HHContactOut != null">
+					hh_contact_out = #{HHContactOut,jdbcType=VARCHAR},
+				</if>
+				<if test="HHContactIn != null">
+					hh_contact_in = #{HHContactIn,jdbcType=VARCHAR},
+				</if>
+				<if test="divisionOut != null">
+					division_out = #{divisionOut,jdbcType=VARCHAR},
+				</if>
+				<if test="divisionIn != null">
+					division_in = #{divisionIn,jdbcType=VARCHAR},
+				</if>
+				<if test="districtOut != null">
+					district_out = #{districtOut,jdbcType=VARCHAR},
+				</if>
+				<if test="districtIn != null">
+					district_in = #{districtIn,jdbcType=VARCHAR},
+				</if>
+				<if test="upazilaOut != null">
+					upazila_out = #{upazilaOut,jdbcType=VARCHAR},
+				</if>
+				<if test="upazilaIn != null">
+					upazila_in = #{upazilaIn,jdbcType=VARCHAR},
+				</if>
+				<if test="pourasavaOut != null">
+					pourasava_out=#{pourasavaOut,jdbcType=VARCHAR},
+				</if>
+				<if test="pourasavaIn != null">
+					pourasava_in = #{pourasavaIn,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="unionOut != null">
+					union_out = #{unionOut,jdbcType=VARCHAR},
+				</if>
+				<if test="unionIn != null">
+					union_in = #{unionIn,jdbcType=VARCHAR},
+				</if>
+				<if test="villageOut != null">
+					village_out = #{villageOut,jdbcType=VARCHAR},
+				</if>
+				<if test="villageIn != null">
+					village_in = #{villageIn,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="villageIDOut != null">
+					village_id_out = #{villageIDOut,jdbcType=VARCHAR},
+				</if>
+				<if test="villageIDIn != null">
+					village_id_in = #{villageIDIn,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="BranchIDOut != null">
+					branch_id_out = #{BranchIDOut,jdbcType=VARCHAR},
+				</if>
+				<if test="branchIDIn != null">
+					branch_id_in = #{branchIDIn,jdbcType=VARCHAR},
+				</if>
+				<if test="SKOut != null">
+					sk_out = #{SKOut,jdbcType=VARCHAR},
+				</if>
+				<if test="SKIn != null">
+					sk_in = #{SKIn,jdbcType=VARCHAR},
+				</if>
+				<if test="SSOut != null">
+					ss_out = #{SSOut,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="SSIn != null">
+					ss_in = #{SSIn,jdbcType=VARCHAR},
+				</if>
+				<if test="numberOfMemberOut != null">
+					number_of_member_out = #{numberOfMemberOut,jdbcType=VARCHAR},
+				</if>
+				<if test="numberOfMemberIn != null">
+					number_of_member_in = #{numberOfMemberIn,jdbcType=VARCHAR},
+				</if>
+				<if test="relationWithHHOut != null">
+					relation_with_hh_out = #{relationWithHHOut,jdbcType=VARCHAR},
+				</if>
+				<if test="relationWithHHIn != null">
+					relation_with_hh_in = #{relationWithHHIn,jdbcType=VARCHAR},
+				</if>
+				<if test="status != null">
+					status = #{status,jdbcType=VARCHAR},
+				</if>
+				<if test="isMember != null">
+					is_member = #{isMember,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="relationalIdIn != null">
+					relational_id_in = #{relationalIdIn,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="relationalIdOut != null">
+					relational_id_out = #{relationalIdOut,jdbcType=VARCHAR},
+				</if>
+				
+				<if test="memberType != null">
+					member_type = #{memberType,jdbcType=VARCHAR},
+				</if>
+				<if test="dob != null">
+					dob = #{dob,jdbcType=DATE},
+				</if>
+				
+				<if test="districtIdOut != null">
+					district_id_out = #{districtIdOut,jdbcType=VARCHAR},
+				</if>
+				<if test="districtIdIn != null">
+					district_id_in = #{districtIdIn,jdbcType=VARCHAR},
+				</if>
+				<if test="motherId != null">
+					mother_id = #{motherId,jdbcType=VARCHAR},
+				</if>
+				<if test="divisionIdOut != null">
+					division_id_out = #{divisionIdOut,jdbcType=VARCHAR},
+				</if>
+				<if test="divisionIdIn != null">
+					division_id_in = #{divisionIdIn,jdbcType=VARCHAR},
+				</if>
+				<if test="timestamp != null">
+					timestamp = #{timestamp,jdbcType=BIGINT},
+				</if>
+			</trim>
+	      
+	    </set>
+	    <where>
+		    	base_entity_id=#{baseEntityId,jdbcType=VARCHAR} and status='PENDING'
+		</where>
+	  </update>
+	  
+	  <update id="updateMigrationStatusByRelationalId">    
+    	update core.migration
+	    <set>      
+	        status = #{status,jdbcType=VARCHAR}
+	    </set>
+	    <where>
+	    	relational_id_in=#{relationalId,jdbcType=VARCHAR}
+	    </where>
+  	</update>
 </mapper>

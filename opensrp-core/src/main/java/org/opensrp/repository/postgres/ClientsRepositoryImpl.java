@@ -626,9 +626,27 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	}
 	
 	@Override
-	public List<Migration> findMigrationByIdRelationId(String relationalId) {
+	public List<Migration> findMigrationByIdRelationId(String relationalId, String status) {
 		
-		return clientMapper.selectMigrationByIdRelationId(relationalId);
+		return clientMapper.selectMigrationByIdRelationId(relationalId, status);
+	}
+	
+	@Override
+	public Integer updateMigration(Migration migration, String baseEntityId) {
+		
+		return clientMapper.updateMigration(migration);
+	}
+	
+	@Override
+	public Integer updateMigrationStatusById(Long id, String status) {
+		
+		return clientMapper.updateMigrationStatusById(id, status);
+	}
+	
+	@Override
+	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
+		
+		return clientMapper.updateMigrationStatusByRelationalId(relationalId, status);
 	}
 	
 }

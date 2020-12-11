@@ -74,5 +74,12 @@ public interface CustomClientMapper extends ClientMapper {
 	
 	Migration selectMigrationById(Long id);
 	
-	List<Migration> selectMigrationByIdRelationId(String relationalId);
+	List<Migration> selectMigrationByIdRelationId(@Param("relationalId") String relationalId, @Param("status") String status);
+	
+	Integer updateMigration(Migration migration);
+	
+	Integer updateMigrationStatusById(@Param("id") Long id, @Param("status") String status);
+	
+	Integer updateMigrationStatusByRelationalId(@Param("relationalId") String relationalId, @Param("status") String status);
+	
 }

@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opensrp.common.MigrationStatus;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
@@ -505,26 +506,29 @@ public class ClientService {
 		migration.setSKOut(outProvider);
 		migration.setSSIn(inClient.getAttribute("SS_Name") + "");
 		migration.setSSOut(outClient.getAttribute("SS_Name") + "");
+		migration.setRelationalIdIn(inHHrelationalId);
+		migration.setRelationalIdOut(outHHrelationalId);
 		
-		if (inHhousehold != null) {
-			migration.setHHNameIn(inHhousehold.getFirstName());
+		if (outHhousehold != null) {
 			migration.setHHNameOut(outHhousehold.getFirstName());
 			
-			migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
 			migration.setHHContactOut(outHhousehold.getAttribute("HOH_Phone_Number") + "");
 			
-			migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
 			migration.setNumberOfMemberOut(outHhousehold.getAttribute("Number_of_HH_Member") + "");
-			migration.setRelationalIdIn(inHHrelationalId);
-			migration.setRelationalIdOut(outHHrelationalId);
 			
-			migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
 			migration.setRelationWithHHOut(outHhousehold.getAttribute("Relation_with_HOH") + "");
+		}
+		if (inHhousehold != null) {
+			migration.setHHNameIn(inHhousehold.getFirstName());
+			migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
+			migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
+			migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
+			
 		}
 		migration.setBranchIDIn(branchIdIn);
 		migration.setBranchIDOut(branchIdOut);
 		
-		migration.setStatus("Pending");
+		migration.setStatus(MigrationStatus.PENDING.name());
 		
 		if (outClient.getBirthdate() != null) {
 			migration.setDob(outClient.getBirthdate().toDate());
@@ -538,6 +542,13 @@ public class ClientService {
 		migration.setDivisionIdOut(oldUserLocation.getDivision());
 		migration.setDivisionIdIn(newUserLocation.getDivision());
 		migration.setTimestamp(System.currentTimeMillis());
+		
+		Map<String, List<String>> motherShips = outClient.getRelationships();
+		String motherId = "";
+		if (motherShips.containsKey("mother")) {
+			motherId = motherShips.get("mother").get(0);
+		}
+		migration.setMotherId(motherId);
 		return migration;
 		
 	}
@@ -556,9 +567,9 @@ public class ClientService {
 		return allClients.findMigrationById(id);
 	}
 	
-	public List<Migration> findMigrationByIdRelationId(String relationalId) {
+	public List<Migration> findMigrationByIdRelationId(String relationalId, String status) {
 		
-		return allClients.findMigrationByIdRelationId(relationalId);
+		return allClients.findMigrationByIdRelationId(relationalId, status);
 	}
 	
 	public Address setAddress(Client c, Migration migration) {
@@ -575,5 +586,20 @@ public class ClientService {
 		address.setStateProvince(migration.getDivisionOut());
 		address.setAddressFields(addressFields);
 		return address;
+	}
+	
+	public Integer updateMigration(Migration migration, String baseEntityId) {
+		
+		return allClients.updateMigration(migration, baseEntityId);
+	}
+	
+	public Integer updateMigrationStatusById(Long id, String status) {
+		
+		return allClients.updateMigrationStatusById(id, status);
+	}
+	
+	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
+		
+		return allClients.updateMigrationStatusByRelationalId(relationalId, status);
 	}
 }
