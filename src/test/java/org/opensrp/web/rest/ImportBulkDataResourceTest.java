@@ -62,7 +62,9 @@ public class ImportBulkDataResourceTest {
 		csvBulkImportDataSummary.setNumberOfRowsProcessed(1);
 		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
 		FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
-		failedRecordSummary.setReasonOfFailure("Validation failed, provided location name mismatches with the system");
+		List<String> failureReasons = new ArrayList<>();
+		failureReasons.add("Validation failed, provided location name mismatches with the system");
+		failedRecordSummary.setReasonOfFailure(failureReasons);
 		failedRecordSummary.setRowNumber(1);
 		failedRecordSummaryList.add(failedRecordSummary);
 		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
@@ -90,7 +92,9 @@ public class ImportBulkDataResourceTest {
 		csvBulkImportDataSummary.setNumberOfRowsProcessed(2);
 		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
 		FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
-		failedRecordSummary.setReasonOfFailure("Validation failed, provided organization name mismatches with the system");
+		List<String> failureReasons = new ArrayList<>();
+		failureReasons.add("Validation failed, provided organization name mismatches with the system");
+		failedRecordSummary.setReasonOfFailure(failureReasons);
 		failedRecordSummary.setRowNumber(1);
 		failedRecordSummaryList.add(failedRecordSummary);
 		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);

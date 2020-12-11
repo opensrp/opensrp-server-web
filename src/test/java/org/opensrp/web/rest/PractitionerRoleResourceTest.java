@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.PractitionerRole;
 import org.opensrp.domain.PractitionerRoleCode;
+import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
@@ -58,7 +59,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         expectedPractitionerRole = initTestPractitionerRole2();
         expectedPractitoinerRoles.add(expectedPractitionerRole);
 
-        doReturn(expectedPractitoinerRoles).when(practitionerRoleService).getAllPractitionerRoles();
+        doReturn(expectedPractitoinerRoles).when(practitionerRoleService).getAllPractitionerRoles(any(PractitionerRoleSearchBean.class));
 
         String actualPractitionerRolessString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<PractitionerRole> actualPractitioners = new Gson().fromJson(actualPractitionerRolessString, new TypeToken<List<PractitionerRole>>(){}.getType());

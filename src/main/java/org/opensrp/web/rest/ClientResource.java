@@ -138,8 +138,9 @@ public class ClientResource extends RestResource<Client> {
 
 		String clientId = getStringFilter("identifier", request);
 		if (!StringUtils.isBlank(clientId)) {
-			Client c = clientService.find(clientId);
-			clients.add(c);
+			Client client = clientService.find(clientId);
+			clients.add(client);
+			includeClientRelatives(request, clients);
 			return clients;
 		}
 
@@ -150,9 +151,20 @@ public class ClientResource extends RestResource<Client> {
 		searchBean.setAttributeType(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0]);
 		searchBean.setAttributeValue(StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1]);
 
+		String locationIds = getStringFilter("locationIds", request);
+		if (StringUtils.isNotBlank(locationIds)) {
+			searchBean.setLocations(Arrays.asList(locationIds.split(",")));
+		}
+
 		clients = clientService.findByCriteria(searchBean, addressSearchBean, lastEdit == null ? null : lastEdit[0],
 				lastEdit == null ? null : lastEdit[1]);
 
+		includeClientRelatives(request, clients);
+
+		return clients;
+	}
+
+	private void includeClientRelatives(HttpServletRequest request, List<Client> clients) {
 		String searchRelationship = getStringFilter(SEARCH_RELATIONSHIP, request);
 		logger.info("Search relationship: " + searchRelationship);
 		if (StringUtils.isBlank(searchRelationship)) {
@@ -169,8 +181,6 @@ public class ClientResource extends RestResource<Client> {
 			List<Client> dependants = getDependants(clients, searchRelationship);
 			clients.addAll(dependants);
 		}
-
-		return clients;
 	}
 
 	private void addSearchDateFilters(HttpServletRequest request, ClientSearchBean searchBean) throws ParseException {

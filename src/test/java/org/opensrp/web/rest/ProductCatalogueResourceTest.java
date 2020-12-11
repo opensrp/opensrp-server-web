@@ -14,6 +14,7 @@ import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.mockito.Captor;
 import org.mockito.ArgumentCaptor;
@@ -38,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,6 +83,12 @@ public class ProductCatalogueResourceTest {
 				.setControllerAdvice(new GlobalExceptionHandler()).
 						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
 						build();
+
+		MockHttpServletRequest mockRequest;
+		mockRequest = new MockHttpServletRequest();
+		mockRequest.setContextPath("/opensrp");
+		ServletRequestAttributes attrs = new ServletRequestAttributes(mockRequest);
+		RequestContextHolder.setRequestAttributes(attrs);
 	}
 
 	@Test
@@ -87,7 +97,7 @@ public class ProductCatalogueResourceTest {
 		productCatalogue.setUniqueId(1l);
 		List<ProductCatalogue> productCatalogues = new ArrayList<>();
 		productCatalogues.add(productCatalogue);
-		when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class)))
+		when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class), anyString()))
 				.thenReturn(productCatalogues);
 		MvcResult result = mockMvc.perform(get(BASE_URL))
 				.andExpect(status().isOk())
@@ -186,7 +196,7 @@ public class ProductCatalogueResourceTest {
 	public void testGetByUniqueId() throws Exception {
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
-		when(productCatalogueService.getProductCatalogue(anyLong()))
+		when(productCatalogueService.getProductCatalogue(anyLong(), anyString()))
 				.thenReturn(productCatalogue);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/1"))
 				.andExpect(status().isOk())
@@ -208,7 +218,7 @@ public class ProductCatalogueResourceTest {
 		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
 		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
 				.andExpect(status().isNoContent()).andReturn();
-		verify(productCatalogueService, Mockito.times(1)).deleteProductCatalogueById(argumentCaptor.capture());
+		verify(productCatalogueService, times(1)).deleteProductCatalogueById(argumentCaptor.capture());
 		assertEquals(argumentCaptor.getValue().longValue(), 1);
 	}
 

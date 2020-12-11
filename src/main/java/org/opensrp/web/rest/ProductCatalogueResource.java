@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Date;
@@ -41,11 +42,15 @@ public class ProductCatalogueResource {
 
 	private static Logger logger = LoggerFactory.getLogger(ProductCatalogueResource.class.toString());
 
+	private static final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
+
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
 			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
 			@RequestParam(value = "serverVersion", required = false) String serverVersion) {
+
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
@@ -57,14 +62,17 @@ public class ProductCatalogueResource {
 		productCatalogueSearchBean.setUniqueId(uniqueId);
 		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean);
+		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, baseUrl);
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" })
 	public ResponseEntity<String> create(@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
+
 		try {
 			productCatalogueService.add(productCatalogue);
+			ProductCatalogue createdProductCatalogue = productCatalogueService.getProductCatalogueByName(productCatalogue.getProductName());
+
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
 			ProductCatalogue catalogue = productCatalogueService
@@ -79,6 +87,8 @@ public class ProductCatalogueResource {
 					logger.info("Saving multimedia file...");
 					multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 				}
+				createdProductCatalogue.setPhotoURL(DOWNLOAD_PHOTO_END_POINT + createdProductCatalogue.getUniqueId());
+				productCatalogueService.update(createdProductCatalogue);
 			}
 
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -95,7 +105,12 @@ public class ProductCatalogueResource {
 	public ResponseEntity<String> update(@PathVariable("id") Long uniqueId,
 			@RequestPart(required = false) MultipartFile file,
 			@RequestPart ProductCatalogue productCatalogue) {
+
 		try {
+			if(file != null) {
+				productCatalogue.setPhotoURL(DOWNLOAD_PHOTO_END_POINT + productCatalogue.getUniqueId());
+			}
+
 			productCatalogueService.update(productCatalogue);
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
@@ -133,6 +148,7 @@ public class ProductCatalogueResource {
 	@GetMapping(value = "/{id}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ProductCatalogue getByUniqueId(@PathVariable("id") Long uniqueId) {
-		return productCatalogueService.getProductCatalogue(uniqueId);
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+		return productCatalogueService.getProductCatalogue(uniqueId, baseUrl);
 	}
 }
