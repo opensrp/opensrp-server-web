@@ -545,13 +545,13 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	}
 	
 	@Override
-	public List<String> getMigratedList(String provider, String type) {
+	public List<String> getMigratedList(String provider, String type, Long timestamp) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public List<String> getRejectedList(String provider, String type) {
+	public List<String> getRejectedList(String provider, String type, Long timestamp) {
 		// TODO Auto-generated method stub
 		return null;
 	}

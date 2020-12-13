@@ -273,9 +273,17 @@ public class ClientResource extends RestResource<Client> {
 	
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/migrated", method = RequestMethod.GET)
 	@ResponseBody
-	public List<String> getStockInfo(@RequestParam("username") String provider, @RequestParam("type") String type,
-	                                 @RequestParam("timestamp") Long timestamp) {
+	public List<String> getMigratedList(@RequestParam("username") String provider, @RequestParam("type") String type,
+	                                    @RequestParam("timestamp") Long timestamp) {
 		
 		return clientService.getMigratedList(provider, type, timestamp + 1);
+	}
+	
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/rejected", method = RequestMethod.GET)
+	@ResponseBody
+	public List<String> getRejectedList(@RequestParam("username") String provider, @RequestParam("type") String type,
+	                                    @RequestParam("timestamp") Long timestamp) {
+		
+		return clientService.getRejectedList(provider, type, timestamp + 1);
 	}
 }
