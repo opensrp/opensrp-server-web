@@ -15,6 +15,7 @@ import org.opensrp.common.MigrationStatus;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
 import org.opensrp.domain.ErrorTrace;
+import org.opensrp.domain.LocationDTO;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -601,5 +602,30 @@ public class ClientService {
 	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
 		
 		return allClients.updateMigrationStatusByRelationalId(relationalId, status);
+	}
+	
+	public List<LocationDTO> getLocationByTagId(Integer tagId) {
+		
+		return allClients.getLocationByTagId(tagId);
+	}
+	
+	public List<LocationDTO> getLocationByparentId(Integer parentId) {
+		
+		return allClients.getLocationByparentId(parentId);
+	}
+	
+	public List<Client> searchClient(Integer vilageId, String gender, Integer startAge, Integer endAge, String type) {
+		
+		return allClients.searchClient(vilageId, gender, startAge, endAge, type);
+	}
+	
+	public List<String> getMigratedList(String provider, String type, Long timestamp) {
+		
+		return allClients.getMigratedList(provider, type, timestamp);
+	}
+	
+	public List<String> getRejectedList(String provider, String type, Long timestamp) {
+		
+		return allClients.getRejectedList(provider, type, timestamp);
 	}
 }

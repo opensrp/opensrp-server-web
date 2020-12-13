@@ -15,6 +15,7 @@ import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
 import static org.opensrp.common.AllConstants.Client.GENDER;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -22,6 +23,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,7 @@ import org.opensrp.search.AddressSearchBean;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+import org.opensrp.util.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +52,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 
 @Controller
@@ -59,6 +65,9 @@ public class ClientResource extends RestResource<Client> {
 	private ClientService clientService;
 	
 	private EventService eventService;
+	
+	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Autowired
 	public ClientResource(ClientService clientService, EventService eventService) {
@@ -235,5 +244,38 @@ public class ClientResource extends RestResource<Client> {
 			
 			return new ResponseEntity<>("", HttpStatus.OK);
 		}
+	}
+	
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/search-client", method = RequestMethod.GET)
+	@ResponseBody
+	protected ResponseEntity<String> searchClient(HttpServletRequest request) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		try {
+			Integer villageId = getIntegerFilter("villageId", request);
+			String gender = getStringFilter("gender", request);
+			Integer startAge = getIntegerFilter("startAge", request);
+			Integer endAge = getIntegerFilter("endAge", request);
+			String type = getStringFilter("type", request);
+			
+			List<Client> clients = clientService.searchClient(villageId, gender, startAge, endAge, type);
+			
+			JsonArray clientsArray = (JsonArray) gson.toJsonTree(clients, new TypeToken<List<Client>>() {}.getType());
+			response.put("clients", clientsArray);
+			return new ResponseEntity<>(gson.toJson(response), HttpStatus.OK);
+		}
+		catch (Exception e) {
+			response.put("msg", "Error occurred");
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+			
+		}
+		
+	}
+	
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/migrated", method = RequestMethod.GET)
+	@ResponseBody
+	public List<String> getStockInfo(@RequestParam("username") String provider, @RequestParam("type") String type,
+	                                 @RequestParam("timestamp") Long timestamp) {
+		
+		return clientService.getMigratedList(provider, type, timestamp + 1);
 	}
 }

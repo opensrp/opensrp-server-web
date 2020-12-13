@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.opensrp.domain.LocationDTO;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.Client;
@@ -81,5 +82,19 @@ public interface CustomClientMapper extends ClientMapper {
 	Integer updateMigrationStatusById(@Param("id") Long id, @Param("status") String status);
 	
 	Integer updateMigrationStatusByRelationalId(@Param("relationalId") String relationalId, @Param("status") String status);
+	
+	List<LocationDTO> selectLocationByTagId(Integer tagId);
+	
+	List<LocationDTO> selectLocationByparentId(Integer parentId);
+	
+	List<Client> selectSearchClient(@Param("vilageId") Integer vilageId, @Param("gender") String gender,
+	                                @Param("startAge") Integer startAge, @Param("endAge") Integer endAge,
+	                                @Param("type") String type);
+	
+	List<String> selectMigratedList(@Param("provider") String provider, @Param("type") String type,
+	                                @Param("timestamp") Long timestamp);
+	
+	List<String> selectRejectedList(@Param("provider") String provider, @Param("type") String type,
+	                                @Param("timestamp") Long timestamp);
 	
 }

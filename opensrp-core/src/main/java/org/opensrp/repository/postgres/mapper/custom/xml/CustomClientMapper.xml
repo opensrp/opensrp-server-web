@@ -95,7 +95,12 @@
 		<result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
 	
 	</resultMap>
-	
+	<resultMap id="LocationMap" type="org.opensrp.domain.LocationDTO">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+		<result column="name" jdbcType="BIGINT" property="name"/>
+		
+	</resultMap>
 	<insert id="insertSelectiveAndSetId" parameterType="org.opensrp.domain.postgres.Client"
 			useGeneratedKeys="true" keyProperty="id" keyColumn="id">
 		insert into core.client
@@ -832,4 +837,31 @@
 	    	relational_id_in=#{relationalId,jdbcType=VARCHAR}
 	    </where>
   	</update>
+  	
+  	<select id="selectLocationByTagId" resultMap="LocationMap">
+		SELECT parent_location_id parent_id,l.id id, split_part(l.name, ':', 1) as name from core.location l
+		         WHERE l.location_tag_id=#{tagId,jdbcType=BIGINT}
+		 	
+	</select>
+	
+	<select id="selectLocationByparentId" resultMap="LocationMap">
+		SELECT parent_location_id parent_id,l.id id, split_part(l.name, ':', 1) as name from core.location l
+		         WHERE l.parent_location_id=#{parentId,jdbcType=BIGINT}
+		 	
+	</select>
+	
+	<select id="selectSearchClient" resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select * from core.searched_client_list(#{vilageId},#{gender},#{startAge},#{endAge},#{type}); 
+		 	
+	</select>
+	
+	<select id="selectMigratedList" resultType="String">
+		select base_entity_id from core.migration as m where sk_out =#{provider,jdbcType=VARCHAR}
+			and member_type=#{type,jdbcType=VARCHAR} and status='ACCEPT' and timestamp > #{timestamp,jdbcType=BIGINT}
+	</select>
+	<select id="selectRejectedList" resultType="String">
+		select base_entity_id from core.migration as m where sk_in =#{provider,jdbcType=VARCHAR}
+			and member_type=#{type,jdbcType=VARCHAR} and status='REJECT' and timestamp > #{timestamp,jdbcType=BIGINT}
+	</select>
+	
 </mapper>

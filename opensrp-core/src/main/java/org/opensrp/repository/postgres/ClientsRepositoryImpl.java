@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.LocationDTO;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.ClientMetadata;
@@ -647,6 +648,36 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
 		
 		return clientMapper.updateMigrationStatusByRelationalId(relationalId, status);
+	}
+	
+	@Override
+	public List<LocationDTO> getLocationByTagId(Integer tagId) {
+		
+		return clientMapper.selectLocationByTagId(tagId);
+	}
+	
+	@Override
+	public List<LocationDTO> getLocationByparentId(Integer parentId) {
+		
+		return clientMapper.selectLocationByparentId(parentId);
+	}
+	
+	@Override
+	public List<Client> searchClient(Integer vilageId, String gender, Integer startAge, Integer endAge, String type) {
+		
+		return convert(clientMapper.selectSearchClient(vilageId, gender, startAge, endAge, type));
+	}
+	
+	@Override
+	public List<String> getMigratedList(String provider, String type, Long timestamp) {
+		
+		return clientMapper.selectMigratedList(provider, type, timestamp);
+	}
+	
+	@Override
+	public List<String> getRejectedList(String provider, String type, Long timestamp) {
+		
+		return clientMapper.selectRejectedList(provider, type, timestamp);
 	}
 	
 }

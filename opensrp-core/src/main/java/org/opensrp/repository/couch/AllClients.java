@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.motechproject.dao.MotechBaseRepository;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.LocationDTO;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -521,6 +522,36 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 	
 	@Override
 	public Integer updateMigrationStatusByRelationalId(String relationalId, String status) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<LocationDTO> getLocationByTagId(Integer tagId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<LocationDTO> getLocationByparentId(Integer parentId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Client> searchClient(Integer vilageId, String gender, Integer startAge, Integer endAge, String type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<String> getMigratedList(String provider, String type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<String> getRejectedList(String provider, String type) {
 		// TODO Auto-generated method stub
 		return null;
 	}

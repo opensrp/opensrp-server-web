@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.LocationDTO;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -114,4 +115,14 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	Integer updateMigrationStatusById(Long id, String status);
 	
 	Integer updateMigrationStatusByRelationalId(String relationalId, String status);
+	
+	List<LocationDTO> getLocationByTagId(Integer tagId);
+	
+	List<LocationDTO> getLocationByparentId(Integer parentId);
+	
+	List<Client> searchClient(Integer vilageId, String gender, Integer startAge, Integer endAge, String type);
+	
+	List<String> getMigratedList(String provider, String type, Long timestamp);
+	
+	List<String> getRejectedList(String provider, String type, Long timestamp);
 }
