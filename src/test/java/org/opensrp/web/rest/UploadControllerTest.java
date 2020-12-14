@@ -33,8 +33,6 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -49,17 +47,23 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
 import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -162,7 +166,8 @@ public class UploadControllerTest {
 
 		// verify data was created and inserted
 		verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
-		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class), anyString());
+		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class),
+				anyString());
 
 		// verify file was saved
 		verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());
