@@ -583,6 +583,14 @@ public class EventResource extends RestResource<Event> {
 		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			JSONObject syncData = new JSONObject(data);
+			String district = getStringFilter("district", request);
+			String inProvider = request.getRemoteUser();
+			String division = getStringFilter("division", request);
+			String branch = getStringFilter("branch", request);
+			String village = getStringFilter("village", request);
+			
+			UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
+			    branch, village);
 			ArrayList<Client> clients = new ArrayList<Client>();
 			if (syncData.has("clients")) {
 				
@@ -610,7 +618,11 @@ public class EventResource extends RestResource<Event> {
 			UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
 			
 			String oldTable = oldUserLocation.getTableName();
+			
 			Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);
+			Address otuClientAddres = c.getAddress("usual_residence");
+			Map<String, Object> otuClientAtt = c.getAttributes();
+			String outMemberId = c.getIdentifier("opensrp_id");
 			
 			Map<String, List<String>> outrelationShips = c.getRelationships();
 			String outHHrelationalId = "";
@@ -619,7 +631,6 @@ public class EventResource extends RestResource<Event> {
 			} else if (outrelationShips.containsKey("family_head")) {
 				outHHrelationalId = outrelationShips.get("family_head").get(0);
 			}
-			System.err.println("outHHrelationalId>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:" + outHHrelationalId);
 			
 			c.getAddresses().remove(0);
 			Address clientAddres = client.getAddress("usual_residence");
@@ -645,37 +656,32 @@ public class EventResource extends RestResource<Event> {
 			});	*/
 			
 			c.withRelationships(client.getRelationships());
-			
-			String district = getStringFilter("district", request);
-			String inProvider = request.getRemoteUser();
-			String division = getStringFilter("division", request);
-			String branch = getStringFilter("branch", request);
-			String village = getStringFilter("village", request);
-			UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, district, division,
-			    branch, village);
-			
+			clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
+			    newUserLocation.getBranch(), newUserLocation.getVillage());
 			String branchIdIn = newUserLocation.getBranch();
 			String branchIdOut = clientService.findBranchId(c.getBaseEntityId(), oldUserLocation.getTableName());
 			
-			clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
-			    newUserLocation.getBranch(), newUserLocation.getVillage());
-			
 			if (type.equalsIgnoreCase("HH")) {
-				migrateHHEventsClients(client, inProvider, outProvider, outHHrelationalId, branchIdIn, branchIdOut,
-				    newUserLocation, oldUserLocation);
-				Migration migration = clientService.setMigration(client, c, client, client, inProvider, outProvider,
-				    inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation, newUserLocation);
+				migrateHHEventsClients(client, otuClientAddres, otuClientAtt, outMemberId, outrelationShips, inProvider,
+				    outProvider, outHHrelationalId, branchIdIn, branchIdOut, newUserLocation, oldUserLocation);
+				Migration migration = clientService.setMigration(c, otuClientAddres, otuClientAtt, outMemberId,
+				    outrelationShips, c, c, inProvider, outProvider, inHHrelationalId, outHHrelationalId, branchIdIn,
+				    branchIdOut, type, oldUserLocation, newUserLocation, "no");
 				clientService.addMigration(migration);
+				
 			} else if (type.equalsIgnoreCase("Member")) {
-				migrateMemberEvents(client, newUserLocation, oldUserLocation);
+				
 				Client inHhousehold = clientService.findClientByBaseEntityId(inHHrelationalId,
-				    oldUserLocation.getTableName());
+				    newUserLocation.getTableName());
 				Client outHhousehold = clientService.findClientByBaseEntityId(outHHrelationalId,
 				    oldUserLocation.getTableName());
-				Migration migration = clientService.setMigration(client, c, inHhousehold, outHhousehold, inProvider,
-				    outProvider, inHHrelationalId, outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation,
-				    newUserLocation);
+				
+				Migration migration = clientService.setMigration(c, otuClientAddres, otuClientAtt, outMemberId,
+				    outrelationShips, inHhousehold, outHhousehold, inProvider, outProvider, inHHrelationalId,
+				    outHHrelationalId, branchIdIn, branchIdOut, type, oldUserLocation, newUserLocation, "yes");
 				clientService.addMigration(migration);
+				
+				migrateMemberEvents(client, newUserLocation, oldUserLocation);
 				
 			} else {
 				
@@ -693,8 +699,10 @@ public class EventResource extends RestResource<Event> {
 		
 	}
 	
-	public boolean migrateHHEventsClients(Client c, String inProvider, String outProvider, String HHrelationalId,
-	                                      String branchIdIn, String branchIdOut, UserLocationTableName newUserLocation,
+	public boolean migrateHHEventsClients(Client c, Address outAddressa, Map<String, Object> otuClientAtt,
+	                                      String outClientIdentifier, Map<String, List<String>> outrelationShips,
+	                                      String inProvider, String outProvider, String HHrelationalId, String branchIdIn,
+	                                      String branchIdOut, UserLocationTableName newUserLocation,
 	                                      UserLocationTableName oldUserLocation) {
 		
 		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), oldUserLocation.getTableName());
@@ -706,6 +714,7 @@ public class EventResource extends RestResource<Event> {
 		    oldUserLocation.getTableName());
 		
 		for (Client client : householdmembers) {
+			
 			client.getAddresses().remove(0);
 			Address memberAddress = c.getAddress("usual_residence");
 			List<Address> memberNewAddress = new ArrayList<>();
@@ -717,8 +726,9 @@ public class EventResource extends RestResource<Event> {
 			List<Event> clinetsEvents = eventService.findByBaseEntityId(client.getBaseEntityId(),
 			    oldUserLocation.getTableName());
 			
-			Migration migration = clientService.setMigration(client, client, c, c, inProvider, outProvider, HHrelationalId,
-			    HHrelationalId, branchIdIn, branchIdOut, "Member", oldUserLocation, newUserLocation);
+			Migration migration = clientService.setMigration(client, outAddressa, otuClientAtt, outClientIdentifier,
+			    outrelationShips, c, c, inProvider, outProvider, HHrelationalId, HHrelationalId, branchIdIn, branchIdOut,
+			    "Member", oldUserLocation, newUserLocation, "no");
 			clientService.addMigration(migration);
 			for (Event event : clinetsEvents) {
 				eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
@@ -732,15 +742,7 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	public boolean migrateMemberEvents(Client c, UserLocationTableName newUserLocation, UserLocationTableName oldUserLocation) {
-		Map<String, List<String>> relationShips = c.getRelationships();
 		
-		String relationalId = "";
-		if (relationShips.containsKey("family")) {
-			relationalId = relationShips.get("family").get(0);
-		} else if (relationShips.containsKey("family_head")) {
-			relationalId = relationShips.get("family_head").get(0);
-		}
-		Client household = clientService.findClientByBaseEntityId(relationalId, oldUserLocation.getTableName());
 		List<Event> events = eventService.findByBaseEntityId(c.getBaseEntityId(), oldUserLocation.getTableName());
 		for (Event event : events) {
 			eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
@@ -776,7 +778,6 @@ public class EventResource extends RestResource<Event> {
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/accept-reject-migration")
 	public ResponseEntity<HttpStatus> acceptRejectMigration(HttpServletRequest request) throws JSONException {
 		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
@@ -865,7 +866,7 @@ public class EventResource extends RestResource<Event> {
 		clientService.addOrUpdate(c, migration.getDistrictIdIn(), districtId, migration.getDivisionIdOut(),
 		    migration.getBranchIDOut(), migration.getVillageIDIn());
 		
-		rejectEvent(c, migration);
+		//rejectEvent(c, migration);
 		clientService.updateMigrationStatusById(migration.getId(), MigrationStatus.REJECT.name());
 		
 	}

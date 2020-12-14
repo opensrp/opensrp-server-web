@@ -472,10 +472,12 @@ public class ClientService {
 	 * @param inClient means after migrated client
 	 * @param outClient means before migrated client
 	 **/
-	public Migration setMigration(Client inClient, Client outClient, Client inHhousehold, Client outHhousehold,
-	                              String inProvider, String outProvider, String inHHrelationalId, String outHHrelationalId,
-	                              String branchIdIn, String branchIdOut, String type, UserLocationTableName oldUserLocation,
-	                              UserLocationTableName newUserLocation) {
+	public Migration setMigration(Client inClient, Address outAddressa, Map<String, Object> otuClientAtt,
+	                              String outMemberId, Map<String, List<String>> outrelationShips, Client inHhousehold,
+	                              Client outHhousehold, String inProvider, String outProvider, String inHHrelationalId,
+	                              String outHHrelationalId, String branchIdIn, String branchIdOut, String type,
+	                              UserLocationTableName oldUserLocation, UserLocationTableName newUserLocation,
+	                              String ismember) {
 		
 		Address inAddressa = inClient.getAddress("usual_residence");
 		Migration migration = new Migration();
@@ -487,8 +489,6 @@ public class ClientService {
 		migration.setUnionIn(inAddressa.getAddressField("address1"));
 		migration.setVillageIDIn(inAddressa.getAddressField("address8"));
 		
-		Address outAddressa = outClient.getAddress("usual_residence");
-		
 		migration.setDistrictOut(outAddressa.getCountyDistrict());
 		migration.setDivisionOut(outAddressa.getStateProvince());
 		migration.setVillageOut(outAddressa.getCityVillage());
@@ -497,46 +497,52 @@ public class ClientService {
 		migration.setUnionOut(outAddressa.getAddressField("address1"));
 		migration.setVillageIDOut(outAddressa.getAddressField("address8"));
 		
-		migration.setMemberName(outClient.getFirstName());
+		migration.setMemberName(inClient.getFirstName());
 		
-		migration.setMemberContact(outClient.getAttribute("Mobile_Number") + "");
+		migration.setMemberContact(inClient.getAttribute("Mobile_Number") + "");
 		
 		migration.setMemberIDIn(inClient.getIdentifier("opensrp_id"));
-		migration.setMemberIDOut(outClient.getIdentifier("opensrp_id"));
+		migration.setMemberIDOut(outMemberId);
 		migration.setSKIn(inProvider);
 		migration.setSKOut(outProvider);
 		migration.setSSIn(inClient.getAttribute("SS_Name") + "");
-		migration.setSSOut(outClient.getAttribute("SS_Name") + "");
+		migration.setSSOut(otuClientAtt.get("SS_Name") + "");
 		migration.setRelationalIdIn(inHHrelationalId);
 		migration.setRelationalIdOut(outHHrelationalId);
 		
 		if (outHhousehold != null) {
 			migration.setHHNameOut(outHhousehold.getFirstName());
-			
 			migration.setHHContactOut(outHhousehold.getAttribute("HOH_Phone_Number") + "");
-			
 			migration.setNumberOfMemberOut(outHhousehold.getAttribute("Number_of_HH_Member") + "");
 			
-			migration.setRelationWithHHOut(outHhousehold.getAttribute("Relation_with_HOH") + "");
 		}
 		if (inHhousehold != null) {
 			migration.setHHNameIn(inHhousehold.getFirstName());
 			migration.setHHContactIn(inHhousehold.getAttribute("HOH_Phone_Number") + "");
 			migration.setNumberOfMemberIn(inHhousehold.getAttribute("Number_of_HH_Member") + "");
-			migration.setRelationWithHHIn(inHhousehold.getAttribute("Relation_with_HOH") + "");
 			
 		}
+		System.err.println("inClient.getAttribute" + inClient.getAttribute("Relation_with_HOH"));
+		if (ismember.equalsIgnoreCase("no")) {
+			migration.setRelationWithHHOut(inClient.getAttribute("Relation_with_HOH") + "");
+		} else {
+			migration.setRelationWithHHOut(otuClientAtt.get("Relation_with_HOH") + "");
+		}
+		migration.setRelationWithHHIn(inClient.getAttribute("Relation_with_HOH") + "");
 		migration.setBranchIDIn(branchIdIn);
 		migration.setBranchIDOut(branchIdOut);
 		
 		migration.setStatus(MigrationStatus.PENDING.name());
 		
-		if (outClient.getBirthdate() != null) {
-			migration.setDob(outClient.getBirthdate().toDate());
+		if (inClient.getBirthdate() != null) {
+			migration.setDob(inClient.getBirthdate().toDate());
 		}
 		migration.setMigrationDate(new DateTime().toDate());
 		migration.setMemberType(type);
-		migration.setBaseEntityId(outClient.getBaseEntityId());
+		
+		migration.setIsMember(ismember);
+		
+		migration.setBaseEntityId(inClient.getBaseEntityId());
 		migration.setDistrictIdOut(oldUserLocation.getTableName());
 		migration.setDistrictIdIn(newUserLocation.getTableName());
 		
@@ -544,10 +550,9 @@ public class ClientService {
 		migration.setDivisionIdIn(newUserLocation.getDivision());
 		migration.setTimestamp(System.currentTimeMillis());
 		
-		Map<String, List<String>> motherShips = outClient.getRelationships();
 		String motherId = "";
-		if (motherShips.containsKey("mother")) {
-			motherId = motherShips.get("mother").get(0);
+		if (outrelationShips.containsKey("mother")) {
+			motherId = outrelationShips.get("mother").get(0);
 		}
 		migration.setMotherId(motherId);
 		return migration;

@@ -1,19 +1,18 @@
 package org.opensrp.domain;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.ektorp.support.TypeDiscriminator;
-import org.joda.time.DateTime;
-import org.opensrp.common.Gender;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.ektorp.support.TypeDiscriminator;
+import org.joda.time.DateTime;
+import org.opensrp.common.Gender;
 
 @TypeDiscriminator("doc.type == 'Client'")
 public class Client extends BaseEntity {
@@ -57,7 +56,7 @@ public class Client extends BaseEntity {
 	@JsonProperty
 	private String dataApprovalStatus;
 	
-	protected Client() {
+	public Client() {
 		
 	}
 	
@@ -349,14 +348,14 @@ public class Client extends BaseEntity {
 	public final int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this, "id", "revision");
 	}
-
+	
 	@Override
 	public String toString() {
-		return "Client{" + "firstName='" + firstName + '\'' + ", middleName='" + middleName + '\'' + ", lastName='"
-				+ lastName + '\'' + ", birthdate=" + birthdate + ", deathdate=" + deathdate + ", birthdateApprox="
-				+ birthdateApprox + ", deathdateApprox=" + deathdateApprox + ", gender='" + gender + '\'' + ", clientType='"
-				+ clientType + '\'' + ", relationships=" + relationships + ", isSendToOpenMRS='" + isSendToOpenMRS + '\''
-				+ ", dataApprovalComments='" + dataApprovalComments + '\'' + ", dataApprovalStatus='" + dataApprovalStatus
-				+ '\'' + '}';
+		return "Client [firstName=" + firstName + ", middleName=" + middleName + ", lastName=" + lastName + ", birthdate="
+		        + birthdate + ", deathdate=" + deathdate + ", birthdateApprox=" + birthdateApprox + ", deathdateApprox="
+		        + deathdateApprox + ", gender=" + gender + ", clientType=" + clientType + ", relationships=" + relationships
+		        + ", isSendToOpenMRS=" + isSendToOpenMRS + ", dataApprovalComments=" + dataApprovalComments
+		        + ", dataApprovalStatus=" + dataApprovalStatus + "]";
 	}
+	
 }

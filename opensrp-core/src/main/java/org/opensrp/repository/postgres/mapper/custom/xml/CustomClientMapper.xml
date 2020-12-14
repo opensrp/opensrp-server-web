@@ -339,7 +339,7 @@
 	<select id="selectByRelationshipId" 
 			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
 		select id,json from core.client${table} where id=any(select client_id from core.client_metadata${table} as cm
-		where relational_id = #{relationshipId,jdbcType=VARCHAR})		
+		where relational_id = #{relationshipId,jdbcType=VARCHAR} and base_entity_id!=#{relationshipId,jdbcType=VARCHAR}) 
 	</select>
 	
 	<insert id="insertMigration" parameterType="org.opensrp.domain.Migration"
