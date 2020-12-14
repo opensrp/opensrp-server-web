@@ -30,6 +30,8 @@ public interface Constants {
 
     public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
 
+    String LOCATIONS = "locations";
+
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
