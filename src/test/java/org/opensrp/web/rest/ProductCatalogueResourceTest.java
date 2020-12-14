@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.domain.Multimedia;
-import org.opensrp.domain.ProductCatalogue;
+import org.smartregister.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
 import org.opensrp.service.MultimediaService;
