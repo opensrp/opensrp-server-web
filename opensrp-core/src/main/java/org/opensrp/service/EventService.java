@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.Client;
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.Obs;
 import org.opensrp.domain.postgres.CustomQuery;
@@ -478,5 +479,10 @@ public class EventService {
 	
 	public List<Event> selectBySearchBean(int userId, long serverVersion, String providerId, int limit, String table) {
 		return allEvents.selectBySearchBean(userId, serverVersion, providerId, limit, table);
+	}
+	
+	public CustomEventMeta findFirstEventMeta(String baseEntityId, String table) {
+		
+		return allEvents.findFirstEventMeta(baseEntityId, table);
 	}
 }

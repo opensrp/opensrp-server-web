@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.EventMetadata;
@@ -647,6 +648,12 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 	public int insertGuestHealthId(HealthId healthId) {
 		
 		return eventMapper.insertGuestHealthId(healthId);
+	}
+	
+	@Override
+	public CustomEventMeta findFirstEventMeta(String baseEntityId, String table) {
+		
+		return eventMetadataMapper.selectFirstEventMeta(baseEntityId, table);
 	}
 	
 }

@@ -34,6 +34,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.common.MigrationStatus;
 import org.opensrp.domain.Address;
 import org.opensrp.domain.Client;
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.Migration;
 import org.opensrp.domain.UserLocationTableName;
@@ -610,13 +611,20 @@ public class EventResource extends RestResource<Event> {
 			JSONArray cls = new JSONArray(syncData.getString("clients"));
 			JSONObject json = cls.getJSONObject(0);
 			String baseEntityId = client.getBaseEntityId();
-			String outProvider = getStringFilter("provider", request);
+			//String outProvider = getStringFilter("provider", request);
 			String type = getStringFilter("type", request);
 			JSONObject attributes = json.getJSONObject("attributes");
 			JSONObject identifiers = json.getJSONObject("identifiers");
 			
-			UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
-			
+			CustomEventMeta customEventMeta = eventService.findFirstEventMeta(baseEntityId, "");
+			String outProvider = customEventMeta.getProvider();
+			//UserLocationTableName oldUserLocation = clientService.getUserLocationAndTable(outProvider, "", "", "", "");
+			UserLocationTableName oldUserLocation = new UserLocationTableName();
+			oldUserLocation.setBranch(customEventMeta.getBranch());
+			oldUserLocation.setDistrict(customEventMeta.getDistrict());
+			oldUserLocation.setDivision(customEventMeta.getDistrict());
+			String table = "_" + customEventMeta.getDistrict();
+			oldUserLocation.setTableName(table);
 			String oldTable = oldUserLocation.getTableName();
 			
 			Client c = clientService.findClientByBaseEntityId(baseEntityId, oldTable);

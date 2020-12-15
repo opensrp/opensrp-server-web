@@ -8,6 +8,15 @@
 		<result column="json" jdbcType="OTHER" property="json"
 			typeHandler="org.opensrp.repository.postgres.handler.EventTypeHandler" />
 	</resultMap>
+	
+	<resultMap id="customMetadata" type="org.opensrp.domain.CustomEventMeta">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="provider" jdbcType="VARCHAR" property="provider"/>
+		<result column="division" jdbcType="VARCHAR" property="division"/>
+		<result column="district" jdbcType="VARCHAR" property="district"/>
+		<result column="branch" jdbcType="VARCHAR" property="branch"/>
+		<result column="village" jdbcType="VARCHAR" property="village"/>
+	</resultMap>
 
 	<sql id="Base_Event_Column_List">
 		e.id, e.json
@@ -225,5 +234,12 @@
 		 	LPAD(n::text, (case when length(n::text)>=5 then length(n::text) else 5 end), '0')
 		from
 		 	generate_series(${maxId}, ${maxIdPlus}) as x(n) order by x.n
+	</select>
+	
+	<select id="selectFirstEventMeta" 
+		resultMap="customMetadata">
+		select	em.id,em.district,em.division,em.village,em.provider_id,em.branch from core.event_metadata em 
+		 where em.base_entity_id =#{baseEntityId,jdbcType=VARCHAR} order by id asc limit 1
+
 	</select>
 </mapper>

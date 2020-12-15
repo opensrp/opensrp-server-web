@@ -3,6 +3,7 @@ package org.opensrp.repository;
 import java.util.Calendar;
 import java.util.List;
 
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.HealthId;
@@ -87,4 +88,5 @@ public interface EventsRepository extends CustomBaseRepository<Event> {
 	
 	int insertGuestHealthId(HealthId healthId);
 	
+	CustomEventMeta findFirstEventMeta(String baseEntityId, String table);
 }

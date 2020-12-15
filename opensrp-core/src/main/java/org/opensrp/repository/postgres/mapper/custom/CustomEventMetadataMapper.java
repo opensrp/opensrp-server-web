@@ -3,6 +3,7 @@ package org.opensrp.repository.postgres.mapper.custom;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.postgres.Event;
 import org.opensrp.domain.postgres.EventMetadataExample;
 import org.opensrp.repository.postgres.mapper.EventMetadataMapper;
@@ -42,4 +43,6 @@ public interface CustomEventMetadataMapper extends EventMetadataMapper {
 	                                           @Param("table") String table);
 	
 	List<String> selectGuestHouseholdId(@Param("maxId") Integer maxId, @Param("maxIdPlus") Integer maxIdPlus);
+	
+	CustomEventMeta selectFirstEventMeta(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
 }
