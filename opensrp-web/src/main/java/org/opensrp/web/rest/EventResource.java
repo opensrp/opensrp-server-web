@@ -606,7 +606,7 @@ public class EventResource extends RestResource<Event> {
 			} else if (inHHrelationShips.containsKey("family_head")) {
 				inHHrelationalId = inHHrelationShips.get("family_head").get(0);
 			}
-			System.err.println("inHHrelationalId>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:" + inHHrelationalId);
+			
 			JSONArray cls = new JSONArray(syncData.getString("clients"));
 			JSONObject json = cls.getJSONObject(0);
 			String baseEntityId = client.getBaseEntityId();
@@ -650,17 +650,11 @@ public class EventResource extends RestResource<Event> {
 				c.addIdentifier(identifiers.names().getString(i), identifiers.get(identifiers.names().getString(i)) + "");
 			}
 			
-			/*identifiers.keys().forEachRemaining(key -> {
-				Object value = attributes.opt(key + "");
-				c.addIdentifier(key + "", value + "");
-			});	*/
-			
 			c.withRelationships(client.getRelationships());
 			clientService.addOrUpdate(c, oldTable, newUserLocation.getDistrict(), newUserLocation.getDivision(),
 			    newUserLocation.getBranch(), newUserLocation.getVillage());
 			String branchIdIn = newUserLocation.getBranch();
-			String branchIdOut = clientService.findBranchId(c.getBaseEntityId(), oldUserLocation.getTableName());
-			
+			String branchIdOut = oldUserLocation.getBranch();
 			if (type.equalsIgnoreCase("HH")) {
 				migrateHHEventsClients(client, otuClientAddres, otuClientAtt, outMemberId, outrelationShips, inProvider,
 				    outProvider, outHHrelationalId, branchIdIn, branchIdOut, newUserLocation, oldUserLocation);
@@ -714,7 +708,7 @@ public class EventResource extends RestResource<Event> {
 		    oldUserLocation.getTableName());
 		
 		for (Client client : householdmembers) {
-			
+			String outMemberId = client.getIdentifier("opensrp_id");
 			client.getAddresses().remove(0);
 			Address memberAddress = c.getAddress("usual_residence");
 			List<Address> memberNewAddress = new ArrayList<>();
@@ -726,7 +720,7 @@ public class EventResource extends RestResource<Event> {
 			List<Event> clinetsEvents = eventService.findByBaseEntityId(client.getBaseEntityId(),
 			    oldUserLocation.getTableName());
 			
-			Migration migration = clientService.setMigration(client, outAddressa, otuClientAtt, outClientIdentifier,
+			Migration migration = clientService.setMigration(client, outAddressa, otuClientAtt, outMemberId,
 			    outrelationShips, c, c, inProvider, outProvider, HHrelationalId, HHrelationalId, branchIdIn, branchIdOut,
 			    "Member", oldUserLocation, newUserLocation, "no");
 			clientService.addMigration(migration);
@@ -734,7 +728,6 @@ public class EventResource extends RestResource<Event> {
 				eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
 				    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
 			}
-			//migrateChildAndEvents(client, newUserLocation, oldUserLocation, c);
 			
 		}
 		return false;
@@ -748,7 +741,7 @@ public class EventResource extends RestResource<Event> {
 			eventService.addorUpdateEvent(event, oldUserLocation.getTableName(), newUserLocation.getDistrict(),
 			    newUserLocation.getDivision(), newUserLocation.getBranch(), newUserLocation.getVillage());
 		}
-		//migrateChildAndEvents(c, newUserLocation, oldUserLocation, household);
+		
 		return false;
 		
 	}
@@ -811,7 +804,7 @@ public class EventResource extends RestResource<Event> {
 					relationships.put("family_head", family);
 					relationships.put("primary_caregiver", family);
 					household.setRelationships(relationships);
-					System.err.println("migration:" + household);
+					
 					rejectEvent(household, migration);
 					List<Migration> migrations = clientService.findMigrationByIdRelationId(relationalId,
 					    MigrationStatus.PENDING.name());
@@ -860,13 +853,13 @@ public class EventResource extends RestResource<Event> {
 		relationships.put("family", family);
 		relationships.put("mother", mother);
 		c.setRelationships(relationships);
-		rejectEvent(c, migration);
+		
 		String districtId = migration.getDistrictIdOut().replace("_", "");
 		
 		clientService.addOrUpdate(c, migration.getDistrictIdIn(), districtId, migration.getDivisionIdOut(),
 		    migration.getBranchIDOut(), migration.getVillageIDIn());
 		
-		//rejectEvent(c, migration);
+		rejectEvent(c, migration);
 		clientService.updateMigrationStatusById(migration.getId(), MigrationStatus.REJECT.name());
 		
 	}

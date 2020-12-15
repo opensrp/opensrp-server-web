@@ -56,7 +56,7 @@ public class Client extends BaseEntity {
 	@JsonProperty
 	private String dataApprovalStatus;
 	
-	public Client() {
+	protected Client() {
 		
 	}
 	

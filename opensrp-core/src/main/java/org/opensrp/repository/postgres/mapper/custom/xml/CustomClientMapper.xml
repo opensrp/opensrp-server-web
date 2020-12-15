@@ -81,7 +81,7 @@
 		<result column="relation_with_hh_out" jdbcType="VARCHAR" property="relationWithHHOut"/>
 		<result column="relation_with_hh_in" jdbcType="VARCHAR" property="relationWithHHIn"/>
 		<result column="status" jdbcType="VARCHAR" property="status"/>
-		<result column="is_member" jdbcType="VARCHAR" property="is_member"/>
+		<result column="is_member" jdbcType="VARCHAR" property="isMember"/>
 		<result column="relational_id_in" jdbcType="VARCHAR" property="relationalIdIn"/>
 		<result column="relational_id_out" jdbcType="VARCHAR" property="relationalIdOut"/>
 		<result column="member_type" jdbcType="VARCHAR" property="memberType"/>
@@ -834,7 +834,7 @@
 	        status = #{status,jdbcType=VARCHAR}
 	    </set>
 	    <where>
-	    	relational_id_in=#{relationalId,jdbcType=VARCHAR}
+	    	relational_id_in=#{relationalId,jdbcType=VARCHAR} and base_entity_id!=#{relationalId,jdbcType=VARCHAR}
 	    </where>
   	</update>
   	
