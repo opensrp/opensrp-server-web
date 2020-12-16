@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class ImportBulkDataResource {
 
 	private ImportBulkDataService importBulkDataService;
 
-	private static final String SAMPLE_CSV_FILE = "./importsummaryreport.csv";
+	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
 	@Autowired
 	public void setImportBulkDataService(ImportBulkDataService importBulkDataService) {
@@ -48,8 +49,9 @@ public class ImportBulkDataResource {
 				.convertandPersistOrganizationdata(csvClients);
 
 		String timestamp = String.valueOf(new Date().getTime());
-		generateCSV(csvBulkImportDataSummary, timestamp);
-		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
 
 		return ResponseEntity.ok()
 				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
@@ -68,8 +70,9 @@ public class ImportBulkDataResource {
 				.convertandPersistPractitionerdata(csvClients);
 
 		String timestamp = String.valueOf(new Date().getTime());
-		generateCSV(csvBulkImportDataSummary, timestamp);
-		File csvFile = new File(SAMPLE_CSV_FILE + "-" + timestamp);
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
 
 		return ResponseEntity.ok()
 				.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
@@ -91,9 +94,9 @@ public class ImportBulkDataResource {
 		return csvClients;
 	}
 
-	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, String timestamp) throws IOException {
+	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, URI uri) throws IOException {
 
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(SAMPLE_CSV_FILE + "-" + timestamp));
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
 		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 
 		csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());

@@ -1,6 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Event.LOCATION_ID;
 import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
 import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
 import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
@@ -14,6 +13,7 @@ import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.Constants.ORDER_BY_TYPE;
 import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.LOCATIONS;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -37,8 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.Inventory;
-import org.opensrp.domain.Stock;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
@@ -128,7 +128,11 @@ public class StockResource extends RestResource<Stock> {
 		searchBean.setDateCreated(getStringFilter(DATE_CREATED, request));
 		searchBean.setToFrom(getStringFilter(TO_FROM, request));
 		searchBean.setDateUpdated(getStringFilter(DATE_UPDATED, request));
-		searchBean.setLocationId(getStringFilter(LOCATION_ID, request));
+		String locations = getStringFilter(LOCATIONS, request);
+		List<String> locationIds = StringUtils.isBlank(locations) ?
+				new ArrayList<>() :
+				Arrays.asList(locations.split(","));
+		searchBean.setLocations(locationIds);
 		return searchBean;
 	}
 
@@ -349,7 +353,9 @@ public class StockResource extends RestResource<Stock> {
 		if(orderByFieldName != null) {
 			stockSearchBean.setOrderByFieldName(StockSearchBean.FieldName.valueOf(orderByFieldName));
 		}
-		stockSearchBean.setLocationId(locationId);
+		List<String> locations = new ArrayList<>();
+		locations.add(locationId);
+		stockSearchBean.setLocations(locations);
 		return stockSearchBean;
 	}
 
