@@ -633,4 +633,15 @@ public class ClientService {
 		
 		return allClients.getRejectedList(provider, type, timestamp);
 	}
+	
+	public Migration findFirstMigrationBybaseEntityId(String baseEntityId) {
+		
+		return allClients.findFirstMigrationBybaseEntityId(baseEntityId);
+	}
+	
+	public Client getClientByBaseEntityId(String baseEntityId, String table) {
+		
+		return allClients.findClientByBaseEntityId(baseEntityId, table);
+	}
+	
 }

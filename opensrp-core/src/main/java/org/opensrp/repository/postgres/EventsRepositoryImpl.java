@@ -656,4 +656,9 @@ public class EventsRepositoryImpl extends CustomBaseRepositoryImpl<Event> implem
 		return eventMetadataMapper.selectFirstEventMeta(baseEntityId, table);
 	}
 	
+	@Override
+	public List<Event> findEventByBaseEntityId(String baseEntityId, String table) {
+		return convert(eventMetadataMapper.selectEventByBaseEntityId(baseEntityId, table));
+	}
+	
 }

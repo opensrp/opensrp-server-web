@@ -556,4 +556,16 @@ public class AllClients extends MotechBaseRepository<Client> implements ClientsR
 		return null;
 	}
 	
+	@Override
+	public Migration findFirstMigrationBybaseEntityId(String baseEntityId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Client findClientByBaseEntityId(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

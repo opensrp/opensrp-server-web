@@ -485,4 +485,8 @@ public class EventService {
 		
 		return allEvents.findFirstEventMeta(baseEntityId, table);
 	}
+	
+	public List<Event> findEventByBaseEntityId(String baseEntityId, String table) {
+		return allEvents.findEventByBaseEntityId(baseEntityId, table);
+	}
 }

@@ -14,6 +14,7 @@ import org.ektorp.util.Documents;
 import org.joda.time.DateTime;
 import org.motechproject.dao.MotechBaseRepository;
 import org.opensrp.common.AllConstants;
+import org.opensrp.domain.CustomEventMeta;
 import org.opensrp.domain.Event;
 import org.opensrp.domain.postgres.CustomQuery;
 import org.opensrp.domain.postgres.HealthId;
@@ -493,6 +494,18 @@ public class AllEvents extends MotechBaseRepository<Event> implements EventsRepo
 	public int insertGuestHealthId(HealthId healthId) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	@Override
+	public CustomEventMeta findFirstEventMeta(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Event> findEventByBaseEntityId(String baseEntityId, String table) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

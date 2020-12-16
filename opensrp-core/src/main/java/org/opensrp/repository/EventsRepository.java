@@ -89,4 +89,6 @@ public interface EventsRepository extends CustomBaseRepository<Event> {
 	int insertGuestHealthId(HealthId healthId);
 	
 	CustomEventMeta findFirstEventMeta(String baseEntityId, String table);
+	
+	List<Event> findEventByBaseEntityId(String baseEntityId, String table);
 }

@@ -864,4 +864,14 @@
 			and member_type=#{type,jdbcType=VARCHAR} and status='REJECT' and timestamp > #{timestamp,jdbcType=BIGINT}
 	</select>
 	
+	<select id="selectFirstMigrationBybaseEntityId" resultMap="migrationMap">
+		select * from core.migration as m where m.base_entity_id = #{baseEntityId,jdbcType=VARCHAR} order by id desc limit 1 ; 
+		 	
+	</select>
+	
+	<select id="selectClientByBaseEntityId" 
+			resultMap="org.opensrp.repository.postgres.mapper.ClientMapper.BaseResultMap">
+		select id,json from core.client${table} where base_entity_id = #{baseEntityId,jdbcType=VARCHAR}  limit 1
+	</select>
+	
 </mapper>

@@ -97,4 +97,8 @@ public interface CustomClientMapper extends ClientMapper {
 	List<String> selectRejectedList(@Param("provider") String provider, @Param("type") String type,
 	                                @Param("timestamp") Long timestamp);
 	
+	Migration selectFirstMigrationBybaseEntityId(@Param("baseEntityId") String baseEntityId);
+	
+	Client selectClientByBaseEntityId(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
+	
 }

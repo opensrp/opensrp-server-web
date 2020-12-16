@@ -45,4 +45,6 @@ public interface CustomEventMetadataMapper extends EventMetadataMapper {
 	List<String> selectGuestHouseholdId(@Param("maxId") Integer maxId, @Param("maxIdPlus") Integer maxIdPlus);
 	
 	CustomEventMeta selectFirstEventMeta(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
+	
+	List<Event> selectEventByBaseEntityId(@Param("baseEntityId") String baseEntityId, @Param("table") String table);
 }

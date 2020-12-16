@@ -242,4 +242,9 @@
 		 where em.base_entity_id =#{baseEntityId,jdbcType=VARCHAR} order by id asc limit 1
 
 	</select>
+	
+	<select id="selectEventByBaseEntityId" 
+		resultMap="BaseEventResultMap">
+		select id,json from core.event${table} where base_entity_id = #{baseEntityId,jdbcType=VARCHAR}
+	</select>
 </mapper>

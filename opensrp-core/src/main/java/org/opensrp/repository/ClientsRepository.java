@@ -125,4 +125,9 @@ public interface ClientsRepository extends CustomBaseRepository<Client> {
 	List<String> getMigratedList(String provider, String type, Long timestamp);
 	
 	List<String> getRejectedList(String provider, String type, Long timestamp);
+	
+	Migration findFirstMigrationBybaseEntityId(String baseEntityId);
+	
+	Client findClientByBaseEntityId(String baseEntityId, String table);
+	
 }

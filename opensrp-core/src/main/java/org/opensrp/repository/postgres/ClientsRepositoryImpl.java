@@ -680,4 +680,16 @@ public class ClientsRepositoryImpl extends CustomBaseRepositoryImpl<Client> impl
 		return clientMapper.selectRejectedList(provider, type, timestamp);
 	}
 	
+	@Override
+	public Migration findFirstMigrationBybaseEntityId(String baseEntityId) {
+		
+		return clientMapper.selectFirstMigrationBybaseEntityId(baseEntityId);
+	}
+	
+	@Override
+	public Client findClientByBaseEntityId(String baseEntityId, String table) {
+		org.opensrp.domain.postgres.Client clients = clientMapper.selectClientByBaseEntityId(baseEntityId, table);
+		return convert(clients);
+	}
+	
 }
