@@ -416,7 +416,7 @@ public class EventResource extends RestResource<Event> {
 		
 		try {
 			String district = getStringFilter("district", request);
-			//System.err.println("data:" + data);
+			System.err.println("data:" + data);
 			String dataProvider = request.getRemoteUser();
 			CustomQuery customQuery = clientService.getUserStatus(dataProvider);
 			
@@ -581,7 +581,7 @@ public class EventResource extends RestResource<Event> {
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/migrate")
-	public ResponseEntity<HttpStatus> migrate(@RequestBody String data, HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> migrate(@RequestBody String data, HttpServletRequest request) throws JSONException {
 		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			JSONObject syncData = new JSONObject(data);
@@ -618,6 +618,7 @@ public class EventResource extends RestResource<Event> {
 			
 			CustomEventMeta customEventMeta = eventService.findFirstEventMeta(baseEntityId, "");
 			Migration existingMigration = clientService.findFirstMigrationBybaseEntityId(baseEntityId);
+			System.err.println("existingMigration:::::" + existingMigration);
 			String outProvider = "";
 			if (existingMigration != null) {
 				outProvider = existingMigration.getSKIn();
@@ -696,12 +697,12 @@ public class EventResource extends RestResource<Event> {
 		catch (Exception e) {
 			transactionManager.rollback(txStatus);
 			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("error ooured", INTERNAL_SERVER_ERROR);
 		}
 		finally {
 			transactionManager.commit(txStatus);
 		}
-		return new ResponseEntity<>(CREATED);
+		return new ResponseEntity<>("ok", CREATED);
 		
 	}
 	

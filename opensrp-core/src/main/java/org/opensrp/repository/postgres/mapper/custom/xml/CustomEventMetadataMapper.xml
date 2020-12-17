@@ -11,7 +11,7 @@
 	
 	<resultMap id="customMetadata" type="org.opensrp.domain.CustomEventMeta">
 		<id column="id" jdbcType="BIGINT" property="id" />
-		<result column="provider" jdbcType="VARCHAR" property="provider"/>
+		<result column="provider_id" jdbcType="VARCHAR" property="provider"/>
 		<result column="division" jdbcType="VARCHAR" property="division"/>
 		<result column="district" jdbcType="VARCHAR" property="district"/>
 		<result column="branch" jdbcType="VARCHAR" property="branch"/>
