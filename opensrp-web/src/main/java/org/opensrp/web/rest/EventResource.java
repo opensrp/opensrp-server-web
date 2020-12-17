@@ -13,6 +13,7 @@ import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.utils.HttpHeaderFactory.allowOrigin;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -584,11 +585,11 @@ public class EventResource extends RestResource<Event> {
 		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			JSONObject syncData = new JSONObject(data);
-			String district = getStringFilter("district", request);
+			String district = getStringFilter("districtId", request);
 			String inProvider = request.getRemoteUser();
-			String division = getStringFilter("division", request);
-			String branch = getStringFilter("branch", request);
-			String village = getStringFilter("village", request);
+			String division = getStringFilter("divisionId", request);
+			String branch = getStringFilter("branchId", request);
+			String village = getStringFilter("villageId", request);
 			
 			UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, "", "", "", "");
 			ArrayList<Client> clients = new ArrayList<Client>();
@@ -760,7 +761,7 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, method = POST, value = "/accept-reject-migration")
-	public ResponseEntity<HttpStatus> acceptRejectMigration(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> acceptRejectMigration(HttpServletRequest request) throws JSONException {
 		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			Long id = getIntegerFilter("id", request).longValue();
@@ -817,12 +818,12 @@ public class EventResource extends RestResource<Event> {
 		catch (Exception e) {
 			transactionManager.rollback(txStatus);
 			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getMessage(), allowOrigin("*"), INTERNAL_SERVER_ERROR);
 		}
 		finally {
 			transactionManager.commit(txStatus);
 		}
-		return new ResponseEntity<>(CREATED);
+		return new ResponseEntity<>("OK", allowOrigin("*"), CREATED);
 		
 	}
 	
