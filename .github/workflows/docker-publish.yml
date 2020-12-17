@@ -13,9 +13,6 @@ on:
   # Run tests for any PRs.
   pull_request:
 
-env:
-  IMAGE_NAME: opensrp/opensrp-server-web
-
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -51,7 +48,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: $IMAGE_NAME
+          repository: opensrp/opensrp-server-web
           tag_with_ref: true
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
@@ -59,5 +56,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: OpenSRP/opensrp-server-web/$IMAGE_NAME
+          repository: OpenSRP/opensrp-server-web
           tag_with_ref: true
