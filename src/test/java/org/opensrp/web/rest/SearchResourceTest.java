@@ -7,14 +7,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opensrp.repository.PlanRepository;
-import org.opensrp.service.TaskGenerator;
+import org.opensrp.service.*;
 import org.smartregister.domain.Client;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
 import org.opensrp.repository.SearchRepository;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.SearchService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,8 @@ public class SearchResourceTest {
 	
 	private EventService eventService;
 
+	private ExportEventDataMapper exportEventDataMapper;
+
 
 	private TaskGenerator taskGenerator;
 
@@ -51,7 +50,7 @@ public class SearchResourceTest {
 
 		searchService = Mockito.spy(new SearchService(searchRepository));
 		clientService = Mockito.spy(new ClientService(clientRepository));
-		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository));
+		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository, exportEventDataMapper));
 		
 	}
 	

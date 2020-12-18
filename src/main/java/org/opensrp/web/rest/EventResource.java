@@ -675,6 +675,10 @@ public class EventResource extends RestResource<Event> {
 		this.clientService = clientService;
 	}
 
+	public void setMultimediaService(MultimediaService multimediaService) {
+		this.multimediaService = multimediaService;
+	}
+
 	private void generateCSV(ExportEventDataSummary exportEventDataSummary, URI uri) throws IOException {
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
