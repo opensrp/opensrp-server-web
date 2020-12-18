@@ -616,7 +616,7 @@ public class EventResource extends RestResource<Event> {
 			JSONObject attributes = json.getJSONObject("attributes");
 			JSONObject identifiers = json.getJSONObject("identifiers");
 			
-			CustomEventMeta customEventMeta = eventService.findFirstEventMeta(baseEntityId, "");
+			CustomEventMeta customEventMeta = eventService.findFirstEventMeta(baseEntityId, "_" + district);
 			Migration existingMigration = clientService.findFirstMigrationBybaseEntityId(baseEntityId);
 			System.err.println("existingMigration:::::" + existingMigration);
 			String outProvider = "";
@@ -697,7 +697,7 @@ public class EventResource extends RestResource<Event> {
 		catch (Exception e) {
 			transactionManager.rollback(txStatus);
 			e.printStackTrace();
-			return new ResponseEntity<>("error ooured", INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("error occured", INTERNAL_SERVER_ERROR);
 		}
 		finally {
 			transactionManager.commit(txStatus);
