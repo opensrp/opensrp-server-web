@@ -576,27 +576,30 @@ public class EventResource extends RestResource<Event> {
 		boolean firstTime = true;
 
 		for (String eventType : eventTypes) {
-			ExportEventDataSummary exportEventDataSummary = eventService.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+			ExportEventDataSummary exportEventDataSummary = eventService
+					.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
+							Utils.getDateTimeFromString(toDate));
 
 			missionName = exportEventDataSummary != null &&
-					exportEventDataSummary.getMissionName() !=  null ? exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase() : "";
+					exportEventDataSummary.getMissionName() != null ?
+					exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase() :
+					"";
 			eventTypeName = eventType.replaceAll("\\s+", "_");
 
 			formatted = df.format(new Date());
 			File csvFile = null;
 			File imagesDirectory = null;
 			zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
-			File zipFileFinal = new File(SAMPLE_CSV_FILE + missionName + "_" + formatted);
 			if (firstTime) {
 				fos = new FileOutputStream(zipFileName);
 				zipOS = new ZipOutputStream(fos);
 			}
 			try {
-				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted;
+				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
 				csvFile = new File(exportDataFileName);
 				URI uri = csvFile.toURI();
-				if(exportEventDataSummary != null) {
+				if (exportEventDataSummary != null) {
 					generateCSV(exportEventDataSummary, uri);
 				}
 				writeToZipFile(uri, zipOS);
@@ -604,71 +607,46 @@ public class EventResource extends RestResource<Event> {
 			}
 
 			catch (IOException e) {
-				logger.error("Exception occurred ");
+				logger.error("Exception occurred, unable to generate csv" + e.getMessage());
 			}
 			Boolean firstTimeForImages = true;
-List<File> imagesSubFolders = new ArrayList<>();
-			if(eventType.equals("flag_problem")) {
+			if (eventType.equals("flag_problem")) {
 
 				ExportImagesSummary exportImagesSummary =
-						eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
-
-				//temp
-//				Set<String> sps = new HashSet<>();
-//				sps.add("1");
-//				sps.add("2");
-//				exportImagesSummary.setServicePointIds(sps);
-				//
+						eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
+								Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 				String imagesDirectoryName;
-				File imagesDirectoryForServicePoint = null;
-				if(firstTimeForImages) {
+				if (firstTimeForImages) {
 					formatted = df.format(new Date());
-					 imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
-					imagesDirectory = new File( imagesDirectoryName + "/");
+					imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+					imagesDirectory = new File(imagesDirectoryName + "/");
 					imagesDirectory.mkdirs();
-					for(String servicePointId : exportImagesSummary.getServicePointIds()) {
-						imagesDirectoryForServicePoint = new File(imagesDirectory , servicePointId);
-						imagesDirectoryForServicePoint.mkdirs();
-						imagesSubFolders.add(imagesDirectoryForServicePoint);
-					}
- firstTimeForImages = false;
+					firstTimeForImages = false;
 				}
 
-//				URI uri = imagesDirectory.toURI();
-//				String childFilePath ;
 				File childFile = null;
-			//				ExportFlagProblemEventImagesMetadata exportFlagProblemEventImagesMetadata = new ExportFlagProblemEventImagesMetadata();
-//				exportFlagProblemEventImagesMetadata.setStockId("12");
-//				exportFlagProblemEventImagesMetadataList.add(exportFlagProblemEventImagesMetadata);
-//				stockIds.add("13");
-				for(ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary.getExportFlagProblemEventImageMetadataList()) {
+				String extension = "";
+				for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
+						.getExportFlagProblemEventImageMetadataList()) {
 					File file = multimediaService
-							.retrieveFile(multiMediaDir + File.separator + "patient_images" + File.separator + exportFlagProblemEventImageMetadata.getStockId()
-									+"_" + planIdentifier);
-					Multimedia multimedia =
-							multimediaService.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
+							.retrieveFile(multiMediaDir + File.separator + "patient_images" + File.separator
+									+ exportFlagProblemEventImageMetadata.getStockId()
+									+ "_" + planIdentifier);
+					Multimedia multimedia = multimediaService.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
 					int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
 							multimedia.getOriginalFileName().indexOf(".") : -1;
-					String extension = "";
-					if(extensionIndex != -1) {
+
+					if (extensionIndex != -1) {
 						extension = multimedia.getOriginalFileName().substring(extensionIndex);
 					}
-//				childFile = new File(imagesDirectory.getPath() + exportFlagProblemEventImagesMetadataObj.getStockId()); //IT WORKED
-				File insideFolder = new File(imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointId());
-					childFile = new File(insideFolder, exportFlagProblemEventImageMetadata.getStockId() + extension);
-				FileUtils.copyFile(file, childFile);
-//				childFile = new File(imagesDirectory.getPath(), childFilePath);
-				writeToZipFile(childFile.toURI(), zipOS); //working
+					File insideFolder = new File(
+							imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
+					childFile = new File(insideFolder,
+							exportFlagProblemEventImageMetadata.getProductName() + "_" + exportFlagProblemEventImageMetadata
+									.getStockId() + extension);
+					FileUtils.copyFile(file, childFile);
+					writeToZipFile(childFile.toURI(), zipOS);
 				}
-//
-//				for(File imageFolder : imagesSubFolders) {
-//					try {
-//						RestUtils.zipFolder(imageFolder,zipFileFinal, zipOS);
-//					}
-//					catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//				}
 
 			}
 		}
@@ -703,7 +681,7 @@ List<File> imagesSubFolders = new ArrayList<>();
 		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 
 		for (List<Object> rows : exportEventDataSummary.getRowsData()) {
-				csvPrinter.printRecord(rows);
+			csvPrinter.printRecord(rows);
 			csvPrinter.printRecord("\n");
 		}
 		csvPrinter.flush();
