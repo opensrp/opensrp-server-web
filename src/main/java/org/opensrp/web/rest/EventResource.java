@@ -22,17 +22,21 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.web.pojo.MqttMessagePayload;
+import org.opensrp.web.service.PushNotificationService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -74,6 +78,9 @@ public class EventResource extends RestResource<Event> {
 	private EventService eventService;
 
 	private ClientService clientService;
+
+	@Autowired
+	private PushNotificationService pushNotificationService;
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -350,8 +357,13 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
-	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
+	public ResponseEntity<HttpStatus> save(@RequestBody String data,
+										   Authentication authentication,
+										   @RequestParam(required = false) boolean isPushNotification) {
 		try {
+			String team = null;
+			List<Event> eventList = new ArrayList<>();
+			List<Client> clientList = new ArrayList<>();
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
 				return new ResponseEntity<>(BAD_REQUEST);
@@ -362,7 +374,8 @@ public class EventResource extends RestResource<Event> {
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				for (Client client : clients) {
 					try {
-						clientService.addorUpdate(client);
+						Client savedClient = clientService.addorUpdate(client);
+						clientList.add(savedClient);
 					}
 					catch (Exception e) {
 						logger.error(
@@ -377,8 +390,10 @@ public class EventResource extends RestResource<Event> {
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
+						team = event.getTeamId();
 						event = eventService.processOutOfArea(event, authentication.getName());
-						eventService.addorUpdateEvent(event);
+						Event savedEvent = eventService.addorUpdateEvent(event);
+						eventList.add(savedEvent);
 					}
 					catch (Exception e) {
 						logger.error(
@@ -387,6 +402,32 @@ public class EventResource extends RestResource<Event> {
 						    e);
 					}
 				}
+			}
+
+			//TODO broadcast the eventClient here
+			if(isPushNotification
+					&& (!eventList.isEmpty() || !clientList.isEmpty())) {
+				EventSyncBean eventSyncBean = new EventSyncBean();
+				eventSyncBean.setClients(clientList);
+				eventSyncBean.setEvents(eventList);
+				eventSyncBean.setNoOfEvents(eventList.size());
+				eventSyncBean.setTotalRecords(eventList.stream().count());
+				String responseString = objectMapper.writeValueAsString(eventSyncBean);
+
+				if(StringUtils.isBlank(team))
+					team = "{sync-param}";
+
+				String host = InetAddress.getLocalHost().getHostName();
+				if(StringUtils.isBlank(host))
+					host = "{domain}";
+
+				String topic = String
+						.format("%s/sync/event-client/%s", host, team);
+				MqttMessagePayload mqttMessagePayload = new MqttMessagePayload();
+				mqttMessagePayload.setMessage(responseString);
+				mqttMessagePayload.setQos(MqttQos.AT_LEAST_ONCE);
+				mqttMessagePayload.setTopic(topic);
+				pushNotificationService.publish(mqttMessagePayload);
 			}
 
 		}
