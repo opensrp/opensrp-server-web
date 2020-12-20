@@ -479,6 +479,9 @@ public class ClientService {
 	                              UserLocationTableName oldUserLocation, UserLocationTableName newUserLocation,
 	                              String isMember) {
 		
+		System.err.println("inHHousehold:" + inHHousehold);
+		System.err.println("outHHousehold:" + outHHousehold);
+		
 		Address inAddressa = inClient.getAddress("usual_residence");
 		Migration migration = new Migration();
 		migration.setDistrictIn(inAddressa.getCountyDistrict());
