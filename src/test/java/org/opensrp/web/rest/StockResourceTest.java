@@ -89,6 +89,12 @@ public class StockResourceTest {
 			+ "    \"serialNumber\":\"1234serial\"\n"
 			+ "}";
 
+	private final String POST_SYNC_PAYLOAD = "{\n"
+			+ "  \"locations\": [\n"
+			+ "     \"90397\"\n"
+			+ "  ]\n"
+			+ "}";
+
 	private final String IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS = "\"Total Number of Rows in the CSV \",2\r\n\"Rows processed \",1\r\n\"\n\"\r\nRow Number,Reason of Failure\r\n1,[PO Number should be a whole number]\r\n";
 
 	@Before
@@ -162,6 +168,36 @@ public class StockResourceTest {
 
 		mockMvc.perform(get(BASE_URL + "/sync").param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
 				.param("limit", "1"))
+				.andExpect(status().isInternalServerError()).andReturn();
+	}
+
+	@Test
+	public void testSyncV2() throws Exception {
+		List<Stock> expected = new ArrayList<>();
+		Stock stock = createStock();
+		stock.setLocationId("90397");
+		expected.add(stock);
+
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(expected);
+
+		MvcResult result = mockMvc
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		assertEquals(actualObj.get("stocks").size(), 1);
+	}
+
+	@Test
+	public void testSyncV2ThrowsException() throws Exception {
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class))).thenReturn(null);
+
+		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
 				.andExpect(status().isInternalServerError()).andReturn();
 	}
 

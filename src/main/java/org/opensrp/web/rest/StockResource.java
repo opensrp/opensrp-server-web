@@ -314,6 +314,35 @@ public class StockResource extends RestResource<Stock> {
 		}
 	}
 
+	@PostMapping(value = "/sync", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	protected ResponseEntity<String> syncV2(@RequestBody StockSearchBean stockSearchBean) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		Integer limit = null;
+		try {
+			if (stockSearchBean != null) {
+				limit = stockSearchBean.getLimit();
+				if (limit == null || limit.intValue() == 0) {
+					limit = 25;
+				}
+			}
+
+			List<Stock> stocks = new ArrayList<Stock>();
+			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
+			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+			}.getType());
+
+			response.put("stocks", stocksArray);
+
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
+		}
+		catch (Exception e) {
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
 		List<Map<String, String>> csvClients = new ArrayList<>();
 		try (Reader reader = new InputStreamReader(file.getInputStream());
