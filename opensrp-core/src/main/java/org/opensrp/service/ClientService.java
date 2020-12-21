@@ -472,8 +472,9 @@ public class ClientService {
 	 * @param inClient means after migrated client
 	 * @param outClient means before migrated client
 	 **/
-	public Migration setMigration(Client inClient, Address outAddress, Map<String, Object> outClientAttributes,
-	                              String outMemberId, Map<String, List<String>> outClientRelationship, Client inHHousehold,
+	public Migration setMigration(String ssOut, String ssIn, Client inClient, Address outAddress,
+	                              Map<String, Object> outClientAttributes, String outMemberId,
+	                              Map<String, List<String>> outClientRelationship, Client inHHousehold,
 	                              Client outHHousehold, String inProvider, String outProvider, String inHHRelationalId,
 	                              String outHHRelationalId, String branchIdIn, String branchIdOut, String type,
 	                              UserLocationTableName oldUserLocation, UserLocationTableName newUserLocation,
@@ -481,6 +482,7 @@ public class ClientService {
 		
 		System.err.println("inHHousehold:" + inHHousehold);
 		System.err.println("outHHousehold:" + outHHousehold);
+		System.err.println("outClientAttributes:" + outClientAttributes);
 		
 		Address inAddressa = inClient.getAddress("usual_residence");
 		Migration migration = new Migration();
@@ -508,8 +510,8 @@ public class ClientService {
 		migration.setMemberIDOut(outMemberId);
 		migration.setSKIn(inProvider);
 		migration.setSKOut(outProvider);
-		migration.setSSIn(inClient.getAttribute("SS_Name") + "");
-		migration.setSSOut(outClientAttributes.get("SS_Name") + "");
+		migration.setSSIn(ssIn);
+		migration.setSSOut(ssOut);
 		migration.setRelationalIdIn(inHHRelationalId);
 		migration.setRelationalIdOut(outHHRelationalId);
 		
