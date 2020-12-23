@@ -154,18 +154,8 @@ public class StockResource extends RestResource<Stock> {
 				searchBean.setServerVersion(Long.valueOf(serverVersion) + 1);
 			}
 			Integer limit = getIntegerFilter("limit", request);
-			if (limit == null || limit.intValue() == 0) {
-				limit = 25;
-			}
-
-			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findStocks(searchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
-			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
-			}.getType());
-
-			response.put("stocks", stocksArray);
-
-			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			searchBean.setLimit(limit);
+			return syncStocks(searchBean);
 
 		} catch (Exception e) {
 			response.put("msg", "Error occurred");
@@ -317,23 +307,9 @@ public class StockResource extends RestResource<Stock> {
 	@PostMapping(value = "/sync", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	protected ResponseEntity<String> syncV2(@RequestBody StockSearchBean stockSearchBean) {
 		Map<String, Object> response = new HashMap<String, Object>();
-		Integer limit = null;
 		try {
-			if (stockSearchBean != null) {
-				limit = stockSearchBean.getLimit();
-				if (limit == null || limit.intValue() == 0) {
-					limit = 25;
-				}
-			}
 
-			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
-			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
-			}.getType());
-
-			response.put("stocks", stocksArray);
-
-			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return syncStocks(stockSearchBean);
 
 		}
 		catch (Exception e) {
@@ -341,6 +317,24 @@ public class StockResource extends RestResource<Stock> {
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	private ResponseEntity<String> syncStocks(StockSearchBean stockSearchBean) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		List<Stock> stocks = new ArrayList<Stock>();
+		Integer limit = stockSearchBean.getLimit();
+		if (limit == null || limit.intValue() == 0) {
+			limit = 25;
+		}
+		stockSearchBean.setLimit(limit);
+		stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", stockSearchBean.getLimit());
+		JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+		}.getType());
+
+		response.put("stocks", stocksArray);
+
+		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
