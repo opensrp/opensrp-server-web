@@ -97,6 +97,8 @@ public class StockResourceTest {
 
 	private final String IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS = "\"Total Number of Rows in the CSV \",2\r\n\"Rows processed \",1\r\n\"\n\"\r\nRow Number,Reason of Failure\r\n1,[PO Number should be a whole number]\r\n";
 
+	private final String ERROR_OCCURED = "Error occurred";
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -197,8 +199,14 @@ public class StockResourceTest {
 	public void testSyncV2ThrowsException() throws Exception {
 		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class))).thenReturn(null);
 
-		mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
+		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
 				.andExpect(status().isInternalServerError()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		assertTrue(responseString.contains(ERROR_OCCURED));
 	}
 
 	@Test
