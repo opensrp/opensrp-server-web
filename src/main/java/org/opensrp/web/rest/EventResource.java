@@ -628,10 +628,6 @@ public class EventResource extends RestResource<Event> {
 				String extension = "";
 				for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
 						.getExportFlagProblemEventImageMetadataList()) {
-					File file = multimediaService
-							.retrieveFile(multiMediaDir + File.separator + "patient_images" + File.separator
-									+ exportFlagProblemEventImageMetadata.getStockId()
-									+ "_" + planIdentifier);
 					Multimedia multimedia = multimediaService.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
 					int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
 							multimedia.getOriginalFileName().indexOf(".") : -1;
@@ -639,13 +635,20 @@ public class EventResource extends RestResource<Event> {
 					if (extensionIndex != -1) {
 						extension = multimedia.getOriginalFileName().substring(extensionIndex);
 					}
+
+					File file = null;
+					if (multimedia != null && multimedia.getFilePath() != null) {
+						file = multimediaService.retrieveFile(multimedia.getFilePath());
+					}
 					File insideFolder = new File(
 							imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
 					childFile = new File(insideFolder,
 							exportFlagProblemEventImageMetadata.getProductName() + "_" + exportFlagProblemEventImageMetadata
 									.getStockId() + extension);
-					FileUtils.copyFile(file, childFile);
-					writeToZipFile(childFile.toURI(), zipOS);
+					if(file != null) {
+						FileUtils.copyFile(file, childFile);
+						writeToZipFile(childFile.toURI(), zipOS);
+					}
 				}
 
 			}
@@ -689,6 +692,8 @@ public class EventResource extends RestResource<Event> {
 			csvPrinter.printRecord("\n");
 		}
 		csvPrinter.flush();
+		writer.close();
+		csvPrinter.close();
 	}
 
 
