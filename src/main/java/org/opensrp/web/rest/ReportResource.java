@@ -59,11 +59,11 @@ public class ReportResource {
 
 	private PhysicalLocationService locationService;
 
-	private Map<String, Map<String, Object>> specificIndicatorsReport = null;
+	private Map<String, Map<String, Object>> specificIndicatorsReport;
 
-	private Map<String, Map<String, Object>> aggregatedIndicatorsReport = null;
+	private Map<String, Map<String, Object>> aggregatedIndicatorsReport;
 
-	private Map<String, Map<String, Object>> stockIndicatorsReport = null;
+	private Map<String, Map<String, Object>> stockIndicatorsReport;
 
 	private static final String PROVINCE = "province";
 
@@ -152,13 +152,13 @@ public class ReportResource {
 			throw new IllegalArgumentException("Missing district");
 		}
 
-		districtName = StringUtils.capitalize(URLDecoder.decode(districtName.trim(), StandardCharsets.UTF_8.toString()));
+		String name = StringUtils.capitalize(URLDecoder.decode(districtName.trim(), StandardCharsets.UTF_8.toString()));
 		Map<String, String> filters = new HashMap<>();
-		filters.put("name", districtName);
+		filters.put("name", name);
 		List<PhysicalLocation> locations = locationService.findLocationsByProperties(false, "", filters);
 		if (locations == null || locations.isEmpty()) {
-			logger.error("District not found: " + districtName);
-			throw new IllegalArgumentException("District not found: " + districtName);
+			logger.error("District not found: " + name);
+			throw new IllegalArgumentException("District not found: " + name);
 		}
 		PhysicalLocation district = locations.get(0);
 		String locationName = district.getProperties().getName().toLowerCase().replace(" ", "_");
@@ -588,6 +588,7 @@ public class ReportResource {
 					newCell.setCellValue(oldCell.getNumericCellValue());
 					break;
 				case Cell.CELL_TYPE_STRING:
+				default:
 					newCell.setCellValue(oldCell.getRichStringCellValue());
 					break;
 			}
