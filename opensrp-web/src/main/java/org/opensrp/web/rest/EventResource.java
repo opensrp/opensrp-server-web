@@ -287,7 +287,15 @@ public class EventResource extends RestResource<Event> {
 			CustomQuery user = eventService.getUser(request.getRemoteUser());
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
 			List<Long> address = new ArrayList<Long>();
-			if(villageIds == null || org.apache.commons.lang3.StringUtils.isBlank(villageIds)) {
+
+			if(villageIds !=null && !org.apache.commons.lang3.StringUtils.isBlank(villageIds) && user.getRoleName().equalsIgnoreCase("pa")) {
+
+				for(String locId: villageIds.split(",")) {
+					address.add(Long.valueOf(locId));
+				}
+			}
+
+			if(villageIds ==null && user.getRoleName().equalsIgnoreCase("sk")) {
 				List<CustomQuery> locations = (teamMember != null) ? clientService.getProviderLocationIdByChildRole(
 						user.getId(), ss, village) : new ArrayList<CustomQuery>();
 
@@ -295,11 +303,7 @@ public class EventResource extends RestResource<Event> {
 					address.add(Long.valueOf(locName.getId()));
 				}
 			}
-			else {
-				for(String locId: villageIds.split(",")) {
-					address.add(Long.valueOf(locId));
-				}
-			}
+
 			logger.info("request.getRemoteUser():" + request.getRemoteUser());
 			
 			String location = "";
