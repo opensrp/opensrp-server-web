@@ -288,6 +288,8 @@ public class EventResource extends RestResource<Event> {
 			CustomQuery teamMember = eventService.getTeamMemberId(user.getId());
 			List<Long> address = new ArrayList<Long>();
 
+			System.out.println(" ------->  villageIds: " +villageIds);
+			System.out.println(" ------->  userRole: " + user.getRoleName().toLowerCase());
 			if(villageIds !=null && !org.apache.commons.lang3.StringUtils.isBlank(villageIds) && user.getRoleName().equalsIgnoreCase("pa")) {
 
 				for(String locId: villageIds.split(",")) {
@@ -389,8 +391,8 @@ public class EventResource extends RestResource<Event> {
 			} else {
 				logger.info("No location found..");
 				System.err.println("NO LOCation found .....................");
-				response.put("msg", "Error occurred");
-				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+//				response.put("msg", "Error occurred");
+				return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.OK);
 			}
 			
 		}
