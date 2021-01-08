@@ -464,7 +464,7 @@ public class EventResource extends RestResource<Event> {
 
 			response.put("failed_events", eventsArray);
 			response.put("failed_clients", clientsArray);
-			return new ResponseEntity<>(gson.toJson(response), HttpStatus.CREATED);
+			return new ResponseEntity<>(gson.toJson(response), CREATED);
 		}
 	}
 	
