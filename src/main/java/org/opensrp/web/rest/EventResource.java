@@ -397,7 +397,12 @@ public class EventResource extends RestResource<Event> {
 	}
 	
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
-	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
+	public ResponseEntity<String> save(@RequestBody String data, Authentication authentication)
+			throws JsonProcessingException {
+
+		List<String> failedClientsIds = new ArrayList<>();
+		List<String> failedEventIds = new ArrayList<>();
+		Map<String, Object> response = new HashMap<String, Object>();
 		try {
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
@@ -415,6 +420,7 @@ public class EventResource extends RestResource<Event> {
 						logger.error(
 						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
 						    e);
+						failedClientsIds.add(client.getId());
 					}
 				}
 				
@@ -432,6 +438,7 @@ public class EventResource extends RestResource<Event> {
 						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
 						            : event.getBaseEntityId() + " failed to sync",
 						    e);
+						failedEventIds.add(event.getId());
 					}
 				}
 			}
@@ -443,7 +450,19 @@ public class EventResource extends RestResource<Event> {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(CREATED);
+		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
+			return new ResponseEntity<>(CREATED);
+		} else {
+			JsonArray clientsArray = (JsonArray) gson.toJsonTree(failedClientsIds, new TypeToken<List<String>>() {
+			}.getType());
+
+			JsonArray eventsArray = (JsonArray) gson.toJsonTree(failedEventIds, new TypeToken<List<String>>() {
+			}.getType());
+
+			response.put("failed_events", eventsArray);
+			response.put("failed_clients", clientsArray);
+			return new ResponseEntity<>(gson.toJson(response), HttpStatus.CREATED);
+		}
 	}
 	
 	@Override
