@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -594,7 +595,7 @@ public class EventResource extends RestResource<Event> {
 
 				formatted = df.format(new Date());
 				File csvFile = null;
-				File imagesDirectory = null;
+
 				zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
 				if (firstTime) {
 					fos = new FileOutputStream(zipFileName);
@@ -612,50 +613,7 @@ public class EventResource extends RestResource<Event> {
 				firstTime = false;
 
 				Boolean firstTimeForImages = true;
-				if (eventType.equals("flag_problem")) {
-
-					ExportImagesSummary exportImagesSummary =
-							eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
-									Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
-					String imagesDirectoryName;
-					if (firstTimeForImages) {
-						formatted = df.format(new Date());
-						imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
-						imagesDirectory = new File(imagesDirectoryName + "/");
-						imagesDirectory.mkdirs();
-						firstTimeForImages = false;
-					}
-
-					File childFile = null;
-					String extension = "";
-					for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
-							.getExportFlagProblemEventImageMetadataList()) {
-						Multimedia multimedia = multimediaService
-								.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
-						int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
-								multimedia.getOriginalFileName().indexOf(".") : -1;
-
-						if (extensionIndex != -1) {
-							extension = multimedia.getOriginalFileName().substring(extensionIndex);
-						}
-
-						File file = null;
-						if (multimedia != null && multimedia.getFilePath() != null) {
-							file = multimediaService.retrieveFile(multimedia.getFilePath());
-						}
-						File insideFolder = new File(
-								imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
-						childFile = new File(insideFolder,
-								exportFlagProblemEventImageMetadata.getProductName() + "_"
-										+ exportFlagProblemEventImageMetadata
-										.getStockId() + extension);
-						if (file != null) {
-							FileUtils.copyFile(file, childFile);
-							writeToZipFile(childFile.toURI(), zipOS);
-						}
-					}
-
-				}
+				firstTimeForImages = exportImagesAgainstFlagProblemEvent(eventType,planIdentifier,fromDate,toDate,firstTimeForImages, zipOS, missionName);
 
 			}
 		}
@@ -681,6 +639,61 @@ public class EventResource extends RestResource<Event> {
 				.contentType(MediaType.parseMediaType("application/zip"))
 				.contentLength(data.length)
 				.body(resource);
+	}
+
+	private boolean exportImagesAgainstFlagProblemEvent(String eventType, String planIdentifier, String fromDate, String toDate, boolean firstTimeForImages
+	, ZipOutputStream zipOS, String missionName)
+			throws IOException {
+
+		File imagesDirectory = null;
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		String formatted = "";
+		formatted = df.format(new Date());
+		if (eventType.equals("flag_problem")) {
+
+			ExportImagesSummary exportImagesSummary =
+					eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
+							Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+			String imagesDirectoryName;
+			if (firstTimeForImages) {
+				formatted = df.format(new Date());
+				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+				imagesDirectory = new File(imagesDirectoryName + "/");
+				imagesDirectory.mkdirs();
+				firstTimeForImages = false;
+			}
+
+			File childFile = null;
+			String extension = "";
+			for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
+					.getExportFlagProblemEventImageMetadataList()) {
+				Multimedia multimedia = multimediaService
+						.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
+				int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
+						multimedia.getOriginalFileName().indexOf(".") : -1;
+
+				if (extensionIndex != -1) {
+					extension = multimedia.getOriginalFileName().substring(extensionIndex);
+				}
+
+				File file = null;
+				if (multimedia != null && multimedia.getFilePath() != null) {
+					file = multimediaService.retrieveFile(multimedia.getFilePath());
+				}
+				File insideFolder = new File(
+						imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
+				childFile = new File(insideFolder,
+						exportFlagProblemEventImageMetadata.getProductName() + "_"
+								+ exportFlagProblemEventImageMetadata
+								.getStockId() + extension);
+				if (file != null) {
+					FileUtils.copyFile(file, childFile);
+					writeToZipFile(childFile.toURI(), zipOS);
+				}
+			}
+
+		}
+		return firstTimeForImages;
 	}
 	
 	public void setEventService(EventService eventService) {
