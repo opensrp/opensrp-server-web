@@ -575,26 +575,27 @@ public class EventResource extends RestResource<Event> {
 		String zipFileName = "";
 		boolean firstTime = true;
 
-		for (String eventType : eventTypes) {
-			ExportEventDataSummary exportEventDataSummary = eventService
-					.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
-							Utils.getDateTimeFromString(toDate));
+		try {
+			for (String eventType : eventTypes) {
+				ExportEventDataSummary exportEventDataSummary = eventService
+						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
+								Utils.getDateTimeFromString(toDate));
 
-			missionName = exportEventDataSummary != null &&
-					exportEventDataSummary.getMissionName() != null ?
-					exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase() :
-					"";
-			eventTypeName = eventType.replaceAll("\\s+", "_");
+				missionName = exportEventDataSummary != null &&
+						exportEventDataSummary.getMissionName() != null ?
+						exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase() :
+						"";
+				eventTypeName = eventType.replaceAll("\\s+", "_");
 
-			formatted = df.format(new Date());
-			File csvFile = null;
-			File imagesDirectory = null;
-			zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
-			if (firstTime) {
-				fos = new FileOutputStream(zipFileName);
-				zipOS = new ZipOutputStream(fos);
-			}
-			try {
+				formatted = df.format(new Date());
+				File csvFile = null;
+				File imagesDirectory = null;
+				zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
+				if (firstTime) {
+					fos = new FileOutputStream(zipFileName);
+					zipOS = new ZipOutputStream(fos);
+				}
+
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
 				csvFile = new File(exportDataFileName);
@@ -604,57 +605,64 @@ public class EventResource extends RestResource<Event> {
 				}
 				writeToZipFile(uri, zipOS);
 				firstTime = false;
-			}
 
-			catch (IOException e) {
-				logger.error("Exception occurred, unable to generate csv" + e.getMessage());
-			}
-			Boolean firstTimeForImages = true;
-			if (eventType.equals("flag_problem")) {
+				Boolean firstTimeForImages = true;
+				if (eventType.equals("flag_problem")) {
 
-				ExportImagesSummary exportImagesSummary =
-						eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
-								Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
-				String imagesDirectoryName;
-				if (firstTimeForImages) {
-					formatted = df.format(new Date());
-					imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
-					imagesDirectory = new File(imagesDirectoryName + "/");
-					imagesDirectory.mkdirs();
-					firstTimeForImages = false;
-				}
-
-				File childFile = null;
-				String extension = "";
-				for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
-						.getExportFlagProblemEventImageMetadataList()) {
-					Multimedia multimedia = multimediaService.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
-					int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
-							multimedia.getOriginalFileName().indexOf(".") : -1;
-
-					if (extensionIndex != -1) {
-						extension = multimedia.getOriginalFileName().substring(extensionIndex);
+					ExportImagesSummary exportImagesSummary =
+							eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
+									Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+					String imagesDirectoryName;
+					if (firstTimeForImages) {
+						formatted = df.format(new Date());
+						imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+						imagesDirectory = new File(imagesDirectoryName + "/");
+						imagesDirectory.mkdirs();
+						firstTimeForImages = false;
 					}
 
-					File file = null;
-					if (multimedia != null && multimedia.getFilePath() != null) {
-						file = multimediaService.retrieveFile(multimedia.getFilePath());
+					File childFile = null;
+					String extension = "";
+					for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
+							.getExportFlagProblemEventImageMetadataList()) {
+						Multimedia multimedia = multimediaService
+								.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
+						int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
+								multimedia.getOriginalFileName().indexOf(".") : -1;
+
+						if (extensionIndex != -1) {
+							extension = multimedia.getOriginalFileName().substring(extensionIndex);
+						}
+
+						File file = null;
+						if (multimedia != null && multimedia.getFilePath() != null) {
+							file = multimediaService.retrieveFile(multimedia.getFilePath());
+						}
+						File insideFolder = new File(
+								imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
+						childFile = new File(insideFolder,
+								exportFlagProblemEventImageMetadata.getProductName() + "_"
+										+ exportFlagProblemEventImageMetadata
+										.getStockId() + extension);
+						if (file != null) {
+							FileUtils.copyFile(file, childFile);
+							writeToZipFile(childFile.toURI(), zipOS);
+						}
 					}
-					File insideFolder = new File(
-							imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
-					childFile = new File(insideFolder,
-							exportFlagProblemEventImageMetadata.getProductName() + "_" + exportFlagProblemEventImageMetadata
-									.getStockId() + extension);
-					if(file != null) {
-						FileUtils.copyFile(file, childFile);
-						writeToZipFile(childFile.toURI(), zipOS);
-					}
+
 				}
 
 			}
 		}
-		zipOS.close();
-		fos.close();
+
+		catch (IOException e) {
+			logger.error("Exception occurred : " + e.getMessage());
+		}
+
+		finally {
+			zipOS.close();
+			fos.close();
+		}
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -683,17 +691,26 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	private void generateCSV(ExportEventDataSummary exportEventDataSummary, URI uri) throws IOException {
+		BufferedWriter writer = null;
+		CSVPrinter csvPrinter = null;
+		try {
+			writer = Files.newBufferedWriter(Paths.get(uri));
+			csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
-		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+	        for (List<Object> rows : exportEventDataSummary.getRowsData()) {
+		        csvPrinter.printRecord(rows);
+		        csvPrinter.printRecord("\n");
+	        }
+        }
 
-		for (List<Object> rows : exportEventDataSummary.getRowsData()) {
-			csvPrinter.printRecord(rows);
-			csvPrinter.printRecord("\n");
+		catch (IOException e) {
+			logger.error("IO Exception occurred " + e.getMessage(), e);
 		}
-		csvPrinter.flush();
-		writer.close();
-		csvPrinter.close();
+		finally {
+	        csvPrinter.flush();
+	        writer.close();
+	        csvPrinter.close();
+        }
 	}
 
 

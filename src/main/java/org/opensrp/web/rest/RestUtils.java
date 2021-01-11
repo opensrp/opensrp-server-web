@@ -184,19 +184,23 @@ public class RestUtils {
 		return null;
 	}
 
-	public static void writeToZipFile(URI uri, ZipOutputStream zipStream) throws FileNotFoundException, IOException {
+	public static void writeToZipFile(URI uri, ZipOutputStream zipStream) {
 		System.out.println("Writing file : '" + uri + "' to zip file");
 		File aFile = new File(uri);
-		FileInputStream fis = new FileInputStream(aFile);
-		ZipEntry zipEntry = new ZipEntry(uri.getPath());
-		zipStream.putNextEntry(zipEntry);
-		byte[] bytes = new byte[1024];
-		int length;
-		while ((length = fis.read(bytes)) >= 0) {
-			zipStream.write(bytes, 0, length);
+		try(FileInputStream fis = new FileInputStream(aFile);) {
+			ZipEntry zipEntry = new ZipEntry(uri.getPath());
+			zipStream.putNextEntry(zipEntry);
+			byte[] bytes = new byte[1024];
+			int length;
+			while ((length = fis.read(bytes)) >= 0) {
+				zipStream.write(bytes, 0, length);
+			}
+
+			zipStream.closeEntry();
 		}
-		zipStream.closeEntry();
-		fis.close();
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
