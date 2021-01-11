@@ -58,7 +58,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
-	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
+	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization,total_records";
 	
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
