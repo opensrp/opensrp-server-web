@@ -70,7 +70,7 @@ public class StockResourceTest extends BaseResourceTest {
 	@Test
 	@Ignore
 	public void shouldFindByProviderId() throws Exception {
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
 		addObjectToRepository(Collections.singletonList(expectedStock), allStocks);
@@ -83,7 +83,7 @@ public class StockResourceTest extends BaseResourceTest {
 
 	@Test
 	public void shouldNotFindStock() throws Exception {
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
 		addObjectToRepository(Collections.singletonList(expectedStock), allStocks);
@@ -95,13 +95,13 @@ public class StockResourceTest extends BaseResourceTest {
 	@Test
 	public void shouldGetAllStocks() throws Exception {
 		String url = BASE_URL + "/getall";
-		Stock expectedStock1 = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock1 = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock expectedStock2 = new Stock(300l, "vaccineTypeId", "transactionType", "providerId1", 3,
+		Stock expectedStock2 = new Stock("300", "vaccineTypeId", "transactionType", "providerId1", 3,
 				new DateTime(10l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(10l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock expectedStock3 = new Stock(400l, "vaccineTypeId", "transactionType", "providerId2", 3,
+		Stock expectedStock3 = new Stock("400", "vaccineTypeId", "transactionType", "providerId2", 3,
 				new DateTime(100l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(100l, DateTimeZone.UTC).getMillis(),
 				223l);
 		List<Stock> expectedStocks = asList(expectedStock1, expectedStock2, expectedStock3);
@@ -118,7 +118,7 @@ public class StockResourceTest extends BaseResourceTest {
 	@Test
 	@Ignore
 	public void shouldCreateValidStock() throws Exception {
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
 		String postData = mapper.writeValueAsString(expectedStock);
@@ -131,7 +131,7 @@ public class StockResourceTest extends BaseResourceTest {
 
 	@Test(expected = NestedServletException.class)
 	public void shouldFailCreateStockWithOutProviderId() throws Exception {
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
 		expectedStock.setProviderid(null);
@@ -143,7 +143,7 @@ public class StockResourceTest extends BaseResourceTest {
 	//TODO: `Stock.class` doesn't have a field call `timestamp`
 	/*@Test(expected = NestedServletException.class)
 	public void shouldFailCreateStockWithOutTimestamp() throws Exception{
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
 		expectedStock.setProviderid(null);
@@ -154,13 +154,13 @@ public class StockResourceTest extends BaseResourceTest {
 
 	@Test
 	public void shouldCreateValidStockUsingAddUrl() throws Exception {
-		Stock expectedStock1 = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock1 = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock expectedStock2 = new Stock(300l, "vaccineTypeId", "transactionType", "providerId1", 3,
+		Stock expectedStock2 = new Stock("300", "vaccineTypeId", "transactionType", "providerId1", 3,
 				new DateTime(10l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(10l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock expectedStock3 = new Stock(400l, "vaccineTypeId", "transactionType", "providerId2", 3,
+		Stock expectedStock3 = new Stock("400", "vaccineTypeId", "transactionType", "providerId2", 3,
 				new DateTime(100l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(100l, DateTimeZone.UTC).getMillis(),
 				223l);
 		List<Stock> expectedStocks = asList(expectedStock1, expectedStock2, expectedStock3);
@@ -178,13 +178,13 @@ public class StockResourceTest extends BaseResourceTest {
 	@Test
 	@Ignore
 	public void shouldUpdateExistingStockUsingAddUrl() throws Exception {
-		Stock expectedStock = new Stock(200l, "vaccineTypeId", "transactionType", "providerId", 3,
+		Stock expectedStock = new Stock("200", "vaccineTypeId", "transactionType", "providerId", 3,
 				new DateTime(0l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(0l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock unchangedStock = new Stock(300l, "vaccineTypeId", "transactionType", "providerId1", 3,
+		Stock unchangedStock = new Stock("300", "vaccineTypeId", "transactionType", "providerId1", 3,
 				new DateTime(10l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(10l, DateTimeZone.UTC).getMillis(),
 				223l);
-		Stock unchangedStock2 = new Stock(400l, "vaccineTypeId", "transactionType", "providerId2", 3,
+		Stock unchangedStock2 = new Stock("400", "vaccineTypeId", "transactionType", "providerId2", 3,
 				new DateTime(100l, DateTimeZone.UTC).getMillis(), "toFrom", new DateTime(100l, DateTimeZone.UTC).getMillis(),
 				223l);
 		List<Stock> stocks = asList(expectedStock, unchangedStock, unchangedStock2);
