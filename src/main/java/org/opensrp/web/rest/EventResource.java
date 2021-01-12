@@ -648,19 +648,19 @@ public class EventResource extends RestResource<Event> {
 		File imagesDirectory = null;
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		String formatted = "";
-		formatted = df.format(new Date());
+		boolean firstTime = firstTimeForImages;
 		if (eventType.equals("flag_problem")) {
 
 			ExportImagesSummary exportImagesSummary =
 					eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
 							Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
 			String imagesDirectoryName;
-			if (firstTimeForImages) {
+			if (firstTime) {
 				formatted = df.format(new Date());
 				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
 				imagesDirectory = new File(imagesDirectoryName + "/");
 				imagesDirectory.mkdirs();
-				firstTimeForImages = false;
+				firstTime = false;
 			}
 
 			File childFile = null;
@@ -693,7 +693,7 @@ public class EventResource extends RestResource<Event> {
 			}
 
 		}
-		return firstTimeForImages;
+		return firstTime;
 	}
 	
 	public void setEventService(EventService eventService) {
