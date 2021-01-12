@@ -325,7 +325,7 @@ public class StockResourceTest {
 	
 	private Stock createStock() {
 		Stock stock = new Stock();
-		stock.setIdentifier(12345l);
+		stock.setIdentifier("12345");
 		stock.setId("ID-123");
 		return stock;
 	}
