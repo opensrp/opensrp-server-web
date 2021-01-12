@@ -470,7 +470,11 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
 		mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/export-data").param("eventTypes", "looks_good,flag_problem")
 				.param("planIdentifier", "15421904649873"))
-				.andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+				.andExpect(status().isOk()).andReturn();
+		verify(eventService).exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
+		verify(eventService).getImagesMetadataForFlagProblemEvent(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
+		verify(multimediaService).retrieveFile(anyString());
+		verify(multimediaService).findByCaseId(anyString());
 	}
 
 
