@@ -282,7 +282,7 @@ public class StockResourceTest {
 		}
 
 		assertEquals(1, response.size());
-		assertEquals(new Long(12345), response.get(0).getIdentifier());
+		assertEquals("12345", response.get(0).getIdentifier());
 
 	}
 
