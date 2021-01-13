@@ -582,6 +582,7 @@ public class EventResource extends RestResource<Event> {
 		boolean firstTime = true;
 
 		try {
+			String tempDirectory = System.getProperty("java.io.tmpdir");
 			for (String eventType : eventTypes) {
 				ExportEventDataSummary exportEventDataSummary = eventService
 						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
@@ -596,13 +597,13 @@ public class EventResource extends RestResource<Event> {
 				formatted = df.format(new Date());
 				File csvFile = null;
 
-				zipFileName = SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
+				zipFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
 				if (firstTime) {
 					fos = new FileOutputStream(zipFileName);
 					zipOS = new ZipOutputStream(fos);
 				}
 
-				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
+				exportDataFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
 				csvFile = new File(exportDataFileName);
 				URI uri = csvFile.toURI();
@@ -623,8 +624,12 @@ public class EventResource extends RestResource<Event> {
 		}
 
 		finally {
-			zipOS.close();
-			fos.close();
+			if (zipOS != null) {
+				zipOS.close();
+			}
+			if (fos != null) {
+				fos.close();
+			}
 		}
 
 		HttpHeaders headers = new HttpHeaders();
@@ -649,6 +654,7 @@ public class EventResource extends RestResource<Event> {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		String formatted = "";
 		boolean firstTime = firstTimeForImages;
+		String tempDirectory = System.getProperty("java.io.tmpdir");
 		if (eventType.equals("flag_problem")) {
 
 			ExportImagesSummary exportImagesSummary =
@@ -657,7 +663,7 @@ public class EventResource extends RestResource<Event> {
 			String imagesDirectoryName;
 			if (firstTime) {
 				formatted = df.format(new Date());
-				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+				imagesDirectoryName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
 				imagesDirectory = new File(imagesDirectoryName + "/");
 				imagesDirectory.mkdirs();
 				firstTime = false;

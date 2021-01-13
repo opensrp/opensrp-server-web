@@ -59,6 +59,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.mockito.Mockito.times;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -440,6 +441,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		Multimedia multimedia = new Multimedia();
 		multimedia.setCaseId("stock-123");
 		multimedia.setOriginalFileName("Midwifery kit.jpg");
+		multimedia.setFilePath("/opt/multimedia/patient_images/ddcaf383-882e-448b-b701-8b72cb0d4d7b_335ef7a3-7f35-58aa-8263-4419464946d8.jpg");
 		List<Object> row = new ArrayList<>();
 		row.add("Location Id");
 		row.add("Location Name");
@@ -470,7 +472,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/export-data").param("eventTypes", "looks_good,flag_problem")
 				.param("planIdentifier", "15421904649873"))
 				.andExpect(status().isOk()).andReturn();
-		verify(eventService).exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
+		verify(eventService, times(2)).exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
 		verify(eventService).getImagesMetadataForFlagProblemEvent(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
 		verify(multimediaService).retrieveFile(anyString());
 		verify(multimediaService).findByCaseId(anyString());
