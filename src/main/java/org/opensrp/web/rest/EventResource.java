@@ -17,26 +17,44 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.rest.RestUtils.writeToZipFile;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.dto.ExportImagesSummary;
+import org.opensrp.dto.ExportEventDataSummary;
+import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+import org.opensrp.service.MultimediaService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
@@ -48,9 +66,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
+import org.opensrp.domain.Multimedia;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -63,6 +83,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
@@ -74,25 +95,30 @@ import com.google.gson.reflect.TypeToken;
 public class EventResource extends RestResource<Event> {
 	
 	private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
-	
+
 	private EventService eventService;
 	
 	private ClientService clientService;
-	
+
+	private MultimediaService multimediaService;
+
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
 	@Value("#{opensrp['opensrp.sync.search.missing.client']}")
 	private boolean searchMissingClients;
-	
+
 	private static final String IS_DELETED = "is_deleted";
-	
+
 	private static final String FALSE = "false";
+
+	private static final String SAMPLE_CSV_FILE = "/";
 	
 	@Autowired
-	public EventResource(ClientService clientService, EventService eventService) {
+	public EventResource(ClientService clientService, EventService eventService, MultimediaService multimediaService) {
 		this.clientService = clientService;
 		this.eventService = eventService;
+		this.multimediaService = multimediaService;
 	}
 	
 	@Override
@@ -537,6 +563,141 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	@GetMapping(value = "/export-data", produces = "application/zip")
+	public ResponseEntity<ByteArrayResource> exportEventData(@RequestParam List<String> eventTypes,
+			@RequestParam String planIdentifier,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) throws IOException {
+
+		FileOutputStream fos = null;
+		ZipOutputStream zipOS = null;
+		String exportDataFileName;
+		String missionName = "";
+		String eventTypeName;
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		String formatted = "";
+		String zipFileName = "";
+		boolean firstTime = true;
+
+		try {
+			String tempDirectory = System.getProperty("java.io.tmpdir");
+			for (String eventType : eventTypes) {
+				ExportEventDataSummary exportEventDataSummary = eventService
+						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
+								Utils.getDateTimeFromString(toDate));
+
+				missionName = exportEventDataSummary != null &&
+						exportEventDataSummary.getMissionName() != null ?
+						exportEventDataSummary.getMissionName().replaceAll("\\s+", "_").toLowerCase() :
+						"";
+				eventTypeName = eventType.replaceAll("\\s+", "_");
+
+				formatted = df.format(new Date());
+				File csvFile = null;
+
+				zipFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
+				if (firstTime) {
+					fos = new FileOutputStream(zipFileName);
+					zipOS = new ZipOutputStream(fos);
+				}
+
+				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
+
+				csvFile = new File(exportDataFileName);
+				if (exportEventDataSummary != null) {
+					generateCSV(exportEventDataSummary, csvFile.getName());
+				}
+				writeToZipFile(csvFile.getName(), zipOS, null);
+				firstTime = false;
+
+				Boolean firstTimeForImages = true;
+				firstTimeForImages = exportImagesAgainstFlagProblemEvent(eventType,planIdentifier,fromDate,toDate,firstTimeForImages, zipOS, missionName);
+
+			}
+		}
+
+		catch (IOException e) {
+			logger.error("Exception occurred : " + e.getMessage());
+		}
+
+		finally {
+			if (zipOS != null) {
+				zipOS.close();
+			}
+			if (fos != null) {
+				fos.close();
+			}
+		}
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+		Path path = Paths.get(zipFileName);
+		byte[] data = Files.readAllBytes(path);
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + path.getFileName().toString())
+				.contentType(MediaType.parseMediaType("application/zip"))
+				.contentLength(data.length)
+				.body(resource);
+	}
+
+	private boolean exportImagesAgainstFlagProblemEvent(String eventType, String planIdentifier, String fromDate, String toDate, boolean firstTimeForImages
+	, ZipOutputStream zipOS, String missionName)
+			throws IOException {
+
+		File imagesDirectory = null;
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		String formatted = "";
+		boolean firstTime = firstTimeForImages;
+		if (eventType.equals("flag_problem")) {
+
+			ExportImagesSummary exportImagesSummary =
+					eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
+							Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+			String imagesDirectoryName;
+			if (firstTime) {
+				formatted = df.format(new Date());
+				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+				imagesDirectory = new File(imagesDirectoryName + "/");
+				imagesDirectory.mkdirs();
+				firstTime = false;
+			}
+
+			File childFile = null;
+			String extension = "";
+			for (ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata : exportImagesSummary
+					.getExportFlagProblemEventImageMetadataList()) {
+				Multimedia multimedia = multimediaService
+						.findByCaseId(exportFlagProblemEventImageMetadata.getStockId() + "_" + planIdentifier);
+				int extensionIndex = multimedia != null && multimedia.getOriginalFileName() != null ?
+						multimedia.getOriginalFileName().indexOf(".") : -1;
+
+				if (extensionIndex != -1) {
+					extension = multimedia.getOriginalFileName().substring(extensionIndex);
+				}
+
+				File file = null;
+				if (multimedia != null && multimedia.getFilePath() != null) {
+					file = multimediaService.retrieveFile(multimedia.getFilePath());
+				}
+				File insideFolder = new File(
+						imagesDirectory.getPath() + "/" + exportFlagProblemEventImageMetadata.getServicePointName());
+				childFile = new File(insideFolder,
+						exportFlagProblemEventImageMetadata.getProductName() + "_"
+								+ exportFlagProblemEventImageMetadata
+								.getStockId() + extension);
+				if (file != null) {
+					FileUtils.copyFile(file, childFile);
+					writeToZipFile(null, zipOS, childFile.getPath());
+				}
+			}
+
+		}
+		return firstTime;
+	}
 	
 	public void setEventService(EventService eventService) {
 		this.eventService = eventService;
@@ -545,5 +706,38 @@ public class EventResource extends RestResource<Event> {
 	public void setClientService(ClientService clientService) {
 		this.clientService = clientService;
 	}
-	
+
+	public void setMultimediaService(MultimediaService multimediaService) {
+		this.multimediaService = multimediaService;
+	}
+
+	private void generateCSV(ExportEventDataSummary exportEventDataSummary, String fileName) throws IOException {
+		BufferedWriter writer = null;
+		CSVPrinter csvPrinter = null;
+		try {
+			writer = Files.newBufferedWriter(Paths.get(fileName));
+			csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+
+	        for (List<Object> rows : exportEventDataSummary.getRowsData()) {
+		        csvPrinter.printRecord(rows);
+		        csvPrinter.printRecord("\n");
+	        }
+        }
+
+		catch (IOException e) {
+			logger.error("IO Exception occurred " + e.getMessage(), e);
+		}
+		finally {
+			if(csvPrinter != null) {
+				csvPrinter.flush();
+				csvPrinter.close();
+			}
+			if(writer != null) {
+				writer.close();
+			}
+
+        }
+	}
+
+
 }
