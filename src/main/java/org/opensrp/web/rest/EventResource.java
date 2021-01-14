@@ -603,14 +603,14 @@ public class EventResource extends RestResource<Event> {
 					zipOS = new ZipOutputStream(fos);
 				}
 
-				exportDataFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
+				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
 				csvFile = new File(exportDataFileName);
 				URI uri = csvFile.toURI();
 				if (exportEventDataSummary != null) {
-					generateCSV(exportEventDataSummary, uri);
+					generateCSV(exportEventDataSummary, csvFile.getName());
 				}
-				writeToZipFile(uri, zipOS);
+				writeToZipFile(csvFile.getName(), zipOS, null);
 				firstTime = false;
 
 				Boolean firstTimeForImages = true;
@@ -663,7 +663,7 @@ public class EventResource extends RestResource<Event> {
 			String imagesDirectoryName;
 			if (firstTime) {
 				formatted = df.format(new Date());
-				imagesDirectoryName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
+				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
 				imagesDirectory = new File(imagesDirectoryName + "/");
 				imagesDirectory.mkdirs();
 				firstTime = false;
@@ -694,7 +694,7 @@ public class EventResource extends RestResource<Event> {
 								.getStockId() + extension);
 				if (file != null) {
 					FileUtils.copyFile(file, childFile);
-					writeToZipFile(childFile.toURI(), zipOS);
+					writeToZipFile(null, zipOS, childFile.getPath());
 				}
 			}
 
@@ -714,11 +714,11 @@ public class EventResource extends RestResource<Event> {
 		this.multimediaService = multimediaService;
 	}
 
-	private void generateCSV(ExportEventDataSummary exportEventDataSummary, URI uri) throws IOException {
+	private void generateCSV(ExportEventDataSummary exportEventDataSummary, String fileName) throws IOException {
 		BufferedWriter writer = null;
 		CSVPrinter csvPrinter = null;
 		try {
-			writer = Files.newBufferedWriter(Paths.get(uri));
+			writer = Files.newBufferedWriter(Paths.get(fileName));
 			csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 
 	        for (List<Object> rows : exportEventDataSummary.getRowsData()) {

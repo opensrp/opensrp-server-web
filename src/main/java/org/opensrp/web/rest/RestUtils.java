@@ -184,11 +184,21 @@ public class RestUtils {
 		return null;
 	}
 
-	public static void writeToZipFile(URI uri, ZipOutputStream zipStream) {
-		System.out.println("Writing file : '" + uri + "' to zip file");
-		File aFile = new File(uri);
-		try(FileInputStream fis = new FileInputStream(aFile);) {
-			ZipEntry zipEntry = new ZipEntry(uri.getPath());
+	public static void writeToZipFile(String fileName, ZipOutputStream zipStream, String filePath) {
+		System.out.println("Writing file : '" + fileName + "' to zip file");
+		File aFile;
+		FileInputStream fis;
+		ZipEntry zipEntry;
+		try{
+			if(fileName != null && !fileName.isEmpty()) {
+				aFile = new File(fileName);
+				fis = new FileInputStream(aFile);
+				zipEntry = new ZipEntry(aFile.getPath());
+			}
+			else {
+				fis = new FileInputStream(filePath);
+				zipEntry = new ZipEntry(filePath);
+			}
 			zipStream.putNextEntry(zipEntry);
 			byte[] bytes = new byte[1024];
 			int length;
