@@ -96,7 +96,7 @@ import com.google.gson.reflect.TypeToken;
 public class EventResource extends RestResource<Event> {
 	
 	private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
-	
+
 	private EventService eventService;
 	
 	private ClientService clientService;
@@ -606,7 +606,6 @@ public class EventResource extends RestResource<Event> {
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
 				csvFile = new File(exportDataFileName);
-				URI uri = csvFile.toURI();
 				if (exportEventDataSummary != null) {
 					generateCSV(exportEventDataSummary, csvFile.getName());
 				}
@@ -654,7 +653,6 @@ public class EventResource extends RestResource<Event> {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		String formatted = "";
 		boolean firstTime = firstTimeForImages;
-		String tempDirectory = System.getProperty("java.io.tmpdir");
 		if (eventType.equals("flag_problem")) {
 
 			ExportImagesSummary exportImagesSummary =

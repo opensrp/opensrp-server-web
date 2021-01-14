@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -184,10 +183,10 @@ public class RestUtils {
 		return null;
 	}
 
-	public static void writeToZipFile(String fileName, ZipOutputStream zipStream, String filePath) {
+	public static void writeToZipFile(String fileName, ZipOutputStream zipStream, String filePath) throws IOException {
 		System.out.println("Writing file : '" + fileName + "' to zip file");
 		File aFile;
-		FileInputStream fis;
+		FileInputStream fis = null;
 		ZipEntry zipEntry;
 		try{
 			if(fileName != null && !fileName.isEmpty()) {
@@ -209,7 +208,12 @@ public class RestUtils {
 			zipStream.closeEntry();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			logger.error("IO EXception occurred: " + e.getMessage());
+		}
+		finally {
+			if (fis != null) {
+				fis.close();
+			}
 		}
 	}
 
