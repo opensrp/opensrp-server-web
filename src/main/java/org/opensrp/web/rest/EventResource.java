@@ -728,9 +728,14 @@ public class EventResource extends RestResource<Event> {
 			logger.error("IO Exception occurred " + e.getMessage(), e);
 		}
 		finally {
-	        csvPrinter.flush();
-	        writer.close();
-	        csvPrinter.close();
+			if(csvPrinter != null) {
+				csvPrinter.flush();
+				csvPrinter.close();
+			}
+			if(writer != null) {
+				writer.close();
+			}
+
         }
 	}
 

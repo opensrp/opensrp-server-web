@@ -184,7 +184,6 @@ public class RestUtils {
 	}
 
 	public static void writeToZipFile(String fileName, ZipOutputStream zipStream, String filePath) throws IOException {
-		System.out.println("Writing file : '" + fileName + "' to zip file");
 		File aFile;
 		FileInputStream fis = null;
 		ZipEntry zipEntry;
@@ -193,10 +192,12 @@ public class RestUtils {
 				aFile = new File(fileName);
 				fis = new FileInputStream(aFile);
 				zipEntry = new ZipEntry(aFile.getPath());
+				logger.info("Writing file : '" + fileName + "' to zip file");
 			}
 			else {
 				fis = new FileInputStream(filePath);
 				zipEntry = new ZipEntry(filePath);
+				logger.info("Writing file : '" + filePath + "' to zip file");
 			}
 			zipStream.putNextEntry(zipEntry);
 			byte[] bytes = new byte[1024];
@@ -208,7 +209,7 @@ public class RestUtils {
 			zipStream.closeEntry();
 		}
 		catch (IOException e) {
-			logger.error("IO EXception occurred: " + e.getMessage());
+			logger.error("IO Exception occurred: " + e.getMessage());
 		}
 		finally {
 			if (fis != null) {
