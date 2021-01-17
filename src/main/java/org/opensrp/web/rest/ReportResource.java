@@ -31,11 +31,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -137,31 +137,26 @@ public class ReportResource {
 	}
 
 	/**
-	 * @param districtName URL encoded name of the district
-	 * @param period       Period to generate report for. Takes the format YYYY-MM
+	 * @param districtId District ID
+	 * @param period     Period to generate report for. Takes the format YYYY-MM
 	 * @param response
 	 * @throws IOException
 	 */
-	@GetMapping(value = "/download/{districtName:.+}/{period:.+}")
-	public void downloadFile(@PathVariable("districtName") String districtName, @PathVariable("period") String period,
-			HttpServletResponse response)
-			throws IOException {
+	@GetMapping(value = "/generate/{districtId:.+}/{period:.+}")
+	public ResponseEntity<HttpStatus> generateReport(@PathVariable("districtId") String districtId,
+			@PathVariable("period") String period,
+			HttpServletResponse response) {
 
-		if (StringUtils.isBlank(districtName)) {
+		if (StringUtils.isBlank(districtId)) {
 			logger.error("Missing district argument");
-			throw new IllegalArgumentException("Missing district");
+			throw new IllegalArgumentException("Missing district ID");
 		}
 
-		String name = StringUtils.capitalize(URLDecoder.decode(districtName.trim(), StandardCharsets.UTF_8.toString()));
-		Map<String, String> filters = new HashMap<>();
-		filters.put("name", name);
-		List<PhysicalLocation> locations = locationService.findLocationsByProperties(false, "", filters);
-		if (locations == null || locations.isEmpty()) {
-			logger.error("District not found: " + name);
-			throw new IllegalArgumentException("District not found: " + name);
+		PhysicalLocation district = locationService.getLocation(districtId, false);
+		if (district == null) {
+			logger.error("District not found: " + districtId);
+			throw new IllegalArgumentException("District not found: " + districtId);
 		}
-		PhysicalLocation district = locations.get(0);
-		String locationName = district.getProperties().getName().toLowerCase().replace(" ", "_");
 
 		if (StringUtils.isBlank(period)) {
 			logger.error("Missing report period");
@@ -178,32 +173,18 @@ public class ReportResource {
 		String year = parts[0];
 		String month = parts[1];
 
-		// generate report filename
 		String templateFilename = "report-template.xlsx";
-		String downloadFilename = String.format("%s-%s-%s-report.xlsx", locationName, year, month);
+		String formattedDistrictName = district.getProperties().getName().toLowerCase().replace(" ", "_");
+		String downloadFilename = String.format("%s-%s-%s-report.xlsx", formattedDistrictName, year, month);
 
-		// downloads directory
 		multiMediaDir = context.getRealPath("/WEB-INF/downloads/");
 		Path path = Paths.get(multiMediaDir, templateFilename);
 
 		// read template
 		Workbook workbook = this.readXLSXTemplate(path.toFile());
 
-		// get the parent (province)
-		List<PhysicalLocation> parents = locationService
-				.findLocationsByIds(false, List.of(district.getProperties().getParentId()));
-		PhysicalLocation province = parents.get(0);
-
-		// get facilities within district
-		List<PhysicalLocation> children = locationService.findLocationByIdWithChildren(false, district.getId(), 1000);
-
-		List<PhysicalLocation> facilities = children.stream().filter(
-				c -> c.getLocationTags()
-						.stream()
-						.anyMatch(t -> t.getName()
-								.equalsIgnoreCase("Facility")
-						)
-		).collect(Collectors.toList());
+		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false);
+		List<PhysicalLocation> facilities = getChildLocationsByLevel(district, "Facility");
 
 		// prepare report data
 		Map<String, Object> data = new HashMap<>();
@@ -224,12 +205,74 @@ public class ReportResource {
 		workbook.removeSheetAt(1);
 
 		Path downloadPath = Paths.get(multiMediaDir, downloadFilename);
-		FileOutputStream fileOut = new FileOutputStream(downloadPath.toFile());
-		workbook.write(fileOut);
-		fileOut.close();
+		FileOutputStream fileOut = null;
+		try {
+			fileOut = new FileOutputStream(downloadPath.toFile());
+			workbook.write(fileOut);
+			fileOut.close();
+			workbook.close();
 
-		// Closing the workbook
-		workbook.close();
+			return new ResponseEntity<>(CREATED);
+		}
+		catch (IOException e) {
+			logger.error("Failed to write workbook to file: " + e.getMessage(), e);
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private List<PhysicalLocation> getChildLocationsByLevel(PhysicalLocation parent, String childLocationLevel) {
+		List<PhysicalLocation> children = locationService.findLocationByIdWithChildren(false, parent.getId(), 1000);
+
+		return children.stream().filter(
+				c -> c.getLocationTags()
+						.stream()
+						.anyMatch(t -> t.getName()
+								.equalsIgnoreCase(childLocationLevel)
+						)
+		).collect(Collectors.toList());
+	}
+
+	/**
+	 * @param districtId District ID
+	 * @param period     Period to generate report for. Takes the format YYYY-MM
+	 * @param response
+	 * @throws IOException
+	 */
+	@GetMapping(value = "/download/{districtId:.+}/{period:.+}")
+	public void downloadFile(@PathVariable("districtId") String districtId, @PathVariable("period") String period,
+			HttpServletResponse response) {
+
+		if (StringUtils.isBlank(districtId)) {
+			logger.error("Missing district argument");
+			throw new IllegalArgumentException("Missing district");
+		}
+
+		PhysicalLocation district = locationService.getLocation(districtId, false);
+		if (district == null) {
+			logger.error("District not found: " + districtId);
+			throw new IllegalArgumentException("District not found" + districtId);
+		}
+
+		if (StringUtils.isBlank(period)) {
+			logger.error("Missing report period");
+			throw new IllegalArgumentException("Missing report period");
+		}
+
+		Pattern pattern = Pattern.compile("^(\\d{4}(-\\d{1,2}))$");
+		if (!pattern.matcher(period).matches()) {
+			logger.error("Invalid report period");
+			throw new IllegalArgumentException("Invalid report period");
+		}
+
+		String[] parts = period.split("-");
+		String year = parts[0];
+		String month = parts[1];
+
+		String formattedDistrictName = district.getProperties().getName().toLowerCase().replace(" ", "_");
+		String downloadFilename = String.format("%s-%s-%s-report.xlsx", formattedDistrictName, year, month);
+
+		multiMediaDir = context.getRealPath("/WEB-INF/downloads/");
+		Path downloadPath = Paths.get(multiMediaDir, downloadFilename);
 
 		if (Files.exists(downloadPath)) {
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -241,9 +284,11 @@ public class ReportResource {
 			}
 			catch (IOException | EncryptedDocumentException e) {
 				logger.error("Failed to download file: " + e.getMessage(), e);
+				throw new IllegalArgumentException("Report could not be downloaded");
 			}
 		} else {
-			logger.error("Download file not found");
+			logger.error("Report not found");
+			throw new IllegalArgumentException("Report not found");
 		}
 	}
 
@@ -604,6 +649,67 @@ public class ReportResource {
 						cellRangeAddress.getLastColumn());
 				sheet.addMergedRegion(newCellRangeAddress);
 			}
+		}
+	}
+
+	public void generateMonthlyDistrictReports() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate startDate = currentDate.plusMonths(1).withDayOfMonth(1);
+		LocalDate endDate = currentDate.plusMonths(1).with(lastDayOfMonth());
+
+		logger.info("Generating district reports: " + startDate.toString() + " to " + endDate.toString());
+
+		List<PhysicalLocation> districts = locationService.findLocationsByTagName(false, "District");
+		for (PhysicalLocation district : districts) {
+			logger.info(district.getProperties().getName() + " district report");
+
+			generateDistrictReport(district, startDate, endDate);
+		}
+	}
+
+	private void generateDistrictReport(PhysicalLocation district, LocalDate startDate, LocalDate endDate) {
+		String templateFilename = "report-template.xlsx";
+		multiMediaDir = context.getRealPath("/WEB-INF/downloads/");
+		Path path = Paths.get(multiMediaDir, templateFilename);
+
+		// read template
+		Workbook workbook = this.readXLSXTemplate(path.toFile());
+
+		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false);
+		List<PhysicalLocation> facilities = getChildLocationsByLevel(district, "Facility");
+
+		int month = startDate.getMonth().getValue();
+		int year = startDate.getYear();
+
+		// prepare report data
+		Map<String, Object> data = new HashMap<>();
+		data.put(PROVINCE, province.getProperties().getName());
+		data.put(DISTRICT, district.getProperties().getName());
+		data.put(MONTH, month);
+		data.put(YEAR, year);
+		data.put(DATE_FROM, startDate);
+		data.put(DATE_TO, endDate);
+		data.put(FACILITIES_COUNT, facilities.size());
+
+		String formattedDistrictName = district.getProperties().getName().toLowerCase().replace(" ", "_");
+		String downloadFilename = String.format("%s-%s-%s-report.xlsx", formattedDistrictName, year, month);
+
+		districtReports = new ArrayList<>();
+		addFacilitySheets(workbook, facilities, data);
+		populateDistrictSheet(workbook, data);
+
+		// remove the template district sheet
+		workbook.removeSheetAt(1);
+
+		try {
+			Path downloadPath = Paths.get(multiMediaDir, downloadFilename);
+			FileOutputStream fileOut = new FileOutputStream(downloadPath.toFile());
+			workbook.write(fileOut);
+			fileOut.close();
+			workbook.close();
+		}
+		catch (IOException e) {
+			logger.error("Failed to write workbook to file", e);
 		}
 	}
 }
