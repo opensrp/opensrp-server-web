@@ -135,7 +135,7 @@ public class SearchResource extends RestResource<Client> {
 
 		List<String> clientBaseEntityIds = getClientBaseEntityIdsByContactPhoneNumber(contactPhoneNumber);
 
-		List<Client> eventChildren = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientBaseEntityIds);
+		List<Client> eventChildren = clientService.findGlobalByFieldValue(BaseEntity.BASE_ENTITY_ID, clientBaseEntityIds);
 
 		children = SearchHelper.intersection(children, eventChildren);// Search conjunction is "AND" find intersection
 
@@ -151,7 +151,7 @@ public class SearchResource extends RestResource<Client> {
 				}
 			}
 
-			linkedMothers = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
+			linkedMothers = clientService.findGlobalByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
 
 		}
 
@@ -159,7 +159,7 @@ public class SearchResource extends RestResource<Client> {
 
 		if (!mothers.isEmpty()) {
 			for (Client client : mothers) {
-				linkedChildren.addAll(clientService.findByRelationship(client.getBaseEntityId()));
+				linkedChildren.addAll(clientService.findGlobalByRelationship(client.getBaseEntityId()));
 			}
 		}
 
