@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.domain.Multimedia;
-import org.opensrp.domain.ProductCatalogue;
+import org.smartregister.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
 import org.opensrp.service.MultimediaService;
@@ -97,7 +97,7 @@ public class ProductCatalogueResourceTest {
 		productCatalogue.setUniqueId(1l);
 		List<ProductCatalogue> productCatalogues = new ArrayList<>();
 		productCatalogues.add(productCatalogue);
-		when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class)))
+		when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class), anyString()))
 				.thenReturn(productCatalogues);
 		MvcResult result = mockMvc.perform(get(BASE_URL))
 				.andExpect(status().isOk())
@@ -196,7 +196,7 @@ public class ProductCatalogueResourceTest {
 	public void testGetByUniqueId() throws Exception {
 		ProductCatalogue productCatalogue = createProductCatalog();
 		productCatalogue.setUniqueId(1l);
-		when(productCatalogueService.getProductCatalogue(anyLong()))
+		when(productCatalogueService.getProductCatalogue(anyLong(), anyString()))
 				.thenReturn(productCatalogue);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/1"))
 				.andExpect(status().isOk())

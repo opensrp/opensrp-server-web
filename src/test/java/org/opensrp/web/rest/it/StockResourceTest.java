@@ -18,7 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opensrp.domain.Stock;
+import org.smartregister.domain.Stock;
 import org.opensrp.repository.postgres.StocksRepositoryImpl;
 import org.opensrp.web.rest.StockResource;
 import org.springframework.beans.factory.annotation.Autowired;
