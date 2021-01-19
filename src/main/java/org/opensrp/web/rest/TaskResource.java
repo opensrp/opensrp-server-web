@@ -12,6 +12,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -292,16 +294,17 @@ public class TaskResource {
 	public ResponseEntity<String> getOptionalTasksWithCount(@Valid TaskSearchBean taskSearchBean) {
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+		Map<String, Object> response = new HashMap<>();
 		int taskCount = taskService.findTaskCountBySearchBean(taskSearchBean);
-		headers.add(TOTAL_RECORDS, String.valueOf(taskCount));
 		List<Task> tasks;
 		if (taskSearchBean != null && taskSearchBean.isReturnTaskCountOnly()) {
 			tasks = new ArrayList<>();
 		} else {
 			tasks = taskService.getTasksBySearchBean(taskSearchBean);
 		}
-
-		return new ResponseEntity<>(gson.toJson(tasks), headers, HttpStatus.OK);
+		response.put("tasks", tasks);
+		response.put(TOTAL_RECORDS, taskCount);
+		return new ResponseEntity<>(gson.toJson(response), headers, HttpStatus.OK);
 	}
 	
 	/**

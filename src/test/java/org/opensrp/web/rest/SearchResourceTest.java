@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opensrp.repository.PlanRepository;
 import org.opensrp.service.TaskGenerator;
+import org.opensrp.service.ExportEventDataMapper;
 import org.smartregister.domain.Client;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
@@ -38,6 +39,8 @@ public class SearchResourceTest {
 	
 	private EventService eventService;
 
+	private ExportEventDataMapper exportEventDataMapper;
+
 
 	private TaskGenerator taskGenerator;
 
@@ -51,7 +54,7 @@ public class SearchResourceTest {
 
 		searchService = Mockito.spy(new SearchService(searchRepository));
 		clientService = Mockito.spy(new ClientService(clientRepository));
-		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository));
+		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository, exportEventDataMapper));
 		
 	}
 	

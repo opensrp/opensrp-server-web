@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -222,7 +221,7 @@ public class SettingResourceTest {
 	public void testPostSaveSetting() throws Exception {
 		String SETTINGS_JSON = "{\"settingConfigurations\":[\"Client1\"]}";
 
-		when(settingService.saveSetting(Matchers.any(String.class))).thenReturn("ID-12345");
+		when(settingService.saveSetting(any(String.class))).thenReturn("ID-12345");
 		MvcResult mvcResult = this.mockMvc.perform(
 				post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(SETTINGS_JSON.getBytes())
 						.accept(MediaType.APPLICATION_JSON))
@@ -267,7 +266,6 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).addSettings(settingConfigurationArgumentCaptor.capture());
 		verify(settingRepository, Mockito.times(1)).get(documentId);
-		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 
@@ -290,7 +288,6 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).get(documentId);
 		verify(settingRepository, Mockito.times(1)).update(settingConfigurationArgumentCaptor.capture());
-		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 

@@ -15,6 +15,7 @@ import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,12 +33,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
 import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
+
+import org.opensrp.domain.Multimedia;
+import org.opensrp.dto.ExportEventDataSummary;
+import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
+import org.opensrp.dto.ExportImagesSummary;
+import org.opensrp.service.MultimediaService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -51,6 +59,8 @@ import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.mockito.Mockito.times;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -63,6 +73,8 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
     private EventService eventService;
 
 	private ClientService clientService;
+
+	private MultimediaService multimediaService;
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -110,9 +122,11 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
     public void setUp() {
         eventService = mock(EventService.class);
         clientService = mock(ClientService.class);
+        multimediaService = mock(MultimediaService.class);
         eventResource = webApplicationContext.getBean(EventResource.class);
         eventResource.setEventService(eventService);
         eventResource.setClientService(clientService);
+        eventResource.setMultimediaService(multimediaService);
 		eventResource.setObjectMapper(mapper);
     }
 
@@ -447,6 +461,49 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(5));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+	}
+
+	@Test
+	public void testExportEventData() throws Exception {
+		ExportEventDataSummary exportEventDataSummary = new ExportEventDataSummary();
+		Multimedia multimedia = new Multimedia();
+		multimedia.setCaseId("stock-123");
+		multimedia.setOriginalFileName("Midwifery kit.jpg");
+		multimedia.setFilePath("/opt/multimedia/patient_images/ddcaf383-882e-448b-b701-8b72cb0d4d7b_335ef7a3-7f35-58aa-8263-4419464946d8.jpg");
+		List<Object> row = new ArrayList<>();
+		row.add("Location Id");
+		row.add("Location Name");
+		List<List<Object>> rowsData = new ArrayList<>();
+		rowsData.add(row);
+		exportEventDataSummary.setMissionName("EUSM Mission");
+		exportEventDataSummary.setRowsData(rowsData);
+		ExportImagesSummary exportImagesSummary = new ExportImagesSummary();
+		Set<String> servicePoints = new HashSet<>();
+		servicePoints.add("Location 1");
+		exportImagesSummary.setServicePoints(servicePoints);
+		ExportFlagProblemEventImageMetadata exportFlagProblemEventImageMetadata = new ExportFlagProblemEventImageMetadata();
+		exportFlagProblemEventImageMetadata.setServicePointName("location abc");
+		exportFlagProblemEventImageMetadata.setStockId("stock-123");
+		exportFlagProblemEventImageMetadata.setProductName("Midwifery Kit");
+		exportImagesSummary
+				.setExportFlagProblemEventImageMetadataList(Collections.singletonList(exportFlagProblemEventImageMetadata));
+
+		String path = "src/test/resources/sample/Midwifery Kit.jpeg";
+		File imageFile = new File(path);
+		when(eventService.exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class)))
+				.thenReturn(exportEventDataSummary);
+		when(eventService
+				.getImagesMetadataForFlagProblemEvent(anyString(), anyString(), nullable(Date.class), nullable(Date.class)))
+				.thenReturn(exportImagesSummary);
+		when(multimediaService.retrieveFile(anyString())).thenReturn(imageFile);
+		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+		mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/export-data").param("eventTypes", "looks_good,flag_problem")
+				.param("planIdentifier", "15421904649873"))
+				.andExpect(status().isOk()).andReturn();
+		verify(eventService, times(2)).exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
+		verify(eventService).getImagesMetadataForFlagProblemEvent(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
+		verify(multimediaService).retrieveFile(anyString());
+		verify(multimediaService).findByCaseId(anyString());
 	}
 
 

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -99,6 +102,8 @@ public class TaskResourceTest {
 	private DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HHmm");
 	
 	private org.opensrp.web.rest.v2.TaskResource taskResourceV2 = new org.opensrp.web.rest.v2.TaskResource();
+
+	protected ObjectMapper mapper = new ObjectMapper();
 	
 	@Before
 	public void setUp() {
@@ -473,7 +478,7 @@ public class TaskResourceTest {
 	public void testGetOptionalTasksWithCount() throws Exception {
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(getTask());
-		int totalRecords = 5;
+		int totalRecords = 1;
 		when(taskService.getTasksBySearchBean(any(TaskSearchBean.class))).thenReturn(tasks);
 		when(taskService.findTaskCountBySearchBean(any(TaskSearchBean.class))).thenReturn(totalRecords);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/search")
@@ -483,10 +488,13 @@ public class TaskResourceTest {
 		verify(taskService, times(1)).getTasksBySearchBean(any(TaskSearchBean.class));
 		verify(taskService, times(1)).findTaskCountBySearchBean(any(TaskSearchBean.class));
 		verifyNoMoreInteractions(taskService);
-		JSONArray jsonreponse = new JSONArray(result.getResponse().getContentAsString());
-		assertEquals(1, jsonreponse.length());
-		int actualTotalRecords = Integer.parseInt(result.getResponse().getHeader("total_records"));
-		assertEquals(totalRecords, actualTotalRecords);
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+		assertEquals(1, actualObj.get("total_records").asInt());
+		assertEquals(1, actualObj.get("tasks").size());
 	}
 	
 }
