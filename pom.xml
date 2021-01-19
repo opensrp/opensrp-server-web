@@ -862,5 +862,11 @@
                 <openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
             </properties>
         </profile>
+        <profile>
+            <id>district-report</id>
+            <properties>
+                <district.report.generation.enabled>district-report</district.report.generation.enabled>
+            </properties>
+        </profile>
     </profiles>
 </project>
