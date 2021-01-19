@@ -474,8 +474,8 @@ public class ReportResource {
 	 * @param data     Data to be populated in report
 	 */
 	private void populateFacilitySheet(Sheet sheet, PhysicalLocation facility, Map<String, Object> data) {
-		DateTime dateFrom = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime(data.get(DATE_FROM).toString());
-		DateTime dateTo = DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime(data.get(DATE_TO).toString());
+		DateTime dateFrom = DateTimeFormat.forPattern("YYYY-MM-dd").parseDateTime(data.get(DATE_FROM).toString());
+		DateTime dateTo = DateTimeFormat.forPattern("YYYY-MM-dd").parseDateTime(data.get(DATE_TO).toString());
 
 		Row row = sheet.getRow(6);
 		Cell cell = row.getCell(1);
@@ -654,14 +654,14 @@ public class ReportResource {
 
 	public void generateMonthlyDistrictReports() {
 		LocalDate currentDate = LocalDate.now();
-		LocalDate startDate = currentDate.plusMonths(1).withDayOfMonth(1);
-		LocalDate endDate = currentDate.plusMonths(1).with(lastDayOfMonth());
+		LocalDate startDate = currentDate.minusMonths(1).withDayOfMonth(1);
+		LocalDate endDate = currentDate.minusMonths(1).with(lastDayOfMonth());
 
 		logger.info("Generating district reports: " + startDate.toString() + " to " + endDate.toString());
 
 		List<PhysicalLocation> districts = locationService.findLocationsByTagName(false, "District");
 		for (PhysicalLocation district : districts) {
-			logger.info(district.getProperties().getName() + " district report");
+			logger.info(district.getId() + " - " + district.getProperties().getName() + " district report");
 
 			generateDistrictReport(district, startDate, endDate);
 		}
