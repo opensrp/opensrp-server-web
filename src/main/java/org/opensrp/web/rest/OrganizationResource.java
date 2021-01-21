@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -244,6 +245,7 @@ public class OrganizationResource {
 			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
 			            Collections.singletonList(UserController.JURISDICTION), false)
 			        .stream()
+			        .filter(plan->plan.getStatus().equals(PlanStatus.ACTIVE))
 			        .flatMap(plan -> plan.getJurisdiction().stream())
 			        .map(Jurisdiction::getCode)
 			        .collect(Collectors.toSet());
