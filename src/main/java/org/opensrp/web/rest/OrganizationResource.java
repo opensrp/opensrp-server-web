@@ -11,6 +11,7 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -250,7 +251,7 @@ public class OrganizationResource {
 			        .map(Jurisdiction::getCode)
 			        .collect(Collectors.toSet());
 		
-			Set<PhysicalLocation> planLocations = new HashSet<>(
+			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty()? Collections.emptySet():
 			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
 		}

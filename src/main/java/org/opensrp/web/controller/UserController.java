@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -220,7 +221,8 @@ public class UserController {
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
 				/** @formatter:on*/	
-				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+				Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty() ? Collections.emptySet()
+				        : locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 				jurisdictions.retainAll(planLocations);		
 			}
 			
