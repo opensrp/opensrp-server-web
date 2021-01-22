@@ -437,18 +437,15 @@ public class OrganizationResourceTest {
 	public void testGetUserAssignedLocationsAndPlansWithPlansShouldReturnActivePlansOnly() throws Exception {
 		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		List<Long> ids = Arrays.asList(123l, 124l);
-
+		
 		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
 		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
 		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
 		
-		List<String> planIds=assignments.stream().map(a->a.getPlanId()).collect(Collectors.toList());
-		List<PlanDefinition> plans=getPlans(assignments);
-		when(planService
-	        .getPlansByIdsReturnOptionalFields(planIds,
-	            Collections.singletonList(UserController.JURISDICTION), false)).thenReturn(plans);
-		
+		List<String> planIds = assignments.stream().map(a -> a.getPlanId()).collect(Collectors.toList());
+		List<PlanDefinition> plans = getPlans(assignments);
+		when(planService.getPlansByIdsReturnOptionalFields(any(), any(), eq(false))).thenReturn(plans);
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().setName("Vilage123");
@@ -479,13 +476,15 @@ public class OrganizationResourceTest {
 		assertEquals(2, userAssignment.getJurisdictions().size());
 		assertEquals(5, userAssignment.getPlans().size());
 		
-		Set<String> activePlans=plans.stream().filter(p->p.getStatus().equals(PlanStatus.ACTIVE)).map(p->p.getIdentifier()).collect(Collectors.toSet());
-		assertTrue(activePlans.size()< 5);
+		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
+		        .map(p -> p.getIdentifier()).collect(Collectors.toSet());
+		assertTrue(activePlans.size() < 5);
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
-		Set<String> inActivePlans=new HashSet<>(planIds);
+		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);
-
-		verify(planService).getPlansByIdsReturnOptionalFields(any(),any(),ArgumentMatchers.anyBoolean());
+		
+		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
+		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS)), eq(false));
 		
 	}
 	
@@ -546,7 +545,7 @@ public class OrganizationResourceTest {
 			PlanDefinition plan = new PlanDefinition();
 			plan.setIdentifier(al.getPlanId());
 			plan.setJurisdiction(Collections.singletonList(new Jurisdiction(al.getJurisdictionId())));
-			plan.setStatus(random.nextBoolean()?PlanStatus.ACTIVE:PlanStatus.COMPLETED);
+			plan.setStatus(random.nextBoolean() ? PlanStatus.ACTIVE : PlanStatus.COMPLETED);
 			return plan;
 		}).collect(Collectors.toList());
 		
