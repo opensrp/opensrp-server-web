@@ -353,7 +353,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	    Client client = createClient();
 	    Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
@@ -366,7 +366,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	public void testSaveThrowsExceptionFromClientService() throws Exception {
 		Event event = createEvent();
 		doThrow(new IllegalArgumentException()).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
@@ -380,7 +380,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
     	Client client = createClient();
 		Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doThrow(new IllegalArgumentException()).when(eventService).addorUpdateEvent(any(Event.class), anyString());
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
