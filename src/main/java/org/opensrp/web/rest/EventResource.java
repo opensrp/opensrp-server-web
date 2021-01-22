@@ -377,8 +377,8 @@ public class EventResource extends RestResource<Event> {
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				for (Event event : events) {
 					try {
-						event = eventService.processOutOfArea(event, authentication.getName());
-						eventService.addorUpdateEvent(event);
+						event = eventService.processOutOfArea(event);
+						eventService.addorUpdateEvent(event,authentication.getName());
 					}
 					catch (Exception e) {
 						logger.error(
