@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -158,7 +159,7 @@ public class UploadControllerTest {
 
 		// verify data was created and inserted
 		verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
-		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class));
+		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class),ArgumentMatchers.anyString());
 
 		// verify file was saved
 		verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());

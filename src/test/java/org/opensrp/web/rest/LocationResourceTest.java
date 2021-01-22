@@ -41,6 +41,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -146,12 +147,12 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueId() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenReturn(createLocation());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN,false)).thenReturn(createLocation());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN,false);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(parentJson, result.getResponse().getContentAsString());
 
@@ -159,10 +160,10 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN,false)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isInternalServerError());
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN,false);
 		verifyNoMoreInteractions(locationService);
 
 	}
@@ -765,7 +766,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllLocations() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
-		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt(),ArgumentMatchers.eq(false)))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")
@@ -774,7 +775,7 @@ public class LocationResourceTest {
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findAllLocations(anyBoolean(), anyLong(),
-				anyInt());
+				anyInt(),ArgumentMatchers.eq(false));
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}

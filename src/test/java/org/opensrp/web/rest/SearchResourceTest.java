@@ -57,7 +57,7 @@ public class SearchResourceTest {
 		searchRepository = Mockito.mock(SearchRepository.class);
 		searchService = Mockito.spy(new SearchService(searchRepository));
 		clientService = Mockito.spy(new ClientService(clientRepository));
-		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository));
+		eventService = Mockito.spy(new EventService(eventsRepository, clientService,taskGenerator,planRepository,null));
 		
 	}
 	
