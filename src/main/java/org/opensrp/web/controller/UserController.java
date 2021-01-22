@@ -7,8 +7,8 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +71,8 @@ public class UserController {
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
 	public static final String JURISDICTION="jurisdiction";
+	
+	public static final String STATUS="status";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -211,9 +213,9 @@ public class UserController {
 				/** @formatter:off*/
 				Set<String> planLocationIds = planService
 				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-				            Collections.singletonList(JURISDICTION), false)
+				        	Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
 				        .stream()
-				        .filter(plan->plan.getStatus().equals(PlanStatus.ACTIVE))
+				        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
 				        .flatMap(plan -> plan.getJurisdiction().stream())
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
