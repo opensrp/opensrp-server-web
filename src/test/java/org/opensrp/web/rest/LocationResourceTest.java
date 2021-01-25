@@ -156,12 +156,12 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueId() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenReturn(createLocation());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN, false)).thenReturn(createLocation());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN, false);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(parentJson, result.getResponse().getContentAsString());
 
@@ -169,10 +169,10 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN,false)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isInternalServerError());
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN, false);
 		verifyNoMoreInteractions(locationService);
 
 	}
@@ -774,7 +774,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllLocations() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
-		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt(), anyBoolean()))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")
@@ -782,8 +782,7 @@ public class LocationResourceTest {
 						.param(LocationResource.RETURN_GEOMETRY, "true")
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).findAllLocations(anyBoolean(), anyLong(),
-				anyInt());
+		verify(locationService).findAllLocations(anyBoolean(), anyLong(), anyInt(), anyBoolean());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}

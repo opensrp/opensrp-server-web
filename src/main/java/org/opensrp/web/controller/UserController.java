@@ -7,6 +7,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -70,6 +72,8 @@ public class UserController {
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
 	public static final String JURISDICTION="jurisdiction";
+	
+	public static final String STATUS="status";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -210,13 +214,15 @@ public class UserController {
 				/** @formatter:off*/
 				Set<String> planLocationIds = planService
 				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-				            Collections.singletonList(JURISDICTION), false)
+				        	Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
 				        .stream()
+				        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
 				        .flatMap(plan -> plan.getJurisdiction().stream())
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
 				/** @formatter:on*/	
-				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+				Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty() ? Collections.emptySet()
+				        : locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 				jurisdictions.retainAll(planLocations);		
 			}
 			

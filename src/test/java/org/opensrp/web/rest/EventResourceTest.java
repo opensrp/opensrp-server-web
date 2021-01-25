@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.doThrow;
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
@@ -352,8 +353,35 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	    Client client = createClient();
 	    Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class), anyString());
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
+		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
+		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
+		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Family Member Registration");
+	}
+
+	@Test
+	public void testSaveThrowsExceptionFromClientService() throws Exception {
+		Event event = createEvent();
+		doThrow(new IllegalArgumentException()).when(clientService).addorUpdate(any(Client.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
+		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
+		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
+		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Family Member Registration");
+	}
+
+	@Test
+	public void testSaveThrowsExceptionFromEventService() throws Exception {
+    	Client client = createClient();
+		Event event = createEvent();
+		doReturn(client).when(clientService).addorUpdate(any(Client.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doThrow(new IllegalArgumentException()).when(eventService).addorUpdateEvent(any(Event.class), anyString());
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
 		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
