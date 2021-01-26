@@ -341,22 +341,13 @@ public class EventResource extends RestResource<Event> {
 	                                        @RequestParam(required = false) String eventType,
 	                                        @RequestParam(required = false) Integer limit)
 	    throws JsonProcessingException {
-		
-		try {
+
 			EventSearchBean eventSearchBean = new EventSearchBean();
 			eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 			eventSearchBean.setEventType(eventType);
 			return new ResponseEntity<>(
 			        objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false)),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-			
-		}
-		catch (Exception e) {
-			EventSyncBean response = new EventSyncBean();
-			response.setMsg("Error occurred");
-			logger.error("", e);
-			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
-		}
 	}
 	
 	/**
@@ -391,52 +382,26 @@ public class EventResource extends RestResource<Event> {
 	
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
-		try {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("clients") && !syncData.has("events")) {
-				return new ResponseEntity<>(BAD_REQUEST);
-			}
-			
-			if (syncData.has("clients")) {
-				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
-				    new TypeToken<ArrayList<Client>>() {}.getType());
-				for (Client client : clients) {
-					try {
-						clientService.addorUpdate(client);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-				
-			}
-			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
-				    new TypeToken<ArrayList<Event>>() {}.getType());
-				for (Event event : events) {
-					try {
-						event = eventService.processOutOfArea(event, RestUtils.currentUser(authentication).getUsername());
-						eventService.addorUpdateEvent(event);
-					}
-					catch (Exception e) {
-						logger.error(
-						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
-						            : event.getBaseEntityId() + " failed to sync",
-						    e);
-					}
-				}
-			}
-			
-		}
-		catch (
-		
-		Exception e) {
-			logger.error("Sync data processing failed with exception {0}.- ", e.getMessage(), e);
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("clients") && !syncData.has("events")) {
+			return new ResponseEntity<>(BAD_REQUEST);
 		}
 
+		if (syncData.has("clients")) {
+			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
+			    new TypeToken<ArrayList<Client>>() {}.getType());
+			for (Client client : clients) {
+				clientService.addorUpdate(client);
+			}
+		}
+		if (syncData.has("events")) {
+			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
+			    new TypeToken<ArrayList<Event>>() {}.getType());
+			for (Event event : events) {
+				event = eventService.processOutOfArea(event, RestUtils.currentUser(authentication).getUsername());
+				eventService.addorUpdateEvent(event);
+			}
+		}
 		return new ResponseEntity<>(CREATED);
 	}
 	
