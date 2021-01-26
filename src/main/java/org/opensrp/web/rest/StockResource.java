@@ -275,14 +275,38 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, value = "/inventory/validate")
+	public ResponseEntity validateBulkInventoryData(@RequestParam("file") MultipartFile file)
+			throws IOException {
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.validateBulkInventoryData(csvClients);
+
+		String timestamp = String.valueOf(new Date().getTime());
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
+
+		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
+			return ResponseEntity.badRequest()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		} else {
+			Map<String, Object> response = new HashMap<String, Object>();
+			response.put("rowCount", csvBulkImportDataSummary.getNumberOfCsvRows());
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+	}
+
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, value = "/import/inventory")
 	public ResponseEntity importInventoryData(@RequestParam("file") MultipartFile file)
 			throws IOException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
-				.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
