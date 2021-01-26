@@ -113,7 +113,7 @@ public class SearchResource extends RestResource<Client> {
 
 		if (childSearchEntity.isValid()) {
 			searchBean = childSearchEntity.getClientSearchBean();
-			children = searchService.searchClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
+			children = searchService.searchGlobalClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
 			    searchBean.getLastName(), childSearchEntity.getLimit());
 		}
 
@@ -125,7 +125,7 @@ public class SearchResource extends RestResource<Client> {
 
 		if (motherSearchEntity.isValid()) {
 			motherSearchBean = motherSearchEntity.getClientSearchBean();
-			mothers = searchService.searchClient(motherSearchBean, motherSearchBean.getFirstName(),
+			mothers = searchService.searchGlobalClient(motherSearchBean, motherSearchBean.getFirstName(),
 			    motherSearchBean.getMiddleName(), motherSearchBean.getLastName(), motherSearchEntity.getLimit());
 		}
 
