@@ -193,7 +193,7 @@ public class UserController {
 		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
-		Set<PhysicalLocation> jurisdictions = null;
+		final Set<PhysicalLocation> jurisdictions =  new HashSet<>();
 		Set<String> locationIds = new HashSet<>();
 		Set<String> planIdentifiers = new HashSet<>();
 		try {
@@ -208,7 +208,7 @@ public class UserController {
 					planIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
+			jurisdictions.addAll(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
 			
 			if (!planIdentifiers.isEmpty()) {
 				/** @formatter:off*/
@@ -255,10 +255,18 @@ public class UserController {
 		
 		JSONArray locations = new JSONArray();
 		
+		/** @formatter:off*/
+		PhysicalLocation defaultLocationId = jurisdictions
+				.stream()
+				.filter(j -> locationIds.contains(j.getId()))
+				.findFirst()
+				.get();
+		/** @formatter:on*/
+		
 		Set<String> locationParents = new HashSet<>();
 		for (PhysicalLocation jurisdiction : jurisdictions) {
 			JSONObject teamLocation = new JSONObject();
-			teamLocation.put("uuid", locationIds.iterator().next());
+			teamLocation.put("uuid",defaultLocationId);
 			teamLocation.put("name", jurisdiction.getProperties().getName());
 			teamLocation.put("display", jurisdiction.getProperties().getName());
 			locations.put(teamLocation);
