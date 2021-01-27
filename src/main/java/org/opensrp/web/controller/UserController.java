@@ -246,6 +246,7 @@ public class UserController {
 		teamMemberJson.put("uuid", practionerOrganizationIds.left.getUserId());
 		
 		JSONObject teamJson = new JSONObject();
+		JSONObject teamLocationJson = new JSONObject();
 		// TODO populate organizations if user has many organizations
 		Organization organization = organizationService.getOrganization(practionerOrganizationIds.right.get(0));
 		teamJson.put("teamName", organization.getName());
@@ -256,25 +257,28 @@ public class UserController {
 		JSONArray locations = new JSONArray();
 		
 		/** @formatter:off*/
-		PhysicalLocation defaultLocationId = jurisdictions
+		String defaultLocationId = jurisdictions
 				.stream()
 				.filter(j -> locationIds.contains(j.getId()))
 				.findFirst()
-				.get();
+				.get().getId();
 		/** @formatter:on*/
 		
 		Set<String> locationParents = new HashSet<>();
 		for (PhysicalLocation jurisdiction : jurisdictions) {
-			JSONObject teamLocation = new JSONObject();
-			teamLocation.put("uuid",defaultLocationId);
-			teamLocation.put("name", jurisdiction.getProperties().getName());
-			teamLocation.put("display", jurisdiction.getProperties().getName());
-			locations.put(teamLocation);
+			JSONObject locationJson = new JSONObject();
+			locationJson.put("uuid",jurisdiction.getId());
+			locationJson.put("name", jurisdiction.getProperties().getName());
+			locationJson.put("display", jurisdiction.getProperties().getName());
+			locations.put(locationJson);
 			locationParents.add(jurisdiction.getProperties().getParentId());
+			if(jurisdiction.getId().equals(defaultLocationId)) {
+				teamLocationJson=locationJson;
+			}
 		}
 		
 		//team location is still returned as 1 object
-		teamJson.put("location", locations.getJSONObject(0));
+		teamJson.put("location", teamLocationJson);
 		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
 		
