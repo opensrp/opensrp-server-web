@@ -105,11 +105,6 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>spring-libs-release</id>
-			<name>Spring Libs Maven Release Repository</name>
-			<url>https://repo.spring.io/libs-release/</url>
-		</repository>
 	</repositories>
 
 	<dependencies>

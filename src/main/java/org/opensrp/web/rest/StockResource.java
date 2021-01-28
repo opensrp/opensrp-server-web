@@ -37,8 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.domain.Inventory;
-import org.opensrp.domain.Stock;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
@@ -278,14 +278,38 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, value = "/inventory/validate")
+	public ResponseEntity validateBulkInventoryData(@RequestParam("file") MultipartFile file)
+			throws IOException {
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.validateBulkInventoryData(csvClients);
+
+		String timestamp = String.valueOf(new Date().getTime());
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
+
+		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
+			return ResponseEntity.badRequest()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		} else {
+			Map<String, Object> response = new HashMap<String, Object>();
+			response.put("rowCount", csvBulkImportDataSummary.getNumberOfCsvRows());
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
+	}
+
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
 			MediaType.APPLICATION_JSON_VALUE }, value = "/import/inventory")
 	public ResponseEntity importInventoryData(@RequestParam("file") MultipartFile file)
 			throws IOException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
-				.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
@@ -305,6 +329,39 @@ public class StockResource extends RestResource<Stock> {
 					.contentType(MediaType.parseMediaType("text/csv"))
 					.body(new FileSystemResource(csvFile));
 		}
+	}
+
+	@PostMapping(value = "/sync", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	protected ResponseEntity<String> syncV2(@RequestBody StockSearchBean stockSearchBean) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		try {
+
+			return syncStocks(stockSearchBean);
+
+		}
+		catch (Exception e) {
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private ResponseEntity<String> syncStocks(StockSearchBean stockSearchBean) {
+		Map<String, Object> response = new HashMap<String, Object>();
+		List<Stock> stocks = new ArrayList<Stock>();
+		Integer limit = stockSearchBean.getLimit();
+		if (limit == null || limit.intValue() == 0) {
+			limit = 25;
+		}
+		stockSearchBean.setLimit(limit);
+		stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", stockSearchBean.getLimit());
+		JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+		}.getType());
+
+		response.put("stocks", stocksArray);
+
+		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {

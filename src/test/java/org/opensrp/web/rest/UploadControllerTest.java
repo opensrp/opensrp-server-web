@@ -63,6 +63,7 @@ import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -165,7 +166,8 @@ public class UploadControllerTest {
 
 		// verify data was created and inserted
 		verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
-		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class));
+		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class),
+				anyString());
 
 		// verify file was saved
 		verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());

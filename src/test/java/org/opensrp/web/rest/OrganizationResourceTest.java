@@ -27,7 +27,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
@@ -39,6 +41,7 @@ import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -56,10 +59,14 @@ import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
+import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
+import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
@@ -282,11 +289,12 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationAndPlan() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
-		when(organizationService.findAssignedLocationsAndPlans(identifier,true, null, null,null,null)).thenReturn(expected);
+		when(organizationService.findAssignedLocationsAndPlans(identifier, true, null, null, null, null))
+		        .thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isOk()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
 		
@@ -295,26 +303,28 @@ public class OrganizationResourceTest {
 	@Test
 	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
+		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier, true,
+		    null, null, null, null);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isBadRequest()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals("", result.getResponse().getContentAsString());
 		
 	}
-
+	
 	@Test
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
-		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
+		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null,
+		    null, null);
 		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
 		        .andExpect(status().isInternalServerError()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlans(identifier,true, null, null,null,null);
+		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -329,11 +339,12 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
-		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null,null,null)).thenReturn(expected);
+		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null))
+		        .thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
 		        .andExpect(status().isOk()).andReturn();
 		
-		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null,null,null);
+		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
 		
@@ -422,6 +433,61 @@ public class OrganizationResourceTest {
 		
 	}
 	
+	@Test
+	public void testGetUserAssignedLocationsAndPlansWithPlansShouldReturnActivePlansOnly() throws Exception {
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		List<Long> ids = Arrays.asList(123l, 124l);
+		
+		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
+		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
+		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(true);
+		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
+		
+		List<String> planIds = assignments.stream().map(a -> a.getPlanId()).collect(Collectors.toList());
+		List<PlanDefinition> plans = getPlans(assignments);
+		when(planService.getPlansByIdsReturnOptionalFields(any(), any(), eq(false))).thenReturn(plans);
+		
+		PhysicalLocation location = LocationResourceTest.createStructure();
+		location.getProperties().setName("Vilage123");
+		PhysicalLocation location2 = new PhysicalLocation();
+		location2.setId(UUID.randomUUID().toString());
+		location2.setProperties(new LocationProperty());
+		location2.getProperties().setName("OA1");
+		location2.getProperties().setParentId(location.getId());
+		
+		PhysicalLocation location3 = new PhysicalLocation();
+		location3.setId(UUID.randomUUID().toString());
+		location3.setProperties(new LocationProperty());
+		location3.getProperties().setName("Oa3");
+		location3.getProperties().setParentId(location.getId());
+		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
+		        .thenReturn(Arrays.asList(location, location2, location3));
+		
+		Authentication authentication = authenticatedUser.getSecond();
+		MvcResult result = mockMvc
+		        .perform(get(BASE_URL + "/user-assignment")
+		                .with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
+		
+		UserAssignmentBean userAssignment = objectMapper.readValue(result.getResponse().getContentAsString(),
+		    UserAssignmentBean.class);
+		
+		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
+		assertEquals(2, userAssignment.getJurisdictions().size());
+		assertEquals(5, userAssignment.getPlans().size());
+		
+		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
+		        .map(p -> p.getIdentifier()).collect(Collectors.toSet());
+		assertTrue(activePlans.size() < 5);
+		assertTrue(userAssignment.getPlans().containsAll(activePlans));
+		Set<String> inActivePlans = new HashSet<>(planIds);
+		inActivePlans.removeAll(activePlans);
+		
+		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
+		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS)), eq(false));
+		
+	}
+	
 	private Organization getOrganization() throws Exception {
 		return objectMapper.readValue(organizationJSON, Organization.class);
 	}
@@ -470,6 +536,18 @@ public class OrganizationResourceTest {
 		practitioner.setIdentifier("ID-123");
 		practitioner.setActive(Boolean.TRUE);
 		return practitioner;
+		
+	}
+	
+	private List<PlanDefinition> getPlans(List<AssignedLocations> assignedLocations) {
+		Random random = new Random();
+		return assignedLocations.stream().map(al -> {
+			PlanDefinition plan = new PlanDefinition();
+			plan.setIdentifier(al.getPlanId());
+			plan.setJurisdiction(Collections.singletonList(new Jurisdiction(al.getJurisdictionId())));
+			plan.setStatus(random.nextBoolean() ? PlanStatus.ACTIVE : PlanStatus.COMPLETED);
+			return plan;
+		}).collect(Collectors.toList());
 		
 	}
 	

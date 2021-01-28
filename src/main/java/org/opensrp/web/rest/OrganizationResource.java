@@ -3,9 +3,14 @@
  */
 package org.opensrp.web.rest;
 
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,10 +52,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -242,13 +244,14 @@ public class OrganizationResource {
 		if (!planIdentifiers.isEmpty()) {
 			Set<String> planLocationIds = planService
 			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-			            Collections.singletonList(UserController.JURISDICTION), false)
+			            Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
 			        .stream()
+			        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
 			        .flatMap(plan -> plan.getJurisdiction().stream())
 			        .map(Jurisdiction::getCode)
 			        .collect(Collectors.toSet());
 		
-			Set<PhysicalLocation> planLocations = new HashSet<>(
+			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty()? Collections.emptySet():
 			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
 		}
