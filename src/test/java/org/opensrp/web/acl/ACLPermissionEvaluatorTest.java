@@ -112,7 +112,6 @@ public class ACLPermissionEvaluatorTest {
 		PlanDefinition planDefinition = new PlanDefinition();
 		List<Long> organizationalIds = new ArrayList<>();
 		organizationalIds.add(12345l);
-		List<Long> ids = Collections.singletonList(12233l);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setIdentifier("practitioner-id");
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,

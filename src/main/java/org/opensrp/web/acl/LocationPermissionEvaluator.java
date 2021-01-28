@@ -5,7 +5,6 @@ package org.opensrp.web.acl;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 

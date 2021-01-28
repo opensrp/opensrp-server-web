@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class WebConfig {
 
 	@Autowired
-	RedisConnectionFactory redisConnectionFactory;
+	private RedisConnectionFactory redisConnectionFactory;
 
 	@Bean
 	public ObjectMapper objectMapper() {

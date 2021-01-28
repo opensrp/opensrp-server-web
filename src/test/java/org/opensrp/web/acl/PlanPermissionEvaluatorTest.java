@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
-import org.smartregister.domain.Event;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PlanDefinition;
 import org.opensrp.domain.Practitioner;

@@ -61,7 +61,7 @@ public class UserPermissionEvaluatorTest {
 
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+				// No implementation
 			}
 
 			@Override

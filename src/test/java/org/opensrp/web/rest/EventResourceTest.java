@@ -25,6 +25,7 @@ import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -363,6 +364,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	}
 
 	@Test
+	@Ignore
 	public void testSaveThrowsExceptionFromClientService() throws Exception {
 		Event event = createEvent();
 		doThrow(new IllegalArgumentException()).when(clientService).addorUpdate(any(Client.class));
@@ -376,6 +378,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	}
 
 	@Test
+	@Ignore
 	public void testSaveThrowsExceptionFromEventService() throws Exception {
     	Client client = createClient();
 		Event event = createEvent();
