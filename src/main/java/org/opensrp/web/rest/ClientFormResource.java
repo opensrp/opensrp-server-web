@@ -219,7 +219,7 @@ public class ClientFormResource {
 
         String fileContentType = jsonFile.getContentType();
         if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
-            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file. The file content type is " + fileContentType, HttpStatus.BAD_REQUEST);
         }
 
         if (jsonFile.isEmpty()) {
