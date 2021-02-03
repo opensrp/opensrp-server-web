@@ -56,14 +56,14 @@ public class LocationController {
 		return new ResponseEntity<>(districts.toString(), OK);
 	}
 	
-	@RequestMapping(value = "/district-list", method = RequestMethod.GET)
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/district-list", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public List<LocationDTO> getDistrictList(HttpServletRequest request) throws JSONException {
 		
 		return clientService.getLocationByTagId(29);
 	}
 	
-	@RequestMapping(value = "/child-location", method = RequestMethod.GET)
+	@RequestMapping(headers = { "Accept=application/json;charset=UTF-8" }, value = "/child-location", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public List<LocationDTO> getChildLocation(@RequestParam("id") Integer id) throws JSONException {
 		
