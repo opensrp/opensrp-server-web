@@ -35,7 +35,6 @@ public interface Constants {
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
-        String APPLICATION_OCTET_STREAM = "application/octet-stream";
     }
 
     interface RestEndpointUrls {
