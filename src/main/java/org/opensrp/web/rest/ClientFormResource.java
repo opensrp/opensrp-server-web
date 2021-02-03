@@ -440,7 +440,7 @@ public class ClientFormResource {
 
     private boolean isYamlContentType(@NonNull String fileContentType, @NonNull String fileName) {
         return fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML)
-                || (fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && fileName.endsWith(".yml") || fileName.endsWith(".yaml"));
+                || (fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && (fileName.endsWith(".yml") || fileName.endsWith(".yaml")));
     }
 
     @VisibleForTesting
