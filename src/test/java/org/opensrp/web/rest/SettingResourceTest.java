@@ -266,7 +266,6 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).addSettings(settingConfigurationArgumentCaptor.capture());
 		verify(settingRepository, Mockito.times(1)).get(documentId);
-		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 
@@ -290,7 +289,6 @@ public class SettingResourceTest {
 
 		verify(settingRepository, Mockito.times(1)).get(documentId);
 		verify(settingRepository, Mockito.times(1)).update(settingConfigurationArgumentCaptor.capture());
-		verify(settingRepository).getNextServerVersion();
 		verifyNoMoreInteractions(settingRepository);
 	}
 

@@ -261,7 +261,7 @@ public class UserController {
 					if (openMRSIdsMap.containsKey(locationId)) {
 						openMRSIds.add(openMRSIdsMap.get(locationId));
 					} else {
-						openMRSIds.add(locationService.getLocation(locationId, false).getProperties().getCustomProperties()
+						openMRSIds.add(locationService.getLocation(locationId, false,false).getProperties().getCustomProperties()
 						        .get("OpenMRS_Id"));
 					}
 				}

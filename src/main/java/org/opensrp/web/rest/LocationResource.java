@@ -105,6 +105,8 @@ public class LocationResource {
 
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 	
+	public static final String INCLUDE_INACTIVE = "includeInactive";
+	
 	private PhysicalLocationService locationService;
 
 	private PlanService planService;
@@ -123,10 +125,11 @@ public class LocationResource {
 	@ApiOperation(value = GET_LOCATION_TREE_BY_ID_ENDPOINT, notes = GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES)
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry,
+			@RequestParam(value = INCLUDE_INACTIVE, defaultValue = FALSE, required = false) boolean includeInactive) {
 
 		return new ResponseEntity<>(
-				gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry) : locationService.getStructure(id, returnGeometry)),
+				gson.toJson(isJurisdiction ? locationService.getLocation(id, returnGeometry,includeInactive) : locationService.getStructure(id, returnGeometry)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
@@ -406,13 +409,14 @@ public class LocationResource {
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
 			@RequestParam(value = BaseEntity.SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = LIMIT, required = false)  Integer limit) {
+			@RequestParam(value = LIMIT, required = false)  Integer limit,
+			@RequestParam(value = INCLUDE_INACTIVE, defaultValue = FALSE, required = false) boolean includeInactive) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
 		if (isJurisdiction) {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit)),
+					gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit,includeInactive)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(

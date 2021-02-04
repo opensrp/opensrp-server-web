@@ -30,6 +30,9 @@ public interface Constants {
 	String ORDER_BY_TYPE = "orderByType";
 	
 	String ORDER_BY_FIELD_NAME = "orderByFieldName";
+	
+	String LOCATIONS = "locations";
+	
     interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
@@ -42,7 +45,7 @@ public interface Constants {
     interface RestPartVariables {
         String ID = "id";
     }
-    
+ 
     interface EndpointParam {
         String APP_ID = "app_id";
         String STRICT = "strict";
