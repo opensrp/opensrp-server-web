@@ -332,7 +332,9 @@ public class StockResource extends RestResource<Stock> {
 	protected ResponseEntity<String> syncV2(@RequestBody StockSearchBean stockSearchBean) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
-
+			if (stockSearchBean != null && stockSearchBean.getServerVersion() != null) {
+				stockSearchBean.setServerVersion(Long.valueOf(stockSearchBean.getServerVersion()) + 1);
+			}
 			return syncStocks(stockSearchBean);
 
 		}
