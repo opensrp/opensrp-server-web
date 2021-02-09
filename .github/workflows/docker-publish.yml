@@ -11,8 +11,9 @@ on:
       - v*
 
   pull_request:
-    branches:
-      - master
+    # Run Tests when changes are made to the Docker file
+    paths:
+      - 'Dockerfile'
 
   workflow_dispatch:
 
@@ -32,7 +33,7 @@ jobs:
 
   push:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v2
