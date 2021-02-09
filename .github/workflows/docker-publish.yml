@@ -13,48 +13,63 @@ on:
   # Run tests for any PRs.
   pull_request:
 
+  workflow_dispatch:
+
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: "recursive"
-
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
+#  test:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          submodules: "recursive"
+#
+#      - name: Run tests
+#        run: |
+#          if [ -f docker-compose.test.yml ]; then
+#            docker-compose --file docker-compose.test.yml build
+#            docker-compose --file docker-compose.test.yml run sut
+#          else
+#            docker build . --file Dockerfile
+#          fi
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     # Ensure test job passes before pushing image.
-    needs: test
+#    needs: test
 
     runs-on: ubuntu-latest
     #if: github.event_name == 'workflow_dispatch'
 
     steps:
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: opensrp/opensrp-server-web # list of Docker images to use as base name for tags
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: opensrp/opensrp-server-web
-          tag_with_ref: true
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
+
+      - name: Login to GitHub Registry
+        uses: docker/login-action@v1
         with:
+          registry: docker.pkg.github.com
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: OpenSRP/opensrp-server-web
-          tag_with_ref: true
+
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
