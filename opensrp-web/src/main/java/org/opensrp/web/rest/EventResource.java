@@ -596,7 +596,7 @@ public class EventResource extends RestResource<Event> {
 			String division = getStringFilter("divisionId", request);
 			String branch = getStringFilter("branchId", request);
 			String village = getStringFilter("villageId", request);
-			System.err.println("syncData::" + syncData);
+			
 			UserLocationTableName newUserLocation = clientService.getUserLocationAndTable(inProvider, "", "", "", "");
 			ArrayList<Client> clients = new ArrayList<Client>();
 			if (syncData.has("clients")) {
@@ -627,7 +627,7 @@ public class EventResource extends RestResource<Event> {
 			}
 			CustomEventMeta customEventMeta = eventService.findFirstEventMeta(baseEntityId, "_" + district);
 			Migration existingMigration = clientService.findFirstMigrationBybaseEntityId(baseEntityId);
-			System.err.println("existingMigration:::::" + existingMigration);
+			
 			String outProvider = "";
 			if (existingMigration != null) {
 				outProvider = existingMigration.getSKIn();
@@ -691,7 +691,6 @@ public class EventResource extends RestResource<Event> {
 				Client inHhousehold = clientService
 				        .getClientByBaseEntityId(inHHrelationalId, newUserLocation.getTableName());
 				
-				System.err.println(inHHrelationalId + ":" + inHhousehold);
 				Client outHhousehold = clientService.getClientByBaseEntityId(outHHrelationalId,
 				    oldUserLocation.getTableName());
 				
