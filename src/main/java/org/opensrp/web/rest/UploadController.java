@@ -17,6 +17,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.service.UploadService;
 import org.opensrp.util.JSONCSVUtil;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
+import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -59,6 +61,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
@@ -103,6 +108,8 @@ public class UploadController {
 
 	private UniqueIdentifierService uniqueIdentifierService;
 
+	private PhysicalLocationService physicalLocationService;
+
 	@Autowired
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
@@ -141,6 +148,11 @@ public class UploadController {
 	@Autowired
 	public void setEventService(EventService eventService) {
 		this.eventService = eventService;
+	}
+
+	@Autowired
+	public void setLocationService(PhysicalLocationService physicalLocationService) {
+		this.physicalLocationService = physicalLocationService;
 	}
 
 	private List<Map<String, String>> readCSVFile(MultipartFile file) throws IOException {
@@ -321,7 +333,20 @@ public class UploadController {
 		List<String> fieldMappings = configs.stream().map(CSVRowConfig::getFieldMapping)
 				.collect(Collectors.toList());
 
-		List<Client> clients = clientService.findAllByAttribute(DEFAULT_RESIDENCE, locationID);
+		Set<String> locations = Arrays.stream(locationID.split(",")).filter(StringUtils::isNotBlank).collect(
+				Collectors.toSet());
+
+		List<PhysicalLocation> physicalLocations = physicalLocationService
+				.findLocationByIdsWithChildren(false, new HashSet<>(locations), 1000);
+		for (PhysicalLocation location : physicalLocations)
+			locations.add(location.getId());
+
+		List<PhysicalLocation> structureIds = physicalLocationService
+				.findStructuresByParentAndServerVersion(String.join(",", locations), 0);
+		for (PhysicalLocation location : structureIds)
+			locations.add(location.getId());
+
+		List<Client> clients = new ArrayList<>(clientService.findAllByAttributes(DEFAULT_RESIDENCE, new ArrayList<>(locations)));
 
 		try (CSVPrinter printer = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT
 				.withHeader(HEADERS))) {

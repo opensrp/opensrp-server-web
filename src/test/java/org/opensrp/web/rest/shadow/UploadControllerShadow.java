@@ -6,6 +6,7 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.service.UploadService;
 import org.opensrp.web.rest.UploadController;
@@ -52,5 +53,10 @@ public class UploadControllerShadow extends UploadController {
 	@Override
 	public void setEventService(EventService eventService) {
 		super.setEventService(eventService);
+	}
+
+	@Override
+	public void setLocationService(PhysicalLocationService locationService) {
+		super.setLocationService(locationService);
 	}
 }
