@@ -337,7 +337,7 @@ public class UploadController {
 				Collectors.toSet());
 
 		List<PhysicalLocation> physicalLocations = physicalLocationService
-				.findLocationByIdsWithChildren(false, new HashSet<>(locations), 1000);
+				.findLocationByIdsWithChildren(false, new HashSet<>(locations), Integer.MAX_VALUE);
 		for (PhysicalLocation location : physicalLocations)
 			locations.add(location.getId());
 
