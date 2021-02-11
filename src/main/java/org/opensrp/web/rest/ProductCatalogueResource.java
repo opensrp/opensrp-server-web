@@ -54,7 +54,7 @@ public class ProductCatalogueResource {
 
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
-			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+			lastSyncedServerVersion = Long.parseLong(serverVersion);
 		}
 
 		ProductCatalogueSearchBean productCatalogueSearchBean = new ProductCatalogueSearchBean();
