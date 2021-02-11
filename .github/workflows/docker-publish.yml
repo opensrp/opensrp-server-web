@@ -17,7 +17,10 @@ on:
       - 'Dockerfile'
 
   workflow_dispatch:
-     #TODO add input for name of the release
+    input:
+      customTag:
+        description: "Includes the specified to the docker image"
+        required: false
 
 jobs:
   # Run tests.
@@ -48,6 +51,7 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v1
         with:
           images: opensrp/opensrp-server-web # list of Docker images to use as base name for tags
+          tag-custom: ${{ github.event.inputs.customTag }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
