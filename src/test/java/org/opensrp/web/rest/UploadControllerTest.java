@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.UniqueIdentifierService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
@@ -103,6 +104,9 @@ public class UploadControllerTest {
 	@Mock
 	private UniqueIdentifierService uniqueIdentifierService;
 
+	@Mock
+	private PhysicalLocationService physicalLocationService;
+
 	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
@@ -122,6 +126,7 @@ public class UploadControllerTest {
 		uploadController.setEventService(eventService);
 		uploadController.setIdentifierSourceService(identifierSourceService);
 		uploadController.setUniqueIdentifierService(uniqueIdentifierService);
+		uploadController.setLocationService(physicalLocationService);
 		uploadController.setObjectMapper(objectMapper);
 	}
 
@@ -272,14 +277,16 @@ public class UploadControllerTest {
 	public void testGetUploadTemplateReadsClientsAndReturnsCSV() throws Exception {
 		when(uploadService.getCSVConfig("ChildRegistration")).thenReturn(new ArrayList<>());
 
+		when(physicalLocationService.findLocationByIdsWithChildren(Mockito.anyBoolean(), Mockito.anySet(), Mockito.anyInt())).thenReturn(new ArrayList<>());
+
 		List<Client> clients = new ArrayList<>();
 		clients.add(new Client("base_entity_id"));
 
-		when(clientService.findAllByAttribute(DEFAULT_RESIDENCE, "12345")).thenReturn(clients);
+		when(clientService.findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList())).thenReturn(clients);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/template?location_id=12345&event_name=ChildRegistration"))
 				.andExpect(status().isOk())
 				.andReturn();
-		verify(clientService, times(1)).findAllByAttribute(DEFAULT_RESIDENCE, "12345");
+		verify(clientService, times(1)).findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList());
 
 		verifyNoMoreInteractions(clientService);
 		assertEquals("text/csv", result.getResponse().getContentType());
