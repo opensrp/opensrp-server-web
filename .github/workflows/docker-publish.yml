@@ -19,12 +19,11 @@ on:
   workflow_dispatch:
     input:
       customTag:
-        description: "Includes the specified to the docker image"
+        description: "Includes the specified tag to docker image tags"
         required: false
 
 jobs:
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  # Run image build test
   test:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -50,7 +49,7 @@ jobs:
         id: docker_meta
         uses: crazy-max/ghaction-docker-meta@v1
         with:
-          images: opensrp/opensrp-server-web # list of Docker images to use as base name for tags
+          images: opensrp/opensrp-server-web
           tag-custom: ${{ github.event.inputs.customTag }}
 
       - name: Login to DockerHub
@@ -66,7 +65,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Push to Dcoker Image to Repositories
+      - name: Push to Docker Image Repositories
         uses: docker/build-push-action@v2
         with:
           push: true
