@@ -17,7 +17,7 @@ on:
       - 'Dockerfile'
 
   workflow_dispatch:
-    input:
+    inputs:
       customTag:
         description: "Includes the specified tag to docker image tags"
         required: false
