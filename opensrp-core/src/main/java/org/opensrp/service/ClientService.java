@@ -29,7 +29,10 @@ import org.opensrp.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 @Service
 public class ClientService {
@@ -37,6 +40,9 @@ public class ClientService {
 	private final ClientsRepository allClients;
 	
 	private static Logger logger = LoggerFactory.getLogger(ClientService.class.toString());
+	
+	@Autowired
+	private DataSourceTransactionManager transactionManager;
 	
 	@Autowired
 	public ClientService(ClientsRepository allClients) {
@@ -271,6 +277,7 @@ public class ClientService {
 			throw new RuntimeException("No baseEntityId");
 		}
 		//Client c = findClient(client);
+		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			Integer clientId = allClients.findClientIdByBaseEntityId(client.getBaseEntityId(), table);
 			if (clientId != null) {
@@ -304,6 +311,11 @@ public class ClientService {
 				errorTraceService.addError(errorTrace);
 			}
 			e.printStackTrace();
+			transactionManager.rollback(txStatus);
+		}
+		finally {
+			transactionManager.commit(txStatus);
+			
 		}
 		return client;
 	}

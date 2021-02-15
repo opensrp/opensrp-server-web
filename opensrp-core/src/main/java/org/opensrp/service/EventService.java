@@ -28,7 +28,10 @@ import org.opensrp.util.DateTimeTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,6 +44,9 @@ public class EventService {
 	private ClientService clientService;
 	
 	private Integer HEALTH_ID_LIMIT = 200;
+	
+	@Autowired
+	private DataSourceTransactionManager transactionManager;
 	
 	@Autowired
 	public EventService(EventsRepository allEvents, ClientService clientService) {
@@ -189,21 +195,32 @@ public class EventService {
 		Integer eventId = allEvents.findEventIdByFormSubmissionId(event.getFormSubmissionId(), table);
 		
 		//Event getEvent = findByFormSubmissionId(event.getFormSubmissionId());
-		if (eventId != null) {
-			Event getEvent = allEvents.findEventByEventId(eventId, table);
-			if (getEvent != null) {
-				
-				event.setDateEdited(DateTime.now());
+		
+		TransactionStatus txStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+		try {
+			if (eventId != null) {
+				Event getEvent = allEvents.findEventByEventId(eventId, table);
+				if (getEvent != null) {
+					
+					event.setDateEdited(DateTime.now());
+					event.setServerVersion(System.currentTimeMillis());
+					event.setId(getEvent.getId());
+					event.setDateCreated(getEvent.getDateCreated());
+					allEvents.update(event, table, district, division, branch, village);
+					
+				}
+			} else {
 				event.setServerVersion(System.currentTimeMillis());
-				event.setId(getEvent.getId());
-				event.setDateCreated(getEvent.getDateCreated());
-				allEvents.update(event, table, district, division, branch, village);
-				
+				event.setDateCreated(DateTime.now());
+				allEvents.add(event, table, district, division, branch, village);
 			}
-		} else {
-			event.setServerVersion(System.currentTimeMillis());
-			event.setDateCreated(DateTime.now());
-			allEvents.add(event, table, district, division, branch, village);
+		}
+		catch (Exception e) {
+			transactionManager.rollback(txStatus);
+		}
+		finally {
+			transactionManager.commit(txStatus);
+			
 		}
 		return event;
 	}
