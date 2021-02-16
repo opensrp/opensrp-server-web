@@ -84,6 +84,8 @@ public class StockResource extends RestResource<Stock> {
 
 	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
+	private static final String RETURN_PRODUCT = "returnProduct";
+
 	@Autowired
 	public StockResource(StockService stockService) {
 		this.stockService = stockService;
@@ -265,13 +267,39 @@ public class StockResource extends RestResource<Stock> {
 			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = RETURN_PRODUCT, required = false) boolean returnProduct) {
 
 		StockSearchBean stockSearchBean =
 				createSearchBeanToGetStocksOfServicePoint(pageNumber, pageSize, orderByType, orderByFieldName,
-						servicePointId);
+						servicePointId, returnProduct);
 
 		return stockService.getStocksByServicePointId(stockSearchBean);
+	}
+
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, value = "/inventory/validate")
+	public ResponseEntity validateBulkInventoryData(@RequestParam("file") MultipartFile file)
+			throws IOException {
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.validateBulkInventoryData(csvClients);
+
+		String timestamp = String.valueOf(new Date().getTime());
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
+
+		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
+			return ResponseEntity.badRequest()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		} else {
+			Map<String, Object> response = new HashMap<String, Object>();
+			response.put("rowCount", csvBulkImportDataSummary.getNumberOfCsvRows());
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
@@ -281,8 +309,7 @@ public class StockResource extends RestResource<Stock> {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
-				.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
@@ -366,10 +393,12 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
-			String orderByFieldName, String locationId) {
+			String orderByFieldName, String locationId, boolean returnProduct) {
 		StockSearchBean stockSearchBean = new StockSearchBean();
 		stockSearchBean.setPageNumber(pageNumber);
 		stockSearchBean.setPageSize(pageSize);
+		stockSearchBean.setReturnProduct(returnProduct);
+
 		if(orderByType != null) {
 			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
 		}

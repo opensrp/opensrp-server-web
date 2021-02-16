@@ -1097,19 +1097,19 @@ public class ClientFormResourceTest {
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenJSON() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(ContentType.APPLICATION_JSON.getMimeType()));
+        assertTrue(clientFormResource.isClientFormContentTypeValid(ContentType.APPLICATION_JSON.getMimeType(), "anc_register.json"));
     }
 
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenApplicationYaml() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.APPLICATION_YAML));
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.APPLICATION_YAML, "anc_register.yml"));
     }
 
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextYamlContentTypeForYamlFile() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML));
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML,"anc_register.yml"));
     }
 
     @Test
@@ -1127,19 +1127,19 @@ public class ClientFormResourceTest {
     @Test
     public void testCheckValidContentShouldReturnErrorMessageWhenGivenInvalidJSONStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JSON_FORM_FILE.substring(0, 10), "application/json"));
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JSON_FORM_FILE.substring(0, 10), "application/json", "anc_register.json"));
     }
 
     @Test
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidYamlStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.INVALID_YAML_FILE_CONTENT, "application/x-yaml"));
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.INVALID_YAML_FILE_CONTENT, "application/x-yaml", "anc_register.yml"));
     }
 
     @Test
     public void testCheckValidJsonYamlPropertiesStructureShouldReturnErrorMessageWhenGivenInvalidPropertiesStructure() {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType()));
+        assertNotNull(clientFormResource.checkValidJsonYamlPropertiesStructure(TestFileContent.JMAG_PROPERTIES_FILE_CONTENT.substring(0, 378) + "\\uxxxx", ContentType.APPLICATION_OCTET_STREAM.getMimeType(), "anc_register.properties"));
     }
 
     @Test

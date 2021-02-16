@@ -97,6 +97,10 @@ public class StockResourceTest {
 
 	private final String IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS = "\"Total Number of Rows in the CSV \",2\r\n\"Rows processed \",1\r\n\"\n\"\r\nRow Number,Reason of Failure\r\n1,[PO Number should be a whole number]\r\n";
 
+	private final String IMPORT_INVENTORY_SUMMARY_REPORT_WITHOUT_ERRORS = "\"Total Number of Rows in the CSV \",2\r\n\"Rows processed \",2\r\n\"";
+
+	private final String VALIDATE_INVENTORY_SUMMARY = "{\"rowCount\":2}";
+
 	private final String ERROR_OCCURED = "Error occurred";
 
 	@Before
@@ -331,7 +335,7 @@ public class StockResourceTest {
 	}
 
 	@Test
-	public void testImportInventoryDataWithErrors() throws Exception {
+	public void testValidateBulkInventoryDataWithErrors() throws Exception {
 		Authentication authentication = mock(Authentication.class);
 		authentication.setAuthenticated(Boolean.TRUE);
 		SecurityContext securityContext = mock(SecurityContext.class);
@@ -354,17 +358,77 @@ public class StockResourceTest {
 		failedRecordSummaryList.add(failedRecordSummary);
 		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
 
-		when(stockService.convertandPersistInventorydata(anyList(), anyString())).thenReturn(csvBulkImportDataSummary);
+		when(stockService.validateBulkInventoryData(anyList())).thenReturn(csvBulkImportDataSummary);
 
 		MvcResult result = mockMvc.perform(
-				MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
-						.file(file)
-		)
+				MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
+						.file(file))
 				.andExpect(status().isBadRequest())
 				.andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
 		assertEquals(IMPORT_INVENTORY_SUMMARY_REPORT_WITH_ERRORS, responseString);
+	}
+
+	@Test
+	public void testValidateBulkInventoryDataWithOutErrors() throws Exception {
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		String path = "src/test/resources/sample/inventory.csv";
+		MockMultipartFile file = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+				Files.readAllBytes(Paths.get(path)));
+
+		CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
+		csvBulkImportDataSummary.setNumberOfCsvRows(2);
+		csvBulkImportDataSummary.setNumberOfRowsProcessed(1);
+		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
+		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
+
+		when(stockService.validateBulkInventoryData(anyList())).thenReturn(csvBulkImportDataSummary);
+
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
+						.file(file))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		assertEquals(VALIDATE_INVENTORY_SUMMARY, responseString);
+	}
+
+
+	@Test
+	public void testImportInventoryDataWithErrors() throws Exception {
+		Authentication authentication = mock(Authentication.class);
+		authentication.setAuthenticated(Boolean.TRUE);
+		SecurityContext securityContext = mock(SecurityContext.class);
+		SecurityContextHolder.setContext(securityContext);
+
+		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+		String path = "src/test/resources/sample/inventory.csv";
+		MockMultipartFile file = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+				Files.readAllBytes(Paths.get(path)));
+
+		CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
+		csvBulkImportDataSummary.setNumberOfCsvRows(2);
+		csvBulkImportDataSummary.setNumberOfRowsProcessed(2);
+		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
+		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
+
+		when(stockService.convertandPersistInventorydata(anyList(), anyString())).thenReturn(csvBulkImportDataSummary);
+
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
+						.file(file))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		assertTrue(responseString.contains(IMPORT_INVENTORY_SUMMARY_REPORT_WITHOUT_ERRORS));
 	}
 	
 	private Stock createStock() {
