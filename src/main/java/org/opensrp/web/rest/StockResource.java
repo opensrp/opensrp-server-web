@@ -75,9 +75,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
 
-	private static Logger logger = LoggerFactory.getLogger(StockResource.class.toString());
+	private static final Logger logger = LoggerFactory.getLogger(StockResource.class.toString());
 
-	private StockService stockService;
+	private final StockService stockService;
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -98,16 +98,15 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch all the stocks
-	 * 
-	 * @param none
+	 *
 	 * @return a map response with stocks, and optionally msg when an error occurs
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
 	protected ResponseEntity<String> getAll() {
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 		try {
-			List<Stock> stocks = new ArrayList<Stock>();
+			List<Stock> stocks;
 			stocks = stockService.findAllStocks();
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
@@ -147,7 +146,7 @@ public class StockResource extends RestResource<Stock> {
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 
 		try {
 			StockSearchBean searchBean = populateSearchBean(request);
@@ -173,7 +172,7 @@ public class StockResource extends RestResource<Stock> {
 			if (!syncData.has("stocks")) {
 				return new ResponseEntity<>(BAD_REQUEST);
 			}
-			ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
+			ArrayList<Stock> stocks = gson.fromJson(syncData.getJSONArray("stocks").toString(),
 					new TypeToken<ArrayList<Stock>>() {
 					}.getType());
 			for (Stock stock : stocks) {
