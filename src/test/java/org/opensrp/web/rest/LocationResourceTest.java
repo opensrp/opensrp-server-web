@@ -799,7 +799,7 @@ public class LocationResourceTest {
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
-				anyInt());
+				anyInt(), anyInt(), anyString(), anyString());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}
