@@ -790,7 +790,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllStructures() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
-		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt(), anyInt(), anyString(), anyString()))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")

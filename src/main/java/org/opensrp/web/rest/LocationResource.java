@@ -1,7 +1,13 @@
 package org.opensrp.web.rest;
 
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
