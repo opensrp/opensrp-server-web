@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -110,7 +111,7 @@ public class MultimediaController {
 			specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
 			return;
 		}
-		downloadFileWithAuth(baseEntityId, response);
+		downloadFileWithAuth(baseEntityId, response, null);
 		
 	}
 	
@@ -142,7 +143,14 @@ public class MultimediaController {
 			zipOutputStream.close();
 		} else {
 			// default to single profile image retrieval logic
-			downloadFileWithAuth(entityId, response);
+			Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(entityId));
+			String extension = "";
+			int startingIndex;
+			if (multimedia != null && multimedia.getOriginalFileName() != null) {
+				startingIndex = multimedia.getOriginalFileName().indexOf('.');
+				extension = multimedia.getOriginalFileName().substring(startingIndex);
+			}
+			downloadFileWithAuth(entityId, response, extension);
 		}
 	}
 	
@@ -179,9 +187,10 @@ public class MultimediaController {
 	 * @param response
 	 * @throws Exception
 	 */
-	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) throws IOException {
+	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response, String extension) throws IOException {
+		String imageExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
 		File file = multimediaService.retrieveFile(
-		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + imageExtension);
 		if (file != null) {
 			downloadFile(file, response);
 		} else {
