@@ -111,7 +111,7 @@ public class MultimediaController {
 			specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
 			return;
 		}
-		downloadFileWithAuth(baseEntityId, response, null);
+		downloadFileWithAuth(baseEntityId, response);
 		
 	}
 	
@@ -143,14 +143,7 @@ public class MultimediaController {
 			zipOutputStream.close();
 		} else {
 			// default to single profile image retrieval logic
-			Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(entityId));
-			String extension = "";
-			int startingIndex;
-			if (multimedia != null && multimedia.getOriginalFileName() != null) {
-				startingIndex = multimedia.getOriginalFileName().indexOf('.');
-				extension = multimedia.getOriginalFileName().substring(startingIndex);
-			}
-			downloadFileWithAuth(entityId, response, extension);
+			downloadFileWithAuth(entityId, response);
 		}
 	}
 	
@@ -187,10 +180,15 @@ public class MultimediaController {
 	 * @param response
 	 * @throws Exception
 	 */
-	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response, String extension) throws IOException {
-		String imageExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
+	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) throws IOException {
+		Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(baseEntityId));
+		String extension = "";
+		if (multimedia != null && multimedia.getContentType() != null) {
+			extension = getFileExtension(multimedia);
+		}
+		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
 		File file = multimediaService.retrieveFile(
-		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + imageExtension);
+		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension);
 		if (file != null) {
 			downloadFile(file, response);
 		} else {
@@ -262,5 +260,30 @@ public class MultimediaController {
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
 		outputStream.close();
+	}
+
+	private String getFileExtension(Multimedia multimedia) {
+		String fileExt = "";
+		switch (multimedia.getContentType()) {
+
+			case "application/octet-stream":
+				fileExt = ".mp4";
+				break;
+			case "image/jpeg":
+				fileExt = ".jpg";
+				break;
+			case "image/gif":
+				fileExt = ".gif";
+				break;
+			case "image/png":
+				fileExt = ".png";
+				break;
+			case "text/csv":
+				fileExt = ".csv";
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown content type : " + multimedia.getContentType());
+		}
+		return fileExt;
 	}
 }
