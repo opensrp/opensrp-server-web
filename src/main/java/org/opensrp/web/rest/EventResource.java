@@ -626,7 +626,7 @@ public class EventResource extends RestResource<Event> {
 
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
-				csvFile = new File(exportDataFileName);
+				csvFile = new File(tempDirectory, exportDataFileName);
 				if (exportEventDataSummary != null) {
 					generateCSV(exportEventDataSummary, csvFile.getName());
 				}
