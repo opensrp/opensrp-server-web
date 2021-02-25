@@ -188,10 +188,10 @@ public class RestUtils {
 		FileInputStream fis = null;
 		ZipEntry zipEntry;
 		try{
-			if(fileName != null && !fileName.isEmpty()) {
-				aFile = new File(fileName);
+			if(StringUtils.isNotBlank(fileName)) {
+				aFile = new File(StringUtils.isNotBlank(filePath) ? filePath : fileName);
 				fis = new FileInputStream(aFile);
-				zipEntry = new ZipEntry(aFile.getPath());
+				zipEntry = new ZipEntry(fileName);
 				logger.info("Writing file : '" + fileName + "' to zip file");
 			}
 			else {

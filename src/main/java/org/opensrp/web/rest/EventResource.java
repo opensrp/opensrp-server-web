@@ -604,6 +604,7 @@ public class EventResource extends RestResource<Event> {
 
 		try {
 			String tempDirectory = System.getProperty("java.io.tmpdir");
+			logger.info("Temp DIR is ============="+tempDirectory);
 			for (String eventType : eventTypes) {
 				ExportEventDataSummary exportEventDataSummary = eventService
 						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
@@ -617,22 +618,20 @@ public class EventResource extends RestResource<Event> {
 
 				formatted = df.format(new Date());
 				File csvFile = null;
-				File zipFile = null;
 
 				zipFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
 				if (firstTime) {
-					zipFile = new File(zipFileName);
-					fos = new FileOutputStream(zipFile);
+					fos = new FileOutputStream(zipFileName);
 					zipOS = new ZipOutputStream(fos);
 				}
 
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
-				csvFile = new File(zipFile, exportDataFileName);
+				csvFile = new File(tempDirectory,exportDataFileName);
 				if (exportEventDataSummary != null) {
-					generateCSV(exportEventDataSummary, csvFile.getName());
+					generateCSV(exportEventDataSummary, csvFile.getAbsolutePath());
 				}
-				writeToZipFile(csvFile.getName(), zipOS, null);
+				writeToZipFile(csvFile.getName(), zipOS, csvFile.getAbsolutePath());
 				firstTime = false;
 
 				Boolean firstTimeForImages = true;
