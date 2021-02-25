@@ -630,7 +630,7 @@ public class EventResource extends RestResource<Event> {
 
 				csvFile = new File(zipFile, exportDataFileName);
 				if (exportEventDataSummary != null) {
-					generateCSV(exportEventDataSummary, csvFile.getName());0
+					generateCSV(exportEventDataSummary, csvFile.getName());
 				}
 				writeToZipFile(csvFile.getName(), zipOS, null);
 				firstTime = false;
