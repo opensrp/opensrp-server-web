@@ -187,11 +187,12 @@ public class RestUtils {
 		File aFile;
 		FileInputStream fis = null;
 		ZipEntry zipEntry;
+		String tempDirectory = System.getProperty("java.io.tmpdir");
 		try{
 			if(StringUtils.isNotBlank(fileName)) {
 				aFile = new File(StringUtils.isNotBlank(filePath) ? filePath : fileName);
 				fis = new FileInputStream(aFile);
-				zipEntry = new ZipEntry(fileName);
+				zipEntry = new ZipEntry(StringUtils.isNotBlank(filePath) ? filePath.replace(tempDirectory, "") : fileName);
 				logger.info("Writing file : '" + fileName + "' to zip file");
 			}
 			else {
