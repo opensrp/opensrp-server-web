@@ -617,16 +617,18 @@ public class EventResource extends RestResource<Event> {
 
 				formatted = df.format(new Date());
 				File csvFile = null;
+				File zipFile = null;
 
 				zipFileName = tempDirectory + SAMPLE_CSV_FILE + missionName + "_" + formatted + ".zip";
 				if (firstTime) {
-					fos = new FileOutputStream(zipFileName);
+					zipFile = new File(zipFileName);
+					fos = new FileOutputStream(zipFile);
 					zipOS = new ZipOutputStream(fos);
 				}
 
 				exportDataFileName = SAMPLE_CSV_FILE + missionName + "_" + eventTypeName + "_" + formatted + ".csv";
 
-				csvFile = new File(tempDirectory, exportDataFileName);
+				csvFile = new File(zipFile, exportDataFileName);
 				if (exportEventDataSummary != null) {
 					generateCSV(exportEventDataSummary, csvFile.getName());
 				}
