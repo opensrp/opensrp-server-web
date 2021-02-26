@@ -34,11 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -324,11 +320,49 @@ public class ClientResourceTest {
 		List<Client> expected = new ArrayList<>();
 		expected.add(createClient());
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-		
+		when(httpServletRequest.getParameter("locationIds")).thenReturn("123,345");
 		when(clientService.findByCriteria(any(ClientSearchBean.class),any(AddressSearchBean.class), nullable(DateTime.class), nullable(DateTime.class))).thenReturn(expected);
 		List<Client> clients = clientResource.search(httpServletRequest);
 		assertEquals(clients.size(),expected.size());
 		assertEquals(clients.get(0).getFirstName(),expected.get(0).getFirstName());
+	}
+
+	@Test
+	public void testSearchClientsWithIdentifier() throws ParseException {
+		List<Client> expected = new ArrayList<>();
+
+		Client client = new Client("client-base-entity-id");
+		client.setFirstName("Farida");
+		client.setLastName("Antonate");
+		client.setId("1");
+		Map<String, String> identifiers = new HashMap<>();
+		String zeirId = "1900121";
+		identifiers.put("zeir_id", zeirId);
+		client.setIdentifiers(identifiers);
+		client.setDateCreated(new DateTime());
+		final String motherBaseEntityId = "client-rel-base-entity-id";
+		client.setRelationships(new HashMap<>() {{
+			put("mother", Collections.singletonList(motherBaseEntityId));
+		}});
+		expected.add(client);
+
+		//Create client relationship object
+		Client mother = new Client(motherBaseEntityId);
+		mother.setFirstName("Zahara");
+		mother.setLastName("Amina");
+		mother.setId("2");
+		mother.setDateCreated(new DateTime());
+
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		when(httpServletRequest.getParameter("identifier")).thenReturn(zeirId);
+		when(httpServletRequest.getParameter("relationships")).thenReturn("mother");
+
+		when(clientService.find(zeirId)).thenReturn(client);
+		when(clientService.find(motherBaseEntityId)).thenReturn(mother);
+		List<Client> clients = clientResource.search(httpServletRequest);
+		assertEquals(clients.size(),2);
+		assertEquals(clients.get(0).getFirstName(),client.getFirstName());
+		assertEquals(clients.get(1).getFirstName(), mother.getFirstName());
 	}
 
 	@Test

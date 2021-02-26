@@ -3,13 +3,14 @@
  */
 package org.opensrp.web.utils;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.lang.Nullable;
-
-import java.util.Date;
 
 /**
  * @author Samuel Githengi created on 06/12/20
@@ -42,5 +43,13 @@ public class Utils {
 		} else {
 			return null;
 		}
+	}
+
+	
+	public static boolean checkRoleIfRoleExists(List<String> roleList, String role) {
+		for (String roleName : roleList)
+			if (StringUtils.containsIgnoreCase(roleName, role))
+				return true;
+		return false;
 	}
 }

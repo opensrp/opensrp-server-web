@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opensrp.domain.Practitioner;
+import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
@@ -51,7 +52,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         expectedPractitioner = initTestPractitioner2();
         expectedPractitoiners.add(expectedPractitioner);
 
-        doReturn(expectedPractitoiners).when(practitionerService).getAllPractitioners();
+        doReturn(expectedPractitoiners).when(practitionerService).getAllPractitioners(any(PractitionerSearchBean.class));
 
         String actualPractitionersString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<Practitioner> actualPractitioners = new Gson().fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>(){}.getType());

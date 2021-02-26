@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
+import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.UniqueIdentifierService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
@@ -63,6 +64,7 @@ import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -102,6 +104,9 @@ public class UploadControllerTest {
 	@Mock
 	private UniqueIdentifierService uniqueIdentifierService;
 
+	@Mock
+	private PhysicalLocationService physicalLocationService;
+
 	private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
@@ -121,6 +126,7 @@ public class UploadControllerTest {
 		uploadController.setEventService(eventService);
 		uploadController.setIdentifierSourceService(identifierSourceService);
 		uploadController.setUniqueIdentifierService(uniqueIdentifierService);
+		uploadController.setLocationService(physicalLocationService);
 		uploadController.setObjectMapper(objectMapper);
 	}
 
@@ -165,7 +171,8 @@ public class UploadControllerTest {
 
 		// verify data was created and inserted
 		verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
-		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class));
+		verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class),
+				anyString());
 
 		// verify file was saved
 		verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());
@@ -270,14 +277,16 @@ public class UploadControllerTest {
 	public void testGetUploadTemplateReadsClientsAndReturnsCSV() throws Exception {
 		when(uploadService.getCSVConfig("ChildRegistration")).thenReturn(new ArrayList<>());
 
+		when(physicalLocationService.findLocationByIdsWithChildren(Mockito.anyBoolean(), Mockito.anySet(), Mockito.anyInt())).thenReturn(new ArrayList<>());
+
 		List<Client> clients = new ArrayList<>();
 		clients.add(new Client("base_entity_id"));
 
-		when(clientService.findAllByAttribute(DEFAULT_RESIDENCE, "12345")).thenReturn(clients);
+		when(clientService.findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList())).thenReturn(clients);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/template?location_id=12345&event_name=ChildRegistration"))
 				.andExpect(status().isOk())
 				.andReturn();
-		verify(clientService, times(1)).findAllByAttribute(DEFAULT_RESIDENCE, "12345");
+		verify(clientService, times(1)).findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList());
 
 		verifyNoMoreInteractions(clientService);
 		assertEquals("text/csv", result.getResponse().getContentType());

@@ -202,6 +202,7 @@ public class UserControllerTest {
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().setName("OA123");
+		location.setId(jurisdictionId);
 		when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId), Integer.MAX_VALUE))
 		        .thenReturn(Collections.singletonList(location));
 		when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))

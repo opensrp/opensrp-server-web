@@ -6,6 +6,9 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
@@ -24,6 +27,7 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
@@ -107,6 +111,8 @@ public class LocationResource {
 	
 	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
 
+	public static final String INCLUDE_INACTIVE = "includeInactive";
+
 	private PhysicalLocationService locationService;
 	
 	private PlanService planService;
@@ -139,11 +145,12 @@ public class LocationResource {
 	@ApiOperation(value = GET_LOCATION_TREE_BY_ID_ENDPOINT, notes = GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES)
 	public ResponseEntity<String> getByUniqueId(@PathVariable("id") String id,
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
-			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry) {
+			@RequestParam(value = RETURN_GEOMETRY, defaultValue = TRUE, required = false) boolean returnGeometry,
+			@RequestParam(value = INCLUDE_INACTIVE, defaultValue = FALSE, required = false) boolean includeInactive) {
 
 		return new ResponseEntity<>(
 				gson.toJson(isJurisdiction ?
-						locationService.getLocation(id, returnGeometry) :
+						locationService.getLocation(id, returnGeometry, includeInactive) :
 						locationService.getStructure(id, returnGeometry)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
@@ -441,17 +448,21 @@ public class LocationResource {
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
 			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
-			@RequestParam(value = LIMIT, required = false) Integer limit) {
+			@RequestParam(value = LIMIT, required = false) Integer limit,
+			@RequestParam(value = INCLUDE_INACTIVE, required = false) boolean includeInactive,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
 		if (isJurisdiction) {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit)),
+					gson.toJson(locationService.findAllLocations(returnGeometry, serverVersion, pageLimit, includeInactive)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
+					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit, pageNumber, orderByType, orderByFieldName)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 
@@ -607,6 +618,13 @@ public class LocationResource {
 				gson.toJson(dhis2ImportLocationsStatusService.getSummaryOfDHISImportsFromAppStateTokens()),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
+
+	@RequestMapping(value = "/heirarchy/ancestors/{locationId}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public Set<LocationDetail> generateLocationTreeWithAncestors(@PathVariable("locationId") String locationId) {
+		return locationService.buildLocationHeirarchyWithAncestors(locationId);
+	}
+
 
 	@Data
 	static class LocationSyncRequestWrapper {

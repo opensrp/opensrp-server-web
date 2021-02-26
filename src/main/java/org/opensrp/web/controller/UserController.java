@@ -7,6 +7,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -70,6 +72,8 @@ public class UserController {
 	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
 	
 	public static final String JURISDICTION="jurisdiction";
+	
+	public static final String STATUS="status";
 	
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
@@ -189,7 +193,7 @@ public class UserController {
 		User u = RestUtils.currentUser(authentication);
 		logger.debug("logged in user {}", u.toString());
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = null;
-		Set<PhysicalLocation> jurisdictions = null;
+		final Set<PhysicalLocation> jurisdictions =  new HashSet<>();
 		Set<String> locationIds = new HashSet<>();
 		Set<String> planIdentifiers = new HashSet<>();
 		try {
@@ -204,19 +208,21 @@ public class UserController {
 					planIdentifiers.add(assignedLocation.getPlanId());
 			}
 			
-			jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
+			jurisdictions.addAll(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
 			
 			if (!planIdentifiers.isEmpty()) {
 				/** @formatter:off*/
 				Set<String> planLocationIds = planService
 				        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-				            Collections.singletonList(JURISDICTION), false)
+				        	Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
 				        .stream()
+				        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
 				        .flatMap(plan -> plan.getJurisdiction().stream())
 				        .map(Jurisdiction::getCode)
 				        .collect(Collectors.toSet());
 				/** @formatter:on*/	
-				Set<PhysicalLocation> planLocations =new HashSet<>(locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+				Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty() ? Collections.emptySet()
+				        : locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 				jurisdictions.retainAll(planLocations);		
 			}
 			
@@ -240,6 +246,7 @@ public class UserController {
 		teamMemberJson.put("uuid", practionerOrganizationIds.left.getUserId());
 		
 		JSONObject teamJson = new JSONObject();
+		JSONObject teamLocationJson = new JSONObject();
 		// TODO populate organizations if user has many organizations
 		Organization organization = organizationService.getOrganization(practionerOrganizationIds.right.get(0));
 		teamJson.put("teamName", organization.getName());
@@ -249,18 +256,29 @@ public class UserController {
 		
 		JSONArray locations = new JSONArray();
 		
+		/** @formatter:off*/
+		String defaultLocationId = jurisdictions
+				.stream()
+				.filter(j -> locationIds.contains(j.getId()))
+				.findFirst()
+				.get().getId();
+		/** @formatter:on*/
+		
 		Set<String> locationParents = new HashSet<>();
 		for (PhysicalLocation jurisdiction : jurisdictions) {
-			JSONObject teamLocation = new JSONObject();
-			teamLocation.put("uuid", locationIds.iterator().next());
-			teamLocation.put("name", jurisdiction.getProperties().getName());
-			teamLocation.put("display", jurisdiction.getProperties().getName());
-			locations.put(teamLocation);
+			JSONObject locationJson = new JSONObject();
+			locationJson.put("uuid",jurisdiction.getId());
+			locationJson.put("name", jurisdiction.getProperties().getName());
+			locationJson.put("display", jurisdiction.getProperties().getName());
+			locations.put(locationJson);
 			locationParents.add(jurisdiction.getProperties().getParentId());
+			if(jurisdiction.getId().equals(defaultLocationId)) {
+				teamLocationJson=locationJson;
+			}
 		}
 		
 		//team location is still returned as 1 object
-		teamJson.put("location", locations.getJSONObject(0));
+		teamJson.put("location", teamLocationJson);
 		teamMemberJson.put("locations", locations);
 		teamMemberJson.put("team", teamJson);
 		

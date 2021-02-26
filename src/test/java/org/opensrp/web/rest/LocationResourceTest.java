@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,6 +53,7 @@ import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2LocationsImportSummary;
 import org.opensrp.connector.dhis2.location.DHISImportLocationsJobStatus;
+import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.StructureDetails;
 import org.opensrp.search.LocationSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -155,12 +157,12 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueId() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenReturn(createLocation());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN, false)).thenReturn(createLocation());
 
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN, false);
 		verifyNoMoreInteractions(locationService);
 		assertEquals(parentJson, result.getResponse().getContentAsString());
 
@@ -168,10 +170,10 @@ public class LocationResourceTest {
 
 	@Test
 	public void testGetLocationByUniqueIdShouldReturnServerError() throws Exception {
-		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN)).thenThrow(new RuntimeException());
+		when(locationService.getLocation("3734", DEFAULT_RETURN_BOOLEAN,false)).thenThrow(new RuntimeException());
 		mockMvc.perform(get(BASE_URL + "/{id}", "3734").param(LocationResource.IS_JURISDICTION, "true"))
 				.andExpect(status().isInternalServerError());
-		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN);
+		verify(locationService).getLocation("3734", DEFAULT_RETURN_BOOLEAN, false);
 		verifyNoMoreInteractions(locationService);
 
 	}
@@ -773,7 +775,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllLocations() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
-		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllLocations(anyBoolean(), anyLong(), anyInt(), anyBoolean()))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")
@@ -781,8 +783,7 @@ public class LocationResourceTest {
 						.param(LocationResource.RETURN_GEOMETRY, "true")
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
-		verify(locationService).findAllLocations(anyBoolean(), anyLong(),
-				anyInt());
+		verify(locationService).findAllLocations(anyBoolean(), anyLong(), anyInt(), anyBoolean());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}
@@ -790,7 +791,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllStructures() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
-		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt(), nullable(Integer.class), nullable(String.class), nullable(String.class)))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")
@@ -799,7 +800,7 @@ public class LocationResourceTest {
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
-				anyInt());
+				anyInt(), nullable(Integer.class), nullable(String.class), nullable(String.class));
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}
@@ -1071,6 +1072,44 @@ public class LocationResourceTest {
 		assertEquals(new Integer(10), summary.getDhisPageCount());
 		assertEquals(new Integer(2), summary.getLastPageSynced());
 		assertEquals(new Integer(200), summary.getNumberOfRowsProcessed());
+	}
+
+	@Test
+	public void testGenerateLocationTreeWithAncestors() throws Exception {
+		Set<LocationDetail> locationDetails = new HashSet<>();
+
+		LocationDetail country = LocationDetail.builder().name("Country 1").id(2l).identifier("1").tags("Country").build();
+		LocationDetail province1 = LocationDetail.builder().name("Province 1").id(3l).identifier("11").parentId("1")
+				.tags("Province").build();
+		LocationDetail province2 = LocationDetail.builder().name("Province 2").id(4l).identifier("12").parentId("1")
+				.tags("Province").build();
+		LocationDetail district1 = LocationDetail.builder().name("District 1").id(5l).identifier("111").parentId("11")
+				.tags("District").build();
+		LocationDetail district2 = LocationDetail.builder().name("District 2").id(6l).identifier("121").parentId("12")
+				.tags("District").build();
+		LocationDetail district3 = LocationDetail.builder().name("District 3").id(7l).identifier("122").parentId("12")
+				.tags("District").build();
+
+		locationDetails.add(country);
+		locationDetails.add(province1);
+		locationDetails.add(province2);
+		locationDetails.add(district1);
+		locationDetails.add(district2);
+		locationDetails.add(district3);
+
+		when(locationService.buildLocationHeirarchyWithAncestors(anyString())).thenReturn(locationDetails);
+
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/heirarchy/ancestors/" + 1))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(locationService).buildLocationHeirarchyWithAncestors(stringCaptor.capture());
+
+		Set<LocationDetail> locationDetailsSet = (Set<LocationDetail>) result.getModelAndView().getModel().get("locationDetailList");
+		assertEquals(6, locationDetailsSet.size());
+		LocationDetail actuallocationDetail = locationDetailsSet.iterator().next();
+		assertEquals("Province 1", actuallocationDetail.getName());
+		assertEquals("Province", actuallocationDetail.getTags());
 	}
 
 }

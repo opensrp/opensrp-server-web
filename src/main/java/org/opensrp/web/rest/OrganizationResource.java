@@ -3,9 +3,14 @@
  */
 package org.opensrp.web.rest;
 
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -109,11 +115,18 @@ public class OrganizationResource {
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<Organization> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID) {
+	public List<Organization> getAllOrganizations(@RequestParam(value = "location_id", required = false) String locationID,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName
+			) {
+		OrganizationSearchBean organizationSearchBean = createOrganizationSearchBeanForPagination(pageNumber, pageSize, orderByType, orderByFieldName);
+
 		if (StringUtils.isNotBlank(locationID)) {
 			return organizationService.selectOrganizationsEncompassLocations(locationID);
 		} else {
-			return organizationService.getAllOrganizations();
+			return organizationService.getAllOrganizations(organizationSearchBean);
 		}
 	}
 	
@@ -188,10 +201,15 @@ public class OrganizationResource {
 	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
-	        @PathVariable("identifier") String identifier) {
+	        @PathVariable("identifier") String identifier,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlans(identifier, true),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(organizationService
+					.findAssignedLocationsAndPlans(identifier, true, pageNumber, pageSize, orderByType, orderByFieldName),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
@@ -226,13 +244,14 @@ public class OrganizationResource {
 		if (!planIdentifiers.isEmpty()) {
 			Set<String> planLocationIds = planService
 			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-			            Collections.singletonList(UserController.JURISDICTION), false)
+			            Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
 			        .stream()
+			        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
 			        .flatMap(plan -> plan.getJurisdiction().stream())
 			        .map(Jurisdiction::getCode)
 			        .collect(Collectors.toSet());
 		
-			Set<PhysicalLocation> planLocations = new HashSet<>(
+			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty()? Collections.emptySet():
 			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
 		}
@@ -269,9 +288,13 @@ public class OrganizationResource {
 	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
 	        MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
-	        @RequestParam(value = "plan") String planIdentifier) {
+	        @RequestParam(value = "plan") String planIdentifier, @RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 		try {
-			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier),
+			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier,
+					pageNumber, pageSize, orderByType, orderByFieldName),
 			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
@@ -295,6 +318,19 @@ public class OrganizationResource {
 		headers.add(TOTAL_RECORDS, String.valueOf(total));
 		return new ResponseEntity<>(objectMapper.writeValueAsString(organizations), headers, HttpStatus.OK);
 		
+	}
+
+	private OrganizationSearchBean createOrganizationSearchBeanForPagination(Integer pageNumber, Integer pageSize,
+			String orderByType, String orderByFieldName) {
+		OrganizationSearchBean organizationSearchBean = new OrganizationSearchBean();
+		OrganizationSearchBean.OrderByType orderByTypeEnum = orderByType != null ? OrganizationSearchBean.OrderByType.valueOf(orderByType) : OrganizationSearchBean.OrderByType.DESC;
+		OrganizationSearchBean.FieldName fieldName = orderByFieldName != null ? OrganizationSearchBean.FieldName.valueOf(orderByFieldName) : OrganizationSearchBean.FieldName.id;
+		organizationSearchBean.setPageNumber(pageNumber);
+		organizationSearchBean.setPageSize(pageSize);
+		organizationSearchBean.setOrderByFieldName(fieldName);
+        organizationSearchBean.setOrderByType(orderByTypeEnum);
+
+		return organizationSearchBean;
 	}
 	
 }
