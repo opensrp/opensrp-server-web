@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -180,8 +181,14 @@ public class MultimediaController {
 	 * @throws Exception
 	 */
 	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) throws IOException {
+		Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(baseEntityId));
+		String extension = "";
+		if (multimedia != null && multimedia.getContentType() != null) {
+			extension = getFileExtension(multimedia);
+		}
+		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
 		File file = multimediaService.retrieveFile(
-		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + ".jpg");
+		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension);
 		if (file != null) {
 			downloadFile(file, response);
 		} else {
@@ -253,5 +260,30 @@ public class MultimediaController {
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
 		outputStream.close();
+	}
+
+	private String getFileExtension(Multimedia multimedia) {
+		String fileExt = "";
+		switch (multimedia.getContentType()) {
+
+			case "application/octet-stream":
+				fileExt = ".mp4";
+				break;
+			case "image/jpeg":
+				fileExt = ".jpg";
+				break;
+			case "image/gif":
+				fileExt = ".gif";
+				break;
+			case "image/png":
+				fileExt = ".png";
+				break;
+			case "text/csv":
+				fileExt = ".csv";
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown content type : " + multimedia.getContentType());
+		}
+		return fileExt;
 	}
 }
