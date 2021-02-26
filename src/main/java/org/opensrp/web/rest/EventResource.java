@@ -675,6 +675,7 @@ public class EventResource extends RestResource<Event> {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		String formatted = "";
 		boolean firstTime = firstTimeForImages;
+		String tempDirectory = System.getProperty("java.io.tmpdir");
 		if (eventType.equals("flag_problem")) {
 
 			ExportImagesSummary exportImagesSummary =
@@ -684,7 +685,7 @@ public class EventResource extends RestResource<Event> {
 			if (firstTime) {
 				formatted = df.format(new Date());
 				imagesDirectoryName = SAMPLE_CSV_FILE + missionName + "_Flag_Problem_Photos_" + formatted;
-				imagesDirectory = new File(imagesDirectoryName + "/");
+				imagesDirectory = new File(tempDirectory, imagesDirectoryName + "/");
 				imagesDirectory.mkdirs();
 				firstTime = false;
 			}
@@ -714,7 +715,7 @@ public class EventResource extends RestResource<Event> {
 								.getStockId() + extension);
 				if (file != null) {
 					FileUtils.copyFile(file, childFile);
-					writeToZipFile(null, zipOS, childFile.getPath());
+					writeToZipFile(childFile.getName(), zipOS, childFile.getAbsolutePath());
 				}
 			}
 
