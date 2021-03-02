@@ -5,7 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -77,22 +80,16 @@ public class PractitionerRoleResource {
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> create(@RequestBody String entity) {
-        try {
-            PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
-            practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner role representation" ,e );
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  catch (IllegalArgumentException e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        return savePractitionerRole(entity);
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> update(@RequestBody String entity) {
+        return savePractitionerRole(entity);
+    }
+
+    private ResponseEntity<String> savePractitionerRole(@RequestBody String entity) {
         try {
             PractitionerRole practitionerRole = gson.fromJson(entity, PractitionerRole.class);
             practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
@@ -102,30 +99,38 @@ public class PractitionerRoleResource {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
 
     @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> batchSave(@RequestBody String entity) {
         try {
+            Set<String> unprocessedIds = new HashSet<>();
             Type listType = new TypeToken<List<PractitionerRole>>() {
             }.getType();
 
             List<PractitionerRole> practitionerRoles = gson.fromJson(entity, listType);
 
             for (PractitionerRole practitionerRole: practitionerRoles) {
-                practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+                try {
+                    practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
+                } catch (Exception exception){
+                    unprocessedIds.add(practitionerRole.getIdentifier());
+                }
             }
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            if (unprocessedIds.isEmpty())
+                return new ResponseEntity<>("All Practitioner Roles processed", HttpStatus.CREATED);
+            else
+                return new ResponseEntity<>("Practitioner IDs NOT processed: " + String.join(",", unprocessedIds),
+                        HttpStatus.CREATED);
         } catch (JsonSyntaxException e) {
             logger.error("The request doesn't contain a valid practitioner role representation" , e );
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }  catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -137,7 +142,7 @@ public class PractitionerRoleResource {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -150,7 +155,7 @@ public class PractitionerRoleResource {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
