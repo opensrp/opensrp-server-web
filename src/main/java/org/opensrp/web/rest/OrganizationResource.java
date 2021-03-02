@@ -1,22 +1,10 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.opensrp.api.domain.User;
@@ -43,15 +31,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.opensrp.web.Constants.*;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -332,5 +317,24 @@ public class OrganizationResource {
 
 		return organizationSearchBean;
 	}
-	
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> saveMultipleOrganizations(@RequestBody Organization[] organizations) {
+		Set<String> unProcessedIds = new HashSet<>();
+		for (Organization organization : organizations) {
+			try {
+				organizationService.addOrUpdateOrganization(organization);
+			} catch (Exception exception) {
+				unProcessedIds.add(organization.getIdentifier());
+			}
+		}
+
+		if (unProcessedIds.isEmpty())
+			return new ResponseEntity<>("All Organizations  processed", HttpStatus.CREATED);
+		else
+			return new ResponseEntity<>("Organizations Ids not processed: " + String.join(",", unProcessedIds),
+					HttpStatus.CREATED);
+
+	}
 }
