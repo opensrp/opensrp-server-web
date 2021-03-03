@@ -6,6 +6,9 @@ import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
 import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
@@ -446,7 +449,10 @@ public class LocationResource {
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
 			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
 			@RequestParam(value = LIMIT, required = false) Integer limit,
-			@RequestParam(value = INCLUDE_INACTIVE, required = false) boolean includeInactive) {
+			@RequestParam(value = INCLUDE_INACTIVE, required = false) boolean includeInactive,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
@@ -456,7 +462,7 @@ public class LocationResource {
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
+					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit, pageNumber, orderByType, orderByFieldName)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 

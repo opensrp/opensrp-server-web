@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -20,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
@@ -142,6 +144,21 @@ public class MultimediaControllerTest {
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf"))
 		        .andExpect(content().string("Sorry. File Name should not contain any special character")).andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
+	}
+
+	@Test
+	public void testDownloadFilesWithFileDoesNotExistsError() throws Exception {
+		File file = mock(File.class);
+		Multimedia multimedia = new Multimedia();
+		multimedia.setOriginalFileName("test.png");
+		multimedia.setCaseId("1");
+		multimedia.setContentType("image/png");
+		multimedia.setFileCategory("catalog_image");
+		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+		when(file.getName()).thenReturn("testFile" + "\r" + ".png");
+		mockMvc.perform(get(BASE_URL + "/media/{entity-id}", "entity-id"))
+				.andExpect(content().string("Sorry. The file you are looking for does not exist")).andReturn();
+		verify(multimediaService).findByCaseId(anyString());
 	}
 	
 }

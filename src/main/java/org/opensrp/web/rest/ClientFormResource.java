@@ -218,8 +218,8 @@ public class ClientFormResource {
         }
 
         String fileContentType = jsonFile.getContentType();
-        if (!(isClientFormContentTypeValid(fileContentType) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
-            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file", HttpStatus.BAD_REQUEST);
+        if (!(isClientFormContentTypeValid(fileContentType, jsonFile.getOriginalFilename()) || isPropertiesFile(fileContentType, jsonFile.getOriginalFilename()))) {
+            return new ResponseEntity<>("The form is not a JSON/Properties/Yaml file.", HttpStatus.BAD_REQUEST);
         }
 
         if (jsonFile.isEmpty()) {
@@ -239,12 +239,12 @@ public class ClientFormResource {
         String fileContentString = new String(bytes);
 
         ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType,
-                fileContentString);
+                fileContentString,  jsonFile.getOriginalFilename());
         if (errorMessageForInvalidContent1 != null)
             return errorMessageForInvalidContent1;
 
         ResponseEntity<String> errorMessage = checkJsonFormsReferenceValidity(identifier, isJsonValidator,
-                fileContentType, fileContentString);
+                fileContentType, fileContentString, jsonFile.getOriginalFilename());
         if (errorMessage != null)
             return errorMessage;
 
@@ -335,7 +335,7 @@ public class ClientFormResource {
 
     private ResponseEntity<String> checkJsonFormsReferenceValidity(
             @RequestParam(value = "form_identifier", required = false) String formIdentifier,
-            boolean isJsonValidator, String fileContentType, String fileContentString) throws JsonProcessingException {
+            boolean isJsonValidator, String fileContentType, String fileContentString, String fileName) throws JsonProcessingException {
         if (isJsonFile(fileContentType) && !isJsonValidator) {
             HashSet<String> missingSubFormReferences = clientFormValidator.checkForMissingFormReferences(fileContentString);
             HashSet<String> missingRuleFileReferences = clientFormValidator.checkForMissingRuleReferences(fileContentString);
@@ -366,7 +366,7 @@ public class ClientFormResource {
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
         }
-        else if (isYamlContentType(fileContentType)) {
+        else if (isYamlContentType(fileContentType,  fileName)) {
 	        HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
 	        if (!missingPropertyFileReferences.isEmpty()) {
 		        String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
@@ -376,8 +376,8 @@ public class ClientFormResource {
         return null;
     }
 
-	private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString) {
-		String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType);
+	private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString, @NonNull String fileName) {
+		String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType, fileName);
 		if (errorMessageForInvalidContent != null) {
 			return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
 		}
@@ -386,7 +386,7 @@ public class ClientFormResource {
 
     @VisibleForTesting
     @Nullable
-    protected String checkValidJsonYamlPropertiesStructure(@NonNull String fileContentString, @NonNull String contentType) {
+    protected String checkValidJsonYamlPropertiesStructure(@NonNull String fileContentString, @NonNull String contentType, @NonNull String fileName) {
         if (isJsonFile(contentType)) {
             try {
                 new JSONObject(fileContentString);
@@ -395,7 +395,7 @@ public class ClientFormResource {
                 logger.error("JSON File upload is invalid JSON", ex);
                 return ex.getMessage();
             }
-        } else if (isYamlContentType(contentType)) {
+        } else if (isYamlContentType(contentType,fileName)) {
             String errorMessage;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
@@ -429,17 +429,18 @@ public class ClientFormResource {
     }
 
     @VisibleForTesting
-    protected boolean isClientFormContentTypeValid(@Nullable String fileContentType) {
+    protected boolean isClientFormContentTypeValid(@Nullable String fileContentType, @NonNull String fileName) {
         return fileContentType != null && (isJsonFile(fileContentType) ||
-                isYamlContentType(fileContentType));
+                isYamlContentType(fileContentType, fileName));
     }
 
     private boolean isJsonFile(@Nullable String fileContentType) {
         return fileContentType.equals(ContentType.APPLICATION_JSON.getMimeType());
     }
 
-    private boolean isYamlContentType(@NonNull String fileContentType) {
-        return fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML);
+    private boolean isYamlContentType(@NonNull String fileContentType, @NonNull String fileName) {
+        return fileContentType.equals(Constants.ContentType.APPLICATION_YAML) || fileContentType.equals(Constants.ContentType.TEXT_YAML)
+                || (fileContentType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType()) && (fileName.endsWith(".yml") || fileName.endsWith(".yaml")));
     }
 
     @VisibleForTesting
