@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
