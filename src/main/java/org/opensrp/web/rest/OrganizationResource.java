@@ -326,6 +326,7 @@ public class OrganizationResource {
 			try {
 				organizationService.addOrUpdateOrganization(organization);
 			} catch (Exception exception) {
+				logger.error(exception.getMessage(), exception);
 				unProcessedIds.add(organization.getIdentifier());
 			}
 		}

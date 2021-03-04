@@ -143,6 +143,7 @@ public class PractitionerResource {
                 try {
                     practitionerService.addOrUpdatePractitioner(practitioner);
                 } catch (Exception exception){
+                    logger.error(exception.getMessage(), exception);
                     unprocessedIds.add(practitioner.getIdentifier());
                 }
             }
@@ -153,8 +154,7 @@ public class PractitionerResource {
                 return new ResponseEntity<>("Practitioners Ids not processed: " + String.join(",", unprocessedIds),
                         HttpStatus.CREATED);
 
-        }
-        catch (JsonSyntaxException e) {
+        } catch (JsonSyntaxException e) {
             logger.error("The request doesnt contain a valid practitioner representation",e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

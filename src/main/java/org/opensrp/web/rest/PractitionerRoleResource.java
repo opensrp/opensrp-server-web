@@ -117,6 +117,7 @@ public class PractitionerRoleResource {
                 try {
                     practitionerRoleService.addOrUpdatePractitionerRole(practitionerRole);
                 } catch (Exception exception){
+                    logger.error(exception.getMessage(), exception);
                     unprocessedIds.add(practitionerRole.getIdentifier());
                 }
             }
