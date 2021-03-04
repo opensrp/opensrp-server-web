@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.Practitioner;
@@ -12,7 +14,6 @@ import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ import static org.opensrp.web.Constants.PAGE_SIZE;
 @RequestMapping(value = "/rest/practitioner")
 public class PractitionerResource {
 
-    private static Logger logger = LoggerFactory.getLogger(PractitionerResource.class.toString());
+    private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
 
     public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();

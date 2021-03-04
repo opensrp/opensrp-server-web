@@ -23,6 +23,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -36,8 +38,6 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.smartregister.utils.DateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,7 +56,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/repidpro")
 public class RapidProResource {
 
-	private static Logger logger = LoggerFactory.getLogger(RapidProResource.class.toString());
+	private static Logger logger = LogManager.getLogger(RapidProResource.class.toString());
 
 	private EventService eventService;
 

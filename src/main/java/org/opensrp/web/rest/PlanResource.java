@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
@@ -28,8 +30,6 @@ import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ import com.google.gson.annotations.SerializedName;
 @RequestMapping(value = "/rest/plans")
 public class PlanResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(PlanResource.class.toString());
+	private static Logger logger = LogManager.getLogger(PlanResource.class.toString());
 	
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
 	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();

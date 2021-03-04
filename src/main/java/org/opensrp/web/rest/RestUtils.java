@@ -17,6 +17,8 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -25,7 +27,6 @@ import org.opensrp.api.domain.User;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -36,7 +37,7 @@ public class RestUtils {
 	public static final String DATETIME_FORMAT = "dd-MM-yyyy HH:mm";
 	public static final SimpleDateFormat SDTF = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
-	private static final Logger logger = LoggerFactory.getLogger(RestUtils.class.toString());
+	private static final Logger logger = LogManager.getLogger(RestUtils.class.toString());
 
 
 	public static String getStringFilter(String filter, HttpServletRequest req)

@@ -1,7 +1,7 @@
 package org.opensrp.web.config.security.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class CrossSiteScriptingPreventionFilter implements Filter {
 
-	private static Logger logger = LoggerFactory.getLogger(CrossSiteScriptingPreventionFilter.class);
+	private static Logger logger = LogManager.getLogger(CrossSiteScriptingPreventionFilter.class);
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
