@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
