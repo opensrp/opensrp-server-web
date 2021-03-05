@@ -1,13 +1,14 @@
 package org.opensrp.web.config;
 
-import io.sentry.Sentry;
-import io.sentry.spring.EnableSentry;
+import javax.annotation.PostConstruct;
+
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-
-import javax.annotation.PostConstruct;
+import io.sentry.Sentry;
+import io.sentry.spring.EnableSentry;
 
 @EnableSentry
 @Configuration
@@ -20,12 +21,17 @@ public class SentryConfiguration {
 	private String release;
 
 	@PostConstruct
-	public void initialize(){
-		if(StringUtils.isNotBlank(dsn)) {
-			Sentry.init(sentryOptions -> {
-				sentryOptions.setDsn(dsn);
-				sentryOptions.setRelease(release);
-			});
+	public void initialize() {
+		if (StringUtils.isNotBlank(dsn)) {
+			initializeSentry();
 		}
+	}
+
+	@VisibleForTesting
+	protected void initializeSentry() {
+		Sentry.init(sentryOptions -> {
+			sentryOptions.setDsn(dsn);
+			sentryOptions.setRelease(release);
+		});
 	}
 }
