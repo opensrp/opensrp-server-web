@@ -13,10 +13,10 @@ import javax.annotation.PostConstruct;
 @Configuration
 public class SentryConfiguration {
 
-	@Value("${sentry.dsn}")
+	@Value("#{opensrp['sentry.dsn'] ?: ''}")
 	private String dsn;
 
-	@Value("${sentry.release}")
+	@Value("#{opensrp['sentry.release'] ?: ''}")
 	private String release;
 
 	@PostConstruct
