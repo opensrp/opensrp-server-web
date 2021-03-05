@@ -7,10 +7,16 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.internal.WhiteboxImpl;
 
 import io.sentry.Sentry;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Sentry.class)
 public class SentryConfigurationTest {
 	
 	private SentryConfiguration sentryConfiguration;
@@ -29,9 +35,9 @@ public class SentryConfigurationTest {
 	
 	@Test
 	public void testInitializeShouldInitializeSentryIfDsnIsNotEmpty() {
-		WhiteboxImpl.setInternalState(sentryConfiguration, "dsn", "https://examplePublicKey@o0.ingest.sentry.io/0");
+		PowerMockito.mockStatic(Sentry.class);
+		WhiteboxImpl.setInternalState(sentryConfiguration, "dsn", "https://examplePublicKey.sdsd.w/0");
 		sentryConfiguration.initialize();
 		verify(sentryConfiguration, atMostOnce()).initializeSentry();
-		Sentry.close();
 	}
 }
