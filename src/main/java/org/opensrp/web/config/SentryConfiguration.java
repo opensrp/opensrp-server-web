@@ -2,6 +2,7 @@ package org.opensrp.web.config;
 
 import io.sentry.Sentry;
 import io.sentry.spring.EnableSentry;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,9 +21,11 @@ public class SentryConfiguration {
 
 	@PostConstruct
 	public void initialize(){
-		Sentry.init(sentryOptions -> {
-			sentryOptions.setDsn(dsn);
-			sentryOptions.setRelease(release);
-		});
+		if(StringUtils.isNotBlank(dsn)) {
+			Sentry.init(sentryOptions -> {
+				sentryOptions.setDsn(dsn);
+				sentryOptions.setRelease(release);
+			});
+		}
 	}
 }
