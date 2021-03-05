@@ -26,8 +26,8 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.9.2-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.2.0-SNAPSHOT</opensrp.connector.version>
+		<opensrp.core.version>2.9.1-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.2.2-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
 		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
 		<powermock.version>2.0.5</powermock.version>
@@ -380,7 +380,16 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>6.0.18.Final</version>
 		</dependency>
-
+		<dependency>
+			<groupId>io.sentry</groupId>
+			<artifactId>sentry-spring</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.sentry</groupId>
+			<artifactId>sentry-log4j2</artifactId>
+			<version>4.2.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -485,7 +494,7 @@
 						</systemProperty>
 						<systemProperty>
 							<name>log4j.configuration</name>
-							<value>file:${main.basedir}/configs/assets/config/log4j.xml</value>
+							<value>file:${main.basedir}/configs/assets/config/log4j2.xml</value>
 						</systemProperty>
 					</systemProperties>
 					<webAppConfig>

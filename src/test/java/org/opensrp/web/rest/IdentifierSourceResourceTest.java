@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,8 @@ import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,10 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -48,7 +55,7 @@ public class IdentifierSourceResourceTest {
 
 	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
 
-	private String BASE_URL = "/rest/identifier-source";
+	private final String BASE_URL = "/rest/identifier-source";
 
 	@Before
 	public void setUp() throws Exception {
@@ -91,6 +98,28 @@ public class IdentifierSourceResourceTest {
 		}
 		JsonNode actualObj = mapper.readTree(responseString);
 		assertEquals(actualObj.get("id").asInt(),1);
+	}
+
+	@Test
+	public void testCreateIdentifierSourceShouldInvokeAddMethod() throws Exception {
+		IdentifierSource identifierSource = createIdentifierSource();
+		doNothing().when(identifierSourceService).add(any(IdentifierSource.class));
+		MvcResult result = mockMvc.perform(post(BASE_URL, new Gson().toJson(identifierSource))
+				             .contentType(MediaType.APPLICATION_JSON))
+							.andExpect(status().isCreated())
+							.andReturn();
+     	assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+	}
+
+	@Test
+	public void testUpdateIdentifierSourceShouldInvokeUpdateMethod() throws Exception {
+		IdentifierSource identifierSource = createIdentifierSource();
+		doNothing().when(identifierSourceService).update(any(IdentifierSource.class));
+		MvcResult result = mockMvc.perform(put(BASE_URL, new Gson().toJson(identifierSource))
+				             .contentType(MediaType.APPLICATION_JSON))
+							.andExpect(status().isCreated())
+							.andReturn();
+		assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
 	}
 
 	private IdentifierSource createIdentifierSource() {
