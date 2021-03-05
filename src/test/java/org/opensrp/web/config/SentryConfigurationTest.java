@@ -3,9 +3,11 @@ package org.opensrp.web.config;
 import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import io.sentry.Sentry;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.reflect.internal.WhiteboxImpl;
@@ -28,9 +30,9 @@ public class SentryConfigurationTest {
 	
 	@Test
 	public void testInitializeShouldInitializeSentryIfDsnIsNotEmpty() {
-		WhiteboxImpl.setInternalState(sentryConfiguration, "dsn", "http://23232323.sentry.io/343");
-		doNothing().when(sentryConfiguration).initializeSentry();
+		WhiteboxImpl.setInternalState(sentryConfiguration,"dsn","https://examplePublicKey@o0.ingest.sentry.io/0");
 		sentryConfiguration.initialize();
 		verify(sentryConfiguration, atMostOnce()).initializeSentry();
+		Sentry.close();
 	}
 }
