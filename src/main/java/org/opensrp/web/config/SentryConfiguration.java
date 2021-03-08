@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import io.sentry.Sentry;
-import io.sentry.spring.EnableSentry;
 
-@EnableSentry
 @Configuration
 public class SentryConfiguration {
 
