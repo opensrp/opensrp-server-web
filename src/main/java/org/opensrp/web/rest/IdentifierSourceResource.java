@@ -1,9 +1,9 @@
 package org.opensrp.web.rest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.IdentifierSource;
 import org.opensrp.service.IdentifierSourceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/identifier-source")
 public class IdentifierSourceResource {
 
-	private static Logger logger = LoggerFactory.getLogger(IdentifierSourceResource.class.toString());
+	private static Logger logger = LogManager.getLogger(IdentifierSourceResource.class.toString());
 
 	@Autowired
 	private IdentifierSourceService identifierSourceService;

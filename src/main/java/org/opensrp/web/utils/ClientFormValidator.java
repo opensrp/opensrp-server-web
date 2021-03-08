@@ -11,12 +11,13 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
@@ -34,7 +35,7 @@ public class ClientFormValidator {
     private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
     private ClientFormService clientFormService;
     private static String PROPERTIES_FILE_NAME = "properties_file_name";
-    private static Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
+    private static Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;

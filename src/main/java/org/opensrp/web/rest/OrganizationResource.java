@@ -19,10 +19,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -31,8 +33,6 @@ import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.controller.UserController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
@@ -60,7 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping(value = "/rest/organization")
 public class OrganizationResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(OrganizationResource.class.toString());
+	private static Logger logger = LogManager.getLogger(OrganizationResource.class.toString());
 	
 	private OrganizationService organizationService;
 	

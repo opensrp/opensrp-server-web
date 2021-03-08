@@ -8,13 +8,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.domain.Report;
 import org.opensrp.service.ReportService;
 import org.smartregister.utils.DateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/report/")
 public class ReportResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(ReportResource.class.toString());
+	private static Logger logger = LogManager.getLogger(ReportResource.class.toString());
 	
 	private ReportService reportService;
 	

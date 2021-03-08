@@ -34,6 +34,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -45,8 +47,6 @@ import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.Constants;
 import org.smartregister.utils.DateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -75,9 +75,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
 
-	private static final Logger logger = LoggerFactory.getLogger(StockResource.class.toString());
+	private static Logger logger = LogManager.getLogger(StockResource.class.toString());
 
-	private final StockService stockService;
+	private StockService stockService;
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -99,14 +99,15 @@ public class StockResource extends RestResource<Stock> {
 	/**
 	 * Fetch all the stocks
 	 *
+	 * @param none
 	 * @return a map response with stocks, and optionally msg when an error occurs
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
 	protected ResponseEntity<String> getAll() {
-		Map<String, Object> response = new HashMap<>();
+		Map<String, Object> response = new HashMap<String, Object>();
 		try {
-			List<Stock> stocks;
+			List<Stock> stocks = new ArrayList<Stock>();
 			stocks = stockService.findAllStocks();
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
@@ -139,14 +140,14 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch stocks ordered by serverVersion ascending order
-	 * 
+	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error
 	 *         occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
-		Map<String, Object> response = new HashMap<>();
+		Map<String, Object> response = new HashMap<String, Object>();
 
 		try {
 			StockSearchBean searchBean = populateSearchBean(request);
@@ -168,20 +169,20 @@ public class StockResource extends RestResource<Stock> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("stocks")) {
-				return new ResponseEntity<>(BAD_REQUEST);
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("stocks")) {
+			return new ResponseEntity<>(BAD_REQUEST);
+		}
+		ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
+				new TypeToken<ArrayList<Stock>>() {
+				}.getType());
+		for (Stock stock : stocks) {
+			try {
+				stockService.addorUpdateStock(stock);
+			} catch (Exception e) {
+				logger.error("Stock" + stock.getId() + " failed to sync", e);
 			}
-			ArrayList<Stock> stocks = gson.fromJson(syncData.getJSONArray("stocks").toString(),
-					new TypeToken<ArrayList<Stock>>() {
-					}.getType());
-			for (Stock stock : stocks) {
-				try {
-					stockService.addorUpdateStock(stock);
-				} catch (Exception e) {
-					logger.error("Stock" + stock.getId() + " failed to sync", e);
-				}
-			}
+		}
 		return new ResponseEntity<>(CREATED);
 	}
 
@@ -377,18 +378,18 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, URI uri) throws IOException {
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
-				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
-			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
-			csvPrinter.printRecord("\n");
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
+		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+		csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+		csvPrinter.printRecord("\n");
 
-			csvPrinter.printRecord("Row Number", "Reason of Failure");
-			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
-				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
-			}
-			writer.flush();
-			csvPrinter.flush();
+		csvPrinter.printRecord("Row Number", "Reason of Failure");
+		for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+			csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
+		}
+		writer.flush();
+		csvPrinter.flush();
 	}
 
 	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
