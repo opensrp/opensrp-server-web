@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpMethod;
 
 import com.google.common.base.Function;
@@ -40,7 +40,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 
 public class GzipBodyDecompressFilter implements Filter {
 	
-	private static Logger logger = LoggerFactory.getLogger(GzipBodyDecompressFilter.class.toString());
+	private static Logger logger = LogManager.getLogger(GzipBodyDecompressFilter.class.toString());
 	
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {//do nothing

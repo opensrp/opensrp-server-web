@@ -2,6 +2,8 @@ package org.opensrp.web.listener;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.opensrp.common.util.DateUtil;
 import org.opensrp.connector.domain.Camp;
@@ -11,7 +13,6 @@ import org.opensrp.connector.rapidpro.MessageType;
 import org.opensrp.connector.repository.couch.AllCamp;
 import org.smartregister.domain.Event;
 import org.opensrp.service.EventService;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -25,7 +26,7 @@ public class RapidproMessageListener {
 	
 	private MessageService messageService;
 	
-	private static Logger logger = LoggerFactory.getLogger(RapidproMessageListener.class.toString());
+	private static Logger logger = LogManager.getLogger(RapidproMessageListener.class.toString());
 	
 	@Autowired
 	private AllCamp allCamp;

@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.opensrp.api.domain.Location;
 import org.opensrp.api.util.LocationTree;
@@ -18,8 +20,6 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.rest.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,7 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
 
-	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+	private static final Logger logger = LogManager.getLogger(SettingResource.class.toString());
 
 	public static final String SETTING_IDENTIFIER = "identifier";
 
