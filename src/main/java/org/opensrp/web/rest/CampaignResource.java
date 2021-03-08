@@ -4,6 +4,8 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -11,8 +13,6 @@ import org.opensrp.domain.Campaign;
 import org.opensrp.service.CampaignService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,7 +30,7 @@ import com.google.gson.JsonSyntaxException;
 @Controller
 @RequestMapping(value = "/rest/campaign")
 public class CampaignResource {
-	private static Logger logger = LoggerFactory.getLogger(CampaignResource.class.toString());
+	private static Logger logger = LogManager.getLogger(CampaignResource.class.toString());
 
 	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 			.registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();

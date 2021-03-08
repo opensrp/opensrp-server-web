@@ -19,11 +19,11 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.util.TextUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -44,7 +44,7 @@ import java.util.Date;
 @RequestMapping("/multimedia")
 public class MultimediaController {
 	
-	private static Logger logger = LoggerFactory.getLogger(MultimediaController.class.toString());
+	private static Logger logger = LogManager.getLogger(MultimediaController.class.toString());
 	
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
