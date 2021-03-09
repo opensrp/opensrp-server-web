@@ -87,7 +87,7 @@ public class SettingResource {
 	}
 
 	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
-		LocationTree locationTree = physicalLocationService.buildLocationHierachyFromLocation(locationId, false);
+		LocationTree locationTree = physicalLocationService.buildLocationTreeHierachyWithAncestors(locationId, false);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
 		if (locationTree != null) {
 			treeNodeHashMap = locationTree.getLocationsHierarchy();
