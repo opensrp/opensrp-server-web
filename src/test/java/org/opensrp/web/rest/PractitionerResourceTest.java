@@ -36,9 +36,9 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private PractitionerService practitionerService;
 
-    private ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
+    private final ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
 
-    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
 
@@ -96,6 +96,15 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
     }
 
+
+    @Test
+    public void testGetPractitionerByUniqueIdSWithBlankIdentifierShouldReturnAnError() throws Exception {
+        String actualPractitionersString = getResponseAsString(BASE_URL + " ", null,
+                MockMvcResultMatchers.status().isBadRequest());
+        String  actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {}.getType());
+        assertNotNull(actualPractitioner);
+        assertEquals("Practitioner Id is required", actualPractitioner);
+    }
     @Test
     public void testGetPractitionerByUserIdShouldReturnCorrectPractititoner() throws Exception {
         List<Practitioner> expectedPractitioners = new ArrayList<>();
@@ -124,17 +133,16 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     @Test
     public void testGetPractitionerByUserIdWithBlankIdentifierShouldReturnAnError() throws Exception {
-        doReturn("The User Id is required").when(practitionerService).getPractitionerByUserId(anyString());
-
-        String actualPractitionersString = getResponseAsString(BASE_URL + "/user/" + "user1", null,
-                MockMvcResultMatchers.status().isOk());
-        assertNotNull(actualPractitionersString);
-        assertEquals("The User Id is required", actualPractitionersString);
+        String actualPractitionersString = getResponseAsString(BASE_URL + "/user/" + " ", null,
+                MockMvcResultMatchers.status().isBadRequest());
+        String  actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {}.getType());
+        assertNotNull(actualPractitioner);
+        assertEquals("The User Id is required", actualPractitioner);
     }
 
     @Test
     public void testCreateShouldCreateNewPractitionerResource() throws Exception {
-        doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner(any());
 
         Practitioner expectedPractitioner = initTestPractitioner1();
 
@@ -170,7 +178,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     @Test
     public void testCreateWithInternalError() throws Exception {
-        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner(any());
         postRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerService);
@@ -179,7 +187,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     @Test
     public void testCreateWithJsonSyntaxException() throws Exception {
         doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService)
-                .addOrUpdatePractitioner((Practitioner) any());
+                .addOrUpdatePractitioner(any());
         postRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerService);
@@ -187,7 +195,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     @Test
     public void testUpdateWithInternalError() throws Exception {
-        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
+        doThrow(new IllegalArgumentException()).when(practitionerService).addOrUpdatePractitioner(any());
         putRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerService);
@@ -196,7 +204,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     @Test
     public void testUpdateWithJsonSyntaxException() throws Exception {
         doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService)
-                .addOrUpdatePractitioner((Practitioner) any());
+                .addOrUpdatePractitioner(any());
         putRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerService);
