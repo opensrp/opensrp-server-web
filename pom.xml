@@ -5,36 +5,36 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.smartregister</groupId>
 
-	<artifactId>opensrp-server-web</artifactId>
-	<packaging>war</packaging>
-	<version>2.5.5-SNAPSHOT</version>
-	<name>opensrp-server-web</name>
-	<description>OpenSRP Server Web Application</description>
-	<url>https://github.com/OpenSRP/opensrp-server-web</url>
+    <artifactId>opensrp-server-web</artifactId>
+    <packaging>war</packaging>
+    <version>2.5.5-SNAPSHOT</version>
+    <name>opensrp-server-web</name>
+    <description>OpenSRP Server Web Application</description>
+    <url>https://github.com/OpenSRP/opensrp-server-web</url>
 
-	<properties>
-		<jetty.port>9979</jetty.port>
-		<main.basedir>${project.basedir}</main.basedir>
-		<hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.2.4.RELEASE</spring.version>
-		<spring.security.version>5.3.3.RELEASE</spring.security.version>
-		<spring.security.oauth.version>2.4.0.RELEASE</spring.security.oauth.version>
-		<spring.fox.swagger.version>2.9.2</spring.fox.swagger.version>
-		<spring.data.redis>2.2.4.RELEASE</spring.data.redis>
-		<redis.jedis.version>3.2.0</redis.jedis.version>
-		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
-		<opensrp.updatePolicy>always</opensrp.updatePolicy>
-		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.9.3-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.2.2-SNAPSHOT</opensrp.connector.version>
-		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
-		<opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
-		<powermock.version>2.0.5</powermock.version>
-		<opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
-		<opensrp-server-openlmis-stock-version>1.0.3-SNAPSHOT</opensrp-server-openlmis-stock-version>
-		<lombok.version>1.18.12</lombok.version>
-	</properties>
+    <properties>
+        <jetty.port>9979</jetty.port>
+        <main.basedir>${project.basedir}</main.basedir>
+        <hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>5.2.4.RELEASE</spring.version>
+        <spring.security.version>5.3.3.RELEASE</spring.security.version>
+        <spring.security.oauth.version>2.4.0.RELEASE</spring.security.oauth.version>
+        <spring.fox.swagger.version>2.9.2</spring.fox.swagger.version>
+        <spring.data.redis>2.2.4.RELEASE</spring.data.redis>
+        <redis.jedis.version>3.2.0</redis.jedis.version>
+        <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
+        <opensrp.updatePolicy>always</opensrp.updatePolicy>
+        <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
+        <opensrp.core.version>2.9.3-SNAPSHOT</opensrp.core.version>
+        <opensrp.connector.version>2.2.2-SNAPSHOT</opensrp.connector.version>
+        <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
+        <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
+        <powermock.version>2.0.5</powermock.version>
+        <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
+        <opensrp-server-openlmis-stock-version>1.0.3-SNAPSHOT</opensrp-server-openlmis-stock-version>
+        <lombok.version>1.18.12</lombok.version>
+    </properties>
 
     <distributionManagement>
         <snapshotRepository>

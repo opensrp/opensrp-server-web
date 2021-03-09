@@ -85,6 +85,30 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     @Test
+    public void testGetPractitionerByUserIdShouldReturnCorrectPractititoner() throws Exception {
+        List<Practitioner> expectedPractitioners =  new ArrayList<>();
+
+        Practitioner expectedPractitioner = initTestPractitioner1();
+        expectedPractitioners.add(expectedPractitioner);
+
+        List<String> practitionerIdList = new ArrayList<>();
+        practitionerIdList.add(expectedPractitioner.getIdentifier());
+
+        doReturn(expectedPractitioner).when(practitionerService).getPractitionerByUserId(anyString());
+
+        String actualPractitionersString = getResponseAsString(BASE_URL + "/user/" + "user1", null,
+                MockMvcResultMatchers.status().isOk());
+        Practitioner actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<Practitioner>(){}.getType());
+
+        assertNotNull(actualPractitioner);
+        assertEquals(actualPractitioner.getIdentifier(), expectedPractitioner.getIdentifier());
+        assertEquals(actualPractitioner.getUserId(), expectedPractitioner.getUserId());
+        assertEquals(actualPractitioner.getName(), expectedPractitioner.getName());
+        assertEquals(actualPractitioner.getUsername(), expectedPractitioner.getUsername());
+        assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
+    }
+
+    @Test
     public void testCreateShouldCreateNewPractitionerResource() throws Exception {
         doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner((Practitioner) any());
 
