@@ -98,7 +98,7 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch all the stocks
-	 * 
+	 *
 	 * @param none
 	 * @return a map response with stocks, and optionally msg when an error occurs
 	 */
@@ -140,7 +140,7 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch stocks ordered by serverVersion ascending order
-	 * 
+	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error
 	 *         occurs
@@ -169,20 +169,20 @@ public class StockResource extends RestResource<Stock> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("stocks")) {
-				return new ResponseEntity<>(BAD_REQUEST);
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("stocks")) {
+			return new ResponseEntity<>(BAD_REQUEST);
+		}
+		ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
+				new TypeToken<ArrayList<Stock>>() {
+				}.getType());
+		for (Stock stock : stocks) {
+			try {
+				stockService.addorUpdateStock(stock);
+			} catch (Exception e) {
+				logger.error("Stock" + stock.getId() + " failed to sync", e);
 			}
-			ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
-					new TypeToken<ArrayList<Stock>>() {
-					}.getType());
-			for (Stock stock : stocks) {
-				try {
-					stockService.addorUpdateStock(stock);
-				} catch (Exception e) {
-					logger.error("Stock" + stock.getId() + " failed to sync", e);
-				}
-			}
+		}
 		return new ResponseEntity<>(CREATED);
 	}
 
@@ -378,18 +378,18 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, URI uri) throws IOException {
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
-				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
-			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
-			csvPrinter.printRecord("\n");
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
+		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+		csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+		csvPrinter.printRecord("\n");
 
-			csvPrinter.printRecord("Row Number", "Reason of Failure");
-			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
-				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
-			}
-			writer.flush();
-			csvPrinter.flush();
+		csvPrinter.printRecord("Row Number", "Reason of Failure");
+		for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+			csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
+		}
+		writer.flush();
+		csvPrinter.flush();
 	}
 
 	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
