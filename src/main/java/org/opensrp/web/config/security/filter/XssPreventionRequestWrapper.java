@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.owasp.encoder.Encode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 	
-	private static Logger logger = LoggerFactory.getLogger(XssPreventionRequestWrapper.class);
+	private static Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	

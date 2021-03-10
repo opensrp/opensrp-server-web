@@ -1,9 +1,9 @@
 package org.opensrp.web;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.web.dto.ResponseDto;
 import org.opensrp.web.exceptions.UploadValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -19,7 +19,7 @@ import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.toString());
+    private static Logger logger = LogManager.getLogger(GlobalExceptionHandler.class.toString());
 
     @ResponseBody
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -12,15 +12,15 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping(value = "/rest/organization")
 public class OrganizationResource {
 
-	private static Logger logger = LoggerFactory.getLogger(OrganizationResource.class.toString());
+	private static Logger logger = LogManager.getLogger(OrganizationResource.class.toString());
 
 	private OrganizationService organizationService;
 

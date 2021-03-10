@@ -3,6 +3,8 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opensrp.api.domain.Location;
@@ -15,8 +17,6 @@ import org.opensrp.domain.setting.SettingConfiguration;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.SettingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,7 +46,7 @@ public class SettingResource {
 
 	private OpenmrsLocationService openmrsLocationService;
 
-	private static final Logger logger = LoggerFactory.getLogger(SettingResource.class.toString());
+	private static final Logger logger = LogManager.getLogger(SettingResource.class.toString());
 
 	@Autowired
 	public void setSettingService(SettingService settingService, OpenmrsLocationService openmrsLocationService) {

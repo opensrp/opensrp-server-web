@@ -1,8 +1,8 @@
 package org.opensrp.web.listener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.connector.openmrs.FetchLocationsHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationStartupListener implements ApplicationListener<ContextRefreshedEvent> {
 	
-	private static Logger logger = LoggerFactory.getLogger(ApplicationStartupListener.class.toString());
+	private static Logger logger = LogManager.getLogger(ApplicationStartupListener.class.toString());
 	
 	public static final String APPLICATION_ID = "/opensrp";
 	

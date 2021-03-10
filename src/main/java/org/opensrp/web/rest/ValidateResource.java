@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.smartregister.domain.Client;
@@ -18,8 +20,6 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.opensrp.web.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/validate/")
 public class ValidateResource {
 
-	private static Logger logger = LoggerFactory.getLogger(ValidateResource.class.toString());
+	private static Logger logger = LogManager.getLogger(ValidateResource.class.toString());
 
 	private ClientService clientService;
 

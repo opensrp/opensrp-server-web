@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,15 +34,13 @@ import org.opensrp.domain.AssignedLocations;
 import org.smartregister.domain.LocationProperty.PropertyStatus;
 import org.opensrp.domain.Organization;
 import org.smartregister.domain.PhysicalLocation;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.rest.RestUtils;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.opensrp.web.utils.LocationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -59,7 +59,7 @@ import com.google.gson.reflect.TypeToken;
 @Controller
 public class UserController {
 
-	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
+	private static Logger logger = LogManager.getLogger(UserController.class.toString());
 
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;

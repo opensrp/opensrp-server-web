@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -26,8 +28,6 @@ import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.dto.TaskDto;
 import org.opensrp.web.dto.TaskSyncRequestWrapper;
 import org.opensrp.web.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Period;
 import org.smartregister.domain.Task;
 import org.smartregister.domain.Task.TaskPriority;
@@ -61,7 +61,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/task")
 public class TaskResource {
 	
-	private static Logger logger = LoggerFactory.getLogger(TaskResource.class.toString());
+	private static Logger logger = LogManager.getLogger(TaskResource.class.toString());
 	
 	public Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
 	        .registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter()).create();
