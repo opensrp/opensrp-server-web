@@ -1,13 +1,13 @@
 package org.opensrp.web.rest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.Multimedia;
 import org.smartregister.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.ProductCatalogueService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,7 +40,7 @@ public class ProductCatalogueResource {
 	@Autowired
 	private MultimediaService multimediaService;
 
-	private static Logger logger = LoggerFactory.getLogger(ProductCatalogueResource.class.toString());
+	private static Logger logger = LogManager.getLogger(ProductCatalogueResource.class.toString());
 
 	private static final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
 

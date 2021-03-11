@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
@@ -40,8 +42,6 @@ import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -74,7 +74,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Api(value = LOCATION_RESOURCE, produces = LOCATION_RESOURCE)
 public class LocationResource {
 
-	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
+	private static Logger logger = LogManager.getLogger(LocationResource.class.toString());
 
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm")
 			.registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();

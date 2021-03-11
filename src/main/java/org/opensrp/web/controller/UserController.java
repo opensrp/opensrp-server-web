@@ -26,6 +26,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,14 +43,13 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.RestUtils;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
@@ -69,7 +70,7 @@ import com.google.gson.reflect.TypeToken;
 @Controller
 public class UserController {
 	
-	private static Logger logger = LoggerFactory.getLogger(UserController.class.toString());
+	private static Logger logger = LogManager.getLogger(UserController.class.toString());
 	
 	public static final String JURISDICTION="jurisdiction";
 	

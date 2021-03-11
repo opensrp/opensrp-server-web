@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsService;
@@ -25,7 +27,6 @@ import org.opensrp.service.IdentifierSourceService;
 import org.opensrp.service.OpenmrsIDService;
 import org.opensrp.service.UniqueIdentifierService;
 import org.opensrp.web.utils.PdfUtil;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,7 @@ import com.google.gson.Gson;
 @RequestMapping("/uniqueids")
 public class UniqueIdController extends OpenmrsService {
 	
-	private static Logger logger = LoggerFactory.getLogger(UniqueIdController.class.toString());
+	private static Logger logger = LogManager.getLogger(UniqueIdController.class.toString());
 	
 	@Value("#{opensrp['qrcodes.directory.name']}")
 	private String qrCodesDir;

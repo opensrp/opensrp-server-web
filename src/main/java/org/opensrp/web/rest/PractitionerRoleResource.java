@@ -10,16 +10,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.opensrp.domain.PractitionerRole;
+import org.smartregister.domain.PractitionerRole;
 import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +39,7 @@ import static org.opensrp.web.Constants.PAGE_SIZE;
 @RequestMapping(value = "/rest/practitionerRole")
 public class PractitionerRoleResource {
 
-    private static Logger logger = LoggerFactory.getLogger(PractitionerRoleResource.class.toString());
+    private static Logger logger = LogManager.getLogger(PractitionerRoleResource.class.toString());
 
     public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
