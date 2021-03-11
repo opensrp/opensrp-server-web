@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -44,8 +46,6 @@ import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.SyncParam;
 import org.opensrp.web.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -69,7 +69,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/event")
 public class EventResource extends RestResource<Event> {
 
-	private static Logger logger = LoggerFactory.getLogger(EventResource.class.toString());
+	private static Logger logger = LogManager.getLogger(EventResource.class.toString());
 
 	private EventService eventService;
 

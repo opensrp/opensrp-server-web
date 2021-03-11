@@ -783,7 +783,7 @@ public class LocationResourceTest {
 	@Test
 	public void testGetAllStructures() throws Exception {
 		List<PhysicalLocation> locations = Collections.singletonList(createStructure());
-		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt()))
+		when(locationService.findAllStructures(anyBoolean(), anyLong(), anyInt(), nullable(Integer.class), nullable(String.class), nullable(String.class)))
 				.thenReturn(locations);
 		MvcResult result = mockMvc
 				.perform(get(BASE_URL + "/getAll")
@@ -792,7 +792,7 @@ public class LocationResourceTest {
 						.param(BaseEntity.SERVER_VERSIOIN, "0"))
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findAllStructures(anyBoolean(), anyLong(),
-				anyInt());
+				anyInt(), nullable(Integer.class), nullable(String.class), nullable(String.class));
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
 
 	}

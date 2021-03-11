@@ -10,12 +10,12 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class ClientFormValidator {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClientFormValidator.class.toString());
+	private static final Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
 
 	private final ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
 

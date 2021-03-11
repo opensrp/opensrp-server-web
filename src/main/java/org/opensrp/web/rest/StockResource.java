@@ -43,6 +43,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
@@ -50,8 +52,6 @@ import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Inventory;
 import org.smartregister.domain.Stock;
 import org.smartregister.utils.DateTimeTypeConverter;
@@ -83,7 +83,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
 
-	private static Logger logger = LoggerFactory.getLogger(StockResource.class.toString());
+	private static Logger logger = LogManager.getLogger(StockResource.class.toString());
 
 	private StockService stockService;
 

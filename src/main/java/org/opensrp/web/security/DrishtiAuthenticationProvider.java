@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.api.domain.User;
 import org.opensrp.connector.openmrs.service.OpenmrsUserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DrishtiAuthenticationProvider implements AuthenticationProvider {
 
-	private static Logger logger = LoggerFactory.getLogger(DrishtiAuthenticationProvider.class.toString());
+	private static Logger logger = LogManager.getLogger(DrishtiAuthenticationProvider.class.toString());
 
 	public static final String INVALID_CREDENTIALS = "The username or password you entered is incorrect. Please enter the correct credentials.";
 

@@ -6,6 +6,9 @@ import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.opensrp.web.Constants.DEFAULT_LIMIT;
 import static org.opensrp.web.Constants.LIMIT;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
@@ -22,6 +25,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.web.utils.Utils;
@@ -36,8 +41,6 @@ import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.bean.LocationSearchcBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -66,7 +69,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = LOCATION_RESOURCE, produces = LOCATION_RESOURCE)
 public class LocationResource {
 
-	private static Logger logger = LoggerFactory.getLogger(LocationResource.class.toString());
+	private static Logger logger = LogManager.getLogger(LocationResource.class.toString());
 
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm")
 			.registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();
@@ -408,9 +411,12 @@ public class LocationResource {
 	public ResponseEntity<String> getAll(
 			@RequestParam(value = IS_JURISDICTION, defaultValue = FALSE, required = false) boolean isJurisdiction,
 			@RequestParam(value = RETURN_GEOMETRY, defaultValue = FALSE, required = false) boolean returnGeometry,
-			@RequestParam(value = BaseEntity.SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(value = LIMIT, required = false)  Integer limit,
-			@RequestParam(value = INCLUDE_INACTIVE, defaultValue = FALSE, required = false) boolean includeInactive) {
+			@RequestParam(value = BaseEntity.SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(value = LIMIT, required = false) Integer limit,
+			@RequestParam(value = INCLUDE_INACTIVE, required = false) boolean includeInactive,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 
 		Integer pageLimit = limit == null ? DEFAULT_LIMIT : limit;
 
@@ -420,7 +426,7 @@ public class LocationResource {
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit)),
+					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit, pageNumber, orderByType, orderByFieldName)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 

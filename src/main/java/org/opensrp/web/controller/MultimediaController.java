@@ -2,12 +2,12 @@ package org.opensrp.web.controller;
 
 import com.google.gson.Gson;
 import org.apache.http.util.TextUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +49,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/multimedia")
 public class MultimediaController {
 
-	private static Logger logger = LoggerFactory.getLogger(MultimediaController.class.toString());
+	private static Logger logger = LogManager.getLogger(MultimediaController.class.toString());
 
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;

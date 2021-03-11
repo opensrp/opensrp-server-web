@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Client;
@@ -36,8 +38,6 @@ import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.web.bean.ClientSyncBean;
 import org.opensrp.web.bean.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,7 +59,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 @RequestMapping(value = "/rest/client")
 public class ClientResource extends RestResource<Client> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClientResource.class.toString());
+	private static final Logger logger = LogManager.getLogger(ClientResource.class.toString());
 
 	private final ClientService clientService;
 
