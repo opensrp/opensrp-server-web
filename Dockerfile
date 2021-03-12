@@ -6,7 +6,9 @@ COPY . /tmp/opensrp-server-web
 # Build WAR file
 ARG opensrp_maven_package_profiles="postgres,jedis,oauth2"
 
-RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles -f /tmp/opensrp-server-web/pom.xml
+ENV MAVEN_PROFILES=$opensrp_maven_package_profiles
+
+RUN mvn clean package -Dmaven.test.skip=true -P $MAVEN_PROFILES -f /tmp/opensrp-server-web/pom.xml
 
 # Explode WAR file
 WORKDIR /tmp/opensrp-server-web-exploded
