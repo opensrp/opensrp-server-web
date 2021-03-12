@@ -6,10 +6,10 @@ import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.smartregister.domain.PractitionerRole;
-import org.smartregister.domain.PractitionerRoleCode;
 import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
+import org.smartregister.domain.PractitionerRole;
+import org.smartregister.domain.PractitionerRoleCode;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -121,7 +121,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
         PractitionerRole expectedPractitioner = initTestPractitionerRole1();
 
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
@@ -137,7 +137,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         String practitionerRolesJson = new Gson().toJson(expectedPractitionerRoles, new TypeToken<List<PractitionerRole>>() {
         }.getType());
 
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitionerRole.getIdentifier());
