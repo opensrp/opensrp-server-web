@@ -187,8 +187,11 @@ public class MultimediaController {
 			extension = getFileExtension(multimedia);
 		}
 		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
-		File file = multimediaService.retrieveFile(
-		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension);
+		String fileLocation = StringUtils.isEmpty(multiMediaDir) ?
+				MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension :
+				multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension;
+
+		File file = multimediaService.retrieveFile(fileLocation);
 		if (file != null) {
 			downloadFile(file, response);
 		} else {
