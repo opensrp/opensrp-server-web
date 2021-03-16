@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
