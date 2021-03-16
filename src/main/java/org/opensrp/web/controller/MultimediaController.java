@@ -51,12 +51,17 @@ public class MultimediaController {
 	
 	@Value("#{opensrp['multimedia.allowed.file.types']}")
 	private String allowedMimeTypes;
+
+	@Value("#{opensrp['multimedia.file.manager']}")
+	private String fileManager;
 	
 	private MultimediaService multimediaService;
 	
 	public final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
 	
 	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
+
+	private final static String FILE_SYSTEM_MULTIMEDIA_MANAGER = "FileSystemMultimediaFileManager";
 	
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
@@ -187,7 +192,7 @@ public class MultimediaController {
 			extension = getFileExtension(multimedia);
 		}
 		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
-		String fileLocation = StringUtils.isEmpty(multiMediaDir) ?
+		String fileLocation = !FILE_SYSTEM_MULTIMEDIA_MANAGER.equals(fileManager)?
 				MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension :
 				multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension;
 

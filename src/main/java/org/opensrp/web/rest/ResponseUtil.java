@@ -1,13 +1,14 @@
 package org.opensrp.web.rest;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 
 public class ResponseUtil {
 
-	public static <T> ArrayList<T> prepareDataResponse(ArrayList<T> list, String[] fieldsToIgnore) throws InstantiationException, IllegalAccessException{
-		ArrayList<T> list2 = new ArrayList<T>();
+	public static <T> List<T> prepareDataResponse(List<T> list, String[] fieldsToIgnore) throws InstantiationException, IllegalAccessException{
+		List<T> list2 = new ArrayList<T>();
 		for (T object : list) {
 			@SuppressWarnings("unchecked")
 			T targeto = (T) object.getClass().newInstance();
