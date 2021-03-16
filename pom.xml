@@ -6,7 +6,7 @@
     <groupId>org.smartregister</groupId>
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
-	<version>2.1.52.2-SNAPSHOT</version>
+	<version>2.1.53.0-SNAPSHOT</version>
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -364,6 +364,27 @@
             <artifactId>sentry-log4j2</artifactId>
             <version>4.3.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+            <version>5.2.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.smartregister</groupId>
+            <artifactId>opensrp-server-referral</artifactId>
+            <version>${opensrp.server.referral}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ektorp</groupId>
+            <artifactId>org.ektorp.spring</artifactId>
+            <version>1.5.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -662,20 +683,6 @@
             <properties>
                 <opensrp.redis.client.profile>lettuce</opensrp.redis.client.profile>
             </properties>
-            <dependencies>
-                <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
-                <dependency>
-                    <groupId>io.lettuce</groupId>
-                    <artifactId>lettuce-core</artifactId>
-                    <version>5.2.2.RELEASE</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-tx</artifactId>
-                    <version>${spring.version}</version>
-                </dependency>
-
-            </dependencies>
         </profile>
         <profile>
             <id>openmrs-sync</id>
@@ -688,39 +695,18 @@
             <properties>
                 <dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.ektorp</groupId>
-                    <artifactId>org.ektorp.spring</artifactId>
-                    <version>1.5.0</version>
-                </dependency>
-            </dependencies>
         </profile>
         <profile>
             <id>atomfeed</id>
             <properties>
                 <atomfeed.enabled>atomfeed</atomfeed.enabled>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.ektorp</groupId>
-                    <artifactId>org.ektorp.spring</artifactId>
-                    <version>1.5.0</version>
-                </dependency>
-            </dependencies>
         </profile>
         <profile>
             <id>rapidpro</id>
             <properties>
                 <rapidpro.enabled>dhis2-sync</rapidpro.enabled>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.ektorp</groupId>
-                    <artifactId>org.ektorp.spring</artifactId>
-                    <version>1.5.0</version>
-                </dependency>
-            </dependencies>
         </profile>
         <profile>
             <id>skip-integration-tests</id>
@@ -792,13 +778,7 @@
         </profile>
         <profile>
             <id>chw_referral_module</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.smartregister</groupId>
-                    <artifactId>opensrp-server-referral</artifactId>
-                    <version>${opensrp.server.referral}</version>
-                </dependency>
-            </dependencies>
+<!--            profile specific configs can be added here-->
         </profile>
     </profiles>
 </project>
