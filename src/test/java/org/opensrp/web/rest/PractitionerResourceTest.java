@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -226,6 +226,22 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         for (Practitioner practitioner : actualList) {
             assertTrue(expectedIds.contains(practitioner.getIdentifier()));
         }
+    }
+
+    @Test
+    public void testBatchSaveShouldCreateNewPractitioner() throws Exception {
+        doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner(any());
+        Practitioner expectedPractitioner = initTestPractitioner1();
+        postRequestWithJsonContentAndReturnString(BASE_URL + "add" , "[" + practitionerJson + "]", MockMvcResultMatchers.status().isCreated());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
+    }
+
+    @Test
+    public void testBatchSaveWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService).addOrUpdatePractitioner(any());
+        postRequestWithJsonContent(BASE_URL + "add", "{\"nothing\": \"works\"}", MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService, atLeast(0)).addOrUpdatePractitioner(argumentCaptor.capture());
     }
 
     private Practitioner initTestPractitioner1() {
