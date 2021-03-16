@@ -2,7 +2,7 @@ package org.opensrp.web.rest;
 
 import junit.framework.TestCase;
 import org.junit.Assert;
-import org.opensrp.domain.Practitioner;
+import org.smartregister.domain.Practitioner;
 
 import java.util.Collections;
 import java.util.List;
