@@ -3,7 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +23,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.Constants.ORDER_BY_TYPE;
@@ -97,8 +102,12 @@ public class PractitionerResource {
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> create(@RequestBody String entity) {
+        return savePractitioner(entity);
+    }
+
+    private ResponseEntity<String> savePractitioner(@RequestBody String payload) {
         try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
+            Practitioner practitioner = gson.fromJson(payload, Practitioner.class);
             practitionerService.addOrUpdatePractitioner(practitioner);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
@@ -115,19 +124,7 @@ public class PractitionerResource {
     @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaType.TEXT_PLAIN_VALUE })
     public ResponseEntity<String> update(@RequestBody String entity) {
-        try {
-            Practitioner practitioner = gson.fromJson(entity, Practitioner.class);
-            practitionerService.addOrUpdatePractitioner(practitioner);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        }
-        catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner representation", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        catch (IllegalArgumentException e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        return savePractitioner(entity);
     }
 
     @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
@@ -169,4 +166,32 @@ public class PractitionerResource {
 
     }
 
+    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+            MediaType.TEXT_PLAIN_VALUE })
+    public ResponseEntity<String> saveMultiplePractitioners(@RequestBody String payload) {
+        try {
+            Set<String> unprocessedIds = new HashSet<>();
+            Type listType = new TypeToken<List<Practitioner>>() {}.getType();
+            List<Practitioner> practitioners = gson.fromJson(payload, listType);
+
+            for (Practitioner practitioner: practitioners){
+                try {
+                    practitionerService.addOrUpdatePractitioner(practitioner);
+                } catch (Exception exception){
+                    logger.error(exception.getMessage(), exception);
+                    unprocessedIds.add(practitioner.getIdentifier());
+                }
+            }
+
+            if (unprocessedIds.isEmpty())
+                return new ResponseEntity<>("All Practitioners  processed", HttpStatus.CREATED);
+            else
+                return new ResponseEntity<>("Practitioners Ids not processed: " + String.join(",", unprocessedIds),
+                        HttpStatus.CREATED);
+
+        } catch (JsonSyntaxException e) {
+            logger.error("The request doesnt contain a valid practitioner representation",e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
