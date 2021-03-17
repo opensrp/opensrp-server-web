@@ -13,6 +13,7 @@ import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
+import java.sql.Time;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
+import org.smartregister.utils.TimingRepeatTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -62,8 +64,10 @@ public class PlanResource {
 	
 	private static Logger logger = LogManager.getLogger(PlanResource.class.toString());
 	
-	public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
-	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
+	public static Gson gson = new GsonBuilder()
+			.registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
+	        .registerTypeAdapter(LocalDate.class, new DateTypeConverter())
+			.registerTypeAdapter(Time.class, new TimingRepeatTimeTypeConverter()).create();
 	
 	private PlanService planService;
 	
