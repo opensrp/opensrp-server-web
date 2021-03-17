@@ -55,6 +55,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -151,6 +152,7 @@ public class UploadControllerTest {
 		Client client = new Client("");
 		clients.add(Pair.of(client, null));
 		validationBean.setAnalyzedData(clients);
+		doReturn(new Client("12345")).when(clientService).findClient(Mockito.any(Client.class));
 
 		IdentifierSource identifierSource = Mockito.mock(IdentifierSource.class);
 		when(identifierSourceService.findByIdentifier(Mockito.anyString())).thenReturn(identifierSource);
