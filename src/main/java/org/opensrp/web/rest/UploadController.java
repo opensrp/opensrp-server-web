@@ -226,7 +226,9 @@ public class UploadController {
 			Client client = eventClient.getLeft();
 
 			Client found = clientService.findClient(client);
-			client.setBaseEntityId(found.getBaseEntityId());
+			if(found != null) {
+				client.setBaseEntityId(found.getBaseEntityId());
+			}
 
 			boolean newClient = StringUtils.isBlank(client.getBaseEntityId());
 			String baseEntityID = StringUtils.defaultIfBlank(client.getBaseEntityId(), UUID.randomUUID().toString());
