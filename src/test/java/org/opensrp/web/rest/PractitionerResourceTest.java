@@ -210,28 +210,31 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         verifyNoMoreInteractions(practitionerService);
     }
 
-	@Test
-	public void testGetPractitionersByPractitionerRoleIdentifierAndCode() throws Exception {
-		List<Practitioner> expectedPractitioners = new ArrayList<>();
+    @Test
+    public void testGetPractitionersByPractitionerRoleIdentifierAndCode() throws Exception {
+        List<Practitioner> expectedPractitioners = new ArrayList<>();
 
-		Practitioner expectedPractitioner = initTestPractitioner1();
-		expectedPractitioners.add(expectedPractitioner);
+        Practitioner expectedPractitioner = initTestPractitioner1();
+        expectedPractitioners.add(expectedPractitioner);
 
-		doReturn(expectedPractitioners).when(practitionerService).getAssignedPractitionersByIdentifierAndCode(anyString(), anyString());
+        doReturn(expectedPractitioners).when(practitionerService)
+                .getAssignedPractitionersByIdentifierAndCode("test", "testCode");
 
-        String actualPractitionersString = getResponseAsString(BASE_URL + "/report-to?practitionerIdentifier=test&code=testCode", null,
+        String actualPractitionersString = getResponseAsString(
+                BASE_URL + "/report-to?practitionerIdentifier=test&code=testCode", null,
                 MockMvcResultMatchers.status().isOk());
-		List<Practitioner> actualPractitioners = new Gson().fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
+        List<Practitioner> actualPractitioners = new Gson()
+                .fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
 
-		}.getType());
+                }.getType());
 
-		assertNotNull(actualPractitioners);
-		assertEquals(actualPractitioners.get(0).getIdentifier(), expectedPractitioner.getIdentifier());
-		assertEquals(actualPractitioners.get(0).getUserId(), expectedPractitioner.getUserId());
-		assertEquals(actualPractitioners.get(0).getName(), expectedPractitioner.getName());
-		assertEquals(actualPractitioners.get(0).getUsername(), expectedPractitioner.getUsername());
-		assertEquals(actualPractitioners.get(0).getActive(), expectedPractitioner.getActive());
-	}
+        assertNotNull(actualPractitioners);
+        assertEquals(actualPractitioners.get(0).getIdentifier(), expectedPractitioner.getIdentifier());
+        assertEquals(actualPractitioners.get(0).getUserId(), expectedPractitioner.getUserId());
+        assertEquals(actualPractitioners.get(0).getName(), expectedPractitioner.getName());
+        assertEquals(actualPractitioners.get(0).getUsername(), expectedPractitioner.getUsername());
+        assertEquals(actualPractitioners.get(0).getActive(), expectedPractitioner.getActive());
+    }
 
     @Override
     protected void assertListsAreSameIgnoringOrder(List<Practitioner> expectedList, List<Practitioner> actualList) {

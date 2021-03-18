@@ -141,13 +141,14 @@ public class PractitionerResource {
     }
 
     @GetMapping(value = "/report-to", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public List<Practitioner> getPractitionersByPractitionerRoleIdentifierAndCode(@RequestParam(value = "practitionerIdentifier") String practitionerIdentifier,
+    public List<Practitioner> getPractitionersByPractitionerRoleIdentifierAndCode(
+            @RequestParam(value = "practitionerIdentifier") String practitionerIdentifier,
             @RequestParam(value = "code") String code) {
 
         return practitionerService.getAssignedPractitionersByIdentifierAndCode(practitionerIdentifier, code);
     }
 
-	private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
+    private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
             String orderByFieldName) {
 
         BaseSearchBean.OrderByType orderByTypeEnum;
