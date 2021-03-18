@@ -210,6 +210,29 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         verifyNoMoreInteractions(practitionerService);
     }
 
+	@Test
+	public void testGetPractitionersByPractitionerRoleIdentifierAndCode() throws Exception {
+		List<Practitioner> expectedPractitioners = new ArrayList<>();
+
+		Practitioner expectedPractitioner = initTestPractitioner1();
+		expectedPractitioners.add(expectedPractitioner);
+
+		doReturn(expectedPractitioners).when(practitionerService).getAssignedPractitionersByIdentifierAndCode(anyString(), anyString());
+
+        String actualPractitionersString = getResponseAsString(BASE_URL + "/report-to?practitionerIdentifier=test&code=testCode", null,
+                MockMvcResultMatchers.status().isOk());
+		List<Practitioner> actualPractitioners = new Gson().fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
+
+		}.getType());
+
+		assertNotNull(actualPractitioners);
+		assertEquals(actualPractitioners.get(0).getIdentifier(), expectedPractitioner.getIdentifier());
+		assertEquals(actualPractitioners.get(0).getUserId(), expectedPractitioner.getUserId());
+		assertEquals(actualPractitioners.get(0).getName(), expectedPractitioner.getName());
+		assertEquals(actualPractitioners.get(0).getUsername(), expectedPractitioner.getUsername());
+		assertEquals(actualPractitioners.get(0).getActive(), expectedPractitioner.getActive());
+	}
+
     @Override
     protected void assertListsAreSameIgnoringOrder(List<Practitioner> expectedList, List<Practitioner> actualList) {
         if (expectedList == null || actualList == null) {
