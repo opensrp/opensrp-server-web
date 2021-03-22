@@ -1,22 +1,7 @@
-/**
- * 
- */
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.smartregister.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -36,6 +20,7 @@ import org.opensrp.web.controller.UserController;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
+import org.smartregister.domain.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -50,8 +35,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -59,40 +55,40 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Controller
 @RequestMapping(value = "/rest/organization")
 public class OrganizationResource {
-	
+
 	private static Logger logger = LogManager.getLogger(OrganizationResource.class.toString());
-	
+
 	private OrganizationService organizationService;
-	
+
 	private PractitionerService practitionerService;
-	
+
 	private PhysicalLocationService locationService;
-	
+
 	private PlanService planService;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	/**
 	 * Set the organizationService
-	 * 
+	 *
 	 * @param organizationService the organizationService to set
 	 */
 	@Autowired
 	public void setOrganizationService(OrganizationService organizationService) {
 		this.organizationService = organizationService;
 	}
-	
+
 	/**
 	 * set the practitionerService
-	 * 
+	 *
 	 * @param practitionerService the practitionerService to set
 	 */
 	@Autowired
 	public void setPractitionerService(PractitionerService practitionerService) {
 		this.practitionerService = practitionerService;
 	}
-	
+
 	/**
 	 * @param locationService the locationService to set
 	 */
@@ -100,7 +96,7 @@ public class OrganizationResource {
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-	
+
 	/**
 	 * @param planService the planService to set
 	 */
@@ -108,10 +104,10 @@ public class OrganizationResource {
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
 	}
-	
+
 	/**
 	 * Gets all the organizations
-	 * 
+	 *
 	 * @return all the organizations
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -120,8 +116,9 @@ public class OrganizationResource {
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
 			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName
-			) {
-		OrganizationSearchBean organizationSearchBean = createOrganizationSearchBeanForPagination(pageNumber, pageSize, orderByType, orderByFieldName);
+	) {
+		OrganizationSearchBean organizationSearchBean = createOrganizationSearchBeanForPagination(pageNumber, pageSize,
+				orderByType, orderByFieldName);
 
 		if (StringUtils.isNotBlank(locationID)) {
 			return organizationService.selectOrganizationsEncompassLocations(locationID);
@@ -129,10 +126,10 @@ public class OrganizationResource {
 			return organizationService.getAllOrganizations(organizationSearchBean);
 		}
 	}
-	
+
 	/**
 	 * Gets an organization using the identifier
-	 * 
+	 *
 	 * @param identifier the Organization Identifier
 	 * @return the organization
 	 */
@@ -140,10 +137,10 @@ public class OrganizationResource {
 	public Organization getOrganizationByIdentifier(@PathVariable("identifier") String identifier) {
 		return organizationService.getOrganization(identifier);
 	}
-	
+
 	/**
 	 * Saves a new Organization
-	 * 
+	 *
 	 * @param organization to add
 	 * @return the http status code
 	 */
@@ -157,18 +154,18 @@ public class OrganizationResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		
+
 	}
-	
+
 	/**
 	 * update an Organization
-	 * 
+	 *
 	 * @param organization to add
 	 * @return the http status code
 	 */
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> updateOrganization(@PathVariable("identifier") String identifier,
-	        @RequestBody Organization organization) {
+			@RequestBody Organization organization) {
 		try {
 			organizationService.updateOrganization(organization);
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -177,18 +174,18 @@ public class OrganizationResource {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
-		
+
 	}
-	
+
 	@RequestMapping(value = "/assignLocationsAndPlans", method = RequestMethod.POST, produces = {
-	        MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> assignLocationAndPlan(
-	        @RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
+			@RequestBody OrganizationAssigmentBean[] organizationAssigmentBeans) {
 		try {
 			for (OrganizationAssigmentBean organizationAssigmentBean : organizationAssigmentBeans) {
 				organizationService.assignLocationAndPlan(organizationAssigmentBean.getOrganization(),
-				    organizationAssigmentBean.getJurisdiction(), organizationAssigmentBean.getPlan(),
-				    organizationAssigmentBean.getFromDate(), organizationAssigmentBean.getToDate());
+						organizationAssigmentBean.getJurisdiction(), organizationAssigmentBean.getPlan(),
+						organizationAssigmentBean.getFromDate(), organizationAssigmentBean.getToDate());
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
@@ -197,11 +194,11 @@ public class OrganizationResource {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@RequestMapping(value = "/assignedLocationsAndPlans/{identifier}", method = RequestMethod.GET, produces = {
-	        MediaType.APPLICATION_JSON_VALUE })
+			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlans(
-	        @PathVariable("identifier") String identifier,
+			@PathVariable("identifier") String identifier,
 			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
@@ -216,13 +213,13 @@ public class OrganizationResource {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@RequestMapping(value = "/user-assignment", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public UserAssignmentBean getUserAssignedLocationsAndPlans(Authentication authentication) {
 		User user = RestUtils.currentUser(authentication);
 		String userId = user.getBaseEntityId();
 		ImmutablePair<Practitioner, List<Long>> practionerOrganizationIds = practitionerService
-		        .getOrganizationsByUserId(userId);
+				.getOrganizationsByUserId(userId);
 		Set<String> jurisdictionIdentifiers = new HashSet<>();
 		Set<String> planIdentifiers = new HashSet<>();
 		/**@formatter:off*/
@@ -270,43 +267,44 @@ public class OrganizationResource {
 				.plans(planIdentifiers)
 				.build();
 		/**@formatter:on*/
-		
+
 	}
-	
+
 	@GetMapping(value = "/practitioner/{identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<Practitioner>> getOrgPractitioners(@PathVariable("identifier") String identifier) {
 		try {
 			return new ResponseEntity<>(practitionerService.getPractitionersByOrgIdentifier(identifier),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
-	        MediaType.APPLICATION_JSON_VALUE })
+			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
-	        @RequestParam(value = "plan") String planIdentifier, @RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = "plan") String planIdentifier,
+			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
 			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
 		try {
 			return new ResponseEntity<>(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(planIdentifier,
 					pageNumber, pageSize, orderByType, orderByFieldName),
-			        RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 		catch (IllegalArgumentException e) {
 			logger.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@RequestMapping(value = "/search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> searchOrganization(OrganizationSearchBean organizationSearchBean)
-	        throws JsonProcessingException {
-		
+			throws JsonProcessingException {
+
 		Integer pageNumber = organizationSearchBean.getPageNumber();
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 		int total = 0;
@@ -314,23 +312,48 @@ public class OrganizationResource {
 			total = organizationService.findOrganizationCount(organizationSearchBean);
 		}
 		List<Organization> organizations = organizationService.getSearchOrganizations(organizationSearchBean);
-		
+
 		headers.add(TOTAL_RECORDS, String.valueOf(total));
 		return new ResponseEntity<>(objectMapper.writeValueAsString(organizations), headers, HttpStatus.OK);
-		
+
 	}
 
 	private OrganizationSearchBean createOrganizationSearchBeanForPagination(Integer pageNumber, Integer pageSize,
 			String orderByType, String orderByFieldName) {
 		OrganizationSearchBean organizationSearchBean = new OrganizationSearchBean();
-		OrganizationSearchBean.OrderByType orderByTypeEnum = orderByType != null ? OrganizationSearchBean.OrderByType.valueOf(orderByType) : OrganizationSearchBean.OrderByType.DESC;
-		OrganizationSearchBean.FieldName fieldName = orderByFieldName != null ? OrganizationSearchBean.FieldName.valueOf(orderByFieldName) : OrganizationSearchBean.FieldName.id;
+		OrganizationSearchBean.OrderByType orderByTypeEnum = orderByType != null ?
+				OrganizationSearchBean.OrderByType.valueOf(orderByType) :
+				OrganizationSearchBean.OrderByType.DESC;
+		OrganizationSearchBean.FieldName fieldName = orderByFieldName != null ?
+				OrganizationSearchBean.FieldName.valueOf(orderByFieldName) :
+				OrganizationSearchBean.FieldName.id;
 		organizationSearchBean.setPageNumber(pageNumber);
 		organizationSearchBean.setPageSize(pageSize);
 		organizationSearchBean.setOrderByFieldName(fieldName);
-        organizationSearchBean.setOrderByType(orderByTypeEnum);
+		organizationSearchBean.setOrderByType(orderByTypeEnum);
 
 		return organizationSearchBean;
 	}
-	
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> saveMultipleOrganizations(@RequestBody Organization[] organizations) {
+		Set<String> unProcessedIds = new HashSet<>();
+		for (Organization organization : organizations) {
+			try {
+				organizationService.addOrUpdateOrganization(organization);
+			}
+			catch (Exception exception) {
+				logger.error(exception.getMessage(), exception);
+				unProcessedIds.add(organization.getIdentifier());
+			}
+		}
+
+		if (unProcessedIds.isEmpty())
+			return new ResponseEntity<>("All Organizations  processed", HttpStatus.CREATED);
+		else
+			return new ResponseEntity<>("Organizations Ids not processed: " + String.join(",", unProcessedIds),
+					HttpStatus.CREATED);
+
+	}
 }
