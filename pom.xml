@@ -385,6 +385,16 @@
             <artifactId>org.ektorp.spring</artifactId>
             <version>1.5.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.14.1</version>
+        </dependency>
+         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
+            <version>2.14.1</version>
+        </dependency>
     </dependencies>
 
     <build>
