@@ -36,6 +36,9 @@ import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
+import org.opensrp.service.PlanService;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PlanDefinition;
 import org.smartregister.domain.Practitioner;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -101,6 +104,9 @@ public class UserControllerTest {
 	
 	@Mock
 	private PhysicalLocationService locationService;
+
+	@Mock
+	private PlanService planService;
 	
 	@Value("#{opensrp['keycloak.configuration.endpoint']}")
 	protected String keycloakConfigurationURL;
@@ -118,6 +124,7 @@ public class UserControllerTest {
 		userController.setOrganizationService(organizationService);
 		userController.setLocationService(locationService);
 		userController.setPractitionerService(practitionerService);
+		userController.setPlanService(planService);
 		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
 		when(securityContext.getToken()).thenReturn(token);
 		when(authentication.getAuthorities()).thenAnswer(a -> roles.stream().map(role -> new GrantedAuthority() {
@@ -235,6 +242,85 @@ public class UserControllerTest {
 		assertEquals(objectMapper.writeValueAsString(new String[] { location.getId() }),
 		    actualObj.get("jurisdictionIds").toString());
 	}
+
+
+    @Test
+    public void testAuthenticateWhenAssignedLocationIsNotOperationArea() throws Exception {
+        User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
+        when(authentication.getPrincipal()).thenReturn(keycloakPrincipal);
+        when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
+        when(securityContext.getToken()).thenReturn(token);
+        when(token.getPreferredUsername()).thenReturn(user.getUsername());
+        when(authentication.getName()).thenReturn(user.getBaseEntityId());
+        List<Long> ids = Collections.singletonList(12233l);
+
+        when(organizationService.getOrganization(ids.get(0))).thenReturn(new Organization());
+
+        Practitioner practitioner = new Practitioner();
+        practitioner.setUserId(user.getBaseEntityId());
+        when(practitionerService.getOrganizationsByUserId(user.getBaseEntityId()))
+                .thenReturn(new ImmutablePair<Practitioner, List<Long>>(practitioner, ids));
+        String jurisdictionId = UUID.randomUUID().toString();
+        String planId = UUID.randomUUID().toString();
+        String secondJurisdiction = UUID.randomUUID().toString();
+        List<AssignedLocations> assignedLocations = Collections
+                .singletonList(new AssignedLocations(jurisdictionId, planId));
+
+        PlanDefinition plan = new PlanDefinition();
+        Jurisdiction jurisdiction = new Jurisdiction();
+        jurisdiction.setCode(secondJurisdiction);
+        plan.setJurisdiction(Collections.singletonList(jurisdiction));
+        plan.setStatus(PlanDefinition.PlanStatus.ACTIVE);
+
+        List<PlanDefinition> planDefinitions = Collections.singletonList(plan);
+        when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
+        when(planService.getPlansByIdsReturnOptionalFields(
+                Collections.singletonList(planId),
+                Arrays.asList(UserController.JURISDICTION, UserController.STATUS), false)
+        ).thenReturn(planDefinitions);
+
+        PhysicalLocation location = LocationResourceTest.createStructure();
+        location.getProperties().setName("OA123");
+        location.setId(jurisdictionId);
+
+        PhysicalLocation location2 = LocationResourceTest.createStructure();
+        location2.getProperties().setName("Other");
+        location2.setId(secondJurisdiction);
+
+        when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(jurisdictionId), Integer.MAX_VALUE))
+                .thenReturn(Arrays.asList(location, location2));
+        when(locationService.buildLocationHierachy(Collections.singleton(location.getId()), false, true))
+                .thenReturn(new LocationTree());
+
+        when(locationService.findLocationByIdsWithChildren(false, Collections.singleton(secondJurisdiction), Integer.MAX_VALUE))
+                .thenReturn(Collections.singletonList(location2));
+
+        String[] locations = new String[5];
+        locations[0] = "Test";
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("user", user);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("test", data);
+
+        Whitebox.setInternalState(userController, "useOpenSRPTeamModule", true);
+        ResponseEntity<String> result = userController.authenticate(authentication);
+        String responseString = result.getBody();
+        if (responseString.isEmpty()) {
+            fail("Test case failed");
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode actualObj = objectMapper.readTree(responseString);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+
+        assertTrue(actualObj.has("team"));
+        assertEquals("Other", actualObj.get("team").get("team").get("location").get("name").asText());
+        assertEquals(secondJurisdiction, actualObj.get("team").get("team").get("location").get("uuid").asText());
+
+        assertEquals(objectMapper.writeValueAsString(new String[]{location2.getProperties().getName()}),
+                actualObj.get("jurisdictions").toString());
+        assertEquals(objectMapper.writeValueAsString(new String[]{location2.getId()}),
+                actualObj.get("jurisdictionIds").toString());
+    }
 	
 	@Test
 	public void testLogoutShouldLogoutOpenSRPSessionAndKeycloak() throws Exception {
