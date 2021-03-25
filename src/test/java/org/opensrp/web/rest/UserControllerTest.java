@@ -203,9 +203,21 @@ public class UserControllerTest {
 		when(practitionerService.getOrganizationsByUserId(user.getBaseEntityId()))
 		        .thenReturn(new ImmutablePair<Practitioner, List<Long>>(practitioner, ids));
 		String jurisdictionId = UUID.randomUUID().toString();
+		String planId = UUID.randomUUID().toString();
 		List<AssignedLocations> assignedLocations = Collections
-		        .singletonList(new AssignedLocations(jurisdictionId, UUID.randomUUID().toString()));
-		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
+		        .singletonList(new AssignedLocations(jurisdictionId, planId));
+        PlanDefinition plan = new PlanDefinition();
+        Jurisdiction jurisdiction = new Jurisdiction();
+        jurisdiction.setCode(jurisdictionId);
+        plan.setJurisdiction(Collections.singletonList(jurisdiction));
+        plan.setStatus(PlanDefinition.PlanStatus.ACTIVE);
+
+        List<PlanDefinition> planDefinitions = Collections.singletonList(plan);
+        when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
+        when(planService.getPlansByIdsReturnOptionalFields(
+                Collections.singletonList(planId),
+                Arrays.asList(UserController.JURISDICTION, UserController.STATUS), false)
+        ).thenReturn(planDefinitions);
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
 		location.getProperties().setName("OA123");
