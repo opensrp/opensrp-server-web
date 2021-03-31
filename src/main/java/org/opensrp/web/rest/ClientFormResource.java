@@ -4,7 +4,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +23,6 @@ import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
 import org.opensrp.web.utils.FormConfigUtils;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -293,16 +291,10 @@ public class ClientFormResource {
             if (manifestList != null && manifestList.size() > 0) {
                 for (int i = 0; i < manifestList.size(); i++) {
                     Manifest manifest = manifestList.get(i);
-                    String json = manifest.getJson();
-                    if (StringUtils.isNotBlank(json)) {
-                        JSONObject jsonObject = new JSONObject(json);
-                        if (jsonObject.has(FORMS_VERSION)) {
-                            String version = jsonObject.getString(FORMS_VERSION);
-                            if (StringUtils.isNotBlank(version)) {
-                                formVersion = FormConfigUtils.getNewVersion(version);
-                                break;
-                            }
-                        }
+                    final String newVersion = deriveNewFormVersionFromManifest(manifest);
+                    if (StringUtils.isNotBlank(newVersion)){
+                        formVersion = newVersion;
+                        break;
                     }
 
                     if (i + 1 == manifestList.size()) {
@@ -313,6 +305,22 @@ public class ClientFormResource {
         }
 
         return formVersion;
+    }
+
+    private String deriveNewFormVersionFromManifest(final Manifest manifest){
+        final String manifestJson = manifest.getJson();
+        if (StringUtils.isBlank(manifestJson)) {
+            return null;
+        }
+        JSONObject manifestJSONObject = new JSONObject(manifestJson);
+        if (!manifestJSONObject.has(FORMS_VERSION)) {
+            return null;
+        }
+        final String version = manifestJSONObject.getString(FORMS_VERSION);
+        if (StringUtils.isBlank(version)) {
+            return null;
+        }
+        return FormConfigUtils.getNewVersion(version);
     }
 
     private ClientFormMetadata getClientFormMetadata(String formVersion, String formName,String module,
