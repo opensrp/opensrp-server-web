@@ -159,6 +159,7 @@ public class UploadControllerTest {
 		when(uniqueIdentifierService.generateIdentifiers(Mockito.any(IdentifierSource.class), Mockito.anyInt(), Mockito.anyString())).thenReturn(results);
 		when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
 				.thenReturn(validationBean);
+		when(multimediaService.saveFile(Mockito.any(),Mockito.any(),Mockito.anyString())).thenReturn("success");
 
 		MvcResult result = mockMvc.perform(
 				MockMvcRequestBuilders
