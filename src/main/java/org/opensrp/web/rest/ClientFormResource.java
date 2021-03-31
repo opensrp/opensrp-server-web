@@ -174,29 +174,29 @@ public class ClientFormResource {
         List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
 
         Manifest manifest = manifestService.getManifest(releaseIdentifier);
-        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
-            JSONObject json = new JSONObject(manifest.getJson());
-            if (json.has(FORM_IDENTIFIERS)) {
-                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
-                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
-                    for (int i = 0; i < fileIdentifiers.length(); i++) {
-                        String fileIdentifier = fileIdentifiers.getString(i);
-                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
-                        if (clientFormMetadata != null) {
-                            clientFormMetadataList.add(clientFormMetadata);
-                        }
-                    }
-                } else {
-                    return new ResponseEntity<>("This manifest does not have any files related to it",
-                                HttpStatus.NO_CONTENT);
-                }
-            } else {
-                return new ResponseEntity<>("This manifest does not have any files related to it",
-                       HttpStatus.NO_CONTENT);
-            }
-        } else {
+        if (manifest == null || StringUtils.isBlank(manifest.getJson())){
             return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NOT_FOUND);
+        }
+
+        JSONObject json = new JSONObject(manifest.getJson());
+        if (!json.has(FORM_IDENTIFIERS)){
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NO_CONTENT);
+        }
+
+        JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
+        if (fileIdentifiers == null || fileIdentifiers.length() <= 0){
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NO_CONTENT);
+        }
+
+        for (int i = 0; i < fileIdentifiers.length(); i++) {
+            String fileIdentifier = fileIdentifiers.getString(i);
+            ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
+            if (clientFormMetadata != null) {
+                clientFormMetadataList.add(clientFormMetadata);
+            }
         }
 
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
