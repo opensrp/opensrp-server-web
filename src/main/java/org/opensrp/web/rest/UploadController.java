@@ -196,6 +196,9 @@ public class UploadController {
 			throw new UploadValidationException(objectMapper.writeValueAsString(validationBean));
 		}
 
+		String saved = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		if(saved.equals("fail")) throw new UploadValidationException("Error saving file on server");
+
 		saveClients(validationBean,locationID,providerId,eventName,teamID,teamName);
 
 		Map<String, Object> details = new HashMap<>();
@@ -205,8 +208,6 @@ public class UploadController {
 		multimediaDTO.withOriginalFileName(file.getOriginalFilename())
 				.withDateUploaded(new Date())
 				.withSummary(objectMapper.writeValueAsString(details));
-
-		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
 
 		return details;
 	}
