@@ -142,26 +142,45 @@ public class ClientFormResource {
         return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
 
-    private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier, boolean isJsonValidator) {
-        List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, isJsonValidator);
-        DefaultArtifactVersion highestVersion = null;
-        IdVersionTuple highestIdVersionTuple = null;
+    private final Comparator<IdVersionTuple> idVersionTupleComparator = (o1, o2) -> {
+        final DefaultArtifactVersion o1ArtifactVersion = new DefaultArtifactVersion(o1.getVersion());
+        final DefaultArtifactVersion o2ArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
+        return o1ArtifactVersion.compareTo(o2ArtifactVersion);
+    };
 
-        for (IdVersionTuple availableFormVersion : availableFormVersions) {
-            DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
-
-            if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
-                highestVersion = semanticFormVersion;
-                highestIdVersionTuple = availableFormVersion;
-            }
-        }
-
-        if (highestIdVersionTuple == null) {
-            return null;
+    private ClientFormMetadata getMostRecentWithVersion(@NonNull final String formIdentifier, final boolean isJsonValidator, @Nullable final String formVersionCap){
+        final List<IdVersionTuple> availableFormIdVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, isJsonValidator);
+        final Optional<IdVersionTuple> maxInCapLimitIdVersionTuple;
+        if (formVersionCap != null) {
+            final DefaultArtifactVersion artifactVersionCap = new DefaultArtifactVersion(formVersionCap);
+            maxInCapLimitIdVersionTuple = availableFormIdVersions.stream()
+                    .filter(idVersionTuple -> {
+                        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(idVersionTuple.getVersion());
+                        return artifactVersion.compareTo(artifactVersionCap) <= 0;
+                    })
+                    .max(idVersionTupleComparator);
         } else {
-            long formId = highestIdVersionTuple.getId();
-            return clientFormService.getClientFormMetadataById(formId);
+            maxInCapLimitIdVersionTuple = Optional.empty();
         }
+
+        final Optional<IdVersionTuple> maxNoCap;
+        if (maxInCapLimitIdVersionTuple.isEmpty()) {
+            maxNoCap = availableFormIdVersions.stream()
+                    .max(idVersionTupleComparator);
+        } else {
+            maxNoCap = Optional.empty();
+        }
+
+        if (maxInCapLimitIdVersionTuple.isEmpty() && maxNoCap.isEmpty()) return null;
+        final long formMetadataId = maxInCapLimitIdVersionTuple
+                .map(IdVersionTuple::getId)
+                .orElseGet(() -> maxNoCap.get().getId());
+
+        return clientFormService.getClientFormMetadataById(formMetadataId);
+    }
+
+    private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier, boolean isJsonValidator) {
+        return getMostRecentWithVersion(formIdentifier, isJsonValidator, null);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
@@ -170,8 +189,6 @@ public class ClientFormResource {
         if (StringUtils.isBlank(releaseIdentifier)) {
             return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
         }
-
-        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
 
         Manifest manifest = manifestService.getManifest(releaseIdentifier);
         if (manifest == null || StringUtils.isBlank(manifest.getJson())){
@@ -191,9 +208,11 @@ public class ClientFormResource {
                     HttpStatus.NO_CONTENT);
         }
 
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        final String formVersionFromManifest = deriveNewFormVersionFromManifest(manifest);
         for (int i = 0; i < fileIdentifiers.length(); i++) {
             String fileIdentifier = fileIdentifiers.getString(i);
-            ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
+            ClientFormMetadata clientFormMetadata = getMostRecentWithVersion(fileIdentifier, false, formVersionFromManifest);
             if (clientFormMetadata != null) {
                 clientFormMetadataList.add(clientFormMetadata);
             }
