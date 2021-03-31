@@ -206,7 +206,8 @@ public class UploadController {
 				.withDateUploaded(new Date())
 				.withSummary(objectMapper.writeValueAsString(details));
 
-		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		String saved = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		if(saved.equals("fail")) throw new UploadValidationException("Error saving file on server");
 
 		return details;
 	}
