@@ -22,6 +22,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
+
+    - name: Checkout configs to branch add-migration-files-table
+      run: cd configs && git checkout -b add-migration-files-table && cd ..
+
     - name: Run Unit tests with Maven
       run: mvn -B clean test jacoco:report --file pom.xml --no-transfer-progress
     - name: Set Branch name Environment variable 
