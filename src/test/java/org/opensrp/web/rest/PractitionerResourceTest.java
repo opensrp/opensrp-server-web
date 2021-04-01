@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -210,6 +210,32 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         verifyNoMoreInteractions(practitionerService);
     }
 
+    @Test
+    public void testGetPractitionersByPractitionerRoleIdentifierAndCode() throws Exception {
+        List<Practitioner> expectedPractitioners = new ArrayList<>();
+
+        Practitioner expectedPractitioner = initTestPractitioner1();
+        expectedPractitioners.add(expectedPractitioner);
+
+        doReturn(expectedPractitioners).when(practitionerService)
+                .getAssignedPractitionersByIdentifierAndCode("test", "testCode");
+
+        String actualPractitionersString = getResponseAsString(
+                BASE_URL + "/report-to?practitionerIdentifier=test&code=testCode", null,
+                MockMvcResultMatchers.status().isOk());
+        List<Practitioner> actualPractitioners = new Gson()
+                .fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
+
+                }.getType());
+
+        assertNotNull(actualPractitioners);
+        assertEquals(actualPractitioners.get(0).getIdentifier(), expectedPractitioner.getIdentifier());
+        assertEquals(actualPractitioners.get(0).getUserId(), expectedPractitioner.getUserId());
+        assertEquals(actualPractitioners.get(0).getName(), expectedPractitioner.getName());
+        assertEquals(actualPractitioners.get(0).getUsername(), expectedPractitioner.getUsername());
+        assertEquals(actualPractitioners.get(0).getActive(), expectedPractitioner.getActive());
+    }
+
     @Override
     protected void assertListsAreSameIgnoringOrder(List<Practitioner> expectedList, List<Practitioner> actualList) {
         if (expectedList == null || actualList == null) {
@@ -226,6 +252,22 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         for (Practitioner practitioner : actualList) {
             assertTrue(expectedIds.contains(practitioner.getIdentifier()));
         }
+    }
+
+    @Test
+    public void testBatchSaveShouldCreateNewPractitioner() throws Exception {
+        doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner(any());
+        Practitioner expectedPractitioner = initTestPractitioner1();
+        postRequestWithJsonContentAndReturnString(BASE_URL + "add" , "[" + practitionerJson + "]", MockMvcResultMatchers.status().isCreated());
+        verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
+    }
+
+    @Test
+    public void testBatchSaveWithJsonSyntaxException() throws Exception {
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService).addOrUpdatePractitioner(any());
+        postRequestWithJsonContent(BASE_URL + "add", "{\"nothing\": \"works\"}", MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerService, atLeast(0)).addOrUpdatePractitioner(argumentCaptor.capture());
     }
 
     private Practitioner initTestPractitioner1() {

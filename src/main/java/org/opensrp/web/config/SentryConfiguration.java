@@ -18,6 +18,9 @@ public class SentryConfiguration {
 	@Value("#{opensrp['sentry.release'] ?: ''}")
 	private String release;
 
+	@Value("#{opensrp['sentry.environment'] ?: ''}")
+	private String environment;
+
 	@PostConstruct
 	public void initialize() {
 		if (StringUtils.isNotBlank(dsn)) {
@@ -30,6 +33,7 @@ public class SentryConfiguration {
 		Sentry.init(sentryOptions -> {
 			sentryOptions.setDsn(dsn);
 			sentryOptions.setRelease(release);
+			sentryOptions.setEnvironment(environment);
 		});
 	}
 }
