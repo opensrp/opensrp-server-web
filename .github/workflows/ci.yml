@@ -26,6 +26,9 @@ jobs:
     - name: Checkout configs to branch add-migration-files-table
       run: cd configs && git checkout -b add-migration-files-table && cd ..
 
+    - name: Deploy server-core artefact
+      run: cd .. && git clone https://github.com/OpenSRP/opensrp-server-core.git && cd opensrp-server-core && git checkout implement-client-migration-file-models-repositories && mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true && cd ../opensrp-server-web
+
     - name: Run Unit tests with Maven
       run: mvn -B clean test jacoco:report --file pom.xml --no-transfer-progress
     - name: Set Branch name Environment variable 
