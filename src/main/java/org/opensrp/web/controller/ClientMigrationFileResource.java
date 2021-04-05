@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,8 +43,8 @@ public class ClientMigrationFileResource {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<String> create(@RequestParam(value = "identifier", required = false) String identifier,
-            @RequestParam(value = "filename", required = false) String filename,
+    public ResponseEntity<String> create(@RequestParam(value = "identifier", required = false) String finalIdentifier,
+            @RequestParam(value = "filename", required = false) String finalFilename,
             @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
             @RequestParam(value = "version") int version,
             @RequestParam("migration_file") MultipartFile migrationFile) {
@@ -67,8 +66,8 @@ public class ClientMigrationFileResource {
         }
 
         // The file storage can be easily switched here -> Kindly implement using a storage contracts if you do so
-        filename = migrationFile.getOriginalFilename();
-        identifier = filename;
+        String filename = finalFilename != null ? finalFilename : migrationFile.getOriginalFilename();
+        String identifier = finalIdentifier != null ? finalIdentifier : filename;
 
         String fileContentString = new String(bytes);
 
@@ -89,8 +88,8 @@ public class ClientMigrationFileResource {
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<String> update(@RequestParam(value = "identifier", required = false) String identifier,
-            @RequestParam(value = "filename", required = false) String filename,
+    public ResponseEntity<String> update(@RequestParam(value = "identifier", required = false) String finalIdentifier,
+            @RequestParam(value = "filename", required = false) String finalFilename,
             @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
             @RequestParam(value = "version") int version,
             @RequestParam("migration_file") MultipartFile migrationFile) {
@@ -113,8 +112,8 @@ public class ClientMigrationFileResource {
         }
 
         // The file storage can be easily switched here -> Kindly implement using a storage contracts if you do so
-        filename = migrationFile.getOriginalFilename();
-        identifier = filename;
+        String filename = finalFilename != null ? finalFilename : migrationFile.getOriginalFilename();
+        String identifier = finalIdentifier != null ? finalIdentifier : filename;
 
         String fileContentString = new String(bytes);
 

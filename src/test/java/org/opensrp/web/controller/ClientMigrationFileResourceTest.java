@@ -1,7 +1,6 @@
 package org.opensrp.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -78,12 +77,6 @@ public class ClientMigrationFileResourceTest {
 		mapper.registerModule(dateTimeModule);
 	}
 
-	public void testSetObjectMapper() {
-	}
-
-	public void testSetClientMigrationFileService() {
-	}
-
 	@Test
 	public void testCreate() throws Exception {
 		String identifier = "1.up.sql";
@@ -122,8 +115,7 @@ public class ClientMigrationFileResourceTest {
 		MockMultipartFile file = new MockMultipartFile("migration_file", identifier,
 				ContentType.TEXT_PLAIN.getMimeType(), fileContent.getBytes());
 
-		MockMultipartHttpServletRequestBuilder builder =
-				MockMvcRequestBuilders.fileUpload(BASE_URL);
+		MockMultipartHttpServletRequestBuilder builder = fileUpload(BASE_URL);
 		builder.with(new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
@@ -152,9 +144,6 @@ public class ClientMigrationFileResourceTest {
 		assertEquals(Boolean.FALSE, clientMigrationFile.getOnObjectStorage());
 		assertEquals(null, clientMigrationFile.getObjectStoragePath());
 		assertEquals(null, clientMigrationFile.getManifestId());
-	}
-
-	public void testGet() {
 	}
 
 	@Test
@@ -211,6 +200,6 @@ public class ClientMigrationFileResourceTest {
 		ArgumentCaptor<ClientMigrationFile> clientMigrationFileArgumentCaptor = ArgumentCaptor.forClass(ClientMigrationFile.class);
 		verify(clientMigrationFileService).deleteClientMigrationFile(clientMigrationFileArgumentCaptor.capture());
 
-		Assert.assertEquals(identifier, clientMigrationFileArgumentCaptor.getValue().getIdentifier());
+		assertEquals(identifier, clientMigrationFileArgumentCaptor.getValue().getIdentifier());
 	}
 }
