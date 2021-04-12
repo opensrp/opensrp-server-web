@@ -4,11 +4,11 @@ import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 
 import java.net.ConnectException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.web.dto.ResponseDto;
 import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.exceptions.UploadValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 	
-	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.toString());
+	private static final Logger logger = LogManager.getLogger(GlobalExceptionHandler.class.toString());
 	
 	@ResponseBody
 	@ExceptionHandler(HttpMessageNotReadableException.class)

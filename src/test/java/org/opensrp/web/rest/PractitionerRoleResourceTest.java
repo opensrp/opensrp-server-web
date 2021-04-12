@@ -6,10 +6,10 @@ import com.google.gson.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.opensrp.domain.PractitionerRole;
-import org.opensrp.domain.PractitionerRoleCode;
 import org.opensrp.search.PractitionerRoleSearchBean;
 import org.opensrp.service.PractitionerRoleService;
+import org.smartregister.domain.PractitionerRole;
+import org.smartregister.domain.PractitionerRoleCode;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -34,9 +34,9 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     private PractitionerRoleService practitionerRoleService;
 
-    private ArgumentCaptor<PractitionerRole> argumentCaptor = ArgumentCaptor.forClass(PractitionerRole.class);
+    private final ArgumentCaptor<PractitionerRole> argumentCaptor = ArgumentCaptor.forClass(PractitionerRole.class);
 
-    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     private final String practitionerRoleJson = "{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}";
 
@@ -93,7 +93,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testCreateShouldCreateNewPractitionerRoleResource() throws Exception {
-        doReturn(new PractitionerRole()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doReturn(new PractitionerRole()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
 
         PractitionerRole expectedPractitioner = initTestPractitionerRole1();
 
@@ -117,11 +117,11 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testBatchSaveShouldCreateNewPractitionerRole() throws Exception {
-        doReturn(new PractitionerRole()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doReturn(new PractitionerRole()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
 
         PractitionerRole expectedPractitioner = initTestPractitionerRole1();
 
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
@@ -137,7 +137,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         String practitionerRolesJson = new Gson().toJson(expectedPractitionerRoles, new TypeToken<List<PractitionerRole>>() {
         }.getType());
 
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitionerRole.getIdentifier());
@@ -164,7 +164,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testCreateWithInternalError() throws Exception {
-        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
         postRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerRoleService);
@@ -172,7 +172,8 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testCreateWithJsonSyntaxException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole(
+                any());
         postRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerRoleService);
@@ -180,7 +181,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testUpdateWithInternalError() throws Exception {
-        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
         putRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerRoleService);
@@ -188,7 +189,8 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testUpdateWithJsonSyntaxException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole(
+                any());
         putRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         verifyNoMoreInteractions(practitionerRoleService);
@@ -196,18 +198,17 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testBatchSaveWithInternalError() throws Exception {
-        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isBadRequest());
-        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
-        verifyNoMoreInteractions(practitionerRoleService);
+        doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , "{\"idiot_json\": \"cannot work\"}", MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService, atLeast(0)).addOrUpdatePractitionerRole(argumentCaptor.capture());
     }
 
     @Test
     public void testBatchSaveWithJsonSyntaxException() throws Exception {
-        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole((PractitionerRole) any());
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isBadRequest());
-        verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
-        verifyNoMoreInteractions(practitionerRoleService);
+        doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole(
+                any());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , "{\"idiot_json_again\": \"can never work\"}", MockMvcResultMatchers.status().isBadRequest());
+        verify(practitionerRoleService, atLeast(0)).addOrUpdatePractitionerRole(argumentCaptor.capture());
     }
 
 

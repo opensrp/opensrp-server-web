@@ -17,6 +17,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.Client;
@@ -28,8 +30,6 @@ import org.opensrp.service.SearchService;
 import org.opensrp.web.utils.ChildMother;
 import org.opensrp.web.utils.SearchEntityWrapper;
 import org.opensrp.web.utils.SearchHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "/rest/search")
 public class SearchResource extends RestResource<Client> {
 	
-	private static Logger logger = LoggerFactory.getLogger(SearchResource.class.toString());
+	private static Logger logger = LogManager.getLogger(SearchResource.class.toString());
 	
 	private SearchService searchService;
 	

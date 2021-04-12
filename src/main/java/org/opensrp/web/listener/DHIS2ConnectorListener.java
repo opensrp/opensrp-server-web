@@ -2,10 +2,10 @@ package org.opensrp.web.listener;
 
 import java.util.Calendar;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.opensrp.connector.dhis2.DHIS2AggregateConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @EnableScheduling
 public class DHIS2ConnectorListener {
 	
-	private static Logger logger = LoggerFactory.getLogger(DHIS2ConnectorListener.class.toString());
+	private static Logger logger = LogManager.getLogger(DHIS2ConnectorListener.class.toString());
 	
 	@Autowired
 	private DHIS2AggregateConnector dHIS2AggregateConnector;

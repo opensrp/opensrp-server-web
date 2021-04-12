@@ -1,36 +1,10 @@
-/**
- * 
- */
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,17 +14,12 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.opensrp.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
@@ -62,10 +31,7 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
-import org.smartregister.domain.Jurisdiction;
-import org.smartregister.domain.LocationProperty;
-import org.smartregister.domain.PhysicalLocation;
-import org.smartregister.domain.PlanDefinition;
+import org.smartregister.domain.*;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -79,11 +45,27 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Samuel Githengi created on 09/17/19
@@ -576,5 +558,25 @@ public class OrganizationResourceTest {
 		
 		return searchOrganization;
 	}
-	
+
+	@Test
+	public void testCreateOrganizationInBatch() throws Exception {
+
+		String organizations = "["+ organizationJSON+"]";
+		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON).content(organizations))
+				.andExpect(status().isCreated());
+		verify(organizationService).addOrUpdateOrganization(organizationArgumentCaptor.capture());
+		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+				.writeValueAsString(organizationArgumentCaptor.getValue()));
+		verifyNoMoreInteractions(organizationService);
+
+	}
+
+	@Test
+	public void testThrowExceptionWithBadRequestStatus() throws Exception {
+		String organizations = "{\"crappy_field\": \"crappy_value\"}";
+		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON).content(organizations))
+				.andExpect(status().isBadRequest());
+		verify(organizationService, atLeast(0)).addOrUpdateOrganization(organizationArgumentCaptor.capture());
+	}
 }

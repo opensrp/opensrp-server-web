@@ -1,6 +1,8 @@
 package org.opensrp.web.utils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,7 +42,27 @@ public class UtilsTest {
 		Assert.assertNotNull(result);
 		Assert.assertEquals("[\"address1\",\"address2\",\"address3\"]", result);
 	}
-	
+
+	@Test
+	public void testGetDateTimeFromStringShouldReturnDate(){
+		Date date = Utils.getDateTimeFromString("1615895228000");
+		Assert.assertNotNull(date);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		Assert.assertEquals(calendar.get(Calendar.YEAR), 2021);
+		Assert.assertEquals(calendar.get(Calendar.MONTH), 2);
+		Assert.assertEquals(calendar.get(Calendar.DATE), 16);
+	}
+
+	@Test
+	public void testGetDateTimeFromStringShouldReturnNull(){
+		Date date = Utils.getDateTimeFromString("wrongdate");
+		Assert.assertNull(date);
+		date = Utils.getDateTimeFromString(null);
+		Assert.assertNull(date);
+	}
+
+	@Test
 	public void testCheckRoleIfRoleExists() {
 		
 		List<String> roleList = new ArrayList<>();
@@ -58,5 +80,4 @@ public class UtilsTest {
 		Assert.assertFalse(result);
 		
 	}
-	
 }

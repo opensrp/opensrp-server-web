@@ -1,6 +1,5 @@
 package org.opensrp.web.rest;
 
-
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
@@ -94,8 +93,7 @@ public abstract class BaseResourceTest<T> {
         if (responseString.isEmpty()) {
             return null;
         }
-        JsonNode actualObj = mapper.readTree(responseString);
-        return actualObj;
+        return mapper.readTree(responseString);
     }
 
     protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {

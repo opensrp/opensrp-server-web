@@ -19,11 +19,11 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.util.TextUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -44,19 +44,24 @@ import java.util.Date;
 @RequestMapping("/multimedia")
 public class MultimediaController {
 	
-	private static Logger logger = LoggerFactory.getLogger(MultimediaController.class.toString());
+	private static Logger logger = LogManager.getLogger(MultimediaController.class.toString());
 	
 	@Value("#{opensrp['multimedia.directory.name']}")
 	private String multiMediaDir;
 	
 	@Value("#{opensrp['multimedia.allowed.file.types']}")
 	private String allowedMimeTypes;
+
+	@Value("#{opensrp['multimedia.file.manager']}")
+	private String fileManager;
 	
 	private MultimediaService multimediaService;
 	
 	public final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
 	
 	private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
+
+	private final static String FILE_SYSTEM_MULTIMEDIA_MANAGER = "FileSystemMultimediaFileManager";
 	
 	@Autowired
 	public void setMultimediaService(MultimediaService multimediaService) {
@@ -187,8 +192,11 @@ public class MultimediaController {
 			extension = getFileExtension(multimedia);
 		}
 		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
-		File file = multimediaService.retrieveFile(
-		    multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension);
+		String fileLocation = !FILE_SYSTEM_MULTIMEDIA_MANAGER.equals(fileManager)?
+				MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension :
+				multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension;
+
+		File file = multimediaService.retrieveFile(fileLocation);
 		if (file != null) {
 			downloadFile(file, response);
 		} else {

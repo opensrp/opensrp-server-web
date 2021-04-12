@@ -7,6 +7,8 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.domain.CSVRowConfig;
@@ -25,8 +27,6 @@ import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.exceptions.UploadValidationException;
 import org.opensrp.web.uniqueid.UniqueIDProvider;
 import org.opensrp.web.uniqueid.UniqueIdentifierProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.smartregister.domain.PhysicalLocation;
@@ -75,7 +75,7 @@ public class UploadController {
 
 	private ObjectMapper objectMapper;
 
-	private static final Logger logger = LoggerFactory.getLogger(UploadController.class.toString());
+	private static final Logger logger = LogManager.getLogger(UploadController.class.toString());
 
 	@Value("#{opensrp['opensrp.config.global_id'] ?: 'opensrp_id'}")
 	private String globalID;
@@ -206,7 +206,8 @@ public class UploadController {
 				.withDateUploaded(new Date())
 				.withSummary(objectMapper.writeValueAsString(details));
 
-		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		String saved = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		if(saved.equals("fail")) throw new UploadValidationException("Error saving file on server");
 
 		return details;
 	}
@@ -224,6 +225,11 @@ public class UploadController {
 
 		for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {
 			Client client = eventClient.getLeft();
+
+			Client found = clientService.findClient(client);
+			if(found != null) {
+				client.setBaseEntityId(found.getBaseEntityId());
+			}
 
 			boolean newClient = StringUtils.isBlank(client.getBaseEntityId());
 			String baseEntityID = StringUtils.defaultIfBlank(client.getBaseEntityId(), UUID.randomUUID().toString());

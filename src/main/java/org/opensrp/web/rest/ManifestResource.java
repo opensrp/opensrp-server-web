@@ -3,6 +3,8 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,8 +13,6 @@ import org.opensrp.service.ClientFormService;
 import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.FormConfigUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,7 +33,7 @@ import java.util.Set;
 @RequestMapping(value = "/rest/manifest")
 public class ManifestResource {
 
-    private static Logger logger = LoggerFactory.getLogger(ManifestResource.class.toString());
+    private static Logger logger = LogManager.getLogger(ManifestResource.class.toString());
     public static final String FALSE = Boolean.FALSE.toString();
     private ManifestService manifestService;
     private ClientFormService clientFormService;

@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.smartregister.domain.Client;
 import org.opensrp.dto.Action;
@@ -20,7 +21,6 @@ import org.opensrp.repository.ClientsRepository;
 import org.opensrp.scheduler.Alert;
 import org.opensrp.scheduler.repository.AlertsRepository;
 import org.opensrp.scheduler.service.ActionService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,7 +35,7 @@ import com.google.gson.Gson;
 @Controller
 public class ActionController {
 	
-	private static org.slf4j.Logger logger = LoggerFactory.getLogger(ActionController.class.toString());
+	private static Logger logger = LogManager.getLogger(ActionController.class.toString());
 	
 	private ActionService actionService;
 	
@@ -71,11 +71,11 @@ public class ActionController {
 		}
 		for (Client c : allClients.findAllClients()) {
 			List<Alert> al = allAlerts.findActiveAlertByEntityId(c.getBaseEntityId());
-			Logger.getLogger(getClass()).warn(al.size() + " Alerts for " + c.getBaseEntityId());
+			logger.warn(al.size() + " Alerts for " + c.getBaseEntityId());
 			Map<String, Alert> am = new HashMap<>();
 			for (Alert a : al) {
 				if (am.containsKey(a.triggerName())) {
-					Logger.getLogger(getClass()).warn("Removing trigger " + a.triggerName());
+					logger.warn("Removing trigger " + a.triggerName());
 					allAlerts.safeRemove(a);
 				} else {
 					am.put(a.triggerName(), a);
