@@ -27,8 +27,7 @@
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
         <opensrp.core.version>2.9.11-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.2.2-SNAPSHOT</opensrp.connector.version>
-        <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
+        <opensrp.connector.version>2.2.3-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
         <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
@@ -156,11 +155,6 @@
             <groupId>org.smartregister</groupId>
             <artifactId>opensrp-server-connector</artifactId>
             <version>${opensrp.connector.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.smartregister</groupId>
-            <artifactId>opensrp-server-common</artifactId>
-            <version>${opensrp.common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
