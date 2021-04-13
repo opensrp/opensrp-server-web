@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
 import org.smartregister.domain.Event;
-import org.opensrp.domain.Practitioner;
 import org.opensrp.repository.LocationRepository;
 import org.opensrp.repository.PractitionerRepository;
 import org.opensrp.repository.PractitionerRoleRepository;
@@ -15,6 +14,7 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.service.PractitionerService;
+import org.smartregister.domain.Practitioner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

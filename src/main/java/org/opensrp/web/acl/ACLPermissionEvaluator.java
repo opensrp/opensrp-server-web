@@ -89,4 +89,28 @@ public class ACLPermissionEvaluator implements PermissionEvaluator {
 		/* @formatter:off */
 	}
 
+	public void setPlanPermissionEvaluator(PlanPermissionEvaluator planPermissionEvaluator) {
+		this.planPermissionEvaluator = planPermissionEvaluator;
+	}
+
+	public void setOrganizationPermissionEvaluator(OrganizationPermissionEvaluator organizationPermissionEvaluator) {
+		this.organizationPermissionEvaluator = organizationPermissionEvaluator;
+	}
+
+	public void setLocationPermissionEvaluator(LocationPermissionEvaluator locationPermissionEvaluator) {
+		this.locationPermissionEvaluator = locationPermissionEvaluator;
+	}
+
+	public void setUserPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator) {
+		this.userPermissionEvaluator = userPermissionEvaluator;
+	}
+
+	public void setEventPermissionEvaluator(EventPermissionEvaluator eventPermissionEvaluator) {
+		this.eventPermissionEvaluator = eventPermissionEvaluator;
+	}
+
+	public void setClientPermissionEvaluator(ClientPermissionEvaluator clientPermissionEvaluator) {
+		this.clientPermissionEvaluator = clientPermissionEvaluator;
+	}
+
 }
