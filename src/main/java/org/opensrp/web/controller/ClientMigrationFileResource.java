@@ -48,6 +48,17 @@ public class ClientMigrationFileResource {
             @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
             @RequestParam(value = "version") int version,
             @RequestParam("migration_file") MultipartFile migrationFile) {
+        ResponseEntity<String> errorResponse = addOrUpdateClientMigrationFile(true, finalIdentifier, finalFilename,
+                jurisdiction, version, migrationFile);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    private ResponseEntity<String> addOrUpdateClientMigrationFile(boolean newRecord, String finalIdentifier, String finalFilename, String jurisdiction,
+            int version, MultipartFile migrationFile) {
         if (migrationFile.isEmpty()) {
             return new ResponseEntity<>("Migration file is empty/missing", HttpStatus.BAD_REQUEST);
         }
@@ -55,7 +66,6 @@ public class ClientMigrationFileResource {
         if (!migrationFile.getOriginalFilename().matches(MIGRATION_FILENAME_PATTERN)) {
             return new ResponseEntity<>("The migration filename does not obey the pattern " + MIGRATION_FILENAME_PATTERN, HttpStatus.BAD_REQUEST);
         }
-
 
         byte[] bytes;
         try {
@@ -71,14 +81,29 @@ public class ClientMigrationFileResource {
 
         String fileContentString = new String(bytes);
 
-        ClientMigrationFile clientMigrationFile = new ClientMigrationFile();
+        ClientMigrationFile clientMigrationFile = null;
+        if (newRecord) {
+            clientMigrationFile = new ClientMigrationFile();
+        } else {
+            clientMigrationFile = clientMigrationFileService.getClientMigrationFile(identifier);
+
+            if (clientMigrationFile == null) {
+                return new ResponseEntity<>("Migration file with the identifier does not exist", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         updateClientMigrationFileProperties(jurisdiction, version, filename, identifier, fileContentString, clientMigrationFile);
 
         // TODO: This should be handled on the manifest upload
         //clientMigrationFile.setManifestId(4);
 
-        clientMigrationFileService.addClientMigrationFile(clientMigrationFile);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        if (newRecord) {
+            clientMigrationFileService.addClientMigrationFile(clientMigrationFile);
+        } else {
+            clientMigrationFileService.updateClientMigrationFile(clientMigrationFile);
+        }
+
+        return null;
     }
 
     @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -87,39 +112,12 @@ public class ClientMigrationFileResource {
             @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
             @RequestParam(value = "version") int version,
             @RequestParam("migration_file") MultipartFile migrationFile) {
-        if (migrationFile.isEmpty()) {
-            return new ResponseEntity<>("Migration file is empty/missing", HttpStatus.BAD_REQUEST);
+        ResponseEntity<String> errorResponse = addOrUpdateClientMigrationFile(false, finalIdentifier, finalFilename,
+                jurisdiction, version, migrationFile);
+        if (errorResponse != null) {
+            return errorResponse;
         }
 
-        if (!migrationFile.getOriginalFilename().matches(MIGRATION_FILENAME_PATTERN)) {
-            return new ResponseEntity<>("The migration filename does not obey the pattern " + MIGRATION_FILENAME_PATTERN,
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        byte[] bytes;
-        try {
-            bytes = migrationFile.getBytes();
-        }
-        catch (IOException e) {
-            logger.error("Error occurred trying to read uploaded file", e);
-            return new ResponseEntity<>("Invalid file", HttpStatus.BAD_REQUEST);
-        }
-
-        // The file storage can be easily switched here -> Kindly implement using a storage contracts if you do so
-        String filename = finalFilename != null ? finalFilename : migrationFile.getOriginalFilename();
-        String identifier = finalIdentifier != null ? finalIdentifier : filename;
-
-        String fileContentString = new String(bytes);
-
-        ClientMigrationFile clientMigrationFile = clientMigrationFileService.getClientMigrationFile(identifier);
-
-        if (clientMigrationFile == null) {
-            return new ResponseEntity<>("Migration file with the identifier does not exist", HttpStatus.BAD_REQUEST);
-        }
-
-        updateClientMigrationFileProperties(jurisdiction, version, filename, identifier, fileContentString, clientMigrationFile);
-
-        clientMigrationFileService.updateClientMigrationFile(clientMigrationFile);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
