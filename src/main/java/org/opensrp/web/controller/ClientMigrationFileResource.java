@@ -72,13 +72,7 @@ public class ClientMigrationFileResource {
         String fileContentString = new String(bytes);
 
         ClientMigrationFile clientMigrationFile = new ClientMigrationFile();
-        clientMigrationFile.setIdentifier(identifier);
-        clientMigrationFile.setFilename(filename);
-        clientMigrationFile.setVersion(version);
-        clientMigrationFile.setCreatedAt(new Date());
-        clientMigrationFile.setFileContents(fileContentString);
-        clientMigrationFile.setJurisdiction(jurisdiction);
-        clientMigrationFile.setOnObjectStorage(false);
+        updateClientMigrationFileProperties(jurisdiction, version, filename, identifier, fileContentString, clientMigrationFile);
 
         // TODO: This should be handled on the manifest upload
         //clientMigrationFile.setManifestId(4);
@@ -123,6 +117,16 @@ public class ClientMigrationFileResource {
             return new ResponseEntity<>("Migration file with the identifier does not exist", HttpStatus.BAD_REQUEST);
         }
 
+        updateClientMigrationFileProperties(jurisdiction, version, filename, identifier, fileContentString, clientMigrationFile);
+
+        clientMigrationFileService.updateClientMigrationFile(clientMigrationFile);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    private void updateClientMigrationFileProperties(
+            @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
+            @RequestParam("version") int version, String filename, String identifier,
+            String fileContentString, ClientMigrationFile clientMigrationFile) {
         clientMigrationFile.setIdentifier(identifier);
         clientMigrationFile.setFilename(filename);
         clientMigrationFile.setVersion(version);
@@ -130,9 +134,6 @@ public class ClientMigrationFileResource {
         clientMigrationFile.setFileContents(fileContentString);
         clientMigrationFile.setJurisdiction(jurisdiction);
         clientMigrationFile.setOnObjectStorage(false);
-
-        clientMigrationFileService.updateClientMigrationFile(clientMigrationFile);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
