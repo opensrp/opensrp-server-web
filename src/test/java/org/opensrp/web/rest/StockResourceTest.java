@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.mockito.ArgumentCaptor;
+
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -124,7 +126,7 @@ public class StockResourceTest {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
 
-		when(stockService.findAllStocks()).thenReturn(expected);
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "getall"))
 				.andExpect(status().isOk()).andReturn();
@@ -141,8 +143,29 @@ public class StockResourceTest {
 	}
 
 	@Test
+	public void testGetAllWithServerVersionParam() throws Exception {
+		List<Stock> expected = new ArrayList<>();
+		expected.add(createStock());
+
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123"))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+
+		assertEquals(actualObj.get("stocks").get(0).get("identifier").asLong(), 12345l);
+		assertEquals(actualObj.get("stocks").get(0).get("id").asText(), "ID-123");
+		assertEquals(actualObj.get("stocks").size(), 1);
+	}
+
+	@Test
 	public void testGetAllWithException() throws Exception {
-		when(stockService.findAllStocks()).thenReturn(null);
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(null);
 		mockMvc.perform(get(BASE_URL + "getall"))
 				.andExpect(status().isInternalServerError()).andReturn();
 	}
@@ -265,7 +288,7 @@ public class StockResourceTest {
 	public void testFilter() {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
-		when(stockService.findAllStocks()).thenReturn(expected);
+		when(stockService.findAllStocks(nullable(Long.class),nullable(Integer.class))).thenReturn(expected);
 		List<Stock> actual = stockResource.filter("");
 		assertEquals(expected.size(),actual.size());
 		assertEquals(expected.get(0).getIdentifier(),actual.get(0).getIdentifier());
