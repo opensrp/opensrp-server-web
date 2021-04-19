@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.mockito.ArgumentCaptor;
+
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -47,8 +49,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
@@ -126,7 +126,7 @@ public class StockResourceTest {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
 
-		when(stockService.findAllStocks(anyLong(),anyInt())).thenReturn(expected);
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "getall"))
 				.andExpect(status().isOk()).andReturn();
@@ -144,7 +144,7 @@ public class StockResourceTest {
 
 	@Test
 	public void testGetAllWithException() throws Exception {
-		when(stockService.findAllStocks(anyLong(),anyInt())).thenReturn(null);
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(null);
 		mockMvc.perform(get(BASE_URL + "getall"))
 				.andExpect(status().isInternalServerError()).andReturn();
 	}
@@ -267,7 +267,7 @@ public class StockResourceTest {
 	public void testFilter() {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
-		when(stockService.findAllStocks(anyLong(),anyInt())).thenReturn(expected);
+		when(stockService.findAllStocks(nullable(Long.class),nullable(Integer.class))).thenReturn(expected);
 		List<Stock> actual = stockResource.filter("");
 		assertEquals(expected.size(),actual.size());
 		assertEquals(expected.get(0).getIdentifier(),actual.get(0).getIdentifier());
