@@ -143,6 +143,27 @@ public class StockResourceTest {
 	}
 
 	@Test
+	public void testGetAllWithServerVersionParam() throws Exception {
+		List<Stock> expected = new ArrayList<>();
+		expected.add(createStock());
+
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123"))
+				.andExpect(status().isOk()).andReturn();
+
+		String responseString = result.getResponse().getContentAsString();
+		if (responseString.isEmpty()) {
+			fail("Test case failed");
+		}
+		JsonNode actualObj = mapper.readTree(responseString);
+
+		assertEquals(actualObj.get("stocks").get(0).get("identifier").asLong(), 12345l);
+		assertEquals(actualObj.get("stocks").get(0).get("id").asText(), "ID-123");
+		assertEquals(actualObj.get("stocks").size(), 1);
+	}
+
+	@Test
 	public void testGetAllWithException() throws Exception {
 		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(null);
 		mockMvc.perform(get(BASE_URL + "getall"))
