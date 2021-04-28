@@ -322,7 +322,7 @@ public class UploadControllerTest {
 	}
 
 	@Test
-	public void testDownloadFile_InUnknownDirectory() throws Exception {
+	public void testDownloadFileInUnknownDirectory() throws Exception {
 		String path = "src/test/resources/sample/childregistration.csv";
 		File file = new File(path);
 
