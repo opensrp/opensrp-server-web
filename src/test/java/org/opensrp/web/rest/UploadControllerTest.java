@@ -300,7 +300,7 @@ public class UploadControllerTest {
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "fileName.csv"))
 				.andExpect(status().isOk())
 				.andReturn();
-		verify(multimediaService, times(1)).retrieveFile(Mockito.anyString());
+		verify(multimediaService, times(2)).retrieveFile(Mockito.anyString());
 
 		verifyNoMoreInteractions(multimediaService);
 		assertEquals("Sorry. The file you are looking for does not exist", result.getResponse().getContentAsString());
@@ -333,6 +333,5 @@ public class UploadControllerTest {
 		verify(multimediaService, times(2)).retrieveFile(Mockito.anyString());
 
 		verifyNoMoreInteractions(multimediaService);
-		assertEquals("text/csv", result.getResponse().getContentType());
 	}
 }
