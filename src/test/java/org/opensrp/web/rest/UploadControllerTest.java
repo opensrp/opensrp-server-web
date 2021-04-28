@@ -326,7 +326,7 @@ public class UploadControllerTest {
 		String path = "src/test/resources/sample/childregistration.csv";
 		File file = new File(path);
 
-		when(multimediaService.retrieveFile(Mockito.anyString())).thenReturn(file);
+		when(multimediaService.retrieveFile("/unknown_files/fileName.csv")).thenReturn(file);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "fileName.csv"))
 				.andExpect(status().isOk())
 				.andReturn();
