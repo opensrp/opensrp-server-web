@@ -191,7 +191,7 @@ public class SettingResourceTest {
 
 		verify(settingService).findSettings(any(SettingSearchBean.class), anyMap());
 		verifyNoMoreInteractions(settingService);
-		verify(physicalLocationService).buildLocationHierachyFromLocation(anyString(), anyBoolean());
+		verify(physicalLocationService).buildLocationTreeHierachyWithAncestors(anyString(), anyBoolean());
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
