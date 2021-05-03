@@ -181,7 +181,7 @@ public class SettingResourceTest {
 		settingConfig.add(config);
 
 		LocationTree locationTree = new Gson().fromJson(locationTreeString, LocationTree.class);
-		Mockito.when(physicalLocationService.buildLocationHierachyFromLocation(anyString(), anyBoolean()))
+		Mockito.when(physicalLocationService.buildLocationTreeHierachyWithAncestors(anyString(), anyBoolean()))
 				.thenReturn(locationTree);
 		Mockito.when(settingService.findSettings(any(SettingSearchBean.class), anyMap())).thenReturn(settingConfig);
 
