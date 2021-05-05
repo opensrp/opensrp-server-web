@@ -206,7 +206,8 @@ public class UploadController {
 				.withDateUploaded(new Date())
 				.withSummary(objectMapper.writeValueAsString(details));
 
-		multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		String saved = multimediaService.saveFile(multimediaDTO, file.getBytes(), file.getOriginalFilename());
+		if(saved.equals("fail")) throw new UploadValidationException("Error saving file on server");
 
 		return details;
 	}
@@ -224,6 +225,11 @@ public class UploadController {
 
 		for (Pair<Client, Event> eventClient : validationBean.getAnalyzedData()) {
 			Client client = eventClient.getLeft();
+
+			Client found = clientService.findClient(client);
+			if(found != null) {
+				client.setBaseEntityId(found.getBaseEntityId());
+			}
 
 			boolean newClient = StringUtils.isBlank(client.getBaseEntityId());
 			String baseEntityID = StringUtils.defaultIfBlank(client.getBaseEntityId(), UUID.randomUUID().toString());
@@ -371,6 +377,13 @@ public class UploadController {
 
 		File file = multimediaService
 				.retrieveFile(multiMediaDir + File.separator + FILE_CATEGORY + File.separator + fileName.trim());
+
+		// check if the file is in the unknown directory
+		// this is a bug for files uploaded via a windows environment
+		if(file == null)
+			file = multimediaService
+					.retrieveFile(multiMediaDir + File.separator + MultimediaService.OTHER_DIR + File.separator + fileName.trim());
+
 		if (file != null) {
 			response.setContentType("text/csv");
 			String headerKey = "Content-Disposition";

@@ -104,11 +104,16 @@ public class StockResource extends RestResource<Stock> {
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
-	protected ResponseEntity<String> getAll() {
+	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion")  String serverVersion,
+			@RequestParam(required = false) Integer limit) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
+			Long lastSyncedServerVersion = null;
+			if (serverVersion != null) {
+				lastSyncedServerVersion = Long.parseLong(serverVersion);
+			}
 			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findAllStocks();
+			stocks = stockService.findAllStocks(lastSyncedServerVersion,limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
 			response.put("stocks", stocksArray);
@@ -224,7 +229,7 @@ public class StockResource extends RestResource<Stock> {
 
 	@Override
 	public List<Stock> filter(String query) {
-		return stockService.findAllStocks();
+		return stockService.findAllStocks(null, null);
 	}
 
 	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE,
