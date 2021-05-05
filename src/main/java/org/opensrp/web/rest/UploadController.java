@@ -377,6 +377,13 @@ public class UploadController {
 
 		File file = multimediaService
 				.retrieveFile(multiMediaDir + File.separator + FILE_CATEGORY + File.separator + fileName.trim());
+
+		// check if the file is in the unknown directory
+		// this is a bug for files uploaded via a windows environment
+		if(file == null)
+			file = multimediaService
+					.retrieveFile(multiMediaDir + File.separator + MultimediaService.OTHER_DIR + File.separator + fileName.trim());
+
 		if (file != null) {
 			response.setContentType("text/csv");
 			String headerKey = "Content-Disposition";

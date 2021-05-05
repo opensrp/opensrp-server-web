@@ -26,12 +26,11 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-	<opensrp.core.version>3.0.0-ACL-2-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.2.2-SNAPSHOT</opensrp.connector.version>
-        <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
+        <opensrp.core.version>3.0.0-ACL-3-SNAPSHOT</opensrp.core.version>
+        <opensrp.connector.version>2.2.4-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
+        <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
         <powermock.version>2.0.5</powermock.version>
-        <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
         <opensrp-server-openlmis-stock-version>1.0.3-SNAPSHOT</opensrp-server-openlmis-stock-version>
         <lombok.version>1.18.12</lombok.version>
     </properties>
@@ -401,11 +400,6 @@
             <groupId>org.ektorp</groupId>
             <artifactId>org.ektorp.spring</artifactId>
             <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.smartregister</groupId>
-            <artifactId>opensrp-server-referral</artifactId>
-            <version>${opensrp.server.referral}</version>
         </dependency>
         <dependency>
             <groupId>org.smartregister</groupId>
@@ -820,10 +814,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>chw_referral_module</id>
-<!--            Any configurations for this profile can be added here-->
         </profile>
         <profile>
             <id>rabbitmq</id>
