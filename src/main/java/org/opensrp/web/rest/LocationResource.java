@@ -219,7 +219,7 @@ public class LocationResource {
 	@RequestMapping(value = "/findStructuresByAncestor", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> getStructuresByAncestor(@RequestParam(name = "id") final String ancestorId){
 		final long serverVersion = 0L;
-		List<PhysicalLocation> locationAndTheirChildren = locationService.findLocationByIdWithChildren(false, ancestorId, Integer.parseInt(DEFAULT_PAGE_SIZE));
+		List<PhysicalLocation> locationAndTheirChildren = locationService.findLocationByIdWithChildren(false, ancestorId, Integer.MAX_VALUE);
 		String parentIds = locationAndTheirChildren.stream()
 				.map(PhysicalLocation::getId)
 				.collect(Collectors.joining(","));
