@@ -83,13 +83,20 @@ public class ClientPermissionEvaluatorTest {
 
 	@Test
 	public void testHasPermission() {
+		String locationId = "cd09a3d4-01d9-485c-a1c5-a2eb078a61be";
+		String teamId = "4231a667-60f9-4d1e-acd2-2d4b77cbd295";
+
 		Client client = new Client("base-entity-id");
-		client.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+		client.setLocationId(locationId);
+		client.setTeamId(teamId);
 
 		List<AssignedLocations> assignedLocations = new ArrayList<>();
 		AssignedLocations assignedLocation = new AssignedLocations();
-		assignedLocation.setPlanId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+		assignedLocation.setPlanId("9c60baef-a007-4726-8f75-71a69bd97ef6");
+		assignedLocation.setOrganizationId(teamId);
+		assignedLocation.setJurisdictionId(locationId);
 		assignedLocations.add(assignedLocation);
+
 		List<Long> organizationalIds = Collections.singletonList(12233l);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setIdentifier("practitioner-id");
@@ -108,8 +115,9 @@ public class ClientPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-        boolean hasPermission = clientPermissionEvaluator.hasPermission(authentication,client);
-        assertTrue(hasPermission);
+
+		boolean hasPermission = clientPermissionEvaluator.hasPermission(authentication, client);
+		assertTrue(hasPermission);
 	}
 
 	@Test
@@ -143,7 +151,7 @@ public class ClientPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 
-		boolean hasPermission = clientPermissionEvaluator.hasObjectPermission(authentication, client,null);
+		boolean hasPermission = clientPermissionEvaluator.hasObjectPermission(authentication, client, null);
 		assertTrue(hasPermission);
 	}
 
@@ -181,7 +189,7 @@ public class ClientPermissionEvaluatorTest {
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 
-		boolean hasPermission = clientPermissionEvaluator.hasObjectPermission(authentication, (Serializable) clients,null);
+		boolean hasPermission = clientPermissionEvaluator.hasObjectPermission(authentication, (Serializable) clients, null);
 		assertTrue(hasPermission);
 	}
 }
