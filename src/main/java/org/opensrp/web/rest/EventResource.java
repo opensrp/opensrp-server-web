@@ -403,18 +403,14 @@ public class EventResource extends RestResource<Event> {
 
 		if (syncData.has("clients")) {
 			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
-					new TypeToken<ArrayList<Client>>() {
-
-					}.getType());
+			    new TypeToken<ArrayList<Client>>() {}.getType());
 			for (Client client : clients) {
 				clientService.addorUpdate(client);
 			}
 		}
 		if (syncData.has("events")) {
 			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
-					new TypeToken<ArrayList<Event>>() {
-
-					}.getType());
+			    new TypeToken<ArrayList<Event>>() {}.getType());
 			for (Event event : events) {
 				event = eventService.processOutOfArea(event);
 				eventService.addorUpdateEvent(event, RestUtils.currentUser(authentication).getUsername());
@@ -424,11 +420,9 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(CREATED);
 		} else {
 			JsonArray clientsArray = (JsonArray) gson.toJsonTree(failedClientsIds, new TypeToken<List<String>>() {
-
 			}.getType());
 
 			JsonArray eventsArray = (JsonArray) gson.toJsonTree(failedEventIds, new TypeToken<List<String>>() {
-
 			}.getType());
 
 			response.put("failed_events", eventsArray);
