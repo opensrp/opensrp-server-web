@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -143,12 +142,12 @@ public class EventResource extends RestResource<Event> {
 			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit,
 					returnCount);
 
-			HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
 				headers.add(TOTAL_RECORDS, String.valueOf(eventSyncBean.getTotalRecords()));
 			}
 
-			return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, HttpStatus.OK);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, OK);
 
 		} else {
 			response.setMsg("specify atleast one filter");
@@ -176,12 +175,12 @@ public class EventResource extends RestResource<Event> {
 						syncParam.getTeamId(),
 						syncParam.getLimit(), syncParam.isReturnCount());
 
-				HttpHeaders headers = RestUtils.getJSONUTF8Headers();
+				HttpHeaders headers = getJSONUTF8Headers();
 				if (syncParam.isReturnCount()) {
 					headers.add(TOTAL_RECORDS, String.valueOf(eventSyncBean.getTotalRecords()));
 				}
 
-				return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, HttpStatus.OK);
+				return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, OK);
 			} else {
 				response.setMsg("specify atleast one filter");
 				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
@@ -239,9 +238,7 @@ public class EventResource extends RestResource<Event> {
 			combinedEventClients.setClients(combinedClients);
 			combinedEventClients.setNoOfEvents(combinedEventClients.getEvents().size());
 
-			return new ResponseEntity<>(objectMapper.writeValueAsString(combinedEventClients),
-					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
+			return new ResponseEntity<>(objectMapper.writeValueAsString(combinedEventClients), getJSONUTF8Headers(), OK);
 		}
 		catch (Exception e) {
 			EventSyncBean response = new EventSyncBean();
@@ -303,7 +300,7 @@ public class EventResource extends RestResource<Event> {
 		//TO DO research on ways to improve this
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User user = RestUtils.currentUser(authentication);
+		User user = currentUser(authentication);
 
 		if (Utils.checkRoleIfRoleExists(user.getRoles(), Role.PII_DATA_MASK)) {
 
@@ -357,7 +354,7 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setEventType(eventType);
 		return new ResponseEntity<>(
 				objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false)),
-				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+				getJSONUTF8Headers(), OK);
 	}
 
 	/**
@@ -379,7 +376,7 @@ public class EventResource extends RestResource<Event> {
 			ModelMap modelMap = new ModelMap();
 			modelMap.put("count", countOfEvents != null ? countOfEvents : 0);
 
-			return new ResponseEntity<>(modelMap, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(modelMap, getJSONUTF8Headers(), OK);
 
 		}
 		catch (Exception e) {
@@ -403,26 +400,32 @@ public class EventResource extends RestResource<Event> {
 
 		if (syncData.has("clients")) {
 			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
-			    new TypeToken<ArrayList<Client>>() {}.getType());
+					new TypeToken<ArrayList<Client>>() {
+
+					}.getType());
 			for (Client client : clients) {
 				clientService.addorUpdate(client);
 			}
 		}
 		if (syncData.has("events")) {
 			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
-			    new TypeToken<ArrayList<Event>>() {}.getType());
+					new TypeToken<ArrayList<Event>>() {
+
+					}.getType());
 			for (Event event : events) {
 				event = eventService.processOutOfArea(event);
-				eventService.addorUpdateEvent(event, RestUtils.currentUser(authentication).getUsername());
+				eventService.addorUpdateEvent(event, currentUser(authentication).getUsername());
 			}
 		}
 		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
 			return new ResponseEntity<>(CREATED);
 		} else {
 			JsonArray clientsArray = (JsonArray) gson.toJsonTree(failedClientsIds, new TypeToken<List<String>>() {
+
 			}.getType());
 
 			JsonArray eventsArray = (JsonArray) gson.toJsonTree(failedEventIds, new TypeToken<List<String>>() {
+
 			}.getType());
 
 			response.put("failed_events", eventsArray);
@@ -434,7 +437,7 @@ public class EventResource extends RestResource<Event> {
 	@Override
 	public Event create(Event o) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return eventService.addEvent(o, RestUtils.currentUser(authentication).getUsername());
+		return eventService.addEvent(o, currentUser(authentication).getUsername());
 	}
 
 	@Override
@@ -515,7 +518,7 @@ public class EventResource extends RestResource<Event> {
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
-			return new ResponseEntity<>(identifiers, RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+			return new ResponseEntity<>(identifiers, getJSONUTF8Headers(), OK);
 
 		}
 		catch (Exception e) {

@@ -111,7 +111,6 @@ public class ACLPermissionEvaluatorTest {
 		PlanDefinition planDefinition = new PlanDefinition();
 		List<Long> organizationalIds = new ArrayList<>();
 		organizationalIds.add(12345l);
-		List<Long> ids = Collections.singletonList(12233l);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setIdentifier("practitioner-id");
 		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
@@ -253,7 +252,7 @@ public class ACLPermissionEvaluatorTest {
 	@Test
 	public void testHasPermissionV2WithUserAsTargetObject() {
 		User user = new User(UUID.randomUUID().toString()).withRoles(roles).withUsername("test_user1");
-		doReturn(true).when(userPermissionEvaluator).hasObjectPermission(authentication,user, "USER");
+		doReturn(true).when(userPermissionEvaluator).hasObjectPermission(authentication, user, "USER");
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, user, "User", "USER");
 		assertTrue(hasPermission);
 	}
@@ -283,7 +282,7 @@ public class ACLPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		doReturn(true).when(eventPermissionEvaluator).hasObjectPermission(authentication,event, "USER");
+		doReturn(true).when(eventPermissionEvaluator).hasObjectPermission(authentication, event, "USER");
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, event, "Event", "USER");
 		assertTrue(hasPermission);
 	}
@@ -313,7 +312,7 @@ public class ACLPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		doReturn(true).when(clientPermissionEvaluator).hasObjectPermission(authentication,client, "USER");
+		doReturn(true).when(clientPermissionEvaluator).hasObjectPermission(authentication, client, "USER");
 		boolean hasPermission = aclPermissionEvaluator.hasPermission(authentication, client, "Client", "USER");
 		assertTrue(hasPermission);
 	}

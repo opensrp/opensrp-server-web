@@ -6,9 +6,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
-import org.smartregister.domain.Event;
-import org.smartregister.domain.Jurisdiction;
-import org.smartregister.domain.PlanDefinition;
 import org.opensrp.repository.LocationRepository;
 import org.opensrp.repository.PractitionerRepository;
 import org.opensrp.repository.PractitionerRoleRepository;
@@ -16,6 +13,8 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.service.PractitionerService;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.PlanDefinition;
 import org.smartregister.domain.Practitioner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -111,7 +110,7 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasPermission(authentication,planDefinition);
+		boolean hasPermission = planPermissionEvaluator.hasPermission(authentication, planDefinition);
 		assertTrue(hasPermission);
 	}
 
@@ -148,7 +147,7 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasPermission(authentication,planDefinition);
+		boolean hasPermission = planPermissionEvaluator.hasPermission(authentication, planDefinition);
 		assertTrue(hasPermission);
 
 	}
@@ -178,7 +177,8 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasObjectPermission(authentication, "cd09a3d4-01d9-485c-a1c5-a2eb078a61be",null);
+		boolean hasPermission = planPermissionEvaluator
+				.hasObjectPermission(authentication, "cd09a3d4-01d9-485c-a1c5-a2eb078a61be", null);
 		assertTrue(hasPermission);
 	}
 
@@ -210,7 +210,8 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasObjectPermission(authentication, (Serializable) collectionOfString,null);
+		boolean hasPermission = planPermissionEvaluator
+				.hasObjectPermission(authentication, (Serializable) collectionOfString, null);
 		assertTrue(hasPermission);
 	}
 
@@ -240,7 +241,7 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasObjectPermission(authentication, planDefinition,null);
+		boolean hasPermission = planPermissionEvaluator.hasObjectPermission(authentication, planDefinition, null);
 		assertTrue(hasPermission);
 	}
 
@@ -274,7 +275,8 @@ public class PlanPermissionEvaluatorTest {
 		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
 		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
 		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = planPermissionEvaluator.hasObjectPermission(authentication, (Serializable) planDefinitions,null);
+		boolean hasPermission = planPermissionEvaluator
+				.hasObjectPermission(authentication, (Serializable) planDefinitions, null);
 		assertTrue(hasPermission);
 	}
 }

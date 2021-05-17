@@ -1,24 +1,23 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.acl;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.smartregister.domain.PhysicalLocation;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Samuel Githengi created on 06/17/20
  */
 @Component
 public class LocationPermissionEvaluator extends BasePermissionEvaluator<PhysicalLocation> {
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
@@ -40,10 +39,10 @@ public class LocationPermissionEvaluator extends BasePermissionEvaluator<Physica
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean hasPermission(Authentication authentication, PhysicalLocation jurisdiction) {
 		return hasPermissionOnJurisdiction(authentication, jurisdiction.getId());
 	}
-	
+
 }

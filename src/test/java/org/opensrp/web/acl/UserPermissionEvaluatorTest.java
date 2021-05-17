@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+
 import java.util.Collection;
 
 import static org.junit.Assert.assertTrue;
@@ -20,14 +21,14 @@ public class UserPermissionEvaluatorTest {
 	@Test
 	public void testHasObjectPermission() {
 		Authentication authentication = getMockedAuthentication();
-        Boolean hasObjectPermission = userPermissionEvaluator.hasObjectPermission(authentication,"admin",null);
-        assertTrue(hasObjectPermission);
+		Boolean hasObjectPermission = userPermissionEvaluator.hasObjectPermission(authentication, "admin", null);
+		assertTrue(hasObjectPermission);
 	}
 
 	@Test
 	public void testHasPermission() {
 		Authentication authentication = getMockedAuthentication();
-		Boolean hasPermission = userPermissionEvaluator.hasPermission(authentication,"admin");
+		Boolean hasPermission = userPermissionEvaluator.hasPermission(authentication, "admin");
 		assertTrue(hasPermission);
 	}
 
@@ -61,7 +62,7 @@ public class UserPermissionEvaluatorTest {
 
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+				// do nothing
 			}
 
 			@Override
