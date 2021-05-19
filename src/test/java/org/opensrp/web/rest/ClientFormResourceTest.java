@@ -40,6 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,8 +48,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -990,33 +990,142 @@ public class ClientFormResourceTest {
 	}
 
 	@Test
-	public void testGetAllFilesRelatedToRelease() throws Exception {
-		String identifier = "0.0.5";
-		String formIdentifier = "opd/reg.json";
+	public void testGetAllFilesRelatedToReleaseResponseEmptyForFilesNotFound() throws Exception {
+        final String identifier = "0.0.5";
+        final String formIdentifier = "opd/reg.json";
+        final Manifest manifest = initTestManifest3();
+        when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false))
+                .thenReturn(new ArrayList<>());
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                .param("identifier", identifier))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		List<IdVersionTuple> idVersionTuples = new ArrayList<>();
-		idVersionTuples.add(new IdVersionTuple(1, "0.0.1"));
-		idVersionTuples.add(new IdVersionTuple(2, "0.0.2"));
-		idVersionTuples.add(new IdVersionTuple(3, "0.0.3"));
+        final String responseString = result.getResponse().getContentAsString();
+        final JsonNode jsonNode = mapper.readTree(responseString);
+        assertTrue(jsonNode.isEmpty());
+    }
 
-		ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
-		clientFormMetadata.setId(3L);
-		clientFormMetadata.setIdentifier(formIdentifier);
-		clientFormMetadata.setVersion("0.0.3");
+    private List<ClientFormMetadata> getSampleClientFormMetadata(@SuppressWarnings("SameParameterValue") final String formIdentifier, String[] versions){
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>(versions.length);
+        for (int i = 0; i < versions.length; i++) {
+            ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
+            clientFormMetadata.setId((long) i);
+            clientFormMetadata.setIdentifier(formIdentifier);
+            clientFormMetadata.setVersion(versions[i]);
 
-		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest3());
+            clientFormMetadataList.add(clientFormMetadata);
+        }
+
+        return clientFormMetadataList;
+    }
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseResponseCorrespondsFormVersion() throws Exception {
+		final String identifier = "0.0.5";
+		final String formIdentifier = "opd/reg.json";
+		final Manifest manifest = initTestManifest3();
+		when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
+
+		final String[] fileVersions = new String[]{"0.0.1", "0.0.2", "0.0.3"};
+		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+                .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
+                .collect(Collectors.toList());
+
 		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
-		when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
+        when(clientFormService.getClientFormMetadataById(any(Long.class)))
+                .thenAnswer(invocation -> {
+                    Long metadataFormId = invocation.getArgument(0);
+                    return clientFormMetadataList.stream()
+                            .filter(clientFormMetadata -> clientFormMetadata.getId().equals(metadataFormId))
+                            .findFirst()
+                            .orElse(null);
+                });
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
 				.param("identifier", identifier))
 				.andExpect(status().isOk())
 				.andReturn();
 
+        final String expectedResponseFileVersion = "0.0.2"; // expected fileVersion to be generated from manifest
+
+		final String responseString = result.getResponse().getContentAsString();
+		final JsonNode jsonNode = mapper.readTree(responseString);
+		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+		assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseResponseFindsHighestBelowManifestFormVersion() throws Exception {
+		final String identifier = "0.0.5";
+		final String formIdentifier = "opd/reg.json";
+		final Manifest manifest = initTestManifest3();
+        when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
+
+        final String[] fileVersions = new String[]{"0.0.1", "0.0.3", "0.0.4"};
+		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+                .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
+                .collect(Collectors.toList());
+
+		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+        when(clientFormService.getClientFormMetadataById(any(Long.class)))
+                .thenAnswer(invocation -> {
+                    Long metadataFormId = invocation.getArgument(0);
+                    return clientFormMetadataList.stream()
+                            .filter(clientFormMetadata -> clientFormMetadata.getId().equals(metadataFormId))
+                            .findFirst()
+                            .orElse(null);
+                });
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		final String expectedResultFileVersion = "0.0.1"; // since no file version of matching "0.0.2" exists
+
+		final String responseString = result.getResponse().getContentAsString();
+		final JsonNode jsonNode = mapper.readTree(responseString);
+		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+		assertEquals(expectedResultFileVersion, jsonNode.get(0).get("version").textValue());
+	}
+
+	@Test
+	public void testGetAllFilesRelatedToReleaseResponseFindsMostRecentFormVersionIfNoMatchingOrBelow() throws Exception {
+		final String identifier = "0.0.5";
+		final String formIdentifier = "opd/reg.json";
+		final Manifest manifest = initTestManifest3();
+        when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
+
+        final String[] fileVersions = new String[]{"0.0.4", "0.0.5", "0.0.7"};
+		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+                .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
+                .collect(Collectors.toList());
+
+		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+		when(clientFormService.getClientFormMetadataById(any(Long.class)))
+                .thenAnswer(invocation -> {
+                    Long argClientFormMetadataId = invocation.getArgument(0);
+                    return clientFormMetadataList.stream()
+                            .filter(clientFormMetadata -> clientFormMetadata.getId().equals(argClientFormMetadataId))
+                            .findFirst()
+                            .orElse(null);
+                });
+
+		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+				.param("identifier", identifier))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		final String expectedResponseFileVersion = "0.0.7"; // most recent, since no matching "0.0.2" or below
 		String responseString = result.getResponse().getContentAsString();
 		JsonNode jsonNode = mapper.readTree(responseString);
-		assertEquals("opd/reg.json", jsonNode.get(0).get("identifier").textValue());
-		assertEquals("0.0.3", jsonNode.get(0).get("version").textValue());
+		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+		assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
 	}
 
 	private static Manifest initTestManifest() {
