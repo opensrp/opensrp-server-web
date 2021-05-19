@@ -142,10 +142,10 @@ public class ClientFormResource {
         return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
 
-    private final Comparator<IdVersionTuple> idVersionTupleComparator = (o1, o2) -> {
-        final DefaultArtifactVersion o1ArtifactVersion = new DefaultArtifactVersion(o1.getVersion());
-        final DefaultArtifactVersion o2ArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
-        return o1ArtifactVersion.compareTo(o2ArtifactVersion);
+    private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
+        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(o1.getVersion());
+        final DefaultArtifactVersion otherArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
+        return artifactVersion.compareTo(otherArtifactVersion);
     };
 
     private ClientFormMetadata getMostRecentWithVersion(@NonNull final String formIdentifier, final boolean isJsonValidator, @Nullable final String formVersionCap){
@@ -158,7 +158,7 @@ public class ClientFormResource {
                         final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(idVersionTuple.getVersion());
                         return artifactVersion.compareTo(artifactVersionCap) <= 0;
                     })
-                    .max(idVersionTupleComparator);
+                    .max(idVersionTupleByVersionComparator);
         } else {
             maxInCapLimitIdVersionTuple = Optional.empty();
         }
@@ -166,7 +166,7 @@ public class ClientFormResource {
         final Optional<IdVersionTuple> maxNoCap;
         if (maxInCapLimitIdVersionTuple.isEmpty()) {
             maxNoCap = availableFormIdVersions.stream()
-                    .max(idVersionTupleComparator);
+                    .max(idVersionTupleByVersionComparator);
         } else {
             maxNoCap = Optional.empty();
         }
