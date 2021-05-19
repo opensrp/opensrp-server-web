@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -258,11 +259,11 @@ public class UserController {
 		JSONArray locations = new JSONArray();
 		
 		/** @formatter:off*/
-		String defaultLocationId = jurisdictions
+		Optional<PhysicalLocation> defaultLocation = jurisdictions
 				.stream()
 				.filter(j -> locationIds.contains(j.getId()))
-				.findFirst()
-				.get().getId();
+				.findFirst();
+		String defaultLocationId = defaultLocation.orElseGet(() -> jurisdictions.iterator().next()).getId();
 		/** @formatter:on*/
 		
 		Set<String> locationParents = new HashSet<>();

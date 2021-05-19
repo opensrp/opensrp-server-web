@@ -51,6 +51,9 @@ public interface Constants {
         String APP_VERSION = "app_version";
         String IS_DRAFT= "is_draft";
         String IS_JSON_VALIDATOR= "is_json_validator";
+        String LIMIT = "limit";
+        String PAGE = "page";
+        String IDENTIFIER = "identifier";
     }
 
     interface DefaultEndpointParam {

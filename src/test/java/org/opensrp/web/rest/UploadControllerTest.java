@@ -300,7 +300,7 @@ public class UploadControllerTest {
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "fileName.csv"))
 				.andExpect(status().isOk())
 				.andReturn();
-		verify(multimediaService, times(1)).retrieveFile(Mockito.anyString());
+		verify(multimediaService, times(2)).retrieveFile(Mockito.anyString());
 
 		verifyNoMoreInteractions(multimediaService);
 		assertEquals("Sorry. The file you are looking for does not exist", result.getResponse().getContentAsString());
@@ -319,5 +319,19 @@ public class UploadControllerTest {
 
 		verifyNoMoreInteractions(multimediaService);
 		assertEquals("text/csv", result.getResponse().getContentType());
+	}
+
+	@Test
+	public void testDownloadFileInUnknownDirectory() throws Exception {
+		String path = "src/test/resources/sample/childregistration.csv";
+		File file = new File(path);
+
+		when(multimediaService.retrieveFile("/unknown_files/fileName.csv")).thenReturn(file);
+		mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "fileName.csv"))
+				.andExpect(status().isOk())
+				.andReturn();
+		verify(multimediaService, times(2)).retrieveFile(Mockito.anyString());
+
+		verifyNoMoreInteractions(multimediaService);
 	}
 }
