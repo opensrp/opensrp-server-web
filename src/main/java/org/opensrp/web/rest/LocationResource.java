@@ -83,6 +83,8 @@ public class LocationResource {
 
 	public static final String PARENT_ID = "parent_id";
 
+	public static final String PARENT_ID_NO_UNDERSCORE = "parentId";
+
 	private static final String FALSE = "false";
 
 	private static final String TRUE = "true";
@@ -347,8 +349,9 @@ public class LocationResource {
 			for (String filter : propertiesFilters) {
 				String[] filterArray = filter.split(":");
 				if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
-						|| "parentId".equalsIgnoreCase(filterArray[0]))) {
-					parentId = filterArray[1];
+						|| PARENT_ID_NO_UNDERSCORE.equalsIgnoreCase(filterArray[0]))) {
+					parentId = "null".equalsIgnoreCase(filterArray[1]) || StringUtils.isBlank(filterArray[1])
+							?  "" : filterArray [1];
 
 				} else if (filterArray.length == 2) {
 					filters.put(filterArray[0], filterArray[1]);
