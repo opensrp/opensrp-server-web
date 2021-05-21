@@ -30,6 +30,7 @@ import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.web.Constants;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
@@ -350,7 +351,7 @@ public class LocationResource {
 				String[] filterArray = filter.split(":");
 				if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
 						|| PARENT_ID_NO_UNDERSCORE.equalsIgnoreCase(filterArray[0]))) {
-					parentId = "null".equalsIgnoreCase(filterArray[1]) || StringUtils.isBlank(filterArray[1])
+					parentId = Constants.NULL.equalsIgnoreCase(filterArray[1]) || StringUtils.isBlank(filterArray[1])
 							?  "" : filterArray [1];
 
 				} else if (filterArray.length == 2) {
