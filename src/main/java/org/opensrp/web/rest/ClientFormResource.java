@@ -4,7 +4,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +23,6 @@ import org.opensrp.service.ManifestService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.utils.ClientFormValidator;
 import org.opensrp.web.utils.FormConfigUtils;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +49,7 @@ public class ClientFormResource {
 
     public static final String FORMS_VERSION = "forms_version";
 
-    private static Logger logger = LogManager.getLogger(EventResource.class.toString());
+    private static Logger logger = LogManager.getLogger(ClientFormResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
@@ -144,26 +142,45 @@ public class ClientFormResource {
         return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
 
-    private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier, boolean isJsonValidator) {
-        List<IdVersionTuple> availableFormVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, isJsonValidator);
-        DefaultArtifactVersion highestVersion = null;
-        IdVersionTuple highestIdVersionTuple = null;
+    private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
+        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(o1.getVersion());
+        final DefaultArtifactVersion otherArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
+        return artifactVersion.compareTo(otherArtifactVersion);
+    };
 
-        for (IdVersionTuple availableFormVersion : availableFormVersions) {
-            DefaultArtifactVersion semanticFormVersion = new DefaultArtifactVersion(availableFormVersion.getVersion());
-
-            if (highestVersion == null || semanticFormVersion.compareTo(highestVersion) > 0) {
-                highestVersion = semanticFormVersion;
-                highestIdVersionTuple = availableFormVersion;
-            }
-        }
-
-        if (highestIdVersionTuple == null) {
-            return null;
+    private ClientFormMetadata getMostRecentWithVersion(@NonNull final String formIdentifier, final boolean isJsonValidator, @Nullable final String formVersionCap){
+        final List<IdVersionTuple> availableFormIdVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, isJsonValidator);
+        final Optional<IdVersionTuple> maxInCapLimitIdVersionTuple;
+        if (formVersionCap != null) {
+            final DefaultArtifactVersion artifactVersionCap = new DefaultArtifactVersion(formVersionCap);
+            maxInCapLimitIdVersionTuple = availableFormIdVersions.stream()
+                    .filter(idVersionTuple -> {
+                        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(idVersionTuple.getVersion());
+                        return artifactVersion.compareTo(artifactVersionCap) <= 0;
+                    })
+                    .max(idVersionTupleByVersionComparator);
         } else {
-            long formId = highestIdVersionTuple.getId();
-            return clientFormService.getClientFormMetadataById(formId);
+            maxInCapLimitIdVersionTuple = Optional.empty();
         }
+
+        final Optional<IdVersionTuple> maxNoCap;
+        if (maxInCapLimitIdVersionTuple.isEmpty()) {
+            maxNoCap = availableFormIdVersions.stream()
+                    .max(idVersionTupleByVersionComparator);
+        } else {
+            maxNoCap = Optional.empty();
+        }
+
+        if (maxInCapLimitIdVersionTuple.isEmpty() && maxNoCap.isEmpty()) return null;
+        final long formMetadataId = maxInCapLimitIdVersionTuple
+                .map(IdVersionTuple::getId)
+                .orElseGet(() -> maxNoCap.get().getId());
+
+        return clientFormService.getClientFormMetadataById(formMetadataId);
+    }
+
+    private ClientFormMetadata getMostRecentVersion(@NonNull String formIdentifier, boolean isJsonValidator) {
+        return getMostRecentWithVersion(formIdentifier, isJsonValidator, null);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "release-related-files")
@@ -173,32 +190,32 @@ public class ClientFormResource {
             return new ResponseEntity<>("Request parameter cannot be empty", HttpStatus.BAD_REQUEST);
         }
 
-        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
-
         Manifest manifest = manifestService.getManifest(releaseIdentifier);
-        if (manifest != null && StringUtils.isNotBlank(manifest.getJson())) {
-            JSONObject json = new JSONObject(manifest.getJson());
-            if (json.has(FORM_IDENTIFIERS)) {
-                JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
-                if (fileIdentifiers != null && fileIdentifiers.length() > 0) {
-                    for (int i = 0; i < fileIdentifiers.length(); i++) {
-                        String fileIdentifier = fileIdentifiers.getString(i);
-                        ClientFormMetadata clientFormMetadata = getMostRecentVersion(fileIdentifier, false);
-                        if (clientFormMetadata != null) {
-                            clientFormMetadataList.add(clientFormMetadata);
-                        }
-                    }
-                } else {
-                    return new ResponseEntity<>("This manifest does not have any files related to it",
-                                HttpStatus.NO_CONTENT);
-                }
-            } else {
-                return new ResponseEntity<>("This manifest does not have any files related to it",
-                       HttpStatus.NO_CONTENT);
-            }
-        } else {
+        if (manifest == null || StringUtils.isBlank(manifest.getJson())){
             return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NOT_FOUND);
+        }
+
+        JSONObject json = new JSONObject(manifest.getJson());
+        if (!json.has(FORM_IDENTIFIERS)){
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NO_CONTENT);
+        }
+
+        JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
+        if (fileIdentifiers == null || fileIdentifiers.length() <= 0){
+            return new ResponseEntity<>("This manifest does not have any files related to it",
+                    HttpStatus.NO_CONTENT);
+        }
+
+        List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>();
+        final String formVersionFromManifest = deriveNewFormVersionFromManifest(manifest);
+        for (int i = 0; i < fileIdentifiers.length(); i++) {
+            String fileIdentifier = fileIdentifiers.getString(i);
+            ClientFormMetadata clientFormMetadata = getMostRecentWithVersion(fileIdentifier, false, formVersionFromManifest);
+            if (clientFormMetadata != null) {
+                clientFormMetadataList.add(clientFormMetadata);
+            }
         }
 
         return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
@@ -293,16 +310,10 @@ public class ClientFormResource {
             if (manifestList != null && manifestList.size() > 0) {
                 for (int i = 0; i < manifestList.size(); i++) {
                     Manifest manifest = manifestList.get(i);
-                    String json = manifest.getJson();
-                    if (StringUtils.isNotBlank(json)) {
-                        JSONObject jsonObject = new JSONObject(json);
-                        if (jsonObject.has(FORMS_VERSION)) {
-                            String version = jsonObject.getString(FORMS_VERSION);
-                            if (StringUtils.isNotBlank(version)) {
-                                formVersion = FormConfigUtils.getNewVersion(version);
-                                break;
-                            }
-                        }
+                    final String newVersion = deriveNewFormVersionFromManifest(manifest);
+                    if (StringUtils.isNotBlank(newVersion)){
+                        formVersion = newVersion;
+                        break;
                     }
 
                     if (i + 1 == manifestList.size()) {
@@ -313,6 +324,22 @@ public class ClientFormResource {
         }
 
         return formVersion;
+    }
+
+    private String deriveNewFormVersionFromManifest(final Manifest manifest){
+        final String manifestJson = manifest.getJson();
+        if (StringUtils.isBlank(manifestJson)) {
+            return null;
+        }
+        JSONObject manifestJSONObject = new JSONObject(manifestJson);
+        if (!manifestJSONObject.has(FORMS_VERSION)) {
+            return null;
+        }
+        final String version = manifestJSONObject.getString(FORMS_VERSION);
+        if (StringUtils.isBlank(version)) {
+            return null;
+        }
+        return FormConfigUtils.getNewVersion(version);
     }
 
     private ClientFormMetadata getClientFormMetadata(String formVersion, String formName,String module,
