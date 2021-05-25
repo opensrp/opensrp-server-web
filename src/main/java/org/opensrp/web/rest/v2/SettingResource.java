@@ -50,6 +50,8 @@ public class SettingResource {
 
 	public static final String SETTING_IDENTIFIER = "identifier";
 
+	public static final String METADATA_VERSION = "metadata_version";
+
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
@@ -110,18 +112,24 @@ public class SettingResource {
 		String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 		String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
 		boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+        String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 
 		if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
+				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion) && StringUtils.isBlank(metadataVersion)) {
 			return new ResponseEntity<>("All parameters cannot be null for this endpoint",
 					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 
 		long lastSyncedServerVersion = 0L;
+		long lastMetadataVersion = 0L;
 		if (StringUtils.isNotBlank(serverVersion)) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
 		}
+
+        if (StringUtils.isNotBlank(metadataVersion)) {
+            lastMetadataVersion = Long.parseLong(metadataVersion);
+        }
 
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
 		settingQueryBean.setTeam(team);
@@ -129,6 +137,7 @@ public class SettingResource {
 		settingQueryBean.setProviderId(providerId);
 		settingQueryBean.setLocationId(locationId);
 		settingQueryBean.setServerVersion(lastSyncedServerVersion);
+		settingQueryBean.setMetadataVersion(lastMetadataVersion);
 		if (StringUtils.isNotBlank(identifier)) {
 			settingQueryBean.setIdentifier(identifier);
 		}
