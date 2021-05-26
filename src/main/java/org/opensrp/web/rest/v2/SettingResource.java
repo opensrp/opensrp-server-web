@@ -114,12 +114,13 @@ public class SettingResource {
 		String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 		String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
 		boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
-        String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
-        String limit = RestUtils.getStringFilter(LIMIT, request);
+		String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
+		String limit = RestUtils.getStringFilter(LIMIT, request);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 
 		if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion) && StringUtils.isBlank(metadataVersion)) {
+				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)
+				&& StringUtils.isBlank(metadataVersion)) {
 			return new ResponseEntity<>("All parameters cannot be null for this endpoint",
 					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
@@ -131,12 +132,12 @@ public class SettingResource {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
 		}
 
-        if (StringUtils.isNotBlank(metadataVersion)) {
-            lastMetadataVersion = Long.parseLong(metadataVersion);
-        }
+		if (StringUtils.isNotBlank(metadataVersion)) {
+			lastMetadataVersion = Long.parseLong(metadataVersion);
+		}
 
-        if(StringUtils.isNotBlank(limit)) {
-        	pageLimit = Integer.parseInt(limit);
+		if (StringUtils.isNotBlank(limit)) {
+			pageLimit = Integer.parseInt(limit);
 		}
 
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
