@@ -31,7 +31,6 @@
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
    		<opensrp.api.version>1.0.6-SNAPSHOT</opensrp.api.version>
         <powermock.version>2.0.5</powermock.version>
-        <opensrp.server.referral>1.0.11-SNAPSHOT</opensrp.server.referral>
         <lombok.version>1.18.12</lombok.version>
     </properties>
 
@@ -374,11 +373,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.smartregister</groupId>
-            <artifactId>opensrp-server-referral</artifactId>
-            <version>${opensrp.server.referral}</version>
         </dependency>
         <dependency>
             <groupId>org.ektorp</groupId>
@@ -785,10 +779,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>chw_referral_module</id>
-<!--            profile specific configs can be added here-->
         </profile>
     </profiles>
 </project>

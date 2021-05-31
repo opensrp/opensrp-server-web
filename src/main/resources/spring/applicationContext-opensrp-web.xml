@@ -66,10 +66,6 @@
     <bean class="org.opensrp.web.config.SwaggerConfig"/>
 
     <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
-
-    <beans profile="chw_referral_module">
-        <import resource="classpath:applicationContext-opensrp-referral.xml"/>
-    </beans>
     
     <beans profile="dhis2-sync,rapidpro">
     	 <import resource="couchDbContext.xml"/>
