@@ -9,22 +9,18 @@ import static org.opensrp.common.AllConstants.Stock.TO_FROM;
 import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
 import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
 import static org.opensrp.common.AllConstants.Stock.VALUE;
-import static org.opensrp.web.Constants.LOCATIONS;
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.Constants.ORDER_BY_TYPE;
 import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.LOCATIONS;
 import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -48,12 +44,13 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
-import org.smartregister.domain.Inventory;
-import org.smartregister.domain.Stock;
+import org.opensrp.web.Constants;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -63,21 +60,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
@@ -92,6 +89,8 @@ public class StockResource extends RestResource<Stock> {
 
 	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
+	private static final String RETURN_PRODUCT = "returnProduct";
+
 	@Autowired
 	public StockResource(StockService stockService) {
 		this.stockService = stockService;
@@ -104,17 +103,23 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch all the stocks
-	 * 
-	 * @param none
+	 *
+	 * @param serverVersion
+	 * @param limit
 	 * @return a map response with stocks, and optionally msg when an error occurs
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
-	protected ResponseEntity<String> getAll() {
+	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion")  String serverVersion,
+			@RequestParam(required = false) Integer limit) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
+			Long lastSyncedServerVersion = null;
+			if (serverVersion != null) {
+				lastSyncedServerVersion = Long.parseLong(serverVersion);
+			}
 			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findAllStocks();
+			stocks = stockService.findAllStocks(lastSyncedServerVersion,limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
 			response.put("stocks", stocksArray);
@@ -146,7 +151,7 @@ public class StockResource extends RestResource<Stock> {
 
 	/**
 	 * Fetch stocks ordered by serverVersion ascending order
-	 * 
+	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error
 	 *         occurs
@@ -175,20 +180,20 @@ public class StockResource extends RestResource<Stock> {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<HttpStatus> save(@RequestBody String data) {
-			JSONObject syncData = new JSONObject(data);
-			if (!syncData.has("stocks")) {
-				return new ResponseEntity<>(BAD_REQUEST);
+		JSONObject syncData = new JSONObject(data);
+		if (!syncData.has("stocks")) {
+			return new ResponseEntity<>(BAD_REQUEST);
+		}
+		ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
+				new TypeToken<ArrayList<Stock>>() {
+				}.getType());
+		for (Stock stock : stocks) {
+			try {
+				stockService.addorUpdateStock(stock);
+			} catch (Exception e) {
+				logger.error("Stock" + stock.getId() + " failed to sync", e);
 			}
-			ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
-					new TypeToken<ArrayList<Stock>>() {
-					}.getType());
-			for (Stock stock : stocks) {
-				try {
-					stockService.addorUpdateStock(stock);
-				} catch (Exception e) {
-					logger.error("Stock" + stock.getId() + " failed to sync", e);
-				}
-			}
+		}
 		return new ResponseEntity<>(CREATED);
 	}
 
@@ -230,7 +235,7 @@ public class StockResource extends RestResource<Stock> {
 
 	@Override
 	public List<Stock> filter(String query) {
-		return stockService.findAllStocks();
+		return stockService.findAllStocks(null, null);
 	}
 
 	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE,
@@ -256,7 +261,7 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> delete(@PathVariable(org.opensrp.web.Constants.RestPartVariables.ID) Long id) {
+	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
 		if (id == null) {
 			return new ResponseEntity<>("Stock item id is required", RestUtils.getJSONUTF8Headers(),
 					BAD_REQUEST);
@@ -273,13 +278,39 @@ public class StockResource extends RestResource<Stock> {
 			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = RETURN_PRODUCT, required = false) boolean returnProduct) {
 
 		StockSearchBean stockSearchBean =
 				createSearchBeanToGetStocksOfServicePoint(pageNumber, pageSize, orderByType, orderByFieldName,
-						servicePointId);
+						servicePointId, returnProduct);
 
 		return stockService.getStocksByServicePointId(stockSearchBean);
+	}
+
+	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
+			MediaType.APPLICATION_JSON_VALUE }, value = "/inventory/validate")
+	public ResponseEntity validateBulkInventoryData(@RequestParam("file") MultipartFile file)
+			throws IOException {
+		List<Map<String, String>> csvClients = readCSVFile(file);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.validateBulkInventoryData(csvClients);
+
+		String timestamp = String.valueOf(new Date().getTime());
+		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
+		generateCSV(csvBulkImportDataSummary, uri);
+		File csvFile = new File(uri);
+
+		if (csvBulkImportDataSummary != null && csvBulkImportDataSummary.getFailedRecordSummaryList().size() > 0) {
+			return ResponseEntity.badRequest()
+					.header("Content-Disposition", "attachment; filename=" + "importsummaryreport-" + timestamp + ".csv")
+					.contentLength(csvFile.length())
+					.contentType(MediaType.parseMediaType("text/csv"))
+					.body(new FileSystemResource(csvFile));
+		} else {
+			Map<String, Object> response = new HashMap<String, Object>();
+			response.put("rowCount", csvBulkImportDataSummary.getNumberOfCsvRows());
+			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		}
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" }, produces = {
@@ -289,8 +320,7 @@ public class StockResource extends RestResource<Stock> {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
-				.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
@@ -359,25 +389,27 @@ public class StockResource extends RestResource<Stock> {
 	}
 
 	private void generateCSV(CsvBulkImportDataSummary csvBulkImportDataSummary, URI uri) throws IOException {
-				BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
-				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-			csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
-			csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
-			csvPrinter.printRecord("\n");
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(uri));
+		CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		csvPrinter.printRecord("Total Number of Rows in the CSV ", csvBulkImportDataSummary.getNumberOfCsvRows());
+		csvPrinter.printRecord("Rows processed ", csvBulkImportDataSummary.getNumberOfRowsProcessed());
+		csvPrinter.printRecord("\n");
 
-			csvPrinter.printRecord("Row Number", "Reason of Failure");
-			for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
-				csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
-			}
-			writer.flush();
-			csvPrinter.flush();
+		csvPrinter.printRecord("Row Number", "Reason of Failure");
+		for (FailedRecordSummary failedRecordSummary : csvBulkImportDataSummary.getFailedRecordSummaryList()) {
+			csvPrinter.printRecord(failedRecordSummary.getRowNumber(), failedRecordSummary.getReasonOfFailure());
+		}
+		writer.flush();
+		csvPrinter.flush();
 	}
 
 	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
-			String orderByFieldName, String locationId) {
+			String orderByFieldName, String locationId, boolean returnProduct) {
 		StockSearchBean stockSearchBean = new StockSearchBean();
 		stockSearchBean.setPageNumber(pageNumber);
 		stockSearchBean.setPageSize(pageSize);
+		stockSearchBean.setReturnProduct(returnProduct);
+
 		if(orderByType != null) {
 			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
 		}
