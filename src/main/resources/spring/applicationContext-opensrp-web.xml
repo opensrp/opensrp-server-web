@@ -68,7 +68,7 @@
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>
     </beans>
     
-    <beans profile="dhis2-sync,rapidpro">
+    <beans profile="dhis2-sync-vaccine-tracker,rapidpro">
     	 <import resource="couchDbContext.xml"/>
     </beans>
 </beans>
