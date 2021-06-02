@@ -717,6 +717,7 @@
             <id>dhis2-sync-vaccine-tracker</id>
             <properties>
                 <dhis2.sync.vaccine.tracker>dhis2-sync-vaccine-tracker</dhis2.sync.vaccine.tracker>
+                <dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
             </properties>
         </profile>
         <profile>
