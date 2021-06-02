@@ -67,7 +67,7 @@
 
     <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
     
-    <beans profile="dhis2-sync,rapidpro">
+    <beans profile="dhis2-sync-vaccine-tracker,rapidpro">
     	 <import resource="couchDbContext.xml"/>
     </beans>
 </beans>

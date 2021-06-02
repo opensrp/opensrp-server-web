@@ -25,7 +25,7 @@
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
 		<opensrp.core.version>2.11.3-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.2.5-LOCAL-SNAPSHOT</opensrp.connector.version>
+		<opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
 
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
@@ -636,6 +636,7 @@
                 <dhis2.sync.enabled>default</dhis2.sync.enabled>
                 <atomfeed.enabled>default</atomfeed.enabled>
                 <rapidpro.enabled>default</rapidpro.enabled>
+                <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
             </properties>
         </profile>
         <profile>
@@ -710,6 +711,12 @@
             <id>rapidpro</id>
             <properties>
                 <rapidpro.enabled>dhis2-sync</rapidpro.enabled>
+            </properties>
+        </profile>
+        <profile>
+            <id>dhis2-sync-vaccine-tracker</id>
+            <properties>
+                <dhis2.sync.vaccine.tracker>dhis2-sync-vaccine-tracker</dhis2.sync.vaccine.tracker>
             </properties>
         </profile>
         <profile>
