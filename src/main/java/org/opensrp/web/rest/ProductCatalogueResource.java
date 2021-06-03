@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.Multimedia;
@@ -48,7 +49,8 @@ public class ProductCatalogueResource {
 	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
 			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
-			@RequestParam(value = "serverVersion", required = false) String serverVersion) {
+			@RequestParam(value = "serverVersion", required = false) String serverVersion,
+			@RequestParam(value = "limit", required = false) String limit) {
 
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
@@ -62,7 +64,14 @@ public class ProductCatalogueResource {
 		productCatalogueSearchBean.setUniqueId(uniqueId);
 		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, baseUrl);
+		if(StringUtils.isBlank(limit)){
+			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.MAX_VALUE,baseUrl);
+		} else {
+			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.parseInt(limit), baseUrl);
+		}
+
+
+
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" })
