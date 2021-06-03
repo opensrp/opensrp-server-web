@@ -45,14 +45,37 @@ public class ProductCatalogueResource {
 
 	private static final String DOWNLOAD_PHOTO_END_POINT = "/multimedia/media/";
 
+	@Deprecated
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
 			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
-			@RequestParam(value = "serverVersion", required = false) String serverVersion,
-			@RequestParam(value = "limit", required = false) String limit) {
+			@RequestParam(value = "serverVersion", required = false) String serverVersion) {
 
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
+		Long lastSyncedServerVersion = null;
+		if (serverVersion != null) {
+			lastSyncedServerVersion = Long.parseLong(serverVersion);
+		}
+
+		ProductCatalogueSearchBean productCatalogueSearchBean = new ProductCatalogueSearchBean();
+		productCatalogueSearchBean.setProductName(productName);
+		productCatalogueSearchBean.setUniqueId(uniqueId);
+		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
+
+		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, baseUrl);
+
+
+	}
+	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, params = "limit")
+	public List<ProductCatalogue> getAll(
+			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
+			, @RequestParam(value = "uniqueId", defaultValue = "0", required = false) Long uniqueId,
+			@RequestParam(value = "serverVersion", required = false) String serverVersion,
+			@RequestParam(value = "limit") String limit) {
+		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
 
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
@@ -69,9 +92,6 @@ public class ProductCatalogueResource {
 		} else {
 			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.parseInt(limit), baseUrl);
 		}
-
-
-
 	}
 
 	@PostMapping(headers = { "Accept=multipart/form-data" })
