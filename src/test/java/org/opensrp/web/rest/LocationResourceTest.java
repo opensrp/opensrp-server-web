@@ -720,6 +720,22 @@ public class LocationResourceTest {
 	}
 
 	@Test
+	public void testFindByLocationPropertiesByNullParentIdString() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(anyBoolean(), anyString(), any(Map.class)))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "true")
+						.param(LocationResource.PROPERTIES_FILTER, "parentId:null"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(), mapCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertTrue(booleanCaptor.getValue());
+		assertEquals("", stringCaptor.getValue());
+	}
+
+	@Test
 	public void testFindByLocationPropertiesWithError() throws Exception {
 		when(locationService.findStructuresByProperties(false, null, null)).thenThrow(new RuntimeException());
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties"))
