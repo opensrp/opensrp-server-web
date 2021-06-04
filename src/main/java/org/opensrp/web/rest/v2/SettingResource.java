@@ -146,13 +146,13 @@ public class SettingResource {
 				settingQueryBean.setResolveSettings(resolveSettings);
 				treeNodeHashMap = getChildParentLocationTree(locationId);
 			}
-            if (StringUtils.isNotBlank(metadataVersion)) {
-                lastMetadataVersion = Long.parseLong(metadataVersion);
-            }
+			if (StringUtils.isNotBlank(metadataVersion)) {
+				lastMetadataVersion = Long.parseLong(metadataVersion);
+			}
 
-            if (StringUtils.isNotBlank(limit)) {
-                pageLimit = Integer.parseInt(limit);
-            }
+			if (StringUtils.isNotBlank(limit)) {
+				pageLimit = Integer.parseInt(limit);
+			}
 
 			settingQueryBean.setMetadataVersion(lastMetadataVersion);
 			settingQueryBean.setLimit(pageLimit);
