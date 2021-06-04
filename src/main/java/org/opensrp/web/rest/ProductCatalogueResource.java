@@ -66,8 +66,8 @@ public class ProductCatalogueResource {
 
 		return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, baseUrl);
 
-
 	}
+
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE }, params = "limit")
 	public List<ProductCatalogue> getAll(
 			@RequestParam(value = "productName", defaultValue = "", required = false) String productName
@@ -75,7 +75,6 @@ public class ProductCatalogueResource {
 			@RequestParam(value = "serverVersion", required = false) String serverVersion,
 			@RequestParam(value = "limit") String limit) {
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-
 
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
@@ -87,10 +86,11 @@ public class ProductCatalogueResource {
 		productCatalogueSearchBean.setUniqueId(uniqueId);
 		productCatalogueSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		if(StringUtils.isBlank(limit)){
-			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.MAX_VALUE,baseUrl);
+		if (StringUtils.isBlank(limit)) {
+			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.MAX_VALUE, baseUrl);
 		} else {
-			return productCatalogueService.getProductCatalogues(productCatalogueSearchBean, Integer.parseInt(limit), baseUrl);
+			return productCatalogueService
+					.getProductCatalogues(productCatalogueSearchBean, Integer.parseInt(limit), baseUrl);
 		}
 	}
 
@@ -100,7 +100,8 @@ public class ProductCatalogueResource {
 
 		try {
 			productCatalogueService.add(productCatalogue);
-			ProductCatalogue createdProductCatalogue = productCatalogueService.getProductCatalogueByName(productCatalogue.getProductName());
+			ProductCatalogue createdProductCatalogue = productCatalogueService
+					.getProductCatalogueByName(productCatalogue.getProductName());
 
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userName = authentication.getName();
@@ -136,7 +137,7 @@ public class ProductCatalogueResource {
 			@RequestPart ProductCatalogue productCatalogue) {
 
 		try {
-			if(file != null) {
+			if (file != null) {
 				productCatalogue.setPhotoURL(DOWNLOAD_PHOTO_END_POINT + productCatalogue.getUniqueId());
 			}
 
