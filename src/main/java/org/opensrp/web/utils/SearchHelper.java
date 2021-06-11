@@ -61,7 +61,8 @@ public class SearchHelper {
 		String lostToFollowUp = RestUtils.getStringFilter(LOST_TO_FOLLOW_UP, request);
 		String nfcCardIdentifier = RestUtils.getStringFilter(NFC_CARD_IDENTIFIER, request);
 
-		DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+		DateTime[] birthdate = RestUtils
+				.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 
 		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
 
@@ -85,7 +86,7 @@ public class SearchHelper {
 
 		Map<String, String> attributes = new HashMap<String, String>();
 		if (!StringUtils.isBlank(inActive) || !StringUtils.isBlank(lostToFollowUp)
-		        || !StringUtils.isBlank(nfcCardIdentifier)) {
+				|| !StringUtils.isBlank(nfcCardIdentifier)) {
 
 			if (!StringUtils.isBlank(inActive)) {
 				attributes.put(INACTIVE, inActive);
@@ -118,28 +119,30 @@ public class SearchHelper {
 		String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
 		String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
 		String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
-		String COMPASS_RELATIONSHIP_ID = "compass_relationship_id";
+		String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
 
 		String motherGuardianNrc = RestUtils.getStringFilter(MOTHER_GUARDIAN_NRC_NUMBER, request);
-		String compassRelationshipId = RestUtils.getStringFilter(COMPASS_RELATIONSHIP_ID, request);
+		String compassRelationshipId = RestUtils.getStringFilter(MOTHER_COMPASS_RELATIONSHIP_ID, request);
 
 		motherSearchBean.setFirstName(RestUtils.getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, request));
 		motherSearchBean.setLastName(RestUtils.getStringFilter(MOTHER_GUARDIAN_LAST_NAME, request));
 
 		String NRC_NUMBER_KEY = "NRC_Number";
-		String MOTHER_COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
+		String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
 
 		Map<String, String> motherAttributes = new HashMap<>();
 		if (!StringUtils.isBlank(motherGuardianNrc)) {
 			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
-			motherAttributes.put(MOTHER_COMPASS_RELATIONSHIP_ID, compassRelationshipId);
+		}
+		if (!StringUtils.isBlank(compassRelationshipId)) {
+			motherAttributes.put(COMPASS_RELATIONSHIP_ID, compassRelationshipId);
 		}
 
 		String nameLike = null;
 
 		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
-		        && StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
-		        && StringUtils.isBlank(motherSearchBean.getLastName())) {
+				&& StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
+				&& StringUtils.isBlank(motherSearchBean.getLastName())) {
 			String[] arr = motherSearchBean.getFirstName().split("\\s+");
 			nameLike = arr[0];
 			motherSearchBean.setFirstName(null);
@@ -180,14 +183,14 @@ public class SearchHelper {
 	public static boolean isSearchValid(ClientSearchBean searchBean) {
 
 		return !StringUtils.isBlank(searchBean.getFirstName())
-		        || !StringUtils.isBlank(searchBean.getMiddleName())
-		        || !StringUtils.isBlank(searchBean.getLastName())
-		        || !StringUtils.isBlank(searchBean.getGender())
-		        || (searchBean.getAttributes() != null && !searchBean.getAttributes().isEmpty())
-		        || searchBean.getBirthdateFrom() != null || searchBean.getBirthdateTo() != null
-		        || searchBean.getLastEditFrom() != null || searchBean.getLastEditTo() != null
-		        || (searchBean.getIdentifiers() != null && !searchBean.getIdentifiers().isEmpty())
-		        || !StringUtils.isBlank(searchBean.getNameLike());
+				|| !StringUtils.isBlank(searchBean.getMiddleName())
+				|| !StringUtils.isBlank(searchBean.getLastName())
+				|| !StringUtils.isBlank(searchBean.getGender())
+				|| (searchBean.getAttributes() != null && !searchBean.getAttributes().isEmpty())
+				|| searchBean.getBirthdateFrom() != null || searchBean.getBirthdateTo() != null
+				|| searchBean.getLastEditFrom() != null || searchBean.getLastEditTo() != null
+				|| (searchBean.getIdentifiers() != null && !searchBean.getIdentifiers().isEmpty())
+				|| !StringUtils.isBlank(searchBean.getNameLike());
 
 	}
 
@@ -247,7 +250,7 @@ public class SearchHelper {
 		for (Client client : clients) {
 
 			if (client != null && client.getBaseEntityId() != null
-			        && c.getBaseEntityId().equals(client.getBaseEntityId())) {
+					&& c.getBaseEntityId().equals(client.getBaseEntityId())) {
 
 				return true;
 
@@ -262,14 +265,14 @@ public class SearchHelper {
 		String CONTACT_PHONE_NUMBER = "contact_phone_number";
 		String motherGuardianPhoneNumber = RestUtils.getStringFilter(MOTHER_GUARDIAN_PHONE_NUMBER, request);
 		motherGuardianPhoneNumber = StringUtils.isBlank(motherGuardianPhoneNumber)
-		        ? RestUtils.getStringFilter(CONTACT_PHONE_NUMBER, request)
-		        : motherGuardianPhoneNumber;
+				? RestUtils.getStringFilter(CONTACT_PHONE_NUMBER, request)
+				: motherGuardianPhoneNumber;
 
 		return motherGuardianPhoneNumber;
 	}
 
 	public static List<ChildMother> processSearchResult(List<Client> children, List<Client> mothers,
-	                                                    String RELATIONSHIP_KEY) {
+			String RELATIONSHIP_KEY) {
 		List<ChildMother> childMotherList = new ArrayList<ChildMother>();
 		for (Client child : children) {
 			for (Client mother : mothers) {
