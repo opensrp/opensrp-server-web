@@ -7,7 +7,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.8.4-SNAPSHOT</version>
+    <version>2.8.7-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -26,8 +26,8 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.11.3-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.2.5-SNAPSHOT</opensrp.connector.version>
+        <opensrp.core.version>2.11.5-SNAPSHOT</opensrp.core.version>
+        <opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
         <powermock.version>2.0.5</powermock.version>
@@ -671,6 +671,7 @@
                 <rapidpro.enabled>default</rapidpro.enabled>
                 <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
                 <openlmis.stock.profile>default</openlmis.stock.profile>
+                <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
             </properties>
         </profile>
         <profile>
@@ -745,6 +746,13 @@
             <id>rapidpro</id>
             <properties>
                 <rapidpro.enabled>dhis2-sync</rapidpro.enabled>
+            </properties>
+        </profile>
+        <profile>
+            <id>dhis2-sync-vaccine-tracker</id>
+            <properties>
+                <dhis2.sync.vaccine.tracker>dhis2-sync-vaccine-tracker</dhis2.sync.vaccine.tracker>
+                <dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
             </properties>
         </profile>
         <profile>
