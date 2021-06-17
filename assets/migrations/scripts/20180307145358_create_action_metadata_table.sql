@@ -32,7 +32,7 @@ CREATE TABLE core.action_metadata
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX action_metadata_base_entity_id_index ON core.action_metadata (base_entity_id);
 CREATE INDEX action_metadata_sync_index ON core.action_metadata (provider_id,server_version);

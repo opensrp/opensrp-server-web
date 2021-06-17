@@ -25,7 +25,7 @@ CREATE TABLE core.alert
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 -- //@UNDO
 -- SQL to undo the change goes here.

@@ -26,7 +26,7 @@ CREATE TABLE core.event
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX event_date_deleted_index ON core.event (date_deleted);
 

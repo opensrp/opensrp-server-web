@@ -30,7 +30,7 @@ CREATE TABLE core.multi_media
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX multi_media_case_id_index ON core.multi_media (case_id);
 CREATE INDEX multi_media_provider_id_index ON core.multi_media (provider_id);

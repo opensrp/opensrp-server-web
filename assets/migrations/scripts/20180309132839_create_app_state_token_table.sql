@@ -28,7 +28,7 @@ CREATE TABLE core.app_state_token
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 
 -- //@UNDO

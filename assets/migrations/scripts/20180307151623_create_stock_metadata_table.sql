@@ -31,7 +31,7 @@ CREATE TABLE core.stock_metadata
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX stock_metadata_sync_index ON core.stock_metadata (provider_id,server_version);
 
