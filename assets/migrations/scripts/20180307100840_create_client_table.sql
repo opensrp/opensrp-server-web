@@ -26,7 +26,7 @@ CREATE TABLE core.client
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX client_date_deleted_index ON core.client (date_deleted);
 

@@ -36,7 +36,7 @@ CREATE TABLE core.report_metadata
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 CREATE INDEX report_metadata_form_submission_id_index ON core.report_metadata (form_submission_id);
 CREATE INDEX report_metadata_base_entity_id_index ON core.report_metadata (base_entity_id);

@@ -36,7 +36,7 @@ CREATE TABLE core.client_metadata
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 
 CREATE INDEX client_metadata_server_version_index ON core.client_metadata (server_version);

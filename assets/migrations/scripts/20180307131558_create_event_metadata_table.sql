@@ -40,7 +40,7 @@ CREATE TABLE core.event_metadata
 )
 WITH (
     OIDS = FALSE
-) TABLESPACE core_space;
+) TABLESPACE ${core_tablespace};
 
 
 CREATE INDEX event_metadata_sync_index ON core.event_metadata (provider_id,location_id,team,team_id,server_version);
