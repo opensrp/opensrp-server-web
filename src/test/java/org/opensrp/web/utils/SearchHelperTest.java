@@ -257,6 +257,7 @@ public class SearchHelperTest {
 		Mockito.when(httpServletRequest.getParameter("mother_last_name")).thenReturn("Doe");
 		Mockito.when(httpServletRequest.getParameter("mother_nrc_number")).thenReturn("2093980");
 		Mockito.when(httpServletRequest.getParameter("NRC_Number")).thenReturn("20939801123");
+		Mockito.when(httpServletRequest.getParameter("mother_compass_relationship_id")).thenReturn("dab102f71bd");
 		SearchEntityWrapper searchEntityWrapper = SearchHelper.motherSearchParamProcessor(httpServletRequest);
 		Map<String, String> result = searchEntityWrapper.getClientSearchBean().getAttributes();
 		Assert.assertEquals(2,  result.size());
