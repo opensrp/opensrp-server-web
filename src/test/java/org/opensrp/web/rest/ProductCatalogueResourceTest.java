@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -103,7 +105,34 @@ public class ProductCatalogueResourceTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel().get("productCatalogueList");
+		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
+				.get("productCatalogueList");
+
+		if (response.size() == 0) {
+			fail("Test case failed");
+		}
+
+		assertEquals(response.size(), 1);
+		assertEquals(new Long(1), response.get(0).getUniqueId());
+		assertEquals("Scale", response.get(0).getProductName());
+		assertEquals("MT-123", response.get(0).getMaterialNumber());
+	}
+
+	@Test
+	public void testGetAllWithLimitParam() throws Exception {
+		ProductCatalogue productCatalogue = createProductCatalog();
+		productCatalogue.setUniqueId(1l);
+		List<ProductCatalogue> productCatalogues = new ArrayList<>();
+		productCatalogues.add(productCatalogue);
+		when(productCatalogueService
+				.getProductCatalogues(any(ProductCatalogueSearchBean.class), any(Integer.class), anyString()))
+				.thenReturn(productCatalogues);
+		MvcResult result = mockMvc.perform(get(BASE_URL + "?limit=10"))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
+				.get("productCatalogueList");
 
 		if (response.size() == 0) {
 			fail("Test case failed");
@@ -135,9 +164,9 @@ public class ProductCatalogueResourceTest {
 		when(multipartFile.getContentType()).thenReturn("");
 		when(multipartFile.getBytes()).thenReturn(bytes);
 		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+		when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
 
-		productCatalogueResource.create(multipartFile,productCatalogue);
+		productCatalogueResource.create(multipartFile, productCatalogue);
 
 		verify(productCatalogueService).add(argumentCaptor.capture());
 
@@ -175,9 +204,9 @@ public class ProductCatalogueResourceTest {
 		when(multipartFile.getContentType()).thenReturn("");
 		when(multipartFile.getBytes()).thenReturn(bytes);
 		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class),any(byte[].class),anyString())).thenReturn("Success");
+		when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
 
-		productCatalogueResource.update(1l,multipartFile,productCatalogue);
+		productCatalogueResource.update(1l, multipartFile, productCatalogue);
 
 		verify(productCatalogueService).update(argumentCaptor.capture());
 
@@ -221,7 +250,6 @@ public class ProductCatalogueResourceTest {
 		verify(productCatalogueService, times(1)).deleteProductCatalogueById(argumentCaptor.capture());
 		assertEquals(argumentCaptor.getValue().longValue(), 1);
 	}
-
 
 	private ProductCatalogue createProductCatalog() {
 		ProductCatalogue productCatalogue = new ProductCatalogue();

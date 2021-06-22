@@ -42,6 +42,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.opensrp.web.Constants.LIMIT;
+
 @Controller("settingResourceV2")
 @RequestMapping(value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
@@ -49,6 +51,8 @@ public class SettingResource {
 	private static final Logger logger = LogManager.getLogger(SettingResource.class.toString());
 
 	public static final String SETTING_IDENTIFIER = "identifier";
+
+	public static final String METADATA_VERSION = "metadata_version";
 
 	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
@@ -110,17 +114,30 @@ public class SettingResource {
 		String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
 		String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
 		boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+		String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
+		String limit = RestUtils.getStringFilter(LIMIT, request);
 		Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 
 		if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)) {
+				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)
+				&& StringUtils.isBlank(metadataVersion)) {
 			return new ResponseEntity<>("All parameters cannot be null for this endpoint",
 					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
 		}
 
 		long lastSyncedServerVersion = 0L;
+		long lastMetadataVersion = 0L;
+		int pageLimit = 0;
 		if (StringUtils.isNotBlank(serverVersion)) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+		}
+
+		if (StringUtils.isNotBlank(metadataVersion)) {
+			lastMetadataVersion = Long.parseLong(metadataVersion);
+		}
+
+		if (StringUtils.isNotBlank(limit)) {
+			pageLimit = Integer.parseInt(limit);
 		}
 
 		SettingSearchBean settingQueryBean = new SettingSearchBean();
@@ -129,6 +146,8 @@ public class SettingResource {
 		settingQueryBean.setProviderId(providerId);
 		settingQueryBean.setLocationId(locationId);
 		settingQueryBean.setServerVersion(lastSyncedServerVersion);
+		settingQueryBean.setMetadataVersion(lastMetadataVersion);
+		settingQueryBean.setLimit(pageLimit);
 		if (StringUtils.isNotBlank(identifier)) {
 			settingQueryBean.setIdentifier(identifier);
 		}
