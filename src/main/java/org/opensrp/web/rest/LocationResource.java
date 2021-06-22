@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -213,6 +214,17 @@ public class LocationResource {
 			}
 			return new ResponseEntity<>(structures, headers, HttpStatus.OK);
 		}
+	}
+
+	@RequestMapping(value = "/findStructuresByAncestor", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<String> getStructuresByAncestor(@RequestParam(name = "id") final String ancestorId){
+		final long serverVersion = 0L;
+		List<PhysicalLocation> locationAndTheirChildren = locationService.findLocationByIdWithChildren(false, ancestorId, Integer.MAX_VALUE);
+		String parentIds = locationAndTheirChildren.stream()
+				.map(PhysicalLocation::getId)
+				.collect(Collectors.joining(","));
+		String structures = gson.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, serverVersion));
+		return ResponseEntity.ok(structures);
 	}
 
 	// here for backward compatibility
