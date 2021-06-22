@@ -11,10 +11,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -1126,6 +1128,21 @@ public class LocationResourceTest {
 		LocationDetail actuallocationDetail = locationDetailsSet.iterator().next();
 		assertEquals("Province 1", actuallocationDetail.getName());
 		assertEquals("Province", actuallocationDetail.getTags());
+	}
+
+	@Test
+	public void testFindStructuresByAncestorGetsStructures() throws Exception {
+		final String ancestorId = "04d663ee-f445-4e45-b982-9b6886822de1";
+		PhysicalLocation physicalLocation = spy(PhysicalLocation.class);
+		physicalLocation.setId(ancestorId);
+		List<PhysicalLocation> location = Collections.singletonList(physicalLocation);
+		when(locationService.findLocationByIdWithChildren(eq(false), eq(ancestorId), anyInt()))
+				.thenReturn(location);
+
+		mockMvc.perform(get(BASE_URL + "/findStructuresByAncestor/?id=" + ancestorId))
+				.andExpect(status().isOk());
+		verify(locationService).findStructuresByParentAndServerVersion(eq(physicalLocation.getId()), eq(0L));
+
 	}
 
 }
