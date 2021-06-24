@@ -84,7 +84,7 @@ jobs:
         id: docker_build
         with:
           push: true
-#          platforms: linux/amd64
+          platforms: linux/arm64
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
       #          cache-from: type=local,src=/tmp/.buildx-cache
