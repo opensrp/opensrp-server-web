@@ -104,6 +104,10 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>spring plugin repo</id>
+            <url>https://repo.spring.io/plugins-release/</url>
+        </repository>
     </repositories>
 
     <dependencies>
