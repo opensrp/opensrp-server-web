@@ -147,7 +147,7 @@ public class PlanResource {
 				//check whether a case triggered plan with a given opensrp event id exists
 			PlanDefinition.UseContext opensrpEventIdUseContext = getUseContextWithCode(plan, OPENSRP_EVENT_ID);
 			if (opensrpEventIdUseContext != null && !isValidCaseTriggeredPlan(opensrpEventIdUseContext)) {
-				return new ResponseEntity<>("Case triggered plan with opensrpEventId " + opensrpEventIdUseContext.getValueCodableConcept() + " already exists", HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Case triggered plan with opensrpEventId " + opensrpEventIdUseContext.getValueCodableConcept() + " already exists", HttpStatus.CONFLICT);
 			}
 				
 			planService.addPlan(plan, RestUtils.currentUser(authentication).getUsername());
