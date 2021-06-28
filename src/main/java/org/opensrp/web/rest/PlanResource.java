@@ -90,6 +90,8 @@ public class PlanResource {
 	public static final String PLAN_STATUS = "planStatus";
 
 	public static final String USE_CONTEXT = "useContext";
+	
+	public static final String OPENSRP_EVENT_ID = "opensrpEventId";
 
 	@Autowired
 	public void setPlanService(PlanService planService) {
@@ -138,9 +140,16 @@ public class PlanResource {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> create(@RequestBody String entity, Authentication authentication) {
+	public ResponseEntity<String> create(@RequestBody String entity, Authentication authentication) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
+			
+				//check whether a case triggered plan with a given opensrp event id exists
+			PlanDefinition.UseContext opensrpEventIdUseContext = getUseContextWithCode(plan, OPENSRP_EVENT_ID);
+			if (opensrpEventIdUseContext != null && !isValidCaseTriggeredPlan(opensrpEventIdUseContext)) {
+				return new ResponseEntity<>("Case triggered plan with opensrpEventId " + opensrpEventIdUseContext.getValueCodableConcept() + " already exists", HttpStatus.BAD_REQUEST);
+			}
+				
 			planService.addPlan(plan, RestUtils.currentUser(authentication).getUsername());
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
@@ -420,6 +429,35 @@ public class PlanResource {
 		planSearchBean.setUseContexts(useContextFilters);
 
 		return planSearchBean;
+	}
+	
+	/**
+	 * This method retrieves a usecontext with a particular code from a plan
+	 * @param plan
+	 * @return PlanDefinition.UseContext
+	 */
+	private PlanDefinition.UseContext getUseContextWithCode(PlanDefinition plan, String useContextCode) {
+		for (PlanDefinition.UseContext useContext: plan.getUseContext() ) {
+			if (useContext.getCode().equalsIgnoreCase(useContextCode)) {
+				return useContext;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * This method validates whether there is an existing case triggered
+	 * plan for a given opensrpEventId
+	 * @param useContext useContext that contains the opensrpEventId
+	 * @return boolean whether the plan is valid (it's not a duplicate)
+	 */
+	private boolean isValidCaseTriggeredPlan(PlanDefinition.UseContext useContext) {
+		Map<String, String> useContextFilters = new HashMap<>();
+		useContextFilters.put(useContext.getCode(),useContext.getValueCodableConcept());
+		PlanSearchBean planSearchBean = createPlanSearchBean(false, 0, 5, null, null, null, useContextFilters);
+
+		List<PlanDefinition> plans = planService.getAllPlans(planSearchBean);
+		return (plans != null && !plans.isEmpty()) ? false : true;
 	}
 	
 }
