@@ -9,6 +9,9 @@ import org.mockito.ArgumentCaptor;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.smartregister.domain.Practitioner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.server.MvcResult;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 
 public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
@@ -268,6 +272,27 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerService).addOrUpdatePractitioner(any());
         postRequestWithJsonContent(BASE_URL + "add", "{\"nothing\": \"works\"}", MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerService, atLeast(0)).addOrUpdatePractitioner(argumentCaptor.capture());
+    }
+
+    @Test
+    public void testCountAllPractitioners() throws Exception {
+        doReturn(2L).when(practitionerService).countAllPractitioners();
+        MvcResult mvcResult = this.mockMvc.perform(get(BASE_URL + "count").accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(mvcResult.getResponse());
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        assertEquals("2", mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testCountAllPractitionersWithException() throws Exception {
+        doThrow(new IllegalArgumentException()).when(practitionerService).countAllPractitioners();
+        MvcResult mvcResult = this.mockMvc.perform(get(BASE_URL + "count").accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError()).andReturn();
+        assertNotNull(mvcResult);
+        assertNotNull(mvcResult.getResponse());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
     }
 
     private Practitioner initTestPractitioner1() {

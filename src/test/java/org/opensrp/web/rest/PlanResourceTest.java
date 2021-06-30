@@ -598,6 +598,50 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	}
 	
+	@Test
+	public void testCreateCaseTriggeredPlanShouldReturnErrorForPlanWithExistingOpensrpEventId() throws Exception {
+		doReturn(new PlanDefinition()).when(planService).addPlan(any(PlanDefinition.class), anyString());
+		List<Jurisdiction> operationalAreas = new ArrayList<>();
+		Jurisdiction operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area_1");
+		operationalAreas.add(operationalArea);
+
+		List<PlanDefinition> existingPlans = new ArrayList<>();
+		PlanDefinition existingPlan = new PlanDefinition();
+		existingPlan.setIdentifier("plan_1");
+		existingPlan.setJurisdiction(operationalAreas);
+
+		PlanDefinition.UseContext opensrpEventIdUseContext = new PlanDefinition.UseContext();
+		opensrpEventIdUseContext.setCode("opensrpEventId");
+		opensrpEventIdUseContext.setValueCodableConcept("opensrp_event_id_1");
+		existingPlan.setUseContext(new ArrayList<>());
+		existingPlan.getUseContext().add(opensrpEventIdUseContext);
+		existingPlans.add(existingPlan);
+
+		PlanDefinition casetriggeredPlan = new PlanDefinition();
+		casetriggeredPlan.setIdentifier("plan_1");
+		casetriggeredPlan.setJurisdiction(operationalAreas);
+
+		casetriggeredPlan = new PlanDefinition();
+		casetriggeredPlan.setIdentifier("plan_1");
+		operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area_2");
+		operationalAreas.clear();
+		operationalAreas.add(operationalArea);
+		casetriggeredPlan.setJurisdiction(operationalAreas);
+		casetriggeredPlan.setUseContext(new ArrayList<>());
+		casetriggeredPlan.getUseContext().add(opensrpEventIdUseContext);
+
+		String plansJson = new Gson().toJson(casetriggeredPlan, new TypeToken<PlanDefinition>() {}.getType());
+
+		doReturn(existingPlans).when(planService).getAllPlans(any(PlanSearchBean.class));
+
+		String reponseString = postRequestWithJsonContentAndReturnString(BASE_URL, plansJson, status().isConflict());
+
+		verify(planService, never()).addPlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()));
+		assertEquals("Case triggered plan with opensrpEventId opensrp_event_id_1 already exists", reponseString);
+	}
+	
 	private PlanDefinition createPlanDefinition() {
 		List<Jurisdiction> operationalAreas = new ArrayList<>();
 		Jurisdiction operationalArea = new Jurisdiction();
