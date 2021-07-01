@@ -115,7 +115,7 @@ public class StockResource extends RestResource<Stock> {
 			List<Stock> stocks = new ArrayList<Stock>();
 			StockSearchBean stockSearchBean = new StockSearchBean();
 			stockSearchBean.setServerVersion(lastSyncedServerVersion);
-			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "desc", limit);
+			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
 			response.put("stocks", stocksArray);
