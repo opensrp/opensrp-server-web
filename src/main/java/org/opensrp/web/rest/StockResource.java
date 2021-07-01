@@ -113,7 +113,9 @@ public class StockResource extends RestResource<Stock> {
 				lastSyncedServerVersion = Long.parseLong(serverVersion);
 			}
 			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findAllStocks(lastSyncedServerVersion,limit);
+			StockSearchBean stockSearchBean = new StockSearchBean();
+			stockSearchBean.setServerVersion(lastSyncedServerVersion);
+			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "desc", limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 			}.getType());
 			response.put("stocks", stocksArray);
