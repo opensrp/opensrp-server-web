@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import org.opensrp.common.AllConstants;
 import org.smartregister.domain.Inventory;
 import org.smartregister.domain.Stock;
@@ -75,7 +76,7 @@ public class StockResourceTest {
 	protected ObjectMapper mapper = new ObjectMapper();
 
 	private final String BASE_URL = "/rest/stockresource/";
-	
+
 	private final String SYNC_PAYLOAD = "{"
 			+ "\"stocks\": [{\"identifier\":123,\"providerid\":\"test-id\"}]"
 			+ "}";
@@ -125,10 +126,11 @@ public class StockResourceTest {
 	public void testGetAll() throws Exception {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(expected);
 
-		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
-
-		MvcResult result = mockMvc.perform(get(BASE_URL + "getall"))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall")
+				.param("limit", "1"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -147,9 +149,10 @@ public class StockResourceTest {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
 
-		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(expected);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123"))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123&limit=1"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -193,7 +196,8 @@ public class StockResourceTest {
 
 	@Test
 	public void testSyncThrowsException() throws Exception {
-		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class))).thenReturn(null);
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(null);
 
 		mockMvc.perform(get(BASE_URL + "/sync").param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
 				.param("limit", "1"))
@@ -211,7 +215,8 @@ public class StockResourceTest {
 				.thenReturn(expected);
 
 		MvcResult result = mockMvc
-				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
+				.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
+						.content(POST_SYNC_PAYLOAD.getBytes()))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -224,9 +229,11 @@ public class StockResourceTest {
 
 	@Test
 	public void testSyncV2ThrowsException() throws Exception {
-		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class))).thenReturn(null);
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(null);
 
-		MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
+		MvcResult result = mockMvc.perform(
+				post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
 				.andExpect(status().isInternalServerError()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -255,7 +262,7 @@ public class StockResourceTest {
 		Stock actual = stockResource.update(stockObject);
 		assertEquals(actual.getId(), actual.getId());
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		when(stockService.addorUpdateStock(any(Stock.class))).thenReturn(createStock());
@@ -283,15 +290,15 @@ public class StockResourceTest {
 		assertTrue(actualRequiredProperties.contains(PROVIDERID));
 		assertTrue(actualRequiredProperties.contains(TIMESTAMP));
 	}
-	
+
 	@Test
 	public void testFilter() {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
-		when(stockService.findAllStocks(nullable(Long.class),nullable(Integer.class))).thenReturn(expected);
+		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
 		List<Stock> actual = stockResource.filter("");
-		assertEquals(expected.size(),actual.size());
-		assertEquals(expected.get(0).getIdentifier(),actual.get(0).getIdentifier());
+		assertEquals(expected.size(), actual.size());
+		assertEquals(expected.get(0).getIdentifier(), actual.get(0).getIdentifier());
 	}
 
 	@Test
@@ -305,7 +312,7 @@ public class StockResourceTest {
 		MvcResult result = mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
 				.content(INVENTORY_PAYLOAD.getBytes()))
 				.andExpect(status().isCreated()).andReturn();
-		verify(stockService).addInventory(any(Inventory.class),anyString());
+		verify(stockService).addInventory(any(Inventory.class), anyString());
 		assertEquals("", result.getResponse().getContentAsString());
 	}
 
@@ -317,10 +324,11 @@ public class StockResourceTest {
 		SecurityContextHolder.setContext(securityContext);
 		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 		Mockito.doNothing().when(stockService).updateInventory(any(Inventory.class), anyString());
-		MvcResult result = mockMvc.perform(put(BASE_URL +"/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
-				.content(INVENTORY_PAYLOAD.getBytes()))
+		MvcResult result = mockMvc.perform(
+				put(BASE_URL + "/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
+						.content(INVENTORY_PAYLOAD.getBytes()))
 				.andExpect(status().isCreated()).andReturn();
-		verify(stockService).updateInventory(any(Inventory.class),anyString());
+		verify(stockService).updateInventory(any(Inventory.class), anyString());
 		assertEquals(result.getResponse().getContentAsString(), "");
 	}
 
@@ -423,7 +431,6 @@ public class StockResourceTest {
 		assertEquals(VALIDATE_INVENTORY_SUMMARY, responseString);
 	}
 
-
 	@Test
 	public void testImportInventoryDataWithErrors() throws Exception {
 		Authentication authentication = mock(Authentication.class);
@@ -453,7 +460,7 @@ public class StockResourceTest {
 		String responseString = result.getResponse().getContentAsString();
 		assertTrue(responseString.contains(IMPORT_INVENTORY_SUMMARY_REPORT_WITHOUT_ERRORS));
 	}
-	
+
 	private Stock createStock() {
 		Stock stock = new Stock();
 		stock.setIdentifier("12345");
