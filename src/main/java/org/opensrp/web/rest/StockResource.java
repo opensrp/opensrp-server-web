@@ -1,9 +1,34 @@
 package org.opensrp.web.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
+import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
+import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
+import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
+import static org.opensrp.common.AllConstants.Stock.TO_FROM;
+import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
+import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
+import static org.opensrp.common.AllConstants.Stock.VALUE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.LOCATIONS;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -14,13 +39,13 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.Constants;
-import org.smartregister.domain.Inventory;
-import org.smartregister.domain.Stock;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -30,39 +55,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.ParseException;
-import java.util.*;
-
-import static org.opensrp.common.AllConstants.Stock.*;
-import static org.opensrp.web.Constants.*;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
 
-	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
-
-	private static final String RETURN_PRODUCT = "returnProduct";
-
 	private static Logger logger = LogManager.getLogger(StockResource.class.toString());
+
+	private StockService stockService;
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-	private StockService stockService;
+	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
+
+	private static final String RETURN_PRODUCT = "returnProduct";
 
 	@Autowired
 	public StockResource(StockService stockService) {
