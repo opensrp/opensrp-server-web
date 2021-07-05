@@ -5,26 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Mockito;
-import org.mockito.ArgumentCaptor;
-
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
+import org.mockito.*;
 import org.opensrp.common.AllConstants;
-import org.smartregister.domain.Inventory;
-import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -47,16 +37,13 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
 import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
 import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })

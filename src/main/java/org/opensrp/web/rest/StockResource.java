@@ -1,34 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.Stock.DATE_CREATED;
-import static org.opensrp.common.AllConstants.Stock.DATE_UPDATED;
-import static org.opensrp.common.AllConstants.Stock.IDENTIFIER;
-import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
-import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
-import static org.opensrp.common.AllConstants.Stock.TO_FROM;
-import static org.opensrp.common.AllConstants.Stock.TRANSACTION_TYPE;
-import static org.opensrp.common.AllConstants.Stock.VACCINE_TYPE_ID;
-import static org.opensrp.common.AllConstants.Stock.VALUE;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.LOCATIONS;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.*;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.ParseException;
-import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -39,13 +14,13 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.smartregister.domain.Inventory;
-import org.smartregister.domain.Stock;
 import org.opensrp.dto.CsvBulkImportDataSummary;
 import org.opensrp.dto.FailedRecordSummary;
 import org.opensrp.search.StockSearchBean;
 import org.opensrp.service.StockService;
 import org.opensrp.web.Constants;
+import org.smartregister.domain.Inventory;
+import org.smartregister.domain.Stock;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -55,36 +30,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.util.*;
+
+import static org.opensrp.common.AllConstants.Stock.*;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
 public class StockResource extends RestResource<Stock> {
 
-	private static Logger logger = LogManager.getLogger(StockResource.class.toString());
+	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
 
-	private StockService stockService;
+	private static final String RETURN_PRODUCT = "returnProduct";
+
+	private static Logger logger = LogManager.getLogger(StockResource.class.toString());
 
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-	private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
-
-	private static final String RETURN_PRODUCT = "returnProduct";
+	private StockService stockService;
 
 	@Autowired
 	public StockResource(StockService stockService) {
@@ -104,7 +82,7 @@ public class StockResource extends RestResource<Stock> {
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
-	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion")  String serverVersion,
+	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion") String serverVersion,
 			@RequestParam(required = false) Integer limit) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
@@ -117,10 +95,12 @@ public class StockResource extends RestResource<Stock> {
 			stockSearchBean.setServerVersion(lastSyncedServerVersion);
 			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+
 			}.getType());
 			response.put("stocks", stocksArray);
 			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -150,7 +130,7 @@ public class StockResource extends RestResource<Stock> {
 	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error
-	 *         occurs
+	 * occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
@@ -166,7 +146,8 @@ public class StockResource extends RestResource<Stock> {
 			searchBean.setLimit(limit);
 			return syncStocks(searchBean);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -182,11 +163,13 @@ public class StockResource extends RestResource<Stock> {
 		}
 		ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
 				new TypeToken<ArrayList<Stock>>() {
+
 				}.getType());
 		for (Stock stock : stocks) {
 			try {
 				stockService.addorUpdateStock(stock);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				logger.error("Stock" + stock.getId() + " failed to sync", e);
 			}
 		}
@@ -316,7 +299,8 @@ public class StockResource extends RestResource<Stock> {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
+				.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
@@ -363,6 +347,7 @@ public class StockResource extends RestResource<Stock> {
 		stockSearchBean.setLimit(limit);
 		stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", stockSearchBean.getLimit());
 		JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+
 		}.getType());
 
 		response.put("stocks", stocksArray);
@@ -399,17 +384,18 @@ public class StockResource extends RestResource<Stock> {
 		csvPrinter.flush();
 	}
 
-	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
+	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber, Integer pageSize,
+			String orderByType,
 			String orderByFieldName, String locationId, boolean returnProduct) {
 		StockSearchBean stockSearchBean = new StockSearchBean();
 		stockSearchBean.setPageNumber(pageNumber);
 		stockSearchBean.setPageSize(pageSize);
 		stockSearchBean.setReturnProduct(returnProduct);
 
-		if(orderByType != null) {
+		if (orderByType != null) {
 			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
 		}
-		if(orderByFieldName != null) {
+		if (orderByFieldName != null) {
 			stockSearchBean.setOrderByFieldName(StockSearchBean.FieldName.valueOf(orderByFieldName));
 		}
 		List<String> locations = new ArrayList<>();
