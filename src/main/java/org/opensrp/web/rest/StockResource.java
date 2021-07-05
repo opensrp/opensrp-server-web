@@ -104,7 +104,7 @@ public class StockResource extends RestResource<Stock> {
 	 */
 
 	@RequestMapping(value = "/getall", method = RequestMethod.GET)
-	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion")  String serverVersion,
+	protected ResponseEntity<String> getAll(@RequestParam(required = false, value = "serverVersion") String serverVersion,
 			@RequestParam(required = false) Integer limit) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		try {
@@ -113,12 +113,16 @@ public class StockResource extends RestResource<Stock> {
 				lastSyncedServerVersion = Long.parseLong(serverVersion);
 			}
 			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findAllStocks(lastSyncedServerVersion,limit);
+			StockSearchBean stockSearchBean = new StockSearchBean();
+			stockSearchBean.setServerVersion(lastSyncedServerVersion);
+			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+
 			}.getType());
 			response.put("stocks", stocksArray);
 			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -148,7 +152,7 @@ public class StockResource extends RestResource<Stock> {
 	 *
 	 * @param request
 	 * @return a map response with events, clients and optionally msg when an error
-	 *         occurs
+	 * occurs
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.GET)
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
@@ -164,7 +168,8 @@ public class StockResource extends RestResource<Stock> {
 			searchBean.setLimit(limit);
 			return syncStocks(searchBean);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			response.put("msg", "Error occurred");
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -180,11 +185,13 @@ public class StockResource extends RestResource<Stock> {
 		}
 		ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
 				new TypeToken<ArrayList<Stock>>() {
+
 				}.getType());
 		for (Stock stock : stocks) {
 			try {
 				stockService.addorUpdateStock(stock);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				logger.error("Stock" + stock.getId() + " failed to sync", e);
 			}
 		}
@@ -314,7 +321,8 @@ public class StockResource extends RestResource<Stock> {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userName = authentication.getName();
 		List<Map<String, String>> csvClients = readCSVFile(file);
-		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService.convertandPersistInventorydata(csvClients, userName);
+		CsvBulkImportDataSummary csvBulkImportDataSummary = stockService
+				.convertandPersistInventorydata(csvClients, userName);
 
 		String timestamp = String.valueOf(new Date().getTime());
 		URI uri = File.createTempFile(SAMPLE_CSV_FILE + "-" + timestamp, "").toURI();
@@ -361,6 +369,7 @@ public class StockResource extends RestResource<Stock> {
 		stockSearchBean.setLimit(limit);
 		stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", stockSearchBean.getLimit());
 		JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
+
 		}.getType());
 
 		response.put("stocks", stocksArray);
@@ -397,17 +406,18 @@ public class StockResource extends RestResource<Stock> {
 		csvPrinter.flush();
 	}
 
-	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber,Integer pageSize, String orderByType,
+	private StockSearchBean createSearchBeanToGetStocksOfServicePoint(Integer pageNumber, Integer pageSize,
+			String orderByType,
 			String orderByFieldName, String locationId, boolean returnProduct) {
 		StockSearchBean stockSearchBean = new StockSearchBean();
 		stockSearchBean.setPageNumber(pageNumber);
 		stockSearchBean.setPageSize(pageSize);
 		stockSearchBean.setReturnProduct(returnProduct);
 
-		if(orderByType != null) {
+		if (orderByType != null) {
 			stockSearchBean.setOrderByType(StockSearchBean.OrderByType.valueOf(orderByType));
 		}
-		if(orderByFieldName != null) {
+		if (orderByFieldName != null) {
 			stockSearchBean.setOrderByFieldName(StockSearchBean.FieldName.valueOf(orderByFieldName));
 		}
 		List<String> locations = new ArrayList<>();
