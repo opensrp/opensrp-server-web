@@ -26,7 +26,6 @@ import java.util.List;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
