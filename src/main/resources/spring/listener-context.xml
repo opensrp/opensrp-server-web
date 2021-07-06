@@ -7,14 +7,12 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
-
-	
 	<context:component-scan base-package="org.opensrp.web.listener"/>
 	<context:annotation-config/>
 	<task:annotation-driven />
 	
 	<task:scheduler pool-size="1" id="dhis2Scheduler"/>
-    <task:scheduler pool-size="1" id="messageScheduler"/>
+    <task:scheduler pool-size="1" id="rapidProScheduler"/>
 
 	<beans profile="dhis2-sync">
 		<bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"/>
@@ -24,5 +22,12 @@
 				cron="0 30 23 28-31 * ?" />
 		</task:scheduled-tasks>
 	</beans>
-   
+
+	<beans profile="rapidpro">
+		<bean id="rapidProListener" class="org.opensrp.web.listener.RapidProListener"/>
+		<task:scheduled-tasks scheduler="rapidProScheduler">
+			<task:scheduled ref="rapidProListener" method="requestRapidProContacts" cron="*/60 * * * * *" />
+		</task:scheduled-tasks>
+	</beans>
+
 </beans>
