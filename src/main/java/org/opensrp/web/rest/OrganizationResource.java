@@ -356,4 +356,14 @@ public class OrganizationResource {
 					HttpStatus.CREATED);
 
 	}
+
+	@GetMapping(value = "/count")
+	public ResponseEntity<Long> getAllOrganizationsCount() {
+		try {
+			return new ResponseEntity<>(organizationService.countAllOrganizations(), HttpStatus.OK);
+		} catch (Exception exception) {
+			logger.error("Error getting organizations count", exception);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

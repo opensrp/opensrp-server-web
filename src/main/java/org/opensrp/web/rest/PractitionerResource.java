@@ -195,4 +195,14 @@ public class PractitionerResource {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping(value = "/count")
+	public ResponseEntity<Long> getAllPractitionersCount() {
+		try {
+			return new ResponseEntity<>(practitionerService.countAllPractitioners(), HttpStatus.OK);
+		} catch (Exception exception) {
+			logger.error("Error getting practitioners count", exception);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
