@@ -26,7 +26,7 @@
 	<beans profile="rapidpro">
 		<bean id="rapidProListener" class="org.opensrp.web.listener.RapidProListener"/>
 		<task:scheduled-tasks scheduler="rapidProScheduler">
-			<task:scheduled ref="rapidProListener" method="requestRapidProContacts" cron="*/60 * * * * *" />
+			<task:scheduled ref="rapidProListener" method="requestRapidProContacts" cron="* */5 * * * *" />
 		</task:scheduled-tasks>
 	</beans>
 
