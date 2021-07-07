@@ -23,4 +23,14 @@
 		<task:annotation-driven />
 	
 	</beans>
+
+	<beans profile="rapidpro">
+		<bean id="rapidProListener" class="org.opensrp.web.listener.RapidProListener"/>
+		<task:scheduled-tasks scheduler="rapidProScheduler">
+			<task:scheduled ref="rapidProListener" method="requestRapidProContacts" cron="* */5 * * * *" />
+		</task:scheduled-tasks>
+		<task:scheduler pool-size="1" id="rapidProScheduler"/>
+		<task:annotation-driven />
+	</beans>
+
 </beans>

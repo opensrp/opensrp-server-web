@@ -9,18 +9,14 @@
 
 	<context:component-scan base-package="org.opensrp.web.listener"/>
 	<context:annotation-config/>
-	<task:annotation-driven />
-	
-	<task:scheduler pool-size="1" id="dhis2Scheduler"/>
-    <task:scheduler pool-size="1" id="rapidProScheduler"/>
 
 	<beans profile="dhis2-sync">
 		<bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"/>
 		<task:scheduled-tasks scheduler="dhis2Scheduler">
-			<task:scheduled ref="dhis2"
-				method="vaccinationAggregatorDataCountForSendingToDHIS2"
-				cron="0 30 23 28-31 * ?" />
+			<task:scheduled ref="dhis2" method="vaccinationAggregatorDataCountForSendingToDHIS2" cron="0 30 23 28-31 * ?" />
 		</task:scheduled-tasks>
+		<task:scheduler pool-size="1" id="dhis2Scheduler"/>
+		<task:annotation-driven />
 	</beans>
 
 	<beans profile="rapidpro">
@@ -28,6 +24,7 @@
 		<task:scheduled-tasks scheduler="rapidProScheduler">
 			<task:scheduled ref="rapidProListener" method="requestRapidProContacts" cron="* */5 * * * *" />
 		</task:scheduled-tasks>
+		<task:scheduler pool-size="1" id="rapidProScheduler"/>
+		<task:annotation-driven />
 	</beans>
-
 </beans>
