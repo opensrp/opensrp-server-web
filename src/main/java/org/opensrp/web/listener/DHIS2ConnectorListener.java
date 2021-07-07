@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
-@Profile("dhis2-sync")
+@Profile("dhis2-sync-vaccine-tracker")
 @Service
 @EnableScheduling
 public class DHIS2ConnectorListener {

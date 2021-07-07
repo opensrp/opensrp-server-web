@@ -13,11 +13,13 @@
        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
     <context:property-placeholder
             location="classpath*:maven.properties,classpath*:opensrp.properties"/>
 
     <import resource="classpath:applicationContext-opensrp.xml"/>
 	<import resource="classpath:applicationContext-connector.xml"/>
+	<import resource="listener-context.xml"/>
 
     <mvc:default-servlet-handler/>
     <!--     <tx:annotation-driven proxy-target-class="true" />

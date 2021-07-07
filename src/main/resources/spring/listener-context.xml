@@ -10,7 +10,7 @@
 	<context:component-scan base-package="org.opensrp.web.listener"/>
 	<context:annotation-config/>
 
-	<beans profile="dhis2-sync">
+	<beans profile="dhis2-sync-vaccine-tracker">
 		<bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"/>
 		<task:scheduled-tasks scheduler="dhis2Scheduler">
 			<task:scheduled ref="dhis2" method="vaccinationAggregatorDataCountForSendingToDHIS2" cron="0 30 23 28-31 * ?" />
