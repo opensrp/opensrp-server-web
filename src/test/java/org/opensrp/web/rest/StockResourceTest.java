@@ -113,10 +113,11 @@ public class StockResourceTest {
 	public void testGetAll() throws Exception {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(expected);
 
-		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
-
-		MvcResult result = mockMvc.perform(get(BASE_URL + "getall"))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall")
+				.param("limit", "1"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
@@ -135,9 +136,10 @@ public class StockResourceTest {
 		List<Stock> expected = new ArrayList<>();
 		expected.add(createStock());
 
-		when(stockService.findAllStocks(nullable(Long.class), nullable(Integer.class))).thenReturn(expected);
+		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
+				.thenReturn(expected);
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123"))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "getall?serverVersion=123&limit=1"))
 				.andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();

@@ -35,6 +35,7 @@ import org.smartregister.domain.*;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -42,6 +43,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -58,6 +60,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -578,5 +581,31 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON).content(organizations))
 				.andExpect(status().isBadRequest());
 		verify(organizationService, atLeast(0)).addOrUpdateOrganization(organizationArgumentCaptor.capture());
+	}
+
+	@Test
+	public void testCountOrganizations() throws Exception {
+		doReturn(2L).when(organizationService).countAllOrganizations();
+		ResultActions resultActions = mockMvc
+				.perform(get(BASE_URL + "count").contentType(MediaType.APPLICATION_JSON).content(""))
+				.andExpect(status().isOk());
+		assertNotNull(resultActions);
+		MvcResult mvcResult = resultActions.andReturn();
+		assertNotNull(mvcResult);
+		assertNotNull(mvcResult.getResponse());
+		assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+	}
+
+	@Test
+	public void testCountOrganizationsWithException() throws Exception {
+		doThrow(new IllegalArgumentException()).when(organizationService).countAllOrganizations();
+		ResultActions resultActions = mockMvc
+				.perform(get(BASE_URL + "count").contentType(MediaType.APPLICATION_JSON).content(""))
+				.andExpect(status().isInternalServerError());
+		assertNotNull(resultActions);
+		MvcResult mvcResult = resultActions.andReturn();
+		assertNotNull(mvcResult);
+		assertNotNull(mvcResult.getResponse());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
 	}
 }

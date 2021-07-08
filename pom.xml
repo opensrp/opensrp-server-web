@@ -1,7 +1,6 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.smartregister</groupId>
 
@@ -26,7 +25,7 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.0.0-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.0.2-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
@@ -103,6 +102,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>spring plugin repo</id>
+            <url>https://repo.spring.io/plugins-release/</url>
         </repository>
     </repositories>
 
@@ -411,7 +414,7 @@
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.14.1</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
             <version>2.14.1</version>
@@ -533,7 +536,7 @@
                             <port>${jetty.port}</port>
                         </connector>
                         <connector
-                            implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
@@ -753,6 +756,7 @@
             <properties>
                 <dhis2.sync.vaccine.tracker>dhis2-sync-vaccine-tracker</dhis2.sync.vaccine.tracker>
                 <dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
+
             </properties>
         </profile>
         <profile>

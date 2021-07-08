@@ -91,7 +91,9 @@ public class StockResource extends RestResource<Stock> {
 				lastSyncedServerVersion = Long.parseLong(serverVersion);
 			}
 			List<Stock> stocks = new ArrayList<Stock>();
-			stocks = stockService.findAllStocks(lastSyncedServerVersion, limit);
+			StockSearchBean stockSearchBean = new StockSearchBean();
+			stockSearchBean.setServerVersion(lastSyncedServerVersion);
+			stocks = stockService.findStocks(stockSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
 			JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
 
 			}.getType());
@@ -134,14 +136,21 @@ public class StockResource extends RestResource<Stock> {
 	protected ResponseEntity<String> sync(HttpServletRequest request) {
 		Map<String, Object> response = new HashMap<String, Object>();
 
-		StockSearchBean searchBean = populateSearchBean(request);
-		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-		if (serverVersion != null) {
-			searchBean.setServerVersion(Long.valueOf(serverVersion) + 1);
+		try {
+			StockSearchBean searchBean = populateSearchBean(request);
+			String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+			if (serverVersion != null) {
+				searchBean.setServerVersion(Long.valueOf(serverVersion) + 1);
+			}
+			Integer limit = getIntegerFilter("limit", request);
+			searchBean.setLimit(limit);
+			return syncStocks(searchBean);
+
 		}
-		Integer limit = getIntegerFilter("limit", request);
-		if (limit == null || limit.intValue() == 0) {
-			limit = 25;
+		catch (Exception e) {
+			response.put("msg", "Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		List<Stock> stocks = new ArrayList<Stock>();
