@@ -152,16 +152,6 @@ public class StockResource extends RestResource<Stock> {
 			logger.error("", e);
 			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		List<Stock> stocks = new ArrayList<Stock>();
-		stocks = stockService.findStocks(searchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit);
-		JsonArray stocksArray = (JsonArray) gson.toJsonTree(stocks, new TypeToken<List<Stock>>() {
-
-		}.getType());
-
-		response.put("stocks", stocksArray);
-
-		return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 
 	@SuppressWarnings("unchecked")
