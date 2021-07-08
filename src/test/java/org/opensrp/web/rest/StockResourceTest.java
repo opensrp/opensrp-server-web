@@ -181,14 +181,14 @@ public class StockResourceTest {
 		assertEquals(actualObj.get("stocks").size(), 1);
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void testSyncThrowsException() throws Exception {
 		when(stockService.findStocks(any(StockSearchBean.class), any(String.class), any(String.class), any(int.class)))
 				.thenReturn(null);
 
 		mockMvc.perform(get(BASE_URL + "/sync")
 				.param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
-				.param("limit", "0"))
+				.param("limit", "1"))
 				.andExpect(status().isInternalServerError())
 				.andReturn();
 	}
