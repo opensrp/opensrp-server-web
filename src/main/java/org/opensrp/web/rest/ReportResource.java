@@ -152,7 +152,7 @@ public class ReportResource {
 			throw new IllegalArgumentException("Missing district ID");
 		}
 
-		PhysicalLocation district = locationService.getLocation(districtId, false);
+		PhysicalLocation district = locationService.getLocation(districtId, false, false);
 		if (district == null) {
 			logger.error("District not found: " + districtId);
 			throw new IllegalArgumentException("District not found: " + districtId);
@@ -183,7 +183,7 @@ public class ReportResource {
 		// read template
 		Workbook workbook = this.readXLSXTemplate(path.toFile());
 
-		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false);
+		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false, false);
 		List<PhysicalLocation> facilities = getChildLocationsByLevel(district, "Facility");
 
 		// prepare report data
@@ -247,7 +247,7 @@ public class ReportResource {
 			throw new IllegalArgumentException("Missing district");
 		}
 
-		PhysicalLocation district = locationService.getLocation(districtId, false);
+		PhysicalLocation district = locationService.getLocation(districtId, false, false);
 		if (district == null) {
 			logger.error("District not found: " + districtId);
 			throw new IllegalArgumentException("District not found" + districtId);
@@ -675,7 +675,7 @@ public class ReportResource {
 		// read template
 		Workbook workbook = this.readXLSXTemplate(path.toFile());
 
-		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false);
+		PhysicalLocation province = locationService.getLocation(district.getProperties().getParentId(), false, false);
 		List<PhysicalLocation> facilities = getChildLocationsByLevel(district, "Facility");
 
 		int month = startDate.getMonth().getValue();
