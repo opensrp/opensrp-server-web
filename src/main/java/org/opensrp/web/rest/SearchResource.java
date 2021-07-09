@@ -101,86 +101,77 @@ public class SearchResource extends RestResource<Client> {
 		searchBean.setIdentifiers(identifierMap);
 		return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
 	private List<ChildMother> searchPathBy(HttpServletRequest request) throws ParseException {
-		try {
-			
-			//Process clients search via demographics
-			
-			ClientSearchBean searchBean = new ClientSearchBean();
-			List<Client> children = new ArrayList<Client>();
-			
-			SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(request);
-			
-			if (childSearchEntity.isValid()) {
-				searchBean = childSearchEntity.getClientSearchBean();
-				children = searchService.searchClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
-				    searchBean.getLastName(), childSearchEntity.getLimit());
-			}
-			
-			//Process mothers search via mother demographics
-			
-			SearchEntityWrapper motherSearchEntity = SearchHelper.motherSearchParamProcessor(request);
-			ClientSearchBean motherSearchBean = new ClientSearchBean();
-			List<Client> mothers = new ArrayList<Client>();
-			
-			if (motherSearchEntity.isValid()) {
-				motherSearchBean = motherSearchEntity.getClientSearchBean();
-				mothers = searchService.searchClient(motherSearchBean, motherSearchBean.getFirstName(),
-				    motherSearchBean.getMiddleName(), motherSearchBean.getLastName(), motherSearchEntity.getLimit());
-			}
-			
-			//Process clients search via contact phone number
-			
-			String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(request);
-			
-			List<String> clientBaseEntityIds = getClientBaseEntityIdsByContactPhoneNumber(contactPhoneNumber);
-			
-			List<Client> eventChildren = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientBaseEntityIds);
-			
-			children = SearchHelper.intersection(children, eventChildren);// Search conjunction is "AND" find intersection
-			
-			List<Client> linkedMothers = new ArrayList<Client>();
-			
-			String RELATIONSHIP_KEY = "mother";
-			if (!children.isEmpty()) {
-				List<String> clientIds = new ArrayList<String>();
-				for (Client c : children) {
-					String relationshipId = SearchHelper.getRelationalId(c, RELATIONSHIP_KEY);
-					if (relationshipId != null && !clientIds.contains(relationshipId)) {
-						clientIds.add(relationshipId);
-					}
-				}
-				
-				linkedMothers = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
-				
-			}
-			
-			List<Client> linkedChildren = new ArrayList<Client>();
-			
-			if (!mothers.isEmpty()) {
-				for (Client client : mothers) {
-					linkedChildren.addAll(clientService.findByRelationship(client.getBaseEntityId()));
-				}
-			}
-			
-			children = SearchHelper.intersection(children, linkedChildren);// Search conjunction is "AND" find intersection
-			
-			for (Client linkedMother : linkedMothers) {
-				if (!SearchHelper.contains(mothers, linkedMother)) {
-					mothers.add(linkedMother);
-				}
-			}
-			
-			return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
-			
+		//Process clients search via demographics
+
+		ClientSearchBean searchBean = new ClientSearchBean();
+		List<Client> children = new ArrayList<Client>();
+
+		SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(request);
+
+		if (childSearchEntity.isValid()) {
+			searchBean = childSearchEntity.getClientSearchBean();
+			children = searchService.searchGlobalClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
+			    searchBean.getLastName(), childSearchEntity.getLimit());
 		}
-		catch (Exception e) {
-			
-			logger.error("", e);
-			return new ArrayList<ChildMother>();
+
+		//Process mothers search via mother demographics
+
+		SearchEntityWrapper motherSearchEntity = SearchHelper.motherSearchParamProcessor(request);
+		ClientSearchBean motherSearchBean = new ClientSearchBean();
+		List<Client> mothers = new ArrayList<Client>();
+
+		if (motherSearchEntity.isValid()) {
+			motherSearchBean = motherSearchEntity.getClientSearchBean();
+			mothers = searchService.searchGlobalClient(motherSearchBean, motherSearchBean.getFirstName(),
+			    motherSearchBean.getMiddleName(), motherSearchBean.getLastName(), motherSearchEntity.getLimit());
 		}
+
+		//Process clients search via contact phone number
+
+		String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(request);
+
+		List<String> clientBaseEntityIds = getClientBaseEntityIdsByContactPhoneNumber(contactPhoneNumber);
+
+		List<Client> eventChildren = clientService.findGlobalByFieldValue(BaseEntity.BASE_ENTITY_ID, clientBaseEntityIds);
+
+		children = SearchHelper.intersection(children, eventChildren);// Search conjunction is "AND" find intersection
+
+		List<Client> linkedMothers = new ArrayList<Client>();
+
+		String RELATIONSHIP_KEY = "mother";
+		if (!children.isEmpty()) {
+			List<String> clientIds = new ArrayList<String>();
+			for (Client c : children) {
+				String relationshipId = SearchHelper.getRelationalId(c, RELATIONSHIP_KEY);
+				if (relationshipId != null && !clientIds.contains(relationshipId)) {
+					clientIds.add(relationshipId);
+				}
+			}
+
+			linkedMothers = clientService.findGlobalByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
+
+		}
+
+		List<Client> linkedChildren = new ArrayList<Client>();
+
+		if (!mothers.isEmpty()) {
+			for (Client client : mothers) {
+				linkedChildren.addAll(clientService.findGlobalByRelationship(client.getBaseEntityId()));
+			}
+		}
+
+		children = SearchHelper.intersection(children, linkedChildren);// Search conjunction is "AND" find intersection
+
+		for (Client linkedMother : linkedMothers) {
+			if (!SearchHelper.contains(mothers, linkedMother)) {
+				mothers.add(linkedMother);
+			}
+		}
+
+		return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
 	}
 	
 	public List<String> getClientBaseEntityIdsByContactPhoneNumber(String motherGuardianPhoneNumber) {
