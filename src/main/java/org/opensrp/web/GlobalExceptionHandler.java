@@ -12,6 +12,7 @@ import org.opensrp.web.exceptions.UploadValidationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -107,6 +108,17 @@ public class GlobalExceptionHandler {
 		logger.error("Connnection Exception occurred : ", exception);
 		ResponseDto<?> dto = buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		dto.setMessage("Connnection Exception: Connection refused");
+		return dto;
+	}
+	
+
+	@ResponseBody
+	@ExceptionHandler(AccessDeniedException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseDto<?> exceptionHandler(AccessDeniedException exception) {
+		logger.warn("Access denied : ", exception.getMessage());
+		ResponseDto<?> dto = buildErrorResponse(HttpStatus.FORBIDDEN);
+		dto.setMessage("Access is denied. You do not have enough permissions for the resource.");
 		return dto;
 	}
 	

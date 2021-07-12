@@ -76,7 +76,7 @@ public class ProductCatalogueResource {
 			@RequestParam(value = "limit") String limit) {
 		final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
-		Long lastSyncedServerVersion = null;
+		Long lastSyncedServerVersion = 0L;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion);
 		}
