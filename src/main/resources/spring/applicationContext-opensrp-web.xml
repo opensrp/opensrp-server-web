@@ -68,4 +68,8 @@
     <beans profile="chw_referral_module">
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>
     </beans>
+
+    <beans profile="dhis2-sync-vaccine-tracker,rapidpro">
+        <import resource="listener-context.xml"/>
+    </beans>
 </beans>
