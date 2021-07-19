@@ -34,7 +34,7 @@ public class RapidProListener {
 	public void requestRapidProContacts() {
 		rapidProService.queryContacts(() -> {
 			if (RapidProConstants.RapidProProjects.ZEIR_RAPIDPRO.equalsIgnoreCase(rapidProProject)) {
-				rapidProStateService.updateRapidProContactsFields();
+				rapidProStateService.postDataToRapidPro();
 			}
 		});
 	}
