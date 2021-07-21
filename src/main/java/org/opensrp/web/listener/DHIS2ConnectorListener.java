@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 @Profile("dhis2-sync-vaccine-tracker")
 @Service
-@EnableScheduling
 public class DHIS2ConnectorListener {
 	
 	private static Logger logger = LogManager.getLogger(DHIS2ConnectorListener.class.toString());
