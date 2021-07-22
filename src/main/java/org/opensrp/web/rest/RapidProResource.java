@@ -67,31 +67,33 @@ public class RapidProResource {
 				rapidProService.queryContacts(() -> {
 					JSONObject payloadJson = new JSONObject(payload);
 					if (payloadJson.has(RapidPro.CONTACT) && payloadJson.has(RapidProConstants.RESULTS)) {
+						JSONObject resultsJson = payloadJson.getJSONObject(RapidProConstants.RESULTS);
+						if (resultsJson != null && resultsJson.has(RapidPro.ID) && resultsJson.has(RapidPro.DATE_OF_BIRTH)) {
+							JSONObject idJson = resultsJson.getJSONObject(RapidPro.ID);
+							JSONObject dobJson = resultsJson.getJSONObject(RapidPro.DATE_OF_BIRTH);
+							if (dobJson != null && idJson != null) {
+								JSONObject supervisorJson = payloadJson.getJSONObject(RapidPro.CONTACT);
+								String supervisorUuid = supervisorJson.getString(RapidPro.UUID);
 
-						JSONObject idJson = payloadJson.getJSONObject(RapidPro.ID);
-						JSONObject dobJson = payloadJson.getJSONObject(RapidPro.DATE_OF_BIRTH);
-						if (dobJson != null && idJson != null) {
-							JSONObject supervisorJson = payloadJson.getJSONObject(RapidPro.CONTACT);
-							String supervisorUuid = supervisorJson.getString(RapidPro.UUID);
+								RapidproState supervisorState = rapidProStateService.getRapidProStateByUuid(supervisorUuid,
+										ZeirRapidProEntity.SUPERVISOR.name(), ZeirRapidProEntityProperty.LOCATION_ID.name());
 
-							RapidproState supervisorState = rapidProStateService.getRapidProStateByUuid(supervisorUuid,
-									ZeirRapidProEntity.SUPERVISOR.name(), ZeirRapidProEntityProperty.LOCATION_ID.name());
+								if (supervisorState != null) {
+									String locationId = supervisorState.getPropertyValue();
+									String id = idJson.getString(RapidPro.VALUE);
+									DateTime dob = DateParserUtils.parseZoneDateTime(dobJson.getString(RapidPro.VALUE));
 
-							if (supervisorState != null) {
-								String locationId = supervisorState.getPropertyValue();
-								String id = idJson.getString(RapidPro.VALUE);
-								DateTime dob = DateParserUtils.parseZoneDateTime(dobJson.getString(RapidPro.VALUE));
+									String uniqueMvaccId = locationId + "|" + id + "/" + dob.getYear();
+									List<RapidproState> childStates =
+											rapidProStateService.getStatesByPropertyKey(ZeirRapidProEntity.CHILD.name(),
+													ZeirRapidProEntityProperty.IDENTIFIER.name(), uniqueMvaccId);
 
-								String uniqueMvaccId = locationId + "|" + id + "/" + dob.getYear();
-								List<RapidproState> childStates =
-										rapidProStateService.getStatesByPropertyKey(ZeirRapidProEntity.CHILD.name(),
-												ZeirRapidProEntityProperty.IDENTIFIER.name(), uniqueMvaccId);
-
-								if (childStates != null && !childStates.isEmpty()) {
-									RapidproState childState = childStates.get(childStates.size() - 1);
-									String opensrpId = childState.getPropertyValue();
-									responseJson.put(RapidProConstants.OPENSRP_ID, opensrpId);
-									logger.info("ZEIR ID (" + opensrpId + ") found for MVACC ID " + uniqueMvaccId);
+									if (childStates != null && !childStates.isEmpty()) {
+										RapidproState childState = childStates.get(childStates.size() - 1);
+										String opensrpId = childState.getPropertyValue();
+										responseJson.put(RapidProConstants.OPENSRP_ID, opensrpId);
+										logger.info("ZEIR ID (" + opensrpId + ") found for MVACC ID " + uniqueMvaccId);
+									}
 								}
 							}
 						}
