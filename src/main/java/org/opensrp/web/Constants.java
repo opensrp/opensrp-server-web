@@ -71,4 +71,12 @@ public interface Constants {
             String KEY = "key";
         }
     }
+
+    interface RapidPro {
+	    String CONTACT = "contact";
+        String UUID = "uuid";
+        String DATE_OF_BIRTH = "dateofbirth";
+        String ID = "id";
+        String VALUE = "value";
+    }
 }
