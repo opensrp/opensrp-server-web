@@ -429,10 +429,12 @@ public class EventResource extends RestResource<Event> {
 	public ResponseEntity<String> save(@RequestBody String data, Authentication authentication)
 			throws JsonProcessingException {
 
+		String username = RestUtils.currentUser(authentication).getUsername();
 		List<String> failedClientsIds = new ArrayList<>();
 		List<String> failedEventIds = new ArrayList<>();
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 		try {
+			long executionTime = System.currentTimeMillis();
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
 				return new ResponseEntity<>(BAD_REQUEST);
@@ -441,44 +443,54 @@ public class EventResource extends RestResource<Event> {
 			if (syncData.has("clients")) {
 				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
+				logger.error("[EVENT_RESOURCE] " + clients.size() +  " clients submitted by user " + username);
+				long currentTime = System.currentTimeMillis();
 				for (Client client : clients) {
 					try {
 						clientService.addorUpdate(client);
 					}
 					catch (Exception e) {
-						logger.error(
-						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
-						    e);
+						client.getBaseEntityId();
+						logger.error( "Client" + client.getBaseEntityId() + " failed to sync",e);
 						failedClientsIds.add(client.getId());
 					}
 				}
+				logger.error("[EVENT_RESOURCE] processed " + clients.size() + " clients in"
+						+ ((System.currentTimeMillis() - currentTime) / 1000) + " seconds");
 				
 			}
+
 			if (syncData.has("events")) {
 				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
+				logger.error("[EVENT_RESOURCE] " + events.size() +  " events submitted by user " + username);
+				long currentTime = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
 						event = eventService.processOutOfArea(event);
-						eventService.addorUpdateEvent(event, RestUtils.currentUser(authentication).getUsername());
+						eventService.addorUpdateEvent(event, username);
 					}
 					catch (Exception e) {
 						logger.error(
-						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
-						            : event.getBaseEntityId() + " failed to sync",
-						    e);
+						    "Event of type " + event.getEventType() + " for client " +
+								    event.getBaseEntityId() + " failed to sync", e);
 						failedEventIds.add(event.getId());
 					}
 				}
+				logger.error("[EVENT_RESOURCE] processed " + events.size() + " events in"
+						+ ((System.currentTimeMillis() - currentTime) / 1000) + " seconds");
 			}
-			
+			logger.error("[EVENT_RESOURCE] sync initiated by " + username + " completed in"
+					+ ((System.currentTimeMillis() - executionTime) / 1000) + " seconds");
 		}
-		catch (
-		
-		Exception e) {
+		catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
+
+		logger.error("[EVENT_RESOURCE] failed events count:  " + failedEventIds.size());
+		logger.error("[EVENT_RESOURCE] failed clients count:  " + failedClientsIds.size());
+
 		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
 			return new ResponseEntity<>(CREATED);
 		} else {
