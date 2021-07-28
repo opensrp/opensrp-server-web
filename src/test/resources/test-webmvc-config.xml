@@ -42,6 +42,8 @@
 	</bean>
 
 	<bean class="org.opensrp.web.config.security.WebConfig" />
+	
+	<bean class="org.opensrp.web.config.TestRedisConfig" />
 
 	<util:properties id="opensrp"
 		location="classpath:/opensrp.properties" />
