@@ -434,20 +434,23 @@ public class EventResource extends RestResource<Event> {
 		List<String> failedEventIds = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
 		try {
-			long executionTime = System.currentTimeMillis();
+			long timeBeforeSync = System.currentTimeMillis();
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
 				return new ResponseEntity<>(BAD_REQUEST);
 			}
-			
+
 			if (syncData.has("clients")) {
 				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
 				logger.error("[EVENT_RESOURCE] " + clients.size() +  " clients submitted by user " + username);
-				long currentTime = System.currentTimeMillis();
+				long timeBeforeSavingClients = System.currentTimeMillis();
 				for (Client client : clients) {
 					try {
+						long timeBeforeSavingClient = System.currentTimeMillis();
 						clientService.addorUpdate(client);
+						logger.error("[EVENT_RESOURCE] client " + client.getBaseEntityId() + " saved in" +
+								getExecutionTime(timeBeforeSavingClient) + " seconds");
 					}
 					catch (Exception e) {
 						client.getBaseEntityId();
@@ -455,33 +458,35 @@ public class EventResource extends RestResource<Event> {
 						failedClientsIds.add(client.getId());
 					}
 				}
-				logger.error("[EVENT_RESOURCE] processed " + clients.size() + " clients in"
-						+ ((System.currentTimeMillis() - currentTime) / 1000) + " seconds");
-				
+				logger.error("[EVENT_RESOURCE] saved " + clients.size() + " clients in" +
+						getExecutionTime(timeBeforeSavingClients) + " seconds");
+
 			}
 
 			if (syncData.has("events")) {
 				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
 				logger.error("[EVENT_RESOURCE] " + events.size() +  " events submitted by user " + username);
-				long currentTime = System.currentTimeMillis();
+				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
 						event = eventService.processOutOfArea(event);
+						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
+						logger.error("[EVENT_RESOURCE] event " + event.getFormSubmissionId() + " of type " +
+								event.getEventType() + " saved in" + getExecutionTime(timeBeforeSavingEvent) + " seconds");
 					}
 					catch (Exception e) {
-						logger.error(
-						    "Event of type " + event.getEventType() + " for client " +
-								    event.getBaseEntityId() + " failed to sync", e);
+						logger.error("Event of type " + event.getEventType() + " for client " +
+								event.getBaseEntityId() + " failed to sync", e);
 						failedEventIds.add(event.getId());
 					}
 				}
-				logger.error("[EVENT_RESOURCE] processed " + events.size() + " events in"
-						+ ((System.currentTimeMillis() - currentTime) / 1000) + " seconds");
+				logger.error("[EVENT_RESOURCE] saved " + events.size() + " events in" +
+						getExecutionTime(timeBeforeSavingEvents) + " seconds");
 			}
-			logger.error("[EVENT_RESOURCE] sync initiated by " + username + " completed in"
-					+ ((System.currentTimeMillis() - executionTime) / 1000) + " seconds");
+			logger.error("[EVENT_RESOURCE] sync initiated by " + username + " completed in" +
+					getExecutionTime(timeBeforeSync) + " seconds");
 		}
 		catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
@@ -505,7 +510,11 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(gson.toJson(response), CREATED);
 		}
 	}
-	
+
+	private String getExecutionTime(long timeBefore) {
+		return String.valueOf(Long.valueOf(System.currentTimeMillis() - timeBefore).doubleValue() / (double) 1000);
+	}
+
 	@Override
 	public Event create(Event o) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
