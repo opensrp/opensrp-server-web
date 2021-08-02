@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -459,17 +460,24 @@ public class OrganizationResourceTest {
 		
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
 		assertEquals(2, userAssignment.getJurisdictions().size());
-		assertEquals(5, userAssignment.getPlans().size());
-		
-		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
-		        .map(p -> p.getIdentifier()).collect(Collectors.toSet());
-		assertTrue(activePlans.size() < 5);
+
+		Set<String> activePlans = plans.stream()
+				.filter(p -> PlanStatus.ACTIVE.equals(p.getStatus())
+						&& (p.getEffectivePeriod().getEnd().isAfterNow()
+						|| p.getEffectivePeriod().getEnd().isEqualNow()))
+				.map(p -> p.getIdentifier())
+				.collect(Collectors.toSet());
+
+		assertEquals(activePlans.size(), userAssignment.getPlans().size());
+
+		assertTrue(activePlans.size() < planIds.size());
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
 		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);
 		
 		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
-		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS)), eq(false));
+		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD)),
+				eq(false));
 		
 	}
 	
@@ -530,6 +538,7 @@ public class OrganizationResourceTest {
 			PlanDefinition plan = new PlanDefinition();
 			plan.setIdentifier(al.getPlanId());
 			plan.setJurisdiction(Collections.singletonList(new Jurisdiction(al.getJurisdictionId())));
+			plan.setEffectivePeriod(new Period(DateTime.now(), DateTime.now().plusDays(2)));
 			plan.setStatus(random.nextBoolean() ? PlanStatus.ACTIVE : PlanStatus.COMPLETED);
 			return plan;
 		}).collect(Collectors.toList());

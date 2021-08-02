@@ -19,6 +19,7 @@ import org.opensrp.web.bean.UserAssignmentBean;
 import org.opensrp.web.controller.UserController;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
 import org.smartregister.domain.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,26 +29,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.*;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -224,46 +211,57 @@ public class OrganizationResource {
 		Set<String> planIdentifiers = new HashSet<>();
 		/**@formatter:off*/
 		organizationService
-		        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)
-		        .stream()
-		        .filter(a->StringUtils.isNotBlank(a.getJurisdictionId()))
-		        .forEach(a ->{
-		        	if(StringUtils.isNotBlank(a.getJurisdictionId())) {
-		        		jurisdictionIdentifiers.add(a.getJurisdictionId());
-		        	}
-		        	if(StringUtils.isNotBlank(a.getPlanId())) {
-		        		planIdentifiers.add(a.getPlanId());
-		        	}
-		        });
+				.findAssignedLocationsAndPlans(practionerOrganizationIds.right)
+				.stream()
+				.filter(a -> StringUtils.isNotBlank(a.getJurisdictionId()))
+				.forEach(a -> {
+					if (StringUtils.isNotBlank(a.getJurisdictionId())) {
+						jurisdictionIdentifiers.add(a.getJurisdictionId());
+					}
+					if (StringUtils.isNotBlank(a.getPlanId())) {
+						planIdentifiers.add(a.getPlanId());
+					}
+				});
 		Set<PhysicalLocation> jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false,
-		    jurisdictionIdentifiers, Integer.MAX_VALUE));
-		
+				jurisdictionIdentifiers, Integer.MAX_VALUE));
+
 		if (!planIdentifiers.isEmpty()) {
-			Set<String> planLocationIds = planService
-			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-			            Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
-			        .stream()
-			        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
-			        .flatMap(plan -> plan.getJurisdiction().stream())
-			        .map(Jurisdiction::getCode)
-			        .collect(Collectors.toSet());
-		
-			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty()? Collections.emptySet():
-			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+			Set<PlanDefinition> validActivePlans = planService
+					.getPlansByIdsReturnOptionalFields(
+							new ArrayList<>(planIdentifiers),
+							Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD),
+							false)
+					.stream()
+					.filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus())
+							&& (plan.getEffectivePeriod().getEnd().isAfterNow()
+							|| plan.getEffectivePeriod().getEnd().isEqualNow()))
+					.collect(Collectors.toUnmodifiableSet());
+
+			Set<String> planLocationIds = validActivePlans.stream()
+					.flatMap(plan -> plan.getJurisdiction().stream())
+					.map(Jurisdiction::getCode)
+					.collect(Collectors.toSet());
+
+			Set<PhysicalLocation> planLocations = new HashSet<>(
+					planLocationIds.isEmpty() ? Collections.emptySet() :
+							locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
+
+			planIdentifiers.retainAll(
+					validActivePlans.stream().map(PlanDefinition::getIdentifier).collect(Collectors.toSet()));
 		}
-		
+
 		Set<String> locationParents = jurisdictions.stream()
-				.map(l->l.getProperties().getParentId())
+				.map(l -> l.getProperties().getParentId())
 				.collect(Collectors.toSet());
-				
+
 		return UserAssignmentBean.builder()
 				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
 				.jurisdictions(jurisdictions
-					.stream()
-					.filter(l->!locationParents.contains(l.getId()))
-		            .map(PhysicalLocation::getId)
-					.collect(Collectors.toSet()))
+						.stream()
+						.filter(l -> !locationParents.contains(l.getId()))
+						.map(PhysicalLocation::getId)
+						.collect(Collectors.toSet()))
 				.plans(planIdentifiers)
 				.build();
 		/**@formatter:on*/
@@ -361,7 +359,8 @@ public class OrganizationResource {
 	public ResponseEntity<Long> getAllOrganizationsCount() {
 		try {
 			return new ResponseEntity<>(organizationService.countAllOrganizations(), HttpStatus.OK);
-		} catch (Exception exception) {
+		}
+		catch (Exception exception) {
 			logger.error("Error getting organizations count", exception);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

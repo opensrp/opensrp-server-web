@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,9 +38,7 @@ import org.opensrp.common.domain.UserDetail;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
 import org.opensrp.service.PlanService;
-import org.smartregister.domain.Jurisdiction;
-import org.smartregister.domain.PlanDefinition;
-import org.smartregister.domain.Practitioner;
+import org.smartregister.domain.*;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerService;
@@ -49,7 +48,6 @@ import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
 import org.powermock.reflect.Whitebox;
-import org.smartregister.domain.PhysicalLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -211,12 +209,14 @@ public class UserControllerTest {
         jurisdiction.setCode(jurisdictionId);
         plan.setJurisdiction(Collections.singletonList(jurisdiction));
         plan.setStatus(PlanDefinition.PlanStatus.ACTIVE);
+        plan.setEffectivePeriod(new Period(DateTime.now(), DateTime.now().plusDays(2)));
 
         List<PlanDefinition> planDefinitions = Collections.singletonList(plan);
         when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
         when(planService.getPlansByIdsReturnOptionalFields(
                 Collections.singletonList(planId),
-                Arrays.asList(UserController.JURISDICTION, UserController.STATUS), false)
+                Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD),
+		        false)
         ).thenReturn(planDefinitions);
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
@@ -283,12 +283,13 @@ public class UserControllerTest {
         jurisdiction.setCode(secondJurisdiction);
         plan.setJurisdiction(Collections.singletonList(jurisdiction));
         plan.setStatus(PlanDefinition.PlanStatus.ACTIVE);
+	    plan.setEffectivePeriod(new Period(DateTime.now(), DateTime.now().plusDays(2)));
 
         List<PlanDefinition> planDefinitions = Collections.singletonList(plan);
         when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignedLocations);
         when(planService.getPlansByIdsReturnOptionalFields(
                 Collections.singletonList(planId),
-                Arrays.asList(UserController.JURISDICTION, UserController.STATUS), false)
+                Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD), false)
         ).thenReturn(planDefinitions);
 
         PhysicalLocation location = LocationResourceTest.createStructure();
