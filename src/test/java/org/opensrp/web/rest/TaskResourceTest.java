@@ -399,6 +399,7 @@ public class TaskResourceTest {
 		ids.add(taskUpdate.getIdentifier());
 		taskUpdates.add(taskUpdate);
 		
+		when(taskService.updateTaskStatus(anyList())).thenReturn(ids);
 		mockMvc.perform(post(BASE_URL + "/update_status").contentType(MediaType.APPLICATION_JSON)
 		        .content(new Gson().toJson(taskUpdates).getBytes())).andExpect(status().isCreated());
 		verify(taskService).updateTaskStatus(taskUpdatelistArguments.capture());
