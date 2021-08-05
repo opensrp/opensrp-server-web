@@ -77,6 +77,8 @@ public class PlanResource {
 
 	private static final String FALSE = "false";
 
+	private static final String TRUE = "true";
+
 	public static final String OPERATIONAL_AREA_ID = "operational_area_id";
 	
 	public static final String IDENTIFIERS = "identifiers";
@@ -86,6 +88,8 @@ public class PlanResource {
 	public static final String USERNAME = "username";
 
 	public static final String IS_TEMPLATE = "is_template";
+
+	public static final String REVOKE_ASSIGNMENTS = "revoke_assignments";
 
 	public static final String PLAN_STATUS = "planStatus";
 
@@ -159,12 +163,13 @@ public class PlanResource {
 		}
 
 	}
-	
+
 	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<HttpStatus> update(@RequestBody String entity, Authentication authentication) {
+	public ResponseEntity<HttpStatus> update(@RequestBody String entity, Authentication authentication,
+			@RequestParam(value = REVOKE_ASSIGNMENTS, defaultValue = TRUE, required = false) boolean revokeAssignments) {
 		try {
 			PlanDefinition plan = gson.fromJson(entity, PlanDefinition.class);
-			planService.updatePlan(plan, RestUtils.currentUser(authentication).getUsername());
+			planService.updatePlan(plan, RestUtils.currentUser(authentication).getUsername(), revokeAssignments);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
