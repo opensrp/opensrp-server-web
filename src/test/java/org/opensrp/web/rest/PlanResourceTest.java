@@ -226,14 +226,41 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>() {}.getType());
 		putRequestWithJsonContent(BASE_URL, plansJson, status().isCreated());
 		
-		verify(planService).updatePlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()));
+		verify(planService).updatePlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()), eq(true));
+		assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
+	}
+
+	@Test
+	public void testUpdateShouldUpdateExistingPlanResourceWithRevokeAssignment() throws Exception {
+		List<Jurisdiction> operationalAreas = new ArrayList<>();
+		Jurisdiction operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area_1");
+		operationalAreas.add(operationalArea);
+
+		PlanDefinition expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_1");
+		expectedPlan.setJurisdiction(operationalAreas);
+
+		expectedPlan = new PlanDefinition();
+		expectedPlan.setIdentifier("plan_1");
+		operationalArea = new Jurisdiction();
+		operationalArea.setCode("operational_area_2");
+		operationalAreas.clear();
+		operationalAreas.add(operationalArea);
+		expectedPlan.setJurisdiction(operationalAreas);
+
+		String plansJson = new Gson().toJson(expectedPlan, new TypeToken<PlanDefinition>() {}.getType());
+
+		putRequestWithJsonContent(BASE_URL + "?revoke_assignments=false", plansJson, status().isCreated());
+		verify(planService).updatePlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()), eq(false));
 		assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPlan.getIdentifier());
 	}
 	
 	@Test
 	public void testUpdateShouldThrowException() throws Exception {
-		doThrow(new JsonSyntaxException("Unable to parse exception")).when(planService).updatePlan(any(PlanDefinition.class),
-		    anyString());
+		doThrow(new JsonSyntaxException("Unable to parse exception"))
+				.when(planService)
+				.updatePlan(any(PlanDefinition.class), anyString(), anyBoolean());
 		putRequestWithJsonContent(BASE_URL, plansJson, status().isBadRequest());
 	}
 	
