@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,7 +15,11 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
@@ -31,8 +36,13 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
-import org.smartregister.domain.*;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.Period;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
+import org.smartregister.domain.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -64,10 +74,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -459,17 +477,24 @@ public class OrganizationResourceTest {
 		
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
 		assertEquals(2, userAssignment.getJurisdictions().size());
-		assertEquals(5, userAssignment.getPlans().size());
-		
-		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
-		        .map(p -> p.getIdentifier()).collect(Collectors.toSet());
-		assertTrue(activePlans.size() < 5);
+
+		Set<String> activePlans = plans.stream()
+				.filter(p -> PlanStatus.ACTIVE.equals(p.getStatus())
+						&& (p.getEffectivePeriod().getEnd().isAfterNow()
+						|| p.getEffectivePeriod().getEnd().isEqualNow()))
+				.map(p -> p.getIdentifier())
+				.collect(Collectors.toSet());
+
+		assertEquals(activePlans.size(), userAssignment.getPlans().size());
+
+		assertTrue(activePlans.size() < planIds.size());
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
 		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);
 		
 		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
-		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS)), eq(false));
+		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD)),
+				eq(false));
 		
 	}
 	
@@ -530,6 +555,7 @@ public class OrganizationResourceTest {
 			PlanDefinition plan = new PlanDefinition();
 			plan.setIdentifier(al.getPlanId());
 			plan.setJurisdiction(Collections.singletonList(new Jurisdiction(al.getJurisdictionId())));
+			plan.setEffectivePeriod(new Period(DateTime.now(), DateTime.now().plusDays(2)));
 			plan.setStatus(random.nextBoolean() ? PlanStatus.ACTIVE : PlanStatus.COMPLETED);
 			return plan;
 		}).collect(Collectors.toList());
