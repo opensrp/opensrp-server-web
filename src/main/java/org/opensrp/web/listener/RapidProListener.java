@@ -1,5 +1,7 @@
 package org.opensrp.web.listener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.service.rapidpro.RapidProService;
 import org.opensrp.service.rapidpro.ZeirRapidProStateService;
 import org.opensrp.util.constants.RapidProConstants;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 @Profile("rapidpro")
 @Component
 public class RapidProListener {
+
+	private final Logger logger = LogManager.getLogger(getClass());
 
 	private RapidProService rapidProService;
 
@@ -30,12 +34,11 @@ public class RapidProListener {
 	}
 
 	public void requestRapidProContacts() {
-		rapidProService.queryContacts(() -> {
-			if (RapidProConstants.RapidProProjects.ZEIR_RAPIDPRO.equalsIgnoreCase(rapidProProject)) {
-				synchronized (this) {
-					rapidProStateService.postDataToRapidPro();
-				}
+		rapidProService.queryContacts(() -> logger.info("Completed processing RapidPro constant"));
+		if (RapidProConstants.RapidProProjects.ZEIR_RAPIDPRO.equalsIgnoreCase(rapidProProject)) {
+			synchronized (this) {
+				rapidProStateService.postDataToRapidPro();
 			}
-		});
+		}
 	}
 }

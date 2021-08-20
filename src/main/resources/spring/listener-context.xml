@@ -27,7 +27,7 @@
                             cron="${rapidpro.listener.cron.schedule}"/>
         </task:scheduled-tasks>
         <task:scheduler pool-size="1" id="rapidProScheduler"/>
-        <task:executor pool-size="1" id="rapidProExecutor"/>
+        <task:executor pool-size="2" id="rapidProExecutor"/>
         <task:annotation-driven executor="rapidProExecutor" scheduler="rapidProScheduler"/>
     </beans>
 </beans>
