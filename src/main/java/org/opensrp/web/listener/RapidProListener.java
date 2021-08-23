@@ -34,10 +34,12 @@ public class RapidProListener {
 	}
 
 	public void requestRapidProContacts() {
-		rapidProService.queryContacts(() -> logger.info("Completed processing RapidPro constant"));
+		rapidProService.queryContacts(() -> logger.info("Completed processing RapidPro contacts"));
 		if (RapidProConstants.RapidProProjects.ZEIR_RAPIDPRO.equalsIgnoreCase(rapidProProject)) {
 			synchronized (this) {
+				logger.info("Posting OpenSRP data to RapidPro");
 				rapidProStateService.postDataToRapidPro();
+				logger.info("Completed posting OpenSRP data to RapidPro");
 			}
 		}
 	}
