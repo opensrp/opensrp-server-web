@@ -12,6 +12,7 @@ import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
+import static org.opensrp.util.constants.EventConstants.CASE_NUMBER;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
@@ -470,6 +471,10 @@ public class EventResource extends RestResource<Event> {
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
+						if (eventService.checkIfCaseTriggeredEventExists(event)){
+							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
+							continue;
+						}
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
