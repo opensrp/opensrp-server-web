@@ -10,14 +10,31 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atMostOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.util.constants.EventConstants.CASE_NUMBER;
+import static org.opensrp.util.constants.EventConstants.EVENT_TYPE_CASE_DETAILS;
+import static org.opensrp.util.constants.EventConstants.FLAG;
 import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,13 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.nullable;
-import static org.mockito.Mockito.doThrow;
+
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
 import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
@@ -60,7 +71,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import static org.mockito.Mockito.times;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -387,6 +397,51 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
 		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
 		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Family Member Registration");
+	}
+
+	@Test
+	public void testSaveAddsOnceForDuplicateCaseTriggeredEvent() throws Exception {
+		String ADD_EVENT_REQUEST_PAYLOAD  = "{\n"
+				+ "    \"clients\":[],\n"
+				+ "    \"events\": [\n"
+				+ "        {\n"
+				+ "    \"_id\": \"c97d2662-91c4-4d6f-bea0-e00b581819b0\",\n"
+				+ "    \"obs\": [],\n"
+				+ "    \"_rev\": \"v1\",\n"
+				+ "    \"type\": \"Event\",\n"
+				+ "    \"teamId\": \" \",\n"
+				+ "    \"details\": {\n"
+				+ "        \"flag\": \"Source\",\n"
+				+ "        \"case_number\": \"141311000005892210504211404817\",\n"
+				+ "        \"case_classification\": \"Bo\"\n"
+				+ "    },\n"
+				+ "    \"eventType\": \"Case_Details\",\n"
+				+ "    \"entityType\": \"Case_Details\",\n"
+				+ "    \"locationId\": \"be847cbb-576b-4d76-b9da-f59175f74dcb\",\n"
+				+ "    \"providerId\": \"nifi-user\",\n"
+				+ "    \"dateCreated\": \"2021-05-11T18:57:42.506+07:00\",\n"
+				+ "    \"identifiers\": {},\n"
+				+ "    \"baseEntityId\": \"be847cbb-576b-4d76-b9da-f59175f74dcb\",\n"
+				+ "    \"serverVersion\": 1601985029999,\n"
+				+ "    \"formSubmissionId\": \"0149bcf6-892b-45f6-b117-6a60bebe3809\"\n"
+				+ "}\n"
+				+ "    ]\n"
+				+ "}";
+		Event event = createEvent();
+		event.setEventType(EVENT_TYPE_CASE_DETAILS);
+		event.addDetails(CASE_NUMBER, "141311000005892210504211404817");
+		event.addDetails(FLAG, "Source");
+
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(false,true, true, true, true ).when(eventService).checkIfCaseTriggeredEventExists(any(Event.class));
+		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
+		// duplicates
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
+
+		verify(eventService, atMostOnce()).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
 	}
 
 	@Test
