@@ -130,6 +130,8 @@ public class MultimediaController {
 	 * @param entityId
 	 * @param contentType
 	 * @param fileCategory
+	 * @param dynamicMediaDirectory When set to true the multimedia directory value is retrieved from the fileCategory value
+	 *                              else it defaults to patient_images
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
@@ -185,6 +187,8 @@ public class MultimediaController {
 	 *
 	 * @param baseEntityId
 	 * @param response
+	 * @param dynamicMediaDirectory When set to true the multimedia directory value is retrieved from the fileCategory value
+	 *                              else it defaults to patient_images
 	 * @throws Exception
 	 */
 	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response, boolean dynamicMediaDirectory) throws IOException {
