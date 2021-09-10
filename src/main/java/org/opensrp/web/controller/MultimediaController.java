@@ -199,12 +199,6 @@ public class MultimediaController {
 				multimediaDirectory + File.separator + baseEntityId.trim() + fileExtension :
 				multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension;
 
-		logger.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
-		logger.info("dynamicMediaDirectory value is  " + dynamicMediaDirectory);
-		logger.info("FILE_SYSTEM_MULTIMEDIA_MANAGER value is  " + FILE_SYSTEM_MULTIMEDIA_MANAGER);
-		logger.info("fileLocation value is   " + fileLocation);
-		logger.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
-
 		File file = multimediaService.retrieveFile(fileLocation);
 		if (file != null) {
 			downloadFile(file, response);
