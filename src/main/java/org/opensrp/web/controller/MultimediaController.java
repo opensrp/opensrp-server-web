@@ -116,7 +116,7 @@ public class MultimediaController {
 			specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
 			return;
 		}
-		downloadFileWithAuth(baseEntityId, response);
+		downloadFileWithAuth(baseEntityId, response, false);
 		
 	}
 	
@@ -130,12 +130,16 @@ public class MultimediaController {
 	 * @param entityId
 	 * @param contentType
 	 * @param fileCategory
+	 * @param dynamicMediaDirectory When set to true the multimedia directory value is retrieved from the fileCategory value
+	 *                              else it defaults to patient_images
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
 	public void downloadFiles(HttpServletResponse response, @PathVariable("entity-id") String entityId,
 	        @RequestParam(value = "content-type", required = false) String contentType,
-	        @RequestParam(value = "file-category", required = false) String fileCategory) throws IOException {
+	        @RequestParam(value = "file-category", required = false) String fileCategory,
+			@RequestParam(value = "dynamic-media-directory", defaultValue = "false", required = false) Boolean dynamicMediaDirectory
+	) throws IOException {
 		
 		// todo: change this to a common repo constant
 		if (!TextUtils.isBlank(fileCategory) && "multi_version".equals(fileCategory)) {
@@ -148,7 +152,7 @@ public class MultimediaController {
 			zipOutputStream.close();
 		} else {
 			// default to single profile image retrieval logic
-			downloadFileWithAuth(entityId, response);
+			downloadFileWithAuth(entityId, response, dynamicMediaDirectory);
 		}
 	}
 	
@@ -183,17 +187,20 @@ public class MultimediaController {
 	 *
 	 * @param baseEntityId
 	 * @param response
+	 * @param dynamicMediaDirectory When set to true the multimedia directory value is retrieved from the fileCategory value
+	 *                              else it defaults to patient_images
 	 * @throws Exception
 	 */
-	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response) throws IOException {
+	private void downloadFileWithAuth(String baseEntityId, HttpServletResponse response, boolean dynamicMediaDirectory) throws IOException {
 		Multimedia multimedia = multimediaService.findByCaseId(String.valueOf(baseEntityId));
 		String extension = "";
 		if (multimedia != null && multimedia.getContentType() != null) {
 			extension = getFileExtension(multimedia);
 		}
 		String fileExtension = StringUtils.isEmpty(extension) ? ".jpg" : extension;
+		String multimediaDirectory = dynamicMediaDirectory ? multimedia.getFileCategory() : MultimediaService.IMAGES_DIR;
 		String fileLocation = !FILE_SYSTEM_MULTIMEDIA_MANAGER.equals(fileManager)?
-				MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension :
+				multimediaDirectory + File.separator + baseEntityId.trim() + fileExtension :
 				multiMediaDir + File.separator + MultimediaService.IMAGES_DIR + File.separator + baseEntityId.trim() + fileExtension;
 
 		File file = multimediaService.retrieveFile(fileLocation);
