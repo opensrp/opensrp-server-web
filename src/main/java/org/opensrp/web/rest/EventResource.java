@@ -139,8 +139,7 @@ public class EventResource extends RestResource<Event> {
 
 		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
-			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit,
-					returnCount);
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, false);
 
 			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
@@ -173,7 +172,8 @@ public class EventResource extends RestResource<Event> {
 				EventSyncBean eventSyncBean = sync(syncParam.getProviderId(), syncParam.getLocationId(),
 						syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
 						syncParam.getTeamId(),
-						syncParam.getLimit(), syncParam.isReturnCount());
+						syncParam.getLimit(), syncParam.isReturnCount(),
+						false);
 
 				HttpHeaders headers = getJSONUTF8Headers();
 				if (syncParam.isReturnCount()) {
@@ -186,6 +186,72 @@ public class EventResource extends RestResource<Event> {
 				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
 			}
 
+		}
+		catch (Exception e) {
+			response.setMsg("Error occurred");
+			logger.error("", e);
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Fetch events without filtering by location
+	 *
+	 * @param request
+	 * @return Events found matching the client IDs
+	 * @throws JsonProcessingException
+	 */
+	@RequestMapping(value = "/sync-out-of-catchment", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	protected ResponseEntity<String> syncOutOfCatchment(HttpServletRequest request) throws JsonProcessingException {
+		EventSyncBean response = new EventSyncBean();
+
+		String providerId = getStringFilter(PROVIDER_ID, request);
+		String locationId = getStringFilter(LOCATION_ID, request);
+		String baseEntityId = getStringFilter(BASE_ENTITY_ID, request);
+		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+		String team = getStringFilter(TEAM, request);
+		String teamId = getStringFilter(TEAM_ID, request);
+		Integer limit = getIntegerFilter("limit", request);
+		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
+
+		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, true);
+
+			HttpHeaders headers = getJSONUTF8Headers();
+			if (returnCount) {
+				headers.add(TOTAL_RECORDS, String.valueOf(eventSyncBean.getTotalRecords()));
+			}
+
+			return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, OK);
+		} else {
+			response.setMsg("Specify at least one filter");
+			return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping(value = "/sync-out-of-catchment", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+	protected ResponseEntity<String> syncOutOfCatchmentByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
+		EventSyncBean response = new EventSyncBean();
+
+		try {
+			if (syncParam.getTeam() != null || syncParam.getProviderId() != null || syncParam.getLocationId() != null
+					|| syncParam.getBaseEntityId() != null || syncParam.getTeamId() != null) {
+
+				EventSyncBean eventSyncBean = sync(syncParam.getProviderId(), syncParam.getLocationId(),
+						syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
+						syncParam.getTeamId(), syncParam.getLimit(), syncParam.isReturnCount(),
+						true);
+
+				HttpHeaders headers = getJSONUTF8Headers();
+				if (syncParam.isReturnCount()) {
+					headers.add(TOTAL_RECORDS, String.valueOf(eventSyncBean.getTotalRecords()));
+				}
+
+				return new ResponseEntity<>(objectMapper.writeValueAsString(eventSyncBean), headers, OK);
+			} else {
+				response.setMsg("Specify at least one filter");
+				return new ResponseEntity<>(objectMapper.writeValueAsString(response), BAD_REQUEST);
+			}
 		}
 		catch (Exception e) {
 			response.setMsg("Error occurred");
@@ -217,7 +283,7 @@ public class EventResource extends RestResource<Event> {
 
 					}.getType());
 			for (String baseEntityId : baseEntityIdsList) {
-				EventSyncBean eventSyncBean = sync(null, null, baseEntityId, "0", null, null, null, false);
+				EventSyncBean eventSyncBean = sync(null, null, baseEntityId, "0", null, null, null, false, false);
 				combinedEvents.addAll(eventSyncBean.getEvents());
 				combinedClients.addAll(eventSyncBean.getClients());
 				if (eventSyncBean != null && eventSyncBean.getClients() != null && !eventSyncBean.getClients().isEmpty()) {
@@ -227,7 +293,7 @@ public class EventResource extends RestResource<Event> {
 							&& withFamilyEvents) {
 						List<String> clientRelationships = clients.get(0).getRelationships().get(Constants.FAMILY);
 						for (String familyRelationship : clientRelationships) {
-							EventSyncBean familyEvents = sync(null, null, familyRelationship, "0", null, null, null, false);
+							EventSyncBean familyEvents = sync(null, null, familyRelationship, "0", null, null, null, false, false);
 							combinedEvents.addAll(familyEvents.getEvents());
 							combinedClients.addAll(familyEvents.getClients());
 						}
@@ -249,7 +315,7 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	public EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion, String team,
-			String teamId, Integer limit, boolean returnCount) {
+			String teamId, Integer limit, boolean returnCount, boolean isOutOfCatchment) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
@@ -263,16 +329,21 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setBaseEntityId(baseEntityId);
 		eventSearchBean.setServerVersion(lastSyncedServerVersion);
 
-		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit, returnCount);
-
+		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit, returnCount, isOutOfCatchment);
 	}
 
-	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit, boolean returnCount) {
+	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit, boolean returnCount, boolean isOutOfCatchment) {
 		List<Event> events = new ArrayList<Event>();
 		List<String> clientIds = new ArrayList<String>();
 		List<Client> clients = new ArrayList<Client>();
 		long startTime = System.currentTimeMillis();
-		events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+
+		if (isOutOfCatchment){
+			events = eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+		}else {
+			events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+		}
+
 		Long totalRecords = 0l;
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
 		if (!events.isEmpty()) {
@@ -353,7 +424,7 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 		eventSearchBean.setEventType(eventType);
 		return new ResponseEntity<>(
-				objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false)),
+				objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false, false)),
 				getJSONUTF8Headers(), OK);
 	}
 
