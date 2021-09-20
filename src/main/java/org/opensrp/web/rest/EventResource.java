@@ -444,22 +444,22 @@ public class EventResource extends RestResource<Event> {
 			if (syncData.has("clients")) {
 				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
-				logger.error("[SYNC_INFO] " + clients.size() +  " Clients submitted by user " + username);
+				logger.info("[SYNC_INFO] " + clients.size() +  " Clients submitted by user " + username);
 				long timeBeforeSavingClients = System.currentTimeMillis();
 				for (Client client : clients) {
 					try {
 						long timeBeforeSavingClient = System.currentTimeMillis();
 						clientService.addorUpdate(client);
-						logger.error("[SYNC_INFO] Client " + client.getBaseEntityId() + " saved in " +
+						logger.info("[SYNC_INFO] Client " + client.getBaseEntityId() + " saved in " +
 								getExecutionTime(timeBeforeSavingClient) + " seconds");
 					}
 					catch (Exception e) {
 						client.getBaseEntityId();
-						logger.error( "Client" + client.getBaseEntityId() + " failed to sync",e);
+						logger.info( "Client" + client.getBaseEntityId() + " failed to sync",e);
 						failedClientsIds.add(client.getId());
 					}
 				}
-				logger.error("[SYNC_INFO] Saved " + clients.size() + " clients in " +
+				logger.info("[SYNC_INFO] Saved " + clients.size() + " clients in " +
 						getExecutionTime(timeBeforeSavingClients) + " seconds");
 
 			}
@@ -467,7 +467,7 @@ public class EventResource extends RestResource<Event> {
 			if (syncData.has("events")) {
 				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
-				logger.error("[SYNC_INFO] " + events.size() +  " Events submitted by user " + username);
+				logger.info("[SYNC_INFO] " + events.size() +  " Events submitted by user " + username);
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
@@ -478,28 +478,28 @@ public class EventResource extends RestResource<Event> {
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
-						logger.error("[SYNC_INFO] Event " + event.getFormSubmissionId() + " of type " +
+						logger.info("[SYNC_INFO] Event " + event.getFormSubmissionId() + " of type " +
 								event.getEventType() + " saved in " + getExecutionTime(timeBeforeSavingEvent) + " seconds");
 					}
 					catch (Exception e) {
-						logger.error("Event of type " + event.getEventType() + " for client " +
+						logger.info("Event of type " + event.getEventType() + " for client " +
 								event.getBaseEntityId() + " failed to sync", e);
 						failedEventIds.add(event.getId());
 					}
 				}
-				logger.error("[SYNC_INFO] Saved " + events.size() + " events in " +
+				logger.info("[SYNC_INFO] Saved " + events.size() + " events in " +
 						getExecutionTime(timeBeforeSavingEvents) + " seconds");
 			}
-			logger.error("[SYNC_INFO] Sync initiated by " + username + " completed in " +
+			logger.info("[SYNC_INFO] Sync initiated by " + username + " completed in " +
 					getExecutionTime(timeBeforeSync) + " seconds");
 		}
 		catch (Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
+			logger.info(format("Sync data processing failed with exception {0}.- ", e));
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 
-		logger.error("[SYNC_INFO] Number of Events NOT saved: " + failedEventIds.size());
-		logger.error("[SYNC_INFO] Number of Clients NOT saved: " + failedClientsIds.size());
+		logger.info("[SYNC_INFO] Number of Events NOT saved: " + failedEventIds.size());
+		logger.info("[SYNC_INFO] Number of Clients NOT saved: " + failedClientsIds.size());
 
 		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
 			return new ResponseEntity<>(CREATED);
