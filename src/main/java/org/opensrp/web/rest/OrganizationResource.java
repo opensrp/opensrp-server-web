@@ -294,6 +294,11 @@ public class OrganizationResource {
 		}
 	}
 
+	@GetMapping(value = "/by-practitioner/{practitioner-identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public List<Organization> getTeamsByPractitionerIdentifier(@PathVariable("practitioner-identifier") String practitionerIdentifier) {
+			return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
+	}
+
 	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<AssignedLocations>> getAssignedLocationsAndPlansByPlanId(
