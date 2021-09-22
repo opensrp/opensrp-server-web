@@ -25,8 +25,10 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.postgres.PlanProcessingStatus;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanProcessingStatusService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
@@ -73,6 +75,8 @@ public class PlanResource {
 	
 	private PhysicalLocationService locationService;
 
+	private PlanProcessingStatusService processingStatusService;
+
 	private static final String IS_DELETED = "is_deleted";
 
 	private static final String FALSE = "false";
@@ -106,7 +110,12 @@ public class PlanResource {
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-	
+
+	@Autowired
+	public void setProcessingStatusService(PlanProcessingStatusService processingStatusService) {
+		this.processingStatusService = processingStatusService;
+	}
+
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields , @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
@@ -463,6 +472,25 @@ public class PlanResource {
 
 		List<PlanDefinition> plans = planService.getAllPlans(planSearchBean);
 		return (plans != null && !plans.isEmpty()) ? false : true;
+	}
+
+	public void generateCaseTriggeredPlans() {
+
+		// Get plan processing record where status is 0 / initial
+
+		List<PlanProcessingStatus> planProcessigStatusList = processingStatusService.getProcessingStatusByStatus(0);
+
+
+		//Get case details event
+		//Update plan processing status to 1 / processing
+		// Validate case details event properties
+		//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
+		//Run logic to select the template type before generating the plan
+		// Fetch template
+		// Create plan from template
+		// Save plan
+		// update plan processing status
+
 	}
 	
 }
