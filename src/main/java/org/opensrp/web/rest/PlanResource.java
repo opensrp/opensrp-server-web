@@ -27,12 +27,14 @@ import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.postgres.PlanProcessingStatus;
 import org.opensrp.search.PlanSearchBean;
+import org.opensrp.service.EventService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanProcessingStatusService;
 import org.opensrp.service.PlanService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
+import org.smartregister.domain.Event;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.smartregister.utils.TimingRepeatTimeTypeConverter;
@@ -77,6 +79,8 @@ public class PlanResource {
 
 	private PlanProcessingStatusService processingStatusService;
 
+	private EventService eventService;
+
 	private static final String IS_DELETED = "is_deleted";
 
 	private static final String FALSE = "false";
@@ -114,6 +118,11 @@ public class PlanResource {
 	@Autowired
 	public void setProcessingStatusService(PlanProcessingStatusService processingStatusService) {
 		this.processingStatusService = processingStatusService;
+	}
+
+	@Autowired
+	public void setEventService(EventService eventService) {
+		this.eventService = eventService;
 	}
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -478,11 +487,22 @@ public class PlanResource {
 
 		// Get plan processing record where status is 0 / initial
 
-		List<PlanProcessingStatus> planProcessigStatusList = processingStatusService.getProcessingStatusByStatus(0);
+		List<PlanProcessingStatus> planProcessingStatusList = processingStatusService.getProcessingStatusByStatus(0);
+
+		for (PlanProcessingStatus processingStatus: planProcessingStatusList ) {
+			//Get case details event
+			Event event = eventService.findByDbId(processingStatus.getEventId(), false);
+			if (event == null){
+				continue;
+			}
+
+			//Update plan processing status to 1 / processing
+			processingStatus.setStatus(1);
+			processingStatus.setDateEdited(new Date());
+			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
+		}
 
 
-		//Get case details event
-		//Update plan processing status to 1 / processing
 		// Validate case details event properties
 		//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
 		//Run logic to select the template type before generating the plan
