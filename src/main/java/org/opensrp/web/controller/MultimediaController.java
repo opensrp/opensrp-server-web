@@ -294,6 +294,7 @@ public class MultimediaController {
 				fileExt = ".png";
 				break;
 			case "text/csv":
+			case "application/vnd.ms-excel":
 				fileExt = ".csv";
 				break;
 			default:
