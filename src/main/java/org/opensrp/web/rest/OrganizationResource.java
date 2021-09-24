@@ -282,6 +282,11 @@ public class OrganizationResource {
 		}
 	}
 
+	/**
+	 * This API queries list of team assignment from a practitioner identifer
+	 * @param practitionerIdentifier
+	 * @return List of Organization
+	 */
 	@GetMapping(value = "/by-practitioner/{practitioner-identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<Organization> getTeamsByPractitionerIdentifier(@PathVariable("practitioner-identifier") String practitionerIdentifier) {
 			return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
