@@ -28,6 +28,8 @@ import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.UploadService;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.utils.DateTimeTypeConverter;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
@@ -55,6 +57,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -160,6 +163,14 @@ public class UploadControllerTest {
 		when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
 				.thenReturn(validationBean);
 		when(multimediaService.saveFile(Mockito.any(),Mockito.any(),Mockito.anyString())).thenReturn("success");
+
+		PhysicalLocation structure = new PhysicalLocation();
+		structure.setId("structure-1");
+		LocationProperty property = new LocationProperty();
+		property.setParentId("parent-id");
+		structure.setProperties(property);
+
+		when(physicalLocationService.getStructure(anyString(), anyBoolean())).thenReturn(structure);
 
 		MvcResult result = mockMvc.perform(
 				MockMvcRequestBuilders
