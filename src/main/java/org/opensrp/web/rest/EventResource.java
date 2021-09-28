@@ -106,6 +106,8 @@ public class EventResource extends RestResource<Event> {
 
 	private MultimediaService multimediaService;
 
+	double sum = 0.0;
+	int batch = 0;
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
@@ -434,6 +436,8 @@ public class EventResource extends RestResource<Event> {
 		List<String> failedClientsIds = new ArrayList<>();
 		List<String> failedEventIds = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
+		logger.info(String.format("[SYNC_INFO] Start of processing batch-%d ", ++batch));
+
 		try {
 			long timeBeforeSync = System.currentTimeMillis();
 			JSONObject syncData = new JSONObject(data);
@@ -444,14 +448,13 @@ public class EventResource extends RestResource<Event> {
 			if (syncData.has("clients")) {
 				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 				    new TypeToken<ArrayList<Client>>() {}.getType());
-				logger.error("[SYNC_INFO] " + clients.size() +  " Clients submitted by user " + username);
+				logger.info(String.format("[SYNC_INFO] %d Clients submitted by user %s", clients.size(), username));
 				long timeBeforeSavingClients = System.currentTimeMillis();
 				for (Client client : clients) {
 					try {
 						long timeBeforeSavingClient = System.currentTimeMillis();
 						clientService.addorUpdate(client);
-						logger.error("[SYNC_INFO] Client " + client.getBaseEntityId() + " saved in " +
-								getExecutionTime(timeBeforeSavingClient) + " seconds");
+						logger.info(String.format("[SYNC_INFO] Client %s saved in %s seconds", client.getBaseEntityId(), getExecutionTime(timeBeforeSavingClient, false)));
 					}
 					catch (Exception e) {
 						client.getBaseEntityId();
@@ -459,15 +462,14 @@ public class EventResource extends RestResource<Event> {
 						failedClientsIds.add(client.getId());
 					}
 				}
-				logger.error("[SYNC_INFO] Saved " + clients.size() + " clients in " +
-						getExecutionTime(timeBeforeSavingClients) + " seconds");
+				logger.info(String.format("[SYNC_INFO] Saved %d clients in %s seconds", clients.size(), getExecutionTime(timeBeforeSavingClients, true)));
 
 			}
 
 			if (syncData.has("events")) {
 				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 				    new TypeToken<ArrayList<Event>>() {}.getType());
-				logger.error("[SYNC_INFO] " + events.size() +  " Events submitted by user " + username);
+				logger.info(String.format("[SYNC_INFO] %d Events submitted by user %s", events.size(), username));
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
@@ -478,28 +480,26 @@ public class EventResource extends RestResource<Event> {
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
-						logger.error("[SYNC_INFO] Event " + event.getFormSubmissionId() + " of type " +
-								event.getEventType() + " saved in " + getExecutionTime(timeBeforeSavingEvent) + " seconds");
+						logger.info(String.format("[SYNC_INFO] Event %s of type %s saved in %s seconds", event.getFormSubmissionId(), event.getEventType(), getExecutionTime(timeBeforeSavingEvent, false)));
 					}
 					catch (Exception e) {
-						logger.error("Event of type " + event.getEventType() + " for client " +
-								event.getBaseEntityId() + " failed to sync", e);
+						logger.error(String.format("Event of type %s for client %s failed to sync", event.getEventType(), event.getBaseEntityId()), e);
 						failedEventIds.add(event.getId());
 					}
 				}
-				logger.error("[SYNC_INFO] Saved " + events.size() + " events in " +
-						getExecutionTime(timeBeforeSavingEvents) + " seconds");
+				logger.info(String.format("[SYNC_INFO] Saved %d events in %s seconds", events.size(), getExecutionTime(timeBeforeSavingEvents, true)));
 			}
-			logger.error("[SYNC_INFO] Sync initiated by " + username + " completed in " +
-					getExecutionTime(timeBeforeSync) + " seconds");
+			logger.info(String.format("[SYNC_INFO] Sync initiated by %s completed in %s seconds", username, getExecutionTime(timeBeforeSync, true)));
 		}
 		catch (Exception e) {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 
+		sum = 0.0;
 		logger.error("[SYNC_INFO] Number of Events NOT saved: " + failedEventIds.size());
 		logger.error("[SYNC_INFO] Number of Clients NOT saved: " + failedClientsIds.size());
+		logger.info(String.format("[SYNC_INFO] End of processing batch-%d ", batch));
 
 		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
 			return new ResponseEntity<>(CREATED);
@@ -516,8 +516,13 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 
-	private String getExecutionTime(long timeBefore) {
-		return String.valueOf(Long.valueOf(System.currentTimeMillis() - timeBefore).doubleValue() / (double) 1000);
+	private String getExecutionTime(long timeBefore, boolean stop) {
+		double secs = (Long.valueOf(System.currentTimeMillis() - timeBefore).doubleValue() / (double) 1000);
+		if(!stop) {
+			sum += secs;
+			logger.info(String.format("[SYNC_INFO] Sync Accumulated time: %s, batch-%d", sum, batch));
+		}
+		return String.valueOf(secs);
 	}
 
 	@Override
