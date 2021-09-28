@@ -477,7 +477,10 @@ public class EventResource extends RestResource<Event> {
 							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
 							continue;
 						}
+						long timeProcessOutOfArea = System.currentTimeMillis();
 						event = eventService.processOutOfArea(event);
+						logger.info(String.format("[SYNC_INFO] function processOutOfArea time %s of type %s saved in %s seconds", event.getFormSubmissionId(), event.getEventType(), getExecutionTime(timeProcessOutOfArea, true)));
+
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
 						logger.info(String.format("[SYNC_INFO] Event %s of type %s saved in %s seconds", event.getFormSubmissionId(), event.getEventType(), getExecutionTime(timeBeforeSavingEvent, false)));
