@@ -457,8 +457,7 @@ public class EventResource extends RestResource<Event> {
 					try {
 						long timeBeforeSavingClient = System.currentTimeMillis();
 						clientService.addorUpdate(client);
-						logger.info(String.format("[SYNC_INFO] Client %s saved in %s seconds", client.getBaseEntityId(),
-								getExecutionTime(timeBeforeSavingClient)));
+						logger.info(String.format("[SYNC_INFO] Client %s saved in %s seconds",client.getBaseEntityId(), getExecutionTime(timeBeforeSavingClient)));
 					}
 					catch (Exception e) {
 						client.getBaseEntityId();
@@ -467,8 +466,7 @@ public class EventResource extends RestResource<Event> {
 						failedClientsIds.add(client.getId());
 					}
 				}
-				logger.info(String.format("[SYNC_INFO] Saved %s clients in %s seconds", clients.size(),
-						getExecutionTime(timeBeforeSavingClients)));
+				logger.info(String.format("[SYNC_INFO] Saved %s clients in %s seconds", clients.size(),getExecutionTime(timeBeforeSavingClients)));
 
 			}
 
@@ -477,7 +475,7 @@ public class EventResource extends RestResource<Event> {
 						new TypeToken<ArrayList<Event>>() {
 
 						}.getType());
-				logger.info(String.format("[SYNC_INFO] %s Events submitted by user %s", events.size(), username));
+				logger.info(String.format("[SYNC_INFO] %s Events submitted by user %s",events.size(),username)));
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
@@ -488,8 +486,7 @@ public class EventResource extends RestResource<Event> {
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
-						logger.info(String.format("[SYNC_INFO] Event %s of type %s saved in %s seconds",
-								event.getFormSubmissionId(), event.getEventType(), getExecutionTime(timeBeforeSavingEvent)));
+						logger.info(String.format("[SYNC_INFO] Event %s of type %s saved in %s seconds",event.getFormSubmissionId(),event.getEventType(),getExecutionTime(timeBeforeSavingEvent)));
 					}
 					catch (Exception e) {
 
@@ -502,8 +499,7 @@ public class EventResource extends RestResource<Event> {
 						getExecutionTime(timeBeforeSavingEvents)));
 
 			}
-			logger.info(String.format("[SYNC_INFO] Sync initiated by %s completed in %s seconds", username,
-					getExecutionTime(timeBeforeSync)));
+			logger.info(String.format("[SYNC_INFO] Sync initiated by %s completed in %s seconds", username, getExecutionTime(timeBeforeSync)));
 		}
 		catch (Exception e) {
 			logger.info(format("Sync data processing failed with exception {0}.- ", e));
@@ -683,7 +679,7 @@ public class EventResource extends RestResource<Event> {
 		}
 
 		catch (IOException e) {
-			logger.error(String.format("Exception occurred : %s", e.getMessage()));
+			logger.error(String.format("Exception occurred : %s" , e.getMessage()));
 		}
 
 		finally {
@@ -792,7 +788,7 @@ public class EventResource extends RestResource<Event> {
 		}
 
 		catch (IOException e) {
-			logger.error(String.format("IO Exception occurred %s", e.getMessage()), e);
+			logger.error(String.format("IO Exception occurred %s",e.getMessage()), e);
 		}
 		finally {
 			if (csvPrinter != null) {
