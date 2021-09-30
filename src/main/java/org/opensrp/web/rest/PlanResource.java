@@ -20,17 +20,20 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.Template;
 import org.opensrp.domain.postgres.PlanProcessingStatus;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.EventService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanProcessingStatusService;
 import org.opensrp.service.PlanService;
+import org.opensrp.service.TemplateService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
@@ -82,6 +85,8 @@ public class PlanResource {
 
 	private EventService eventService;
 
+	private TemplateService templateService;
+
 	private static final String IS_DELETED = "is_deleted";
 
 	private static final String FALSE = "false";
@@ -124,6 +129,11 @@ public class PlanResource {
 	@Autowired
 	public void setEventService(EventService eventService) {
 		this.eventService = eventService;
+	}
+
+	@Autowired
+	public void setTemplateService(TemplateService templateService) {
+		this.templateService = templateService;
 	}
 
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -516,13 +526,35 @@ public class PlanResource {
 				continue;
 			}
 
-
 			//TODO Run logic to select the template type before generating the plan
 			//TODO Fetch template
+			Template template = templateService.getTemplateByTemplateId(1);
 			//TODO Create plan from template
+			String plan = createPlanFromTemplate(template.getTemplate());
 			//TODO Save plan
 			//TODO update plan processing status to 2 / complete
 		}
+	}
+
+	public String createPlanFromTemplate(String templateString) {
+		// Build map
+		Map<String, String> valuesMap = new HashMap<>();
+		valuesMap.put("date", String.valueOf(new Date()));
+		valuesMap.put("focus_status", "A1");
+		valuesMap.put("opensrpCaseClassificationEventId", "9829041d-b222-4be5-afd6-b1efc5e52a2f");
+		valuesMap.put("case_number", "201113000001883210923150950336");
+		valuesMap.put("focus_id", "85679d99-2ddf-4325-8443-95a359f160ae");
+		valuesMap.put("focus_name", "ท่าตาฝั่ง (5804050701)");
+		valuesMap.put("patient_name", "หน่อโพชิ");
+		valuesMap.put("patient_surname", "หน่อโพชิ surname");
+
+		// Build StringSubstitutor
+		StringSubstitutor sub = new StringSubstitutor(valuesMap);
+
+		// Replace
+		String resolvedString = sub.replace(templateString);
+
+		return resolvedString;
 	}
 	
 }

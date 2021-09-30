@@ -41,8 +41,10 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.search.PlanSearchBean;
+import org.opensrp.service.EventService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
+import org.opensrp.service.TemplateService;
 import org.opensrp.web.bean.Identifier;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PlanDefinition;
@@ -91,6 +93,160 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	        + "      },\n" + "      \"reason\": \"\",\n" + "      \"goalId\": \"\",\n"
 	        + "      \"subjectCodableConcept\": {\n" + "        \"text\": \"\"\n" + "      },\n"
 	        + "      \"taskTemplate\": \"\"\n" + "    }\n" + "  ],\n" + "  \"serverVersion\": 0\n" + "}";
+
+	private final String planTemplateString = "{\n" +
+			"    \"identifier\": \"${UUID()}\",\n" +
+			"    \"version\": \"1\",\n" +
+			"    \"name\": \"${focus_status}-${focus_name}-${patient_name}_${patient_surname}-${date}-${flag}\",\n" +
+			"    \"title\": \"${focus_status} - ${focus_name} - ${patient_name} ${patient_surname} - ${date} - ${flag}\",\n" +
+			"    \"status\": \"draft\",\n" +
+			"    \"date\": \"${date}\",\n" +
+			"    \"effectivePeriod\": {\n" +
+			"      \"start\": \"${date}\",\n" +
+			"      \"end\": \"${date}\"\n" +
+			"    },\n" +
+			"    \"useContext\": [\n" +
+			"      {\n" +
+			"        \"code\": \"interventionType\",\n" +
+			"        \"valueCodableConcept\": \"FI\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"code\": \"fiStatus\",\n" +
+			"        \"valueCodableConcept\": \"${focus_status}\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"code\": \"fiReason\",\n" +
+			"        \"valueCodableConcept\": \"Case Triggered\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"code\": \"opensrpEventId\",\n" +
+			"        \"valueCodableConcept\": \"${opensrpCaseClassificationEventId}\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"code\": \"caseNum\",\n" +
+			"        \"valueCodableConcept\": \"${case_number}\"\n" +
+			"      },\n" +
+			"      {\n" +
+			"        \"code\": \"taskGenerationStatus\",\n" +
+			"        \"valueCodableConcept\": \"False\"\n" +
+			"      }\n" +
+			"    ],\n" +
+			"    \"jurisdiction\": [\n" +
+			"      {\n" +
+			"        \"code\": \"${focus_id}\"\n" +
+			"      }\n" +
+			"    ],\n" +
+			"    \"serverVersion\": 0,\n" +
+			"    \"goal\": [\n" +
+			"        {\n" +
+			"            \"id\": \"RACD_register_families\",\n" +
+			"            \"description\": \"ลงทะเบียนครัวเรือนและสมาชิกในครัวเรือน (100%) ภายในพื้นที่ปฏิบัติงาน\",\n" +
+			"            \"priority\": \"medium-priority\",\n" +
+			"            \"target\": [\n" +
+			"              {\n" +
+			"                \"measure\": \"ร้อยละของบ้าน สิ่งปลูกสร้างที่ได้ลงทะเบียนข้อมูลครัวเรือน\",\n" +
+			"                \"detail\": {\n" +
+			"                  \"detailQuantity\": {\n" +
+			"                    \"value\": 100.0,\n" +
+			"                    \"comparator\": \">=\",\n" +
+			"                    \"unit\": \"%\"\n" +
+			"                  }\n" +
+			"                },\n" +
+			"                \"due\": \"${date}\"\n" +
+			"              }\n" +
+			"            ]\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"id\": \"RACD_Blood_Screening\",\n" +
+			"            \"description\": \"เจาะเลือดรอบบ้านผู้ป่วยในรัศมี 1 กิโลเมตร (100%)\",\n" +
+			"            \"priority\": \"medium-priority\",\n" +
+			"            \"target\": [\n" +
+			"              {\n" +
+			"                \"measure\": \"จำนวนผู้ที่ได้รับการเจาะโลหิต\",\n" +
+			"                \"detail\": {\n" +
+			"                  \"detailQuantity\": {\n" +
+			"                    \"value\": 50.0,\n" +
+			"                    \"comparator\": \">=\",\n" +
+			"                    \"unit\": \"คน\"\n" +
+			"                  }\n" +
+			"                },\n" +
+			"                \"due\": \"${date}\"\n" +
+			"              }\n" +
+			"            ]\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"id\": \"BCC_Focus\",\n" +
+			"            \"description\": \"ให้สุขศึกษาในพื้นที่ปฏิบัติงานอย่างน้อย 1 ครั้ง\",\n" +
+			"            \"priority\": \"medium-priority\",\n" +
+			"            \"target\": [\n" +
+			"              {\n" +
+			"                \"measure\": \"จำนวนกิจกรรมการให้สุขศึกษา\",\n" +
+			"                \"detail\": {\n" +
+			"                  \"detailQuantity\": {\n" +
+			"                    \"value\": 1.0,\n" +
+			"                    \"comparator\": \">=\",\n" +
+			"                    \"unit\": \"แห่ง\"\n" +
+			"                  }\n" +
+			"                },\n" +
+			"                \"due\": \"${date}\"\n" +
+			"              }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ],\n" +
+			"    \"action\": [\n" +
+			"        {\n" +
+			"            \"identifier\": \"${UUID()}\",\n" +
+			"            \"prefix\": 2,\n" +
+			"            \"title\": \"ลงทะเบียนครัวเรือน\",\n" +
+			"            \"description\": \"ลงทะเบียนครัวเรือนและสมาชิกในครัวเรือน (100%) ภายในพื้นที่ปฏิบัติงาน\",\n" +
+			"            \"code\": \"RACD Register Family\",\n" +
+			"            \"timingPeriod\": {\n" +
+			"              \"start\": \"${date}\",\n" +
+			"              \"end\": \"${date}\"\n" +
+			"            },\n" +
+			"            \"reason\": \"Investigation\",\n" +
+			"            \"goalId\": \"RACD_register_families\",\n" +
+			"            \"subjectCodableConcept\": {\n" +
+			"              \"text\": \"Residential_Structure\"\n" +
+			"            },\n" +
+			"            \"taskTemplate\": \"RACD_register_families\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"identifier\": \"${UUID()}\",\n" +
+			"          \"prefix\": 3,\n" +
+			"          \"title\": \"กิจกรรมการเจาะโลหิต\",\n" +
+			"          \"description\": \"เจาะเลือดรอบบ้านผู้ป่วยในรัศมี 1 กิโลเมตร (100%)\",\n" +
+			"          \"code\": \"Blood Screening\",\n" +
+			"          \"timingPeriod\": {\n" +
+			"            \"start\": \"${date}\",\n" +
+			"            \"end\": \"${date}\"\n" +
+			"          },\n" +
+			"          \"reason\": \"Investigation\",\n" +
+			"          \"goalId\": \"RACD_Blood_Screening\",\n" +
+			"          \"subjectCodableConcept\": {\n" +
+			"            \"text\": \"Person\"\n" +
+			"          },\n" +
+			"          \"taskTemplate\": \"RACD_Blood_Screening\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"identifier\": \"${UUID()}\",\n" +
+			"          \"prefix\": 4,\n" +
+			"          \"title\": \"กิจกรรมการให้สุขศึกษา\",\n" +
+			"          \"description\": \"ดำเนินกิจกรรมให้สุขศึกษา\",\n" +
+			"          \"code\": \"BCC\",\n" +
+			"          \"timingPeriod\": {\n" +
+			"            \"start\": \"${date}\",\n" +
+			"            \"end\": \"${date}\"\n" +
+			"          },\n" +
+			"          \"reason\": \"Investigation\",\n" +
+			"          \"goalId\": \"BCC_Focus\",\n" +
+			"          \"subjectCodableConcept\": {\n" +
+			"            \"text\": \"Operational_Area\"\n" +
+			"          },\n" +
+			"          \"taskTemplate\": \"BCC_Focus\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
 	
 	private ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
 	
@@ -108,13 +264,23 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	@Captor
 	private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(boolean.class);
 
+	private PlanResource planResource;
+
+	private TemplateService templateService;
+
+	private EventService eventResource;
+
 	@Before
 	public void setUp() {
 		planService = mock(PlanService.class);
 		locationService = mock(PhysicalLocationService.class);
-		PlanResource planResource = webApplicationContext.getBean(PlanResource.class);
+		templateService = mock(TemplateService.class);
+		eventResource = mock(EventService.class);
+		planResource = webApplicationContext.getBean(PlanResource.class);
 		planResource.setPlanService(planService);
 		planResource.setLocationService(locationService);
+		planResource.setTemplateService(templateService);
+		planResource.setEventService(eventResource);
 	}
 	
 	@Test
@@ -667,6 +833,12 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 		verify(planService, never()).addPlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()));
 		assertEquals("Case triggered plan with opensrpEventId opensrp_event_id_1 already exists", reponseString);
+	}
+
+	@Test
+	public void testCreatePlanFromTemplate() {
+		String plan = planResource.createPlanFromTemplate(planTemplateString);
+		assertNotNull(plan);
 	}
 	
 	private PlanDefinition createPlanDefinition() {
