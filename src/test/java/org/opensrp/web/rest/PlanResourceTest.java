@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
@@ -46,6 +48,7 @@ import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
 import org.opensrp.service.TemplateService;
 import org.opensrp.web.bean.Identifier;
+import org.smartregister.domain.Event;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PlanDefinition;
 import org.springframework.http.MediaType;
@@ -837,7 +840,11 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	@Test
 	public void testCreatePlanFromTemplate() {
-		String plan = planResource.createPlanFromTemplate(planTemplateString, null);
+		Event caseDetailsEvent = new Event();
+		caseDetailsEvent.setId("event-id-1");
+		Map<String, String> details = new HashMap<>();
+		caseDetailsEvent.setDetails(details);
+		PlanDefinition plan = planResource.createPlanFromTemplate(planTemplateString, caseDetailsEvent);
 		assertNotNull(plan);
 	}
 	

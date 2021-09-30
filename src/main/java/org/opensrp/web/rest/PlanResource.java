@@ -530,13 +530,17 @@ public class PlanResource {
 			//TODO Fetch template
 			Template template = templateService.getTemplateByTemplateId(1);
 			//TODO Create plan from template
-			String plan = createPlanFromTemplate(template.getTemplate(), event);
+			PlanDefinition plan = createPlanFromTemplate(template.getTemplate(), event);
 			//TODO Save plan
+			planService.addPlan(plan, "opensrp");
 			//TODO update plan processing status to 2 / complete
+			processingStatus.setStatus(2);
+			processingStatus.setDateEdited(new Date());
+			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
 		}
 	}
 
-	public String createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
+	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
 		valuesMap.put("date", String.valueOf(new Date()));
@@ -555,7 +559,7 @@ public class PlanResource {
 		// Replace
 		String resolvedString = sub.replace(templateString);
 
-		return resolvedString;
+		return gson.fromJson(resolvedString, PlanDefinition.class);
 	}
 	
 }
