@@ -35,6 +35,7 @@ import org.opensrp.util.DateTypeConverter;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Event;
+import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.smartregister.utils.TimingRepeatTimeTypeConverter;
@@ -500,17 +501,28 @@ public class PlanResource {
 			processingStatus.setStatus(1);
 			processingStatus.setDateEdited(new Date());
 			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
+
+			//TODO Validate case details event properties
+
+			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
+			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get("bfid") : null;
+			if (biophicsJurisdictionId == null){
+				continue;
+			}
+			Map<String, String> properties = new HashMap<>();
+			properties.put("externalId", biophicsJurisdictionId);
+			List<PhysicalLocation> jurisdictionList = locationService.findLocationsByProperties(false, null, properties);
+			if (jurisdictionList == null || jurisdictionList.isEmpty()){
+				continue;
+			}
+
+
+			//TODO Run logic to select the template type before generating the plan
+			//TODO Fetch template
+			//TODO Create plan from template
+			//TODO Save plan
+			//TODO update plan processing status to 2 / complete
 		}
-
-
-		// Validate case details event properties
-		//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
-		//Run logic to select the template type before generating the plan
-		// Fetch template
-		// Create plan from template
-		// Save plan
-		// update plan processing status
-
 	}
 	
 }
