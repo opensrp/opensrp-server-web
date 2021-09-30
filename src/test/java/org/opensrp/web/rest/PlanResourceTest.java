@@ -837,7 +837,7 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	@Test
 	public void testCreatePlanFromTemplate() {
-		String plan = planResource.createPlanFromTemplate(planTemplateString);
+		String plan = planResource.createPlanFromTemplate(planTemplateString, null);
 		assertNotNull(plan);
 	}
 	

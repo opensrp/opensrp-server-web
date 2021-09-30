@@ -530,23 +530,24 @@ public class PlanResource {
 			//TODO Fetch template
 			Template template = templateService.getTemplateByTemplateId(1);
 			//TODO Create plan from template
-			String plan = createPlanFromTemplate(template.getTemplate());
+			String plan = createPlanFromTemplate(template.getTemplate(), event);
 			//TODO Save plan
 			//TODO update plan processing status to 2 / complete
 		}
 	}
 
-	public String createPlanFromTemplate(String templateString) {
+	public String createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
 		valuesMap.put("date", String.valueOf(new Date()));
-		valuesMap.put("focus_status", "A1");
-		valuesMap.put("opensrpCaseClassificationEventId", "9829041d-b222-4be5-afd6-b1efc5e52a2f");
-		valuesMap.put("case_number", "201113000001883210923150950336");
-		valuesMap.put("focus_id", "85679d99-2ddf-4325-8443-95a359f160ae");
-		valuesMap.put("focus_name", "ท่าตาฝั่ง (5804050701)");
-		valuesMap.put("patient_name", "หน่อโพชิ");
-		valuesMap.put("patient_surname", "หน่อโพชิ surname");
+		valuesMap.put("focus_status", caseDetailsEvent.getDetails().get("focus_status"));
+		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getEventId());
+		valuesMap.put("case_number", caseDetailsEvent.getDetails().get("case_number"));
+		valuesMap.put("focus_id", caseDetailsEvent.getDetails().get("focus_id"));
+		valuesMap.put("focus_name", caseDetailsEvent.getDetails().get("focus_name"));
+		valuesMap.put("patient_name", caseDetailsEvent.getDetails().get("patient_name"));
+		valuesMap.put("patient_surname", caseDetailsEvent.getDetails().get("patient_surname"));
+		valuesMap.put("flag", caseDetailsEvent.getDetails().get("flag"));
 
 		// Build StringSubstitutor
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
