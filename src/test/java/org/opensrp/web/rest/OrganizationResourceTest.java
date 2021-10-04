@@ -608,4 +608,16 @@ public class OrganizationResourceTest {
 		assertNotNull(mvcResult.getResponse());
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
 	}
+
+	@Test
+	public void testGetTeamsByPractitionerIdentifier() throws Exception {
+		List<Organization> expected = new ArrayList<>();
+		expected.add(createSearchOrganization());
+		when(organizationService.getOrganizationsByPractitionerIdentifier(anyString())).thenReturn(expected);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "by-practitioner/test-practitioner"))
+				.andExpect(status().isOk()).andReturn();
+		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
+				result.getResponse().getContentAsString());
+	}
 }
