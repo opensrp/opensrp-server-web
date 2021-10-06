@@ -497,7 +497,6 @@ public class PlanResource {
 	public void generateCaseTriggeredPlans() {
 
 		// Get plan processing record where status is 0 / initial
-
 		List<PlanProcessingStatus> planProcessingStatusList = processingStatusService.getProcessingStatusByStatus(0);
 
 		for (PlanProcessingStatus processingStatus: planProcessingStatusList ) {
@@ -512,7 +511,8 @@ public class PlanResource {
 			processingStatus.setDateEdited(new Date());
 			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
 
-			//TODO Validate case details event properties
+			//Validate case details event properties
+			planService.validateCaseDetailsEvent(event);
 
 			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
 			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get("bfid") : null;
@@ -526,14 +526,18 @@ public class PlanResource {
 				continue;
 			}
 
-			//TODO Run logic to select the template type before generating the plan
-			//TODO Fetch template
-			Template template = templateService.getTemplateByTemplateId(1);
+			// Run logic to select the template type before generating the plan
+			Integer templateId = planService.getPlanTemplate(event);
+			if (templateId == null) {
+				continue;
+			}
+			//Fetch template
+			Template template = templateService.getTemplateByTemplateId(templateId);
 			//TODO Create plan from template
 			PlanDefinition plan = createPlanFromTemplate(template.getTemplate(), event);
-			//TODO Save plan
+			//Save plan
 			planService.addPlan(plan, "opensrp");
-			//TODO update plan processing status to 2 / complete
+			//update plan processing status to 2 / complete
 			processingStatus.setStatus(2);
 			processingStatus.setDateEdited(new Date());
 			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
