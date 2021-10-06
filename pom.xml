@@ -675,6 +675,7 @@
                 <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
                 <openlmis.stock.profile>default</openlmis.stock.profile>
                 <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
+                <plan.generation.profile>default</plan.generation.profile>
             </properties>
         </profile>
         <profile>
@@ -844,6 +845,12 @@
             <id>openlmis-stock</id>
             <properties>
                 <openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>plan-generation</id>
+            <properties>
+                <plan.generation.profile>plan-generation</plan.generation.profile>
             </properties>
         </profile>
     </profiles>
