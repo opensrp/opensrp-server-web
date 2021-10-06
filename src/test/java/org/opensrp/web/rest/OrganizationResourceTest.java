@@ -72,8 +72,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -633,5 +632,17 @@ public class OrganizationResourceTest {
 		assertNotNull(mvcResult);
 		assertNotNull(mvcResult.getResponse());
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+	}
+
+	@Test
+	public void testGetTeamsByPractitionerIdentifier() throws Exception {
+		List<Organization> expected = new ArrayList<>();
+		expected.add(createSearchOrganization());
+		when(organizationService.getOrganizationsByPractitionerIdentifier(anyString())).thenReturn(expected);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "by-practitioner/test-practitioner"))
+				.andExpect(status().isOk()).andReturn();
+		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
+				result.getResponse().getContentAsString());
 	}
 }
