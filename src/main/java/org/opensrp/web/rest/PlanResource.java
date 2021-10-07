@@ -35,6 +35,7 @@ import org.opensrp.service.PlanProcessingStatusService;
 import org.opensrp.service.PlanService;
 import org.opensrp.service.TemplateService;
 import org.opensrp.util.DateTypeConverter;
+import org.opensrp.util.constants.PlanConstants;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Event;
@@ -495,25 +496,26 @@ public class PlanResource {
 	}
 
 	public void generateCaseTriggeredPlans() {
-
+		logger.info("++++++++++++++ starting  generateCaseTriggeredPlans ++++++++++++");
 		// Get plan processing record where status is 0 / initial
 		List<PlanProcessingStatus> planProcessingStatusList = processingStatusService.getProcessingStatusByStatus(0);
 
 		for (PlanProcessingStatus processingStatus: planProcessingStatusList ) {
+			logger.info("++++++++++++++ finding event with id : " + processingStatus.getEventId());
 			//Get case details event
 			Event event = eventService.findByDbId(processingStatus.getEventId(), false);
 			if (event == null){
 				continue;
 			}
-
+			logger.info("++++++++++++++ Update plan processing status to 1 / processing : " + processingStatus.getEventId());
 			//Update plan processing status to 1 / processing
 			processingStatus.setStatus(1);
 			processingStatus.setDateEdited(new Date());
 			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
-
+			logger.info("++++++++++++++ //Validate case details event properties : " + processingStatus.getEventId());
 			//Validate case details event properties
 			planService.validateCaseDetailsEvent(event);
-
+			logger.info("++++++++++++++ Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case : " + event.getDetails().get("bfid"));
 			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
 			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get("bfid") : null;
 			if (biophicsJurisdictionId == null){
@@ -525,18 +527,22 @@ public class PlanResource {
 			if (jurisdictionList == null || jurisdictionList.isEmpty()){
 				continue;
 			}
-
+			logger.info("++++++++++++++ // Run logic to select the template type before generating the plan : " + processingStatus.getEventId());
 			// Run logic to select the template type before generating the plan
 			Integer templateId = planService.getPlanTemplate(event);
 			if (templateId == null) {
 				continue;
 			}
+			logger.info("++++++++++++++ // Fetch template : " + templateId);
 			//Fetch template
 			Template template = templateService.getTemplateByTemplateId(templateId);
+			logger.info("++++++++++++++ // Create plan from template : " + templateId);
 			//TODO Create plan from template
 			PlanDefinition plan = createPlanFromTemplate(template.getTemplate(), event);
+			logger.info("++++++++++++++ // Save plan : " + plan.getIdentifier());
 			//Save plan
 			planService.addPlan(plan, "opensrp");
+			logger.info("++++++++++++++ // update plan processing status to 2 / complete : " + processingStatus.getEventId());
 			//update plan processing status to 2 / complete
 			processingStatus.setStatus(2);
 			processingStatus.setDateEdited(new Date());
@@ -547,15 +553,16 @@ public class PlanResource {
 	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
+		valuesMap.put("UUID()", UUID.randomUUID().toString());
 		valuesMap.put("date", String.valueOf(new Date()));
-		valuesMap.put("focus_status", caseDetailsEvent.getDetails().get("focus_status"));
+		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
 		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getEventId());
-		valuesMap.put("case_number", caseDetailsEvent.getDetails().get("case_number"));
-		valuesMap.put("focus_id", caseDetailsEvent.getDetails().get("focus_id"));
-		valuesMap.put("focus_name", caseDetailsEvent.getDetails().get("focus_name"));
-		valuesMap.put("patient_name", caseDetailsEvent.getDetails().get("patient_name"));
-		valuesMap.put("patient_surname", caseDetailsEvent.getDetails().get("patient_surname"));
-		valuesMap.put("flag", caseDetailsEvent.getDetails().get("flag"));
+		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
+		valuesMap.put(PlanConstants.FOCUS_ID, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_ID));
+		valuesMap.put(PlanConstants.FOCUS_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_NAME));
+		valuesMap.put(PlanConstants.PATIENT_NAME, caseDetailsEvent.getDetails().get(PlanConstants.PATIENT_NAME));
+		valuesMap.put(PlanConstants.PATIENT_SURNAME, caseDetailsEvent.getDetails().get(PlanConstants.PATIENT_SURNAME));
+		valuesMap.put(PlanConstants.FLAG, caseDetailsEvent.getDetails().get(PlanConstants.FLAG));
 
 		// Build StringSubstitutor
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
