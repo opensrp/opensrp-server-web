@@ -13,6 +13,7 @@ import static org.opensrp.common.AllConstants.Event.TEAM;
 import static org.opensrp.common.AllConstants.Event.TEAM_ID;
 import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
 import static org.opensrp.util.constants.EventConstants.CASE_NUMBER;
+import static org.opensrp.util.constants.EventConstants.EVENT_TYPE_CASE_DETAILS;
 import static org.opensrp.web.Constants.RETURN_COUNT;
 import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
@@ -61,6 +62,8 @@ import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PlanProcessingStatusService;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
@@ -106,6 +109,8 @@ public class EventResource extends RestResource<Event> {
 
 	private MultimediaService multimediaService;
 
+	private PlanProcessingStatusService planProcessingStatusService;
+
 	Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	        .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 	
@@ -119,10 +124,11 @@ public class EventResource extends RestResource<Event> {
 	private static final String SAMPLE_CSV_FILE = "/";
 
 	@Autowired
-	public EventResource(ClientService clientService, EventService eventService, MultimediaService multimediaService) {
+	public EventResource(ClientService clientService, EventService eventService, MultimediaService multimediaService, PlanProcessingStatusService planProcessingStatusService) {
 		this.clientService = clientService;
 		this.eventService = eventService;
 		this.multimediaService = multimediaService;
+		this.planProcessingStatusService = planProcessingStatusService;
 	}
 	
 	@Override
@@ -474,6 +480,13 @@ public class EventResource extends RestResource<Event> {
 						if (eventService.checkIfCaseTriggeredEventExists(event)){
 							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
 							continue;
+						}
+
+						if (StringUtils.isNotBlank(event.getEventType())
+								&& event.getEventType().equals(EVENT_TYPE_CASE_DETAILS)
+								&& event.getDetails() != null
+								&& StringUtils.isNotBlank(event.getDetails().get(CASE_NUMBER))) {
+							planProcessingStatusService.updatePlanProcessingStatus(event.getId(), PlanProcessingStatusConstants.INITIAL);
 						}
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
