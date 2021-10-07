@@ -226,6 +226,7 @@ public class TaskResource {
 			if (updateTasks.size() > 0) {
 				JSONObject json = new JSONObject();
 				json.put("task_ids", updateTasks);
+				logger.info("TaskResource successfully updated status for  : " + String.join(", ", updateTasks));
 				return new ResponseEntity<>(json.toString(), HttpStatus.CREATED);
 			} else {
 				return new ResponseEntity<>("Tasks not Updated: ", HttpStatus.CREATED);

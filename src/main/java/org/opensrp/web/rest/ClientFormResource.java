@@ -81,7 +81,7 @@ public class ClientFormResource {
             boolean isJsonValidator = Boolean.parseBoolean(isJsonValidatorParam.toLowerCase());
             clientFormMetadataList = clientFormService.getJsonWidgetValidatorClientFormMetadata(isJsonValidator);
         }
-        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -139,7 +139,7 @@ public class ClientFormResource {
 
         completeClientForm = new ClientFormService.CompleteClientForm(clientForm, clientFormMetadata);
 
-        return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
@@ -218,7 +218,7 @@ public class ClientFormResource {
             }
         }
 
-        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])), HttpStatus.OK);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(clientFormMetadataList.toArray(new ClientFormMetadata[0])),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
     }
 
     @RequestMapping(headers = {"Accept=multipart/form-data"}, method = RequestMethod.POST)
