@@ -248,7 +248,14 @@ public class UploadController {
 
 			event.setTeamId(StringUtils.defaultIfBlank(teamID,event.getTeamId()));
 			event.setTeam(StringUtils.defaultIfBlank(teamName,event.getTeam()));
-			event.setLocationId(StringUtils.defaultIfBlank(locationID,event.getLocationId()));
+
+			// Get structure by Id
+			String uploadedStructureId = (String) client.getAttribute(DEFAULT_RESIDENCE);
+			PhysicalLocation structure = physicalLocationService.getStructure(uploadedStructureId, false);
+			// Set event location Id from the school parent Id value
+			if (structure != null && structure.getProperties() != null && StringUtils.isNotBlank(structure.getProperties().getParentId())) {
+				event.setLocationId(structure.getProperties().getParentId());
+			}
 
 			// save the event
 			String userName = RestUtils.currentUser(authentication) != null ? RestUtils.currentUser(authentication).getUsername() : "";
