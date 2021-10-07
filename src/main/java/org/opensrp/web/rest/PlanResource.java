@@ -14,6 +14,7 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -554,7 +555,8 @@ public class PlanResource {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
 		valuesMap.put("UUID()", UUID.randomUUID().toString());
-		valuesMap.put("date", String.valueOf(new Date()));
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		valuesMap.put("date", sdf.format(new Date()));
 		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
 		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getEventId());
 		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
