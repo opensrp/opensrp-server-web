@@ -486,7 +486,7 @@ public class EventResource extends RestResource<Event> {
 								&& event.getEventType().equals(EVENT_TYPE_CASE_DETAILS)
 								&& event.getDetails() != null
 								&& StringUtils.isNotBlank(event.getDetails().get(CASE_NUMBER))) {
-							planProcessingStatusService.updatePlanProcessingStatus(event.getId(), PlanProcessingStatusConstants.INITIAL);
+							planProcessingStatusService.addPlanProcessingStatus(event.getId(), PlanProcessingStatusConstants.INITIAL);
 						}
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();

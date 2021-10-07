@@ -37,6 +37,7 @@ import org.opensrp.service.PlanService;
 import org.opensrp.service.TemplateService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.constants.PlanConstants;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Event;
@@ -510,9 +511,7 @@ public class PlanResource {
 			}
 			logger.info("++++++++++++++ Update plan processing status to 1 / processing : " + processingStatus.getEventId());
 			//Update plan processing status to 1 / processing
-			processingStatus.setStatus(1);
-			processingStatus.setDateEdited(new Date());
-			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,null, PlanProcessingStatusConstants.PROCESSING);
 			logger.info("++++++++++++++ //Validate case details event properties : " + processingStatus.getEventId());
 			//Validate case details event properties
 			planService.validateCaseDetailsEvent(event);
@@ -543,11 +542,9 @@ public class PlanResource {
 			logger.info("++++++++++++++ // Save plan : " + plan.getIdentifier());
 			//Save plan
 			planService.addPlan(plan, "opensrp");
-			logger.info("++++++++++++++ // update plan processing status to 2 / complete : " + processingStatus.getEventId());
+			logger.info("++++++++++++++ // update plan processing status to complete : " + processingStatus.getEventId());
 			//update plan processing status to 2 / complete
-			processingStatus.setStatus(2);
-			processingStatus.setDateEdited(new Date());
-			processingStatusService.addOrUpdatePlanProcessingStatus(processingStatus);
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,plan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE);
 		}
 	}
 
@@ -556,7 +553,14 @@ public class PlanResource {
 		Map<String, String> valuesMap = new HashMap<>();
 		valuesMap.put("UUID()", UUID.randomUUID().toString());
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		valuesMap.put("date", sdf.format(new Date()));
+		valuesMap.put("currentDate", sdf.format(new Date()));
+		valuesMap.put("registerFamilyActionId", UUID.randomUUID().toString());
+		valuesMap.put("bloodScreeningActionId", UUID.randomUUID().toString());
+		valuesMap.put("bccActionId", UUID.randomUUID().toString());
+		valuesMap.put("bednetDistributionActionId", UUID.randomUUID().toString());
+		valuesMap.put("larvalDippingActionId", UUID.randomUUID().toString());
+		valuesMap.put("mosquitoCollectionActionId", UUID.randomUUID().toString());
+
 		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
 		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getEventId());
 		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
