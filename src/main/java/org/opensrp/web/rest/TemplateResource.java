@@ -61,6 +61,7 @@ public class TemplateResource {
 			templateService.addOrUpdateTemplate(templateToAdd);
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}catch (Exception exception){
+			exception.printStackTrace();
 			logger.error(exception.getMessage());
 			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 		}
@@ -74,14 +75,19 @@ public class TemplateResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (Exception exception){
+			exception.printStackTrace();
 			logger.error(exception.getMessage());
 			return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	private Template getTemplateWithUpdatedVersion(Template template) {
-		Template latestTemplate = templateService.getAll(1).get(0);
-		template.setVersion(latestTemplate.getVersion() + 1);
+		List<Template> latestTemplates = templateService.getAll(1);
+		if (latestTemplates.isEmpty()){
+			template.setVersion(1);
+		}else {
+			template.setVersion(latestTemplates.get(0).getVersion() + 1);
+		}
 		return template;
 	}
 
