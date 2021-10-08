@@ -537,8 +537,9 @@ public class PlanResource {
 			//Fetch template
 			Template template = templateService.getTemplateByTemplateId(templateId);
 			logger.info("++++++++++++++ // Create plan from template : " + templateId);
-			//TODO Create plan from template
-			PlanDefinition plan = createPlanFromTemplate(template.getTemplate(), event);
+			// Create plan from template
+			String planTemplateString = gson.toJson(template.getTemplate());
+			PlanDefinition plan = createPlanFromTemplate(planTemplateString, event);
 			logger.info("++++++++++++++ // Save plan : " + plan.getIdentifier());
 			//Save plan
 			planService.addPlan(plan, "opensrp");
@@ -551,9 +552,17 @@ public class PlanResource {
 	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
-		valuesMap.put("UUID()", UUID.randomUUID().toString());
+		valuesMap.put("planIdentifier", UUID.randomUUID().toString());
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		valuesMap.put("currentDate", sdf.format(new Date()));
+		Date currentDate = new Date();
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(currentDate);
+		c.add(Calendar.YEAR, 5);
+		endDate = c.getTime();
+
+		valuesMap.put("currentDate", sdf.format(currentDate));
+		valuesMap.put("endDate", sdf.format(endDate));
 		valuesMap.put("registerFamilyActionId", UUID.randomUUID().toString());
 		valuesMap.put("bloodScreeningActionId", UUID.randomUUID().toString());
 		valuesMap.put("bccActionId", UUID.randomUUID().toString());
