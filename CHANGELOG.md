@@ -2,7 +2,7 @@
 
 Notable changes will be documented in this changelog. This format is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 3.0.4-SNAPSHOT - 23-11-2021
+## 3.0.6-SNAPSHOT - 13-10-2021
 
 ### Overview
 
