@@ -2,6 +2,7 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -246,9 +247,9 @@ public class OrganizationResource {
 							Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD),
 							false)
 					.stream()
-					.filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus())
-							&& (plan.getEffectivePeriod().getEnd().isAfterNow()
-							|| plan.getEffectivePeriod().getEnd().isEqualNow()))
+					.filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()) && (plan.getEffectivePeriod() != null
+							&& plan.getEffectivePeriod().getEnd() != null && (plan.getEffectivePeriod().getEnd().isAfterNow()
+							|| plan.getEffectivePeriod().getEnd().isEqualNow())))
 					.collect(Collectors.toUnmodifiableSet());
 
 			Set<String> planLocationIds = validActivePlans.stream()
