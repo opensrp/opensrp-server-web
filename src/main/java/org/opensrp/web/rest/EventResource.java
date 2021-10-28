@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Multimedia;
+import org.opensrp.domain.Search;
 import org.opensrp.dto.ExportEventDataSummary;
 import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.dto.ExportImagesSummary;
@@ -338,7 +339,12 @@ public class EventResource extends RestResource<Event> {
 		List<Client> clients = new ArrayList<Client>();
 		long startTime = System.currentTimeMillis();
 
-		if (isOutOfCatchment){
+		if (isOutOfCatchment) {
+			// fetch siblings
+			String[] baseEntityIds = eventSearchBean.getBaseEntityId().split(",");
+			List<String> relationships = getRelationships(baseEntityIds);
+			eventSearchBean.setBaseEntityId(eventSearchBean.getBaseEntityId() + "," + String.join(",", relationships));
+
 			events = eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
 		} else {
 			events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
@@ -782,4 +788,14 @@ public class EventResource extends RestResource<Event> {
 		}
 	}
 
+	private List<String> getRelationships(String[] baseEntityIds) {
+		List<String> relations = new ArrayList<>();
+
+		for (String baseEntityId : baseEntityIds) {
+			Search search = new Search(baseEntityId);
+			relations.addAll(search.getRelationships(baseEntityId));
+		}
+
+		return relations;
+	}
 }
