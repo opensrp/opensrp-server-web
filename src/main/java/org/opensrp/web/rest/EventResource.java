@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import org.opensrp.api.domain.User;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.Multimedia;
-import org.opensrp.domain.Search;
 import org.opensrp.dto.ExportEventDataSummary;
 import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.dto.ExportImagesSummary;
@@ -58,6 +57,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
@@ -792,8 +792,14 @@ public class EventResource extends RestResource<Event> {
 		List<String> relations = new ArrayList<>();
 
 		for (String baseEntityId : baseEntityIds) {
-			Search search = new Search(baseEntityId);
-			relations.addAll(search.findRelatives("mother"));
+			List<Client> siblings = clientService.findGlobalByRelationship(baseEntityId);
+
+			siblings.stream().forEach(entry-> entry.getBaseEntityId());
+			relations.addAll(
+					siblings.stream()
+					.map(child -> child.getBaseEntityId())
+					.collect(Collectors.toList())
+			);
 		}
 
 		return relations;
