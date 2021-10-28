@@ -340,7 +340,7 @@ public class EventResource extends RestResource<Event> {
 
 		if (isOutOfCatchment){
 			events = eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
-		}else {
+		} else {
 			events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
 		}
 
@@ -355,7 +355,12 @@ public class EventResource extends RestResource<Event> {
 			}
 			for (int i = 0; i < clientIds.size(); i = i + CLIENTS_FETCH_BATCH_SIZE) {
 				int end = Math.min(i + CLIENTS_FETCH_BATCH_SIZE, clientIds.size());
-				clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
+
+				if (isOutOfCatchment) {
+					clients.addAll(clientService.findOutOfCatchmentByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
+				} else {
+					clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
+				}
 			}
 			logger.info("fetching clients took: " + (System.currentTimeMillis() - startTime));
 
