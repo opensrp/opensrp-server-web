@@ -793,7 +793,7 @@ public class EventResource extends RestResource<Event> {
 
 		for (String baseEntityId : baseEntityIds) {
 			Search search = new Search(baseEntityId);
-			relations.addAll(search.getRelationships(baseEntityId));
+			relations.addAll(search.findRelatives("mother"));
 		}
 
 		return relations;
