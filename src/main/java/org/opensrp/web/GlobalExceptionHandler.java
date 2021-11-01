@@ -1,9 +1,5 @@
 package org.opensrp.web;
 
-import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
-
-import java.net.ConnectException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.web.dto.ResponseDto;
@@ -20,6 +16,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.net.ConnectException;
+
+import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(AccessDeniedException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public ResponseDto<?> exceptionHandler(AccessDeniedException exception) {
-		logger.warn("Access denied : ", exception.getMessage());
+		logger.warn("Access denied : ", exception.getMessage(), exception.getStackTrace());
 		ResponseDto<?> dto = buildErrorResponse(HttpStatus.FORBIDDEN);
 		dto.setMessage("Access is denied. You do not have enough permissions for the resource.");
 		return dto;
