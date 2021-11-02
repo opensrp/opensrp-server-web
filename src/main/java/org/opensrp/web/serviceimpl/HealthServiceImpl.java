@@ -5,7 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
-import org.opensrp.web.health.*;
+import org.opensrp.web.health.JdbcServiceHealthIndicator;
+import org.opensrp.web.health.KeycloakServiceHealthIndicator;
+import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
+import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,62 +27,64 @@ import java.util.concurrent.Future;
 @Service("HealthServiceImpl")
 public class HealthServiceImpl implements HealthService {
 
-    private static final Logger logger = LogManager.getLogger(HealthServiceImpl.class.toString());
+	private static final Logger logger = LogManager.getLogger(HealthServiceImpl.class.toString());
 
-    @Autowired
-    private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+	@Autowired
+	private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
 
-    @Autowired(required = false)
-    private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
+	@Autowired(required = false)
+	private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
 
-    @Autowired
-    private RedisServiceHealthIndicator redisServiceHealthIndicator;
+	@Autowired
+	private RedisServiceHealthIndicator redisServiceHealthIndicator;
 
-    @Autowired(required = false)
-    private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
+	@Autowired(required = false)
+	private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
 
-    @Value("#{opensrp['sentry.release'] ?: ''}")
-    private String serverVersion;
+	@Value("#{opensrp['sentry.release'] ?: ''}")
+	private String serverVersion;
 
-    private List<ServiceHealthIndicator> getHealthIndicators() {
-        List<ServiceHealthIndicator> healthIndicators = new ArrayList<>();
-        healthIndicators.add(jdbcServiceHealthIndicator);
-        healthIndicators.add(redisServiceHealthIndicator);
-        if (rabbitmqServiceHealthIndicator != null)
-            healthIndicators.add(rabbitmqServiceHealthIndicator);
-        if (keycloakServiceHealthIndicator != null)
-            healthIndicators.add(keycloakServiceHealthIndicator);
-        return healthIndicators;
-    }
+	private List<ServiceHealthIndicator> getHealthIndicators() {
+		List<ServiceHealthIndicator> healthIndicators = new ArrayList<>();
+		healthIndicators.add(jdbcServiceHealthIndicator);
+		healthIndicators.add(redisServiceHealthIndicator);
+		if (rabbitmqServiceHealthIndicator != null)
+			healthIndicators.add(rabbitmqServiceHealthIndicator);
+		if (keycloakServiceHealthIndicator != null)
+			healthIndicators.add(keycloakServiceHealthIndicator);
+		return healthIndicators;
+	}
 
-    @Override
-    public ModelMap aggregateHealthCheck() {
-        ModelMap servicesObjectMap = new ModelMap();
-        ModelMap problemsObjectMap = new ModelMap();
-        ModelMap resultPayload = new ModelMap();
-        List<Callable<ModelMap>> callableList = new ArrayList<>();
-        for (ServiceHealthIndicator serviceHealthIndicator : getHealthIndicators()) {
-            callableList.add(serviceHealthIndicator.doHealthCheck());
-        }
+	@Override
+	public ModelMap aggregateHealthCheck() {
+		ModelMap servicesObjectMap = new ModelMap();
+		ModelMap problemsObjectMap = new ModelMap();
+		ModelMap resultPayload = new ModelMap();
+		List<Callable<ModelMap>> callableList = new ArrayList<>();
+		for (ServiceHealthIndicator serviceHealthIndicator : getHealthIndicators()) {
+			callableList.add(serviceHealthIndicator.doHealthCheck());
+		}
 
-        try {
-            List<Future<ModelMap>> futureList = Executors.newFixedThreadPool(callableList.size()).invokeAll(callableList);
-            for (Future<ModelMap> resultFuture : futureList) {
-                ModelMap modelMap = resultFuture.get();
-                Boolean status = (Boolean) modelMap.get(Constants.HealthIndicator.STATUS);
-                String indicator = (String) modelMap.get(Constants.HealthIndicator.INDICATOR);
-                if (!status)
-                    problemsObjectMap.put(indicator, modelMap.get(Constants.HealthIndicator.EXCEPTION));
-                servicesObjectMap.put(indicator, status);
-            }
-            resultPayload.put(Constants.HealthIndicator.PROBLEMS, problemsObjectMap);
-            resultPayload.put(Constants.HealthIndicator.SERVICES, servicesObjectMap);
-            resultPayload.put(Constants.HealthIndicator.TIME, new SimpleDateFormat(Constants.HealthIndicator.DATE_TIME_FORMAT).format(new Date()));
-            if (StringUtils.isNotBlank(serverVersion))
-                resultPayload.put(Constants.HealthIndicator.VERSION, serverVersion);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error(e);
-        }
-        return resultPayload;
-    }
+		try {
+			List<Future<ModelMap>> futureList = Executors.newFixedThreadPool(callableList.size()).invokeAll(callableList);
+			for (Future<ModelMap> resultFuture : futureList) {
+				ModelMap modelMap = resultFuture.get();
+				Boolean status = (Boolean) modelMap.get(Constants.HealthIndicator.STATUS);
+				String indicator = (String) modelMap.get(Constants.HealthIndicator.INDICATOR);
+				if (!status)
+					problemsObjectMap.put(indicator, modelMap.get(Constants.HealthIndicator.EXCEPTION));
+				servicesObjectMap.put(indicator, status);
+			}
+			resultPayload.put(Constants.HealthIndicator.PROBLEMS, problemsObjectMap);
+			resultPayload.put(Constants.HealthIndicator.SERVICES, servicesObjectMap);
+			resultPayload.put(Constants.HealthIndicator.TIME,
+					new SimpleDateFormat(Constants.HealthIndicator.DATE_TIME_FORMAT).format(new Date()));
+			if (StringUtils.isNotBlank(serverVersion))
+				resultPayload.put(Constants.HealthIndicator.VERSION, serverVersion);
+		}
+		catch (InterruptedException | ExecutionException e) {
+			logger.error(e);
+		}
+		return resultPayload;
+	}
 }
