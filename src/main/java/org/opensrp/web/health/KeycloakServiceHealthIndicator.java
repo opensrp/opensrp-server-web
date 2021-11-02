@@ -19,29 +19,31 @@ import java.util.concurrent.Callable;
 @Component
 public class KeycloakServiceHealthIndicator implements ServiceHealthIndicator {
 
-    private static final Logger logger = LogManager.getLogger(KeycloakServiceHealthIndicator.class.toString());
+	private static final Logger logger = LogManager.getLogger(KeycloakServiceHealthIndicator.class.toString());
 
-    @Autowired
-    private KeycloakDeployment keycloakDeployment;
+	@Autowired
+	private KeycloakDeployment keycloakDeployment;
 
-    private final String HEALTH_INDICATOR_KEY = "keycloak";
+	private final String HEALTH_INDICATOR_KEY = "keycloak";
 
-    @Override
-    public Callable<ModelMap> doHealthCheck() {
-        return () -> {
-            ModelMap modelMap = new ModelMap();
-            boolean result = false;
-            try {
-                RestTemplate restTemplate = new RestTemplate();
-                ResponseEntity<String> responseEntity = restTemplate.getForEntity(keycloakDeployment.getRealmInfoUrl(), String.class);
-                result = responseEntity.getStatusCode() == HttpStatus.OK;
-            } catch (Exception e) {
-                logger.error(e);
-                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-            }
-            modelMap.put(Constants.HealthIndicator.STATUS, result);
-            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-            return modelMap;
-        };
-    }
+	@Override
+	public Callable<ModelMap> doHealthCheck() {
+		return () -> {
+			ModelMap modelMap = new ModelMap();
+			boolean result = false;
+			try {
+				RestTemplate restTemplate = new RestTemplate();
+				ResponseEntity<String> responseEntity = restTemplate.getForEntity(keycloakDeployment.getRealmInfoUrl(),
+						String.class);
+				result = responseEntity.getStatusCode() == HttpStatus.OK;
+			}
+			catch (Exception e) {
+				logger.error(e);
+				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+			}
+			modelMap.put(Constants.HealthIndicator.STATUS, result);
+			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+			return modelMap;
+		};
+	}
 }

@@ -16,27 +16,28 @@ import java.util.concurrent.Callable;
 @Component
 public class JdbcServiceHealthIndicator implements ServiceHealthIndicator {
 
-    private static final Logger logger = LogManager.getLogger(JdbcServiceHealthIndicator.class.toString());
+	private static final Logger logger = LogManager.getLogger(JdbcServiceHealthIndicator.class.toString());
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
-    private final String HEALTH_INDICATOR_KEY = "postgres";
+	private final String HEALTH_INDICATOR_KEY = "postgres";
 
-    @Override
-    public Callable<ModelMap> doHealthCheck() {
-        return () -> {
-            ModelMap modelMap = new ModelMap();
-            boolean result = false;
-            try {
-                result = jdbcTemplate.queryForObject("SELECT 1;", Integer.class) == 1;
-            } catch (Exception e) {
-                logger.error(e);
-                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-            }
-            modelMap.put(Constants.HealthIndicator.STATUS, result);
-            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-            return modelMap;
-        };
-    }
+	@Override
+	public Callable<ModelMap> doHealthCheck() {
+		return () -> {
+			ModelMap modelMap = new ModelMap();
+			boolean result = false;
+			try {
+				result = jdbcTemplate.queryForObject("SELECT 1;", Integer.class) == 1;
+			}
+			catch (Exception e) {
+				logger.error(e);
+				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+			}
+			modelMap.put(Constants.HealthIndicator.STATUS, result);
+			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+			return modelMap;
+		};
+	}
 }

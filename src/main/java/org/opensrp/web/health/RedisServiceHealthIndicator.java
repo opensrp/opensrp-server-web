@@ -16,28 +16,29 @@ import java.util.concurrent.Callable;
 @Component
 public class RedisServiceHealthIndicator implements ServiceHealthIndicator {
 
-    private static final Logger logger = LogManager.getLogger(RedisServiceHealthIndicator.class.toString());
+	private static final Logger logger = LogManager.getLogger(RedisServiceHealthIndicator.class.toString());
 
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+	@Autowired
+	private RedisConnectionFactory redisConnectionFactory;
 
-    private final String HEALTH_INDICATOR_KEY = "redis";
+	private final String HEALTH_INDICATOR_KEY = "redis";
 
-    @Override
-    public Callable<ModelMap> doHealthCheck() {
-        return () -> {
-            ModelMap modelMap = new ModelMap();
-            boolean result = false;
-            try {
-                String pingResult = redisConnectionFactory.getConnection().ping();
-                result = "PONG".equalsIgnoreCase(pingResult);
-            } catch (Exception e) {
-                logger.error(e);
-                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-            }
-            modelMap.put(Constants.HealthIndicator.STATUS, result);
-            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-            return modelMap;
-        };
-    }
+	@Override
+	public Callable<ModelMap> doHealthCheck() {
+		return () -> {
+			ModelMap modelMap = new ModelMap();
+			boolean result = false;
+			try {
+				String pingResult = redisConnectionFactory.getConnection().ping();
+				result = "PONG".equalsIgnoreCase(pingResult);
+			}
+			catch (Exception e) {
+				logger.error(e);
+				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+			}
+			modelMap.put(Constants.HealthIndicator.STATUS, result);
+			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+			return modelMap;
+		};
+	}
 }
