@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.opensrp.web.health.JdbcServiceHealthIndicator;
-import org.opensrp.web.health.KeycloakServiceHealthIndicator;
 import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
