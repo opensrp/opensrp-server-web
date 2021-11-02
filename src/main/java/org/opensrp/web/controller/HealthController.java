@@ -3,6 +3,7 @@ package org.opensrp.web.controller;
 import org.opensrp.web.Constants;
 import org.opensrp.web.service.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthController {
 
     @Autowired
+    @Qualifier("HealthServiceImpl")
     private HealthService healthService;
 
     @GetMapping
