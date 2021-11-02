@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
-@ActiveProfiles(profiles = {"jedis", "postgres", "oauth2"})
+@ActiveProfiles(profiles = {"jedis", "postgres", "basic_auth"})
 public class RedisServiceHealthIndicatorTest {
 
     @Autowired

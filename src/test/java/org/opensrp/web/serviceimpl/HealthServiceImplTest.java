@@ -24,7 +24,7 @@ import static org.mockito.Mockito.doReturn;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
-@ActiveProfiles(profiles = {"jedis", "postgres", "oauth2", "rabbitmq"})
+@ActiveProfiles(profiles = {"jedis", "postgres", "basic_auth", "rabbitmq"})
 public class HealthServiceImplTest {
 
     @Autowired
