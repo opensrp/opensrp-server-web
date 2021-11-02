@@ -3,6 +3,7 @@ package org.opensrp.web.health;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.web.Constants;
+import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
