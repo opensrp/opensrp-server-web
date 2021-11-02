@@ -23,23 +23,23 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
-@ActiveProfiles(profiles = {"jedis", "postgres", "basic_auth", "rabbitmq"})
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth", "rabbitmq" })
 public class HealthServiceImplTest {
 
-    @Autowired
-    private HealthServiceImpl healthService;
+	@Autowired
+	private HealthServiceImpl healthService;
 
-    @Mock
-    private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+	@Mock
+	private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
 
-    @Mock
-    private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
+	@Mock
+	private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
 
-    @Mock
-    private RedisServiceHealthIndicator redisServiceHealthIndicator;
+	@Mock
+	private RedisServiceHealthIndicator redisServiceHealthIndicator;
 
-    @Before
+	@Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
@@ -57,10 +57,10 @@ public class HealthServiceImplTest {
         doReturn(mapCallable).when(jdbcServiceHealthIndicator).doHealthCheck();
         doReturn(mapCallable).when(rabbitmqServiceHealthIndicator).doHealthCheck();
         doReturn(mapCallable).when(redisServiceHealthIndicator).doHealthCheck();
-        ModelMap modelMap = healthService.aggregateHealthCheck();
-        assertNotNull(modelMap);
-        assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
-        assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));
-        assertTrue(modelMap.containsKey(Constants.HealthIndicator.TIME));
-    }
+		ModelMap modelMap = healthService.aggregateHealthCheck();
+		assertNotNull(modelMap);
+		assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
+		assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));
+		assertTrue(modelMap.containsKey(Constants.HealthIndicator.TIME));
+	}
 }
