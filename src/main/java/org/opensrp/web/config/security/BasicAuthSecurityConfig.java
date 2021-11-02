@@ -74,6 +74,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		return http.authorizeRequests()
 		.mvcMatchers("/index.html").permitAll()
 		.mvcMatchers("/").permitAll()
+		.mvcMatchers("/health").permitAll()
 		.mvcMatchers("/multimedia/download/**").permitAll()
 		.mvcMatchers("/multimedia/profileimage/**").permitAll()
 		.mvcMatchers("/multimedia/media/**").permitAll()

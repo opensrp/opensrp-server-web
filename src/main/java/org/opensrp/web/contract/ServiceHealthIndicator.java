@@ -1,4 +1,4 @@
-package org.opensrp.web.health;
+package org.opensrp.web.contract;
 
 import org.springframework.ui.ModelMap;
 
