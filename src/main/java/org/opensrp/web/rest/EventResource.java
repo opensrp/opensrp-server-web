@@ -480,22 +480,31 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(BAD_REQUEST);
 		}
 
+		logger.info("Adding clients");
+
 		if (syncData.has("clients")) {
 			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 					new TypeToken<ArrayList<Client>>() {
 
 					}.getType());
 			for (Client client : clients) {
+				logger.info("Add client - " + client.getBaseEntityId());
 				clientService.addorUpdate(client);
 			}
 		}
+
+		logger.info("Adding events");
+
 		if (syncData.has("events")) {
 			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 					new TypeToken<ArrayList<Event>>() {
 
 					}.getType());
 			for (Event event : events) {
+				logger.info("Process out of area event - " + event.getBaseEntityId() + " - " + event.getEventId());
 				event = eventService.processOutOfArea(event);
+
+				logger.info("Add event - " + event.getBaseEntityId() + " - " + event.getEventId());
 				eventService.addorUpdateEvent(event, currentUser(authentication).getUsername());
 			}
 		}
