@@ -480,31 +480,32 @@ public class EventResource extends RestResource<Event> {
 			return new ResponseEntity<>(BAD_REQUEST);
 		}
 
-		logger.info("Adding clients");
-
 		if (syncData.has("clients")) {
 			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
 					new TypeToken<ArrayList<Client>>() {
 
 					}.getType());
+
+			logger.info("Adding " + clients.size() + " clients");
+
 			for (Client client : clients) {
-				logger.info("Add client - " + client.getBaseEntityId());
+				logger.info("Add client - " + client.getBaseEntityId() + "\n" + gson.toJson(client));
 				clientService.addorUpdate(client);
 			}
 		}
-
-		logger.info("Adding events");
 
 		if (syncData.has("events")) {
 			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
 					new TypeToken<ArrayList<Event>>() {
 
 					}.getType());
+
+			logger.info("Adding " + events.size() + " events");
+
 			for (Event event : events) {
-				logger.info("Process out of area event - " + event.getBaseEntityId() + " - " + event.getEventId());
 				event = eventService.processOutOfArea(event);
 
-				logger.info("Add event - " + event.getBaseEntityId() + " - " + event.getEventId());
+				logger.info("Add event - " + event.getBaseEntityId() + " - " + event.getFormSubmissionId() + "\n" + gson.toJson(event));
 				eventService.addorUpdateEvent(event, currentUser(authentication).getUsername());
 			}
 		}
