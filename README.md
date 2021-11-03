@@ -1,9 +1,10 @@
 # opensrp-server-web
 [![Build Status](https://travis-ci.org/OpenSRP/opensrp-server-web.svg?branch=master)](https://travis-ci.org/OpenSRP/opensrp-server-web) [![Coverage Status](https://coveralls.io/repos/github/OpenSRP/opensrp-server-web/badge.svg?branch=master)](https://coveralls.io/github/OpenSRP/opensrp-server-web?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5544ce1a89924b919197c902819c83eb)](https://www.codacy.com/app/OpenSRP/opensrp-server-web?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OpenSRP/opensrp-server-web&amp;utm_campaign=Badge_Grade)
 
+## Overview 
 Generic web application
 
-#### Relevant Wiki Pages ####
+### Relevant Wiki Pages
 * OpenSRP Server Refactor and Cleanup
   * [Refactor and Cleanup](https://smartregister.atlassian.net/wiki/spaces/Documentation/pages/562659330/OpenSRP+Server+Refactor+and+Clean+up)
   * [How to upload and use maven jar artifacts](https://smartregister.atlassian.net/wiki/spaces/Documentation/pages/564428801/How+to+upload+and+use+maven+jar+artifacts)
@@ -42,3 +43,48 @@ Sample Request
 
 **NOTE:** 
 Remember to add your timezone to the DateTimeFormat.ISO
+
+### Health Endpoint
+The health endpoint of the opensrp server is `/opensrp/health`. It always returns information in json format. The status code of the response can either be `200` or `500` depending on status of the services. Response status code is `200` if all the services are running ok but `500` if any service is down/inaccessible.
+> The `sentry.release` property in [opensrp.properties](https://github.com/opensrp/opensrp-server-configs/blob/master/assets/config/opensrp.properties) populates the `version` attribute in the response as per examples below (ensure its set on the deployment otherwise the version attribute will be omitted from the response).
+
+Sample responses from the health endpoint are as follows:
+
+Request Endpoint: `/opensrp/health`  
+Request Method: GET  
+Status Code: 200  
+```json
+{
+  "problems": {},
+  "services": {
+    "postgres": true,
+    "redis": true,
+    "keycloak": true,
+    "rabbitmq": true
+  },
+  "time": "2021-11-01T09:44:43.584+03:00",
+  "version": "v3.2"
+}
+```
+
+---
+
+Request Endpoint: `/opensrp/health`  
+Request Method: GET  
+Status Code: 500  
+```json
+{
+  "problems": {
+    "redis": "Cannot get Jedis connection; nested exception is redis.clients.jedis.exceptions.JedisConnectionException: Could not get a resource from the pool",
+    "rabbitmq": "java.io.IOException"
+  },
+  "services": {
+    "postgres": true,
+    "redis": false,
+    "keycloak": true,
+    "rabbitmq": false
+  },
+  "time": "2021-11-02T09:44:43.584+03:00",
+  "version": "v3.2"
+}
+```
