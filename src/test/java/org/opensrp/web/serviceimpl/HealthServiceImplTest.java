@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.web.Constants;
 import org.opensrp.web.health.JdbcServiceHealthIndicator;
+import org.opensrp.web.health.OpenmrsServiceHealthIndicator;
 import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -39,6 +40,9 @@ public class HealthServiceImplTest {
 	@Mock
 	private RedisServiceHealthIndicator redisServiceHealthIndicator;
 
+	@Mock
+	private OpenmrsServiceHealthIndicator openmrsServiceHealthIndicator;
+
 	@Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -57,7 +61,8 @@ public class HealthServiceImplTest {
         doReturn(mapCallable).when(jdbcServiceHealthIndicator).doHealthCheck();
         doReturn(mapCallable).when(rabbitmqServiceHealthIndicator).doHealthCheck();
         doReturn(mapCallable).when(redisServiceHealthIndicator).doHealthCheck();
-		ModelMap modelMap = healthService.aggregateHealthCheck();
+	    doReturn(mapCallable).when(openmrsServiceHealthIndicator).doHealthCheck();
+	    ModelMap modelMap = healthService.aggregateHealthCheck();
 		assertNotNull(modelMap);
 		assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
 		assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));

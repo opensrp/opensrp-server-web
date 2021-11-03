@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.opensrp.web.health.JdbcServiceHealthIndicator;
+import org.opensrp.web.health.OpenmrsServiceHealthIndicator;
 import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
@@ -37,6 +38,9 @@ public class HealthServiceImpl implements HealthService {
 	@Autowired
 	private RedisServiceHealthIndicator redisServiceHealthIndicator;
 
+	@Autowired
+	private OpenmrsServiceHealthIndicator openmrsServiceHealthIndicator;
+
 	@Value("#{opensrp['sentry.release'] ?: ''}")
 	private String serverVersion;
 
@@ -44,6 +48,7 @@ public class HealthServiceImpl implements HealthService {
 		List<ServiceHealthIndicator> healthIndicators = new ArrayList<>();
 		healthIndicators.add(jdbcServiceHealthIndicator);
 		healthIndicators.add(redisServiceHealthIndicator);
+		healthIndicators.add(openmrsServiceHealthIndicator);
 		if (rabbitmqServiceHealthIndicator != null)
 			healthIndicators.add(rabbitmqServiceHealthIndicator);
 		return healthIndicators;

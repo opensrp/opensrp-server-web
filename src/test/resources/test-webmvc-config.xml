@@ -55,6 +55,8 @@
 
 	<bean class="org.opensrp.web.health.RabbitmqServiceHealthIndicator" />
 
+	<bean class="org.opensrp.web.health.OpenmrsServiceHealthIndicator" />
+
 	<bean class="org.opensrp.web.serviceimpl.HealthServiceImpl" />
 
 	<bean class="org.springframework.amqp.rabbit.core.RabbitAdmin" >
