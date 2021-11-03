@@ -23,6 +23,6 @@ public class HealthController {
     public ResponseEntity<ModelMap> index() {
         ModelMap modelMap = healthService.aggregateHealthCheck();
         ModelMap problemsModelMap = (ModelMap) modelMap.get(Constants.HealthIndicator.PROBLEMS);
-        return ResponseEntity.status(problemsModelMap.isEmpty() ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR).body(modelMap);
+        return ResponseEntity.status(problemsModelMap.isEmpty() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE).body(modelMap);
     }
 }

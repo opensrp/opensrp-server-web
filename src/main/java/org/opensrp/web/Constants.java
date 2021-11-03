@@ -72,8 +72,10 @@ public interface Constants {
         String STATUS = "status";
         String INDICATOR = "indicator";
         String EXCEPTION = "exception";
-        String TIME = "time";
+        String TIME = "serverTime";
         String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
         String VERSION = "version";
+	    String GIT_BUILD_TIME = "gitBuildTime";
+        String GIT_COMMIT_ID = "gitCommitId";
     }
 }

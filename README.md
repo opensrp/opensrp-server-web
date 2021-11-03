@@ -45,8 +45,7 @@ Sample Request
 Remember to add your timezone to the DateTimeFormat.ISO  
 
 ### Health Endpoint
-The health endpoint of the opensrp server is `/opensrp/health`. It always returns information in json format. The status code of the response can either be `200` or `500` depending on status of the services. Response status code is `200` if all the services are running ok but `500` if any service is down/inaccessible.
-> The `sentry.release` property in [opensrp.properties](https://github.com/opensrp/opensrp-server-configs/blob/master/assets/config/opensrp.properties) populates the `version` attribute in the response as per examples below (ensure its set on the deployment otherwise the version attribute will be omitted from the response).
+The health endpoint of the opensrp server is `/opensrp/health`. It always returns information in JSON. The status code of the response can either be `200` or `503` depending on status of the services. Response status code is `200` if all the services are running ok but `503` if any service is down/inaccessible.
 
 Sample responses from the health endpoint are as follows:
 
@@ -59,11 +58,13 @@ Status Code: 200
   "services": {
     "postgres": true,
     "redis": true,
-    "keycloak": true,
+    "openmrs": true,
     "rabbitmq": true
   },
-  "time": "2021-11-01T09:44:43.584+03:00",
-  "version": "v3.2"
+  "serverTime": "2021-11-01T09:44:43.584+03:00",
+  "buildVersion": "3.2",
+  "gitBuildTime": "2021-11-03T14:56:28+0300",
+  "gitCommitId": "234234234"
 }
 ```
 
@@ -71,7 +72,7 @@ Status Code: 200
 
 Request Endpoint: `/opensrp/health`  
 Request Method: GET  
-Status Code: 500  
+Status Code: 503
 ```json
 {
   "problems": {
@@ -81,10 +82,14 @@ Status Code: 500
   "services": {
     "postgres": true,
     "redis": false,
-    "keycloak": true,
+    "openmrs": true,
     "rabbitmq": false
   },
-  "time": "2021-11-02T09:44:43.584+03:00",
-  "version": "v3.2"
+  "serverTime": "2021-11-02T09:44:43.584+03:00",
+  "buildVersion": "3.2",
+  "gitBuildTime": "2021-11-03T14:56:28+0300",
+  "gitCommitId": "234234234"
 }
 ```
+
+**NOTE: Some services will only be checked if they are enabled by the spring maven profiles e.g rabbitmq**
