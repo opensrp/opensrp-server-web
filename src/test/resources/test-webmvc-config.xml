@@ -43,8 +43,33 @@
 
 	<bean class="org.opensrp.web.config.security.WebConfig" />
 
+	<bean class="org.opensrp.TestDatabaseConfig" />
+
+	<bean class="org.opensrp.web.health.RedisServiceHealthIndicator" />
+
+	<bean class="org.opensrp.web.health.JdbcServiceHealthIndicator" />
+
+	<bean class="org.opensrp.web.health.KeycloakServiceHealthIndicator" />
+
+	<bean class="org.opensrp.web.health.RabbitmqServiceHealthIndicator" />
+
+	<bean class="org.opensrp.web.serviceimpl.HealthServiceImpl" />
+
+	<bean class="org.springframework.amqp.rabbit.core.RabbitAdmin" >
+		<constructor-arg index="0" ref="rabbitTemplate" />
+	</bean>
+
+	<bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate" >
+		<constructor-arg index="0" ref="rabbitConnectionFactory" />
+	</bean>
+
+	<bean id="rabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" />
+
 	<util:properties id="opensrp"
 		location="classpath:/opensrp.properties" />
+
+	<util:properties id="git"
+					 location="classpath:/git.properties" />
 
 	<mvc:annotation-driven />
 	<mvc:default-servlet-handler />
