@@ -50,7 +50,7 @@ The health endpoint of the opensrp server is `/opensrp/health`. It always return
 
 Sample responses from the health endpoint are as follows:
 
-Request URL: https://<opensrp-url>/opensrp/health  
+Request Endpoint: `/opensrp/health`  
 Request Method: GET  
 Status Code: 200  
 ```json
@@ -69,7 +69,7 @@ Status Code: 200
 
 ---
 
-Request URL: https://<opensrp-url>/opensrp/health  
+Request Endpoint: `/opensrp/health`  
 Request Method: GET  
 Status Code: 500  
 ```json
