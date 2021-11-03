@@ -516,6 +516,25 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		verify(multimediaService).findByCaseId(anyString());
 	}
 
+	@Test
+	public void testGetById() {
+		Event expectedEvent = createEvent();
+		when(eventService.findById(expectedEvent.getId())).thenReturn(expectedEvent);
+		Event actualEvent = eventResource.getById(expectedEvent.getId());
+		verify(eventService).findById(expectedEvent.getId());
+		assertEquals(expectedEvent.getId(), actualEvent.getId());
+	}
+
+	@Test
+	public void testRequiredProperties() {
+		List<String> requiredProperties = eventResource.requiredProperties();
+		assertNotNull(requiredProperties);
+		assertEquals(3, requiredProperties.size());
+		assertTrue(requiredProperties.contains(BASE_ENTITY_ID));
+		assertTrue(requiredProperties.contains(EVENT_TYPE));
+		assertTrue(requiredProperties.contains(PROVIDER_ID));
+	}
+
 
 	private Event createEvent() {
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
