@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.0.5-SNAPSHOT</version>
+    <version>3.0.6-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -25,7 +25,7 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.0.4-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.0.5-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
@@ -652,6 +652,29 @@
                         <version>2.3.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>5.0.0</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                </configuration>
             </plugin>
         </plugins>
     </build>

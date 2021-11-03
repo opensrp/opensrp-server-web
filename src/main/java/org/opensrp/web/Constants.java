@@ -70,4 +70,16 @@ public interface Constants {
         }
     }
 
+    interface HealthIndicator {
+        String PROBLEMS = "problems";
+        String SERVICES = "services";
+        String STATUS = "status";
+        String INDICATOR = "indicator";
+        String EXCEPTION = "exception";
+        String TIME = "serverTime";
+        String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+        String VERSION = "buildVersion";
+	    String GIT_BUILD_TIME = "buildTime";
+        String GIT_COMMIT_ID = "gitCommitId";
+    }
 }
