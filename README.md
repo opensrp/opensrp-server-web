@@ -63,7 +63,7 @@ Status Code: 200
   },
   "serverTime": "2021-11-01T09:44:43.584+03:00",
   "buildVersion": "3.2",
-  "gitBuildTime": "2021-11-03T14:56:28+0300",
+  "buildTime": "2021-11-03T14:56:28+0300",
   "gitCommitId": "234234234"
 }
 ```
@@ -87,7 +87,7 @@ Status Code: 503
   },
   "serverTime": "2021-11-02T09:44:43.584+03:00",
   "buildVersion": "3.2",
-  "gitBuildTime": "2021-11-03T14:56:28+0300",
+  "buildTime": "2021-11-03T14:56:28+0300",
   "gitCommitId": "234234234"
 }
 ```
