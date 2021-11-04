@@ -11,7 +11,6 @@ import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
@@ -41,14 +40,7 @@ public class HealthServiceImpl implements HealthService {
 	@Autowired(required = false)
 	private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
 
-	@Value("#{git['git.build.version'] ?: ''}")
-	private String buildVersion;
-
-	@Value("#{git['git.commit.id.full'] ?: ''}")
-	private String gitCommitId;
-
-	@Value("#{git['git.build.time'] ?: ''}")
-	private String gitBuildTime;
+	private final String buildVersion = this.getClass().getPackage().getImplementationVersion();
 
 	private List<ServiceHealthIndicator> getHealthIndicators() {
 		List<ServiceHealthIndicator> healthIndicators = new ArrayList<>();
@@ -87,10 +79,7 @@ public class HealthServiceImpl implements HealthService {
 					new SimpleDateFormat(Constants.HealthIndicator.DATE_TIME_FORMAT).format(new Date()));
 			if (StringUtils.isNotBlank(buildVersion))
 				resultPayload.put(Constants.HealthIndicator.VERSION, buildVersion);
-			if (StringUtils.isNotBlank(gitBuildTime))
-				resultPayload.put(Constants.HealthIndicator.GIT_BUILD_TIME, gitBuildTime);
-			if (StringUtils.isNotBlank(gitCommitId))
-				resultPayload.put(Constants.HealthIndicator.GIT_COMMIT_ID, gitCommitId);
+
 		}
 		catch (InterruptedException | ExecutionException e) {
 			logger.error(e);
