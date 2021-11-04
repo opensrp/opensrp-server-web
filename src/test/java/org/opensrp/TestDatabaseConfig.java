@@ -3,7 +3,8 @@ package org.opensrp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import javax.sql.DataSource;
 
 import static org.mockito.Mockito.mock;
 
@@ -11,8 +12,8 @@ import static org.mockito.Mockito.mock;
 public class TestDatabaseConfig {
 
     @Bean
-    public JdbcTemplate jdbcTemplate() {
-        return mock(JdbcTemplate.class);
+    public DataSource dataSource() {
+        return mock(DataSource.class);
     }
 
     @Bean
