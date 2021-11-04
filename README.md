@@ -62,9 +62,7 @@ Status Code: 200
     "rabbitmq": true
   },
   "serverTime": "2021-11-02T09:44:43.584+03:00",
-  "buildVersion": "3.2",
-  "buildTime": "2021-11-03T14:56:28+0300",
-  "gitCommitId": "234234234"
+  "buildVersion": "3.2"
 }
 ```
 
@@ -86,9 +84,7 @@ Status Code: 503
     "rabbitmq": false
   },
   "serverTime": "2021-11-02T09:44:43.584+03:00",
-  "buildVersion": "3.2",
-  "buildTime": "2021-11-03T14:56:28+0300",
-  "gitCommitId": "234234234"
+  "buildVersion": "3.2"
 }
 ```
 **NOTE: Some services will only be checked if they are enabled by the spring maven profiles e.g rabbitmq**

@@ -11,6 +11,7 @@ import org.opensrp.web.health.KeycloakServiceHealthIndicator;
 import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,6 +23,7 @@ import java.util.concurrent.Callable;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -64,7 +66,9 @@ public class HealthServiceImplTest {
 		doReturn(mapCallable).when(rabbitmqServiceHealthIndicator).doHealthCheck();
 		doReturn(mapCallable).when(redisServiceHealthIndicator).doHealthCheck();
 		doReturn(mapCallable).when(keycloakServiceHealthIndicator).doHealthCheck();
-		ModelMap modelMap = healthService.aggregateHealthCheck();
+		HealthServiceImpl spyHealthService = spy(healthService);
+		Whitebox.setInternalState(spyHealthService,"buildVersion", "3.2");
+		ModelMap modelMap = spyHealthService.aggregateHealthCheck();
 		assertNotNull(modelMap);
 		assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
 		assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));
