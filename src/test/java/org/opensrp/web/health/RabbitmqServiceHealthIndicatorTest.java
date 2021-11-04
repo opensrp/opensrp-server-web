@@ -37,4 +37,15 @@ public class RabbitmqServiceHealthIndicatorTest {
 		assertEquals(map.get(Constants.HealthIndicator.INDICATOR), "rabbitmq");
 	}
 
+	@Test
+	public void testDoHealthCheckShouldReturnValidMapWithException() throws Exception {
+		AmqpAdmin amqpAdmin = null;
+		Whitebox.setInternalState(rabbitmqServiceHealthIndicator, "amqpAdmin", amqpAdmin);
+		ModelMap map = rabbitmqServiceHealthIndicator.doHealthCheck().call();
+		assertNotNull(map);
+		assertTrue(map.containsKey(Constants.HealthIndicator.EXCEPTION));
+		assertTrue(map.containsKey(Constants.HealthIndicator.STATUS));
+		assertEquals(map.get(Constants.HealthIndicator.INDICATOR), "rabbitmq");
+	}
+
 }
