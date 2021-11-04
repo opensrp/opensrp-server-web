@@ -67,7 +67,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		        new NotOAuthRequestMatcher(endpoints.oauth2EndpointHandlerMapping()),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/index.html")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/")),
-		        new NegatedRequestMatcher(new AntPathRequestMatcher("/login*")),
+				new NegatedRequestMatcher(new AntPathRequestMatcher("/health")),
+				new NegatedRequestMatcher(new AntPathRequestMatcher("/login*")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("/logout.do")),
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**"))))
 			.authorizeRequests()

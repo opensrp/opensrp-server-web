@@ -72,8 +72,9 @@
 	<util:properties id="opensrp"
 		location="classpath:/opensrp.properties" />
 
-	<util:properties id="git"
-					 location="classpath:/git.properties" />
+
+	<util:properties id="pom"
+					 location="classpath*:pom.properties" />
 
 	<mvc:annotation-driven />
 	<mvc:default-servlet-handler />

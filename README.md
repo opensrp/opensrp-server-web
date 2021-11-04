@@ -58,13 +58,11 @@ Status Code: 200
   "services": {
     "postgres": true,
     "redis": true,
-    "openmrs": true,
+    "keycloak": true,
     "rabbitmq": true
   },
   "serverTime": "2021-11-01T09:44:43.584+03:00",
-  "buildVersion": "3.2",
-  "buildTime": "2021-11-03T14:56:28+0300",
-  "gitCommitId": "234234234"
+  "buildVersion": "3.2"
 }
 ```
 
@@ -72,7 +70,7 @@ Status Code: 200
 
 Request Endpoint: `/opensrp/health`  
 Request Method: GET  
-Status Code: 503
+Status Code: 503  
 ```json
 {
   "problems": {
@@ -86,9 +84,7 @@ Status Code: 503
     "rabbitmq": false
   },
   "serverTime": "2021-11-02T09:44:43.584+03:00",
-  "buildVersion": "3.2",
-  "buildTime": "2021-11-03T14:56:28+0300",
-  "gitCommitId": "234234234"
+  "buildVersion": "3.2"
 }
 ```
 
