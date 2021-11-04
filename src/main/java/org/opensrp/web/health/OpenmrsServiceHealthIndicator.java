@@ -7,6 +7,7 @@ import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,12 @@ public class OpenmrsServiceHealthIndicator implements ServiceHealthIndicator {
 	@Value("#{opensrp['openmrs.url'] ?: ''}")
 	private String openmrsUrl;
 
+	@Value("#{opensrp['health.endpoint.openmrs.connectionTimeout'] ?: 5000 }")
+	private Integer openmrsConnectionTimeout;
+
+	@Value("#{opensrp['health.endpoint.openmrs.readTimeout'] ?: 5000 }")
+	private Integer openmrsReadTimeout;
+
 	private final String HEALTH_INDICATOR_KEY = "openmrs";
 
 	@Override
@@ -29,7 +36,11 @@ public class OpenmrsServiceHealthIndicator implements ServiceHealthIndicator {
 			ModelMap modelMap = new ModelMap();
 			boolean result = false;
 			try {
-				RestTemplate restTemplate = new RestTemplate();
+				SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+				simpleClientHttpRequestFactory.setConnectTimeout(openmrsConnectionTimeout);
+				simpleClientHttpRequestFactory.setReadTimeout(openmrsReadTimeout);
+
+				RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
 				ResponseEntity<String> responseEntity = restTemplate.getForEntity(openmrsUrl,
 						String.class);
 				result = responseEntity.getStatusCode() == HttpStatus.OK;
