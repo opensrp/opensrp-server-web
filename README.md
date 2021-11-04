@@ -61,7 +61,7 @@ Status Code: 200
     "keycloak": true,
     "rabbitmq": true
   },
-  "serverTime": "2021-11-02T09:44:43.584+03:00",
+  "serverTime": "2021-11-01T09:44:43.584+03:00",
   "buildVersion": "3.2"
 }
 ```
@@ -87,4 +87,15 @@ Status Code: 503
   "buildVersion": "3.2"
 }
 ```
+
+#### Configurations for the Endpoint
+
+| Configuration                               | Description                                    | Type    | Default | 
+|---------------------------------------------|------------------------------------------------|---------|---------|
+| health.endpoint.keycloak.connectionTimeout  | http client connection timeout for the request | Integer | 5000ms  |
+| health.endpoint.keycloak.readTimeout        | http client read timeout for the request       | Integer | 5000ms  |
+| health.endpoint.postgres.queryTimeout       | postgres query timeout for indicator DB query  | Integer | 2000ms  |
+
+The above configs can be updated on `opensrp.properties` file.  
+
 **NOTE: Some services will only be checked if they are enabled by the spring maven profiles e.g rabbitmq**
