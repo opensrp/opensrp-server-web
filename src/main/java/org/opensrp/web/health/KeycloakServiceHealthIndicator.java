@@ -6,9 +6,11 @@ import org.keycloak.adapters.KeycloakDeployment;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +26,12 @@ public class KeycloakServiceHealthIndicator implements ServiceHealthIndicator {
 	@Autowired
 	private KeycloakDeployment keycloakDeployment;
 
+	@Value("#{opensrp['health.endpoint.keycloak.connectionTimeout'] ?: 5000 }")
+	private Integer connectionTimeout;
+
+	@Value("#{opensrp['health.endpoint.keycloak.readTimeout'] ?: 5000 }")
+	private Integer readTimeout;
+
 	private final String HEALTH_INDICATOR_KEY = "keycloak";
 
 	@Override
@@ -32,7 +40,11 @@ public class KeycloakServiceHealthIndicator implements ServiceHealthIndicator {
 			ModelMap modelMap = new ModelMap();
 			boolean result = false;
 			try {
-				RestTemplate restTemplate = new RestTemplate();
+				SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+				simpleClientHttpRequestFactory.setReadTimeout(readTimeout);
+				simpleClientHttpRequestFactory.setConnectTimeout(connectionTimeout);
+
+				RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
 				ResponseEntity<String> responseEntity = restTemplate.getForEntity(keycloakDeployment.getRealmInfoUrl(),
 						String.class);
 				result = responseEntity.getStatusCode() == HttpStatus.OK;
