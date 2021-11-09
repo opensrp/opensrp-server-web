@@ -477,11 +477,6 @@ public class EventResource extends RestResource<Event> {
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
-						if (eventService.checkIfCaseTriggeredEventExists(event)){
-							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
-							continue;
-						}
-
 						if (StringUtils.isNotBlank(event.getEventType())
 								&& event.getEventType().equals(EVENT_TYPE_CASE_DETAILS)
 								&& event.getDetails() != null

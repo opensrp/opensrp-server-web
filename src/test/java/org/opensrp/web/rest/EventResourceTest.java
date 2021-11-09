@@ -400,51 +400,6 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	}
 
 	@Test
-	public void testSaveAddsOnceForDuplicateCaseTriggeredEvent() throws Exception {
-		String ADD_EVENT_REQUEST_PAYLOAD  = "{\n"
-				+ "    \"clients\":[],\n"
-				+ "    \"events\": [\n"
-				+ "        {\n"
-				+ "    \"_id\": \"c97d2662-91c4-4d6f-bea0-e00b581819b0\",\n"
-				+ "    \"obs\": [],\n"
-				+ "    \"_rev\": \"v1\",\n"
-				+ "    \"type\": \"Event\",\n"
-				+ "    \"teamId\": \" \",\n"
-				+ "    \"details\": {\n"
-				+ "        \"flag\": \"Source\",\n"
-				+ "        \"case_number\": \"141311000005892210504211404817\",\n"
-				+ "        \"case_classification\": \"Bo\"\n"
-				+ "    },\n"
-				+ "    \"eventType\": \"Case_Details\",\n"
-				+ "    \"entityType\": \"Case_Details\",\n"
-				+ "    \"locationId\": \"be847cbb-576b-4d76-b9da-f59175f74dcb\",\n"
-				+ "    \"providerId\": \"nifi-user\",\n"
-				+ "    \"dateCreated\": \"2021-05-11T18:57:42.506+07:00\",\n"
-				+ "    \"identifiers\": {},\n"
-				+ "    \"baseEntityId\": \"be847cbb-576b-4d76-b9da-f59175f74dcb\",\n"
-				+ "    \"serverVersion\": 1601985029999,\n"
-				+ "    \"formSubmissionId\": \"0149bcf6-892b-45f6-b117-6a60bebe3809\"\n"
-				+ "}\n"
-				+ "    ]\n"
-				+ "}";
-		Event event = createEvent();
-		event.setEventType(EVENT_TYPE_CASE_DETAILS);
-		event.addDetails(CASE_NUMBER, "141311000005892210504211404817");
-		event.addDetails(FLAG, "Source");
-
-		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
-		doReturn(false,true, true, true, true ).when(eventService).checkIfCaseTriggeredEventExists(any(Event.class));
-		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
-		// duplicates
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_EVENT_REQUEST_PAYLOAD, status().isCreated());
-
-		verify(eventService, atMostOnce()).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
-	}
-
-	@Test
 	public void testGetAll() throws Exception {
 		List<Event> expectedEvents = new ArrayList<>();
 		expectedEvents.add(createEvent());
@@ -559,6 +514,25 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		verify(eventService).getImagesMetadataForFlagProblemEvent(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
 		verify(multimediaService).retrieveFile(anyString());
 		verify(multimediaService).findByCaseId(anyString());
+	}
+
+	@Test
+	public void testGetById() {
+		Event expectedEvent = createEvent();
+		when(eventService.findById(expectedEvent.getId())).thenReturn(expectedEvent);
+		Event actualEvent = eventResource.getById(expectedEvent.getId());
+		verify(eventService).findById(expectedEvent.getId());
+		assertEquals(expectedEvent.getId(), actualEvent.getId());
+	}
+
+	@Test
+	public void testRequiredProperties() {
+		List<String> requiredProperties = eventResource.requiredProperties();
+		assertNotNull(requiredProperties);
+		assertEquals(3, requiredProperties.size());
+		assertTrue(requiredProperties.contains(BASE_ENTITY_ID));
+		assertTrue(requiredProperties.contains(EVENT_TYPE));
+		assertTrue(requiredProperties.contains(PROVIDER_ID));
 	}
 
 
