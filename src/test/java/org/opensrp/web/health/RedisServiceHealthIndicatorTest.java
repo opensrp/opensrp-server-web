@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.ui.ModelMap;
+import redis.clients.jedis.Jedis;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,8 +44,10 @@ public class RedisServiceHealthIndicatorTest {
 	public void testDoHealthCheckShouldReturnValidMapWithoutException() throws Exception {
 		RedisConnectionFactory redisConnectionFactory = mock(RedisConnectionFactory.class);
 		JedisConnection redisConnection = mock(JedisConnection.class);
-		doReturn("PONG").when(redisConnection).ping();
+		Jedis jedis = mock(Jedis.class);
+		doReturn("PONG").when(jedis).ping();
 		doReturn(redisConnection).when(redisConnectionFactory).getConnection();
+		doReturn(jedis).when(redisConnection).getNativeConnection();
 		Whitebox.setInternalState(redisServiceHealthIndicator, "redisConnectionFactory", redisConnectionFactory);
 		ModelMap map = redisServiceHealthIndicator.doHealthCheck().call();
 		assertNotNull(map);
