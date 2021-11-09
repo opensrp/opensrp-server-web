@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
+import redis.clients.jedis.Jedis;
 
 import java.util.concurrent.Callable;
 
@@ -28,8 +29,8 @@ public class RedisServiceHealthIndicator implements ServiceHealthIndicator {
 		return () -> {
 			ModelMap modelMap = new ModelMap();
 			boolean result = false;
-			try {
-				String pingResult = redisConnectionFactory.getConnection().ping();
+			try (Jedis jedis = (Jedis) redisConnectionFactory.getConnection().getNativeConnection()) {
+				String pingResult = jedis.ping();
 				result = "PONG".equalsIgnoreCase(pingResult);
 			}
 			catch (Exception e) {
