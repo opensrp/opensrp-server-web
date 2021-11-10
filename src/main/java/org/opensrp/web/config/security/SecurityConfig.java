@@ -90,6 +90,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		.and()
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
+			.mvcMatchers("/health").permitAll()
 			.mvcMatchers("/").permitAll()
 			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()

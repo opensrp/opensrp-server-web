@@ -1,9 +1,10 @@
 # opensrp-server-web
 [![Build Status](https://travis-ci.org/OpenSRP/opensrp-server-web.svg?branch=master)](https://travis-ci.org/OpenSRP/opensrp-server-web) [![Coverage Status](https://coveralls.io/repos/github/OpenSRP/opensrp-server-web/badge.svg?branch=master)](https://coveralls.io/github/OpenSRP/opensrp-server-web?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5544ce1a89924b919197c902819c83eb)](https://www.codacy.com/app/OpenSRP/opensrp-server-web?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OpenSRP/opensrp-server-web&amp;utm_campaign=Badge_Grade)
 
+## Overview 
 Generic web application
 
-#### Relevant Wiki Pages ####
+### Relevant Wiki Pages
 * OpenSRP Server Refactor and Cleanup
   * [Refactor and Cleanup](https://smartregister.atlassian.net/wiki/spaces/Documentation/pages/562659330/OpenSRP+Server+Refactor+and+Clean+up)
   * [How to upload and use maven jar artifacts](https://smartregister.atlassian.net/wiki/spaces/Documentation/pages/564428801/How+to+upload+and+use+maven+jar+artifacts)
@@ -42,3 +43,59 @@ Sample Request
 
 **NOTE:** 
 Remember to add your timezone to the DateTimeFormat.ISO
+
+### Health Endpoint
+The health endpoint of the opensrp server is `/opensrp/health`. It always returns information in JSON format. The status code of the response can either be `200` or `503` depending on status of the services. Response status code is `200` if all the services are running ok but `503` if any service is down/inaccessible.
+
+Sample responses from the health endpoint are as follows:
+
+Request Endpoint: `/opensrp/health`  
+Request Method: GET  
+Status Code: 200  
+```json
+{
+  "problems": {},
+  "services": {
+    "postgres": true,
+    "redis": true,
+    "keycloak": true,
+    "rabbitmq": true
+  },
+  "serverTime": "2021-11-01T09:44:43.584+03:00",
+  "buildVersion": "3.2"
+}
+```
+
+---
+
+Request Endpoint: `/opensrp/health`  
+Request Method: GET  
+Status Code: 503  
+```json
+{
+  "problems": {
+    "redis": "Cannot get Jedis connection; nested exception is redis.clients.jedis.exceptions.JedisConnectionException: Could not get a resource from the pool",
+    "rabbitmq": "java.io.IOException"
+  },
+  "services": {
+    "postgres": true,
+    "redis": false,
+    "keycloak": true,
+    "rabbitmq": false
+  },
+  "serverTime": "2021-11-02T09:44:43.584+03:00",
+  "buildVersion": "3.2"
+}
+```
+
+#### Configurations for the Endpoint
+
+| Configuration                               | Description                                    | Type    | Default | 
+|---------------------------------------------|------------------------------------------------|---------|---------|
+| health.endpoint.keycloak.connectionTimeout  | http client connection timeout for the request | Integer | 5000ms  |
+| health.endpoint.keycloak.readTimeout        | http client read timeout for the request       | Integer | 5000ms  |
+| health.endpoint.postgres.queryTimeout       | postgres query timeout for indicator DB query  | Integer | 2000ms  |
+
+The above configs can be updated on `opensrp.properties` file.  
+
+**NOTE: Some services will only be checked if they are enabled by the spring maven profiles e.g rabbitmq**

@@ -485,8 +485,6 @@ public class OrganizationResourceTest {
 				.collect(Collectors.toSet());
 
 		assertEquals(activePlans.size(), userAssignment.getPlans().size());
-
-		assertTrue(activePlans.size() < planIds.size());
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
 		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);
