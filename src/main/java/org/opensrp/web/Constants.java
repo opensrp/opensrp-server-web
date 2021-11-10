@@ -73,10 +73,21 @@ public interface Constants {
     }
 
     interface RapidPro {
-	    String CONTACT = "contact";
+        String CONTACT = "contact";
         String UUID = "uuid";
         String DATE_OF_BIRTH = "dateofbirth";
         String ID = "id";
         String VALUE = "value";
+    }
+
+    interface HealthIndicator {
+        String PROBLEMS = "problems";
+        String SERVICES = "services";
+        String STATUS = "status";
+        String INDICATOR = "indicator";
+        String EXCEPTION = "exception";
+        String TIME = "serverTime";
+        String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+        String VERSION = "buildVersion";
     }
 }
