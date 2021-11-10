@@ -477,17 +477,17 @@ public class EventResource extends RestResource<Event> {
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
+						event = eventService.processOutOfArea(event);
+						long timeBeforeSavingEvent = System.currentTimeMillis();
+						eventService.addorUpdateEvent(event, username);
+						logger.error("[SYNC_INFO] Event " + event.getFormSubmissionId() + " of type " +
+								event.getEventType() + " saved in " + getExecutionTime(timeBeforeSavingEvent) + " seconds");
 						if (StringUtils.isNotBlank(event.getEventType())
 								&& event.getEventType().equals(EVENT_TYPE_CASE_DETAILS)
 								&& event.getDetails() != null
 								&& StringUtils.isNotBlank(event.getDetails().get(CASE_NUMBER))) {
 							planProcessingStatusService.addPlanProcessingStatus(event.getId(), PlanProcessingStatusConstants.INITIAL);
 						}
-						event = eventService.processOutOfArea(event);
-						long timeBeforeSavingEvent = System.currentTimeMillis();
-						eventService.addorUpdateEvent(event, username);
-						logger.error("[SYNC_INFO] Event " + event.getFormSubmissionId() + " of type " +
-								event.getEventType() + " saved in " + getExecutionTime(timeBeforeSavingEvent) + " seconds");
 					}
 					catch (Exception e) {
 						logger.error("Event of type " + event.getEventType() + " for client " +
