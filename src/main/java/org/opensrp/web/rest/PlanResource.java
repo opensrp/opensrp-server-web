@@ -571,12 +571,12 @@ public class PlanResource {
 		valuesMap.put("mosquitoCollectionActionId", UUID.randomUUID().toString());
 
 		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
-		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getEventId());
+		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getId());
 		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
 		valuesMap.put(PlanConstants.FOCUS_ID, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_ID));
 		valuesMap.put(PlanConstants.FOCUS_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_NAME));
-		valuesMap.put(PlanConstants.PATIENT_NAME, caseDetailsEvent.getDetails().get(PlanConstants.PATIENT_NAME));
-		valuesMap.put(PlanConstants.PATIENT_SURNAME, caseDetailsEvent.getDetails().get(PlanConstants.PATIENT_SURNAME));
+		valuesMap.put(PlanConstants.PATIENT_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FIRST_NAME));
+		valuesMap.put(PlanConstants.PATIENT_SURNAME, caseDetailsEvent.getDetails().get(PlanConstants.SURNAME));
 		valuesMap.put(PlanConstants.FLAG, caseDetailsEvent.getDetails().get(PlanConstants.FLAG));
 
 		// Build StringSubstitutor
