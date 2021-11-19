@@ -99,3 +99,47 @@ Status Code: 503
 The above configs can be updated on `opensrp.properties` file.  
 
 **NOTE: Some services will only be checked if they are enabled by the spring maven profiles e.g rabbitmq**
+
+
+### Metrics Endpoint
+The metrics endpoint of the opensrp server is `/opensrp/metrics`. It returns information in `text/plain; version=0.0.4; charset=utf-8` format. The status code of the response should always be `200`.  
+
+The endpoint is only accessible through the following ips when unauthenticated but requires authentication for the any other ips:
+- `127.0.0.1`, 
+- `InetAddress.getLocalHost().getHostAddress()`,
+- One additional configurable ip, kindly check below `metrics.additional_ip_allowed`
+
+Sample responses from the metrics endpoint are as follows:
+
+Request Endpoint: `/opensrp/health`  
+Request Method: GET  
+Status Code: 200
+```text
+# HELP health_check_rabbitmq  
+# TYPE health_check_rabbitmq gauge
+health_check_rabbitmq 0.0
+# HELP postgres_size The database size
+# TYPE postgres_size gauge
+postgres_size{database="opensrp",} 1.2512801439E10
+# HELP health_check_postgres  
+# TYPE health_check_postgres gauge
+health_check_postgres 1.0
+jvm_threads_states_threads{state="blocked",} 0.0
+```
+
+#### Configurations for the Endpoint
+
+| Configuration                               | Description                                    | Type    | Default | 
+|---------------------------------------------|------------------------------------------------|---------|---------|
+| metrics.tags  | Refers to the common tags to be added on all metrics | Map | {}  |
+| metrics.health_check_updater.cron        | Cron schedule for updating health indicator (custom metrics)      | Integer | 1minute  |
+| metrics.additional_ip_allowed       | ip or pattern for access metrics endpoint without authentication e.g  192.168.100.0/8 or 192.168.100.3 (only one ip) | String | ""  |
+| metrics.include       | metrics to be include  | Set (Comma separated string) | "all"  |
+| metrics.exclude       | metrics to be excluded  | Set (Comma separated string) | ""  |
+
+> Available metrics:
+> `all,log4j2,jvm_thread,jvm_thread,jvm_gc,jvm_mem,cpu,uptime,db,disk_space`
+
+> Health indicators [above](#health-endpoint) are added as gauge meters with name in the following pattern; health_check_%s, `%s` is a placeholder for service name e.g health_check_postgres 
+
+The above configs can be updated on `opensrp.properties` file.

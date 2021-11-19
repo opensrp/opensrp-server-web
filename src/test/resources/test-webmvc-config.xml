@@ -69,6 +69,10 @@
 
 	<bean id="rabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" />
 
+	<bean class="org.opensrp.web.config.MetricsConfiguration" />
+
+	<bean class="org.opensrp.web.config.HealthCheckMetricUpdater" />
+
 	<util:properties id="opensrp"
 		location="classpath:/opensrp.properties" />
 
