@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.0.9-SNAPSHOT</version>
+    <version>3.0.10-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -418,6 +418,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
             <version>2.14.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>1.7.5</version>
         </dependency>
     </dependencies>
 
