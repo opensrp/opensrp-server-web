@@ -2,8 +2,6 @@ package org.opensrp.web.config;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
@@ -25,8 +23,6 @@ public class HealthCheckMetricUpdater {
 	private HealthService healthService;
 
 	private Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
-
-	private static final Logger logger = LogManager.getLogger(HealthCheckMetricUpdater.class.toString());
 
 	@PostConstruct
 	private void init() {
