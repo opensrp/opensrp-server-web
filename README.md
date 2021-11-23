@@ -136,6 +136,7 @@ jvm_threads_states_threads{state="blocked",} 0.0
 | metrics.additional_ip_allowed       | ip or pattern for access metrics endpoint without authentication e.g  192.168.100.0/8 or 192.168.100.3 (only one ip) | String | ""  |
 | metrics.include       | metrics to be include  | Set (Comma separated string) | "all"  |
 | metrics.exclude       | metrics to be excluded  | Set (Comma separated string) | ""  |
+| metrics.permitAll       | permits access to metrics endpoint without authentication (Set true if restriction on reverse proxy configs, otherwise whitelist ip if needed) | Boolean | false  |
 
 > Available metrics:
 > `all,log4j2,jvm_thread,jvm_thread,jvm_gc,jvm_mem,cpu,uptime,db,disk_space`
