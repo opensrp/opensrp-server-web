@@ -60,6 +60,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Value("#{opensrp['metrics.additional_ip_allowed'] ?: '' }")
 	private String metricsAdditionalIpAllowed;
 
+	@Value("#{opensrp['metrics.permitAll'] ?: false }")
+	private boolean metricsPermitAll;
+
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
@@ -97,10 +100,11 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/health").permitAll()
 			.mvcMatchers("/metrics")
-				.access("(isAuthenticated() or hasIpAddress('127.0.0.1') "
+				.access(metricsPermitAll ? "permitAll()" :
+						" ( isAuthenticated()"
+						+ " or hasIpAddress('127.0.0.1') "
 						+ " or hasIpAddress('"+ InetAddress.getLocalHost().getHostAddress() +"') "
-						+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",
-						metricsAdditionalIpAllowed)) + ")")
+						+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",metricsAdditionalIpAllowed)) + ")")
 			.mvcMatchers("/").permitAll()
 			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
