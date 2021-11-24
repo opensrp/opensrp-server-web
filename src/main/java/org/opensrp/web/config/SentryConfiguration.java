@@ -26,7 +26,7 @@ public class SentryConfiguration {
 	@Value("#{opensrp['sentry.environment'] ?: ''}")
 	private String environment;
 
-	@Value("#{opensrp['sentry.tags'] ?: '{}'}")
+	@Value("#{opensrp['sentry.tags'] ?: {} }")
 	private String tags;
 
 	@PostConstruct
