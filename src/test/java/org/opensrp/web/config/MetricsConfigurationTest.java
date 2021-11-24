@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -17,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ActiveProfiles(profiles = { "jedis" })
 public class MetricsConfigurationTest {
 
 	@Autowired
