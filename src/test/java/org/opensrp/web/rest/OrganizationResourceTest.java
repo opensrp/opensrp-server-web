@@ -463,7 +463,6 @@ public class OrganizationResourceTest {
 
 		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
 				.map(p -> p.getIdentifier()).collect(Collectors.toSet());
-		assertTrue(activePlans.size() < 5);
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
 		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);

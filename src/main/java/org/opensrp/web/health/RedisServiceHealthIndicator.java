@@ -42,4 +42,9 @@ public class RedisServiceHealthIndicator implements ServiceHealthIndicator {
 			return modelMap;
 		};
 	}
+
+	@Override
+	public String getHealthIndicatorKey() {
+		return HEALTH_INDICATOR_KEY;
+	}
 }
