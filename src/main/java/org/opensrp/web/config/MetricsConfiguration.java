@@ -40,10 +40,10 @@ public class MetricsConfiguration {
 
 	private static final Logger logger = LogManager.getLogger(MetricsConfiguration.class.toString());
 
-	@Value("#{opensrp['metrics.tags'] ?: {} }")
+	@Value("#{opensrp['metrics.tags'] ?: '{}' }")
 	private String metricsTags;
 
-	@Value("#{opensrp['sentry.tags'] ?: {} }")
+	@Value("#{opensrp['sentry.tags'] ?: '{}' }")
 	private String sentryTags;
 
 	@Autowired
@@ -144,7 +144,7 @@ public class MetricsConfiguration {
 	@VisibleForTesting
 	protected List<Tag> buildMetricsTags(String tags, String prefix) {
 		List<Tag> tagList = new ArrayList<>();
-		if (StringUtils.isNotBlank(tags)) {
+		if (StringUtils.isNotBlank(tags) && tags.length() > 2) {
 			Map<String, String> map;
 			try {
 				map = new Gson().fromJson(tags, Map.class);
