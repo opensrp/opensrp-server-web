@@ -3,9 +3,11 @@
  */
 package org.opensrp.web.config.security;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -22,6 +24,8 @@ import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.net.InetAddress;
 
 import static org.springframework.http.HttpMethod.OPTIONS;
 
@@ -48,6 +52,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Autowired(required = false)
 	private AuthorizationServerEndpointsConfiguration endpoints;
 
+	@Value("#{opensrp['metrics.additional_ip_allowed'] ?: '' }")
+	private String metricsAdditionalIpAllowed;
+
+	@Value("#{opensrp['metrics.permitAll'] ?: false }")
+	private boolean metricsPermitAll;
+
 	@Override
 	public void configure(ResourceServerSecurityConfigurer security) throws Exception {
 		/* @formatter:off */
@@ -73,6 +83,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 		        new NegatedRequestMatcher(new AntPathRequestMatcher("rest/viewconfiguration/**"))))
 			.authorizeRequests()
 				.mvcMatchers(OPTIONS,"/**").permitAll()
+				.mvcMatchers("/metrics")
+				.access(metricsPermitAll ? "permitAll()" :
+						" ( isAuthenticated()"
+								+ " or hasIpAddress('127.0.0.1') "
+								+ " or hasIpAddress('"+ InetAddress.getLocalHost().getHostAddress() +"') "
+								+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",metricsAdditionalIpAllowed)) + ")")
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 				.mvcMatchers("/rest/plans/user/**").hasRole(Role.PLANS_FOR_USER)
 				.anyRequest().hasRole(Role.OPENMRS)

@@ -3,6 +3,7 @@
  */
 package org.opensrp.web.config.security;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 
 import static org.springframework.http.HttpMethod.DELETE;
@@ -49,7 +51,13 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 	private long corsMaxAge;
 	
 	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
-	
+
+	@Value("#{opensrp['metrics.additional_ip_allowed'] ?: '' }")
+	private String metricsAdditionalIpAllowed;
+
+	@Value("#{opensrp['metrics.permitAll'] ?: false }")
+	private boolean metricsPermitAll;
+
 	@Autowired
 	public void setOpensrpAuthenticationProvider(DrishtiAuthenticationProvider opensrpAuthenticationProvider) {
 		this.opensrpAuthenticationProvider = opensrpAuthenticationProvider;
@@ -75,6 +83,12 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/index.html").permitAll()
 		.mvcMatchers("/").permitAll()
 		.mvcMatchers("/health").permitAll()
+				.mvcMatchers("/metrics")
+				.access(metricsPermitAll ? "permitAll()" :
+						" ( isAuthenticated()"
+								+ " or hasIpAddress('127.0.0.1') "
+								+ " or hasIpAddress('"+ InetAddress.getLocalHost().getHostAddress() +"') "
+								+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",metricsAdditionalIpAllowed)) + ")")
 		.mvcMatchers("/multimedia/download/**").permitAll()
 		.mvcMatchers("/multimedia/profileimage/**").permitAll()
 		.mvcMatchers("/multimedia/media/**").permitAll()

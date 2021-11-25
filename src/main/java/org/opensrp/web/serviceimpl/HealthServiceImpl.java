@@ -42,13 +42,18 @@ public class HealthServiceImpl implements HealthService {
 
 	private final String buildVersion = this.getClass().getPackage().getImplementationVersion();
 
-	private List<ServiceHealthIndicator> getHealthIndicators() {
-		List<ServiceHealthIndicator> healthIndicators = new ArrayList<>();
-		healthIndicators.add(jdbcServiceHealthIndicator);
-		healthIndicators.add(redisServiceHealthIndicator);
-		healthIndicators.add(openmrsServiceHealthIndicator);
-		if (rabbitmqServiceHealthIndicator != null)
-			healthIndicators.add(rabbitmqServiceHealthIndicator);
+	private List<ServiceHealthIndicator> healthIndicators;
+
+	@Override
+	public List<ServiceHealthIndicator> getHealthIndicators() {
+		if (healthIndicators == null) {
+			healthIndicators = new ArrayList<>();
+			healthIndicators.add(jdbcServiceHealthIndicator);
+			healthIndicators.add(redisServiceHealthIndicator);
+			healthIndicators.add(openmrsServiceHealthIndicator);
+			if (rabbitmqServiceHealthIndicator != null)
+				healthIndicators.add(rabbitmqServiceHealthIndicator);
+		}
 		return healthIndicators;
     }
 
