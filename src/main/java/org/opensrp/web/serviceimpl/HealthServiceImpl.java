@@ -11,6 +11,7 @@ import org.opensrp.web.health.RabbitmqServiceHealthIndicator;
 import org.opensrp.web.health.RedisServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
@@ -20,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @Service("HealthServiceImpl")
@@ -43,6 +43,9 @@ public class HealthServiceImpl implements HealthService {
 	private final String buildVersion = this.getClass().getPackage().getImplementationVersion();
 
 	private List<ServiceHealthIndicator> healthIndicators;
+
+	@Autowired
+	private ThreadPoolTaskExecutor taskExecutor;
 
 	@Override
 	public List<ServiceHealthIndicator> getHealthIndicators() {
@@ -68,7 +71,7 @@ public class HealthServiceImpl implements HealthService {
 		}
 
 		try {
-			List<Future<ModelMap>> futureList = Executors.newFixedThreadPool(callableList.size()).invokeAll(callableList);
+			List<Future<ModelMap>> futureList = taskExecutor.getThreadPoolExecutor().invokeAll(callableList);
 			for (Future<ModelMap> resultFuture : futureList) {
 				ModelMap modelMap = resultFuture.get();
 				Boolean status = (Boolean) modelMap.get(Constants.HealthIndicator.STATUS);
