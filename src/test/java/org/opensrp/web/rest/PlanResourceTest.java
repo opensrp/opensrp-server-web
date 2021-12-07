@@ -41,9 +41,11 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.PlanTaskCount;
+import org.opensrp.domain.TaskCount;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
+import org.opensrp.util.constants.PlanConstants;
 import org.opensrp.web.bean.Identifier;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PlanDefinition;
@@ -673,20 +675,18 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	@Test
 	public void testFindMissingTaskGeneration() throws Exception {
 		PlanTaskCount planTaskCount = new PlanTaskCount();
-		planTaskCount.setBccExpectedTaskCount(2l);
-		planTaskCount.setBccActualTaskCount(1l);
-		planTaskCount.setBccVariationTaskCount(1l);
+		TaskCount taskCount = new TaskCount();
+		taskCount.setCode(PlanConstants.CASE_CONFIRMATION);
+		taskCount.setExpectedCount(3l);
+		taskCount.setActualCount(2l);
+		taskCount.setMissingCount(1l);
+		planTaskCount.setTaskCounts(Collections.singletonList(taskCount));
+		planTaskCount.setPlanIdentifier("identifier-1");
 		doReturn(Collections.singletonList(planTaskCount)).when(planService).getPlanTaskCounts(any(),any(),any());
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/findMissingTaskGeneration")).andExpect(status().isOk())
 				.andReturn();
 		verify(planService).getPlanTaskCounts(any(),any(),any());
-		assertEquals("[{\"planIdentifier\":null,\"familyRegActualTaskCount\":null,\"familyRegExpectedTaskCount\":null," +
-				"\"familyRegVariationTaskCount\":null,\"bednetDistributionActualTaskCount\":null,\"bednetDistributionExpectedTaskCount\":null," +
-				"\"bednetDistributionVariationTaskCount\":null,\"bloodScreeningActualTaskCount\":null,\"bloodScreeningExpectedTaskCount\":null," +
-				"\"bloodScreeningVariationTaskCount\":null,\"bccActualTaskCount\":1,\"bccExpectedTaskCount\":2,\"bccVariationTaskCount\":1," +
-				"\"caseConfirmationActualTaskCount\":null,\"caseConfirmationExpectedTaskCount\":null,\"caseConfirmationVariationTaskCount\":null," +
-				"\"larvalDippingActualTaskCount\":null,\"larvalDippingExpectedTaskCount\":null,\"larvalDippingVariationTaskCount\":null,\"mosquitoCollectionActualTaskCount\":null," +
-				"\"mosquitoCollectionExpectedTaskCount\":null,\"mosquitoCollectionVariationTaskCount\":null}]", result.getResponse().getContentAsString());
+		assertEquals("[{\"planIdentifier\":\"identifier-1\",\"taskCounts\":[{\"code\":\"Case Confirmation\",\"actualCount\":2,\"expectedCount\":3,\"missingCount\":1}]}]", result.getResponse().getContentAsString());
 	}
 
 	private PlanDefinition createPlanDefinition() {
