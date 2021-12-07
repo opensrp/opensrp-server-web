@@ -473,7 +473,7 @@ public class PlanResource {
 	 *
 	 * @return A list of plan identifiers and missed task generation information
 	 */
-	@RequestMapping(value = "/findMissingTaskGeneration/{planIdentifier}", method = RequestMethod.GET, produces = {
+	@RequestMapping(value = "/findMissingTaskGeneration", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<List<PlanTaskCount>> findMissingTaskGeneration(
 			@RequestParam(value = IDENTIFIERS, required = false) List<String> identifiers,

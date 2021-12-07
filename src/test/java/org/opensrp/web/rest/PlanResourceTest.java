@@ -40,6 +40,7 @@ import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.PlanTaskCount;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
@@ -668,7 +669,26 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		verify(planService, never()).addPlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()));
 		assertEquals("Case triggered plan with opensrpEventId opensrp_event_id_1 already exists", reponseString);
 	}
-	
+
+	@Test
+	public void testFindMissingTaskGeneration() throws Exception {
+		PlanTaskCount planTaskCount = new PlanTaskCount();
+		planTaskCount.setBccExpectedTaskCount(2l);
+		planTaskCount.setBccActualTaskCount(1l);
+		planTaskCount.setBccVariationTaskCount(1l);
+		doReturn(Collections.singletonList(planTaskCount)).when(planService).getPlanTaskCounts(any(),any(),any());
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findMissingTaskGeneration")).andExpect(status().isOk())
+				.andReturn();
+		verify(planService).getPlanTaskCounts(any(),any(),any());
+		assertEquals("[{\"planIdentifier\":null,\"familyRegActualTaskCount\":null,\"familyRegExpectedTaskCount\":null," +
+				"\"familyRegVariationTaskCount\":null,\"bednetDistributionActualTaskCount\":null,\"bednetDistributionExpectedTaskCount\":null," +
+				"\"bednetDistributionVariationTaskCount\":null,\"bloodScreeningActualTaskCount\":null,\"bloodScreeningExpectedTaskCount\":null," +
+				"\"bloodScreeningVariationTaskCount\":null,\"bccActualTaskCount\":1,\"bccExpectedTaskCount\":2,\"bccVariationTaskCount\":1," +
+				"\"caseConfirmationActualTaskCount\":null,\"caseConfirmationExpectedTaskCount\":null,\"caseConfirmationVariationTaskCount\":null," +
+				"\"larvalDippingActualTaskCount\":null,\"larvalDippingExpectedTaskCount\":null,\"larvalDippingVariationTaskCount\":null,\"mosquitoCollectionActualTaskCount\":null," +
+				"\"mosquitoCollectionExpectedTaskCount\":null,\"mosquitoCollectionVariationTaskCount\":null}]", result.getResponse().getContentAsString());
+	}
+
 	private PlanDefinition createPlanDefinition() {
 		List<Jurisdiction> operationalAreas = new ArrayList<>();
 		Jurisdiction operationalArea = new Jurisdiction();
