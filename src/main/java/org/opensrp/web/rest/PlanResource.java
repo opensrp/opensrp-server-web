@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.PlanTaskCount;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
@@ -464,5 +465,23 @@ public class PlanResource {
 		List<PlanDefinition> plans = planService.getAllPlans(planSearchBean);
 		return (plans != null && !plans.isEmpty()) ? false : true;
 	}
-	
+
+
+	/**
+	 * This method provides an endpoint that searches for plans with missed task generation
+	 * and returns the details
+	 *
+	 * @return A list of plan identifiers and missed task generation information
+	 */
+	@RequestMapping(value = "/findMissingTaskGeneration/{planIdentifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<PlanTaskCount>> findMissingTaskGeneration(
+			@RequestParam(value = IDENTIFIERS, required = false) List<String> identifiers,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
+
+		return new ResponseEntity<>(planService.getPlanTaskCounts(identifiers,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
 }
