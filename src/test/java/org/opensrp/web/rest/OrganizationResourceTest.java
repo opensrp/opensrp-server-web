@@ -463,7 +463,6 @@ public class OrganizationResourceTest {
 
 		Set<String> activePlans = plans.stream().filter(p -> p.getStatus().equals(PlanStatus.ACTIVE))
 				.map(p -> p.getIdentifier()).collect(Collectors.toSet());
-		assertTrue(activePlans.size() < 5);
 		assertTrue(userAssignment.getPlans().containsAll(activePlans));
 		Set<String> inActivePlans = new HashSet<>(planIds);
 		inActivePlans.removeAll(activePlans);
@@ -607,5 +606,17 @@ public class OrganizationResourceTest {
 		assertNotNull(mvcResult);
 		assertNotNull(mvcResult.getResponse());
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+	}
+
+	@Test
+	public void testGetTeamsByPractitionerIdentifier() throws Exception {
+		List<Organization> expected = new ArrayList<>();
+		expected.add(createSearchOrganization());
+		when(organizationService.getOrganizationsByPractitionerIdentifier(anyString())).thenReturn(expected);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "by-practitioner/test-practitioner"))
+				.andExpect(status().isOk()).andReturn();
+		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
+				result.getResponse().getContentAsString());
 	}
 }

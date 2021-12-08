@@ -6,11 +6,11 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.11-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
-	
+
     <properties>
         <jetty.port>9979</jetty.port>
         <main.basedir>${project.basedir}</main.basedir>
@@ -25,7 +25,7 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.0.3-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.0.7-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
@@ -419,6 +419,11 @@
             <artifactId>log4j-jcl</artifactId>
             <version>2.14.1</version>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>1.7.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -505,6 +510,12 @@
                         </webResource>
                     </webResources>
                     <failOnMissingWebXml>true</failOnMissingWebXml>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
