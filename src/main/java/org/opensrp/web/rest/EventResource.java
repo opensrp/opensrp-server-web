@@ -273,6 +273,8 @@ public class EventResource extends RestResource<Event> {
 		List<Client> clients = new ArrayList<Client>();
 		long startTime = System.currentTimeMillis();
 		events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+		logger.info("getEventsAndClients - filters: " + gson.toJson(eventSearchBean));
+		logger.info("getEventsAndClients - events: " + gson.toJson(events));
 		Long totalRecords = 0l;
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
 		if (!events.isEmpty()) {
