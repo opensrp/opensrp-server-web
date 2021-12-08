@@ -40,9 +40,12 @@ import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.PlanTaskCount;
+import org.opensrp.domain.TaskCount;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PlanService;
+import org.opensrp.util.constants.PlanConstants;
 import org.opensrp.web.bean.Identifier;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PlanDefinition;
@@ -668,7 +671,24 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		verify(planService, never()).addPlan(argumentCaptor.capture(), eq(authenticatedUser.getFirst().getUsername()));
 		assertEquals("Case triggered plan with opensrpEventId opensrp_event_id_1 already exists", reponseString);
 	}
-	
+
+	@Test
+	public void testFindMissingTaskGeneration() throws Exception {
+		PlanTaskCount planTaskCount = new PlanTaskCount();
+		TaskCount taskCount = new TaskCount();
+		taskCount.setCode(PlanConstants.CASE_CONFIRMATION);
+		taskCount.setExpectedCount(3l);
+		taskCount.setActualCount(2l);
+		taskCount.setMissingCount(1l);
+		planTaskCount.setTaskCounts(Collections.singletonList(taskCount));
+		planTaskCount.setPlanIdentifier("identifier-1");
+		doReturn(Collections.singletonList(planTaskCount)).when(planService).getPlanTaskCounts(any(),any(),any());
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/findMissingTaskGeneration")).andExpect(status().isOk())
+				.andReturn();
+		verify(planService).getPlanTaskCounts(any(),any(),any());
+		assertEquals("[{\"planIdentifier\":\"identifier-1\",\"taskCounts\":[{\"code\":\"Case Confirmation\",\"actualCount\":2,\"expectedCount\":3,\"missingCount\":1}]}]", result.getResponse().getContentAsString());
+	}
+
 	private PlanDefinition createPlanDefinition() {
 		List<Jurisdiction> operationalAreas = new ArrayList<>();
 		Jurisdiction operationalArea = new Jurisdiction();
