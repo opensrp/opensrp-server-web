@@ -73,9 +73,9 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 	public MockitoRule rule = MockitoJUnit.rule();
 	
 	private final static String BASE_URL = "/rest/plans/";
-	
+
 	private PlanService planService;
-	
+
 	private PhysicalLocationService locationService;
 	
 	private final String plansJson = "{\n" + "  \"identifier\": \"plan_1\",\n" + "  \"version\": \"\",\n"
@@ -273,16 +273,13 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	private PlanResource planResource;
 
-	private TemplateService templateService;
-
-	private EventService eventResource;
 
 	@Before
 	public void setUp() {
 		planService = mock(PlanService.class);
 		locationService = mock(PhysicalLocationService.class);
-		templateService = mock(TemplateService.class);
-		eventResource = mock(EventService.class);
+		TemplateService templateService = mock(TemplateService.class);
+		EventService eventResource = mock(EventService.class);
 		planResource = webApplicationContext.getBean(PlanResource.class);
 		planResource.setPlanService(planService);
 		planResource.setLocationService(locationService);
