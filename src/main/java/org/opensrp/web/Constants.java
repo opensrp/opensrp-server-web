@@ -106,6 +106,9 @@ public interface Constants {
         String LARVAL_DIPPING_ACTION_ID = "larvalDippingActionId";
         String MOSQUITO_COLLECTION_ID = "mosquitoCollectionActionId";
         String OPENSRP_CASE_CLASSIFICATION_EVENT_ID = "opensrpCaseClassificationEventId";
+        String EXTERNAL_ID = "externalId";
+        String PLAN_USER = "opensrp";
+        String BFID = "bfid";
         int PLAN_DURATION = 5;
     }
 }

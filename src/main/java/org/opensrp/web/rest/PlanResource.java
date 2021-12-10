@@ -542,15 +542,18 @@ public class PlanResource {
 			processingStatusService.updatePlanProcessingStatus(processingStatus, null,null, PlanProcessingStatusConstants.PROCESSING);
 			logger.info("++++++++++++++ //Validate case details event properties : " + processingStatus.getEventId());
 			//Validate case details event properties
-			planService.validateCaseDetailsEvent(event);
+			boolean isValidCaseDetailsEvent = planService.validateCaseDetailsEvent(event);
+			if (!isValidCaseDetailsEvent) {
+				continue;
+			}
 			logger.info("++++++++++++++ Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case : " + event.getDetails().get("bfid"));
 			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
-			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get("bfid") : null;
+			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get(Constants.Plan.BFID) : null;
 			if (biophicsJurisdictionId == null){
 				continue;
 			}
 			Map<String, String> properties = new HashMap<>();
-			properties.put("externalId", biophicsJurisdictionId);
+			properties.put(Constants.Plan.EXTERNAL_ID, biophicsJurisdictionId);
 			List<PhysicalLocation> jurisdictionList = locationService.findLocationsByProperties(false, null, properties);
 			if (jurisdictionList == null || jurisdictionList.isEmpty()){
 				continue;
@@ -570,7 +573,7 @@ public class PlanResource {
 			PlanDefinition plan = createPlanFromTemplate(planTemplateString, event);
 			logger.info("++++++++++++++ // Save plan : " + plan.getIdentifier());
 			//Save plan
-			planService.addPlan(plan, "opensrp");
+			planService.addPlan(plan, Constants.Plan.PLAN_USER);
 			logger.info("++++++++++++++ // update plan processing status to complete : " + processingStatus.getEventId());
 			//update plan processing status to 2 / complete
 			processingStatusService.updatePlanProcessingStatus(processingStatus, null,plan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE);

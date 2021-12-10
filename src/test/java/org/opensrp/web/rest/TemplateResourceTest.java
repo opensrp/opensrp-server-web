@@ -34,8 +34,6 @@ public class TemplateResourceTest extends BaseSecureResourceTest<PlanTemplate>{
 
     private TemplateService templateService;
 
-    private TemplateResource templateResource;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
@@ -43,8 +41,8 @@ public class TemplateResourceTest extends BaseSecureResourceTest<PlanTemplate>{
 
     @Before
     public void setUp() {
+        TemplateResource templateResource = webApplicationContext.getBean(TemplateResource.class);
         templateService = Mockito.mock(TemplateService.class);
-        templateResource = webApplicationContext.getBean(TemplateResource.class);
         templateResource.setTemplateService(templateService);
         templateResource.setObjectMapper(objectMapper);
     }
