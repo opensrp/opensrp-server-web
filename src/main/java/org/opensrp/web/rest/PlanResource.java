@@ -14,24 +14,43 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.lang.reflect.Field;
 import java.sql.Time;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.Template;
+import org.opensrp.domain.postgres.PlanProcessingStatus;
 import org.opensrp.domain.PlanTaskCount;
 import org.opensrp.search.PlanSearchBean;
+import org.opensrp.service.EventService;
 import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanProcessingStatusService;
 import org.opensrp.service.PlanService;
+import org.opensrp.service.TemplateService;
 import org.opensrp.util.DateTypeConverter;
+import org.opensrp.util.constants.PlanConstants;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
+import org.opensrp.web.Constants;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
+import org.smartregister.domain.Event;
+import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.smartregister.utils.TimingRepeatTimeTypeConverter;
@@ -74,6 +93,12 @@ public class PlanResource {
 	
 	private PhysicalLocationService locationService;
 
+	private PlanProcessingStatusService processingStatusService;
+
+	private EventService eventService;
+
+	private TemplateService templateService;
+
 	private static final String IS_DELETED = "is_deleted";
 
 	private static final String FALSE = "false";
@@ -107,7 +132,22 @@ public class PlanResource {
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-	
+
+	@Autowired
+	public void setProcessingStatusService(PlanProcessingStatusService processingStatusService) {
+		this.processingStatusService = processingStatusService;
+	}
+
+	@Autowired
+	public void setEventService(EventService eventService) {
+		this.eventService = eventService;
+	}
+
+	@Autowired
+	public void setTemplateService(TemplateService templateService) {
+		this.templateService = templateService;
+	}
+
 	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> getPlanByUniqueId(@PathVariable("identifier") String identifier,
 	        @RequestParam(value = FIELDS, required = false) List<String> fields , @RequestParam(value = IS_TEMPLATE, required = false) boolean isTemplateParam) {
@@ -484,4 +524,102 @@ public class PlanResource {
 				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate)),
 				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
+
+	public void generateCaseTriggeredPlans() {
+		logger.info("++++++++++++++ starting  generateCaseTriggeredPlans ++++++++++++");
+		// Get plan processing record where status is 0 / initial
+		List<PlanProcessingStatus> planProcessingStatusList = processingStatusService.getProcessingStatusByStatus(0);
+
+		for (PlanProcessingStatus processingStatus: planProcessingStatusList ) {
+			logger.info("++++++++++++++ finding event with id : " + processingStatus.getEventId());
+			//Get case details event
+			Event event = eventService.findByDbId(processingStatus.getEventId(), false);
+			if (event == null){
+				continue;
+			}
+			logger.info("++++++++++++++ Update plan processing status to 1 / processing : " + processingStatus.getEventId());
+			//Update plan processing status to 1 / processing
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,null, PlanProcessingStatusConstants.PROCESSING);
+			logger.info("++++++++++++++ //Validate case details event properties : " + processingStatus.getEventId());
+			//Validate case details event properties
+			boolean isValidCaseDetailsEvent = planService.validateCaseDetailsEvent(event);
+			if (!isValidCaseDetailsEvent) {
+				continue;
+			}
+			logger.info("++++++++++++++ Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case : " + event.getDetails().get("bfid"));
+			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
+			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get(Constants.Plan.BFID) : null;
+			if (biophicsJurisdictionId == null){
+				continue;
+			}
+			Map<String, String> properties = new HashMap<>();
+			properties.put(Constants.Plan.EXTERNAL_ID, biophicsJurisdictionId);
+			List<PhysicalLocation> jurisdictionList = locationService.findLocationsByProperties(false, null, properties);
+			if (jurisdictionList == null || jurisdictionList.isEmpty()){
+				continue;
+			}
+			logger.info("++++++++++++++ // Run logic to select the template type before generating the plan : " + processingStatus.getEventId());
+			// Run logic to select the template type before generating the plan
+			Integer templateId = planService.getPlanTemplate(event);
+			if (templateId == null) {
+				continue;
+			}
+			logger.info("++++++++++++++ // Fetch template : " + templateId);
+			//Fetch template
+			Template template = templateService.getTemplateByTemplateId(templateId);
+			logger.info("++++++++++++++ // Create plan from template : " + templateId);
+			// Create plan from template
+			String planTemplateString = gson.toJson(template.getTemplate());
+			PlanDefinition plan = createPlanFromTemplate(planTemplateString, event);
+			logger.info("++++++++++++++ // Save plan : " + plan.getIdentifier());
+			//Save plan
+			planService.addPlan(plan, Constants.Plan.PLAN_USER);
+			logger.info("++++++++++++++ // update plan processing status to complete : " + processingStatus.getEventId());
+			//update plan processing status to 2 / complete
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,plan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE);
+		}
+	}
+
+	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
+		// Build map
+		Map<String, String> valuesMap = new HashMap<>();
+		String planIdentifier = caseDetailsEvent.getDetails() != null &&
+				!StringUtils.isBlank(caseDetailsEvent.getDetails().get(Constants.Plan.PLAN_IDENTIFIER)) ?
+				caseDetailsEvent.getDetails().get(Constants.Plan.PLAN_IDENTIFIER) : UUID.randomUUID().toString();
+		valuesMap.put(Constants.Plan.PLAN_IDENTIFIER, planIdentifier);
+		SimpleDateFormat sdf = new SimpleDateFormat(Constants.Plan.DATE_FORMAT);
+		Date currentDate = new Date();
+		Date endDate;
+		Calendar c = Calendar.getInstance();
+		c.setTime(currentDate);
+		c.add(Calendar.YEAR, Constants.Plan.PLAN_DURATION);
+		endDate = c.getTime();
+
+		valuesMap.put(Constants.Plan.CURRENT_DATE, sdf.format(currentDate));
+		valuesMap.put(Constants.Plan.END_DATE, sdf.format(endDate));
+		valuesMap.put(Constants.Plan.REGISTER_FAMILY_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BLOOD_SCREENING_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BCC_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BEDNET_DISTRIBUTION_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.LARVAL_DIPPING_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.MOSQUITO_COLLECTION_ID, UUID.randomUUID().toString());
+
+		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
+		valuesMap.put(Constants.Plan.OPENSRP_CASE_CLASSIFICATION_EVENT_ID, caseDetailsEvent.getId());
+		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
+		valuesMap.put(PlanConstants.FOCUS_ID, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_ID));
+		valuesMap.put(PlanConstants.FOCUS_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_NAME));
+		valuesMap.put(PlanConstants.PATIENT_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FIRST_NAME));
+		valuesMap.put(PlanConstants.PATIENT_SURNAME, caseDetailsEvent.getDetails().get(PlanConstants.SURNAME));
+		valuesMap.put(PlanConstants.FLAG, caseDetailsEvent.getDetails().get(PlanConstants.FLAG));
+
+		// Build StringSubstitutor
+		StringSubstitutor sub = new StringSubstitutor(valuesMap);
+
+		// Replace
+		String resolvedString = sub.replace(templateString);
+
+		return gson.fromJson(resolvedString, PlanDefinition.class);
+	}
+
 }

@@ -93,4 +93,22 @@ public interface Constants {
         String DISK_SPACE = "disk_space";
         String ALL = "all";
     }
+
+    interface Plan {
+        String PLAN_IDENTIFIER = "planIdentifier";
+        String DATE_FORMAT = "yyyy-MM-dd";
+        String CURRENT_DATE = "currentDate";
+        String END_DATE = "endDate";
+        String REGISTER_FAMILY_ACTION_ID = "registerFamilyActionId";
+        String BLOOD_SCREENING_ACTION_ID = "bloodScreeningActionId";
+        String BCC_ACTION_ID = "bccActionId";
+        String BEDNET_DISTRIBUTION_ACTION_ID = "bednetDistributionActionId";
+        String LARVAL_DIPPING_ACTION_ID = "larvalDippingActionId";
+        String MOSQUITO_COLLECTION_ID = "mosquitoCollectionActionId";
+        String OPENSRP_CASE_CLASSIFICATION_EVENT_ID = "opensrpCaseClassificationEventId";
+        String EXTERNAL_ID = "externalId";
+        String PLAN_USER = "opensrp";
+        String BFID = "bfid";
+        int PLAN_DURATION = 5;
+    }
 }
