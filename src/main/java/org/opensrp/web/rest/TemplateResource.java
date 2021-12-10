@@ -80,8 +80,8 @@ public class TemplateResource {
 	}
 
 	private Template getTemplateWithUpdatedVersion(Template template) {
-		List<Template> templates = templateService.getAll(1);
-		int templateVersion = templates != null && !templates.isEmpty() ? templates.get(0).getVersion() + 1 : 0;
+		Template existingTemplate = templateService.getTemplateByTemplateId(template.getTemplateId());
+		int templateVersion = existingTemplate != null  ? existingTemplate.getVersion() + 1 : 0;
 		template.setVersion(templateVersion);
 		return template;
 	}
