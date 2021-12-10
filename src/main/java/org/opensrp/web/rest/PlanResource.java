@@ -15,7 +15,14 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,6 +45,7 @@ import org.opensrp.service.TemplateService;
 import org.opensrp.util.DateTypeConverter;
 import org.opensrp.util.constants.PlanConstants;
 import org.opensrp.util.constants.PlanProcessingStatusConstants;
+import org.opensrp.web.Constants;
 import org.opensrp.web.bean.Identifier;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Event;
@@ -552,26 +560,29 @@ public class PlanResource {
 	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
-		valuesMap.put("planIdentifier", UUID.randomUUID().toString());
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String planIdentifier = caseDetailsEvent.getDetails() != null &&
+				!StringUtils.isBlank(caseDetailsEvent.getDetails().get(Constants.Plan.PLAN_IDENTIFIER)) ?
+				caseDetailsEvent.getDetails().get(Constants.Plan.PLAN_IDENTIFIER) : UUID.randomUUID().toString();
+		valuesMap.put(Constants.Plan.PLAN_IDENTIFIER, planIdentifier);
+		SimpleDateFormat sdf = new SimpleDateFormat(Constants.Plan.DATE_FORMAT);
 		Date currentDate = new Date();
-		Date endDate = new Date();
+		Date endDate;
 		Calendar c = Calendar.getInstance();
 		c.setTime(currentDate);
-		c.add(Calendar.YEAR, 5);
+		c.add(Calendar.YEAR, Constants.Plan.PLAN_DURATION);
 		endDate = c.getTime();
 
-		valuesMap.put("currentDate", sdf.format(currentDate));
-		valuesMap.put("endDate", sdf.format(endDate));
-		valuesMap.put("registerFamilyActionId", UUID.randomUUID().toString());
-		valuesMap.put("bloodScreeningActionId", UUID.randomUUID().toString());
-		valuesMap.put("bccActionId", UUID.randomUUID().toString());
-		valuesMap.put("bednetDistributionActionId", UUID.randomUUID().toString());
-		valuesMap.put("larvalDippingActionId", UUID.randomUUID().toString());
-		valuesMap.put("mosquitoCollectionActionId", UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.CURRENT_DATE, sdf.format(currentDate));
+		valuesMap.put(Constants.Plan.END_DATE, sdf.format(endDate));
+		valuesMap.put(Constants.Plan.REGISTER_FAMILY_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BLOOD_SCREENING_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BCC_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.BEDNET_DISTRIBUTION_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.LARVAL_DIPPING_ACTION_ID, UUID.randomUUID().toString());
+		valuesMap.put(Constants.Plan.MOSQUITO_COLLECTION_ID, UUID.randomUUID().toString());
 
 		valuesMap.put(PlanConstants.FOCUS_STATUS, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_STATUS));
-		valuesMap.put("opensrpCaseClassificationEventId", caseDetailsEvent.getId());
+		valuesMap.put(Constants.Plan.OPENSRP_CASE_CLASSIFICATION_EVENT_ID, caseDetailsEvent.getId());
 		valuesMap.put(PlanConstants.CASE_NUMBER, caseDetailsEvent.getDetails().get(PlanConstants.CASE_NUMBER));
 		valuesMap.put(PlanConstants.FOCUS_ID, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_ID));
 		valuesMap.put(PlanConstants.FOCUS_NAME, caseDetailsEvent.getDetails().get(PlanConstants.FOCUS_NAME));
