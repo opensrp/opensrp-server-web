@@ -36,6 +36,7 @@ import org.joda.time.LocalDate;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.Template;
 import org.opensrp.domain.postgres.PlanProcessingStatus;
+import org.opensrp.domain.PlanTaskCount;
 import org.opensrp.search.PlanSearchBean;
 import org.opensrp.service.EventService;
 import org.opensrp.service.PhysicalLocationService;
@@ -505,6 +506,25 @@ public class PlanResource {
 		return (plans != null && !plans.isEmpty()) ? false : true;
 	}
 
+
+	/**
+	 * This method provides an endpoint that searches for plans with missed task generation
+	 * and returns the details
+	 *
+	 * @return A list of plan identifiers and missed task generation information
+	 */
+	@RequestMapping(value = "/findMissingTaskGeneration", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<PlanTaskCount>> findMissingTaskGeneration(
+			@RequestParam(value = IDENTIFIERS, required = false) List<String> identifiers,
+			@RequestParam(value = "fromDate", required = false) String fromDate,
+			@RequestParam(value = "toDate", required = false) String toDate) {
+
+		return new ResponseEntity<>(planService.getPlanTaskCounts(identifiers,
+				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
+
 	public void generateCaseTriggeredPlans() {
 		logger.info("++++++++++++++ starting  generateCaseTriggeredPlans ++++++++++++");
 		// Get plan processing record where status is 0 / initial
@@ -598,5 +618,5 @@ public class PlanResource {
 
 		return gson.fromJson(resolvedString, PlanDefinition.class);
 	}
-	
+
 }

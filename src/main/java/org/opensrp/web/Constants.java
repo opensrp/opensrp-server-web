@@ -79,6 +79,19 @@ public interface Constants {
         String TIME = "serverTime";
         String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
         String VERSION = "buildVersion";
+        String HEALTH_CHECK_PLACEHOLDER = "health_check_%s";
+    }
+
+    interface Metrics {
+        String LOG4J2 = "log4j2";
+        String JVM_THREAD = "jvm_thread";
+        String JVM_GC = "jvm_gc";
+        String JVM_MEMORY = "jvm_mem";
+        String PROCESSOR = "cpu";
+        String UPTIME = "uptime";
+        String DATABASE = "db";
+        String DISK_SPACE = "disk_space";
+        String ALL = "all";
     }
 
     interface Plan {

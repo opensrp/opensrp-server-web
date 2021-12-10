@@ -12,8 +12,10 @@ import static org.springframework.http.HttpMethod.PUT;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -54,7 +56,13 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	
 	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
 	private Resource keycloakConfigFileResource;
-	
+
+	@Value("#{opensrp['metrics.additional_ip_allowed'] ?: '' }")
+	private String metricsAdditionalIpAllowed;
+
+	@Value("#{opensrp['metrics.permitAll'] ?: false }")
+	private boolean metricsPermitAll;
+
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
@@ -91,6 +99,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/health").permitAll()
+			.mvcMatchers("/metrics")
+				.access(metricsPermitAll ? "permitAll()" :
+						" ( isAuthenticated()"
+						+ " or hasIpAddress('127.0.0.1') "
+						+ " or hasIpAddress('"+ InetAddress.getLocalHost().getHostAddress() +"') "
+						+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",metricsAdditionalIpAllowed)) + ")")
 			.mvcMatchers("/").permitAll()
 			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()

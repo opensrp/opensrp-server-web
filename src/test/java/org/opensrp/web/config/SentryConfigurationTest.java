@@ -48,7 +48,7 @@ public class SentryConfigurationTest {
 
 	@Test(expected = IllegalAccessError.class)
 	public void testPopulateTagsShouldThrowExceptionIfTagsInvalid() {
-		WhiteboxImpl.setInternalState(sentryConfiguration, "tags", "}");
+		WhiteboxImpl.setInternalState(sentryConfiguration, "tags", "{sample");
 		SentryOptions sentryOptions = mock(SentryOptions.class);
 		sentryConfiguration.populateTags(sentryOptions);
 		verify(sentryOptions, never()).setTag(anyString(), anyString());
