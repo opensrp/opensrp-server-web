@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -32,8 +33,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Date;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1736,7 +1739,11 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		Template template = gson.fromJson(templateString, Template.class);
 		when(templateService.getTemplateByTemplateId(1)).thenReturn(template);
 
-		planResource.generateCaseTriggeredPlans();
+	    PlanResource planResourceSpy = spy(planResource);
+		Date todayDate = new DateTime(2021, 12, 10, 0, 0, 0, 0).toDate();
+		when(planResourceSpy.getCurrentDate()).thenReturn(todayDate);
+
+		planResourceSpy.generateCaseTriggeredPlans();
 
 		verify(planService).addPlan(argumentCaptor.capture(), stringArgumentCaptor.capture());
 		assertEquals(Constants.Plan.PLAN_USER, stringArgumentCaptor.getValue());

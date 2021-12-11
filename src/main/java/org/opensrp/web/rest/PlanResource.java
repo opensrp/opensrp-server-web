@@ -580,6 +580,10 @@ public class PlanResource {
 		}
 	}
 
+	public Date getCurrentDate(){
+		return new Date();
+	}
+
 	public PlanDefinition createPlanFromTemplate(String templateString, Event caseDetailsEvent) {
 		// Build map
 		Map<String, String> valuesMap = new HashMap<>();
@@ -588,7 +592,7 @@ public class PlanResource {
 				caseDetailsEvent.getDetails().get(Constants.Plan.PLAN_IDENTIFIER) : UUID.randomUUID().toString();
 		valuesMap.put(Constants.Plan.PLAN_IDENTIFIER, planIdentifier);
 		SimpleDateFormat sdf = new SimpleDateFormat(Constants.Plan.DATE_FORMAT);
-		Date currentDate = new Date();
+		Date currentDate = getCurrentDate();
 		Date endDate;
 		Calendar c = Calendar.getInstance();
 		c.setTime(currentDate);
