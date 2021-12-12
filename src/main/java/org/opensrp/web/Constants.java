@@ -106,6 +106,11 @@ public interface Constants {
         String LARVAL_DIPPING_ACTION_ID = "larvalDippingActionId";
         String MOSQUITO_COLLECTION_ID = "mosquitoCollectionActionId";
         String OPENSRP_CASE_CLASSIFICATION_EVENT_ID = "opensrpCaseClassificationEventId";
+        String TEMPLATE_NOT_FOUND = "Plan template not found";
+        String JURISDICTION_NOT_FOUND = "Jurisdiction not found";
+        String BIOPHICS_ID_MISSING = "Biophics id missing from case details event";
+        String INVALID_CASE_DETAILS_EVENT = "Case details event is invalid";
+        String MISSING_CASE_DETAILS_EVENT = "Case details event does not exist";
         String EXTERNAL_ID = "externalId";
         String PLAN_USER = "opensrp";
         String BFID = "bfid";

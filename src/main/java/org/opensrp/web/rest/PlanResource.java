@@ -535,33 +535,44 @@ public class PlanResource {
 			//Get case details event
 			Event event = eventService.findByDbId(processingStatus.getEventId(), false);
 			if (event == null){
+				processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+						PlanProcessingStatusConstants.FAILED, Constants.Plan.MISSING_CASE_DETAILS_EVENT);
 				continue;
 			}
 			logger.info("++++++++++++++ Update plan processing status to 1 / processing : " + processingStatus.getEventId());
 			//Update plan processing status to 1 / processing
-			processingStatusService.updatePlanProcessingStatus(processingStatus, null,null, PlanProcessingStatusConstants.PROCESSING);
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+					PlanProcessingStatusConstants.PROCESSING, null);
 			logger.info("++++++++++++++ //Validate case details event properties : " + processingStatus.getEventId());
 			//Validate case details event properties
 			boolean isValidCaseDetailsEvent = planService.validateCaseDetailsEvent(event);
 			if (!isValidCaseDetailsEvent) {
+				processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+						PlanProcessingStatusConstants.FAILED, Constants.Plan.INVALID_CASE_DETAILS_EVENT);
 				continue;
 			}
 			logger.info("++++++++++++++ Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case : " + event.getDetails().get("bfid"));
 			//Validate OpenSRP jurisdiction exists for the Biophics operational area id provided in the index case
 			String biophicsJurisdictionId = event.getDetails() != null ? event.getDetails().get(Constants.Plan.BFID) : null;
 			if (biophicsJurisdictionId == null){
+				processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+						PlanProcessingStatusConstants.FAILED, Constants.Plan.BIOPHICS_ID_MISSING);
 				continue;
 			}
 			Map<String, String> properties = new HashMap<>();
 			properties.put(Constants.Plan.EXTERNAL_ID, biophicsJurisdictionId);
 			List<PhysicalLocation> jurisdictionList = locationService.findLocationsByProperties(false, null, properties);
 			if (jurisdictionList == null || jurisdictionList.isEmpty()){
+				processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+						PlanProcessingStatusConstants.FAILED, Constants.Plan.JURISDICTION_NOT_FOUND);
 				continue;
 			}
 			logger.info("++++++++++++++ // Run logic to select the template type before generating the plan : " + processingStatus.getEventId());
 			// Run logic to select the template type before generating the plan
 			Integer templateId = planService.getPlanTemplate(event);
 			if (templateId == null) {
+				processingStatusService.updatePlanProcessingStatus(processingStatus, null,null,
+						PlanProcessingStatusConstants.FAILED, Constants.Plan.TEMPLATE_NOT_FOUND);
 				continue;
 			}
 			logger.info("++++++++++++++ // Fetch template : " + templateId);
@@ -576,7 +587,8 @@ public class PlanResource {
 			planService.addPlan(plan, Constants.Plan.PLAN_USER);
 			logger.info("++++++++++++++ // update plan processing status to complete : " + processingStatus.getEventId());
 			//update plan processing status to 2 / complete
-			processingStatusService.updatePlanProcessingStatus(processingStatus, null,plan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE);
+			processingStatusService.updatePlanProcessingStatus(processingStatus, null,plan.getIdentifier(),
+					PlanProcessingStatusConstants.COMPLETE, null);
 		}
 	}
 
