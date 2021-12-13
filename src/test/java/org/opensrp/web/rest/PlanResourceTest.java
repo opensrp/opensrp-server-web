@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -1752,9 +1753,145 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 		assertEquals(expectedPlan.getName(), actualPlan.getName());
 		assertEquals(expectedPlan.getTitle(), actualPlan.getTitle());
 		verify(processingStatusService).updatePlanProcessingStatus(status, null,
-				actualPlan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE);
+				actualPlan.getIdentifier(), PlanProcessingStatusConstants.COMPLETE, null);
 
 	}
+
+	@Test
+	public void testGenerateCaseTriggeredPlansLogsErrorWhenEventIsInvalid() {
+		PlanProcessingStatus status = new PlanProcessingStatus();
+		status.setStatus(0);
+		status.setTemplateId(1l);
+		status.setEventId(1l);
+		when(processingStatusService.getProcessingStatusByStatus(0))
+				.thenReturn(Collections.singletonList(status));
+
+		when(eventService.findByDbId(status.getEventId(),false)).thenReturn(null);
+
+		PlanResource planResourceSpy = spy(planResource);
+		planResourceSpy.generateCaseTriggeredPlans();
+
+		verify(processingStatusService).updatePlanProcessingStatus(status, null,
+				null, PlanProcessingStatusConstants.FAILED, "Case details event does not exist");
+
+		verify(planService,times(0)).addPlan(any(),any());
+
+	}
+
+	@Test
+	public void testGenerateCaseTriggeredPlansLogsErrorWhenEventIsMissing() {
+		PlanProcessingStatus status = new PlanProcessingStatus();
+		status.setStatus(0);
+		status.setTemplateId(1l);
+		status.setEventId(1l);
+		when(processingStatusService.getProcessingStatusByStatus(0))
+				.thenReturn(Collections.singletonList(status));
+
+		Event event = gson.fromJson(caseDetailsEventJson, Event.class);
+		when(eventService.findByDbId(status.getEventId(),false)).thenReturn(event);
+
+		when(planService.validateCaseDetailsEvent(event)).thenReturn(false);
+
+		PlanResource planResourceSpy = spy(planResource);
+		planResourceSpy.generateCaseTriggeredPlans();
+
+		verify(processingStatusService).updatePlanProcessingStatus(status, null,
+				null, PlanProcessingStatusConstants.FAILED, "Case details event is invalid");
+
+		verify(planService,times(0)).addPlan(any(),any());
+
+	}
+
+	@Test
+	public void testGenerateCaseTriggeredPlansLogsErrorWhenBiophicsLocationIdIsMissing() {
+		PlanProcessingStatus status = new PlanProcessingStatus();
+		status.setStatus(0);
+		status.setTemplateId(1l);
+		status.setEventId(1l);
+		when(processingStatusService.getProcessingStatusByStatus(0))
+				.thenReturn(Collections.singletonList(status));
+
+		Event event = gson.fromJson(caseDetailsEventJson, Event.class);
+		event.getDetails().remove(Constants.Plan.BFID);
+		when(eventService.findByDbId(status.getEventId(),false)).thenReturn(event);
+
+		when(planService.validateCaseDetailsEvent(event)).thenReturn(true);
+
+		PlanResource planResourceSpy = spy(planResource);
+		planResourceSpy.generateCaseTriggeredPlans();
+
+		verify(processingStatusService).updatePlanProcessingStatus(status, null,
+				null, PlanProcessingStatusConstants.FAILED, "Biophics id missing from case details event");
+
+		verify(planService,times(0)).addPlan(any(),any());
+
+	}
+
+	@Test
+	public void testGenerateCaseTriggeredPlansLogsErrorWhenOpensrpLocationIsMissing() {
+		PlanProcessingStatus status = new PlanProcessingStatus();
+		status.setStatus(0);
+		status.setTemplateId(1l);
+		status.setEventId(1l);
+		when(processingStatusService.getProcessingStatusByStatus(0))
+				.thenReturn(Collections.singletonList(status));
+
+		Event event = gson.fromJson(caseDetailsEventJson, Event.class);
+		when(eventService.findByDbId(status.getEventId(),false)).thenReturn(event);
+
+		when(planService.validateCaseDetailsEvent(event)).thenReturn(true);
+
+		Map<String, String> properties = new HashMap<>();
+		properties.put(Constants.Plan.EXTERNAL_ID, event.getDetails().get(Constants.Plan.BFID));
+		PhysicalLocation location = new PhysicalLocation();
+		location.setId("location-id");
+		when(locationService.findLocationsByProperties(false, null, properties))
+				.thenReturn(null);
+
+		PlanResource planResourceSpy = spy(planResource);
+		planResourceSpy.generateCaseTriggeredPlans();
+
+		verify(processingStatusService).updatePlanProcessingStatus(status, null,
+				null, PlanProcessingStatusConstants.FAILED, "Jurisdiction not found");
+
+		verify(planService,times(0)).addPlan(any(),any());
+
+	}
+
+	@Test
+	public void testGenerateCaseTriggeredPlansLogsErrorWhenTemplateIsMissing() {
+		PlanDefinition expectedPlan = gson.fromJson(caseTriggeredPlanJson, PlanDefinition.class);
+		PlanProcessingStatus status = new PlanProcessingStatus();
+		status.setStatus(0);
+		status.setTemplateId(1l);
+		status.setEventId(1l);
+		when(processingStatusService.getProcessingStatusByStatus(0))
+				.thenReturn(Collections.singletonList(status));
+
+		Event event = gson.fromJson(caseDetailsEventJson, Event.class);
+		when(eventService.findByDbId(status.getEventId(),false)).thenReturn(event);
+
+		when(planService.validateCaseDetailsEvent(event)).thenReturn(true);
+
+		Map<String, String> properties = new HashMap<>();
+		properties.put(Constants.Plan.EXTERNAL_ID, event.getDetails().get(Constants.Plan.BFID));
+		PhysicalLocation location = new PhysicalLocation();
+		location.setId("location-id");
+		when(locationService.findLocationsByProperties(false, null, properties))
+				.thenReturn(Collections.singletonList(location));
+
+		when(planService.getPlanTemplate(event)).thenReturn(null);
+
+		PlanResource planResourceSpy = spy(planResource);
+		planResourceSpy.generateCaseTriggeredPlans();
+
+		verify(processingStatusService).updatePlanProcessingStatus(status, null,
+				null, PlanProcessingStatusConstants.FAILED, "Plan template not found");
+
+		verify(planService,times(0)).addPlan(any(),any());
+
+	}
+
 
 	private PlanDefinition createPlanDefinition() {
 		List<Jurisdiction> operationalAreas = new ArrayList<>();
