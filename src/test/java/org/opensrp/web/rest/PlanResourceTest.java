@@ -1860,7 +1860,6 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
 
 	@Test
 	public void testGenerateCaseTriggeredPlansLogsErrorWhenTemplateIsMissing() {
-		PlanDefinition expectedPlan = gson.fromJson(caseTriggeredPlanJson, PlanDefinition.class);
 		PlanProcessingStatus status = new PlanProcessingStatus();
 		status.setStatus(0);
 		status.setTemplateId(1l);
