@@ -1,9 +1,5 @@
 package org.opensrp.web;
 
-import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
-
-import java.net.ConnectException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.web.dto.ResponseDto;
@@ -20,6 +16,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.net.ConnectException;
+
+import static org.opensrp.web.Constants.DEFAULT_EXCEPTION_HANDLER_MESSAGE;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
