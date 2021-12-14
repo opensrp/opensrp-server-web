@@ -339,16 +339,7 @@ public class EventResource extends RestResource<Event> {
 		List<Client> clients = new ArrayList<Client>();
 		long startTime = System.currentTimeMillis();
 
-		if (isOutOfCatchment) {
-			// fetch siblings
-			String[] baseEntityIds = eventSearchBean.getBaseEntityId().split(",");
-			List<String> relationships = getRelationships(baseEntityIds);
-			eventSearchBean.setBaseEntityId(eventSearchBean.getBaseEntityId() + "," + String.join(",", relationships));
-
-			events = eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
-		} else {
-			events = eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
-		}
+		events = getEvents(eventSearchBean, limit, isOutOfCatchment);
 
 		Long totalRecords = 0l;
 		logger.info("fetching events took: " + (System.currentTimeMillis() - startTime));
@@ -396,6 +387,19 @@ public class EventResource extends RestResource<Event> {
 		eventSyncBean.setNoOfEvents(events.size());
 		eventSyncBean.setTotalRecords(totalRecords);
 		return eventSyncBean;
+	}
+
+	private List<Event> getEvents(EventSearchBean eventSearchBean, Integer limit, boolean isOutOfCatchment) {
+		if (isOutOfCatchment) {
+			// fetch siblings
+			String[] baseEntityIds = eventSearchBean.getBaseEntityId().split(",");
+			List<String> relationships = getRelationships(baseEntityIds);
+			eventSearchBean.setBaseEntityId(eventSearchBean.getBaseEntityId() + "," + String.join(",", relationships));
+
+			return eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+		} else {
+			return eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+		}
 	}
 
 	private void searchMissingClients(List<String> clientIds, List<Client> clients, long startTime) {
