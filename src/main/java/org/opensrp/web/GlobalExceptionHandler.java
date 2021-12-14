@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(AccessDeniedException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public ResponseDto<?> exceptionHandler(AccessDeniedException exception) {
-		logger.warn("Access denied : ", exception.getMessage(), exception.getStackTrace());
+		logger.warn("Access denied : ", exception.getMessage());
 		ResponseDto<?> dto = buildErrorResponse(HttpStatus.FORBIDDEN);
 		dto.setMessage("Access is denied. You do not have enough permissions for the resource.");
 		return dto;

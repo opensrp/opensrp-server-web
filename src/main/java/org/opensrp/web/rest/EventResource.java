@@ -363,7 +363,7 @@ public class EventResource extends RestResource<Event> {
 				int end = Math.min(i + CLIENTS_FETCH_BATCH_SIZE, clientIds.size());
 
 				if (isOutOfCatchment) {
-					clients.addAll(clientService.findOutOfCatchmentByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
+					clients.addAll(clientService.findByFieldValueOutOfCatchment(BASE_ENTITY_ID, clientIds.subList(i, end)));
 				} else {
 					clients.addAll(clientService.findByFieldValue(BASE_ENTITY_ID, clientIds.subList(i, end)));
 				}
@@ -486,10 +486,7 @@ public class EventResource extends RestResource<Event> {
 
 					}.getType());
 
-			logger.info("Adding " + clients.size() + " clients");
-
 			for (Client client : clients) {
-				logger.info("Add client - " + client.getBaseEntityId() + "\n" + gson.toJson(client));
 				clientService.addorUpdate(client);
 			}
 		}
@@ -500,12 +497,8 @@ public class EventResource extends RestResource<Event> {
 
 					}.getType());
 
-			logger.info("Adding " + events.size() + " events");
-
 			for (Event event : events) {
 				event = eventService.processOutOfArea(event);
-
-				logger.info("Add event - " + event.getBaseEntityId() + " - " + event.getFormSubmissionId() + "\n" + gson.toJson(event));
 				eventService.addorUpdateEvent(event, currentUser(authentication).getUsername());
 			}
 		}
