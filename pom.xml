@@ -6,7 +6,7 @@
     <groupId>org.smartregister</groupId>
 	<artifactId>opensrp-server-web</artifactId>
 	<packaging>war</packaging>
-	<version>2.1.54.2-SNAPSHOT</version>
+	<version>2.1.54.3-SNAPSHOT</version>
 	<name>opensrp-server-web</name>
 	<description>OpenSRP Server Web Application</description>
 	<url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -24,9 +24,8 @@
 		<redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
 		<opensrp.updatePolicy>always</opensrp.updatePolicy>
 		<nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-		<opensrp.core.version>2.12.17-SNAPSHOT</opensrp.core.version>
-		<opensrp.connector.version>2.3.2-SNAPSHOT</opensrp.connector.version>
-
+		<opensrp.core.version>2.12.19-SNAPSHOT</opensrp.core.version>
+		<opensrp.connector.version>2.3.3-SNAPSHOT</opensrp.connector.version>
 		<opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
    		<opensrp.api.version>1.0.6-SNAPSHOT</opensrp.api.version>
@@ -365,7 +364,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
-            <version>4.3.0</version>
+            <version>5.5.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
         <dependency>
@@ -386,17 +385,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.15.0</version>
+            <version>2.16.0</version>
         </dependency>
          <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.15.0</version>
+            <version>2.16.0</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>1.7.5</version>
+            <version>1.8.1</version>
         </dependency>
     </dependencies>
 
