@@ -26,7 +26,7 @@ public class SentryConfiguration {
 	@Value("#{opensrp['sentry.environment'] ?: ''}")
 	private String environment;
 
-	@Value("#{opensrp['sentry.tags'] ?: '{}'}")
+	@Value("#{opensrp['sentry.tags'] ?: '{}' }")
 	private String tags;
 
 	@PostConstruct
@@ -47,7 +47,7 @@ public class SentryConfiguration {
 	}
 	@VisibleForTesting
 	protected void populateTags(SentryOptions sentryOptions) {
-		if(StringUtils.isNotBlank(tags)) {
+		if(StringUtils.isNotBlank(tags) && tags.length() > 2) {
 			Map<String, String> map;
 			try {
 				map = new Gson().fromJson(tags, Map.class);
