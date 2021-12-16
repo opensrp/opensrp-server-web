@@ -114,7 +114,6 @@ The metrics endpoint of the opensrp server is `/opensrp/metrics`. It returns inf
 The endpoint is only accessible through the following ips when unauthenticated but requires authentication for the any other ips:
 
 *   `127.0.0.1`,
-*   `InetAddress.getLocalHost().getHostAddress()`,
 *   One additional configurable ip, kindly check below `metrics.additional_ip_allowed`
 
 Sample responses from the metrics endpoint are as follows:
