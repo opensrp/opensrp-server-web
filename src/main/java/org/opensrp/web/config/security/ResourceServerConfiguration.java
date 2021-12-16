@@ -25,8 +25,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.net.InetAddress;
-
 import static org.springframework.http.HttpMethod.OPTIONS;
 
 /**
@@ -87,7 +85,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 				.access(metricsPermitAll ? "permitAll()" :
 						" ( isAuthenticated()"
 								+ " or hasIpAddress('127.0.0.1') "
-								+ " or hasIpAddress('"+ InetAddress.getLocalHost().getHostAddress() +"') "
 								+ (StringUtils.isBlank(metricsAdditionalIpAllowed) ? "" : String.format(" or hasIpAddress('%s')",metricsAdditionalIpAllowed)) + ")")
 				.mvcMatchers("/rest/*/getAll").hasRole(Role.ALL_EVENTS)
 				.mvcMatchers("/rest/plans/user/**").hasRole(Role.PLANS_FOR_USER)
