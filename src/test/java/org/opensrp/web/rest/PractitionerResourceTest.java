@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -54,16 +55,16 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     @Test
-    public void testGetPractitionersSHouldReturnAllPractitioners() throws Exception {
-        List<Practitioner> expectedPractitoiners = new ArrayList<>();
+    public void testGetPractitionersShouldReturnAllPractitioners() throws Exception {
+        List<Practitioner> expectedPractitioners = new ArrayList<>();
 
         Practitioner expectedPractitioner = initTestPractitioner1();
-        expectedPractitoiners.add(expectedPractitioner);
+        expectedPractitioners.add(expectedPractitioner);
 
         expectedPractitioner = initTestPractitioner2();
-        expectedPractitoiners.add(expectedPractitioner);
+        expectedPractitioners.add(expectedPractitioner);
 
-        doReturn(expectedPractitoiners).when(practitionerService).getAllPractitioners(any(PractitionerSearchBean.class));
+        doReturn(expectedPractitioners).when(practitionerService).getAllPractitioners(any(PractitionerSearchBean.class));
 
         String actualPractitionersString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<Practitioner> actualPractitioners = new Gson()
@@ -71,15 +72,15 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
                 }.getType());
 
-        assertListsAreSameIgnoringOrder(actualPractitioners, expectedPractitoiners);
+        assertListsAreSameIgnoringOrder(actualPractitioners, expectedPractitioners);
     }
 
     @Test
-    public void testGetPractitionerByUniqueIdShouldReturnCorrectPractititoner() throws Exception {
-        List<Practitioner> expectedPractitoiners = new ArrayList<>();
+    public void testGetPractitionerByUniqueIdShouldReturnCorrectPractitioner() throws Exception {
+        List<Practitioner> expectedPractitioners = new ArrayList<>();
 
         Practitioner expectedPractitioner = initTestPractitioner1();
-        expectedPractitoiners.add(expectedPractitioner);
+        expectedPractitioners.add(expectedPractitioner);
 
         List<String> practitionerIdList = new ArrayList<>();
         practitionerIdList.add(expectedPractitioner.getIdentifier());
@@ -110,7 +111,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals("Practitioner Id is required", actualPractitioner);
     }
     @Test
-    public void testGetPractitionerByUserIdShouldReturnCorrectPractititoner() throws Exception {
+    public void testGetPractitionerByUserIdShouldReturnCorrectPractitioner() throws Exception {
         List<Practitioner> expectedPractitioners = new ArrayList<>();
 
         Practitioner expectedPractitioner = initTestPractitioner1();
@@ -296,22 +297,30 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     private Practitioner initTestPractitioner1() {
+        DateTime dateCreated = new DateTime();
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier("practitoner-1-identifier");
         practitioner.setActive(true);
         practitioner.setName("Practitioner");
         practitioner.setUsername("Practioner1");
         practitioner.setUserId("user1");
+        practitioner.setDateCreated(dateCreated);
+        practitioner.setDateEdited(dateCreated);
+        practitioner.setServerVersion(1);
         return practitioner;
     }
 
     private Practitioner initTestPractitioner2() {
+        DateTime dateCreated = new DateTime();
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier("practitoner-2-identifier");
         practitioner.setActive(false);
         practitioner.setName("Second Practitioner");
         practitioner.setUsername("Practioner2");
         practitioner.setUserId("user2");
+        practitioner.setDateCreated(dateCreated);
+        practitioner.setDateEdited(dateCreated);
+        practitioner.setServerVersion(2);
         return practitioner;
     }
 
