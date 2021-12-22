@@ -14,6 +14,7 @@ import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.util.DateTypeConverter;
 import org.smartregister.domain.Practitioner;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,8 +41,8 @@ public class PractitionerResource {
 
     private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
 
-    public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-            .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
+    public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     private PractitionerService practitionerService;
 

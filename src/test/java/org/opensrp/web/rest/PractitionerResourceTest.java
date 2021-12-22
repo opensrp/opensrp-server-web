@@ -1,6 +1,7 @@
 package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.joda.time.DateTime;
@@ -10,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.smartregister.domain.Practitioner;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.server.MvcResult;
@@ -47,6 +49,9 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
 
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm.ss.SSSZ")
+            .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+
     @Before
     public void setUp() {
         practitionerService = mock(PractitionerService.class);
@@ -67,8 +72,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         doReturn(expectedPractitioners).when(practitionerService).getAllPractitioners(any(PractitionerSearchBean.class));
 
         String actualPractitionersString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-        List<Practitioner> actualPractitioners = new Gson()
-                .fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
+        List<Practitioner> actualPractitioners = gson.fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
 
                 }.getType());
 
@@ -89,7 +93,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
         String actualPractitionersString = getResponseAsString(BASE_URL + "practitoner-1-identifier", null,
                 MockMvcResultMatchers.status().isOk());
-        Practitioner actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<Practitioner>() {
+        Practitioner actualPractitioner = gson.fromJson(actualPractitionersString, new TypeToken<Practitioner>() {
 
         }.getType());
 
@@ -99,6 +103,9 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioner.getName(), expectedPractitioner.getName());
         assertEquals(actualPractitioner.getUsername(), expectedPractitioner.getUsername());
         assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
+        assertEquals(actualPractitioner.getDateCreated(), expectedPractitioner.getDateCreated());
+        assertEquals(actualPractitioner.getDateEdited(), expectedPractitioner.getDateEdited());
+        assertEquals(actualPractitioner.getServerVersion(), expectedPractitioner.getServerVersion());
     }
 
 
@@ -124,7 +131,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
         String actualPractitionersString = getResponseAsString(BASE_URL + "/user/" + "user1", null,
                 MockMvcResultMatchers.status().isOk());
-        Practitioner actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<Practitioner>() {
+        Practitioner actualPractitioner = gson.fromJson(actualPractitionersString, new TypeToken<Practitioner>() {
 
         }.getType());
 
@@ -134,6 +141,9 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioner.getName(), expectedPractitioner.getName());
         assertEquals(actualPractitioner.getUsername(), expectedPractitioner.getUsername());
         assertEquals(actualPractitioner.getActive(), expectedPractitioner.getActive());
+        assertEquals(actualPractitioner.getDateCreated(), expectedPractitioner.getDateCreated());
+        assertEquals(actualPractitioner.getDateEdited(), expectedPractitioner.getDateEdited());
+        assertEquals(actualPractitioner.getServerVersion(), expectedPractitioner.getServerVersion());
     }
 
     @Test
@@ -162,7 +172,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     public void testUpdateShouldUpdateExistingPractitionerResource() throws Exception {
         Practitioner expectedPractitioner = initTestPractitioner1();
 
-        String practitionerJson = new Gson().toJson(expectedPractitioner, new TypeToken<Practitioner>() {
+        String practitionerJson = gson.toJson(expectedPractitioner, new TypeToken<Practitioner>() {
 
         }.getType());
         putRequestWithJsonContent(BASE_URL, practitionerJson, MockMvcResultMatchers.status().isCreated());
@@ -228,8 +238,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         String actualPractitionersString = getResponseAsString(
                 BASE_URL + "/report-to?practitionerIdentifier=test&code=testCode", null,
                 MockMvcResultMatchers.status().isOk());
-        List<Practitioner> actualPractitioners = new Gson()
-                .fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
+        List<Practitioner> actualPractitioners = gson.fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
 
                 }.getType());
 
@@ -239,6 +248,10 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         assertEquals(actualPractitioners.get(0).getName(), expectedPractitioner.getName());
         assertEquals(actualPractitioners.get(0).getUsername(), expectedPractitioner.getUsername());
         assertEquals(actualPractitioners.get(0).getActive(), expectedPractitioner.getActive());
+        assertEquals(actualPractitioners.get(0).getDateCreated(), expectedPractitioner.getDateCreated());
+        assertEquals(actualPractitioners.get(0).getDateEdited(), expectedPractitioner.getDateEdited());
+        assertEquals(actualPractitioners.get(0).getServerVersion(), expectedPractitioner.getServerVersion());
+
     }
 
     @Override
@@ -276,7 +289,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     @Test
-    public void testCountAllPractitioners() throws Exception {
+    public void testCountAllPractitioners() throws Exception  {
         doReturn(2L).when(practitionerService).countAllPractitioners();
         MvcResult mvcResult = this.mockMvc.perform(get(BASE_URL + "count").accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
@@ -297,7 +310,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     private Practitioner initTestPractitioner1() {
-        DateTime dateCreated = new DateTime();
+        DateTime dateCreated = DateTime.now();
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier("practitoner-1-identifier");
         practitioner.setActive(true);
@@ -311,7 +324,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     private Practitioner initTestPractitioner2() {
-        DateTime dateCreated = new DateTime();
+        DateTime dateCreated = DateTime.now();
         Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier("practitoner-2-identifier");
         practitioner.setActive(false);
