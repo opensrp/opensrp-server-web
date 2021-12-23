@@ -30,10 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.*;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
@@ -73,10 +70,16 @@ public class PractitionerResource {
     public ResponseEntity<String> getPractitioners(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+            @RequestParam(value = SERVER_VERSION, required = false) String serverVersionParam) {
+
+        Long serverVersion = null;
+        if (serverVersionParam != null) {
+            serverVersion = Long.parseLong(serverVersionParam);
+        }
 
         PractitionerSearchBean practitionerSearchBean = createPractitionerSearchBean(pageNumber, pageSize, orderByType,
-                orderByFieldName);
+                orderByFieldName, serverVersion);
         return new ResponseEntity<>(gson.toJson(
                 practitionerService.getAllPractitioners(practitionerSearchBean)),
                 RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
@@ -150,7 +153,7 @@ public class PractitionerResource {
     }
 
     private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
-            String orderByFieldName) {
+            String orderByFieldName, Long serverVersion) {
 
         BaseSearchBean.OrderByType orderByTypeEnum;
         BaseSearchBean.FieldName fieldName;
@@ -164,6 +167,7 @@ public class PractitionerResource {
                 .pageSize(pageSize)
                 .orderByType(orderByTypeEnum)
                 .orderByFieldName(fieldName)
+                .serverVersion(serverVersion)
                 .build();
 
     }
