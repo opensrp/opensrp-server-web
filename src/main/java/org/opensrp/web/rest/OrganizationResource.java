@@ -43,11 +43,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.*;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -115,10 +111,17 @@ public class OrganizationResource {
 			@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
 			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
 			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = SERVER_VERSION, required = false) String serverVersionParam
 	) {
+
+		Long serverVersion = null;
+		if (serverVersionParam != null) {
+			serverVersion = Long.parseLong(serverVersionParam);
+		}
+
 		OrganizationSearchBean organizationSearchBean = createOrganizationSearchBeanForPagination(pageNumber, pageSize,
-				orderByType, orderByFieldName);
+				orderByType, orderByFieldName, serverVersion);
 
 		if (StringUtils.isNotBlank(locationID)) {
 			return organizationService.selectOrganizationsEncompassLocations(locationID);
@@ -329,7 +332,7 @@ public class OrganizationResource {
 	}
 
 	private OrganizationSearchBean createOrganizationSearchBeanForPagination(Integer pageNumber, Integer pageSize,
-			String orderByType, String orderByFieldName) {
+			String orderByType, String orderByFieldName, Long serverVersion) {
 		OrganizationSearchBean organizationSearchBean = new OrganizationSearchBean();
 		OrganizationSearchBean.OrderByType orderByTypeEnum = orderByType != null ?
 				OrganizationSearchBean.OrderByType.valueOf(orderByType) :
@@ -341,6 +344,7 @@ public class OrganizationResource {
 		organizationSearchBean.setPageSize(pageSize);
 		organizationSearchBean.setOrderByFieldName(fieldName);
 		organizationSearchBean.setOrderByType(orderByTypeEnum);
+		organizationSearchBean.setServerVersion(serverVersion);
 
 		return organizationSearchBean;
 	}
