@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -72,7 +73,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -432,21 +435,84 @@ public class OrganizationResourceTest {
 			assertFalse(userAssignment.getPlans().contains(assignment.getPlanId()));
 		}
 		verifyNoInteractions(planService);
-		
+
 	}
-	
+
+	@Test
+	public void testGetUserAssignedLocationsAndPlansWithPlansWithoutEffectiveEndDateShouldReturnActivePlansOnly()
+			throws Exception {
+		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+		List<Long> ids = Arrays.asList(123l, 124l);
+
+		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
+				.thenReturn(new ImmutablePair<>(getPractioner(), ids));
+		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(true);
+		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
+
+		List<String> planIds = assignments.stream().map(a -> a.getPlanId()).collect(Collectors.toList());
+		List<PlanDefinition> plans = getPlans(assignments, false);
+		when(planService.getPlansByIdsReturnOptionalFields(any(), any(), eq(false))).thenReturn(plans);
+
+		PhysicalLocation location = LocationResourceTest.createStructure();
+		location.getProperties().setName("Vilage123");
+		PhysicalLocation location2 = new PhysicalLocation();
+		location2.setId(UUID.randomUUID().toString());
+		location2.setProperties(new LocationProperty());
+		location2.getProperties().setName("OA1");
+		location2.getProperties().setParentId(location.getId());
+
+		PhysicalLocation location3 = new PhysicalLocation();
+		location3.setId(UUID.randomUUID().toString());
+		location3.setProperties(new LocationProperty());
+		location3.getProperties().setName("Oa3");
+		location3.getProperties().setParentId(location.getId());
+		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
+				.thenReturn(Arrays.asList(location, location2, location3));
+
+		Authentication authentication = authenticatedUser.getSecond();
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/user-assignment")
+						.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+				.andExpect(status().isOk()).andReturn();
+
+		UserAssignmentBean userAssignment = objectMapper.readValue(result.getResponse().getContentAsString(),
+				UserAssignmentBean.class);
+
+		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
+		assertEquals(2, userAssignment.getJurisdictions().size());
+
+		Set<String> activePlans = plans.stream()
+				.filter(p -> PlanStatus.ACTIVE.equals(p.getStatus())
+						&& (p.getEffectivePeriod().getEnd().isAfterNow()
+						|| p.getEffectivePeriod().getEnd().isEqualNow()))
+				.map(p -> p.getIdentifier())
+				.collect(Collectors.toSet());
+
+		assertEquals(activePlans.size(), userAssignment.getPlans().size());
+
+		assertTrue(activePlans.size() < planIds.size());
+		assertTrue(userAssignment.getPlans().containsAll(activePlans));
+		Set<String> inActivePlans = new HashSet<>(planIds);
+		inActivePlans.removeAll(activePlans);
+
+		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
+				eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD)),
+				eq(false));
+
+	}
+
 	@Test
 	public void testGetUserAssignedLocationsAndPlansWithPlansShouldReturnActivePlansOnly() throws Exception {
 		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		List<Long> ids = Arrays.asList(123l, 124l);
-		
+
 		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
-		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
+				.thenReturn(new ImmutablePair<>(getPractioner(), ids));
 		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
-		
+
 		List<String> planIds = assignments.stream().map(a -> a.getPlanId()).collect(Collectors.toList());
-		List<PlanDefinition> plans = getPlans(assignments);
+		List<PlanDefinition> plans = getPlans(assignments, true);
 		when(planService.getPlansByIdsReturnOptionalFields(any(), any(), eq(false))).thenReturn(plans);
 		
 		PhysicalLocation location = LocationResourceTest.createStructure();
@@ -535,24 +601,26 @@ public class OrganizationResourceTest {
 			
 		}
 		return organizationAssigmentBeans;
-		
+
 	}
-	
+
 	private Practitioner getPractioner() {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setIdentifier("ID-123");
 		practitioner.setActive(Boolean.TRUE);
 		return practitioner;
-		
+
 	}
-	
-	private List<PlanDefinition> getPlans(List<AssignedLocations> assignedLocations) {
+
+	private List<PlanDefinition> getPlans(List<AssignedLocations> assignedLocations, boolean addEffectiveEndDate) {
 		Random random = new Random();
 		return assignedLocations.stream().map(al -> {
 			PlanDefinition plan = new PlanDefinition();
 			plan.setIdentifier(al.getPlanId());
 			plan.setJurisdiction(Collections.singletonList(new Jurisdiction(al.getJurisdictionId())));
-			plan.setEffectivePeriod(new Period(DateTime.now(), DateTime.now().plusDays(2)));
+			plan.setEffectivePeriod(addEffectiveEndDate ?
+					new Period(DateTime.now(), DateTime.now().plusDays(2)) :
+					new Period(DateTime.now(), null));
 			plan.setStatus(random.nextBoolean() ? PlanStatus.ACTIVE : PlanStatus.COMPLETED);
 			return plan;
 		}).collect(Collectors.toList());
