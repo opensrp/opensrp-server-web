@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.8.36-SNAPSHOT</version>
+    <version>2.8.44-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -17,7 +17,7 @@
         <hibernate-entitymanager.version>5.4.12.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>5.2.4.RELEASE</spring.version>
-        <spring.security.version>5.3.3.RELEASE</spring.security.version>
+        <spring.security.version>5.3.12.RELEASE</spring.security.version>
         <spring.security.oauth.version>2.4.0.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>2.9.2</spring.fox.swagger.version>
         <spring.data.redis>2.2.4.RELEASE</spring.data.redis>
@@ -25,8 +25,8 @@
         <redis.lettuce.version>5.2.2.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.12.15-SNAPSHOT</opensrp.core.version>
-        <opensrp.connector.version>2.3.0-SNAPSHOT</opensrp.connector.version>
+        <opensrp.core.version>2.12.22-SNAPSHOT</opensrp.core.version>
+        <opensrp.connector.version>2.3.4-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <opensrp.common.version>2.0.3-SNAPSHOT</opensrp.common.version>
         <powermock.version>2.0.5</powermock.version>
@@ -168,7 +168,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -381,12 +381,12 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.0.18.Final</version>
+            <version>6.0.22.Final</version>
         </dependency>
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
-            <version>4.3.0</version>
+            <version>5.5.2</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
@@ -413,17 +413,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.14.1</version>
+            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
-            <version>2.14.1</version>
+            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>1.7.5</version>
+            <version>1.8.1</version>
         </dependency>
     </dependencies>
 
@@ -687,6 +687,7 @@
                 <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
                 <openlmis.stock.profile>default</openlmis.stock.profile>
                 <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
+                <plan.generation.profile>default</plan.generation.profile>
             </properties>
         </profile>
         <profile>
@@ -856,6 +857,12 @@
             <id>openlmis-stock</id>
             <properties>
                 <openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>plan-generation</id>
+            <properties>
+                <plan.generation.profile>plan-generation</plan.generation.profile>
             </properties>
         </profile>
     </profiles>
