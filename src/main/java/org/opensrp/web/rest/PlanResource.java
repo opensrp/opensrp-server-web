@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.opensrp.domain.LocationDetail;
 import org.opensrp.domain.Template;
 import org.opensrp.domain.postgres.PlanProcessingStatus;
@@ -169,7 +170,8 @@ public class PlanResource {
 			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
 			@RequestParam(value = PLAN_STATUS, required = false) String planStatus,
 			@RequestParam(value = USE_CONTEXT, required = false)  List<String> useContextList) {
-
+		long funcTime = System.currentTimeMillis();
+		LocalDateTime requestId = LocalDateTime.now(); // to be used to Id the current function and its subcalls
 		Map<String, String> useContextFilters = null;
 		if (useContextList != null) {
 			useContextFilters = new HashMap<>();
@@ -180,8 +182,15 @@ public class PlanResource {
 				}
 			}
 		}
+
 		PlanSearchBean planSearchBean = createPlanSearchBean(isTemplateParam, pageNumber, pageSize, orderByType, orderByFieldName, planStatus, useContextFilters);
-		return new ResponseEntity<>(gson.toJson(planService.getAllPlans(planSearchBean)),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		long timeToGetPlans = System.currentTimeMillis();
+		List<PlanDefinition> plans  = planService.getAllPlans(planSearchBean); // temp pull this out to measure execution time
+		timeToGetPlans = System.currentTimeMillis()-timeToGetPlans;
+		funcTime = System.currentTimeMillis() - funcTime;
+		System.out.println(String.format("/opensrp/rest/plans/ request id %s took: %d",requestId, funcTime));
+		System.out.println(String.format("\t=>planService#getAllPlans for request id %s took: %d",requestId, timeToGetPlans));
+		return new ResponseEntity<>(gson.toJson(plans),RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })

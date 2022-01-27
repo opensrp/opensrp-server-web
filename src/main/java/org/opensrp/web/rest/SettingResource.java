@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +67,11 @@ public class SettingResource {
 	@RequestMapping(method = RequestMethod.GET, value = "/sync")
 	public @ResponseBody
 	ResponseEntity<String> findSettingsByVersion(HttpServletRequest request) {
-		JSONObject response = new JSONObject();
+		long requestTime = System.currentTimeMillis();
+		LocalDateTime requestId = LocalDateTime.now(); // to be used to Id the current function and its subcalls
+		String findSettingsTimeString = null;
+		String getChildParentTreeTimeString = null;
+				JSONObject response = new JSONObject();
 		ResponseEntity responseEntity;
 
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -84,7 +90,7 @@ public class SettingResource {
 			if (StringUtils.isBlank(serverVersion)) {
 				return new ResponseEntity<>(response.toString(), responseHeaders, HttpStatus.BAD_REQUEST);
 			}
-
+			long searchBeanInit = System.currentTimeMillis();
 			SettingSearchBean settingQueryBean = new SettingSearchBean();
 			settingQueryBean.setTeam(team);
 			settingQueryBean.setTeamId(teamId);
@@ -94,15 +100,20 @@ public class SettingResource {
 			settingQueryBean.setV1Settings(true);
 			if (StringUtils.isNotBlank(locationId)) {
 				settingQueryBean.setResolveSettings(resolveSettings);
+				long timeToGetLocationTree= System.currentTimeMillis(); // start time
 				treeNodeHashMap = getChildParentLocationTree(locationId);
+				timeToGetLocationTree = System.currentTimeMillis()-timeToGetLocationTree;
+				getChildParentTreeTimeString = String.format("\t=>findSettingByVersion#getChildParentLocationTree with id: %s took %d ms",
+						requestId, timeToGetLocationTree);
 			}
 
 			if (StringUtils.isNotBlank(identifier)) {
 				settingQueryBean.setIdentifier(identifier);
 			}
-
+			long findSettingsTime = System.currentTimeMillis();
 			SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
-
+			findSettingsTime = System.currentTimeMillis()- findSettingsTime;
+			findSettingsTimeString = String.format("\t=>findSettingByVersion#getChildLocationTree with id: %s took %d ms", requestId, findSettingsTime);
 			SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
 			String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
@@ -113,7 +124,11 @@ public class SettingResource {
 			logger.error(format("Sync data processing failed with exception {0}.- ", e));
 			responseEntity = new ResponseEntity<>(responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+		requestTime = System.currentTimeMillis()-requestTime;
 
+		logger.info(String.format("/rest/settings/sync in total for ID: %s took %dms", requestId, requestTime));
+		logger.info(getChildParentTreeTimeString);
+		logger.info(findSettingsTimeString);
 		return responseEntity;
 	}
 
