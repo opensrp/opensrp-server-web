@@ -21,7 +21,7 @@
         <spring.security.oauth.version>2.4.2.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
         <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
-        <redis.jedis.version>4.1.1</redis.jedis.version>
+        <redis.jedis.version>3.8.0</redis.jedis.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
         <opensrp.core.version>2.20.0-alpha-r1-SNAPSHOT</opensrp.core.version>
