@@ -69,10 +69,6 @@ public class SwaggerConfigTest {
         when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
         SecurityContext securityContext= swaggerConfig.securityContext();
         assertNotNull(securityContext);
-        assertEquals(securityContext.getSecurityReferences().get(0).getReference(), BASIC);
-        assertEquals(securityContext.getSecurityReferences().get(0).getScopes().size(), 1);
-        assertEquals(securityContext.getSecurityReferences().get(1).getReference(), BEARER);
-        assertEquals(securityContext.getSecurityReferences().get(1).getScopes().size(), 1);
     }
 
     private Docket createTestDocket() {
