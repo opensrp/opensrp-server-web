@@ -1,10 +1,13 @@
 package org.opensrp.web.config;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -18,6 +21,7 @@ import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.ServletContext;
 import java.util.List;
 
 @Configuration
@@ -30,12 +34,19 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
     private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
 
+    @Autowired
+    private ServletContext context;
+
     @Bean
     public Docket api(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.regex("(/rest/.*)|(/multimedia/.*)|(/security/.*)|(/user-details)"))
+                .paths(PathSelectors.regex(
+                        StringUtils.replace("(basePath/rest/.*)|(basePath/multimedia/.*)|(basePath/security/.*)|(basePath/user-details)",
+                                "basePath",
+                                context.getContextPath()
+                        ))) // To be revisited on v3.0.1
                 .build()
                 .apiInfo(getApiInfo())
                 .securityContexts(Lists.newArrayList(securityContext()))
@@ -54,8 +65,14 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/swagger-ui/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/");
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/swagger-ui/")
+                .setViewName("forward:/swagger-ui/index.html");
     }
 
     public SecurityContext securityContext() {
