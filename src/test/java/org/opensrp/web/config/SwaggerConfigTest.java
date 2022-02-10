@@ -5,6 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powermock.reflect.internal.WhiteboxImpl;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -16,12 +23,16 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import javax.servlet.ServletContext;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(JUnit4.class)
@@ -33,14 +44,19 @@ public class SwaggerConfigTest {
     private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
 
+    @Mock
+    private ServletContext servletContext;
+
     @Before
     public void setUp() {
-        swaggerConfig = mock(SwaggerConfig.class);
+        MockitoAnnotations.initMocks(this);
+        doReturn("/opensrp").when(servletContext).getContextPath();
+        swaggerConfig = spy(new SwaggerConfig());
+        WhiteboxImpl.setInternalState(swaggerConfig, "servletContext", servletContext);
     }
 
     @Test
     public void testApi() {
-        assertNull(swaggerConfig.api());
         when(swaggerConfig.api()).thenReturn(createTestDocket());
         when(swaggerConfig.getApiInfo()).thenReturn(createTestApiInfo());
         when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
@@ -52,27 +68,40 @@ public class SwaggerConfigTest {
 
     @Test
     public void testGetApiInfo() {
-        assertNull(swaggerConfig.getApiInfo());
-        when(swaggerConfig.getApiInfo()).thenReturn(createTestApiInfo());
-        ApiInfo apiInfo = swaggerConfig.getApiInfo();
-        assertNotNull(apiInfo);
-        assertEquals(apiInfo.getTitle(), "Test title");
-        assertEquals(apiInfo.getDescription(), "Test description");
-        assertEquals(apiInfo.getVersion(), "VERSION 1.0");
-        assertEquals(apiInfo.getLicense(), "Test LICENSE");
-        assertEquals(apiInfo.getLicenseUrl(), "Test license url");
+        assertNotNull(swaggerConfig.getApiInfo());
     }
 
     @Test
     public void testSecurityContext() {
-        assertNull(swaggerConfig.securityContext());
-        when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
-        SecurityContext securityContext= swaggerConfig.securityContext();
-        assertNotNull(securityContext);
-        assertEquals(securityContext.getSecurityReferences().get(0).getReference(), BASIC);
-        assertEquals(securityContext.getSecurityReferences().get(0).getScopes().size(), 1);
-        assertEquals(securityContext.getSecurityReferences().get(1).getReference(), BEARER);
-        assertEquals(securityContext.getSecurityReferences().get(1).getScopes().size(), 1);
+        assertNotNull(swaggerConfig.securityContext());
+    }
+
+    @Test
+    public void testAddResourceHandlersShouldInvokeRegistryResourceHandler() {
+        String pathPattern = "/swagger-ui/**";
+        String resourceLocation = "classpath:/META-INF/resources/webjars/springfox-swagger-ui/";
+        ResourceHandlerRegistry mockRegistry = mock(ResourceHandlerRegistry.class);
+        ResourceHandlerRegistration mockHandlerRegistration = mock(ResourceHandlerRegistration.class);
+        doReturn(mockHandlerRegistration).when(mockRegistry).addResourceHandler(eq(pathPattern));
+
+        swaggerConfig.addResourceHandlers(mockRegistry);
+
+        verify(mockRegistry).addResourceHandler(eq(pathPattern));
+        verify(mockHandlerRegistration).addResourceLocations(eq(resourceLocation));
+    }
+
+    @Test
+    public void testAddViewControllersShouldInvokeViewControllerAddMethod() {
+        String path = "/swagger-ui/";
+        String viewName = "forward:/swagger-ui/index.html";
+        ViewControllerRegistry mockViewControllerRegistry = mock(ViewControllerRegistry.class);
+        ViewControllerRegistration mockViewControllerRegistration = mock(ViewControllerRegistration.class);
+        doReturn(mockViewControllerRegistration).when(mockViewControllerRegistry).addViewController(eq(path));
+
+        swaggerConfig.addViewControllers(mockViewControllerRegistry);
+
+        verify(mockViewControllerRegistry).addViewController(eq(path));
+        verify(mockViewControllerRegistration).setViewName(eq(viewName));
     }
 
     private Docket createTestDocket() {
