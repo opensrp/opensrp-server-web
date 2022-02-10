@@ -35,7 +35,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
     private static final String HEADER = "header";
 
     @Autowired
-    private ServletContext context;
+    private ServletContext servletContext;
 
     @Bean
     public Docket api(){
@@ -45,7 +45,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
                 .paths(PathSelectors.regex(
                         StringUtils.replace("(basePath/rest/.*)|(basePath/multimedia/.*)|(basePath/security/.*)|(basePath/user-details)",
                                 "basePath",
-                                context.getContextPath()
+                                servletContext.getContextPath()
                         ))) // To be revisited on v3.0.1
                 .build()
                 .apiInfo(getApiInfo())
