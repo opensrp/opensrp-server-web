@@ -476,6 +476,10 @@ public class EventResource extends RestResource<Event> {
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
+						if (eventService.checkIfCaseTriggeredEventExists(event)){
+							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
+							continue;
+						}
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
