@@ -50,7 +50,6 @@ import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.Constants.SERVER_VERSION;
 
-
 /**
  * @author Samuel Githengi created on 09/10/19
  */
@@ -233,46 +232,46 @@ public class OrganizationResource {
 		Set<String> planIdentifiers = new HashSet<>();
 		/**@formatter:off*/
 		organizationService
-		        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)
-		        .stream()
-		        .filter(a->StringUtils.isNotBlank(a.getJurisdictionId()))
-		        .forEach(a ->{
-		        	if(StringUtils.isNotBlank(a.getJurisdictionId())) {
-		        		jurisdictionIdentifiers.add(a.getJurisdictionId());
-		        	}
-		        	if(StringUtils.isNotBlank(a.getPlanId())) {
-		        		planIdentifiers.add(a.getPlanId());
-		        	}
-		        });
+				.findAssignedLocationsAndPlans(practionerOrganizationIds.right)
+				.stream()
+				.filter(a -> StringUtils.isNotBlank(a.getJurisdictionId()))
+				.forEach(a -> {
+					if (StringUtils.isNotBlank(a.getJurisdictionId())) {
+						jurisdictionIdentifiers.add(a.getJurisdictionId());
+					}
+					if (StringUtils.isNotBlank(a.getPlanId())) {
+						planIdentifiers.add(a.getPlanId());
+					}
+				});
 		Set<PhysicalLocation> jurisdictions = new HashSet<>(locationService.findLocationByIdsWithChildren(false,
-		    jurisdictionIdentifiers, Integer.MAX_VALUE));
-		
+				jurisdictionIdentifiers, Integer.MAX_VALUE));
+
 		if (!planIdentifiers.isEmpty()) {
 			Set<String> planLocationIds = planService
-			        .getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
-			            Arrays.asList(UserController.JURISDICTION,UserController.STATUS), false)
-			        .stream()
-			        .filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
-			        .flatMap(plan -> plan.getJurisdiction().stream())
-			        .map(Jurisdiction::getCode)
-			        .collect(Collectors.toSet());
-		
-			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty()? Collections.emptySet():
-			        locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
+					.getPlansByIdsReturnOptionalFields(new ArrayList<>(planIdentifiers),
+							Arrays.asList(UserController.JURISDICTION, UserController.STATUS), false)
+					.stream()
+					.filter(plan -> PlanStatus.ACTIVE.equals(plan.getStatus()))
+					.flatMap(plan -> plan.getJurisdiction().stream())
+					.map(Jurisdiction::getCode)
+					.collect(Collectors.toSet());
+
+			Set<PhysicalLocation> planLocations = new HashSet<>(planLocationIds.isEmpty() ? Collections.emptySet() :
+					locationService.findLocationByIdsWithChildren(false, planLocationIds, Integer.MAX_VALUE));
 			jurisdictions.retainAll(planLocations);
 		}
-		
+
 		Set<String> locationParents = jurisdictions.stream()
-				.map(l->l.getProperties().getParentId())
+				.map(l -> l.getProperties().getParentId())
 				.collect(Collectors.toSet());
-				
+
 		return UserAssignmentBean.builder()
 				.organizationIds(new HashSet<>(practionerOrganizationIds.right))
 				.jurisdictions(jurisdictions
-					.stream()
-					.filter(l->!locationParents.contains(l.getId()))
-		            .map(PhysicalLocation::getId)
-					.collect(Collectors.toSet()))
+						.stream()
+						.filter(l -> !locationParents.contains(l.getId()))
+						.map(PhysicalLocation::getId)
+						.collect(Collectors.toSet()))
 				.plans(planIdentifiers)
 				.build();
 		/**@formatter:on*/
@@ -293,12 +292,14 @@ public class OrganizationResource {
 
 	/**
 	 * This API queries list of team assignment from a practitioner identifer
+	 *
 	 * @param practitionerIdentifier
 	 * @return List of Organization
 	 */
 	@GetMapping(value = "/by-practitioner/{practitioner-identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<Organization> getTeamsByPractitionerIdentifier(@PathVariable("practitioner-identifier") String practitionerIdentifier) {
-			return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
+	public List<Organization> getTeamsByPractitionerIdentifier(
+			@PathVariable("practitioner-identifier") String practitionerIdentifier) {
+		return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
 	}
 
 	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
@@ -381,7 +382,8 @@ public class OrganizationResource {
 	public ResponseEntity<Long> getAllOrganizationsCount() {
 		try {
 			return new ResponseEntity<>(organizationService.countAllOrganizations(), HttpStatus.OK);
-		} catch (Exception exception) {
+		}
+		catch (Exception exception) {
 			logger.error("Error getting organizations count", exception);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
