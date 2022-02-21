@@ -44,7 +44,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.Constants.PAGE_NUMBER;
+import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.SERVER_VERSION;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -299,12 +304,14 @@ public class OrganizationResource {
 
 	/**
 	 * This API queries list of team assignment from a practitioner identifer
+	 *
 	 * @param practitionerIdentifier
 	 * @return List of Organization
 	 */
 	@GetMapping(value = "/by-practitioner/{practitioner-identifier}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public List<Organization> getTeamsByPractitionerIdentifier(@PathVariable("practitioner-identifier") String practitionerIdentifier) {
-			return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
+	public List<Organization> getTeamsByPractitionerIdentifier(
+			@PathVariable("practitioner-identifier") String practitionerIdentifier) {
+		return organizationService.getOrganizationsByPractitionerIdentifier(practitionerIdentifier);
 	}
 
 	@RequestMapping(value = "/assignedLocationsAndPlans", method = RequestMethod.GET, produces = {
