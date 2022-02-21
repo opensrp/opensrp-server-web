@@ -12,9 +12,8 @@ import org.joda.time.LocalDate;
 import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
-import org.opensrp.util.DateTypeConverter;
 import org.smartregister.domain.Practitioner;
-import org.smartregister.utils.TaskDateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,13 +25,15 @@ import java.util.List;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.DATETIME_IN_UTC_FORMAT_STRING;
 import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.SERVER_VERSION;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
@@ -40,8 +41,8 @@ public class PractitionerResource {
 
     private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
 
-    public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-            .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
+    public static Gson gson = new GsonBuilder().setDateFormat(DATETIME_IN_UTC_FORMAT_STRING)
+            .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     private PractitionerService practitionerService;
 
@@ -72,10 +73,16 @@ public class PractitionerResource {
     public ResponseEntity<String> getPractitioners(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+            @RequestParam(value = SERVER_VERSION, required = false) String serverVersionParam) {
+
+        Long serverVersion = null;
+        if (serverVersionParam != null) {
+            serverVersion = Long.parseLong(serverVersionParam);
+        }
 
         PractitionerSearchBean practitionerSearchBean = createPractitionerSearchBean(pageNumber, pageSize, orderByType,
-                orderByFieldName);
+                orderByFieldName, serverVersion);
         return new ResponseEntity<>(gson.toJson(
                 practitionerService.getAllPractitioners(practitionerSearchBean)),
                 RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
@@ -149,7 +156,7 @@ public class PractitionerResource {
     }
 
     private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
-            String orderByFieldName) {
+            String orderByFieldName, Long serverVersion) {
 
         BaseSearchBean.OrderByType orderByTypeEnum;
         BaseSearchBean.FieldName fieldName;
@@ -163,6 +170,7 @@ public class PractitionerResource {
                 .pageSize(pageSize)
                 .orderByType(orderByTypeEnum)
                 .orderByFieldName(fieldName)
+                .serverVersion(serverVersion)
                 .build();
 
     }

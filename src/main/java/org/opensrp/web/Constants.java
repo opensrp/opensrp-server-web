@@ -26,9 +26,13 @@ public interface Constants {
 
     public static final String PAGE_SIZE = "pageSize";
 
+    public static final String SERVER_VERSION = "serverVersion";
+
     public static final String ORDER_BY_TYPE = "orderByType";
 
     public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
+    public static final String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     String LOCATIONS = "locations";
 
