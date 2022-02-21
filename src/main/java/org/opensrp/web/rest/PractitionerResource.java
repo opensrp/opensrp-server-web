@@ -31,7 +31,6 @@ import static org.opensrp.web.Constants.DATETIME_IN_UTC_FORMAT_STRING;
 import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.PAGE_SIZE;
 import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
 import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
 import static org.opensrp.web.Constants.SERVER_VERSION;
 
