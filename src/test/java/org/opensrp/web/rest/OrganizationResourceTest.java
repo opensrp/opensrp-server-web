@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Rule;
@@ -113,7 +115,7 @@ public class OrganizationResourceTest {
 
 	private String BASE_URL = "/rest/organization/";
 
-	private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"serverVersion\":0}";
+	private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"dateCreated\":\"2021-12-20T13:16:02.457Z\",\"dateEdited\":\"2021-12-20T13:16:02.457Z\",\"serverVersion\":1}";
 
 	private ObjectMapper objectMapper;
 
@@ -130,6 +132,8 @@ public class OrganizationResourceTest {
 		organizationResource.setLocationService(locationService);
 		organizationResource.setPlanService(planService);
 		objectMapper = new ObjectMapper();
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.registerModule(new JodaModule());
 	}
 
 	@Test
@@ -272,6 +276,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testGetAssignedLocationAndPlan() throws Exception {
+		objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlans(identifier, true, null, null, null, null))
@@ -282,7 +287,6 @@ public class OrganizationResourceTest {
 		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
-
 	}
 
 	@Test
@@ -322,6 +326,7 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testGetAssignedLocationsAndPlansByPlanId() throws Exception {
+		objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null))
@@ -332,7 +337,6 @@ public class OrganizationResourceTest {
 		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
-
 	}
 
 	@Test
@@ -495,7 +499,7 @@ public class OrganizationResourceTest {
 	}
 
 	private List<AssignedLocations> getOrganizationLocationsAssigned(boolean includePlans) {
-		List<AssignedLocations> organizationAssigmentBeans = new ArrayList<>();
+		List<AssignedLocations> organizationAssignmentBeans = new ArrayList<>();
 		Random random = new Random();
 		for (int i = 0; i < 5; i++) {
 			AssignedLocations bean = new AssignedLocations();
@@ -508,10 +512,10 @@ public class OrganizationResourceTest {
 				bean.setFromDate(new Date());
 			if (random.nextBoolean())
 				bean.setToDate(new Date());
-			organizationAssigmentBeans.add(bean);
+			organizationAssignmentBeans.add(bean);
 
 		}
-		return organizationAssigmentBeans;
+		return organizationAssignmentBeans;
 
 	}
 
