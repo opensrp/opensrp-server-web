@@ -114,6 +114,6 @@ public interface Constants {
         String EXTERNAL_ID = "externalId";
         String PLAN_USER = "opensrp";
         String BFID = "bfid";
-        int PLAN_DURATION = 5;
+        int PLAN_DURATION_DAYS = 20;
     }
 }
