@@ -17,7 +17,11 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.domain.User;
@@ -34,8 +38,13 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.controller.UserController;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.TestData;
-import org.smartregister.domain.*;
+import org.smartregister.domain.Jurisdiction;
+import org.smartregister.domain.LocationProperty;
+import org.smartregister.domain.Period;
+import org.smartregister.domain.PhysicalLocation;
+import org.smartregister.domain.PlanDefinition;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
+import org.smartregister.domain.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -65,12 +74,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -126,7 +142,7 @@ public class OrganizationResourceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
-				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		organizationResource = webApplicationContext.getBean(OrganizationResource.class);
 		organizationResource.setOrganizationService(organizationService);
 		organizationResource.setPractitionerService(practitionerService);
@@ -163,7 +179,7 @@ public class OrganizationResourceTest {
 		Organization expected = getOrganization();
 		when(organizationService.getOrganization(expected.getIdentifier())).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/{identifier}", expected.getIdentifier()))
-				.andExpect(status().isOk()).andReturn();
+		        .andExpect(status().isOk()).andReturn();
 		verify(organizationService).getOrganization(expected.getIdentifier());
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(organizationJSON, result.getResponse().getContentAsString());
@@ -174,10 +190,10 @@ public class OrganizationResourceTest {
 	public void testCreateOrganization() throws Exception {
 
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isCreated());
+		        .andExpect(status().isCreated());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
 		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-				.writeValueAsString(organizationArgumentCaptor.getValue()));
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -186,7 +202,7 @@ public class OrganizationResourceTest {
 	public void testCreateOrganizationWithoutIdentifier() throws Exception {
 		doThrow(IllegalArgumentException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isBadRequest());
+		        .andExpect(status().isBadRequest());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
@@ -196,7 +212,7 @@ public class OrganizationResourceTest {
 	public void testCreateOrganizationWithError() throws Exception {
 		doThrow(RuntimeException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isInternalServerError());
+		        .andExpect(status().isInternalServerError());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
@@ -206,11 +222,11 @@ public class OrganizationResourceTest {
 	public void testUpdateOrganization() throws Exception {
 
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
-				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isCreated());
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isCreated());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
 		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-				.writeValueAsString(organizationArgumentCaptor.getValue()));
+		        .writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -219,8 +235,8 @@ public class OrganizationResourceTest {
 	public void testUpdateOrganizationWithoutIdentifier() throws Exception {
 		doThrow(new IllegalArgumentException()).when(organizationService).updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
-				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isBadRequest());
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isBadRequest());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
@@ -230,8 +246,8 @@ public class OrganizationResourceTest {
 	public void testUpdateOrganizationWithError() throws Exception {
 		doThrow(new RuntimeException()).when(organizationService).updateOrganization(any(Organization.class));
 		mockMvc.perform(put(BASE_URL + "/{identifier}", getOrganization().getIdentifier())
-				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-				.andExpect(status().isInternalServerError());
+		        .contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
+		        .andExpect(status().isInternalServerError());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
@@ -240,10 +256,10 @@ public class OrganizationResourceTest {
 	@Test
 	public void testAssignLocationAndPlan() throws Exception {
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
+		        .content(objectMapper.writeValueAsBytes(getOrganizationAssignment()))).andExpect(status().isOk());
 		for (OrganizationAssigmentBean bean : getOrganizationAssignment())
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
-					bean.getFromDate(), bean.getToDate());
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -251,13 +267,13 @@ public class OrganizationResourceTest {
 	@Test
 	public void testAssignLocationAndPlanWithMissingParams() throws Exception {
 		doThrow(new IllegalArgumentException()).when(organizationService).assignLocationAndPlan(null, null, null, null,
-				null);
+		    null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
+		        .content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isBadRequest());
 		for (OrganizationAssigmentBean bean : beans)
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
-					bean.getFromDate(), bean.getToDate());
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -267,10 +283,10 @@ public class OrganizationResourceTest {
 		doThrow(new RuntimeException()).when(organizationService).assignLocationAndPlan(null, null, null, null, null);
 		OrganizationAssigmentBean[] beans = new OrganizationAssigmentBean[] { new OrganizationAssigmentBean() };
 		mockMvc.perform(post(BASE_URL + "/assignLocationsAndPlans").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
+		        .content(objectMapper.writeValueAsBytes(beans))).andExpect(status().isInternalServerError());
 		for (OrganizationAssigmentBean bean : beans)
 			verify(organizationService).assignLocationAndPlan(bean.getOrganization(), bean.getJurisdiction(), bean.getPlan(),
-					bean.getFromDate(), bean.getToDate());
+			    bean.getFromDate(), bean.getToDate());
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -281,9 +297,9 @@ public class OrganizationResourceTest {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlans(identifier, true, null, null, null, null))
-				.thenReturn(expected);
+		        .thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
-				.andExpect(status().isOk()).andReturn();
+		        .andExpect(status().isOk()).andReturn();
 
 		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
@@ -295,10 +311,10 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationAndPlanWithMissingParams() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		doThrow(new IllegalArgumentException()).when(organizationService).findAssignedLocationsAndPlans(identifier, true,
-				null, null, null, null);
+		    null, null, null, null);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
-				.andExpect(status().isBadRequest()).andReturn();
+		        .andExpect(status().isBadRequest()).andReturn();
 
 		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
@@ -310,10 +326,10 @@ public class OrganizationResourceTest {
 	public void testGetAssignedLocationAndPlanWithInternalError() throws Exception {
 		String identifier = UUID.randomUUID().toString();
 		doThrow(new RuntimeException()).when(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null,
-				null, null);
+		    null, null);
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans/{identifier}", identifier))
-				.andExpect(status().isInternalServerError()).andReturn();
+		        .andExpect(status().isInternalServerError()).andReturn();
 
 		verify(organizationService).findAssignedLocationsAndPlans(identifier, true, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
@@ -332,13 +348,14 @@ public class OrganizationResourceTest {
 		String identifier = UUID.randomUUID().toString();
 		List<AssignedLocations> expected = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null))
-				.thenReturn(expected);
+		        .thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/assignedLocationsAndPlans?plan=" + identifier))
-				.andExpect(status().isOk()).andReturn();
+		        .andExpect(status().isOk()).andReturn();
 
 		verify(organizationService).findAssignedLocationsAndPlansByPlanIdentifier(identifier, null, null, null, null);
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.writeValueAsString(expected), result.getResponse().getContentAsString());
+
 	}
 
 	@Test
@@ -348,7 +365,7 @@ public class OrganizationResourceTest {
 		expected.add(getPractioner());
 		when(practitionerService.getPractitionersByOrgIdentifier(any(String.class))).thenReturn(expected);
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/practitioner/{identifier}", identifier))
-				.andExpect(status().isOk()).andReturn();
+		        .andExpect(status().isOk()).andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {
@@ -366,7 +383,7 @@ public class OrganizationResourceTest {
 		doThrow(new RuntimeException()).when(practitionerService).getPractitionersByOrgIdentifier(any(String.class));
 
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/practitioner/{identifier}", identifier))
-				.andExpect(status().isInternalServerError()).andReturn();
+		        .andExpect(status().isInternalServerError()).andReturn();
 
 		verify(practitionerService).getPractitionersByOrgIdentifier(identifier);
 		verifyNoMoreInteractions(practitionerService);
@@ -383,7 +400,7 @@ public class OrganizationResourceTest {
 		Pair<User, Authentication> authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
 		List<Long> ids = Arrays.asList(123l, 124l);
 		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
-				.thenReturn(new ImmutablePair<>(getPractioner(), ids));
+		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
 		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(false);
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
 		PhysicalLocation location = LocationResourceTest.createStructure();
@@ -400,16 +417,16 @@ public class OrganizationResourceTest {
 		location3.getProperties().setName("Oa3");
 		location3.getProperties().setParentId(location.getId());
 		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
-				.thenReturn(Arrays.asList(location, location2, location3));
+		        .thenReturn(Arrays.asList(location, location2, location3));
 
 		Authentication authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/user-assignment")
-						.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
-				.andExpect(status().isOk()).andReturn();
+		        .perform(get(BASE_URL + "/user-assignment")
+		                .with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
 
 		UserAssignmentBean userAssignment = objectMapper.readValue(result.getResponse().getContentAsString(),
-				UserAssignmentBean.class);
+		    UserAssignmentBean.class);
 
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
 		assertEquals(2, userAssignment.getJurisdictions().size());
@@ -430,7 +447,7 @@ public class OrganizationResourceTest {
 		List<Long> ids = Arrays.asList(123l, 124l);
 
 		when(practitionerService.getOrganizationsByUserId(authenticatedUser.getFirst().getBaseEntityId()))
-				.thenReturn(new ImmutablePair<>(getPractioner(), ids));
+		        .thenReturn(new ImmutablePair<>(getPractioner(), ids));
 		List<AssignedLocations> assignments = getOrganizationLocationsAssigned(true);
 		when(organizationService.findAssignedLocationsAndPlans(ids)).thenReturn(assignments);
 
@@ -452,16 +469,16 @@ public class OrganizationResourceTest {
 		location3.getProperties().setName("Oa3");
 		location3.getProperties().setParentId(location.getId());
 		when(locationService.findLocationByIdsWithChildren(eq(false), any(), eq(Integer.MAX_VALUE)))
-				.thenReturn(Arrays.asList(location, location2, location3));
+		        .thenReturn(Arrays.asList(location, location2, location3));
 
 		Authentication authentication = authenticatedUser.getSecond();
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "/user-assignment")
-						.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
-				.andExpect(status().isOk()).andReturn();
+		        .perform(get(BASE_URL + "/user-assignment")
+		                .with(SecurityMockMvcRequestPostProcessors.authentication(authentication)))
+		        .andExpect(status().isOk()).andReturn();
 
 		UserAssignmentBean userAssignment = objectMapper.readValue(result.getResponse().getContentAsString(),
-				UserAssignmentBean.class);
+		    UserAssignmentBean.class);
 
 		assertEquals(new HashSet<>(ids), userAssignment.getOrganizationIds());
 		assertEquals(2, userAssignment.getJurisdictions().size());
@@ -479,7 +496,8 @@ public class OrganizationResourceTest {
 		inActivePlans.removeAll(activePlans);
 
 		verify(planService).getPlansByIdsReturnOptionalFields(ArgumentMatchers.argThat(arg -> arg.containsAll(planIds)),
-				eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS)), eq(false));
+		    eq(Arrays.asList(UserController.JURISDICTION, UserController.STATUS, UserController.EFFECTIVE_PERIOD)),
+				eq(false));
 
 	}
 
@@ -554,15 +572,15 @@ public class OrganizationResourceTest {
 		when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
 		when(organizationService.findOrganizationCount((OrganizationSearchBean) any())).thenReturn(1);
 		MvcResult result = mockMvc
-				.perform(get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
-						.param("pageNumber", "1").param("pageSize", "10").param("orderByType", "ASC"))
-				.andExpect(status().isOk()).andReturn();
+		        .perform(get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
+		                .param("pageNumber", "1").param("pageSize", "10").param("orderByType", "ASC"))
+		        .andExpect(status().isOk()).andReturn();
 
 		verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
 		verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
 		verifyNoMoreInteractions(organizationService);
 		assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
-				result.getResponse().getContentAsString());
+		    result.getResponse().getContentAsString());
 	}
 
 	private Organization createSearchOrganization() throws JsonMappingException, JsonProcessingException {
