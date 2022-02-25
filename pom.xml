@@ -10,7 +10,7 @@
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
-user
+
     <properties>
         <jetty.port>9979</jetty.port>
         <main.basedir>${project.basedir}</main.basedir>
