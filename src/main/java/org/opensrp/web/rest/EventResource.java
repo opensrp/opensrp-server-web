@@ -773,6 +773,10 @@ public class EventResource extends RestResource<Event> {
 		this.multimediaService = multimediaService;
 	}
 
+	public void setPlanProcessingStatusService(PlanProcessingStatusService planProcessingStatusService) {
+		this.planProcessingStatusService = planProcessingStatusService;
+	}
+
 	private void generateCSV(ExportEventDataSummary exportEventDataSummary, String fileName) throws IOException {
 		BufferedWriter writer = null;
 		CSVPrinter csvPrinter = null;

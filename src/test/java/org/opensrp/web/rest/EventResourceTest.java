@@ -57,6 +57,7 @@ import org.opensrp.dto.ExportEventDataSummary;
 import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.dto.ExportImagesSummary;
 import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PlanProcessingStatusService;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -85,6 +86,8 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	private ClientService clientService;
 
 	private MultimediaService multimediaService;
+
+	private PlanProcessingStatusService planProcessingStatusService;
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -133,11 +136,13 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
         eventService = mock(EventService.class);
         clientService = mock(ClientService.class);
         multimediaService = mock(MultimediaService.class);
+		planProcessingStatusService = mock(PlanProcessingStatusService.class);
         eventResource = webApplicationContext.getBean(EventResource.class);
         eventResource.setEventService(eventService);
         eventResource.setClientService(clientService);
         eventResource.setMultimediaService(multimediaService);
 		eventResource.setObjectMapper(mapper);
+		eventResource.setPlanProcessingStatusService(planProcessingStatusService);
     }
 
     @Test
@@ -535,6 +540,23 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertTrue(requiredProperties.contains(PROVIDER_ID));
 	}
 
+	@Test
+	public void testSaveCaseDetailsEvent() throws Exception {
+		Client client = createClient();
+		String caseDetailsEventString = "{\"type\":\"Event\",\"dateCreated\":\"2021-06-08T10:38:04.411+07:00\",\"serverVersion\":1601985074968,\"identifiers\":{},\"baseEntityId\":\"abe875a2-92f0-11ec-b909-0242ac120002\",\"locationId\":\"8cf6788d-5c7b-467a-99e5-987ba6adbc15\",\"eventDate\":\"2020-12-06T07:00:00.000+07:00\",\"eventType\":\"Case_Details\",\"formSubmissionId\":\"a142f8b6-92f0-11ec-b909-0242ac120002\",\"providerId\":\"nifi-user\",\"duration\":0,\"obs\":[],\"entityType\":\"Case_Details\",\"details\":{\"id\":\"2206\",\"age\":\"23\",\"bfid\":\"7107060601\",\"flag\":\"Site\",\"species\":\"V\",\"surname\":\"-\",\"focus_id\":\"8cf6788d-5c7b-467a-99e5-987ba6adbc15\",\"first_name\":\"เช่อ\",\"focus_name\":\"บ้านไร่ (7107060601)\",\"case_number\":\"1411170000065902106071700319889\",\"family_name\":\"เช่อ\",\"focus_reason\":\"Investigation\",\"focus_status\":\"A1\",\"house_number\":\"m13\",\"case_classification\":\"A\"},\"version\":1557860282617,\"teamId\":\" \",\"_id\":\"d357eb36-92f0-11ec-b909-0242ac120002\",\"_rev\":\"v1\"}";
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+				.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+		Event event = gson.fromJson(caseDetailsEventString,new TypeToken<Event>(){}.getType());
+		doReturn(client).when(clientService).addorUpdate(any(Client.class));
+		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
+		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
+		doReturn(true).when(eventService).checkIfCaseTriggeredEventExists(event);
+		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
+		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
+		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
+		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Case_Details");
+	}
 
 	private Event createEvent() {
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
