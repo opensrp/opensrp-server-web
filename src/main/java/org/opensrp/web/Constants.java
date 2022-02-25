@@ -20,15 +20,20 @@ public interface Constants {
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
 
     public static final String RETURN_COUNT= "return_count";
+
     public static final String TOTAL_RECORDS = "total_records";
 
     public static final String PAGE_NUMBER = "pageNumber";
 
     public static final String PAGE_SIZE = "pageSize";
 
+    public static final String SERVER_VERSION = "serverVersion";
+
     public static final String ORDER_BY_TYPE = "orderByType";
 
     public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
+	public static final String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     String LOCATIONS = "locations";
 
