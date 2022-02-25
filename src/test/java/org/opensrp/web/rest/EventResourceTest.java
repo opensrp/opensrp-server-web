@@ -58,6 +58,7 @@ import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.dto.ExportImagesSummary;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.PlanProcessingStatusService;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
 import org.opensrp.search.EventSearchBean;
@@ -553,6 +554,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		doReturn(true).when(eventService).checkIfCaseTriggeredEventExists(event);
 		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
+		verify(planProcessingStatusService).addPlanProcessingStatus(event.getId(), PlanProcessingStatusConstants.INITIAL);
 		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
 		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
 		assertEquals(eventArgumentCaptor.getValue().getEventType(), "Case_Details");
