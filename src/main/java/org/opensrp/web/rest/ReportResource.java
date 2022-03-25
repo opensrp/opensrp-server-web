@@ -192,9 +192,9 @@ public class ReportResource {
 		data.put(DISTRICT, district.getProperties().getName());
 		data.put(MONTH, month);
 		data.put(YEAR, year);
-		data.put(DATE_FROM, String.format("%s/%s/%s", "01", month, year));
+		data.put(DATE_FROM, String.format("%s-%s-%s", year, month, "01"));
 		int lastDayOfMonth = Month.of(Integer.parseInt(month)).length(Year.isLeap(Long.parseLong(year)));
-		data.put(DATE_TO, String.format("%s/%s/%s", lastDayOfMonth, month, year));
+		data.put(DATE_TO, String.format("%s-%s-%s", year, month, lastDayOfMonth));
 		data.put(FACILITIES_COUNT, facilities.size());
 
 		districtReports = new ArrayList<>();
