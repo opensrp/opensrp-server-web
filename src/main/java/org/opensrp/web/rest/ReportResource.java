@@ -277,6 +277,7 @@ public class ReportResource {
 		if (Files.exists(downloadPath)) {
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 			response.addHeader("Content-Disposition", "attachment; filename=" + downloadFilename);
+			response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
 
 			try {
 				Files.copy(downloadPath, response.getOutputStream());
