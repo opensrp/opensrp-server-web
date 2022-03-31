@@ -16,7 +16,7 @@
         <main.basedir>${project.basedir}</main.basedir>
         <hibernate-entitymanager.version>5.4.24.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.2.19.RELEASE</spring.version>
+        <spring.version>5.3.18</spring.version>
         <spring.security.version>5.3.13.RELEASE</spring.security.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
