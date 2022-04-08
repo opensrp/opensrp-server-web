@@ -476,6 +476,10 @@ public class EventResource extends RestResource<Event> {
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
+						if (eventService.checkIfCaseTriggeredEventExists(event)){
+							failedEventIds.add(event.getDetails().get(CASE_NUMBER));
+							continue;
+						}
 						event = eventService.processOutOfArea(event);
 						long timeBeforeSavingEvent = System.currentTimeMillis();
 						eventService.addorUpdateEvent(event, username);
@@ -767,6 +771,10 @@ public class EventResource extends RestResource<Event> {
 
 	public void setMultimediaService(MultimediaService multimediaService) {
 		this.multimediaService = multimediaService;
+	}
+
+	public void setPlanProcessingStatusService(PlanProcessingStatusService planProcessingStatusService) {
+		this.planProcessingStatusService = planProcessingStatusService;
 	}
 
 	private void generateCSV(ExportEventDataSummary exportEventDataSummary, String fileName) throws IOException {
