@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.1.2-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -16,7 +16,7 @@
         <main.basedir>${project.basedir}</main.basedir>
         <hibernate-entitymanager.version>5.4.24.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.2.19.RELEASE</spring.version>
+        <spring.version>5.2.20.RELEASE</spring.version>
         <spring.security.version>5.3.13.RELEASE</spring.security.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
@@ -25,11 +25,11 @@
         <redis.lettuce.version>6.1.6.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.1.0-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.1.1-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.4.0-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
-        <opensrp-server-openlmis-stock-version>1.1.1-SNAPSHOT</opensrp-server-openlmis-stock-version>
+        <opensrp-server-openlmis-stock-version>1.1.2-SNAPSHOT</opensrp-server-openlmis-stock-version>
         <lombok.version>1.18.12</lombok.version>
         <log4j.version>2.17.1</log4j.version>
     </properties>
