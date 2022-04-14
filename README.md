@@ -1,6 +1,8 @@
 # opensrp-server-web
 
-[![Build Status](https://travis-ci.org/OpenSRP/opensrp-server-web.svg?branch=master)](https://travis-ci.org/OpenSRP/opensrp-server-web) [![Coverage Status](https://coveralls.io/repos/github/OpenSRP/opensrp-server-web/badge.svg?branch=master)](https://coveralls.io/github/OpenSRP/opensrp-server-web?branch=master) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c2739ddb2c6640fe8a926eface8b5846)](https://www.codacy.com/gh/opensrp/opensrp-server-web/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=opensrp/opensrp-server-web&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/OpenSRP/opensrp-server-web.svg?branch=master)](https://travis-ci.org/OpenSRP/opensrp-server-web)
+[![Coverage Status](https://coveralls.io/repos/github/opensrp/opensrp-server-web/badge.svg?branch=master)](https://coveralls.io/github/opensrp/opensrp-server-web?branch=master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c2739ddb2c6640fe8a926eface8b5846)](https://www.codacy.com/gh/opensrp/opensrp-server-web/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=opensrp/opensrp-server-web&amp;utm_campaign=Badge_Grade)
 
 ## Overview
 
