@@ -1,36 +1,37 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.dto.Action;
+import org.opensrp.repository.ClientsRepository;
+import org.opensrp.scheduler.Alert;
+import org.opensrp.scheduler.repository.AlertsRepository;
+import org.opensrp.scheduler.service.ActionService;
+import org.smartregister.domain.Client;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.opensrp.common.AllConstants.BaseEntity;
-import org.smartregister.domain.Client;
-import org.opensrp.dto.Action;
-import org.opensrp.repository.ClientsRepository;
-import org.opensrp.scheduler.Alert;
-import org.opensrp.scheduler.repository.AlertsRepository;
-import org.opensrp.scheduler.service.ActionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.google.gson.Gson;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 public class ActionController {
@@ -57,6 +58,22 @@ public class ActionController {
 		return actions.stream().map(action -> ActionConvertor.from(action)).collect(Collectors.toList());
 	}
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/actions", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public List<Action> getNewActionForANMByPost(@RequestBody String requestBody) {
+		try {
+			JSONObject data = new JSONObject(requestBody);
+			String anmIdentifier = data.optString("anmIdentifier");
+			long timeStamp = Long.parseLong(data.optString("timeStamp"));
+
+			List<org.opensrp.scheduler.Action> actions = actionService.getNewAlertsForANM(anmIdentifier, timeStamp);
+			return actions.stream().map(action -> ActionConvertor.from(action)).collect(Collectors.toList());
+		}
+		catch (JSONException e) {
+			logger.error(String.format("Invalid request body {0}", e));
+			return new ArrayList<>();
+		}
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/useractions", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<Action> getNewActionForClient(@RequestParam("baseEntityId") String baseEntityId,
 	        @RequestParam("timeStamp") Long timeStamp) {
