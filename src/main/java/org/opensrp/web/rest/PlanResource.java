@@ -608,7 +608,7 @@ public class PlanResource {
 		Date endDate;
 		Calendar c = Calendar.getInstance();
 		c.setTime(currentDate);
-		c.add(Calendar.YEAR, Constants.Plan.PLAN_DURATION);
+		c.add(Calendar.DATE, Constants.Plan.PLAN_DURATION_DAYS);
 		endDate = c.getTime();
 
 		valuesMap.put(Constants.Plan.CURRENT_DATE, sdf.format(currentDate));

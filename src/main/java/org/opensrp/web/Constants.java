@@ -21,16 +21,21 @@ public interface Constants {
     String FAILURE = "Failure occurred";
     String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
 
-    String RETURN_COUNT= "return_count";
-    String TOTAL_RECORDS = "total_records";
+    public static final String RETURN_COUNT= "return_count";
+
+    public static final String TOTAL_RECORDS = "total_records";
 
     String PAGE_NUMBER = "pageNumber";
 
     String PAGE_SIZE = "pageSize";
 
-    String ORDER_BY_TYPE = "orderByType";
+    public static final String SERVER_VERSION = "serverVersion";
+
+    public static final String ORDER_BY_TYPE = "orderByType";
 
     String ORDER_BY_FIELD_NAME = "orderByFieldName";
+
+	public static final String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     String LOCATIONS = "locations";
 
@@ -124,6 +129,6 @@ public interface Constants {
         String EXTERNAL_ID = "externalId";
         String PLAN_USER = "opensrp";
         String BFID = "bfid";
-        int PLAN_DURATION = 5;
+        int PLAN_DURATION_DAYS = 20;
     }
 }

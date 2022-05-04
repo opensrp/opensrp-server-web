@@ -8,13 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
-import org.opensrp.util.DateTypeConverter;
 import org.smartregister.domain.Practitioner;
-import org.smartregister.utils.TaskDateTimeTypeConverter;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,178 +26,192 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.DATETIME_IN_UTC_FORMAT_STRING;
 import static org.opensrp.web.Constants.PAGE_NUMBER;
 import static org.opensrp.web.Constants.PAGE_SIZE;
+import static org.opensrp.web.Constants.ORDER_BY_TYPE;
+import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
+import static org.opensrp.web.Constants.SERVER_VERSION;
 
 @Controller
 @RequestMapping(value = "/rest/practitioner")
 public class PractitionerResource {
 
-    private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
+	private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
 
-    public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
-            .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
+	public static Gson gson = new GsonBuilder().setDateFormat(DATETIME_IN_UTC_FORMAT_STRING)
+			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-    private PractitionerService practitionerService;
+	private PractitionerService practitionerService;
 
-    public static final String IDENTIFIER = "identifier";
+	public static final String IDENTIFIER = "identifier";
 
-    public static final String USER_ID = "userId";
+	public static final String USER_ID = "userId";
 
-    public static final String GET_PRACTITIONER_BY_USER_URL = "/user/{userId}";
+	public static final String GET_PRACTITIONER_BY_USER_URL = "/user/{userId}";
 
-    @Autowired
-    public void setPractitionerService(PractitionerService practitionerService) {
-        this.practitionerService = practitionerService;
-    }
+	@Autowired
+	public void setPractitionerService(PractitionerService practitionerService) {
+		this.practitionerService = practitionerService;
+	}
 
-    @RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> getPractitionerByUniqueId(@PathVariable(IDENTIFIER) String identifier) {
-        if (StringUtils.isBlank(identifier)) {
-            return new ResponseEntity<>(gson.toJson("Practitioner Id is required"), RestUtils.getJSONUTF8Headers(),
-                    HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(gson.toJson(
-                practitionerService.getPractitioner(identifier)),
-                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-    }
+	@RequestMapping(value = "/{identifier}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getPractitionerByUniqueId(@PathVariable(IDENTIFIER) String identifier) {
+		if (StringUtils.isBlank(identifier)) {
+			return new ResponseEntity<>(gson.toJson("Practitioner Id is required"), RestUtils.getJSONUTF8Headers(),
+					HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(gson.toJson(
+				practitionerService.getPractitioner(identifier)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
 
-    @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> getPractitioners(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
-            @RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName) {
+	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getPractitioners(@RequestParam(value = PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = ORDER_BY_TYPE, required = false) String orderByType,
+			@RequestParam(value = ORDER_BY_FIELD_NAME, required = false) String orderByFieldName,
+			@RequestParam(value = SERVER_VERSION, required = false) String serverVersionParam) {
 
-        PractitionerSearchBean practitionerSearchBean = createPractitionerSearchBean(pageNumber, pageSize, orderByType,
-                orderByFieldName);
-        return new ResponseEntity<>(gson.toJson(
-                practitionerService.getAllPractitioners(practitionerSearchBean)),
-                RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-    }
+		Long serverVersion = null;
+		if (serverVersionParam != null) {
+			serverVersion = Long.parseLong(serverVersionParam);
+		}
 
-    /**
-     * Gets a practitioner using the user id
-     *
-     * @param userId {@link String}, User id from Keycloak
-     * @return practitioner {@link Practitioner}
-     */
-    @RequestMapping(value = GET_PRACTITIONER_BY_USER_URL, method = RequestMethod.GET, produces = {
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> getPractitionerByUser(@PathVariable(value = USER_ID) String userId) {
-        if (StringUtils.isNotBlank(userId)) {
-            return new ResponseEntity<>(gson.toJson(practitionerService.getPractitionerByUserId(userId)),
-                    RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(gson.toJson("The User Id is required"),
-                    RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
-        }
-    }
+		PractitionerSearchBean practitionerSearchBean = createPractitionerSearchBean(pageNumber, pageSize, orderByType,
+				orderByFieldName, serverVersion);
+		return new ResponseEntity<>(gson.toJson(
+				practitionerService.getAllPractitioners(practitionerSearchBean)),
+				RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+	}
 
-    @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> create(@RequestBody String entity) {
-        return savePractitioner(entity);
-    }
+	/**
+	 * Gets a practitioner using the user id
+	 *
+	 * @param userId {@link String}, User id from Keycloak
+	 * @return practitioner {@link Practitioner}
+	 */
+	@RequestMapping(value = GET_PRACTITIONER_BY_USER_URL, method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getPractitionerByUser(@PathVariable(value = USER_ID) String userId) {
+		if (StringUtils.isNotBlank(userId)) {
+			return new ResponseEntity<>(gson.toJson(practitionerService.getPractitionerByUserId(userId)),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(gson.toJson("The User Id is required"),
+					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    private ResponseEntity<String> savePractitioner(@RequestBody String payload) {
-        try {
-            Practitioner practitioner = gson.fromJson(payload, Practitioner.class);
-            practitionerService.addOrUpdatePractitioner(practitioner);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        }
-        catch (JsonSyntaxException e) {
-            logger.error("The request doesn't contain a valid practitioner representation", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        catch (IllegalArgumentException e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
+	@RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> create(@RequestBody String entity) {
+		return savePractitioner(entity);
+	}
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> update(@RequestBody String entity) {
-        return savePractitioner(entity);
-    }
+	private ResponseEntity<String> savePractitioner(@RequestBody String payload) {
+		try {
+			Practitioner practitioner = gson.fromJson(payload, Practitioner.class);
+			practitionerService.addOrUpdatePractitioner(practitioner);
+			return new ResponseEntity<>(HttpStatus.CREATED);
+		}
+		catch (JsonSyntaxException e) {
+			logger.error("The request doesn't contain a valid practitioner representation", e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    @RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
-        try {
-            practitionerService.deletePractitioner(identifier);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        catch (IllegalArgumentException e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
+	@RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> update(@RequestBody String entity) {
+		return savePractitioner(entity);
+	}
 
-    @GetMapping(value = "/report-to", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public List<Practitioner> getPractitionersByPractitionerRoleIdentifierAndCode(
-            @RequestParam(value = "practitionerIdentifier") String practitionerIdentifier,
-            @RequestParam(value = "code") String code) {
+	@RequestMapping(value = "/delete/{identifier}", method = RequestMethod.DELETE, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> delete(@PathVariable("identifier") String identifier) {
+		try {
+			practitionerService.deletePractitioner(identifier);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		catch (IllegalArgumentException e) {
+			logger.error(e.getMessage(), e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
 
-        return practitionerService.getAssignedPractitionersByIdentifierAndCode(practitionerIdentifier, code);
-    }
+	@GetMapping(value = "/report-to", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public List<Practitioner> getPractitionersByPractitionerRoleIdentifierAndCode(
+			@RequestParam(value = "practitionerIdentifier") String practitionerIdentifier,
+			@RequestParam(value = "code") String code) {
 
-    private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
-            String orderByFieldName) {
+		return practitionerService.getAssignedPractitionersByIdentifierAndCode(practitionerIdentifier, code);
+	}
 
-        BaseSearchBean.OrderByType orderByTypeEnum;
-        BaseSearchBean.FieldName fieldName;
-        orderByTypeEnum =
-                orderByType != null ? BaseSearchBean.OrderByType.valueOf(orderByType) : BaseSearchBean.OrderByType.DESC;
-        fieldName =
-                orderByFieldName != null ? BaseSearchBean.FieldName.valueOf(orderByFieldName) : BaseSearchBean.FieldName.id;
+	private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
+			String orderByFieldName, Long serverVersion) {
 
-        return PractitionerSearchBean.builder()
-                .pageNumber(pageNumber)
-                .pageSize(pageSize)
-                .orderByType(orderByTypeEnum)
-                .orderByFieldName(fieldName)
-                .build();
+		BaseSearchBean.OrderByType orderByTypeEnum;
+		BaseSearchBean.FieldName fieldName;
+		orderByTypeEnum =
+				orderByType != null ? BaseSearchBean.OrderByType.valueOf(orderByType) : BaseSearchBean.OrderByType.DESC;
+		fieldName =
+				orderByFieldName != null ? BaseSearchBean.FieldName.valueOf(orderByFieldName) : BaseSearchBean.FieldName.id;
 
-    }
+		return PractitionerSearchBean.builder()
+				.pageNumber(pageNumber)
+				.pageSize(pageSize)
+				.orderByType(orderByTypeEnum)
+				.orderByFieldName(fieldName)
+				.serverVersion(serverVersion)
+				.build();
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.TEXT_PLAIN_VALUE })
-    public ResponseEntity<String> saveMultiplePractitioners(@RequestBody String payload) {
-        try {
-            Set<String> unprocessedIds = new HashSet<>();
-            Type listType = new TypeToken<List<Practitioner>>() {}.getType();
-            List<Practitioner> practitioners = gson.fromJson(payload, listType);
+	}
 
-            for (Practitioner practitioner: practitioners){
-                try {
-                    practitionerService.addOrUpdatePractitioner(practitioner);
-                } catch (Exception exception){
-                    logger.error(exception.getMessage(), exception);
-                    unprocessedIds.add(practitioner.getIdentifier());
-                }
-            }
+	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.TEXT_PLAIN_VALUE })
+	public ResponseEntity<String> saveMultiplePractitioners(@RequestBody String payload) {
+		try {
+			Set<String> unprocessedIds = new HashSet<>();
+			Type listType = new TypeToken<List<Practitioner>>() {
 
-            if (unprocessedIds.isEmpty())
-                return new ResponseEntity<>("All Practitioners  processed", HttpStatus.CREATED);
-            else
-                return new ResponseEntity<>("Practitioners Ids not processed: " + String.join(",", unprocessedIds),
-                        HttpStatus.CREATED);
+			}.getType();
+			List<Practitioner> practitioners = gson.fromJson(payload, listType);
 
-        } catch (JsonSyntaxException e) {
-            logger.error("The request doesnt contain a valid practitioner representation",e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+			for (Practitioner practitioner : practitioners) {
+				try {
+					practitionerService.addOrUpdatePractitioner(practitioner);
+				}
+				catch (Exception exception) {
+					logger.error(exception.getMessage(), exception);
+					unprocessedIds.add(practitioner.getIdentifier());
+				}
+			}
 
-    @GetMapping(value = "/count")
+			if (unprocessedIds.isEmpty())
+				return new ResponseEntity<>("All Practitioners  processed", HttpStatus.CREATED);
+			else
+				return new ResponseEntity<>("Practitioners Ids not processed: " + String.join(",", unprocessedIds),
+						HttpStatus.CREATED);
+
+		}
+		catch (JsonSyntaxException e) {
+			logger.error("The request doesnt contain a valid practitioner representation", e);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/count")
 	public ResponseEntity<Long> getAllPractitionersCount() {
 		try {
 			return new ResponseEntity<>(practitionerService.countAllPractitioners(), HttpStatus.OK);
-		} catch (Exception exception) {
+		}
+		catch (Exception exception) {
 			logger.error("Error getting practitioners count", exception);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
