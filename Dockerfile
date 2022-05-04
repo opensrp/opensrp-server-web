@@ -32,6 +32,6 @@ RUN mkdir -p /opt/mybatis \
 # Run migrations (mybatis)
 # RUN /opt/mybatis/mybatis-migrations-3.3.4/bin/migrate up --path=/migrations --env=deployment
 
-EXPOSE 8080 8081
+EXPOSE 8080
 # Start app
 CMD /usr/local/tomcat/bin/catalina.sh run
