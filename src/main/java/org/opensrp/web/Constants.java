@@ -4,6 +4,8 @@ public interface Constants {
 
     String LIMIT = "limit";
 
+    String AUTHORIZATION = "Authorization";
+
     int DEFAULT_LIMIT = 25;
 
     int DEFAULT_GET_ALL_IDS_LIMIT = 5000;
@@ -23,15 +25,15 @@ public interface Constants {
 
     public static final String TOTAL_RECORDS = "total_records";
 
-    public static final String PAGE_NUMBER = "pageNumber";
+    String PAGE_NUMBER = "pageNumber";
 
-    public static final String PAGE_SIZE = "pageSize";
+    String PAGE_SIZE = "pageSize";
 
     public static final String SERVER_VERSION = "serverVersion";
 
     public static final String ORDER_BY_TYPE = "orderByType";
 
-    public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+    String ORDER_BY_FIELD_NAME = "orderByFieldName";
 
 	public static final String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
@@ -73,6 +75,14 @@ public interface Constants {
             String FIELDS = "fields";
             String KEY = "key";
         }
+    }
+
+    interface RapidPro {
+        String CONTACT = "contact";
+        String UUID = "uuid";
+        String DATE_OF_BIRTH = "dateofbirth";
+        String ID = "id";
+        String VALUE = "value";
     }
 
     interface HealthIndicator {

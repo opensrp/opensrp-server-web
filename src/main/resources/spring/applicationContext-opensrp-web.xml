@@ -13,6 +13,7 @@
        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
     <context:property-placeholder
             location="classpath*:maven.properties,classpath*:opensrp.properties"/>
 
@@ -67,8 +68,8 @@
     <beans profile="chw_referral_module">
         <import resource="classpath:applicationContext-opensrp-referral.xml"/>
     </beans>
-    
+
     <beans profile="dhis2-sync-vaccine-tracker,rapidpro">
-    	 <import resource="couchDbContext.xml"/>
+        <import resource="listener-context.xml"/>
     </beans>
 </beans>
