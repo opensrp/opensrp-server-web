@@ -68,7 +68,8 @@ public class OrganizationResourceTest {
 
 	private String BASE_URL = "/rest/organization/";
 
-	private String organizationJSON = "{\"id\":null,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"assignedLocations\":null,\"memberCount\":null}";
+	private String organizationJSON = "{\"id\":null,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"assignedLocations\":null,\"dateCreated\":null,\"dateEdited\":null,\"serverVersion\":0,\"memberCount\":null}";
+
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	private String MESSAGE = "The server encountered an error processing the request.";
 
@@ -120,8 +121,7 @@ public class OrganizationResourceTest {
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 				.andExpect(status().isCreated());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-				.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 
 	}
@@ -153,8 +153,7 @@ public class OrganizationResourceTest {
 				.contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
 				.andExpect(status().isCreated());
 		verify(organizationService).updateOrganization(organizationArgumentCaptor.capture());
-		assertEquals(organizationJSON, objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-				.writeValueAsString(organizationArgumentCaptor.getValue()));
+		assertEquals(organizationJSON, objectMapper.writeValueAsString(organizationArgumentCaptor.getValue()));
 		verifyNoMoreInteractions(organizationService);
 
 	}
