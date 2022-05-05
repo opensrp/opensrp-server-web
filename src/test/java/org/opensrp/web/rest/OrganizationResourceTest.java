@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,12 +7,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.domain.AssignedLocations;
 import org.opensrp.domain.Organization;
-import org.smartregister.domain.Practitioner;
 import org.opensrp.search.OrganizationSearchBean;
 import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PractitionerService;
@@ -23,6 +19,7 @@ import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.bean.OrganizationAssigmentBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.smartregister.domain.Practitioner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,21 +33,10 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.doThrow;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
  * @author Samuel Githengi created on 09/17/19
@@ -82,7 +68,8 @@ public class OrganizationResourceTest {
 
 	private String BASE_URL = "/rest/organization/";
 
-	private String organizationJSON = "{\"id\":null,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"assignedLocations\":null,\"memberCount\":null}";
+	private String organizationJSON = "{\"id\":null,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"assignedLocations\":null,\"dateCreated\":null,\"dateEdited\":null,\"serverVersion\":0,\"memberCount\":null}";
+
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	private String MESSAGE = "The server encountered an error processing the request.";
 
@@ -104,9 +91,8 @@ public class OrganizationResourceTest {
 		verifyNoMoreInteractions(organizationService);
 		assertEquals("[" + organizationJSON + "]", result.getResponse().getContentAsString());
 
-		
 	}
-	
+
 	@Test
 	public void testGetAllOrganizationsUnderLocation() throws Exception {
 		List<Organization> expected = Collections.singletonList(getOrganization());
@@ -114,7 +100,6 @@ public class OrganizationResourceTest {
 		mockMvc.perform(get(BASE_URL).param("location_id", "12345")).andExpect(status().isOk()).andReturn();
 		verify(organizationService).selectOrganizationsEncompassLocations("12345");
 		verifyNoMoreInteractions(organizationService);
-		
 
 	}
 
@@ -153,9 +138,9 @@ public class OrganizationResourceTest {
 
 	@Test
 	public void testCreateOrganizationWithError() throws Exception {
-		doThrow(IllegalStateException.class).when(organizationService).addOrganization(any(Organization.class));
+		doThrow(RuntimeException.class).when(organizationService).addOrganization(any(Organization.class));
 		mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(organizationJSON.getBytes()))
-		        .andExpect(status().isInternalServerError());
+				.andExpect(status().isInternalServerError());
 		verify(organizationService).addOrganization(organizationArgumentCaptor.capture());
 		verifyNoMoreInteractions(organizationService);
 
