@@ -3,18 +3,6 @@
  */
 package org.opensrp.web.config.security;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.OPTIONS;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.util.Arrays;
-
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
@@ -41,6 +29,13 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
+import static org.springframework.http.HttpMethod.*;
 
 /**
  * @author Samuel Githengi created on 04/20/20
@@ -115,7 +110,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.anyRequest().authenticated()
 		.and()
     		.csrf()
-    		.ignoringAntMatchers("/rest/**","/multimedia/**")
+    		.ignoringAntMatchers("/rest/**","/multimedia/**","/actions/**")
     	.and()
     		.logout()
     		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"));
