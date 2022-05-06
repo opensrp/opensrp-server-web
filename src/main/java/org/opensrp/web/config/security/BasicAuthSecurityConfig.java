@@ -71,7 +71,7 @@ public class BasicAuthSecurityConfig extends WebSecurityConfigurerAdapter {
 		.mvcMatchers("/**").hasRole(Role.OPENMRS)
 		.and()
     		.csrf()
-    		.ignoringAntMatchers("/rest/**","/location/**", "/multimedia/upload");
+    		.ignoringAntMatchers("/rest/**","/location/**", "/multimedia/upload","/actions/**");
 		applyBasicAndStateless(http);
 		/* @formatter:on */
 	}

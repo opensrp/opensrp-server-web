@@ -3,8 +3,6 @@
  */
 package org.opensrp.web.config.security;
 
-import javax.sql.DataSource;
-
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +17,8 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import javax.sql.DataSource;
 
 /**
  * @author Samuel Githengi created on 03/10/20
@@ -62,7 +62,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		        	.exceptionHandling().accessDeniedPage("/login.jsp?authentication_error=true")
 		        .and()
 		        	.csrf()
-		        	.ignoringAntMatchers("/rest/**")
+		        	.ignoringAntMatchers("/rest/**","/actions/**")
 		        .and().authenticationProvider(opensrpAuthenticationProvider);
 		/* @formatter:on */
 	}
