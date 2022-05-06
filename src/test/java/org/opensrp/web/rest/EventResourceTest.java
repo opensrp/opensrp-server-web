@@ -1,42 +1,9 @@
 package org.opensrp.web.rest;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMostOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.nullable;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.util.constants.EventConstants.CASE_NUMBER;
-import static org.opensrp.util.constants.EventConstants.EVENT_TYPE_CASE_DETAILS;
-import static org.opensrp.util.constants.EventConstants.FLAG;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -45,36 +12,38 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.common.AllConstants.Event.TEAM_ID;
-
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.ExportEventDataSummary;
 import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
 import org.opensrp.dto.ExportImagesSummary;
-import org.opensrp.service.MultimediaService;
-import org.opensrp.service.PlanProcessingStatusService;
-import org.opensrp.util.constants.PlanProcessingStatusConstants;
-import org.smartregister.domain.Client;
-import org.smartregister.domain.Event;
 import org.opensrp.search.EventSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
-import org.smartregister.utils.DateTimeTypeConverter;
+import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PlanProcessingStatusService;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
 import org.opensrp.web.bean.EventSyncBean;
 import org.opensrp.web.bean.Identifier;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.http.ResponseEntity;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.common.AllConstants.Event.*;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
