@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.9.5-SNAPSHOT-ALPHA-ZEIR</version>
+    <version>2.9.6-SNAPSHOT-ALPHA-ZEIR</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -24,7 +24,7 @@
         <redis.jedis.version>3.8.0</redis.jedis.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.13.4-ZEIR-ALPHA-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>2.13.5-ZEIR-ALPHA-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.4.1-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
