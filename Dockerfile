@@ -12,25 +12,25 @@ RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles 
 WORKDIR /tmp/opensrp-server-web-exploded
 RUN jar -xvf /tmp/opensrp-server-web/target/opensrp.war
 
-FROM tomcat:9-jre11-openjdk-slim
-# Copy the exploded directory
-COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
-
-# copy the migration files
-COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations /migrations
-
-# Download mybatis
 RUN apt update && apt install -y unzip wget
 
 # setup mybatis
 RUN mkdir -p /opt/mybatis \
-    && wget --quiet --no-cookies https://github.com/mybatis/migrations/releases/download/mybatis-migrations-3.3.4/mybatis-migrations-3.3.4-bundle.zip -O /opt/mybatis/mybatis-migrations-3.3.4.zip \
-    && unzip /opt/mybatis/mybatis-migrations-3.3.4.zip -d /opt/mybatis/ \
-    && rm -f /opt/mybatis/mybatis-migrations-3.3.4.zip \
-    && chmod +x /opt/mybatis/mybatis-migrations-3.3.4/bin/migrate
+    && wget --quiet --no-cookies https://github.com/mybatis/migrations/releases/download/mybatis-migrations-3.3.9/mybatis-migrations-3.3.9-bundle.zip -O /opt/mybatis/mybatis-migrations-3.3.9.zip \
+    && unzip /opt/mybatis/mybatis-migrations-3.3.9.zip -d /opt/mybatis/ \
+    && rm -f /opt/mybatis/mybatis-migrations-3.3.9.zip \
+    && chmod +x /opt/mybatis/mybatis-migrations-3.3.9/bin/migrate
 
-# Run migrations (mybatis)
-# RUN /opt/mybatis/mybatis-migrations-3.3.4/bin/migrate up --path=/migrations --env=deployment
+FROM tomcat:9-jdk11-corretto
+## Copy the exploded directory
+COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
+#
+## copy the migration files
+COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations /migrations
+
+COPY --from=build /opt/mybatis/mybatis-migrations-3.3.9 /opt/mybatis/mybatis-migrations-3.3.9
+
+RUN yum update -y
 
 EXPOSE 8080
 # Start app
