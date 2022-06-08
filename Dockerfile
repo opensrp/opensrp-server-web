@@ -16,21 +16,8 @@ FROM tomcat:9-jre11-openjdk-slim
 # Copy the exploded directory
 COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
 
-# copy the migration files
-COPY --from=build /tmp/opensrp-server-web/configs/assets/migrations /migrations
-
 # Download mybatis
 RUN apt update && apt install -y unzip wget
-
-# setup mybatis
-RUN mkdir -p /opt/mybatis \
-    && wget --quiet --no-cookies https://github.com/mybatis/migrations/releases/download/mybatis-migrations-3.3.4/mybatis-migrations-3.3.4-bundle.zip -O /opt/mybatis/mybatis-migrations-3.3.4.zip \
-    && unzip /opt/mybatis/mybatis-migrations-3.3.4.zip -d /opt/mybatis/ \
-    && rm -f /opt/mybatis/mybatis-migrations-3.3.4.zip \
-    && chmod +x /opt/mybatis/mybatis-migrations-3.3.4/bin/migrate
-
-# Run migrations (mybatis)
-# RUN /opt/mybatis/mybatis-migrations-3.3.4/bin/migrate up --path=/migrations --env=deployment
 
 EXPOSE 8080
 # Start app
