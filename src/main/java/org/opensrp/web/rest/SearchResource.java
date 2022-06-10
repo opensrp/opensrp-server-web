@@ -9,10 +9,7 @@ import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -60,7 +57,8 @@ public class SearchResource extends RestResource<Client> {
 		String firstName = getStringFilter(FIRST_NAME, request);
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
-		
+		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter("phone_number", request));
+
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		
@@ -83,8 +81,12 @@ public class SearchResource extends RestResource<Client> {
 			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
 			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
 			
-			attributeMap = new HashMap<String, String>();
+			attributeMap = new HashMap<>();
 			attributeMap.put(attributeType, attributeValue);
+		}
+		if (phoneNumber.isPresent()) {
+			attributeMap = new HashMap<>();
+			attributeMap.put("alt_phone_number", phoneNumber.get());
 		}
 		searchBean.setAttributes(attributeMap);
 		
