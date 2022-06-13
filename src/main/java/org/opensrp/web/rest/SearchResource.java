@@ -1,11 +1,7 @@
 package org.opensrp.web.rest;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.LAST_NAME;
-import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
+import static org.opensrp.common.AllConstants.Client.*;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 import java.text.ParseException;
@@ -61,7 +57,7 @@ public class SearchResource extends RestResource<Client> {
 		String firstName = getStringFilter(FIRST_NAME, request);
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
-		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter("phone_number", request));
+		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
 
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
@@ -90,7 +86,7 @@ public class SearchResource extends RestResource<Client> {
 		}
 		if (phoneNumber.isPresent()) {
 			attributeMap = new HashMap<>();
-			attributeMap.put("alt_phone_number", phoneNumber.get());
+			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
 		}
 		searchBean.setAttributes(attributeMap);
 		
