@@ -134,10 +134,18 @@ public class SearchResourceTest extends BaseResourceTest {
 	public void shouldSearchClientWithBirthDate() throws Exception {
 		Client expectedClient = createOneSearchableClient();
 
-		String searchQuery = "birthdate=" + birthDate.toLocalDate();
+		String searchQuery = "birthdate=" + birthDate.toLocalDate() + ":" + birthDate.toLocalDate();
 		JsonNode actualObj = searchClient(searchQuery);
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 
+		assertEquals(expectedClient, actualClient);
+	}
+	@Test
+	public void shouldSearchClientWithBirthDateWithoutColons() throws Exception {
+		Client expectedClient = createOneSearchableClient();
+		String searchQuery = "birthdate=" + birthDate.toLocalDate();
+		JsonNode actualObj = searchClient(searchQuery);
+		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
 	@Test
