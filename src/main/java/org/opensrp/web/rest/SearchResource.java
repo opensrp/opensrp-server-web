@@ -57,7 +57,7 @@ public class SearchResource extends RestResource<Client> {
 		String firstName = getStringFilter(FIRST_NAME, request);
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
-		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
+		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter("phone_number", request));
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		
@@ -85,7 +85,7 @@ public class SearchResource extends RestResource<Client> {
 		}
 		if (phoneNumber.isPresent()) {
 			attributeMap = new HashMap<>();
-			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
+			attributeMap.put("alt_phone_number", phoneNumber.get());
 		}
 		searchBean.setAttributes(attributeMap);
 		
