@@ -129,22 +129,22 @@ public class SearchResourceTest  extends BaseResourceTest {
 		assertEquals(listA, result);
 		
 	}
-	@Test
-	public void shouldSearchClientWithBirthDateWithoutColons() throws Exception {
-		Client expectedClient = createOneSearchableClient();
-		String searchQuery = "birthdate=" + birthDate.toLocalDate();
-		JsonNode actualObj = searchClient(searchQuery);
-		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
-		assertEquals(expectedClient, actualClient);
-	}
-	@Test
-	public void shouldSearchClientWithMobileNumber() throws Exception {
-		Client expectedClient = createOneSearchableClient();
-		String searchQuery = "phone_number=" + phoneNumber;
-		JsonNode actualObj = searchClient(searchQuery);
-		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
-		assertEquals(expectedClient, actualClient);
-	}
+//	@Test
+//	public void shouldSearchClientWithBirthDateWithoutColons() throws Exception {
+//		Client expectedClient = createOneSearchableClient();
+//		String searchQuery = "birthdate=" + birthDate.toLocalDate();
+//		JsonNode actualObj = searchClient(searchQuery);
+//		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
+//		assertEquals(expectedClient, actualClient);
+//	}
+//	@Test
+//	public void shouldSearchClientWithMobileNumber() throws Exception {
+//		Client expectedClient = createOneSearchableClient();
+//		String searchQuery = "phone_number=" + phoneNumber;
+//		JsonNode actualObj = searchClient(searchQuery);
+//		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
+//		assertEquals(expectedClient, actualClient);
+//	}
 	private JsonNode searchClient(String query) throws Exception {
 		String searchQuery = "search?" + query;
 
