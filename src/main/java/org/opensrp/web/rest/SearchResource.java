@@ -1,25 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.*;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.smartregister.domain.Client;
-import org.smartregister.domain.Event;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
@@ -27,11 +12,21 @@ import org.opensrp.service.SearchService;
 import org.opensrp.web.utils.ChildMother;
 import org.opensrp.web.utils.SearchEntityWrapper;
 import org.opensrp.web.utils.SearchHelper;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.util.*;
+
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.*;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping(value = "/rest/search")
@@ -58,7 +53,7 @@ public class SearchResource extends RestResource<Client> {
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
 		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
-
+		Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 		
@@ -80,7 +75,7 @@ public class SearchResource extends RestResource<Client> {
 		if (!StringUtils.isBlank(attributes)) {
 			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
 			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-			
+
 			attributeMap = new HashMap<>();
 			attributeMap.put(attributeType, attributeValue);
 		}
@@ -88,14 +83,18 @@ public class SearchResource extends RestResource<Client> {
 			attributeMap = new HashMap<>();
 			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
 		}
+		if (alternateName.isPresent()) {
+			attributeMap = new HashMap<>();
+			attributeMap.put(ALT_NAME, alternateName.get());
+		}
 		searchBean.setAttributes(attributeMap);
-		
+
 		Map<String, String> identifierMap = null;
 		String identifiers = getStringFilter("identifier", request);
 		if (!StringUtils.isBlank(identifiers)) {
 			String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
 			String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
-			
+
 			identifierMap = new HashMap<String, String>();
 			identifierMap.put(identifierType, identifierValue);
 		}
