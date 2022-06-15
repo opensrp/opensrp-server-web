@@ -12,12 +12,11 @@ RUN mvn clean package -Dmaven.test.skip=true -P $opensrp_maven_package_profiles 
 WORKDIR /tmp/opensrp-server-web-exploded
 RUN jar -xvf /tmp/opensrp-server-web/target/opensrp.war
 
-FROM tomcat:9-jre11-openjdk-slim
+FROM tomcat:9-jdk11-corretto
 # Copy the exploded directory
 COPY --from=build /tmp/opensrp-server-web-exploded /usr/local/tomcat/webapps/opensrp
 
-# Download mybatis
-RUN apt update && apt install -y unzip wget
+RUN yum update -y
 
 EXPOSE 8080
 # Start app
