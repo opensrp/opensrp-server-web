@@ -9,32 +9,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opensrp.repository.PlanRepository;
-import org.opensrp.repository.postgres.ClientsRepositoryImpl;
-import org.opensrp.service.TaskGenerator;
-import org.opensrp.service.ExportEventDataMapper;
-import org.opensrp.web.rest.it.BaseResourceTest;
-import org.smartregister.domain.Address;
-import org.smartregister.domain.Client;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
+import org.opensrp.repository.PlanRepository;
 import org.opensrp.repository.SearchRepository;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.SearchService;
+import org.opensrp.repository.postgres.ClientsRepositoryImpl;
+import org.opensrp.service.*;
+import org.opensrp.web.rest.it.BaseResourceTest;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
+import org.smartregister.domain.Address;
+import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.keycloak.util.JsonSerialization.mapper;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -137,6 +131,7 @@ public class SearchResourceTest  extends BaseResourceTest {
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
+
 	@Test
 	public void shouldSearchClientWithMobileNumber() throws Exception {
 		Client expectedClient = createOneSearchableClient();
@@ -145,11 +140,22 @@ public class SearchResourceTest  extends BaseResourceTest {
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
+
+	@Test
+	public void shouldSearchClientByAltName() throws Exception {
+		Client expectedClient = createOneSearchableClient();
+		String searchQuery = "alt_name=" + "ona";
+		JsonNode actualObj = searchClient(searchQuery);
+		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
+		assertEquals(expectedClient, actualClient);
+	}
+
 	private JsonNode searchClient(String query) throws Exception {
 		String searchQuery = "search?" + query;
 
 		return getCallAsJsonNode(BASE_URL + searchQuery, "", status().isOk());
 	}
+
 	private Client createOneSearchableClient() {
 		Client expectedClient = (Client) new Client("1").withFirstName(firstName).withMiddleName(MIDDLE_NAME)
 				.withLastName(LAST_NAME).withGender(male).withBirthdate(birthDate, false).withDeathdate(deathDate, true)
@@ -164,14 +170,14 @@ public class SearchResourceTest  extends BaseResourceTest {
 		otherClient.withIdentifier("fsdf", "sfdf");
 		otherClient.withAttribute("sfdf", "sfdf");
 		otherClient.withAttribute("alt_phone_number",phoneNumber);
+		otherClient.withAttribute("alt_name","ona");
 		Client otherClient2 = (Client) new Client("3").withFirstName("dd").withMiddleName("fdf").withLastName("sfd")
 				.withGender(FEMALE).withBirthdate(birthDate, false).withDeathdate(deathDate, true).withAddress(address);
-		;
 		otherClient2.setDateCreated(DATE_CREATED);
 		otherClient2.withIdentifier("hg", "ghgh");
 		otherClient2.withAttribute("hg", "hgh");
-		otherClient2.withAttribute("alt_phone_number",phoneNumber);
-
+		otherClient2.withAttribute("alt_phone_number", phoneNumber);
+		otherClient2.withAttribute("alt_name", "ona");
 		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
 
 		return expectedClient;
