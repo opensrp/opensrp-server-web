@@ -1,21 +1,5 @@
 package org.opensrp.web.rest;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,9 +11,19 @@ import org.opensrp.api.domain.User;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class RestUtils {
 	public static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -73,15 +67,17 @@ public class RestUtils {
 	  return strval == null ? null : new DateTime(strval);
 	}
 	
-	public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException
-	{
-	  String strval = getStringFilter(filter, req);
-	  if(strval == null){
-		  return null;
-	  }
-	  DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
-	  DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
-	  return new DateTime[]{d1,d2};
+	public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException {
+		String strval = getStringFilter(filter, req);
+		if (strval == null) {
+			return null;
+		}
+		if (!strval.contains(":")) {
+			return new DateTime[] { new DateTime(strval), new DateTime(strval) };
+		}
+		DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+		DateTime d2 = new DateTime(strval.substring(strval.indexOf(":") + 1));
+		return new DateTime[] { d1, d2 };
 	}
 
 	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
