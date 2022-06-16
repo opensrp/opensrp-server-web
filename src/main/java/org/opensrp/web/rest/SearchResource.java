@@ -22,7 +22,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
 import static org.opensrp.common.AllConstants.Client.*;
@@ -52,8 +56,8 @@ public class SearchResource extends RestResource<Client> {
 		String firstName = getStringFilter(FIRST_NAME, request);
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
-		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter("phone_number", request));
-		Optional<String> alternateName = Optional.ofNullable(getStringFilter("alt_name", request));
+		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
+		Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
 
@@ -83,11 +87,11 @@ public class SearchResource extends RestResource<Client> {
 		}
 		if (phoneNumber.isPresent()) {
 			attributeMap = new HashMap<>();
-			attributeMap.put("alt_phone_number", phoneNumber.get());
+			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
 		}
 		if (alternateName.isPresent()) {
 			attributeMap = new HashMap<>();
-			attributeMap.put("alt_name", alternateName.get());
+			attributeMap.put(ALT_NAME, alternateName.get());
 		}
 		searchBean.setAttributes(attributeMap);
 
