@@ -1,12 +1,6 @@
 package org.opensrp.web.rest.it;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -14,17 +8,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.smartregister.domain.Address;
-import org.smartregister.domain.Client;
 import org.opensrp.repository.postgres.ClientsRepositoryImpl;
 import org.opensrp.repository.postgres.EventsRepositoryImpl;
 import org.opensrp.web.rest.SearchResource;
+import org.smartregister.domain.Address;
+import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 @RunWith(MockitoJUnitRunner.class)
 public class SearchResourceTest extends BaseResourceTest {
 	MockHttpServletRequest mockHttpServletRequest;
@@ -169,7 +167,6 @@ public class SearchResourceTest extends BaseResourceTest {
 	@Test
 	public void shouldSearchClientByAltName() throws Exception {
 		mockHttpServletRequest= new MockHttpServletRequest();
-		SearchResource resource=Mockito.mock(SearchResource.class);
 		Client expectedClient = createOneSearchableClient();
 		String searchQuery = "alt_name=" + "ona";
 		JsonNode actualObj = searchClient(searchQuery);
