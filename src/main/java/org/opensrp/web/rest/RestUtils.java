@@ -15,7 +15,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -129,7 +133,8 @@ public class RestUtils {
      * @param multimediaFiles
      * @throws IOException
      */
-	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles, MultimediaFileManager fileManager) throws IOException {
+	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles, MultimediaFileManager fileManager) throws
+			IOException {
 		for (Multimedia multiMedia : multimediaFiles) {
 			FileInputStream inputStream;
 			File file = fileManager.retrieveFile(multiMedia.getFilePath());
