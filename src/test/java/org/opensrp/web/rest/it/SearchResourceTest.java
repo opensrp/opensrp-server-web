@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+
 public class SearchResourceTest extends BaseResourceTest {
 
 	private final static String BASE_URL = "/rest/search/";
@@ -66,6 +67,7 @@ public class SearchResourceTest extends BaseResourceTest {
 	String town = "town";
 
 	String firstName = "name";
+
 
 	String male = "male";
 
