@@ -96,7 +96,7 @@ public class SearchResourceTest {
 		mockHttpServletRequest.addParameter("alt_name",firstName);
 		mockHttpServletRequest.addParameter("attribute","next_contact_date:2022-06-15");
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
-		List <Client> clients= ReflectionTestUtils.invokeMethod(SearchResource.class,"search",mockHttpServletRequest);
+		List <Client> clients= ReflectionTestUtils.invokeMethod(SearchResource.class,"search",MockHttpServletRequest.class);
 		Assert.assertNotNull(clients);
 	}
 }
