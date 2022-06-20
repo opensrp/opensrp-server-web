@@ -44,16 +44,16 @@ public class SearchResourceTest {
 	private TaskGenerator taskGenerator;
 
 	private PlanRepository planRepository;
-
 	MockHttpServletRequest mockHttpServletRequest;
-
 	String phoneNumber = "0727000000";
-
 	String town = "town";
 
 	String firstName = "name";
 
+	String male = "male";
+
 	DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
+
 
 	@Before
 	public void setUp() {
@@ -70,7 +70,6 @@ public class SearchResourceTest {
 
 	@Test
 	public void testInstantanceCreatesCorrectly() {
-
 		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
 		Assert.assertNotNull(searchResource);
 
@@ -78,7 +77,6 @@ public class SearchResourceTest {
 
 	@Test
 	public void testIntersectionMethodReturnsCorrectResult() {
-
 		Client clientA = Mockito.mock(Client.class);
 		List<Client> listA = Arrays.asList(new Client[] { clientA });
 		List<Client> result = SearchHelper.intersection(null, listA);
