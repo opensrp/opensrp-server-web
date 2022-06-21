@@ -50,7 +50,15 @@ public class SearchResource extends RestResource<Client> {
 		this.clientService = clientService;
 		this.eventService = eventService;
 	}
-	
+
+	/**
+	 * @param request
+	 * contains search parameter of with attributes and full colon e.g
+	 * 1. search?attributes=phone_number:072700000
+	 * or search parameter without attribute and without colon e.g
+	 * 2. search?phone_number=072700000
+	 * @throws ParseException
+	 */
 	@Override
 	public List<Client> search(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
 		String firstName = getStringFilter(FIRST_NAME, request);
@@ -59,7 +67,7 @@ public class SearchResource extends RestResource<Client> {
 		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
 		Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
 		ClientSearchBean searchBean = new ClientSearchBean();
-		searchBean.setNameLike(getStringFilter("name", request));
+		searchBean.setNameLike(getStringFilter(NAME, request));
 		
 		searchBean.setGender(getStringFilter(GENDER, request));
 		DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
@@ -75,7 +83,7 @@ public class SearchResource extends RestResource<Client> {
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
 		Map<String, String> attributeMap = null;
-		String attributes = getStringFilter("attribute", request);
+		String attributes = getStringFilter(ATTRIBUTE, request);
 		if (!StringUtils.isBlank(attributes)) {
 			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
 			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
@@ -94,7 +102,7 @@ public class SearchResource extends RestResource<Client> {
 		searchBean.setAttributes(attributeMap);
 
 		Map<String, String> identifierMap = null;
-		String identifiers = getStringFilter("identifier", request);
+		String identifiers = getStringFilter(IDENTIFIER, request);
 		if (!StringUtils.isBlank(identifiers)) {
 			String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
 			String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];

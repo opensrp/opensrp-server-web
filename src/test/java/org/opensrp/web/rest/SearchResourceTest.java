@@ -1,6 +1,8 @@
 
 package org.opensrp.web.rest;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +21,12 @@ import org.opensrp.service.SearchService;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +49,15 @@ public class SearchResourceTest {
 	private TaskGenerator taskGenerator;
 
 	private PlanRepository planRepository;
+	MockHttpServletRequest mockHttpServletRequest;
+	String phoneNumber = "0727000000";
+	String town = "town";
+
+	String firstName = "name";
+
+	String male = "male";
+
+	DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
 
 	@Before
 	public void setUp() {
@@ -76,5 +89,17 @@ public class SearchResourceTest {
 		Assert.assertNotNull(result);
 		Assert.assertEquals(listA, result);
 		
+	}
+	@Test
+	public void shouldSearchClient() throws ParseException {
+		mockHttpServletRequest = new MockHttpServletRequest();
+		mockHttpServletRequest.addParameter("ff", "ona");
+		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
+		mockHttpServletRequest.addParameter("alt_name", firstName);
+		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
+		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
+		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
+		List<Client> clients = searchResource.search(mockHttpServletRequest);
+		Assert.assertNotNull(clients);
 	}
 }
