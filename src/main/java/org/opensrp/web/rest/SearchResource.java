@@ -61,12 +61,14 @@ public class SearchResource extends RestResource<Client> {
 		this.eventService = eventService;
 	}
 
-
-	/*
-	* This method has been enhanced to support search parameters with attributes and colon
-	* e.g search?attributes=phone_number:0727000000 and without attributes and without colon
-	* e.g search?phone_number=0727000000
-	* */
+	/**
+	 * @param request
+	 * contains search parameter of with attributes and full colon e.g
+	 * 1. search?attributes=phone_number:072700000
+	 * or search parameter without attribute and without colon e.g
+	 * 2. search?phone_number=072700000
+	 * @throws ParseException
+	 */
 	@Override
 	public List<Client> search(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
 		String firstName = getStringFilter(FIRST_NAME, request);
