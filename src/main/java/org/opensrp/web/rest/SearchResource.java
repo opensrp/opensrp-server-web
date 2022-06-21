@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
 import static org.opensrp.common.AllConstants.Client.ALT_NAME;
 import static org.opensrp.common.AllConstants.Client.PHONE_NUMBER;
 import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
