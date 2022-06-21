@@ -90,11 +90,11 @@ public class SearchResourceTest {
 	public void shouldSearchClient() throws ParseException {
 		mockHttpServletRequest = new MockHttpServletRequest();
 		mockHttpServletRequest.addParameter("ff", "ona");
-		mockHttpServletRequest.addParameter("alt_phone_number", phoneNumber);
+		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
 		mockHttpServletRequest.addParameter("alt_name", firstName);
 		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
-		 SearchResource searchResource=Mockito.mock(SearchResource.class);
+		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
 		Assert.assertNotNull(clients);
 	}
