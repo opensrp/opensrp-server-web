@@ -72,7 +72,7 @@ public class SearchResourceTest {
 	}
 	
 	@Test
-	public void testInstantanceCreatesCorrectly() throws Exception {
+	public void testInstantanceCreatesCorrectly() {
 		
 		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
 		Assert.assertNotNull(searchResource);
