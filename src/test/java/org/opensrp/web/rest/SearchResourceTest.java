@@ -1,4 +1,3 @@
-
 package org.opensrp.web.rest;
 
 import org.joda.time.DateTime;
@@ -27,77 +26,67 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class SearchResourceTest {
 
-	@Autowired
-	protected WebApplicationContext webApplicationContext;
+    @Autowired
+    protected WebApplicationContext webApplicationContext;
+    MockHttpServletRequest mockHttpServletRequest;
+    String phoneNumber = "0727000000";
+    String town = "town";
+    String firstName = "name";
+    String male = "male";
+    DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
+    private SearchService searchService;
+    private ClientService clientService;
+    private EventService eventService;
+    private ExportEventDataMapper exportEventDataMapper;
+    private TaskGenerator taskGenerator;
+    private PlanRepository planRepository;
 
-	private SearchService searchService;
+    @Before
+    public void setUp() {
+        SearchRepository searchRepository = Mockito.mock(SearchRepository.class);
+        ClientsRepository clientRepository = Mockito.mock(ClientsRepository.class);
+        EventsRepository eventsRepository = Mockito.mock(EventsRepository.class);
 
-	private ClientService clientService;
+        searchService = Mockito.spy(new SearchService(searchRepository));
+        clientService = Mockito.spy(new ClientService(clientRepository));
+        eventService = Mockito.spy(
+                new EventService(eventsRepository, clientService, taskGenerator, planRepository, exportEventDataMapper));
 
-	private EventService eventService;
+    }
 
-	private ExportEventDataMapper exportEventDataMapper;
+    @Test
+    public void testInstantanceCreatesCorrectly() {
+        SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
+        Assert.assertNotNull(searchResource);
 
-	private TaskGenerator taskGenerator;
+    }
 
-	private PlanRepository planRepository;
-	MockHttpServletRequest mockHttpServletRequest;
-	String phoneNumber = "0727000000";
-	String town = "town";
+    @Test
+    public void testIntersectionMethodReturnsCorrectResult() {
+        Client clientA = Mockito.mock(Client.class);
+        List<Client> listA = Arrays.asList(new Client[]{clientA});
+        List<Client> result = SearchHelper.intersection(null, listA);
 
-	String firstName = "name";
+        Assert.assertNotNull(result);
+        Assert.assertEquals(listA, result);
 
-	String male = "male";
+    }
 
-	DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
-
-
-	@Before
-	public void setUp() {
-		SearchRepository searchRepository = Mockito.mock(SearchRepository.class);
-		ClientsRepository clientRepository = Mockito.mock(ClientsRepository.class);
-		EventsRepository eventsRepository = Mockito.mock(EventsRepository.class);
-
-		searchService = Mockito.spy(new SearchService(searchRepository));
-		clientService = Mockito.spy(new ClientService(clientRepository));
-		eventService = Mockito.spy(
-				new EventService(eventsRepository, clientService, taskGenerator, planRepository, exportEventDataMapper));
-
-	}
-
-	@Test
-	public void testInstantanceCreatesCorrectly() {
-		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
-		Assert.assertNotNull(searchResource);
-
-	}
-
-	@Test
-	public void testIntersectionMethodReturnsCorrectResult() {
-		Client clientA = Mockito.mock(Client.class);
-		List<Client> listA = Arrays.asList(new Client[] { clientA });
-		List<Client> result = SearchHelper.intersection(null, listA);
-
-		Assert.assertNotNull(result);
-		Assert.assertEquals(listA, result);
-
-	}
-
-	@Test
-	public void shouldSearchClient() throws ParseException {
-		mockHttpServletRequest = new MockHttpServletRequest();
-		mockHttpServletRequest.addParameter("ff", "ona");
-		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
-		mockHttpServletRequest.addParameter("alt_phone_number", phoneNumber);
-		mockHttpServletRequest.addParameter("alt_name", firstName);
-		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
-		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
-		mockHttpServletRequest.addParameter("identifier", "fsdf"+":"+ "sfdf");
-		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
-		List<Client> clients = searchResource.search(mockHttpServletRequest);
-		Assert.assertNotNull(clients);
-	}
+    @Test
+    public void shouldSearchClient() throws ParseException {
+        mockHttpServletRequest = new MockHttpServletRequest();
+        mockHttpServletRequest.addParameter("ff", "ona");
+        mockHttpServletRequest.addParameter("phone_number", phoneNumber);
+        mockHttpServletRequest.addParameter("alt_phone_number", phoneNumber);
+        mockHttpServletRequest.addParameter("alt_name", firstName);
+        mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
+        mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
+        mockHttpServletRequest.addParameter("identifier", "fsdf" + ":" + "sfdf");
+        SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
+        List<Client> clients = searchResource.search(mockHttpServletRequest);
+        Assert.assertNotNull(clients);
+    }
 }

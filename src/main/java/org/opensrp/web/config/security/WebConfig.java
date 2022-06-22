@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.opensrp.util.DateTimeDeserializer;
@@ -36,48 +37,48 @@ import java.text.DateFormat;
 @EnableAsync
 public class WebConfig {
 
-	@Autowired
-	private RedisConnectionFactory redisConnectionFactory;
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		objectMapper.setDateFormat(DateFormat.getDateTimeInstance());
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setDateFormat(DateFormat.getDateTimeInstance());
 
-		SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
-		dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
-		dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
+        SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
+        dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
+        dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
 
-		SimpleModule dateModule = new SimpleModule("LocalDateModule");
-		dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
-		dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
-		objectMapper.registerModules(dateTimeModule, dateModule);
-		return objectMapper;
-	}
+        SimpleModule dateModule = new SimpleModule("LocalDateModule");
+        dateTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        dateTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer());
+        objectMapper.registerModules(dateTimeModule, dateModule);
+        return objectMapper;
+    }
 
-	@Bean(name = "mappingJackson2JsonView")
-	public MappingJackson2JsonView mappingJackson2JsonView() {
-		MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-		jsonView.setObjectMapper(objectMapper());
-		jsonView.setExtractValueFromSingleKeyModel(true);
-		return jsonView;
-	}
+    @Bean(name = "mappingJackson2JsonView")
+    public MappingJackson2JsonView mappingJackson2JsonView() {
+        MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+        jsonView.setObjectMapper(objectMapper());
+        jsonView.setExtractValueFromSingleKeyModel(true);
+        return jsonView;
+    }
 
-	@Bean(name = "mappingJackson2HttpMessageConverter")
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-		converter.setObjectMapper(objectMapper());
-		return converter;
-	}
+    @Bean(name = "mappingJackson2HttpMessageConverter")
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(objectMapper());
+        return converter;
+    }
 
-	@Bean
-	public RedisCacheManager cacheManager() {
-		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+    @Bean
+    public RedisCacheManager cacheManager() {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
 
-		return RedisCacheManager.builder(redisConnectionFactory)
-				.cacheDefaults(config)
-				.build();
-	}
+        return RedisCacheManager.builder(redisConnectionFactory)
+                .cacheDefaults(config)
+                .build();
+    }
 }

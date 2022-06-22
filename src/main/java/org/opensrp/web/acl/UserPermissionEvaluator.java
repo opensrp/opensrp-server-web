@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.acl;
 
@@ -13,14 +13,14 @@ import java.io.Serializable;
  */
 @Component
 public class UserPermissionEvaluator extends BasePermissionEvaluator<String> {
-	
-	@Override
-	public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
-		return authentication.getName().equals(object);
-	}
-	
-	@Override
-	public boolean hasPermission(Authentication authentication, String username) {
-		return authentication.getName().equals(username);
-	}
+
+    @Override
+    public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
+        return authentication.getName().equals(object);
+    }
+
+    @Override
+    public boolean hasPermission(Authentication authentication, String username) {
+        return authentication.getName().equals(username);
+    }
 }

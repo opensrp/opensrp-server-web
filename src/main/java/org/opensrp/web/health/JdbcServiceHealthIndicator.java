@@ -10,46 +10,43 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
-import javax.sql.DataSource;
 
 import java.util.concurrent.Callable;
+
+import javax.sql.DataSource;
 
 @Profile("postgres")
 @Component
 public class JdbcServiceHealthIndicator implements ServiceHealthIndicator {
 
-	private static final Logger logger = LogManager.getLogger(JdbcServiceHealthIndicator.class.toString());
+    private static final Logger logger = LogManager.getLogger(JdbcServiceHealthIndicator.class.toString());
+    private final String HEALTH_INDICATOR_KEY = "postgres";
+    @Value("#{opensrp['health.endpoint.postgres.queryTimeout'] ?: 2000 }")
+    private Integer queryTimeout;
+    @Autowired
+    private DataSource dataSource;
 
-	@Value("#{opensrp['health.endpoint.postgres.queryTimeout'] ?: 2000 }")
-	private Integer queryTimeout;
+    @Override
+    public Callable<ModelMap> doHealthCheck() {
+        return () -> {
+            ModelMap modelMap = new ModelMap();
+            boolean result = false;
+            try {
+                JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+                jdbcTemplate.setQueryTimeout(queryTimeout);
+                result = jdbcTemplate.queryForObject("SELECT 1;", Integer.class) == 1;
+            } catch (Exception e) {
+                logger.error(e);
+                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+            }
+            modelMap.put(Constants.HealthIndicator.STATUS, result);
+            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+            return modelMap;
+        };
+    }
 
-	@Autowired
-	private DataSource dataSource;
-
-	private final String HEALTH_INDICATOR_KEY = "postgres";
-
-	@Override
-	public Callable<ModelMap> doHealthCheck() {
-		return () -> {
-			ModelMap modelMap = new ModelMap();
-			boolean result = false;
-			try {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-				jdbcTemplate.setQueryTimeout(queryTimeout);
-				result = jdbcTemplate.queryForObject("SELECT 1;", Integer.class) == 1;
-			}
-			catch (Exception e) {
-				logger.error(e);
-				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-			}
-			modelMap.put(Constants.HealthIndicator.STATUS, result);
-			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-			return modelMap;
-		};
-	}
-
-	@Override
-	public String getHealthIndicatorKey() {
-		return HEALTH_INDICATOR_KEY;
-	}
+    @Override
+    public String getHealthIndicatorKey() {
+        return HEALTH_INDICATOR_KEY;
+    }
 }

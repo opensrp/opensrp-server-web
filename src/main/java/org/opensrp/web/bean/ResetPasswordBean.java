@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.bean;
 
@@ -15,11 +15,11 @@ import lombok.Setter;
 @Setter
 @Getter
 public class ResetPasswordBean {
-	
-	private String currentPassword;
-	
-	private String newPassword;
-	
-	private String confirmation;
-	
+
+    private String currentPassword;
+
+    private String newPassword;
+
+    private String confirmation;
+
 }

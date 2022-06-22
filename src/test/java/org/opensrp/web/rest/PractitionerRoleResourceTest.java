@@ -1,8 +1,15 @@
 package org.opensrp.web.rest;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,13 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-
-public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerRole>{
+public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerRole> {
 
     private final static String BASE_URL = "/rest/practitionerRole/";
 
@@ -35,16 +36,35 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     private final static String DELETE_ENDPOINT = "delete/";
 
     private final static String DELETE_BY_PRACTITIONER_ENDPOINT = "deleteByPractitioner";
-
+    private final ArgumentCaptor<PractitionerRole> argumentCaptor = ArgumentCaptor.forClass(PractitionerRole.class);
+    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    private final String practitionerRoleJson = "{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}";
+    private final String practitionerRoleListJson = "[{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}]";
     private PractitionerRoleService practitionerRoleService;
 
-    private final ArgumentCaptor<PractitionerRole> argumentCaptor = ArgumentCaptor.forClass(PractitionerRole.class);
+    private static PractitionerRole initTestPractitionerRole1() {
+        PractitionerRole practitionerRole = new PractitionerRole();
+        practitionerRole.setIdentifier("pr1-identifier");
+        practitionerRole.setActive(true);
+        practitionerRole.setOrganizationIdentifier("org1");
+        practitionerRole.setPractitionerIdentifier("p1-identifier");
+        PractitionerRoleCode code = new PractitionerRoleCode();
+        code.setText("pr1Code");
+        practitionerRole.setCode(code);
+        return practitionerRole;
+    }
 
-    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
-    private final String practitionerRoleJson = "{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}";
-
-    private final String practitionerRoleListJson = "[{\"identifier\":\"pr1-identifier\",\"active\":true,\"organization\":\"org1\",\"practitioner\":\"p1-identifier\",\"code\":{\"text\":\"pr1Code\"}}]";
+    private static PractitionerRole initTestPractitionerRole2() {
+        PractitionerRole practitionerRole = new PractitionerRole();
+        practitionerRole.setIdentifier("pr2-identifier");
+        practitionerRole.setActive(true);
+        practitionerRole.setOrganizationIdentifier("org1");
+        practitionerRole.setPractitionerIdentifier("p2-identifier");
+        PractitionerRoleCode code = new PractitionerRoleCode();
+        code.setText("pr2Code");
+        practitionerRole.setCode(code);
+        return practitionerRole;
+    }
 
     @Before
     public void setUp() {
@@ -55,7 +75,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
     @Test
     public void testGetPractitionerRolesShouldReturnAllPractitionerRoles() throws Exception {
-        List<PractitionerRole> expectedPractitoinerRoles =  new ArrayList<>();
+        List<PractitionerRole> expectedPractitoinerRoles = new ArrayList<>();
 
         PractitionerRole expectedPractitionerRole = initTestPractitionerRole1();
         expectedPractitoinerRoles.add(expectedPractitionerRole);
@@ -66,14 +86,15 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         doReturn(expectedPractitoinerRoles).when(practitionerRoleService).getAllPractitionerRoles(any(PractitionerRoleSearchBean.class));
 
         String actualPractitionerRolessString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-        List<PractitionerRole> actualPractitioners = new Gson().fromJson(actualPractitionerRolessString, new TypeToken<List<PractitionerRole>>(){}.getType());
+        List<PractitionerRole> actualPractitioners = new Gson().fromJson(actualPractitionerRolessString, new TypeToken<List<PractitionerRole>>() {
+        }.getType());
 
         assertListsAreSameIgnoringOrder(actualPractitioners, expectedPractitoinerRoles);
     }
 
     @Test
     public void testGetPractitionerRoleByUniqueIdShouldReturnCorrectPractititonerRole() throws Exception {
-        List<PractitionerRole> expectedPractitoinerRoles =  new ArrayList<>();
+        List<PractitionerRole> expectedPractitoinerRoles = new ArrayList<>();
 
         PractitionerRole expectedPractitionerRole = initTestPractitionerRole1();
         expectedPractitoinerRoles.add(expectedPractitionerRole);
@@ -85,7 +106,8 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
         String actualPractitionerRoleString = getResponseAsString(BASE_URL + "pr1-identifier", null,
                 MockMvcResultMatchers.status().isOk());
-        PractitionerRole actualPractitionerRole = new Gson().fromJson(actualPractitionerRoleString, new TypeToken<PractitionerRole>(){}.getType());
+        PractitionerRole actualPractitionerRole = new Gson().fromJson(actualPractitionerRoleString, new TypeToken<PractitionerRole>() {
+        }.getType());
 
         assertNotNull(actualPractitionerRole);
         assertEquals(actualPractitionerRole.getIdentifier(), expectedPractitionerRole.getIdentifier());
@@ -112,7 +134,8 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     public void testUpdateShouldUpdateExistingPractitionerRoleResource() throws Exception {
         PractitionerRole expectedPractitionerRole = initTestPractitionerRole1();
 
-        String practitionerRoleJson = new Gson().toJson(expectedPractitionerRole, new TypeToken<PractitionerRole>(){}.getType());
+        String practitionerRoleJson = new Gson().toJson(expectedPractitionerRole, new TypeToken<PractitionerRole>() {
+        }.getType());
         putRequestWithJsonContent(BASE_URL, practitionerRoleJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
@@ -125,7 +148,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
 
         PractitionerRole expectedPractitioner = initTestPractitionerRole1();
 
-        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT, practitionerRoleListJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
@@ -141,7 +164,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
         String practitionerRolesJson = new Gson().toJson(expectedPractitionerRoles, new TypeToken<List<PractitionerRole>>() {
         }.getType());
 
-        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT , practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + BATCH_SAVE_ENDPOINT, practitionerRolesJson, MockMvcResultMatchers.status().isCreated());
 
         verify(practitionerRoleService).addOrUpdatePractitionerRole(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitionerRole.getIdentifier());
@@ -159,7 +182,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     @Test
     public void testDeleteByOrgAndPractitionerShouldDeleteExistingPractitionerRoleResource() throws Exception {
 
-        deleteRequestWithParams(BASE_URL + DELETE_BY_PRACTITIONER_ENDPOINT , "organization=org1&practitioner=pract1", MockMvcResultMatchers.status().isNoContent());
+        deleteRequestWithParams(BASE_URL + DELETE_BY_PRACTITIONER_ENDPOINT, "organization=org1&practitioner=pract1", MockMvcResultMatchers.status().isNoContent());
 
         verify(practitionerRoleService).deletePractitionerRole(stringArgumentCaptor.capture(), stringArgumentCaptor.capture());
         assertEquals(stringArgumentCaptor.getAllValues().get(0), "org1");
@@ -203,7 +226,7 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     @Test
     public void testBatchSaveWithInternalError() throws Exception {
         doThrow(new IllegalArgumentException()).when(practitionerRoleService).addOrUpdatePractitionerRole(any());
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , "{\"idiot_json\": \"cannot work\"}", MockMvcResultMatchers.status().isBadRequest());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT, "{\"idiot_json\": \"cannot work\"}", MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService, atLeast(0)).addOrUpdatePractitionerRole(argumentCaptor.capture());
     }
 
@@ -211,33 +234,8 @@ public class PractitionerRoleResourceTest extends BaseResourceTest<PractitionerR
     public void testBatchSaveWithJsonSyntaxException() throws Exception {
         doThrow(new JsonSyntaxException("Unable to parse JSON")).when(practitionerRoleService).addOrUpdatePractitionerRole(
                 any());
-        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT , "{\"idiot_json_again\": \"can never work\"}", MockMvcResultMatchers.status().isBadRequest());
+        postRequestWithJsonContent(BASE_URL + BATCH_SAVE_ENDPOINT, "{\"idiot_json_again\": \"can never work\"}", MockMvcResultMatchers.status().isBadRequest());
         verify(practitionerRoleService, atLeast(0)).addOrUpdatePractitionerRole(argumentCaptor.capture());
-    }
-
-
-    private static PractitionerRole initTestPractitionerRole1(){
-        PractitionerRole practitionerRole = new PractitionerRole();
-        practitionerRole.setIdentifier("pr1-identifier");
-        practitionerRole.setActive(true);
-        practitionerRole.setOrganizationIdentifier("org1");
-        practitionerRole.setPractitionerIdentifier("p1-identifier");
-        PractitionerRoleCode code = new PractitionerRoleCode();
-        code.setText("pr1Code");
-        practitionerRole.setCode(code);
-        return practitionerRole;
-    }
-
-    private static PractitionerRole initTestPractitionerRole2(){
-        PractitionerRole practitionerRole = new PractitionerRole();
-        practitionerRole.setIdentifier("pr2-identifier");
-        practitionerRole.setActive(true);
-        practitionerRole.setOrganizationIdentifier("org1");
-        practitionerRole.setPractitionerIdentifier("p2-identifier");
-        PractitionerRoleCode code = new PractitionerRoleCode();
-        code.setText("pr2Code");
-        practitionerRole.setCode(code);
-        return practitionerRole;
     }
 
     @Override

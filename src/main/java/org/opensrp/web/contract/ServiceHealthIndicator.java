@@ -6,5 +6,6 @@ import java.util.concurrent.Callable;
 
 public interface ServiceHealthIndicator {
     Callable<ModelMap> doHealthCheck();
+
     String getHealthIndicatorKey();
 }

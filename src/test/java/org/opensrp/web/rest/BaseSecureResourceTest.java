@@ -51,169 +51,159 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml" })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public abstract class BaseSecureResourceTest<T> {
 
-	@Rule
-	public MockitoRule rule = MockitoJUnit.rule();
+    protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+    @Autowired
+    protected WebApplicationContext webApplicationContext;
+    protected MockMvc mockMvc;
 
-	@Autowired
-	protected WebApplicationContext webApplicationContext;
+    protected ObjectMapper mapper = new ObjectMapper();
+    protected Pair<User, Authentication> authenticatedUser;
+    @Mock
+    private RefreshableKeycloakSecurityContext securityContext;
+    private Authentication authentication;
+    @Mock
+    private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
+    @Mock
+    private AccessToken token;
+    private RequestPostProcessor requestPostProcessors;
 
-	@Mock
-	private RefreshableKeycloakSecurityContext securityContext;
+    @Before
+    public void bootStrap() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
+                .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 
-	protected MockMvc mockMvc;
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setDateFormat(DateFormat.getDateTimeInstance());
 
-	protected ObjectMapper mapper = new ObjectMapper();
+        SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
+        dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
+        dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
+        mapper.registerModule(dateTimeModule);
+        when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
+        when(securityContext.getToken()).thenReturn(token);
+        authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
+        authentication = authenticatedUser.getSecond();
+        requestPostProcessors = SecurityMockMvcRequestPostProcessors.authentication(authentication);
+    }
 
-	protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
-	private Authentication authentication;
+        String finalUrl = url;
+        if (parameter != null && !parameter.isEmpty()) {
+            finalUrl = finalUrl + "?" + parameter;
+        }
 
-	@Mock
-	private KeycloakPrincipal<KeycloakSecurityContext> keycloakPrincipal;
+        MvcResult mvcResult = this.mockMvc
+                .perform(get(finalUrl).accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
+                .andExpect(expectedStatus).andReturn();
 
-	@Mock
-	private AccessToken token;
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
 
-	private RequestPostProcessor requestPostProcessors;
+    protected JsonNode postRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
+        MvcResult mvcResult = this.mockMvc
+                .perform(
+                        post(url)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(data.getBytes())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .with(requestPostProcessors)
+                )
+                .andExpect(expectedStatus)
+                .andReturn();
 
-	protected Pair<User, Authentication> authenticatedUser;
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        JsonNode actualObj = mapper.readTree(responseString);
+        return actualObj;
+    }
 
-	@Before
-	public void bootStrap() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity())
-				.addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+    protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus)
+            throws Exception {
 
-		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		mapper.setDateFormat(DateFormat.getDateTimeInstance());
+        MvcResult mvcResult = this.mockMvc
+                .perform(post(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
+                        .accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
+                .andExpect(expectedStatus).andReturn();
 
-		SimpleModule dateTimeModule = new SimpleModule("DateTimeModule");
-		dateTimeModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
-		dateTimeModule.addSerializer(DateTime.class, new DateTimeSerializer());
-		mapper.registerModule(dateTimeModule);
-		when(keycloakPrincipal.getKeycloakSecurityContext()).thenReturn(securityContext);
-		when(securityContext.getToken()).thenReturn(token);
-		authenticatedUser = TestData.getAuthentication(token, keycloakPrincipal, securityContext);
-		authentication = authenticatedUser.getSecond();
-		requestPostProcessors = SecurityMockMvcRequestPostProcessors.authentication(authentication);
-	}
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
 
-	protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
+    protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
-		String finalUrl = url;
-		if (parameter != null && !parameter.isEmpty()) {
-			finalUrl = finalUrl + "?" + parameter;
-		}
+        MvcResult mvcResult = this.mockMvc
+                .perform(put(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
+                        .accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
+                .andExpect(expectedStatus).andReturn();
 
-		MvcResult mvcResult = this.mockMvc
-				.perform(get(finalUrl).accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        JsonNode actualObj = mapper.readTree(responseString);
+        return actualObj;
+    }
 
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		return responseString;
-	}
+    protected String deleteRequestWithParams(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
-	protected JsonNode postRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
-		MvcResult mvcResult = this.mockMvc
-				.perform(
-						post(url)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(data.getBytes())
-						.accept(MediaType.APPLICATION_JSON)
-						.with(requestPostProcessors)
-				)
-				.andExpect(expectedStatus)
-				.andReturn();
+        String finalUrl = url;
+        if (parameter != null && !parameter.isEmpty()) {
+            finalUrl = finalUrl + "?" + parameter;
+        }
 
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		return actualObj;
-	}
+        MvcResult mvcResult = this.mockMvc
+                .perform(delete(finalUrl).accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
+                .andExpect(expectedStatus).andReturn();
 
-	protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus)
-			throws Exception {
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
 
-		MvcResult mvcResult = this.mockMvc
-				.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
-						.accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
+    protected String deleteRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
+        MvcResult mvcResult = this.mockMvc
+                .perform(delete(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
+                        .accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
+                .andExpect(expectedStatus).andReturn();
 
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		return responseString;
-	}
+        String responseString = mvcResult.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            return null;
+        }
+        return responseString;
+    }
 
-	protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
+    /**
+     * Objects in the list should have a unique uuid identifier field
+     **/
+    protected abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
 
-		MvcResult mvcResult = this.mockMvc
-				.perform(put(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
-						.accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
-
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		return actualObj;
-	}
-
-	protected String deleteRequestWithParams(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
-
-		String finalUrl = url;
-		if (parameter != null && !parameter.isEmpty()) {
-			finalUrl = finalUrl + "?" + parameter;
-		}
-
-		MvcResult mvcResult = this.mockMvc
-				.perform(delete(finalUrl).accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
-
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		return responseString;
-	}
-
-	protected String deleteRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
-		MvcResult mvcResult = this.mockMvc
-				.perform(delete(url).contentType(MediaType.APPLICATION_JSON).content(data.getBytes())
-						.accept(MediaType.APPLICATION_JSON).with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
-
-		String responseString = mvcResult.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			return null;
-		}
-		return responseString;
-	}
-
-	/**
-	 * Objects in the list should have a unique uuid identifier field
-	 **/
-	protected abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
-
-	protected Date convertDate(String dateString, String dateFormat) {
-		DateFormat format = new SimpleDateFormat(dateFormat);
-		Date date = null;
-		try {
-			date = format.parse(dateString);
-		}
-		catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return date;
-	}
+    protected Date convertDate(String dateString, String dateFormat) {
+        DateFormat format = new SimpleDateFormat(dateFormat);
+        Date date = null;
+        try {
+            date = format.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
 }

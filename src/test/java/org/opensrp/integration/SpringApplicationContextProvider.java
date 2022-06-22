@@ -9,7 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration("classpath:applicationContext-web.xml")
 public class SpringApplicationContextProvider {
 
-	public static ApplicationContext context;
+    public static ApplicationContext context;
 
     public static ApplicationContext getContext() {
         return context;
@@ -19,5 +19,5 @@ public class SpringApplicationContextProvider {
         SpringApplicationContextProvider.context = context;
     }
 
-    
+
 }

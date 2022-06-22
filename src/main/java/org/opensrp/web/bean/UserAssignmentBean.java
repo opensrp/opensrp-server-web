@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.bean;
 
@@ -18,11 +18,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAssignmentBean {
-	
-	private Set<Long> organizationIds;
-	
-	private Set<String> jurisdictions;
-	
-	private Set<String> plans;
-	
+
+    private Set<Long> organizationIds;
+
+    private Set<String> jurisdictions;
+
+    private Set<String> plans;
+
 }

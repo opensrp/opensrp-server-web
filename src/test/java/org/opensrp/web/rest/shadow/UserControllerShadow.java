@@ -9,24 +9,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserControllerShadow extends UserController {
-	
-	@Override
-	public void setPractitionerService(PractitionerService practitionerService) {
-		super.setPractitionerService(practitionerService);
-	}
-	
-	@Override
-	public void setOrganizationService(OrganizationService organizationService) {
-		super.setOrganizationService(organizationService);
-	}
-	
-	@Override
-	public void setLocationService(PhysicalLocationService locationService) {
-		super.setLocationService(locationService);
-	}
-	
-	@Override
-	public void setPlanService(PlanService planService) {
-		super.setPlanService(planService);
-	}
+
+    @Override
+    public void setPractitionerService(PractitionerService practitionerService) {
+        super.setPractitionerService(practitionerService);
+    }
+
+    @Override
+    public void setOrganizationService(OrganizationService organizationService) {
+        super.setOrganizationService(organizationService);
+    }
+
+    @Override
+    public void setLocationService(PhysicalLocationService locationService) {
+        super.setLocationService(locationService);
+    }
+
+    @Override
+    public void setPlanService(PlanService planService) {
+        super.setPlanService(planService);
+    }
 }

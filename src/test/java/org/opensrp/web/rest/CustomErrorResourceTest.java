@@ -1,5 +1,9 @@
 package org.opensrp.web.rest;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,38 +18,34 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml" })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public class CustomErrorResourceTest {
 
-	private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-	private String ERROR_ENDPOINT = "/error";
+    private String ERROR_ENDPOINT = "/error";
 
-	@InjectMocks
-	private CustomErrorResource customErrorResource;
+    @InjectMocks
+    private CustomErrorResource customErrorResource;
 
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(customErrorResource)
-				.setControllerAdvice(new GlobalExceptionHandler())
-				.build();
-	}
+        mockMvc = MockMvcBuilders.standaloneSetup(customErrorResource)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
-	@Test
-	public void testErrorEndpointReturnsJsonString() throws Exception {
-		MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+    @Test
+    public void testErrorEndpointReturnsJsonString() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		String responseString = mvcResult.getResponse().getContentAsString();
-		assertEquals("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}", responseString);
-	}
+        String responseString = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}", responseString);
+    }
 }

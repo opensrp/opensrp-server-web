@@ -1,6 +1,16 @@
 package org.opensrp.web.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +22,11 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistra
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+
+import java.util.List;
+
+import javax.servlet.ServletContext;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -23,27 +38,13 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import javax.servlet.ServletContext;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @RunWith(JUnit4.class)
 public class SwaggerConfigTest {
-    private SwaggerConfig swaggerConfig;
-
     private static final String AUTHORIZATION = "Authorization";
     private static final String BASIC = "Basic";
     private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
-
+    private SwaggerConfig swaggerConfig;
     @Mock
     private ServletContext servletContext;
 
@@ -131,12 +132,12 @@ public class SwaggerConfigTest {
                 .build();
     }
 
-	private List<SecurityReference> getDefaultAuth() {
-		AuthorizationScope authorizationScope
-				= new AuthorizationScope("global", "accessEverything");
-		AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-		authorizationScopes[0] = authorizationScope;
-		return Lists.newArrayList(
-				new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
-	}
+    private List<SecurityReference> getDefaultAuth() {
+        AuthorizationScope authorizationScope
+                = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return Lists.newArrayList(
+                new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
+    }
 }

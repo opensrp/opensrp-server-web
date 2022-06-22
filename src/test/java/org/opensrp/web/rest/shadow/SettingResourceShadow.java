@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SettingResourceShadow extends SettingResource {
 
-	@Override
-	public void setSettingService(SettingService settingService, PhysicalLocationService physicalLocationService) {
-		super.setSettingService(settingService, physicalLocationService);
-	}
+    @Override
+    public void setSettingService(SettingService settingService, PhysicalLocationService physicalLocationService) {
+        super.setSettingService(settingService, physicalLocationService);
+    }
 
 }

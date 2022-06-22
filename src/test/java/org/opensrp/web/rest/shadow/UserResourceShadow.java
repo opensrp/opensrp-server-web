@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.rest.shadow;
 
@@ -12,10 +12,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UserResourceShadow extends UserResource {
-	
-	@Override
-	public void setUserService(OpenmrsUserService userService) {
-		super.setUserService(userService);
-	};
-	
+
+    @Override
+    public void setUserService(OpenmrsUserService userService) {
+        super.setUserService(userService);
+    }
+
+    ;
+
 }

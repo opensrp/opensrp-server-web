@@ -21,46 +21,41 @@ import java.util.concurrent.Callable;
 @Component
 public class KeycloakServiceHealthIndicator implements ServiceHealthIndicator {
 
-	private static final Logger logger = LogManager.getLogger(KeycloakServiceHealthIndicator.class.toString());
+    private static final Logger logger = LogManager.getLogger(KeycloakServiceHealthIndicator.class.toString());
+    private final String HEALTH_INDICATOR_KEY = "keycloak";
+    @Autowired
+    private KeycloakDeployment keycloakDeployment;
+    @Value("#{opensrp['health.endpoint.keycloak.connectionTimeout'] ?: 5000 }")
+    private Integer connectionTimeout;
+    @Value("#{opensrp['health.endpoint.keycloak.readTimeout'] ?: 5000 }")
+    private Integer readTimeout;
 
-	@Autowired
-	private KeycloakDeployment keycloakDeployment;
+    @Override
+    public Callable<ModelMap> doHealthCheck() {
+        return () -> {
+            ModelMap modelMap = new ModelMap();
+            boolean result = false;
+            try {
+                SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+                simpleClientHttpRequestFactory.setReadTimeout(readTimeout);
+                simpleClientHttpRequestFactory.setConnectTimeout(connectionTimeout);
 
-	@Value("#{opensrp['health.endpoint.keycloak.connectionTimeout'] ?: 5000 }")
-	private Integer connectionTimeout;
+                RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
+                ResponseEntity<String> responseEntity = restTemplate.getForEntity(keycloakDeployment.getRealmInfoUrl(),
+                        String.class);
+                result = responseEntity.getStatusCode() == HttpStatus.OK;
+            } catch (Exception e) {
+                logger.error(e);
+                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+            }
+            modelMap.put(Constants.HealthIndicator.STATUS, result);
+            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+            return modelMap;
+        };
+    }
 
-	@Value("#{opensrp['health.endpoint.keycloak.readTimeout'] ?: 5000 }")
-	private Integer readTimeout;
-
-	private final String HEALTH_INDICATOR_KEY = "keycloak";
-
-	@Override
-	public Callable<ModelMap> doHealthCheck() {
-		return () -> {
-			ModelMap modelMap = new ModelMap();
-			boolean result = false;
-			try {
-				SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
-				simpleClientHttpRequestFactory.setReadTimeout(readTimeout);
-				simpleClientHttpRequestFactory.setConnectTimeout(connectionTimeout);
-
-				RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
-				ResponseEntity<String> responseEntity = restTemplate.getForEntity(keycloakDeployment.getRealmInfoUrl(),
-						String.class);
-				result = responseEntity.getStatusCode() == HttpStatus.OK;
-			}
-			catch (Exception e) {
-				logger.error(e);
-				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-			}
-			modelMap.put(Constants.HealthIndicator.STATUS, result);
-			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-			return modelMap;
-		};
-	}
-
-	@Override
-	public String getHealthIndicatorKey() {
-		return HEALTH_INDICATOR_KEY;
-	}
+    @Override
+    public String getHealthIndicatorKey() {
+        return HEALTH_INDICATOR_KEY;
+    }
 }

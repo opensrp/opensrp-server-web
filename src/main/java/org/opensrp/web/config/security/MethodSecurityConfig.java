@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.config.security;
 
@@ -17,16 +17,16 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
-	
-	@Autowired
-	private ACLPermissionEvaluator permissionEvaluator;
-	
-	@Override
-	protected MethodSecurityExpressionHandler createExpressionHandler() {
-		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		expressionHandler.setPermissionEvaluator(permissionEvaluator);
-		return expressionHandler;
-		
-	}
-	
+
+    @Autowired
+    private ACLPermissionEvaluator permissionEvaluator;
+
+    @Override
+    protected MethodSecurityExpressionHandler createExpressionHandler() {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(permissionEvaluator);
+        return expressionHandler;
+
+    }
+
 }

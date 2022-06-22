@@ -3,7 +3,8 @@ package org.opensrp.web.controller;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.text.MessageFormat;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,8 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.text.MessageFormat;
 
 @Controller
 public class ANMLocationController {
@@ -38,7 +38,7 @@ public class ANMLocationController {
         this.httpAgent = httpAgent;
     }
 
-    @RequestMapping(method = GET, value = "/anm-villages",produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = GET, value = "/anm-villages", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VillagesDTO> villagesForANM(Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {

@@ -9,13 +9,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
+import com.google.gson.Gson;
 
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.ErrorTraceForm;
@@ -33,178 +27,179 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.gson.Gson;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/errorhandler")
 public class ErrorTraceController {
 
-	private String opensrpSiteUrl;
+    private String opensrpSiteUrl;
 
-	private ErrorTraceService errorTraceService;
+    private ErrorTraceService errorTraceService;
 
-	@InitBinder
-	public void initBinder(WebDataBinder binder) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		dateFormat.setLenient(false);
-		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
-	}
+    @Autowired
+    public ErrorTraceController(ErrorTraceService errorTraceService) {
 
-	@Autowired
-	public ErrorTraceController(ErrorTraceService errorTraceService) {
+        this.errorTraceService = errorTraceService;
+    }
 
-		this.errorTraceService = errorTraceService;
-	}
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+    }
 
-	@RequestMapping(method = GET, value = "/index")
-	public ModelAndView showPage() {
+    @RequestMapping(method = GET, value = "/index")
+    public ModelAndView showPage() {
 
-		Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<String, Object>();
 
-		ErrorTraceForm errorForm = new ErrorTraceForm();
+        ErrorTraceForm errorForm = new ErrorTraceForm();
 
-		Gson gson = new Gson();
+        Gson gson = new Gson();
 
-		//
-		// Convert numbers array into JSON string.
-		//
-		String optionsJson = gson.toJson(errorForm.getStatusOptions());
-		model.put("statusOptions", optionsJson);
+        //
+        // Convert numbers array into JSON string.
+        //
+        String optionsJson = gson.toJson(errorForm.getStatusOptions());
+        model.put("statusOptions", optionsJson);
 
-		model.put("type", "all");
+        model.put("type", "all");
 
-		return new ModelAndView("home_error", model);
+        return new ModelAndView("home_error", model);
 
-	}
+    }
 
-	@RequestMapping(method = GET, value = "/errortrace",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<ErrorTrace>> allErrors() {
+    @RequestMapping(method = GET, value = "/errortrace", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<ErrorTrace>> allErrors() {
 
-		try {
-			Map<String, Object> model = new HashMap<String, Object>();
-			List<ErrorTrace> list = errorTraceService.getAllErrors();
-			model.put("errors", list);
-			model.put("type", "all");
+        try {
+            Map<String, Object> model = new HashMap<String, Object>();
+            List<ErrorTrace> list = errorTraceService.getAllErrors();
+            model.put("errors", list);
+            model.put("type", "all");
 
-			return new ResponseEntity<>(list, HttpStatus.OK);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
 
-	}
+    }
 
-	@RequestMapping(method = GET, value = "/unsolvederrors",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<ErrorTrace>> showUnsolved() {
+    @RequestMapping(method = GET, value = "/unsolvederrors", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<ErrorTrace>> showUnsolved() {
 
-		try {
-			Map<String, Object> model = new HashMap<String, Object>();
-			List<ErrorTrace> list = errorTraceService.getAllUnsolvedErrors();
-			model.put("errors", list);
-			model.put("type", "unsolved");
+        try {
+            Map<String, Object> model = new HashMap<String, Object>();
+            List<ErrorTrace> list = errorTraceService.getAllUnsolvedErrors();
+            model.put("errors", list);
+            model.put("type", "unsolved");
 
-			return new ResponseEntity<>(list, HttpStatus.OK);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	@RequestMapping(method = GET, value = "/solvederrors",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<ErrorTrace>> showSolved() {
+    @RequestMapping(method = GET, value = "/solvederrors", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<ErrorTrace>> showSolved() {
 
-		try {
-			Map<String, Object> model = new HashMap<String, Object>();
+        try {
+            Map<String, Object> model = new HashMap<String, Object>();
 
-			List<ErrorTrace> list = errorTraceService.getAllSolvedErrors();
-			model.put("errors", list);
-			model.put("type", "solved");
+            List<ErrorTrace> list = errorTraceService.getAllSolvedErrors();
+            model.put("errors", list);
+            model.put("type", "solved");
 
-			return new ResponseEntity<>(list, HttpStatus.OK);
+            return new ResponseEntity<>(list, HttpStatus.OK);
 
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
 
-	}
+    }
 
-	@RequestMapping(method = GET, value = "/viewerror",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<ErrorTraceForm> showError(@RequestParam("id") String id) {
-		try {
-			ErrorTrace error = errorTraceService.getError(id);
+    @RequestMapping(method = GET, value = "/viewerror", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ErrorTraceForm> showError(@RequestParam("id") String id) {
+        try {
+            ErrorTrace error = errorTraceService.getError(id);
 
-			ErrorTraceForm errorTraceForm = new ErrorTraceForm();
-			errorTraceForm.setErrorTrace(error);
-			System.out.println("error ID :" + errorTraceForm.getErrorTrace().getId());
+            ErrorTraceForm errorTraceForm = new ErrorTraceForm();
+            errorTraceForm.setErrorTrace(error);
+            System.out.println("error ID :" + errorTraceForm.getErrorTrace().getId());
 
-			return new ResponseEntity<>(errorTraceForm, HttpStatus.OK);
+            return new ResponseEntity<>(errorTraceForm, HttpStatus.OK);
 
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
 
-	}
+    }
 
-	@RequestMapping(method = GET, value = "/getstatusoptions",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<String>> statusOptions() {
-		try {
+    @RequestMapping(method = GET, value = "/getstatusoptions", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<String>> statusOptions() {
+        try {
 
-			ErrorTraceForm errorTraceForm = new ErrorTraceForm();
+            ErrorTraceForm errorTraceForm = new ErrorTraceForm();
 
-			return new ResponseEntity<>(errorTraceForm.getStatusOptions(), HttpStatus.OK);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-		}
+            return new ResponseEntity<>(errorTraceForm.getStatusOptions(), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
 
-	}
+    }
 
-	/**
-	 * @param ErrorTraceForm this method uses spring binding for form update .
-	 * @return String , value of the view error page
-	 * @author engrmahmed14@gmail.com
-	 */
-	@RequestMapping(value = "/update_errortrace", method = POST)
-	public String updateErrorTrace(HttpServletRequest request, ErrorTraceForm errorTraceForm, BindingResult errors) {
-		if (errors.hasErrors()) {
+    /**
+     * @param ErrorTraceForm this method uses spring binding for form update .
+     * @return String , value of the view error page
+     * @author engrmahmed14@gmail.com
+     */
+    @RequestMapping(value = "/update_errortrace", method = POST)
+    public String updateErrorTrace(HttpServletRequest request, ErrorTraceForm errorTraceForm, BindingResult errors) {
+        if (errors.hasErrors()) {
 
-		}
+        }
 
-		System.out.println(errorTraceForm.getErrorTrace().getId());
-		ErrorTrace errorTrace = errorTraceService.getError(errorTraceForm.getErrorTrace().getId());
-		errorTrace.setStatus(errorTraceForm.getErrorTrace().getStatus());
-		errorTraceService.updateError(errorTrace);
-		// System.out.println("page context :: "+request.getContextPath());
-		return "redirect:/errorhandler/viewerror?id=" + errorTrace.getId();
-	}
+        System.out.println(errorTraceForm.getErrorTrace().getId());
+        ErrorTrace errorTrace = errorTraceService.getError(errorTraceForm.getErrorTrace().getId());
+        errorTrace.setStatus(errorTraceForm.getErrorTrace().getStatus());
+        errorTraceService.updateError(errorTrace);
+        // System.out.println("page context :: "+request.getContextPath());
+        return "redirect:/errorhandler/viewerror?id=" + errorTrace.getId();
+    }
 
-	@RequestMapping(value = "/update_status", method = GET)
-	public String UpdateStatus(@RequestParam("id") String id, @RequestParam("status") String status) {
+    @RequestMapping(value = "/update_status", method = GET)
+    public String UpdateStatus(@RequestParam("id") String id, @RequestParam("status") String status) {
 
-		ErrorTrace errorTrace = errorTraceService.getError(id);
-		errorTrace.setStatus(status);
-		errorTraceService.updateError(errorTrace);
+        ErrorTrace errorTrace = errorTraceService.getError(id);
+        errorTrace.setStatus(status);
+        errorTraceService.updateError(errorTrace);
 
-		return "redirect:/errorhandler/index";
-	}
+        return "redirect:/errorhandler/index";
+    }
 
-	@RequestMapping(method = GET, value = "/allerrors",produces = { MediaType.APPLICATION_JSON_VALUE })
-	public <T> ResponseEntity<T> getAllErrors() {
+    @RequestMapping(method = GET, value = "/allerrors", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public <T> ResponseEntity<T> getAllErrors() {
 
-		List<ErrorTrace> list = errorTraceService.getAllErrors();
-		if (list == null) {
-			return (ResponseEntity<T>) new ResponseEntity<>("No Record(s) Found .", allowOrigin(opensrpSiteUrl), OK);
+        List<ErrorTrace> list = errorTraceService.getAllErrors();
+        if (list == null) {
+            return (ResponseEntity<T>) new ResponseEntity<>("No Record(s) Found .", allowOrigin(opensrpSiteUrl), OK);
 
-		}
-		return (ResponseEntity<T>) new ResponseEntity<>(list, allowOrigin(opensrpSiteUrl), OK);
+        }
+        return (ResponseEntity<T>) new ResponseEntity<>(list, allowOrigin(opensrpSiteUrl), OK);
 
-	}
+    }
 
 }

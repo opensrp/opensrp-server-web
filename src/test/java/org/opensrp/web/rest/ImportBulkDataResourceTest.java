@@ -1,5 +1,9 @@
 package org.opensrp.web.rest;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,91 +27,87 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ImportBulkDataResourceTest {
 
-	private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-	@InjectMocks
-	private ImportBulkDataResource importBulkDataResource;
+    @InjectMocks
+    private ImportBulkDataResource importBulkDataResource;
 
-	@Mock
-	private ImportBulkDataService importBulkDataService;
+    @Mock
+    private ImportBulkDataService importBulkDataService;
 
-	private String BASE_URL = "/rest/import";
+    private String BASE_URL = "/rest/import";
 
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(importBulkDataResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).
-						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-						build();
-	}
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(importBulkDataResource)
+                .setControllerAdvice(new GlobalExceptionHandler()).
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
+    }
 
-	@Test
-	public void testImportOrganizationsData() throws Exception {
+    @Test
+    public void testImportOrganizationsData() throws Exception {
 
-		String path = "src/test/resources/sample/organizations.csv";
-		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
-				Files.readAllBytes(Paths.get(path)));
+        String path = "src/test/resources/sample/organizations.csv";
+        MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+                Files.readAllBytes(Paths.get(path)));
 
-		CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
-		csvBulkImportDataSummary.setNumberOfCsvRows(2);
-		csvBulkImportDataSummary.setNumberOfRowsProcessed(1);
-		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
-		FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
-		List<String> failureReasons = new ArrayList<>();
-		failureReasons.add("Validation failed, provided location name mismatches with the system");
-		failedRecordSummary.setReasonOfFailure(failureReasons);
-		failedRecordSummary.setRowNumber(1);
-		failedRecordSummaryList.add(failedRecordSummary);
-		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
+        CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
+        csvBulkImportDataSummary.setNumberOfCsvRows(2);
+        csvBulkImportDataSummary.setNumberOfRowsProcessed(1);
+        List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
+        FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
+        List<String> failureReasons = new ArrayList<>();
+        failureReasons.add("Validation failed, provided location name mismatches with the system");
+        failedRecordSummary.setReasonOfFailure(failureReasons);
+        failedRecordSummary.setRowNumber(1);
+        failedRecordSummaryList.add(failedRecordSummary);
+        csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
 
-		when(importBulkDataService
-				.convertandPersistOrganizationdata(anyList())).thenReturn(csvBulkImportDataSummary);
+        when(importBulkDataService
+                .convertandPersistOrganizationdata(anyList())).thenReturn(csvBulkImportDataSummary);
 
-		mockMvc.perform(
-				MockMvcRequestBuilders.multipart(BASE_URL + "/organizations")
-						.file(firstFile)
-		)
-				.andExpect(status().isOk())
-				.andReturn();
-	}
+        mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/organizations")
+                                .file(firstFile)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+    }
 
-	@Test
-	public void testImportPractitionersData() throws Exception {
+    @Test
+    public void testImportPractitionersData() throws Exception {
 
-		String path = "src/test/resources/sample/practitioners.csv";
-		MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
-				Files.readAllBytes(Paths.get(path)));
+        String path = "src/test/resources/sample/practitioners.csv";
+        MockMultipartFile firstFile = new MockMultipartFile("file", "sampleFile.txt", "text/csv",
+                Files.readAllBytes(Paths.get(path)));
 
-		CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
-		csvBulkImportDataSummary.setNumberOfCsvRows(3);
-		csvBulkImportDataSummary.setNumberOfRowsProcessed(2);
-		List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
-		FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
-		List<String> failureReasons = new ArrayList<>();
-		failureReasons.add("Validation failed, provided organization name mismatches with the system");
-		failedRecordSummary.setReasonOfFailure(failureReasons);
-		failedRecordSummary.setRowNumber(1);
-		failedRecordSummaryList.add(failedRecordSummary);
-		csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
+        CsvBulkImportDataSummary csvBulkImportDataSummary = new CsvBulkImportDataSummary();
+        csvBulkImportDataSummary.setNumberOfCsvRows(3);
+        csvBulkImportDataSummary.setNumberOfRowsProcessed(2);
+        List<FailedRecordSummary> failedRecordSummaryList = new ArrayList<>();
+        FailedRecordSummary failedRecordSummary = new FailedRecordSummary();
+        List<String> failureReasons = new ArrayList<>();
+        failureReasons.add("Validation failed, provided organization name mismatches with the system");
+        failedRecordSummary.setReasonOfFailure(failureReasons);
+        failedRecordSummary.setRowNumber(1);
+        failedRecordSummaryList.add(failedRecordSummary);
+        csvBulkImportDataSummary.setFailedRecordSummaryList(failedRecordSummaryList);
 
-		when(importBulkDataService
-				.convertandPersistPractitionerdata(anyList())).thenReturn(csvBulkImportDataSummary);
+        when(importBulkDataService
+                .convertandPersistPractitionerdata(anyList())).thenReturn(csvBulkImportDataSummary);
 
-		mockMvc.perform(
-				MockMvcRequestBuilders.multipart(BASE_URL + "/practitioners")
-						.file(firstFile)
-		)
-				.andExpect(status().isOk())
-				.andReturn();
-	}
+        mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/practitioners")
+                                .file(firstFile)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+    }
 
 }
