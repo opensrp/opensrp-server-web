@@ -79,6 +79,9 @@ public class RestUtils {
 	  if(strval == null){
 		  return null;
 	  }
+	  if (!strval.contains(":")) {
+			return new DateTime[] { new DateTime(strval), new DateTime(strval) };
+	  }
 	  DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
 	  DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
 	  return new DateTime[]{d1,d2};
