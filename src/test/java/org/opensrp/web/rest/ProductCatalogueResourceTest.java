@@ -1,11 +1,29 @@
 package org.opensrp.web.rest;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.opensrp.domain.Multimedia;
-import org.smartregister.domain.ProductCatalogue;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
 import org.opensrp.service.MultimediaService;
@@ -13,6 +31,7 @@ import org.opensrp.service.ProductCatalogueService;
 import org.opensrp.web.GlobalExceptionHandler;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
+import org.smartregister.domain.ProductCatalogue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
@@ -28,287 +47,260 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-import org.mockito.Captor;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.InjectMocks;
-
-import org.mockito.MockitoAnnotations;
-import org.mockito.Mockito;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ProductCatalogueResourceTest {
 
-	@Mock
-	private ProductCatalogueService productCatalogueService;
+    @Autowired
+    protected WebApplicationContext webApplicationContext;
+    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    @Mock
+    private ProductCatalogueService productCatalogueService;
+    @Mock
+    private MultimediaService multimediaService;
+    @InjectMocks
+    private ProductCatalogueResource productCatalogueResource;
+    @Captor
+    private ArgumentCaptor<ProductCatalogue> argumentCaptor;
+    private MockMvc mockMvc;
+    private String BASE_URL = "/rest/product-catalogue";
 
-	@Mock
-	private MultimediaService multimediaService;
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(productCatalogueResource)
+                .setControllerAdvice(new GlobalExceptionHandler()).
+                        addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                        build();
 
-	@Autowired
-	protected WebApplicationContext webApplicationContext;
+        MockHttpServletRequest mockRequest;
+        mockRequest = new MockHttpServletRequest();
+        mockRequest.setContextPath("/opensrp");
+        ServletRequestAttributes attrs = new ServletRequestAttributes(mockRequest);
+        RequestContextHolder.setRequestAttributes(attrs);
+    }
 
-	@InjectMocks
-	private ProductCatalogueResource productCatalogueResource;
+    @Test
+    public void testGetAll() throws Exception {
+        ProductCatalogue productCatalogue = createProductCatalog();
+        productCatalogue.setUniqueId(1l);
+        List<ProductCatalogue> productCatalogues = new ArrayList<>();
+        productCatalogues.add(productCatalogue);
+        when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class), anyString()))
+                .thenReturn(productCatalogues);
+        MvcResult result = mockMvc.perform(get(BASE_URL))
+                .andExpect(status().isOk())
+                .andReturn();
 
-	@Captor
-	private ArgumentCaptor<ProductCatalogue> argumentCaptor;
+        List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
+                .get("productCatalogueList");
 
-	private MockMvc mockMvc;
+        if (response.size() == 0) {
+            fail("Test case failed");
+        }
 
-	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+        assertEquals(response.size(), 1);
+        assertEquals(new Long(1), response.get(0).getUniqueId());
+        assertEquals("Scale", response.get(0).getProductName());
+        assertEquals("MT-123", response.get(0).getMaterialNumber());
+    }
 
-	private String BASE_URL = "/rest/product-catalogue";
+    @Test
+    public void testGetAllWithLimitParam() throws Exception {
+        ProductCatalogue productCatalogue = createProductCatalog();
+        productCatalogue.setUniqueId(1l);
+        List<ProductCatalogue> productCatalogues = new ArrayList<>();
+        productCatalogues.add(productCatalogue);
+        when(productCatalogueService
+                .getProductCatalogues(any(ProductCatalogueSearchBean.class), any(Integer.class), anyString()))
+                .thenReturn(productCatalogues);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "?limit=10"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(productCatalogueResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).
-						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-						build();
+        List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
+                .get("productCatalogueList");
 
-		MockHttpServletRequest mockRequest;
-		mockRequest = new MockHttpServletRequest();
-		mockRequest.setContextPath("/opensrp");
-		ServletRequestAttributes attrs = new ServletRequestAttributes(mockRequest);
-		RequestContextHolder.setRequestAttributes(attrs);
-	}
+        if (response.size() == 0) {
+            fail("Test case failed");
+        }
 
-	@Test
-	public void testGetAll() throws Exception {
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		List<ProductCatalogue> productCatalogues = new ArrayList<>();
-		productCatalogues.add(productCatalogue);
-		when(productCatalogueService.getProductCatalogues(any(ProductCatalogueSearchBean.class), anyString()))
-				.thenReturn(productCatalogues);
-		MvcResult result = mockMvc.perform(get(BASE_URL))
-				.andExpect(status().isOk())
-				.andReturn();
+        assertEquals(response.size(), 1);
+        assertEquals(new Long(1), response.get(0).getUniqueId());
+        assertEquals("Scale", response.get(0).getProductName());
+        assertEquals("MT-123", response.get(0).getMaterialNumber());
+    }
 
-		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
-				.get("productCatalogueList");
+    @Test
+    public void testCreate() throws Exception {
 
-		if (response.size() == 0) {
-			fail("Test case failed");
-		}
+        MultipartFile multipartFile = mock(MultipartFile.class);
+        ProductCatalogue productCatalogue = createProductCatalog();
+        productCatalogue.setUniqueId(1l);
+        Authentication authentication = mock(Authentication.class);
+        authentication.setAuthenticated(Boolean.TRUE);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        byte[] bytes = new byte[10];
 
-		assertEquals(response.size(), 1);
-		assertEquals(new Long(1), response.get(0).getUniqueId());
-		assertEquals("Scale", response.get(0).getProductName());
-		assertEquals("MT-123", response.get(0).getMaterialNumber());
-	}
+        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 
-	@Test
-	public void testGetAllWithLimitParam() throws Exception {
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		List<ProductCatalogue> productCatalogues = new ArrayList<>();
-		productCatalogues.add(productCatalogue);
-		when(productCatalogueService
-				.getProductCatalogues(any(ProductCatalogueSearchBean.class), any(Integer.class), anyString()))
-				.thenReturn(productCatalogues);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "?limit=10"))
-				.andExpect(status().isOk())
-				.andReturn();
+        Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+        when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
+        when(multimediaService.findByCaseId(anyString())).thenReturn(null);
+        when(multipartFile.getContentType()).thenReturn("");
+        when(multipartFile.getBytes()).thenReturn(bytes);
+        when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+        when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
 
-		List<ProductCatalogue> response = (List<ProductCatalogue>) result.getModelAndView().getModel()
-				.get("productCatalogueList");
+        productCatalogueResource.create(multipartFile, productCatalogue);
 
-		if (response.size() == 0) {
-			fail("Test case failed");
-		}
+        verify(productCatalogueService).add(argumentCaptor.capture());
 
-		assertEquals(response.size(), 1);
-		assertEquals(new Long(1), response.get(0).getUniqueId());
-		assertEquals("Scale", response.get(0).getProductName());
-		assertEquals("MT-123", response.get(0).getMaterialNumber());
-	}
+        // verify call
 
-	@Test
-	public void testCreate() throws Exception {
+        verify(multimediaService).findByCaseId(anyString());
 
-		MultipartFile multipartFile = mock(MultipartFile.class);
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		Authentication authentication = mock(Authentication.class);
-		authentication.setAuthenticated(Boolean.TRUE);
-		SecurityContext securityContext = mock(SecurityContext.class);
-		SecurityContextHolder.setContext(securityContext);
-		byte[] bytes = new byte[10];
+        verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+                anyString());
 
-		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+        ProductCatalogue catalogue = argumentCaptor.getValue();
+        assertEquals("Scale", catalogue.getProductName());
+    }
 
-		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
-		when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
-		when(multimediaService.findByCaseId(anyString())).thenReturn(null);
-		when(multipartFile.getContentType()).thenReturn("");
-		when(multipartFile.getBytes()).thenReturn(bytes);
-		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
+    @Test
+    public void testUpdate() throws Exception {
 
-		productCatalogueResource.create(multipartFile, productCatalogue);
+        MultipartFile multipartFile = mock(MultipartFile.class);
+        ProductCatalogue productCatalogue = createProductCatalog();
+        productCatalogue.setUniqueId(1l);
+        Authentication authentication = mock(Authentication.class);
+        authentication.setAuthenticated(Boolean.TRUE);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        byte[] bytes = new byte[10];
+        Multimedia multimedia = new Multimedia();
+        multimedia.setCaseId("1");
 
-		verify(productCatalogueService).add(argumentCaptor.capture());
+        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 
-		// verify call
+        Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+        when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
+        when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
+        Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
+        when(multipartFile.getContentType()).thenReturn("");
+        when(multipartFile.getBytes()).thenReturn(bytes);
+        when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
+        when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
 
-		verify(multimediaService).findByCaseId(anyString());
+        productCatalogueResource.update(1l, multipartFile, productCatalogue);
 
-		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
-				anyString());
+        verify(productCatalogueService).update(argumentCaptor.capture());
 
-		ProductCatalogue catalogue = argumentCaptor.getValue();
-		assertEquals("Scale", catalogue.getProductName());
-	}
+        verify(multimediaService).findByCaseId(anyString());
 
-	@Test
-	public void testUpdate() throws Exception {
+        verify(multimediaService).deleteMultimedia(any(Multimedia.class));
 
-		MultipartFile multipartFile = mock(MultipartFile.class);
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		Authentication authentication = mock(Authentication.class);
-		authentication.setAuthenticated(Boolean.TRUE);
-		SecurityContext securityContext = mock(SecurityContext.class);
-		SecurityContextHolder.setContext(securityContext);
-		byte[] bytes = new byte[10];
-		Multimedia multimedia = new Multimedia();
-		multimedia.setCaseId("1");
+        verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+                anyString());
 
-		when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
+        ProductCatalogue catalogue = argumentCaptor.getValue();
+        assertEquals("Scale", catalogue.getProductName());
+    }
 
-		Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
-		when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
-		when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
-		Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
-		when(multipartFile.getContentType()).thenReturn("");
-		when(multipartFile.getBytes()).thenReturn(bytes);
-		when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
-		when(multimediaService.saveFile(any(MultimediaDTO.class), any(byte[].class), anyString())).thenReturn("Success");
+    @Test
+    public void testGetByUniqueId() throws Exception {
+        ProductCatalogue productCatalogue = createProductCatalog();
+        productCatalogue.setUniqueId(1l);
+        when(productCatalogueService.getProductCatalogue(anyLong(), anyString()))
+                .thenReturn(productCatalogue);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/1"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		productCatalogueResource.update(1l, multipartFile, productCatalogue);
+        ProductCatalogue response = (ProductCatalogue) result.getModelAndView().getModel().get("productCatalogue");
 
-		verify(productCatalogueService).update(argumentCaptor.capture());
+        if (response == null) {
+            fail("Test case failed");
+        }
 
-		verify(multimediaService).findByCaseId(anyString());
+        assertEquals(new Long(1), response.getUniqueId());
+        assertEquals("Scale", response.getProductName());
+        assertEquals("MT-123", response.getMaterialNumber());
+    }
 
-		verify(multimediaService).deleteMultimedia(any(Multimedia.class));
+    @Test
+    public void testDelete() throws Exception {
+        ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
+                .andExpect(status().isNoContent()).andReturn();
+        verify(productCatalogueService, times(1)).deleteProductCatalogueById(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().longValue(), 1);
+    }
 
-		verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
-				anyString());
+    private ProductCatalogue createProductCatalog() {
+        ProductCatalogue productCatalogue = new ProductCatalogue();
+        productCatalogue.setProductName("Scale");
+        productCatalogue.setIsAttractiveItem(Boolean.TRUE);
+        productCatalogue.setMaterialNumber("MT-123");
+        productCatalogue.setAvailability("available");
+        productCatalogue.setCondition("good condition");
+        productCatalogue.setAppropriateUsage("staff is trained to use it appropriately");
+        productCatalogue.setAccountabilityPeriod(1);
+        productCatalogue.setServerVersion(123456l);
+        return productCatalogue;
+    }
 
-		ProductCatalogue catalogue = argumentCaptor.getValue();
-		assertEquals("Scale", catalogue.getProductName());
-	}
+    private Authentication getMockedAuthentication() {
+        Authentication authentication = new Authentication() {
 
-	@Test
-	public void testGetByUniqueId() throws Exception {
-		ProductCatalogue productCatalogue = createProductCatalog();
-		productCatalogue.setUniqueId(1l);
-		when(productCatalogueService.getProductCatalogue(anyLong(), anyString()))
-				.thenReturn(productCatalogue);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/1"))
-				.andExpect(status().isOk())
-				.andReturn();
+            /**
+             *
+             */
+            private static final long serialVersionUID = 1L;
 
-		ProductCatalogue response = (ProductCatalogue) result.getModelAndView().getModel().get("productCatalogue");
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
 
-		if (response == null) {
-			fail("Test case failed");
-		}
+            @Override
+            public Object getCredentials() {
+                return "";
+            }
 
-		assertEquals(new Long(1), response.getUniqueId());
-		assertEquals("Scale", response.getProductName());
-		assertEquals("MT-123", response.getMaterialNumber());
-	}
+            @Override
+            public Object getDetails() {
+                return null;
+            }
 
-	@Test
-	public void testDelete() throws Exception {
-		ArgumentCaptor<Long> argumentCaptor = ArgumentCaptor.forClass(Long.class);
-		mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/{id}", 1))
-				.andExpect(status().isNoContent()).andReturn();
-		verify(productCatalogueService, times(1)).deleteProductCatalogueById(argumentCaptor.capture());
-		assertEquals(argumentCaptor.getValue().longValue(), 1);
-	}
+            @Override
+            public Object getPrincipal() {
+                return "Test User";
+            }
 
-	private ProductCatalogue createProductCatalog() {
-		ProductCatalogue productCatalogue = new ProductCatalogue();
-		productCatalogue.setProductName("Scale");
-		productCatalogue.setIsAttractiveItem(Boolean.TRUE);
-		productCatalogue.setMaterialNumber("MT-123");
-		productCatalogue.setAvailability("available");
-		productCatalogue.setCondition("good condition");
-		productCatalogue.setAppropriateUsage("staff is trained to use it appropriately");
-		productCatalogue.setAccountabilityPeriod(1);
-		productCatalogue.setServerVersion(123456l);
-		return productCatalogue;
-	}
+            @Override
+            public boolean isAuthenticated() {
+                return false;
+            }
 
-	private Authentication getMockedAuthentication() {
-		Authentication authentication = new Authentication() {
+            @Override
+            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+                // TODO Auto-generated method stub
+            }
 
-			/**
-			 *
-			 */
-			private static final long serialVersionUID = 1L;
+            @Override
+            public String getName() {
+                return "admin";
+            }
+        };
 
-			@Override
-			public Collection<? extends GrantedAuthority> getAuthorities() {
-				return null;
-			}
-
-			@Override
-			public Object getCredentials() {
-				return "";
-			}
-
-			@Override
-			public Object getDetails() {
-				return null;
-			}
-
-			@Override
-			public Object getPrincipal() {
-				return "Test User";
-			}
-
-			@Override
-			public boolean isAuthenticated() {
-				return false;
-			}
-
-			@Override
-			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public String getName() {
-				return "admin";
-			}
-		};
-
-		return authentication;
-	}
+        return authentication;
+    }
 
 }

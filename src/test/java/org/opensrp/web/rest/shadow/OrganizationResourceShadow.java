@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.rest.shadow;
 
@@ -16,23 +16,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrganizationResourceShadow extends OrganizationResource {
 
-	@Override
-	public void setOrganizationService(OrganizationService organizationService) {
-		super.setOrganizationService(organizationService);
-	}
+    @Override
+    public void setOrganizationService(OrganizationService organizationService) {
+        super.setOrganizationService(organizationService);
+    }
 
-	@Override
-	public void setPractitionerService(PractitionerService practitionerService) {
-		super.setPractitionerService(practitionerService);
-	}
-	
-	@Override
-	public void setLocationService(PhysicalLocationService locationService) {
-		super.setLocationService(locationService);
-	}
-	
-	@Override
-	public void setPlanService(PlanService planService) {
-		super.setPlanService(planService);
-	}
+    @Override
+    public void setPractitionerService(PractitionerService practitionerService) {
+        super.setPractitionerService(practitionerService);
+    }
+
+    @Override
+    public void setLocationService(PhysicalLocationService locationService) {
+        super.setLocationService(locationService);
+    }
+
+    @Override
+    public void setPlanService(PlanService planService) {
+        super.setPlanService(planService);
+    }
 }

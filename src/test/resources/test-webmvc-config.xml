@@ -1,104 +1,101 @@
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:sec="http://www.springframework.org/schema/security"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd           
+<beans xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:sec="http://www.springframework.org/schema/security"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.springframework.org/schema/beans" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	   http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd 
 	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
 	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd   
 	   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
-	<bean id="mvcContentNegotiationManager"
-		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-		<property name="favorPathExtension" value="true" />
-		<property name="ignoreAcceptHeader" value="true" />
-		<property name="defaultContentType" value="text/html" />
-		<property name="mediaTypes">
-			<map>
-				<entry key="html" value="text/html" />
-				<entry key="json" value="application/json" />
-			</map>
-		</property>
-	</bean>
+    <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"
+        id="mvcContentNegotiationManager">
+        <property name="favorPathExtension" value="true" />
+        <property name="ignoreAcceptHeader" value="true" />
+        <property name="defaultContentType" value="text/html" />
+        <property name="mediaTypes">
+            <map>
+                <entry key="html" value="text/html" />
+                <entry key="json" value="application/json" />
+            </map>
+        </property>
+    </bean>
 
-	<util:properties id="opensrp"
-		location="classpath:/opensrp.properties" />
+    <util:properties id="opensrp" location="classpath:/opensrp.properties" />
 
-	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-		<property name="contentNegotiationManager"
-			ref="mvcContentNegotiationManager" />
-		<property name="viewResolvers">
-			<bean
-				class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-				p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
-		</property>
-		<property name="defaultViews">
-			<ref bean="mappingJackson2JsonView" />
-		</property>
-	</bean>
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"
+        id="viewResolver">
+        <property name="contentNegotiationManager" ref="mvcContentNegotiationManager" />
+        <property name="viewResolvers">
+            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+                p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+        </property>
+        <property name="defaultViews">
+            <ref bean="mappingJackson2JsonView" />
+        </property>
+    </bean>
 
-	<bean class="org.opensrp.web.config.security.WebConfig" />
-	
-	<bean class="org.opensrp.web.config.TestRedisConfig" />
+    <bean class="org.opensrp.web.config.security.WebConfig" />
 
-	<bean class="org.opensrp.TestDatabaseConfig" />
+    <bean class="org.opensrp.web.config.TestRedisConfig" />
 
-	<bean class="org.opensrp.web.health.RedisServiceHealthIndicator" />
+    <bean class="org.opensrp.TestDatabaseConfig" />
 
-	<bean class="org.opensrp.web.health.JdbcServiceHealthIndicator" />
+    <bean class="org.opensrp.web.health.RedisServiceHealthIndicator" />
 
-	<bean class="org.opensrp.web.health.KeycloakServiceHealthIndicator" />
+    <bean class="org.opensrp.web.health.JdbcServiceHealthIndicator" />
 
-	<bean class="org.opensrp.web.health.RabbitmqServiceHealthIndicator" />
+    <bean class="org.opensrp.web.health.KeycloakServiceHealthIndicator" />
 
-	<bean class="org.opensrp.web.serviceimpl.HealthServiceImpl" />
+    <bean class="org.opensrp.web.health.RabbitmqServiceHealthIndicator" />
 
-	<bean class="org.springframework.amqp.rabbit.core.RabbitAdmin" >
-		<constructor-arg index="0" ref="rabbitTemplate" />
-	</bean>
+    <bean class="org.opensrp.web.serviceimpl.HealthServiceImpl" />
 
-	<bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate" >
-		<constructor-arg index="0" ref="rabbitConnectionFactory" />
-	</bean>
+    <bean class="org.springframework.amqp.rabbit.core.RabbitAdmin">
+        <constructor-arg index="0" ref="rabbitTemplate" />
+    </bean>
 
-	<bean id="rabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory" />
+    <bean class="org.springframework.amqp.rabbit.core.RabbitTemplate" id="rabbitTemplate">
+        <constructor-arg index="0" ref="rabbitConnectionFactory" />
+    </bean>
 
-	<bean class="org.opensrp.web.config.MetricsConfiguration" />
+    <bean class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory"
+        id="rabbitConnectionFactory" />
 
-	<bean class="org.opensrp.web.config.HealthCheckMetricUpdater" />
+    <bean class="org.opensrp.web.config.MetricsConfiguration" />
 
-	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-		<property name="corePoolSize" value="5" />
-		<property name="maxPoolSize" value="10" />
-		<property name="queueCapacity" value="25" />
-	</bean>
+    <bean class="org.opensrp.web.config.HealthCheckMetricUpdater" />
 
-	<util:properties id="opensrp"
-		location="classpath:/opensrp.properties" />
+    <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"
+        id="taskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="10" />
+        <property name="queueCapacity" value="25" />
+    </bean>
 
-	<mvc:annotation-driven />
-	<mvc:default-servlet-handler />
+    <util:properties id="opensrp" location="classpath:/opensrp.properties" />
 
-	<bean class="org.opensrp.TestSecurityConfig"/>
-	
-	<bean class="org.opensrp.web.GlobalExceptionHandler"/>
-	
-	<context:component-scan base-package="org.opensrp.web.rest.shadow"/>
+    <mvc:annotation-driven />
+    <mvc:default-servlet-handler />
 
-	<sec:http  request-matcher="mvc" auto-config="true" >
-		<sec:csrf disabled="true"/> 
-	</sec:http>
-	
-	 <sec:authentication-manager>  
-      <sec:authentication-provider>  
-        <sec:user-service>  
-        <sec:user name="admin" password="1234" authorities="hasRole(ROLE_USER)" />  
-        </sec:user-service>  
-      </sec:authentication-provider>  
-    </sec:authentication-manager>  
+    <bean class="org.opensrp.TestSecurityConfig" />
+
+    <bean class="org.opensrp.web.GlobalExceptionHandler" />
+
+    <context:component-scan base-package="org.opensrp.web.rest.shadow" />
+
+    <sec:http auto-config="true" request-matcher="mvc">
+        <sec:csrf disabled="true" />
+    </sec:http>
+
+    <sec:authentication-manager>
+        <sec:authentication-provider>
+            <sec:user-service>
+                <sec:user name="admin" authorities="hasRole(ROLE_USER)" password="1234" />
+            </sec:user-service>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
 
 </beans>

@@ -1,20 +1,19 @@
 package org.opensrp.web.dto;
 
 
+import static org.opensrp.web.Constants.FAILURE;
+
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 
-import static org.opensrp.web.Constants.FAILURE;
-
 public class ResponseDto<T> implements Serializable {
 
     private static final long serialVersionUID = -3031863362202637459L;
-
+    protected boolean success;
     private String message;
     private String status;
     private transient T data;
-    protected boolean success;
 
     public String getMessage() {
         return message;

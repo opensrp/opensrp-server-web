@@ -4,7 +4,7 @@ import org.opensrp.dto.Action;
 import org.opensrp.dto.ActionData;
 
 public class ActionConvertor {
-    public static Action from(org.opensrp.scheduler.Action action){
+    public static Action from(org.opensrp.scheduler.Action action) {
         return new Action(action.baseEntityId(), action.getTarget(), action.getActionType(), action.data(), String.valueOf(action.getTimestamp()), action.getIsActionActive(), action.getDetails());
     }
 

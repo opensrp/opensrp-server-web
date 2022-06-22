@@ -12,52 +12,52 @@ import java.util.Set;
 @Component
 public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
 
-	public boolean hasPermission(Authentication authentication, Client targetDomainObject) {
-		return hasPermissionOnClient(authentication, targetDomainObject);
-	}
+    public boolean hasPermission(Authentication authentication, Client targetDomainObject) {
+        return hasPermissionOnClient(authentication, targetDomainObject);
+    }
 
-	private boolean hasPermissionOnClient(Authentication authentication, Client client) {
-		/* @formatter:off */
-		return getAssignedLocations(authentication.getName())
-				.stream()
-				.anyMatch( (a) -> {
-							return a.getJurisdictionId().equals(client.getLocationId()) ||
-							a.getOrganizationId().equals(client.getTeamId());
-				});
-		/* @formatter:on */
-	}
+    private boolean hasPermissionOnClient(Authentication authentication, Client client) {
+        /* @formatter:off */
+        return getAssignedLocations(authentication.getName())
+                .stream()
+                .anyMatch((a) -> {
+                    return a.getJurisdictionId().equals(client.getLocationId()) ||
+                            a.getOrganizationId().equals(client.getTeamId());
+                });
+        /* @formatter:on */
+    }
 
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof Client) {
-			Client client = (Client) targetId;
-			/* @formatter:off */
-			return getAssignedLocations(authentication.getName())
-					.stream()
-					.anyMatch((assignedLocation) -> {
-						return assignedLocation.getJurisdictionId().equals(client.getLocationId()) ||
-								assignedLocation.getOrganizationId().equals(client.getTeamId());
-					});
-			/* @formatter:on */
-		} else if (isCollectionOfResources(targetId, Client.class)) {
-			Collection<Client> clients = (Collection<Client>) targetId;
-			Set<String> organizationIdentifiers = new HashSet<>();
-			Set<String> jurisdictionIdentifiers = new HashSet<>();
-			/* @formatter:off */
-			getAssignedLocations(authentication.getName())
-					.stream()
-					.forEach((assignedLocation) -> {
-						organizationIdentifiers.add(assignedLocation.getOrganizationId());
-						jurisdictionIdentifiers.add(assignedLocation.getJurisdictionId());
-					});
-			return clients
-					.stream()
-					.allMatch((client) -> {
-						return jurisdictionIdentifiers.contains(client.getLocationId()) ||
-								organizationIdentifiers.contains(client.getTeamId());
-					});
-			/* @formatter:on */
-		}
-		return false;
-	}
+    public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
+        if (targetId instanceof Client) {
+            Client client = (Client) targetId;
+            /* @formatter:off */
+            return getAssignedLocations(authentication.getName())
+                    .stream()
+                    .anyMatch((assignedLocation) -> {
+                        return assignedLocation.getJurisdictionId().equals(client.getLocationId()) ||
+                                assignedLocation.getOrganizationId().equals(client.getTeamId());
+                    });
+            /* @formatter:on */
+        } else if (isCollectionOfResources(targetId, Client.class)) {
+            Collection<Client> clients = (Collection<Client>) targetId;
+            Set<String> organizationIdentifiers = new HashSet<>();
+            Set<String> jurisdictionIdentifiers = new HashSet<>();
+            /* @formatter:off */
+            getAssignedLocations(authentication.getName())
+                    .stream()
+                    .forEach((assignedLocation) -> {
+                        organizationIdentifiers.add(assignedLocation.getOrganizationId());
+                        jurisdictionIdentifiers.add(assignedLocation.getJurisdictionId());
+                    });
+            return clients
+                    .stream()
+                    .allMatch((client) -> {
+                        return jurisdictionIdentifiers.contains(client.getLocationId()) ||
+                                organizationIdentifiers.contains(client.getTeamId());
+                    });
+            /* @formatter:on */
+        }
+        return false;
+    }
 
 }

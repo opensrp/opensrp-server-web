@@ -1,5 +1,10 @@
 package org.opensrp.web.health;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensrp.web.Constants;
@@ -13,28 +18,23 @@ import org.springframework.ui.ModelMap;
 
 import javax.sql.DataSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
-@ActiveProfiles(profiles = { "jedis", "postgres", "oauth2" })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = {"jedis", "postgres", "oauth2"})
 public class JdbcServiceHealthIndicatorTest {
 
-	@Autowired
-	private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+    @Autowired
+    private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
 
-	@Test
-	public void testDoHealthCheckShouldReturnValidMap() throws Exception {
-		DataSource dataSource = mock(DataSource.class);
-		Whitebox.setInternalState(jdbcServiceHealthIndicator, "dataSource", dataSource);
-		ModelMap map = jdbcServiceHealthIndicator.doHealthCheck().call();
-		assertNotNull(map);
-		assertTrue(map.containsKey(Constants.HealthIndicator.EXCEPTION));
-		assertTrue(map.containsKey(Constants.HealthIndicator.STATUS));
-		assertEquals(map.get(Constants.HealthIndicator.INDICATOR), "postgres");
-	}
+    @Test
+    public void testDoHealthCheckShouldReturnValidMap() throws Exception {
+        DataSource dataSource = mock(DataSource.class);
+        Whitebox.setInternalState(jdbcServiceHealthIndicator, "dataSource", dataSource);
+        ModelMap map = jdbcServiceHealthIndicator.doHealthCheck().call();
+        assertNotNull(map);
+        assertTrue(map.containsKey(Constants.HealthIndicator.EXCEPTION));
+        assertTrue(map.containsKey(Constants.HealthIndicator.STATUS));
+        assertEquals(map.get(Constants.HealthIndicator.INDICATOR), "postgres");
+    }
 
 }

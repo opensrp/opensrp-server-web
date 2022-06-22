@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.dto;
 
@@ -15,11 +15,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TaskDto extends Task {
-	
-	private static final long serialVersionUID = 1801263421730964348L;
-	
-	private DateTime executionStartDate;
-	
-	private DateTime executionEndDate;
-	
+
+    private static final long serialVersionUID = 1801263421730964348L;
+
+    private DateTime executionStartDate;
+
+    private DateTime executionEndDate;
+
 }

@@ -1,9 +1,23 @@
 package org.opensrp.web.rest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,35 +36,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-
 public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 
     private final static String BASE_URL = "/rest/practitioner/";
 
     private final static String DELETE_ENDPOINT = "delete/";
-
-    private PractitionerService practitionerService;
-
     private final ArgumentCaptor<Practitioner> argumentCaptor = ArgumentCaptor.forClass(Practitioner.class);
-
     private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
     private final String practitionerJson = "{\"identifier\":\"practitoner-1-identifier\",\"active\":true,\"name\":\"Practitioner\",\"userId\":\"user1\",\"username\":\"Practioner1\"}";
-
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm.ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+    private PractitionerService practitionerService;
 
     @Before
     public void setUp() {
@@ -74,7 +70,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
         String actualPractitionersString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
         List<Practitioner> actualPractitioners = gson.fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
 
-                }.getType());
+        }.getType());
 
         assertListsAreSameIgnoringOrder(actualPractitioners, expectedPractitioners);
     }
@@ -113,10 +109,12 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     public void testGetPractitionerByUniqueIdSWithBlankIdentifierShouldReturnAnError() throws Exception {
         String actualPractitionersString = getResponseAsString(BASE_URL + " ", null,
                 MockMvcResultMatchers.status().isBadRequest());
-        String  actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {}.getType());
+        String actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {
+        }.getType());
         assertNotNull(actualPractitioner);
         assertEquals("Practitioner Id is required", actualPractitioner);
     }
+
     @Test
     public void testGetPractitionerByUserIdShouldReturnCorrectPractitioner() throws Exception {
         List<Practitioner> expectedPractitioners = new ArrayList<>();
@@ -150,7 +148,8 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     public void testGetPractitionerByUserIdWithBlankIdentifierShouldReturnAnError() throws Exception {
         String actualPractitionersString = getResponseAsString(BASE_URL + "/user/" + " ", null,
                 MockMvcResultMatchers.status().isBadRequest());
-        String  actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {}.getType());
+        String actualPractitioner = new Gson().fromJson(actualPractitionersString, new TypeToken<String>() {
+        }.getType());
         assertNotNull(actualPractitioner);
         assertEquals("The User Id is required", actualPractitioner);
     }
@@ -240,7 +239,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
                 MockMvcResultMatchers.status().isOk());
         List<Practitioner> actualPractitioners = gson.fromJson(actualPractitionersString, new TypeToken<List<Practitioner>>() {
 
-                }.getType());
+        }.getType());
 
         assertNotNull(actualPractitioners);
         assertEquals(actualPractitioners.get(0).getIdentifier(), expectedPractitioner.getIdentifier());
@@ -276,7 +275,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     public void testBatchSaveShouldCreateNewPractitioner() throws Exception {
         doReturn(new Practitioner()).when(practitionerService).addOrUpdatePractitioner(any());
         Practitioner expectedPractitioner = initTestPractitioner1();
-        postRequestWithJsonContentAndReturnString(BASE_URL + "add" , "[" + practitionerJson + "]", MockMvcResultMatchers.status().isCreated());
+        postRequestWithJsonContentAndReturnString(BASE_URL + "add", "[" + practitionerJson + "]", MockMvcResultMatchers.status().isCreated());
         verify(practitionerService).addOrUpdatePractitioner(argumentCaptor.capture());
         assertEquals(argumentCaptor.getValue().getIdentifier(), expectedPractitioner.getIdentifier());
     }
@@ -289,7 +288,7 @@ public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
     }
 
     @Test
-    public void testCountAllPractitioners() throws Exception  {
+    public void testCountAllPractitioners() throws Exception {
         doReturn(2L).when(practitionerService).countAllPractitioners();
         MvcResult mvcResult = this.mockMvc.perform(get(BASE_URL + "count").accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();

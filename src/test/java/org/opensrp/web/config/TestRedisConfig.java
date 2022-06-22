@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.config;
 
@@ -17,46 +17,46 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 public class TestRedisConfig {
 
-	private int redisMaxConnections = 0;
+    private int redisMaxConnections = 0;
 
-	private int redisDatabase = 0;
+    private int redisDatabase = 0;
 
-	@Value("#{opensrp['redis.host']}")
-	private String redisHost;
+    @Value("#{opensrp['redis.host']}")
+    private String redisHost;
 
-	@Value("#{opensrp['redis.port']}")
-	private int redisPort;
+    @Value("#{opensrp['redis.port']}")
+    private int redisPort;
 
-	@Value("#{opensrp['redis.password']}")
-	private String redisPassword;
+    @Value("#{opensrp['redis.password']}")
+    private String redisPassword;
 
-	@Bean(name = "jedisConnectionFactory")
-	public RedisConnectionFactory jedisConnectionFactory() {
-		JedisClientConfiguration clientConfiguration = JedisClientConfiguration.builder().usePooling()
-				.poolConfig(poolConfig()).build();
-		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration(),
-				clientConfiguration);
-		return jedisConnectionFactory;
-	}
+    @Bean(name = "jedisConnectionFactory")
+    public RedisConnectionFactory jedisConnectionFactory() {
+        JedisClientConfiguration clientConfiguration = JedisClientConfiguration.builder().usePooling()
+                .poolConfig(poolConfig()).build();
+        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration(),
+                clientConfiguration);
+        return jedisConnectionFactory;
+    }
 
-	@Bean(name = "redisTemplate")
-	public RedisTemplate<String, String> jedisTemplate() {
-		RedisTemplate<String, String> template = new RedisTemplate<>();
-		template.setConnectionFactory(jedisConnectionFactory());
-		return template;
-	}
+    @Bean(name = "redisTemplate")
+    public RedisTemplate<String, String> jedisTemplate() {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(jedisConnectionFactory());
+        return template;
+    }
 
-	private RedisStandaloneConfiguration redisStandaloneConfiguration() {
-		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost,
-				redisPort);
-		redisStandaloneConfiguration.setDatabase(redisDatabase);
-		redisStandaloneConfiguration.setPassword(redisPassword);
-		return redisStandaloneConfiguration;
-	}
+    private RedisStandaloneConfiguration redisStandaloneConfiguration() {
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost,
+                redisPort);
+        redisStandaloneConfiguration.setDatabase(redisDatabase);
+        redisStandaloneConfiguration.setPassword(redisPassword);
+        return redisStandaloneConfiguration;
+    }
 
-	private GenericObjectPoolConfig poolConfig() {
-		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-		poolConfig.setMaxTotal(redisMaxConnections);
-		return poolConfig;
-	}
+    private GenericObjectPoolConfig poolConfig() {
+        GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+        poolConfig.setMaxTotal(redisMaxConnections);
+        return poolConfig;
+    }
 }

@@ -18,31 +18,31 @@ import java.util.stream.Collectors;
 @Component
 public class LocationPermissionEvaluator extends BasePermissionEvaluator<PhysicalLocation> {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof String) {
-			return hasPermissionOnJurisdiction(authentication, (String) targetId);
-		} else if (isCollectionOfString(targetId)) {
-			return hasPermissionOnJurisdictions(authentication, (Collection<String>) targetId);
-		} else if (targetId instanceof PhysicalLocation) {
-			return hasPermission(authentication, (PhysicalLocation) targetId);
-		} else if (isCollectionOfResources(targetId, PhysicalLocation.class)) {
-			Collection<PhysicalLocation> jurisdictions = (Collection<PhysicalLocation>) targetId;
-			/* @formatter:off */
-			Set<String> identifiers =jurisdictions
-					.stream()
-					.map(jurisdiction -> jurisdiction.getId())
-					.collect(Collectors.toSet());
-			return hasPermissionOnJurisdictions(authentication, identifiers);
-			/* @formatter:on */
-		}
-		return false;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
+        if (targetId instanceof String) {
+            return hasPermissionOnJurisdiction(authentication, (String) targetId);
+        } else if (isCollectionOfString(targetId)) {
+            return hasPermissionOnJurisdictions(authentication, (Collection<String>) targetId);
+        } else if (targetId instanceof PhysicalLocation) {
+            return hasPermission(authentication, (PhysicalLocation) targetId);
+        } else if (isCollectionOfResources(targetId, PhysicalLocation.class)) {
+            Collection<PhysicalLocation> jurisdictions = (Collection<PhysicalLocation>) targetId;
+            /* @formatter:off */
+            Set<String> identifiers = jurisdictions
+                    .stream()
+                    .map(jurisdiction -> jurisdiction.getId())
+                    .collect(Collectors.toSet());
+            return hasPermissionOnJurisdictions(authentication, identifiers);
+            /* @formatter:on */
+        }
+        return false;
+    }
 
-	@Override
-	public boolean hasPermission(Authentication authentication, PhysicalLocation jurisdiction) {
-		return hasPermissionOnJurisdiction(authentication, jurisdiction.getId());
-	}
+    @Override
+    public boolean hasPermission(Authentication authentication, PhysicalLocation jurisdiction) {
+        return hasPermissionOnJurisdiction(authentication, jurisdiction.getId());
+    }
 
 }

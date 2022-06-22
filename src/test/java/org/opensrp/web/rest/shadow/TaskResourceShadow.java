@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskResourceShadow extends TaskResource {
 
-	@Override
-	public void setTaskService(TaskService taskService) {
-		super.setTaskService(taskService);
-	}
+    @Override
+    public void setTaskService(TaskService taskService) {
+        super.setTaskService(taskService);
+    }
 
 }

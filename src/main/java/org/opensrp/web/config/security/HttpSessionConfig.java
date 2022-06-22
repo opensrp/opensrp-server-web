@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableSpringHttpSession
 public class HttpSessionConfig {
 
-	@Bean
-	public MapSessionRepository sessionRepository() {
-		return new MapSessionRepository(new ConcurrentHashMap<>());
-	}
+    @Bean
+    public MapSessionRepository sessionRepository() {
+        return new MapSessionRepository(new ConcurrentHashMap<>());
+    }
 }

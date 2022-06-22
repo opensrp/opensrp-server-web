@@ -6,12 +6,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.opensrp.common.audit.AuditMessageType.FORM_SUBMISSION;
 import static org.opensrp.common.audit.AuditMessageType.SMS;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +13,12 @@ import org.mockito.Mock;
 import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.Auditor;
 import org.opensrp.web.controller.AuditMessageController.AuditMessageItem;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AuditMessageControllerTest {
     @Mock
@@ -30,7 +30,7 @@ public class AuditMessageControllerTest {
     public void setUp() throws Exception {
         initMocks(this);
         now = DateTime.now();
-        yesterday =DateTime.now().minusDays(1);
+        yesterday = DateTime.now().minusDays(1);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class AuditMessageControllerTest {
         when(auditor.messagesSince(10)).thenReturn(messages());
 
         List<AuditMessageItem> messageItems = controller.getAuditMessages(10);
-        assertEquals(messageItems.size(),expectedMessageItems().size());
+        assertEquals(messageItems.size(), expectedMessageItems().size());
     }
 
     private List<AuditMessageItem> expectedMessageItems() {
@@ -68,7 +68,7 @@ public class AuditMessageControllerTest {
     }
 
     private Map<String, String> smsData() {
-        Map<String,String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<String, String>();
         map.put("recipient", "Abc");
         map.put("message", "SMS 1");
         return map;

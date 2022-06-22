@@ -1,74 +1,67 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+<beans xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
-       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
-       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd 
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
-       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
     <context:property-placeholder
-            location="classpath*:maven.properties,classpath*:opensrp.properties"/>
+        location="classpath*:maven.properties,classpath*:opensrp.properties" />
 
-    <import resource="classpath:applicationContext-opensrp.xml"/>
-	<import resource="classpath:applicationContext-connector.xml"/>
+    <import resource="classpath:applicationContext-opensrp.xml" />
+    <import resource="classpath:applicationContext-connector.xml" />
 
-    <mvc:default-servlet-handler/>
+    <mvc:default-servlet-handler />
     <!--     <tx:annotation-driven proxy-target-class="true" />
         <aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
-    <context:annotation-config/>
+    <context:annotation-config />
 
-    <context:component-scan base-package="org.opensrp.web"/>
+    <context:component-scan base-package="org.opensrp.web" />
 
-    <mvc:annotation-driven/>
-    <bean id="multipartResolver"
-          class="org.opensrp.web.config.multipartresolver.PostAndPutCommonsMultipartResolver">
+    <mvc:annotation-driven />
+    <bean class="org.opensrp.web.config.multipartresolver.PostAndPutCommonsMultipartResolver"
+        id="multipartResolver">
         <!-- max upload size in bytes -->
-        <property name="maxUploadSize" value="${file.maxUploadSize}"/> <!-- 20MB -->
+        <property name="maxUploadSize" value="${file.maxUploadSize}" /> <!-- 20MB -->
     </bean>
-       
-   <bean id="mvcContentNegotiationManager"  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+
+    <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"
+        id="mvcContentNegotiationManager">
         <property name="favorPathExtension" value="true" />
-        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="ignoreAcceptHeader" value="true" />
         <property name="defaultContentType" value="text/html" />
         <property name="mediaTypes">
             <map>
-               <entry key="html" value="text/html"/>
-               <entry key="json" value="application/json"/>
-           </map>
+                <entry key="html" value="text/html" />
+                <entry key="json" value="application/json" />
+            </map>
         </property>
     </bean>
-   
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-      	<property name="contentNegotiationManager" ref="mvcContentNegotiationManager"/>
+
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"
+        id="viewResolver">
+        <property name="contentNegotiationManager" ref="mvcContentNegotiationManager" />
         <property name="viewResolvers">
             <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-                  p:prefix="/WEB-INF/jsp/"
-                  p:suffix=".jsp"/>
+                p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
         </property>
         <property name="defaultViews">
-                   <ref bean="mappingJackson2JsonView"/>
+            <ref bean="mappingJackson2JsonView" />
         </property>
     </bean>
     <!-- Required so swagger-springmvc can access spring's RequestMappingHandlerMapping  -->
-	<mvc:annotation-driven/>
+    <mvc:annotation-driven />
 
-    <bean class="org.opensrp.web.config.SwaggerConfig"/>
+    <bean class="org.opensrp.web.config.SwaggerConfig" />
 
-    <alias name="${multimedia.file.manager}" alias="multimedia.file.manager"/>
+    <alias name="${multimedia.file.manager}" alias="multimedia.file.manager" />
 
     <beans profile="chw_referral_module">
-        <import resource="classpath:applicationContext-opensrp-referral.xml"/>
+        <import resource="classpath:applicationContext-opensrp-referral.xml" />
     </beans>
-    
+
     <beans profile="dhis2-sync-vaccine-tracker,rapidpro">
-    	 <import resource="couchDbContext.xml"/>
+        <import resource="couchDbContext.xml" />
     </beans>
 </beans>

@@ -17,37 +17,33 @@ import java.util.concurrent.Callable;
 @Component
 public class RabbitmqServiceHealthIndicator implements ServiceHealthIndicator {
 
-	private static final Logger logger = LogManager.getLogger(RabbitmqServiceHealthIndicator.class.toString());
+    private static final Logger logger = LogManager.getLogger(RabbitmqServiceHealthIndicator.class.toString());
+    private final String HEALTH_INDICATOR_KEY = "rabbitmq";
+    @Autowired
+    private AmqpAdmin amqpAdmin;
+    @Value("#{opensrp['rabbitmq.queue'] ?: ''}")
+    private String queueName;
 
-	@Autowired
-	private AmqpAdmin amqpAdmin;
+    @Override
+    public Callable<ModelMap> doHealthCheck() {
+        return () -> {
+            ModelMap modelMap = new ModelMap();
+            boolean result = false;
+            try {
+                amqpAdmin.getQueueInfo(queueName);
+                result = true;
+            } catch (Exception e) {
+                logger.error(e);
+                modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
+            }
+            modelMap.put(Constants.HealthIndicator.STATUS, result);
+            modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
+            return modelMap;
+        };
+    }
 
-	private final String HEALTH_INDICATOR_KEY = "rabbitmq";
-
-	@Value("#{opensrp['rabbitmq.queue'] ?: ''}")
-	private String queueName;
-
-	@Override
-	public Callable<ModelMap> doHealthCheck() {
-		return () -> {
-			ModelMap modelMap = new ModelMap();
-			boolean result = false;
-			try {
-				amqpAdmin.getQueueInfo(queueName);
-				result = true;
-			}
-			catch (Exception e) {
-				logger.error(e);
-				modelMap.put(Constants.HealthIndicator.EXCEPTION, e.getMessage());
-			}
-			modelMap.put(Constants.HealthIndicator.STATUS, result);
-			modelMap.put(Constants.HealthIndicator.INDICATOR, HEALTH_INDICATOR_KEY);
-			return modelMap;
-		};
-	}
-
-	@Override
-	public String getHealthIndicatorKey() {
-		return HEALTH_INDICATOR_KEY;
-	}
+    @Override
+    public String getHealthIndicatorKey() {
+        return HEALTH_INDICATOR_KEY;
+    }
 }

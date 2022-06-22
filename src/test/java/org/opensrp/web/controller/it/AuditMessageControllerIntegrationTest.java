@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Ignore
 public class AuditMessageControllerIntegrationTest extends BaseResourceTest {
 
-	@Autowired
-	Auditor auditor;
+    @Autowired
+    Auditor auditor;
 
 
 /*

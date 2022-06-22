@@ -17,7 +17,6 @@ import org.opensrp.domain.postgres.ClientForm;
 import org.opensrp.service.ClientFormService;
 import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
-
 import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
@@ -30,12 +29,12 @@ import java.util.Map;
 
 public class ClientFormValidator {
 
+    private static String PROPERTIES_FILE_NAME = "properties_file_name";
+    private static Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
     private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
     private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
     private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
     private ClientFormService clientFormService;
-    private static String PROPERTIES_FILE_NAME = "properties_file_name";
-    private static Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;
@@ -65,13 +64,13 @@ public class ClientFormValidator {
         HashSet<String> subFormReferences = new HashSet<>();
         HashSet<String> missingSubFormReferences = new HashSet<>();
 
-        for (String jsonPath: jsonPathForSubFormReferences) {
+        for (String jsonPath : jsonPathForSubFormReferences) {
             List<String> references = JsonPath.read(jsonForm, jsonPath);
             subFormReferences.addAll(references);
         }
 
         // Check if the references exist in the DB
-        for (String subFormReference: subFormReferences) {
+        for (String subFormReference : subFormReferences) {
             // If the form does not exist, Add a .json extension & check again
             if (!clientFormService.isClientFormExists(subFormReference) && !clientFormService.isClientFormExists(subFormReference + ".json")) {
                 missingSubFormReferences.add(subFormReference);
@@ -86,13 +85,13 @@ public class ClientFormValidator {
         HashSet<String> ruleFileReferences = new HashSet<>();
         HashSet<String> missingRuleFileReferences = new HashSet<>();
 
-        for (String jsonPath: jsonPathForRuleReferences) {
+        for (String jsonPath : jsonPathForRuleReferences) {
             List<String> references = JsonPath.read(jsonForm, jsonPath);
             ruleFileReferences.addAll(references);
         }
 
         // Check if the references exist in the DB
-        for (String ruleFileReference: ruleFileReferences) {
+        for (String ruleFileReference : ruleFileReferences) {
             if (!clientFormService.isClientFormExists(ruleFileReference)) {
                 missingRuleFileReferences.add(ruleFileReference);
             }
@@ -109,7 +108,7 @@ public class ClientFormValidator {
         HashSet<String> propertyFileReferences = new HashSet<>();
         HashSet<String> missingPropertyFileReferences = new HashSet<>();
 
-        for (String jsonPath: jsonPathForPropertyFileReferences) {
+        for (String jsonPath : jsonPathForPropertyFileReferences) {
             String reference = (JsonPath.using(conf)).parse(jsonForm).read(jsonPath);
 
             if (reference != null) {
@@ -118,7 +117,7 @@ public class ClientFormValidator {
         }
 
         // Check if the references exist in the DB
-        for (String propertyFileReference: propertyFileReferences) {
+        for (String propertyFileReference : propertyFileReferences) {
             if (!clientFormService.isClientFormExists(propertyFileReference) && !clientFormService.isClientFormExists(propertyFileReference + ".properties")) {
                 missingPropertyFileReferences.add(propertyFileReference);
             }
@@ -136,12 +135,12 @@ public class ClientFormValidator {
                 propertyFileReferences.add((String) document.get(PROPERTIES_FILE_NAME));
             }
             // Check if the references exist in the DB
-            for (String propertyFileReference: propertyFileReferences) {
+            for (String propertyFileReference : propertyFileReferences) {
                 if (!clientFormService.isClientFormExists(propertyFileReference) && !clientFormService.isClientFormExists(propertyFileReference + ".properties")) {
                     missingPropertyFileReferences.add(propertyFileReference);
                 }
             }
-        }catch (ComposerException exception) {
+        } catch (ComposerException exception) {
             logger.error("Validator parsing a YAML file that doesn't conform in structure", exception);
             return missingPropertyFileReferences;
         }
