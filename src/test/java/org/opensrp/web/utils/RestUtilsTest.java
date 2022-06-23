@@ -1,12 +1,5 @@
 package org.opensrp.web.utils;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
 import org.opensrp.common.AllConstants.Client;
 import org.opensrp.domain.Multimedia;
@@ -23,6 +16,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
+
 public class RestUtilsTest {
 
     @Test
@@ -35,7 +32,7 @@ public class RestUtilsTest {
 
     @Test
     public void testZipFilesShouldZipFiles() throws IOException {
-        final String ROOT_DIR = Paths.get("").toAbsolutePath().toString() + "/src/test/java/org/opensrp/web/utils/";
+        final String ROOT_DIR = Paths.get("").toAbsolutePath() + "/src/test/java/org/opensrp/web/utils/";
 
         List<Multimedia> multimediaFiles = new ArrayList<>();
         Multimedia multimedia = new Multimedia();

@@ -9,11 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -45,7 +41,7 @@ public class TestResourceLoader {
         formDirPath = props.getProperty("form.directory.name", "/form");
         formToDownload = props.getProperty("form.download.files", "form.xml, model.xml, form_definition.json").replace(" ", "");
         String rc = props.getProperty("openmrs.test.make-rest-call");
-        pushToOpenmrsForTest = StringUtils.isBlank(rc) ? false : Boolean.parseBoolean(rc);
+        pushToOpenmrsForTest = !StringUtils.isBlank(rc) && Boolean.parseBoolean(rc);
 
         this.patientService = new PatientService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword);
         this.encounterService = new EncounterService(openmrsOpenmrsUrl, openmrsUsername, openmrsPassword);
@@ -60,7 +56,7 @@ public class TestResourceLoader {
     private byte[] zipFiles(File directory) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(baos);
-        byte bytes[] = new byte[2048];
+        byte[] bytes = new byte[2048];
         String[] fl = directory.list();
         for (String fileName : fl) {
             if (formToDownload.matches("(.+,)?" + fileName + "(,.+)?$")) {

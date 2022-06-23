@@ -1,17 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Rule;
@@ -62,16 +49,17 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Samuel Githengi created on 09/17/19
@@ -114,13 +102,13 @@ public class OrganizationResourceTest {
 
     private OrganizationResource organizationResource;
 
-    private String BASE_URL = "/rest/organization/";
+    private final String BASE_URL = "/rest/organization/";
 
-    private String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"dateCreated\":\"2021-12-20T13:16:02.457Z\",\"dateEdited\":\"2021-12-20T13:16:02.457Z\",\"serverVersion\":1}";
+    private final String organizationJSON = "{\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce4\",\"active\":true,\"name\":\"B Team\",\"partOf\":1123,\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/organization-type\",\"code\":\"team\",\"display\":\"Team\"}]},\"dateCreated\":\"2021-12-20T13:16:02.457Z\",\"dateEdited\":\"2021-12-20T13:16:02.457Z\",\"serverVersion\":1}";
 
     private ObjectMapper objectMapper;
 
-    private String MESSAGE = "The server encountered an error processing the request.";
+    private final String MESSAGE = "The server encountered an error processing the request.";
 
     @Before
     public void setUp() {
@@ -544,21 +532,21 @@ public class OrganizationResourceTest {
     public void testGetSearchOrganizationWithParams() throws Exception {
         List<Organization> expected = new ArrayList<>();
         expected.add(createSearchOrganization());
-        when(organizationService.getSearchOrganizations((OrganizationSearchBean) any())).thenReturn(expected);
-        when(organizationService.findOrganizationCount((OrganizationSearchBean) any())).thenReturn(1);
+        when(organizationService.getSearchOrganizations(any())).thenReturn(expected);
+        when(organizationService.findOrganizationCount(any())).thenReturn(1);
         MvcResult result = mockMvc
                 .perform(get(BASE_URL + "search/").param("name", "C Team").param("orderByFieldName", "id")
                         .param("pageNumber", "1").param("pageSize", "10").param("orderByType", "ASC"))
                 .andExpect(status().isOk()).andReturn();
 
-        verify(organizationService).getSearchOrganizations((OrganizationSearchBean) any());
-        verify(organizationService).findOrganizationCount((OrganizationSearchBean) any());
+        verify(organizationService).getSearchOrganizations(any());
+        verify(organizationService).findOrganizationCount(any());
         verifyNoMoreInteractions(organizationService);
         assertEquals(objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(expected),
                 result.getResponse().getContentAsString());
     }
 
-    private Organization createSearchOrganization() throws JsonMappingException, JsonProcessingException {
+    private Organization createSearchOrganization() throws JsonProcessingException {
         String searchResponseJson = "{\"id\":3,\"identifier\":\"801874c0-d963-11e9-8a34-2a2ae2dbcce5\",\"active\":false,\"name\":\"C Team\",\"partOf\":2,\"memberCount\":2}";
 
         Organization searchOrganization = objectMapper.readValue(searchResponseJson, Organization.class);

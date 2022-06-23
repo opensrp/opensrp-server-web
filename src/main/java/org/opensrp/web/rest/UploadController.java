@@ -1,10 +1,6 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
-import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -19,13 +15,7 @@ import org.opensrp.domain.CSVRowConfig;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.IdentifierSourceService;
-import org.opensrp.service.MultimediaService;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.UniqueIdentifierService;
-import org.opensrp.service.UploadService;
+import org.opensrp.service.*;
 import org.opensrp.util.JSONCSVUtil;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.exceptions.UploadValidationException;
@@ -41,35 +31,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
+import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
 
 @Controller
 @RequestMapping(value = "/rest/upload")
@@ -391,7 +364,7 @@ public class UploadController {
             String errorMessage = "Sorry. The file you are looking for does not exist";
             logger.info(errorMessage);
             OutputStream outputStream = response.getOutputStream();
-            outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+            outputStream.write(errorMessage.getBytes(StandardCharsets.UTF_8));
             outputStream.close();
         }
     }

@@ -2,7 +2,6 @@ package org.opensrp.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.domain.ClientMigrationFile;
@@ -28,7 +27,7 @@ import java.util.Date;
 public class ClientMigrationFileResource {
 
     public static final String MIGRATION_FILENAME_PATTERN = "(\\d).(up|down).sql";
-    private static Logger logger = LogManager.getLogger(ClientMigrationFileResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ClientMigrationFileResource.class.toString());
     protected ObjectMapper objectMapper;
     private ClientMigrationFileService clientMigrationFileService;
 

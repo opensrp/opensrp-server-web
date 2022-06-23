@@ -1,7 +1,6 @@
 package org.opensrp.web.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.smartregister.domain.PhysicalLocation;
 
 import java.util.List;

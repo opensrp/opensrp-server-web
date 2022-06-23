@@ -1,7 +1,5 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +11,7 @@ import org.opensrp.api.util.TreeNode;
 import org.opensrp.common.AllConstants;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.domain.setting.SettingConfiguration;
+import org.opensrp.repository.postgres.handler.BaseTypeHandler;
 import org.opensrp.repository.postgres.handler.SettingTypeHandler;
 import org.opensrp.search.SettingSearchBean;
 import org.opensrp.service.PhysicalLocationService;
@@ -28,11 +27,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import static java.text.MessageFormat.format;
 
 @Controller
 @RequestMapping(value = "/rest/settings")
@@ -101,7 +101,7 @@ public class SettingResource {
             SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
 
             SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
-            String settingsArrayString = settingTypeHandler.mapper.writeValueAsString(SettingConfigurations);
+            String settingsArrayString = BaseTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
             responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,
                     HttpStatus.OK); // todo: why is this conversion to json array necessary?

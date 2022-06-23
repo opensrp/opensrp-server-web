@@ -1,24 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
-import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -34,13 +19,7 @@ import org.opensrp.domain.IdentifierSource;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.IdentifierSourceService;
-import org.opensrp.service.MultimediaService;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.UniqueIdentifierService;
-import org.opensrp.service.UploadService;
+import org.opensrp.service.*;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -67,6 +46,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
+import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})

@@ -1,17 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.Constants.DATETIME_IN_UTC_FORMAT_STRING;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.SERVER_VERSION;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.opensrp.web.Constants.*;
+
 @Controller
 @RequestMapping(value = "/rest/practitioner")
 public class PractitionerResource {
@@ -42,7 +36,7 @@ public class PractitionerResource {
     public static final String GET_PRACTITIONER_BY_USER_URL = "/user/{userId}";
     public static Gson gson = new GsonBuilder().setDateFormat(DATETIME_IN_UTC_FORMAT_STRING)
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private static Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
     private PractitionerService practitionerService;
 
     @Autowired

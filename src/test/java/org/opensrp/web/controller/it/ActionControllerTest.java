@@ -1,17 +1,7 @@
 package org.opensrp.web.controller.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.opensrp.dto.AlertStatus.normal;
-import static org.opensrp.dto.BeneficiaryType.mother;
-import static org.opensrp.web.rest.it.ResourceTestUtility.createActions;
-import static org.opensrp.web.rest.it.ResourceTestUtility.createAlerts;
-import static org.opensrp.web.rest.it.ResourceTestUtility.createClients;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static java.util.Arrays.asList;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -31,6 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.opensrp.dto.AlertStatus.normal;
+import static org.opensrp.dto.BeneficiaryType.mother;
+import static org.opensrp.web.rest.it.ResourceTestUtility.*;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 public class ActionControllerTest extends BaseResourceTest {
 

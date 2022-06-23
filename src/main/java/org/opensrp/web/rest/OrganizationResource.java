@@ -1,15 +1,7 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.SERVER_VERSION;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -36,20 +28,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.opensrp.web.Constants.*;
 
 /**
  * @author Samuel Githengi created on 09/10/19
@@ -58,7 +42,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/rest/organization")
 public class OrganizationResource {
 
-    private static Logger logger = LogManager.getLogger(OrganizationResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(OrganizationResource.class.toString());
 
     private OrganizationService organizationService;
 

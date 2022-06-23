@@ -1,7 +1,6 @@
 package org.opensrp.web.rest.shadow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.opensrp.service.LocationTagService;
 import org.opensrp.web.rest.LocationTagResource;
 import org.springframework.stereotype.Component;

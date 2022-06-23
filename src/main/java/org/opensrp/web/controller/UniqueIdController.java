@@ -1,11 +1,8 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +26,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,14 +38,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping("/uniqueids")
 public class UniqueIdController extends OpenmrsService {
 
-    private static Logger logger = LogManager.getLogger(UniqueIdController.class.toString());
+    private static final Logger logger = LogManager.getLogger(UniqueIdController.class.toString());
     @Autowired
     protected ObjectMapper objectMapper;
     @Value("#{opensrp['qrcodes.directory.name']}")
@@ -89,7 +87,7 @@ public class UniqueIdController extends OpenmrsService {
 
         try (ByteArrayOutputStream byteArrayOutputStream = PdfUtil.generatePdf(idsToPrint, 140, 140, 1, 5);
              FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
-             OutputStream os = response.getOutputStream();) {
+             OutputStream os = response.getOutputStream()) {
             user = openmrsUserService.getUser(currentPrincipalName);
             if (!checkRoleIfRoleExitst(user.getRoles(), "opensrp-generate-qr-code")) {
                 return new ResponseEntity<>("Sorry, insufficient privileges to generate ID QR codes", HttpStatus.OK);

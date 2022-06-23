@@ -3,14 +3,14 @@
  */
 package org.opensrp;
 
-import static org.mockito.Mockito.mock;
-
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Samuel Githengi created on 05/13/20

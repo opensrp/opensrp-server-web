@@ -2,18 +2,15 @@ package org.opensrp.web.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
-
+import io.sentry.Sentry;
+import io.sentry.SentryOptions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
-import io.sentry.Sentry;
-import io.sentry.SentryOptions;
+import java.util.Map;
 
 @Configuration
 public class SentryConfiguration {

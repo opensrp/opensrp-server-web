@@ -1,21 +1,9 @@
 package org.opensrp.web.rest.rapid;
 
-import static org.opensrp.common.AllConstants.Event.BIRTH_REGISTRATION;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.MVACC_DATE_FORMAT;
-import static org.opensrp.common.AllConstants.Event.MVACC_UUID_IDENTIFIER_TYPE;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static java.text.MessageFormat.format;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,32 +29,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static java.text.MessageFormat.format;
+import static org.opensrp.common.AllConstants.Event.*;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/repidpro")
 public class RapidProResource {
 
-    private static Logger logger = LogManager.getLogger(RapidProResource.class.toString());
-    private static Comparator<Client> COMPARATOR = new Comparator<Client>() {
+    private static final Logger logger = LogManager.getLogger(RapidProResource.class.toString());
+    private static final Comparator<Client> COMPARATOR = new Comparator<Client>() {
 
         public int compare(Client c1, Client c2) {
             return c1.getDateCreated().compareTo(c2.getDateCreated());
         }
     };
-    private EventService eventService;
-    private ClientService clientService;
-    private PatientService patientService;
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+    private final EventService eventService;
+    private final ClientService clientService;
+    private final PatientService patientService;
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     @Autowired
     public RapidProResource(ClientService clientService, EventService eventService, PatientService patientService) {

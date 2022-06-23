@@ -1,19 +1,6 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +15,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+
 public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
     private final static String BASE_URL = "/rest/manifest";
@@ -37,9 +30,9 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"add_structure.json\",\"remove_structure.json\"]}";
     private ManifestService manifestService;
     private ClientFormService clientFormService;
-    private ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
-    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
+    private final ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
+    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
 
     private static Manifest initTestManifest() {
         Manifest manifest = new Manifest();

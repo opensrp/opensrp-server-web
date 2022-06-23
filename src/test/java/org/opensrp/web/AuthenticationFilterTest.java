@@ -6,9 +6,8 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
+import java.io.IOException;
 
 //TODO: Find a way to test authentication filter.
 @Ignore

@@ -1,10 +1,11 @@
 package org.opensrp.web.utils;
 
-import static java.util.Arrays.asList;
-
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static java.util.Arrays.asList;
 
 public class PdfUtilTest {
 

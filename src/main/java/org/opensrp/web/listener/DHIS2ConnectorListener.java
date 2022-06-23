@@ -16,7 +16,7 @@ import java.util.Calendar;
 @EnableScheduling
 public class DHIS2ConnectorListener {
 
-    private static Logger logger = LogManager.getLogger(DHIS2ConnectorListener.class.toString());
+    private static final Logger logger = LogManager.getLogger(DHIS2ConnectorListener.class.toString());
 
     @Autowired
     private DHIS2AggregateConnector dHIS2AggregateConnector;
@@ -31,7 +31,7 @@ public class DHIS2ConnectorListener {
                 aggregatedDataSet = dHIS2AggregateConnector.getAggregatedDataCount();
                 dHIS2AggregateConnector.aggredateDataSendToDHIS2(aggregatedDataSet);
                 message = aggregatedDataSet.toString();
-                System.out.println("Aggregated data send to DHIS2..." + aggregatedDataSet.toString());
+                System.out.println("Aggregated data send to DHIS2..." + aggregatedDataSet);
 
             } catch (Exception e) {
                 System.out.println("Aggregate Data Count Error Message" + e.getMessage());

@@ -23,7 +23,7 @@ import java.util.List;
 @EnableScheduling
 public class RapidproMessageListener {
 
-    private static Logger logger = LogManager.getLogger(RapidproMessageListener.class.toString());
+    private static final Logger logger = LogManager.getLogger(RapidproMessageListener.class.toString());
     private MessageService messageService;
     @Autowired
     private AllCamp allCamp;

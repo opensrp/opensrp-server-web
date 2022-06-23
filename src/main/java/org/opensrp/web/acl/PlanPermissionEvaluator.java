@@ -27,7 +27,7 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
      * @return true/false if user has the permission for the plan
      */
     public boolean hasPermission(Authentication authentication, PlanDefinition targetDomainObject) {
-        PlanDefinition plan = (PlanDefinition) targetDomainObject;
+        PlanDefinition plan = targetDomainObject;
         return hasPermissiononPlan(authentication, plan.getIdentifier())
                 || hasPermissionOnJurisdictions(authentication, plan.getJurisdiction());
     }

@@ -1,7 +1,6 @@
 package org.opensrp.web.controller.fake;
 
 import com.google.gson.Gson;
-
 import org.opensrp.dto.Action;
 import org.opensrp.scheduler.repository.ActionsRepository;
 import org.opensrp.web.controller.ActionConvertor;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class FakeActionController {
 
-    private ActionsRepository allActions;
+    private final ActionsRepository allActions;
 
     @Autowired
     public FakeActionController(ActionsRepository allActions) {

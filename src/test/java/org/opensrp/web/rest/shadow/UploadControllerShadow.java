@@ -1,15 +1,8 @@
 package org.opensrp.web.rest.shadow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.opensrp.repository.MultimediaRepository;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.IdentifierSourceService;
-import org.opensrp.service.MultimediaService;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.UniqueIdentifierService;
-import org.opensrp.service.UploadService;
+import org.opensrp.service.*;
 import org.opensrp.web.rest.UploadController;
 import org.springframework.stereotype.Component;
 

@@ -1,9 +1,6 @@
 package org.opensrp.web.controller;
 
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import com.google.gson.Gson;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -33,11 +30,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping("/import")
@@ -67,11 +62,11 @@ public class XlsDataImportController {
     @Value("#{opensrp['multimedia.allowed.file.types']}")
     private String allowedMimeTypes;
 
-    private ClientService clientService;
-    private EventService eventService;
-    private OpenmrsIDService openmrsIDService;
+    private final ClientService clientService;
+    private final EventService eventService;
+    private final OpenmrsIDService openmrsIDService;
 
-    private DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
+    private final DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
 
 
     @Autowired

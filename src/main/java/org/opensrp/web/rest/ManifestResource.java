@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,11 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +33,7 @@ public class ManifestResource {
     public static final String IDENTIFIER = "identifier";
     public static final String FORM_VERSION = "forms_version";
     public static final String FORM_IDENTIFIERS = "identifiers";
-    private static Logger logger = LogManager.getLogger(ManifestResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ManifestResource.class.toString());
     protected ObjectMapper objectMapper;
     private ManifestService manifestService;
     private ClientFormService clientFormService;

@@ -36,10 +36,10 @@ public class RedisConfig {
     @Value("#{opensrp['redis.password']}")
     private String redisPassword;
 
-    private int redisDatabase = 0;
+    private final int redisDatabase = 0;
 
     @Value("#{opensrp['redis.pool.max.connections']}")
-    private int redisMaxConnections = 0;
+    private final int redisMaxConnections = 0;
 
     @Profile("lettuce")
     @Bean(name = "lettuceConnectionFactory")

@@ -4,7 +4,6 @@ package org.opensrp.web.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +49,7 @@ public class ClientFormResource {
 
     public static final String FORMS_VERSION = "forms_version";
 
-    private static Logger logger = LogManager.getLogger(ClientFormResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ClientFormResource.class.toString());
     private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
         final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(o1.getVersion());
         final DefaultArtifactVersion otherArtifactVersion = new DefaultArtifactVersion(o2.getVersion());

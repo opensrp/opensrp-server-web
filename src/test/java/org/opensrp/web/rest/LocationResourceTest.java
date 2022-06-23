@@ -1,36 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,11 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
@@ -75,14 +44,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -123,9 +92,9 @@ public class LocationResourceTest {
     private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
     @Mock
     private PlanService planService;
-    private String MESSAGE = "The server encountered an error processing the request.";
-    private String BASE_URL = "/rest/location/";
-    private boolean DEFAULT_RETURN_BOOLEAN = true;
+    private final String MESSAGE = "The server encountered an error processing the request.";
+    private final String BASE_URL = "/rest/location/";
+    private final boolean DEFAULT_RETURN_BOOLEAN = true;
 
     public static PhysicalLocation createStructure() {
         return LocationResource.gson.fromJson(structureJson, PhysicalLocation.class);
@@ -862,7 +831,7 @@ public class LocationResourceTest {
     public void testGetSearchLocationsWithParams() throws Exception {
         List<PhysicalLocation> expected = new ArrayList<>();
         expected.add(createSearchLocation());
-        when(locationService.searchLocations((LocationSearchBean) any())).thenReturn(expected);
+        when(locationService.searchLocations(any())).thenReturn(expected);
         MvcResult result = mockMvc
                 .perform(
                         get(BASE_URL + "search-by-tag/").param("locationTagId", "2").param("name", "a")
@@ -872,7 +841,7 @@ public class LocationResourceTest {
         LocationSearchcBean expectedLocations = new LocationSearchcBean();
         expectedLocations.setLocations(expected);
         expectedLocations.setTotal(0);
-        verify(locationService).searchLocations((LocationSearchBean) any());
+        verify(locationService).searchLocations(any());
         verifyNoMoreInteractions(locationService);
         assertEquals(LocationResource.gson.toJson(expectedLocations), result.getResponse().getContentAsString());
     }

@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.service.LocationTagService;
@@ -25,7 +24,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/location-tag")
 public class LocationTagResource {
 
-    private static Logger logger = LogManager.getLogger(LocationTagResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(LocationTagResource.class.toString());
     protected ObjectMapper objectMapper;
     private LocationTagService locationTagService;
 

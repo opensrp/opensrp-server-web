@@ -1,12 +1,7 @@
 package org.opensrp.web.controller.it;
 
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.junit.Test;
 import org.opensrp.web.rest.it.BaseResourceTest;
 import org.opensrp.web.utils.TestResourceLoader;
@@ -14,9 +9,13 @@ import org.springframework.web.util.NestedServletException;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
 public class FormDownloadIntegrationTest extends BaseResourceTest {
 
-    private String BASE_URL = "/form/";
+    private final String BASE_URL = "/form/";
 
     @Test
     public void shouldFetchAllAvailableVersion() throws Exception {

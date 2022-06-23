@@ -67,7 +67,7 @@ public class SearchResourceTest {
     @Test
     public void testIntersectionMethodReturnsCorrectResult() {
         Client clientA = Mockito.mock(Client.class);
-        List<Client> listA = Arrays.asList(new Client[]{clientA});
+        List<Client> listA = Arrays.asList(clientA);
         List<Client> result = SearchHelper.intersection(null, listA);
 
         Assert.assertNotNull(result);

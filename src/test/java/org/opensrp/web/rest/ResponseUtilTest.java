@@ -1,7 +1,6 @@
 package org.opensrp.web.rest;
 
 import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.smartregister.domain.Practitioner;
 

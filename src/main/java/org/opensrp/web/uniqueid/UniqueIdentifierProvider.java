@@ -16,7 +16,7 @@ public class UniqueIdentifierProvider implements UniqueIDProvider {
 
     private final Queue<String> availableIDs = new LinkedList<>();
 
-    private String source;
+    private final String source;
 
     public UniqueIdentifierProvider(
             UniqueIdentifierService uniqueIdentifierService,

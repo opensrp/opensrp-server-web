@@ -1,5 +1,7 @@
 package org.opensrp.web.config;
 
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.opensrp.web.Constants;
 import org.opensrp.web.contract.ServiceHealthIndicator;
 import org.opensrp.web.service.HealthService;
@@ -7,13 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
 
 @Component
 public class HealthCheckMetricUpdater {
@@ -24,7 +22,7 @@ public class HealthCheckMetricUpdater {
     @Autowired
     private HealthService healthService;
 
-    private Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
+    private final Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
 
     @PostConstruct
     private void init() {

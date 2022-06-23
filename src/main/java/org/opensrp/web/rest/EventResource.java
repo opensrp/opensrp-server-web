@@ -78,7 +78,7 @@ public class EventResource extends RestResource<Event> {
     private static final String IS_DELETED = "is_deleted";
     private static final String FALSE = "false";
     private static final String SAMPLE_CSV_FILE = "/";
-    private static Logger logger = LogManager.getLogger(EventResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(EventResource.class.toString());
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
     private EventService eventService;

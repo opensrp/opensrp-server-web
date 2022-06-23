@@ -35,13 +35,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping(value = "/rest/validate/")
 public class ValidateResource {
 
-    private static Logger logger = LogManager.getLogger(ValidateResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ValidateResource.class.toString());
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
-    private EventService eventService;
+    private final EventService eventService;
 
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     @Autowired

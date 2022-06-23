@@ -3,8 +3,6 @@
  */
 package org.opensrp.web.config.security;
 
-import static org.springframework.http.HttpMethod.*;
-
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
@@ -36,6 +34,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+
+import static org.springframework.http.HttpMethod.*;
 
 /**
  * @author Samuel Githengi created on 04/20/20

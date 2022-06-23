@@ -1,15 +1,8 @@
 package org.opensrp.web.rest;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static java.text.MessageFormat.format;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -26,14 +19,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 
+import static java.text.MessageFormat.format;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 @Controller
 @RequestMapping(value = "/rest/report/")
 public class ReportResource {
 
-    private static Logger logger = LogManager.getLogger(ReportResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ReportResource.class.toString());
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private ReportService reportService;
+    private final ReportService reportService;
 
     @Autowired
     public ReportResource(ReportService reportService) {
@@ -54,7 +51,7 @@ public class ReportResource {
             if (!syncData.has("reports")) {
                 return new ResponseEntity<>(BAD_REQUEST);
             }
-            ArrayList<Report> reports = (ArrayList<Report>) gson.fromJson(syncData.getString("reports"),
+            ArrayList<Report> reports = gson.fromJson(syncData.getString("reports"),
                     new TypeToken<ArrayList<Report>>() {
                     }.getType());
             for (Report report : reports) {

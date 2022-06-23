@@ -1,17 +1,6 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static java.util.Arrays.asList;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -31,6 +20,13 @@ import org.springframework.web.util.NestedServletException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 public class EventResourceTest extends BaseResourceTest {
 

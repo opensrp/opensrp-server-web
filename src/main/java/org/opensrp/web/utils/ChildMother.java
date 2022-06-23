@@ -4,9 +4,9 @@ import org.smartregister.domain.Client;
 
 public class ChildMother {
 
-    private Client child;
+    private final Client child;
 
-    private Client mother;
+    private final Client mother;
 
     public ChildMother(Client child, Client mother) {
         this.child = child;

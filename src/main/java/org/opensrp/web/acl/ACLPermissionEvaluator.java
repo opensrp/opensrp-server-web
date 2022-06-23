@@ -3,6 +3,7 @@
  */
 package org.opensrp.web.acl;
 
+import lombok.Setter;
 import org.opensrp.domain.Organization;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
@@ -14,8 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-
-import lombok.Setter;
 
 /**
  * @author Samuel Githengi created on 06/03/20

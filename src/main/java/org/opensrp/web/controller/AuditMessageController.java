@@ -1,7 +1,6 @@
 package org.opensrp.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.joda.time.DateTime;
 import org.opensrp.common.audit.AuditMessage;
 import org.opensrp.common.audit.AuditMessageType;

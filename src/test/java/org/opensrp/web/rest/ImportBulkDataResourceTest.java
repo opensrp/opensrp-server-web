@@ -1,9 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +23,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ImportBulkDataResourceTest {
@@ -39,7 +39,7 @@ public class ImportBulkDataResourceTest {
     @Mock
     private ImportBulkDataService importBulkDataService;
 
-    private String BASE_URL = "/rest/import";
+    private final String BASE_URL = "/rest/import";
 
     @Before
     public void setUp() throws Exception {

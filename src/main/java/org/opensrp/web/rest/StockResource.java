@@ -1,22 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.Stock.*;
-import static org.opensrp.web.Constants.LOCATIONS;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -46,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
@@ -53,7 +41,13 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.Stock.*;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/stockresource/")
@@ -61,10 +55,10 @@ public class StockResource extends RestResource<Stock> {
 
     private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
     private static final String RETURN_PRODUCT = "returnProduct";
-    private static Logger logger = LogManager.getLogger(StockResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(StockResource.class.toString());
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private StockService stockService;
+    private final StockService stockService;
 
     @Autowired
     public StockResource(StockService stockService) {
@@ -161,7 +155,7 @@ public class StockResource extends RestResource<Stock> {
         if (!syncData.has("stocks")) {
             return new ResponseEntity<>(BAD_REQUEST);
         }
-        ArrayList<Stock> stocks = (ArrayList<Stock>) gson.fromJson(syncData.getJSONArray("stocks").toString(),
+        ArrayList<Stock> stocks = gson.fromJson(syncData.getJSONArray("stocks").toString(),
                 new TypeToken<ArrayList<Stock>>() {
 
                 }.getType());

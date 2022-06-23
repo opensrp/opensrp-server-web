@@ -1,18 +1,6 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static java.util.Arrays.asList;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -28,6 +16,12 @@ import org.springframework.web.util.NestedServletException;
 
 import java.util.Collections;
 import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.Client.*;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 public class ClientResourceTest extends BaseResourceTest {
 
@@ -264,7 +258,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
         String searchQuery =
                 "search?name=" + name + "&gender=" + male + "&addressType=" + addressType + "&birthDate=" + birthDate
-                        .toLocalDate().toString() + "&deathDate=" + deathDate.toLocalDate().toString() + "&country="
+                        .toLocalDate() + "&deathDate=" + deathDate.toLocalDate() + "&country="
                         + country + "&stateProvince=" + stateProvince + "&countryDistrict=" + countryDistrict
                         + "&cityVillage=" + cityVillage + "&town=" + town + "&subDistrict=" + subDistrict;
         JsonNode actualObj = getCallAsJsonNode(BASE_URL + searchQuery, "", status().isOk());
@@ -285,7 +279,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
         String searchQuery =
                 "search?name=invalid" + name + "&gender=invalid" + male + "&addressType=" + addressType + "&birthDate="
-                        + birthDate.toLocalDate().toString() + "&deathDate=" + deathDate.toLocalDate().toString()
+                        + birthDate.toLocalDate() + "&deathDate=" + deathDate.toLocalDate()
                         + "&country=" + country + "&stateProvince=" + stateProvince + "&countryDistrict=" + countryDistrict
                         + "&cityVillage=" + cityVillage + "&town=" + town + "&subDistrict=" + subDistrict;
         JsonNode actualObj = getCallAsJsonNode(BASE_URL + searchQuery, "", status().isOk());
@@ -329,7 +323,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
     @Test
     public void shouldFailToSearchIfClientDoesntHaveAddressField() throws Exception {
-        Client expectedClient = (Client) new Client("1").withFirstName(name).withGender(male).withBirthdate(birthDate, false)
+        Client expectedClient = new Client("1").withFirstName(name).withGender(male).withBirthdate(birthDate, false)
                 .withDeathdate(deathDate, true);
         expectedClient.setDateCreated(new DateTime(0l, DateTimeZone.UTC));
 
@@ -356,7 +350,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
         String searchQuery =
                 "?q=name:" + name + "and gender:" + male + "and addressType:" + addressType + "and birthDate:" + birthDate
-                        .toLocalDate().toString() + "and deathDate:" + deathDate.toLocalDate().toString() + "and country:"
+                        .toLocalDate() + "and deathDate:" + deathDate.toLocalDate() + "and country:"
                         + country + "and stateProvince:" + stateProvince + "and countryDistrict:" + countryDistrict
                         + "and cityVillage:" + cityVillage + "and town:" + town + "and subDistrict:" + subDistrict;
         JsonNode actualObj = getCallAsJsonNode(BASE_URL + searchQuery, "", status().isOk());
@@ -417,7 +411,7 @@ public class ClientResourceTest extends BaseResourceTest {
 
     @Test
     public void shouldFailToFilterIfClientDoesntHaveAddressField() throws Exception {
-        Client expectedClient = (Client) new Client("1").withFirstName(name).withGender(male).withBirthdate(birthDate, false)
+        Client expectedClient = new Client("1").withFirstName(name).withGender(male).withBirthdate(birthDate, false)
                 .withDeathdate(deathDate, true);
         expectedClient.setDateCreated(new DateTime(0l, DateTimeZone.UTC));
 

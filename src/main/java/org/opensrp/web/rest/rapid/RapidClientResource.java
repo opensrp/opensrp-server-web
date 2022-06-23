@@ -20,16 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.UUID;
-
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Controller
 @RequestMapping("/rest/rapid/client")
@@ -44,10 +38,10 @@ public class RapidClientResource {
         put("60", new String[]{"measles2"});
 
     }};
-    private ClientService clientService;
-    private EventService eventService;
-    private PatientService ps;
-    private EncounterService es;
+    private final ClientService clientService;
+    private final EventService eventService;
+    private final PatientService ps;
+    private final EncounterService es;
 
     @Autowired
     public RapidClientResource(ClientService clientService, EventService eventService,
@@ -79,7 +73,7 @@ public class RapidClientResource {
             for (Obs o : e.getObs()) {
                 System.out.println(o + " FOUND OBS");
 
-                if (o.getFormSubmissionField().toString().toLowerCase().matches("bcg|penta1|penta2|penta3|measles1|measles2")) {
+                if (o.getFormSubmissionField().toLowerCase().matches("bcg|penta1|penta2|penta3|measles1|measles2")) {
                     receivedVacines.put(o.getFormSubmissionField(), o.getValue().toString());
                 }
             }
@@ -224,21 +218,16 @@ public class RapidClientResource {
                 String basic = st.nextToken();
 
                 if (basic.equalsIgnoreCase("Basic")) {
-                    try {
-                        String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
-                        System.out.println("Credentials: " + credentials);
-                        int p = credentials.indexOf(":");
-                        if (p != -1) {
-                            String login = credentials.substring(0, p).trim();
-                            String password = credentials.substring(p + 1).trim();
+                    String credentials = new String(Base64.decodeBase64(st.nextToken()), StandardCharsets.UTF_8);
+                    System.out.println("Credentials: " + credentials);
+                    int p = credentials.indexOf(":");
+                    if (p != -1) {
+                        String login = credentials.substring(0, p).trim();
+                        String password = credentials.substring(p + 1).trim();
 
-                            return login;
-                        } else {
-                            System.out.println("Invalid authentication token");
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                        System.out.println("Couldn't retrieve authentication");
+                        return login;
+                    } else {
+                        System.out.println("Invalid authentication token");
                     }
                 }
             }

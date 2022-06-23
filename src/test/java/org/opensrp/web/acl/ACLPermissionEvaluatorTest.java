@@ -1,11 +1,5 @@
 package org.opensrp.web.acl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +18,19 @@ import org.smartregister.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ACLPermissionEvaluatorTest {
 
@@ -74,7 +79,7 @@ public class ACLPermissionEvaluatorTest {
     @InjectMocks
     private ACLPermissionEvaluator aclPermissionEvaluator;
 
-    private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 
     @Before
     public void setup() {
