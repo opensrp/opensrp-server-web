@@ -1,7 +1,6 @@
 package org.opensrp.web.rest.shadow.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.SettingService;
 import org.opensrp.web.rest.v2.SettingResource;

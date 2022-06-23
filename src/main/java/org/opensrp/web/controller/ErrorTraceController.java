@@ -3,14 +3,7 @@
  */
 package org.opensrp.web.controller;
 
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import com.google.gson.Gson;
-
 import org.opensrp.domain.ErrorTrace;
 import org.opensrp.domain.ErrorTraceForm;
 import org.opensrp.service.ErrorTraceService;
@@ -27,13 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping("/errorhandler")
@@ -41,7 +39,7 @@ public class ErrorTraceController {
 
     private String opensrpSiteUrl;
 
-    private ErrorTraceService errorTraceService;
+    private final ErrorTraceService errorTraceService;
 
     @Autowired
     public ErrorTraceController(ErrorTraceService errorTraceService) {

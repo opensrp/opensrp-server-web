@@ -15,7 +15,7 @@ import java.util.Map;
 @Controller
 public class ReportController {
 
-    private OpenmrsReportingService reportService;
+    private final OpenmrsReportingService reportService;
 
     @Autowired
     public ReportController(OpenmrsReportingService reportService) {

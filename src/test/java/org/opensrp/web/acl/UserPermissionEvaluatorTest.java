@@ -1,13 +1,13 @@
 package org.opensrp.web.acl;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+
+import static org.junit.Assert.assertTrue;
 
 public class UserPermissionEvaluatorTest {
 

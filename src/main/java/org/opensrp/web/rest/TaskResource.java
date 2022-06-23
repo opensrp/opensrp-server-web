@@ -1,18 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -42,22 +33,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * Task V1 API that returns {@link TaskPriority} as enum ordinal and execution collapsed
@@ -71,7 +57,7 @@ public class TaskResource {
     public static final String PLAN = "plan";
     public static final String GROUP = "group";
     public static final String OWNER = "owner";
-    private static Logger logger = LogManager.getLogger(TaskResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(TaskResource.class.toString());
     public Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(TaskPriority.class, new PriorityOrdinalConverter()).create();
     private TaskService taskService;

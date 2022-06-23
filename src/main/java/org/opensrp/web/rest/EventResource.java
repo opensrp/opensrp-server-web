@@ -1,27 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
-import static org.opensrp.common.AllConstants.Event.*;
-import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.rest.RestUtils.currentUser;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getJSONUTF8Headers;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.opensrp.web.rest.RestUtils.writeToZipFile;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -63,6 +46,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,7 +60,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
+import static org.opensrp.common.AllConstants.Event.*;
+import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.rest.RestUtils.*;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/event")
@@ -85,7 +78,7 @@ public class EventResource extends RestResource<Event> {
     private static final String IS_DELETED = "is_deleted";
     private static final String FALSE = "false";
     private static final String SAMPLE_CSV_FILE = "/";
-    private static Logger logger = LogManager.getLogger(EventResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(EventResource.class.toString());
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
     private EventService eventService;

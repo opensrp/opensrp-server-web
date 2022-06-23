@@ -17,9 +17,9 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 public class TestRedisConfig {
 
-    private int redisMaxConnections = 0;
+    private final int redisMaxConnections = 0;
 
-    private int redisDatabase = 0;
+    private final int redisDatabase = 0;
 
     @Value("#{opensrp['redis.host']}")
     private String redisHost;

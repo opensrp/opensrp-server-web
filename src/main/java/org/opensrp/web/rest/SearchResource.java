@@ -1,19 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.ALT_NAME;
-import static org.opensrp.common.AllConstants.Client.ALT_PHONE_NUMBER;
-import static org.opensrp.common.AllConstants.Client.ATTRIBUTE;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.IDENTIFIER;
-import static org.opensrp.common.AllConstants.Client.LAST_NAME;
-import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
-import static org.opensrp.common.AllConstants.Client.NAME;
-import static org.opensrp.common.AllConstants.Client.PHONE_NUMBER;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,26 +20,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.util.*;
+
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.*;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 @RequestMapping(value = "/rest/search")
 public class SearchResource extends RestResource<Client> {
 
-    private static Logger logger = LogManager.getLogger(SearchResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(SearchResource.class.toString());
 
-    private SearchService searchService;
+    private final SearchService searchService;
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
-    private EventService eventService;
+    private final EventService eventService;
 
     @Autowired
     public SearchResource(SearchService searchService, ClientService clientService, EventService eventService) {

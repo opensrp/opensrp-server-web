@@ -3,12 +3,12 @@
  */
 package org.opensrp.web.dto;
 
-import static org.opensrp.web.Constants.RETURN_COUNT;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.opensrp.web.Constants.RETURN_COUNT;
 
 /**
  * @author Samuel Githengi created on 11/18/20
@@ -16,10 +16,10 @@ import java.util.List;
 public class TaskSyncRequestWrapper {
 
     @JsonProperty
-    private List<String> plan = new ArrayList<>();
+    private final List<String> plan = new ArrayList<>();
 
     @JsonProperty
-    private List<String> group = new ArrayList<>();
+    private final List<String> group = new ArrayList<>();
 
     @JsonProperty
     private long serverVersion;

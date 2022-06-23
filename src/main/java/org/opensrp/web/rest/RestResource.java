@@ -2,20 +2,14 @@ package org.opensrp.web.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.smartregister.domain.BaseDataEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.text.ParseException;
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.util.List;
 
 public abstract class RestResource<T extends BaseDataEntity> {
 
@@ -25,8 +19,6 @@ public abstract class RestResource<T extends BaseDataEntity> {
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
-
-    ;
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     private T createNew(@RequestBody T entity) {

@@ -8,38 +8,25 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-
+import edu.umd.cs.findbugs.annotations.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpMethod;
 
-import java.io.ByteArrayInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-
-import edu.umd.cs.findbugs.annotations.Nullable;
-
 public class GzipBodyDecompressFilter implements Filter {
 
-    private static Logger logger = LogManager.getLogger(GzipBodyDecompressFilter.class.toString());
+    private static final Logger logger = LogManager.getLogger(GzipBodyDecompressFilter.class.toString());
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {//do nothing

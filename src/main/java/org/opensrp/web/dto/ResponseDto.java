@@ -1,11 +1,11 @@
 package org.opensrp.web.dto;
 
 
-import static org.opensrp.web.Constants.FAILURE;
-
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
+
+import static org.opensrp.web.Constants.FAILURE;
 
 public class ResponseDto<T> implements Serializable {
 

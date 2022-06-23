@@ -1,9 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +23,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ImportBulkDataResourceTest {
@@ -39,15 +39,15 @@ public class ImportBulkDataResourceTest {
     @Mock
     private ImportBulkDataService importBulkDataService;
 
-    private String BASE_URL = "/rest/import";
+    private final String BASE_URL = "/rest/import";
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(importBulkDataResource)
                 .setControllerAdvice(new GlobalExceptionHandler()).
-                        addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-                        build();
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
     }
 
     @Test
@@ -73,9 +73,9 @@ public class ImportBulkDataResourceTest {
                 .convertandPersistOrganizationdata(anyList())).thenReturn(csvBulkImportDataSummary);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.multipart(BASE_URL + "/organizations")
-                        .file(firstFile)
-        )
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/organizations")
+                                .file(firstFile)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -103,9 +103,9 @@ public class ImportBulkDataResourceTest {
                 .convertandPersistPractitionerdata(anyList())).thenReturn(csvBulkImportDataSummary);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.multipart(BASE_URL + "/practitioners")
-                        .file(firstFile)
-        )
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/practitioners")
+                                .file(firstFile)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
     }

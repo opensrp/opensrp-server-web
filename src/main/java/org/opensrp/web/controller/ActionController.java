@@ -1,11 +1,6 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.google.gson.Gson;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -27,24 +22,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
 public class ActionController {
 
-    private static Logger logger = LogManager.getLogger(ActionController.class.toString());
+    private static final Logger logger = LogManager.getLogger(ActionController.class.toString());
 
-    private ActionService actionService;
+    private final ActionService actionService;
 
-    private ClientsRepository allClients;
+    private final ClientsRepository allClients;
 
-    private AlertsRepository allAlerts;
+    private final AlertsRepository allAlerts;
 
     @Autowired
     public ActionController(ActionService actionService, ClientsRepository c, AlertsRepository allAlerts) {

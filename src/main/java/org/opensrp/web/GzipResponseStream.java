@@ -1,11 +1,10 @@
 package org.opensrp.web;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author samuelgithengi
@@ -60,11 +59,11 @@ public class GzipResponseStream extends ServletOutputStream {
         }
     }
 
-    public void write(byte b[]) throws IOException {
+    public void write(byte[] b) throws IOException {
         write(b, 0, b.length);
     }
 
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
         if (!closed) {
             gzipstream.write(b, off, len);
         }

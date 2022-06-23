@@ -1,11 +1,6 @@
 package org.opensrp.web.controller;
 
-import static org.opensrp.web.rest.RestUtils.zipFiles;
-import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import com.google.gson.Gson;
-
 import org.apache.http.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,20 +20,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
+import static org.opensrp.web.rest.RestUtils.zipFiles;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping("/multimedia")
@@ -47,7 +40,7 @@ public class MultimediaController {
     public final static String FILE_NAME_ERROR_MESSAGE = "Sorry. File Name should not contain any special character";
     private final static String ENTITY_ID_ERROR_MESSAGE = "Sorry. Entity Id should not contain any special character";
     private final static String FILE_SYSTEM_MULTIMEDIA_MANAGER = "FileSystemMultimediaFileManager";
-    private static Logger logger = LogManager.getLogger(MultimediaController.class.toString());
+    private static final Logger logger = LogManager.getLogger(MultimediaController.class.toString());
     @Value("#{opensrp['multimedia.directory.name']}")
     private String multiMediaDir;
     @Value("#{opensrp['multimedia.allowed.file.types']}")
@@ -251,7 +244,7 @@ public class MultimediaController {
         String errorMessage = "Sorry. The file you are looking for does not exist";
         logger.info(errorMessage);
         OutputStream outputStream = response.getOutputStream();
-        outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+        outputStream.write(errorMessage.getBytes(StandardCharsets.UTF_8));
         outputStream.close();
     }
 
@@ -259,7 +252,7 @@ public class MultimediaController {
         logger.error(errorMessage);
         OutputStream outputStream = response.getOutputStream();
         response.setStatus(HttpStatus.BAD_REQUEST.value());
-        outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+        outputStream.write(errorMessage.getBytes(StandardCharsets.UTF_8));
         outputStream.close();
     }
 

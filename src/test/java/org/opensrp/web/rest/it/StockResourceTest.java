@@ -1,15 +1,6 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
-import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static java.util.Arrays.asList;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -25,6 +16,12 @@ import org.springframework.web.util.NestedServletException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 
 /**

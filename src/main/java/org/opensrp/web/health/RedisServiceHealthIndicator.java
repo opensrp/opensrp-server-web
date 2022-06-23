@@ -9,10 +9,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
+import redis.clients.jedis.Jedis;
 
 import java.util.concurrent.Callable;
-
-import redis.clients.jedis.Jedis;
 
 @Profile("jedis")
 @Component

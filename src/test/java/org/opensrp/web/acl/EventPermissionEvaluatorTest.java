@@ -1,12 +1,5 @@
 package org.opensrp.web.acl;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +24,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class EventPermissionEvaluatorTest {
 
@@ -61,7 +61,7 @@ public class EventPermissionEvaluatorTest {
     @Mock
     private PractitionerRepository practitionerRepository;
 
-    private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 
 
     @Before

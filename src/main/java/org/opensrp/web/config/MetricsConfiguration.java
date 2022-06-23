@@ -2,29 +2,6 @@ package org.opensrp.web.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.opensrp.web.Constants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.io.File;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
@@ -37,6 +14,22 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.opensrp.web.Constants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public class MetricsConfiguration {

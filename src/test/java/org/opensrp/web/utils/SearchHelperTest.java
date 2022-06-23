@@ -7,10 +7,9 @@ import org.opensrp.common.util.EasyMap;
 import org.smartregister.domain.Client;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class SearchHelperTest {
 
@@ -28,7 +27,7 @@ public class SearchHelperTest {
         client.setLastName("Test");
         client.setGender("MALE");
 
-        List<Client> myClientList = Arrays.asList(new Client[]{client});
+        List<Client> myClientList = Arrays.asList(client);
 
         List<Client> list = SearchHelper.createClientListIfEmpty(myClientList);
 

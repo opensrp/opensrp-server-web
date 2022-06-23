@@ -18,6 +18,4 @@ public class UserResourceShadow extends UserResource {
         super.setUserService(userService);
     }
 
-    ;
-
 }

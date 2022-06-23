@@ -14,11 +14,8 @@ import org.opensrp.service.multimedia.S3MultimediaFileManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,8 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class RestUtils {
     public static final String DATE_FORMAT = "dd-MM-yyyy";

@@ -8,12 +8,7 @@ import org.smartregister.domain.Address;
 import org.smartregister.domain.Client;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MaskingUtilsTest {
 

@@ -1,14 +1,7 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.result.MockMvcResultHandlers.print;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -30,6 +23,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.server.result.MockMvcResultHandlers.print;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {
@@ -86,7 +85,7 @@ public abstract class BaseResourceTest {
     protected JsonNode postCallWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -138,7 +137,7 @@ public abstract class BaseResourceTest {
 
     protected <T> void assertTwoListAreSameIgnoringOrder(List<T> expectedList, List<T> actualList) {
         assertEquals(expectedList.size(), actualList.size());
-        assertTrue("expected: " + expectedList.toString() + "\n" + "actual: " + actualList.toString(),
+        assertTrue("expected: " + expectedList + "\n" + "actual: " + actualList,
                 expectedList.containsAll(actualList) && actualList.containsAll(expectedList));
     }
 

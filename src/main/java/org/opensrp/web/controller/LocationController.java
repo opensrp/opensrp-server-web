@@ -1,7 +1,6 @@
 package org.opensrp.web.controller;
 
 import com.google.gson.Gson;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.connector.openmrs.service.OpenmrsLocationService;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/location/")
 public class LocationController {
-    private OpenmrsLocationService openmrsLocationService;
+    private final OpenmrsLocationService openmrsLocationService;
 
     @Autowired
     public LocationController(OpenmrsLocationService openmrsLocationService) {

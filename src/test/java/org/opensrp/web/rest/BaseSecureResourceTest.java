@@ -1,15 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,6 +41,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
  * Created by Vincent Karuri on 06/05/2019

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:util="http://www.springframework.org/schema/util"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://www.springframework.org/schema/beans" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <util:properties id="couchdbProperties" location="classpath:couchdb.properties" />
+    <util:properties id="couchdbProperties" location="classpath:couchdb.properties"/>
 
     <bean class="org.ektorp.spring.HttpClientFactoryBean" id="httpClient">
-        <property name="properties" ref="couchdbProperties" />
+        <property name="properties" ref="couchdbProperties"/>
     </bean>
 
     <bean class="org.ektorp.impl.StdCouchDbInstance" id="couchDbInstance">
-        <constructor-arg ref="httpClient" />
+        <constructor-arg ref="httpClient"/>
     </bean>
 
     <bean class="org.ektorp.impl.StdCouchDbConnector" id="opensrpDatabaseConnector">
-        <constructor-arg value="${couchdb.db.opensrp}" />
-        <constructor-arg ref="couchDbInstance" />
+        <constructor-arg value="${couchdb.db.opensrp}"/>
+        <constructor-arg ref="couchDbInstance"/>
     </bean>
 
 </beans>

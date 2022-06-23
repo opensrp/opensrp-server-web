@@ -1,16 +1,6 @@
 package org.opensrp.web.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +12,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistra
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-
-import java.util.List;
-
-import javax.servlet.ServletContext;
-
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -37,6 +22,14 @@ import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
+
+import javax.servlet.ServletContext;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(JUnit4.class)
 public class SwaggerConfigTest {
@@ -63,7 +56,7 @@ public class SwaggerConfigTest {
         when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
         Docket docket = swaggerConfig.api();
         assertNotNull(docket);
-        assertEquals(docket.getDocumentationType(), DocumentationType.SWAGGER_2.SWAGGER_2);
+        assertEquals(docket.getDocumentationType(), DocumentationType.SWAGGER_2);
         assertNotNull(docket.select());
     }
 
@@ -106,7 +99,7 @@ public class SwaggerConfigTest {
     }
 
     private Docket createTestDocket() {
-        return new Docket(DocumentationType.SWAGGER_2.SWAGGER_2)
+        return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .build()

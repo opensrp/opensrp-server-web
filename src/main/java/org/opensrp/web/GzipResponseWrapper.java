@@ -1,12 +1,12 @@
 package org.opensrp.web;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author samuelgithengi
@@ -67,7 +67,7 @@ public class GzipResponseWrapper extends HttpServletResponseWrapper {
         }
 
         stream = createOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(stream, "UTF-8"));
+        writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
         return (writer);
     }
 

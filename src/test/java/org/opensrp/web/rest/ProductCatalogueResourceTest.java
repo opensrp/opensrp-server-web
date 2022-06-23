@@ -1,28 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.search.ProductCatalogueSearchBean;
@@ -52,6 +34,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ProductCatalogueResourceTest {
@@ -68,15 +57,15 @@ public class ProductCatalogueResourceTest {
     @Captor
     private ArgumentCaptor<ProductCatalogue> argumentCaptor;
     private MockMvc mockMvc;
-    private String BASE_URL = "/rest/product-catalogue";
+    private final String BASE_URL = "/rest/product-catalogue";
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(productCatalogueResource)
                 .setControllerAdvice(new GlobalExceptionHandler()).
-                        addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-                        build();
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
 
         MockHttpServletRequest mockRequest;
         mockRequest = new MockHttpServletRequest();

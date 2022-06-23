@@ -1,15 +1,7 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +16,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
     private final static String BASE_URL = "/rest/location-tag/";
@@ -31,7 +28,7 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
     private final static String DELETE_ENDPOINT = "delete/";
     private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
     private LocationTagService locationTagService;
-    private ArgumentCaptor<LocationTag> argumentCaptor = ArgumentCaptor.forClass(LocationTag.class);
+    private final ArgumentCaptor<LocationTag> argumentCaptor = ArgumentCaptor.forClass(LocationTag.class);
     @Captor
     private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
@@ -79,7 +76,7 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
     @Test
     public void testShouldCreateNewLocationTagResource() throws Exception {
-        doReturn(new LocationTag()).when(locationTagService).addOrUpdateLocationTag((LocationTag) any());
+        doReturn(new LocationTag()).when(locationTagService).addOrUpdateLocationTag(any());
 
         LocationTag expectedLocationTag = initTestLocationTag1();
 

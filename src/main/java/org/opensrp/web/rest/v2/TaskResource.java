@@ -5,7 +5,6 @@ package org.opensrp.web.rest.v2;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.GsonBuilder;
-
 import org.joda.time.DateTime;
 import org.opensrp.web.dto.TaskDto;
 import org.smartregister.domain.Task;
@@ -14,14 +13,13 @@ import org.smartregister.utils.TaskDateTimeTypeConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 /**
  * @author Samuel Githengi created on 11/12/20 Task V2 API that returns {@link TaskPriority} as enum
- *         name
+ * name
  */
 @Controller("TaskResourceV2")
 @RequestMapping(value = "/rest/v2/task")

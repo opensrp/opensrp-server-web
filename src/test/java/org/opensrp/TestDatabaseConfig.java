@@ -1,17 +1,16 @@
 package org.opensrp;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @Configuration
 public class TestDatabaseConfig {

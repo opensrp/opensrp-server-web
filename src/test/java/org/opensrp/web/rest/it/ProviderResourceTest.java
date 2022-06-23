@@ -1,14 +1,13 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 public class ProviderResourceTest extends BaseResourceTest {
 

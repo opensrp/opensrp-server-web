@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form autocomplete="off" class="or clearfix" id="offsite_child_vaccination_followup"
-    novalidate="novalidate">
+      novalidate="novalidate">
     <!--This form was created by transforming a OpenRosa-flavored (X)Form using an XSLT sheet created by Enketo LLC.-->
     <section class="form-logo"></section>
     <h3 id="form-title">دوسرے سینٹر میں رجسٹرڈ بچّوں کا فالو اپ رجسٹر برائے ٹیکاجات - Off Site Child
@@ -13,369 +13,388 @@
     </select>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/provider_location_note:label"
-            lang="ur">شہر: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; ٹائون: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; یوسی: <span
-            class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
+              lang="ur">شہر: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; ٹائون: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; یوسی: <span
+                class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
             سینٹرکا نام:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/provider_location_note:label"
-            lang="en">City: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; Town: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; UC: <span
-            class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/provider_location_note:label"
+              lang="en">City: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; Town: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; UC: <span
+                class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
             Center Name:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/provider_location_note:label"
-            lang="Roman Urdu">Shehr: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; Town: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; UC: <span
-            class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
+              lang="Roman Urdu">Shehr: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_city "></span> ; Town: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/provider_town "></span> ; UC: <span
+                class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/provider_uc "></span> ;
             Center ka Naam:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/provider_location_name "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/provider_location_note" data-type-xml="string"
-            readonly="readonly" type="text" />
+               readonly="readonly" type="text"/>
     </label>
     <label class="note non-select ">
-        <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
-            lang="ur">
+        <span class="question-label "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
+              lang="ur">
             پروگرام میں اندراج کی تاریخ:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
-            lang="en">
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
+              lang="en">
             Program Registration date:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
         </span>
 
-        <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
-            lang="Roman Urdu">
+        <span class="question-label "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:label"
+              lang="Roman Urdu">
             Program mai andraj ki tareekh:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_client_reg_date "></span>
         </span>
         <span class="or-hint " data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:hint"
-            lang="ur">
+              lang="ur">
             بچے کو ویکسین لگنے کی تاریخ
         </span>
-        <span class="or-hint active" data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:hint"
-            lang="en">
+        <span class="or-hint active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:hint"
+              lang="en">
             Date on which child was vaccinated
         </span>
 
         <span class="or-hint " data-itext-id="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note:hint"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             Bachay ko vaccine lagnay ki tareekh
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/existing_client_reg_date_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/program_client_id_note:label"
-            lang="ur">پروگرام
+              lang="ur">پروگرام
             آئی ڈی:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/program_client_id_note:label"
-            lang="en">Program
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/program_client_id_note:label"
+              lang="en">Program
             ID:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/program_client_id_note:label"
-            lang="Roman Urdu">Program
+              lang="Roman Urdu">Program
             ID:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_program_client_id "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/program_client_id_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="question non-select ">
-        <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
-            lang="ur">
+        <span class="or-constraint-msg "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
+              lang="ur">
             نمبر آٹھ ہندسوں پر مشتمل ہونا چاہئے
         </span>
-        <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
-            lang="en">
+        <span class="or-constraint-msg active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
+              lang="en">
             Number should be 8 digits
         </span>
 
-        <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
-            lang="Roman Urdu">
+        <span class="or-constraint-msg "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:jr:constraintMsg"
+              lang="Roman Urdu">
             Number 8 hindason par mushtamil hona chahiye
         </span>
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:label"
-            lang="ur">ای پی آئی کارڈ
+              lang="ur">ای پی آئی کارڈ
             نمبر:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:label"
-            lang="en">EPI Card
+              lang="en">EPI Card
             Number:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/epi_card_number:label"
-            lang="Roman Urdu">EPI Card
+              lang="Roman Urdu">EPI Card
             Number:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_epi_card_number "></span>
         </span>
         <span class="required">*</span>
         <input name="/Offsite_Child_Vaccination_Followup/epi_card_number" data-constraint="string-length(.) = 8"
-            data-type-xml="int" required="required" type="number" />
+               data-type-xml="int" required="required" type="number"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/first_name_note:label"
-            lang="ur">نام:
+              lang="ur">نام:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/first_name_note:label"
-            lang="en">First Name:
+              lang="en">First Name:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/first_name_note:label"
-            lang="Roman Urdu">Naam:
+              lang="Roman Urdu">Naam:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_first_name "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/first_name_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/last_name_note:label"
-            lang="ur">والد کا نام:
+              lang="ur">والد کا نام:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/last_name_note:label"
-            lang="en">Last name:
+              lang="en">Last name:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/last_name_note:label"
-            lang="Roman Urdu">Waalid ka naam:
+              lang="Roman Urdu">Waalid ka naam:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_last_name "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/last_name_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/calc_dob_note:label"
-            lang="ur">بچے کی تاریخ
+              lang="ur">بچے کی تاریخ
             پیدائش: <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
-                class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) مہینے
+                          data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
+                    class="or-output"
+                    data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) مہینے
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/calc_dob_note:label"
-            lang="en">Child Date of
+              lang="en">Child Date of
             Birth: <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
-                class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) months
+                         data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
+                    class="or-output"
+                    data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) months
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/calc_dob_note:label"
-            lang="Roman Urdu">Bachay ki
+              lang="Roman Urdu">Bachay ki
             tareekh-e-paidaish: <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
-                class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) mahinay
+                                      data-value=" /Offsite_Child_Vaccination_Followup/existing_birth_date "></span> (<span
+                    class="or-output"
+                    data-value=" /Offsite_Child_Vaccination_Followup/child_age "></span>) mahinay
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/calc_dob_note" data-type-xml="string"
-            readonly="readonly" type="text" />
+               readonly="readonly" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/gender_note:label"
-            lang="ur">جنس:
+              lang="ur">جنس:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/gender_note:label"
-            lang="en">Gender:
+              lang="en">Gender:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/gender_note:label"
-            lang="Roman Urdu">Jins:
+              lang="Roman Urdu">Jins:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_gender "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/gender_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/mother_name_note:label"
-            lang="ur">ماں کا نام:
+              lang="ur">ماں کا نام:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/mother_name_note:label"
-            lang="en">Mother's
+              lang="en">Mother's
             Name:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/mother_name_note:label"
-            lang="Roman Urdu">Maa ka naam:
+              lang="Roman Urdu">Maa ka naam:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_mother_name "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/mother_name_note" data-type-xml="string"
-            readonly="readonly" type="text" />
+               readonly="readonly" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/exisiting_ethnicity_note:label"
-            lang="ur">
+              lang="ur">
             قومیت:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/exisiting_ethnicity_note:label"
-            lang="en">
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/exisiting_ethnicity_note:label"
+              lang="en">
             Ethnicity:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/exisiting_ethnicity_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             Qomiat:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_ethnicity "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/exisiting_ethnicity_note" data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="note non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address:label"
-            lang="ur">موجودہ پتہ: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
+              lang="ur">موجودہ پتہ: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/address:label"
-            lang="en">Current Address: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
+              lang="en">Current Address: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address:label"
-            lang="Roman Urdu">Mojooda Address: <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
-            class="or-output"
-            data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
+              lang="Roman Urdu">Mojooda Address: <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_address1 "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_landmark "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_union_councilname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_townname "></span>, <span
+                class="or-output"
+                data-value=" /Offsite_Child_Vaccination_Followup/existing_city_villagename "></span>,
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_provincename "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/address" data-type-xml="string" readonly="readonly"
-            type="text" />
+               type="text"/>
     </label>
     <fieldset class="question ">
         <fieldset>
             <legend>
                 <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change:label"
-                    lang="ur">کیا آپ
+                      lang="ur">کیا آپ
                     کا گھر کا پتہ بدلا ہے؟
                 </span>
-                <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/address_change:label"
-                    lang="en">Has
+                <span class="question-label active"
+                      data-itext-id="/Offsite_Child_Vaccination_Followup/address_change:label"
+                      lang="en">Has
                     your home address changed?
                 </span>
 
                 <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change:label"
-                    lang="Roman Urdu">Kya aap
+                      lang="Roman Urdu">Kya aap
                     ka ghar ka pata badla hai?
                 </span>
             </legend>
             <div class="option-wrapper">
                 <label class="">
-                    <input name="/Offsite_Child_Vaccination_Followup/address_change" data-name="/Offsite_Child_Vaccination_Followup/address_change"
-                        data-type-xml="select1" type="radio"
-                        value="yes" />
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
-                        lang="ur">
+                    <input name="/Offsite_Child_Vaccination_Followup/address_change"
+                           data-name="/Offsite_Child_Vaccination_Followup/address_change"
+                           data-type-xml="select1" type="radio"
+                           value="yes"/>
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
+                          lang="ur">
                         ہاں
                     </span>
-                    <span class="option-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
-                        lang="en">
+                    <span class="option-label active"
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
+                          lang="en">
                         Yes
                     </span>
 
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
-                        lang="Roman Urdu">
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/yes:label"
+                          lang="Roman Urdu">
                         Yes
                     </span>
                 </label>
                 <label class="">
-                    <input name="/Offsite_Child_Vaccination_Followup/address_change" data-name="/Offsite_Child_Vaccination_Followup/address_change"
-                        data-type-xml="select1" type="radio"
-                        value="no" />
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
-                        lang="ur">
+                    <input name="/Offsite_Child_Vaccination_Followup/address_change"
+                           data-name="/Offsite_Child_Vaccination_Followup/address_change"
+                           data-type-xml="select1" type="radio"
+                           value="no"/>
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
+                          lang="ur">
                         نہیں
                     </span>
-                    <span class="option-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
-                        lang="en">
+                    <span class="option-label active"
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
+                          lang="en">
                         No
                     </span>
 
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
-                        lang="Roman Urdu">
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/address_change/no:label"
+                          lang="Roman Urdu">
                         No
                     </span>
                 </label>
@@ -384,20 +403,21 @@
     </fieldset>
     <label class="question or-appearance-minimal  or-branch pre-init ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/province:label"
-            lang="ur">صوبہ
+              lang="ur">صوبہ
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/province:label"
-            lang="en">Province
+              lang="en">Province
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/province:label"
-            lang="Roman Urdu">Suba
+              lang="Roman Urdu">Suba
         </span>
         <span class="required">*</span>
         <select name="/Offsite_Child_Vaccination_Followup/province"
-            data-name="/Offsite_Child_Vaccination_Followup/province" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
-            data-type-xml="select1"
-            required="required">
+                data-name="/Offsite_Child_Vaccination_Followup/province"
+                data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+                data-type-xml="select1"
+                required="required">
             <option value="">...</option>
             <option value="kpk">Khyber Pakhtunkhwa</option>
             <option value="sindh">Sindh</option>
@@ -445,28 +465,30 @@
     </label>
     <label class="question or-appearance-minimal  or-branch pre-init ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/city_village:label"
-            lang="ur">شہر
+              lang="ur">شہر
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/city_village:label"
-            lang="en">City
+              lang="en">City
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/city_village:label"
-            lang="Roman Urdu">Shehr
+              lang="Roman Urdu">Shehr
         </span>
         <span class="required">*</span>
         <select name="/Offsite_Child_Vaccination_Followup/city_village"
-            data-name="/Offsite_Child_Vaccination_Followup/city_village" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
-            data-type-xml="select1"
-            required="required">
-            <option class="itemset-template" data-items-path="instance('cities')/root/item[province= /Offsite_Child_Vaccination_Followup/province  or province='na']"
-                value="">
+                data-name="/Offsite_Child_Vaccination_Followup/city_village"
+                data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+                data-type-xml="select1"
+                required="required">
+            <option class="itemset-template"
+                    data-items-path="instance('cities')/root/item[province= /Offsite_Child_Vaccination_Followup/province  or province='na']"
+                    value="">
                 ...
             </option>
         </select>
         <span style="display:none;" class="or-option-translations"></span>
         <span class="itemset-labels" data-label-ref="itextId" data-label-type="itext"
-            data-value-ref="name">
+              data-value-ref="name">
             <span class="option-label " data-itext-id="static_instance-cities-0" lang="ur">کراچی
             </span>
             <span class="option-label active" data-itext-id="static_instance-cities-0" lang="en">
@@ -519,28 +541,30 @@
     </label>
     <label class="question or-appearance-minimal  or-branch pre-init ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/town:label"
-            lang="ur">ٹاٰئون/ قصبہ/ بستی
+              lang="ur">ٹاٰئون/ قصبہ/ بستی
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/town:label"
-            lang="en">Town
+              lang="en">Town
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/town:label"
-            lang="Roman Urdu">Town / Qasbah / Basti
+              lang="Roman Urdu">Town / Qasbah / Basti
         </span>
         <span class="required">*</span>
         <select name="/Offsite_Child_Vaccination_Followup/town"
-            data-name="/Offsite_Child_Vaccination_Followup/town" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
-            data-type-xml="select1"
-            required="required">
-            <option class="itemset-template" data-items-path="instance('towns')/root/item[(province= /Offsite_Child_Vaccination_Followup/province  and city= /Offsite_Child_Vaccination_Followup/city_village  ) or city='na']"
-                value="">
+                data-name="/Offsite_Child_Vaccination_Followup/town"
+                data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+                data-type-xml="select1"
+                required="required">
+            <option class="itemset-template"
+                    data-items-path="instance('towns')/root/item[(province= /Offsite_Child_Vaccination_Followup/province  and city= /Offsite_Child_Vaccination_Followup/city_village  ) or city='na']"
+                    value="">
                 ...
             </option>
         </select>
         <span style="display:none;" class="or-option-translations"></span>
         <span class="itemset-labels" data-label-ref="itextId" data-label-type="itext"
-            data-value-ref="name">
+              data-value-ref="name">
             <span class="option-label " data-itext-id="static_instance-towns-0" lang="ur">کورنگی
             </span>
             <span class="option-label active" data-itext-id="static_instance-towns-0" lang="en">
@@ -730,28 +754,30 @@
     </label>
     <label class="question or-appearance-minimal  or-branch pre-init ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/union_council:label"
-            lang="ur">یونین کونسل
+              lang="ur">یونین کونسل
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/union_council:label"
-            lang="en">Union Council
+              lang="en">Union Council
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/union_council:label"
-            lang="Roman Urdu">Union Council
+              lang="Roman Urdu">Union Council
         </span>
         <span class="required">*</span>
         <select name="/Offsite_Child_Vaccination_Followup/union_council"
-            data-name="/Offsite_Child_Vaccination_Followup/union_council" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
-            data-type-xml="select1"
-            required="required">
-            <option class="itemset-template" data-items-path="instance('ucs')/root/item[(province= /Offsite_Child_Vaccination_Followup/province  and city= /Offsite_Child_Vaccination_Followup/city_village  and town= /Offsite_Child_Vaccination_Followup/town ) or town='na']"
-                value="">
+                data-name="/Offsite_Child_Vaccination_Followup/union_council"
+                data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+                data-type-xml="select1"
+                required="required">
+            <option class="itemset-template"
+                    data-items-path="instance('ucs')/root/item[(province= /Offsite_Child_Vaccination_Followup/province  and city= /Offsite_Child_Vaccination_Followup/city_village  and town= /Offsite_Child_Vaccination_Followup/town ) or town='na']"
+                    value="">
                 ...
             </option>
         </select>
         <span style="display:none;" class="or-option-translations"></span>
         <span class="itemset-labels" data-label-ref="itextId" data-label-type="itext"
-            data-value-ref="name">
+              data-value-ref="name">
             <span class="option-label " data-itext-id="static_instance-ucs-0" lang="ur">بلال
                 کالونی
             </span>
@@ -2479,156 +2505,171 @@
     </label>
     <label class="question or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address1:label"
-            lang="ur">گھر کا پتہ
+              lang="ur">گھر کا پتہ
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/address1:label"
-            lang="en">Home Address
+              lang="en">Home Address
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/address1:label"
-            lang="Roman Urdu">Ghar ka pata
+              lang="Roman Urdu">Ghar ka pata
         </span>
         <span class="required">*</span>
-        <input name="/Offsite_Child_Vaccination_Followup/address1" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')" data-type-xml="string"
-            required="required"
-            type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/address1"
+               data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+               data-type-xml="string"
+               required="required"
+               type="text"/>
     </label>
     <label class="question or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/landmark:label"
-            lang="ur">گھر کے قریب کوئی
+              lang="ur">گھر کے قریب کوئی
             مشہور جگہ
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/landmark:label"
-            lang="en">Land Mark
+              lang="en">Land Mark
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/landmark:label"
-            lang="Roman Urdu">Ghar ke qareeb koi
+              lang="Roman Urdu">Ghar ke qareeb koi
             mashoor jagah
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/landmark" data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
-            data-type-xml="string"
-            type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/landmark"
+               data-relevant="selected( /Offsite_Child_Vaccination_Followup/address_change , 'yes')"
+               data-type-xml="string"
+               type="text"/>
     </label>
     <label class="question non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/center_gps:label"
-            lang="ur">حاصل کردہ معلومات
+              lang="ur">حاصل کردہ معلومات
             کی جگہ کے GPS کارڈینیٹس درج کریں
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/center_gps:label"
-            lang="en">Collect GPS
+              lang="en">Collect GPS
             coordinates of data entry location:
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/center_gps:label"
-            lang="Roman Urdu">Hasil karda
+              lang="Roman Urdu">Hasil karda
             malomaat ki jaga ke GPS coordinates darj karain
         </span>
         <span class="or-hint active" lang="">GPS coordinates can only be collected when outside.
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/center_gps" data-type-xml="geopoint"
-            type="text" />
+               type="text"/>
     </label>
     <label class="note non-select ">
-        <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
-            lang="ur">
+        <span class="question-label "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
+              lang="ur">
             کیا بچہ پیدائش کے وقت کسی مرض میں مبتلا تھا؟
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
-            lang="en">
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
+              lang="en">
             Child was suffering from a disease at birth:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
         </span>
 
-        <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
-            lang="Roman Urdu">
+        <span class="question-label "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note:label"
+              lang="Roman Urdu">
             Kya bacha pedaaish k waqt kissi marz mai mubtila tha?
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_child_was_suffering_from_a_disease_at_birth "></span>
         </span>
         <input name="/Offsite_Child_Vaccination_Followup/child_was_suffering_from_a_disease_at_birth_note"
-            data-type-xml="string"
-            readonly="readonly" required="required" type="text" />
+               data-type-xml="string"
+               readonly="readonly" required="required" type="text"/>
     </label>
     <label class="question non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/aefi:label"
-            lang="ur">حفاظتی ٹیکوں کے مضر اثرات
+              lang="ur">حفاظتی ٹیکوں کے مضر اثرات
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/aefi:label"
-            lang="en">Temporary side-effects of
+              lang="en">Temporary side-effects of
             immunization shots
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/aefi:label"
-            lang="Roman Urdu">Hifazati teekon ke muzr
+              lang="Roman Urdu">Hifazati teekon ke muzr
             asraat
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/aefi" data-type-xml="string" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/aefi" data-type-xml="string" type="text"/>
     </label>
     <fieldset class="question ">
         <fieldset>
             <legend>
-                <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
-                    lang="ur">کیا
+                <span class="question-label "
+                      data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
+                      lang="ur">کیا
                     آپ اپنے بچے کی اگلی ویکسین کی تاریخ کے لیے SMS موصول کرنا چاہتے ہیں؟
                     <span class="or-output"
-                        data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
+                          data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
                 </span>
-                <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
-                    lang="en">Are
+                <span class="question-label active"
+                      data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
+                      lang="en">Are
                     you willing to receive SMS reminders for your next visit?
                     <span class="or-output"
-                        data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
+                          data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
                 </span>
 
-                <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
-                    lang="Roman Urdu">Kya
+                <span class="question-label "
+                      data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval:label"
+                      lang="Roman Urdu">Kya
                     aap apnay bachay ki agli vaccine ki tareekh ke liye SMS mausool karna chahtay
                     hain?
                     <span class="or-output"
-                        data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
+                          data-value=" /Offsite_Child_Vaccination_Followup/existing_reminders_approval "></span>
                 </span>
                 <span class="required">*</span>
             </legend>
             <div class="option-wrapper">
                 <label class="">
                     <input name="/Offsite_Child_Vaccination_Followup/reminders_approval"
-                        data-name="/Offsite_Child_Vaccination_Followup/reminders_approval"
-                        data-type-xml="select1"
-                        required="required" type="radio" value="yes" />
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
-                        lang="ur">
+                           data-name="/Offsite_Child_Vaccination_Followup/reminders_approval"
+                           data-type-xml="select1"
+                           required="required" type="radio" value="yes"/>
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
+                          lang="ur">
                         ہاں
                     </span>
-                    <span class="option-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
-                        lang="en">
+                    <span class="option-label active"
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
+                          lang="en">
                         Yes
                     </span>
 
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
-                        lang="Roman Urdu">
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/yes:label"
+                          lang="Roman Urdu">
                         Yes
                     </span>
                 </label>
                 <label class="">
                     <input name="/Offsite_Child_Vaccination_Followup/reminders_approval"
-                        data-name="/Offsite_Child_Vaccination_Followup/reminders_approval"
-                        data-type-xml="select1"
-                        required="required" type="radio" value="no" />
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
-                        lang="ur">
+                           data-name="/Offsite_Child_Vaccination_Followup/reminders_approval"
+                           data-type-xml="select1"
+                           required="required" type="radio" value="no"/>
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
+                          lang="ur">
                         نہیں
                     </span>
-                    <span class="option-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
-                        lang="en">
+                    <span class="option-label active"
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
+                          lang="en">
                         No
                     </span>
 
-                    <span class="option-label " data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
-                        lang="Roman Urdu">
+                    <span class="option-label "
+                          data-itext-id="/Offsite_Child_Vaccination_Followup/reminders_approval/no:label"
+                          lang="Roman Urdu">
                         No
                     </span>
                 </label>
@@ -2636,355 +2677,375 @@
         </fieldset>
     </fieldset>
     <label class="question or-branch pre-init non-select ">
-        <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
-            lang="ur">
+        <span class="or-constraint-msg "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
+              lang="ur">
             فون نمبر گیارہ ہندسوں پر مشتمل اور مندرجہ ذیل شکل میں ہونا چاہئے: *********03
         </span>
-        <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
-            lang="en">
+        <span class="or-constraint-msg active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
+              lang="en">
             Phone number should be 11 digits in the following format: 03*********
         </span>
 
-        <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
-            lang="Roman Urdu">
+        <span class="or-constraint-msg "
+              data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:jr:constraintMsg"
+              lang="Roman Urdu">
             Phone number 11 hindason par mushtamil aur mundarja zail shakal main hona chahiey:
             03*********
         </span>
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:label"
-            lang="ur">موبائل
+              lang="ur">موبائل
             نمبر:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
         </span>
-        <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:label"
-            lang="en">Mobile
+        <span class="question-label active"
+              data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:label"
+              lang="en">Mobile
             Number:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/contact_phone_number:label"
-            lang="Roman Urdu">Mobile
+              lang="Roman Urdu">Mobile
             Number:
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/existing_contact_phone_number "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/contact_phone_number" data-constraint="regex(., '^03[0-9]{9}$')"
-            data-relevant=" /Offsite_Child_Vaccination_Followup/reminders_approval ='yes'"
-            data-type-xml="string"
-            type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/contact_phone_number"
+               data-constraint="regex(., '^03[0-9]{9}$')"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/reminders_approval ='yes'"
+               data-type-xml="string"
+               type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/bcg_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_bcg "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/bcg_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_bcg "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/bcg_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_bcg "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/bcg_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_bcg  != ''"
-            data-type-xml="string" readonly="readonly"
-            type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/bcg_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_bcg  != ''"
+               data-type-xml="string" readonly="readonly"
+               type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv0_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/opv0_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv0_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv0 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/opv0_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv0  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/opv0_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv0  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv1_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/opv1_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv1_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta2 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/opv1_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta2  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/opv1_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta2  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv1_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/pcv1_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv1_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta1 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/pcv1_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta1  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/pcv1_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta1  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta1_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/penta1_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta1_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_penta3 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/penta1_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta3  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/penta1_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_penta3  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv2_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/opv2_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv2_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv1 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/opv2_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv1  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/opv2_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv1  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv2_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/pcv2_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv2_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv2 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/pcv2_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv2  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/pcv2_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv2  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta2_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/penta2_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta2_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_opv3 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/penta2_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv3  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/penta2_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_opv3  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv3_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/opv3_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/opv3_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv1 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/opv3_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv1  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/opv3_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv1  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv3_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/pcv3_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/pcv3_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv2 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/pcv3_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv2  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/pcv3_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv2  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta3_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/penta3_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/penta3_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_pcv3 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/penta3_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv3  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/penta3_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_pcv3  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/ipv_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_ipv "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/ipv_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_ipv "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/ipv_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output" data-value=" /Offsite_Child_Vaccination_Followup/e_ipv "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/ipv_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_ipv  != ''"
-            data-type-xml="string" readonly="readonly"
-            type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/ipv_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_ipv  != ''"
+               data-type-xml="string" readonly="readonly"
+               type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/measles1_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/measles1_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/measles1_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles1 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/measles1_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_measles1  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/measles1_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_measles1  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="note or-branch pre-init non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/measles2_note:label"
-            lang="ur">
+              lang="ur">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/measles2_note:label"
-            lang="en">
+              lang="en">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/measles2_note:label"
-            lang="Roman Urdu">
+              lang="Roman Urdu">
             <span class="or-output"
-                data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
+                  data-value=" /Offsite_Child_Vaccination_Followup/e_measles2 "></span>
         </span>
-        <input name="/Offsite_Child_Vaccination_Followup/measles2_note" data-relevant=" /Offsite_Child_Vaccination_Followup/e_measles2  != ''"
-            data-type-xml="string"
-            readonly="readonly" type="text" />
+        <input name="/Offsite_Child_Vaccination_Followup/measles2_note"
+               data-relevant=" /Offsite_Child_Vaccination_Followup/e_measles2  != ''"
+               data-type-xml="string"
+               readonly="readonly" type="text"/>
     </label>
     <label class="question or-appearance-minimal ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines:label"
-            lang="ur">پچھلی تاریخ جب کسی
+              lang="ur">پچھلی تاریخ جب کسی
             اور سینٹر پر ٹیکے لگواِے گیے یا قطرے پلائے گئے
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines:label"
-            lang="en">Retro vaccines
+              lang="en">Retro vaccines
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines:label"
-            lang="Roman Urdu">Pichli tareekh jab
+              lang="Roman Urdu">Pichli tareekh jab
             kissi aur center par teekay lagwaye gaye ya katray pilaey gaye
         </span>
         <select name="/Offsite_Child_Vaccination_Followup/vaccines" data-type-xml="select"
-            multiple="multiple">
-            <option class="itemset-template" data-items-path="instance('vaccines')/root/item[name != if(  /Offsite_Child_Vaccination_Followup/e_bcg  != '', 'bcg' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv0  != '', 'opv0' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta1  != '', 'penta1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta2  != '', 'penta2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta3  != '', 'penta3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv1  != '', 'opv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv2  != '', 'opv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv3  != '', 'opv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv1  != '', 'pcv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv2  != '', 'pcv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv3  != '', 'pcv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_ipv  != '', 'ipv' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles1  != '', 'measles1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles2  != '', 'measles2' , '')]"
-                value="">
+                multiple="multiple">
+            <option class="itemset-template"
+                    data-items-path="instance('vaccines')/root/item[name != if(  /Offsite_Child_Vaccination_Followup/e_bcg  != '', 'bcg' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv0  != '', 'opv0' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta1  != '', 'penta1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta2  != '', 'penta2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta3  != '', 'penta3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv1  != '', 'opv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv2  != '', 'opv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv3  != '', 'opv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv1  != '', 'pcv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv2  != '', 'pcv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv3  != '', 'pcv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_ipv  != '', 'ipv' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles1  != '', 'measles1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles2  != '', 'measles2' , '')]"
+                    value="">
                 ...
             </option>
         </select>
         <span style="display:none;" class="or-option-translations"></span>
         <span class="itemset-labels" data-label-ref="itextId" data-label-type="itext"
-            data-value-ref="name">
+              data-value-ref="name">
             <span class="option-label " data-itext-id="static_instance-vaccines-0" lang="ur">بی سی
                 جی
             </span>
@@ -2992,10 +3053,10 @@
                 BCG
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-0"
-                lang="openmrs_code">1570AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">1570AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-0"
-                lang="Roman Urdu">BCG
+                  lang="Roman Urdu">BCG
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1" lang="ur">او پی
                 وی 0
@@ -3004,10 +3065,10 @@
                 OPV 0
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1"
-                lang="Roman Urdu">OPV 0
+                  lang="Roman Urdu">OPV 0
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2" lang="ur">پی سی
                 وی 1
@@ -3016,10 +3077,10 @@
                 PCV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2"
-                lang="Roman Urdu">PCV 1
+                  lang="Roman Urdu">PCV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3" lang="ur">او پی
                 وی 1
@@ -3028,10 +3089,10 @@
                 OPV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3"
-                lang="Roman Urdu">OPV 1
+                  lang="Roman Urdu">OPV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4" lang="ur">پینٹا
                 ویلنٹ 1
@@ -3040,10 +3101,10 @@
                 Pentavalent 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4"
-                lang="Roman Urdu">Pentavalent 1
+                  lang="Roman Urdu">Pentavalent 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5" lang="ur">پی سی
                 وی 2
@@ -3052,10 +3113,10 @@
                 PCV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5"
-                lang="Roman Urdu">PCV 2
+                  lang="Roman Urdu">PCV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6" lang="ur">او پی
                 وی 2
@@ -3064,10 +3125,10 @@
                 OPV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6"
-                lang="Roman Urdu">OPV 2
+                  lang="Roman Urdu">OPV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7" lang="ur">پینٹا
                 ویلنٹ 2
@@ -3076,10 +3137,10 @@
                 Pentavalent 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7"
-                lang="Roman Urdu">Pentavalent 2
+                  lang="Roman Urdu">Pentavalent 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8" lang="ur">پی سی
                 وی 3
@@ -3088,10 +3149,10 @@
                 PCV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8"
-                lang="Roman Urdu">PCV 3
+                  lang="Roman Urdu">PCV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9" lang="ur">او پی
                 وی 3
@@ -3100,10 +3161,10 @@
                 OPV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9"
-                lang="Roman Urdu">OPV 3
+                  lang="Roman Urdu">OPV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10" lang="ur">پینٹا
                 ویلنٹ 3
@@ -3112,10 +3173,10 @@
                 Pentavalent 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10"
-                lang="Roman Urdu">Pentavalent 3
+                  lang="Roman Urdu">Pentavalent 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11" lang="ur">آئی پی
                 وی
@@ -3124,10 +3185,10 @@
                 IPV
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11"
-                lang="openmrs_code">82242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">82242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11"
-                lang="Roman Urdu">IPV
+                  lang="Roman Urdu">IPV
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12" lang="ur">خسرہ
                 1
@@ -3136,10 +3197,10 @@
                 Measles 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12"
-                lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12"
-                lang="Roman Urdu">Khasra 1
+                  lang="Roman Urdu">Khasra 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13" lang="ur">خسرہ
                 2
@@ -3148,538 +3209,633 @@
                 Measles 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13"
-                lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13"
-                lang="Roman Urdu">Khasra 2
+                  lang="Roman Urdu">Khasra 2
             </span>
         </span>
     </label>
     <section name="/Offsite_Child_Vaccination_Followup/vaccines_group" class="or-group-data ">
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
+                  lang="ur">
                 بی سی جی
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
+                  lang="en">
                 BCG
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro:label"
+                  lang="Roman Urdu">
                 BCG
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'bcg')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/bcg_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'bcg')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
+                  lang="ur">
                 او پی وی 0
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
+                  lang="en">
                 OPV 0
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro:label"
+                  lang="Roman Urdu">
                 OPV 0
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
+                  lang="ur">
                 پی سی وی 1
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
+                  lang="en">
                 PCV1
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro:label"
+                  lang="Roman Urdu">
                 PCV1
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
+                  lang="ur">
                 او پی وی1
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
+                  lang="en">
                 OPV 1
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro:label"
+                  lang="Roman Urdu">
                 OPV 1
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
+                  lang="ur">
                 پینٹا ویلنٹ 1
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
+                  lang="en">
                 Pentavalent 1
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro:label"
+                  lang="Roman Urdu">
                 Pentavalent 1
             </span>
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_retro"
-                data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1')"
-                data-type-xml="date"
-                type="date" />
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
+                  lang="ur">
                 پی سی وی 2
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
+                  lang="en">
                 PCV2
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro:label"
+                  lang="Roman Urdu">
                 PCV2
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
+                  lang="ur">
                 او پی وی 2
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
+                  lang="en">
                 OPV 2
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro:label"
+                  lang="Roman Urdu">
                 OPV 2
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
+                  lang="ur">
                 پینٹا ویلنٹ 2
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
+                  lang="en">
                 Pentavalent 2
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro:label"
+                  lang="Roman Urdu">
                 Pentavalent 2
             </span>
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_retro"
-                data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
-                data-type-xml="date"
-                type="date" />
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
+                  lang="ur">
                 پی سی وی 3
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
+                  lang="en">
                 PCV3
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro:label"
+                  lang="Roman Urdu">
                 PCV3
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv3')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv3')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
+                  lang="ur">
                 او پی وی3
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
+                  lang="en">
                 OPV 3
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro:label"
+                  lang="Roman Urdu">
                 OPV 3
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
+                  lang="ur">
                 پینٹا ویلنٹ 3
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
+                  lang="en">
                 Pentavalent 3
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro:label"
+                  lang="Roman Urdu">
                 Pentavalent 3
             </span>
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_retro"
-                data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3')"
-                data-type-xml="date"
-                type="date" />
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
+                  lang="ur">
                 آئی پی وی
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
+                  lang="en">
                 IPV
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro:label"
+                  lang="Roman Urdu">
                 IPV
             </span>
-            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro" data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv')"
-                data-type-xml="date"
-                type="date" />
+            <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/ipv_retro"
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
+                  lang="ur">
                 خسرہ 1
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
+                  lang="en">
                 Measles 1
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro:label"
+                  lang="Roman Urdu">
                 Measles 1
             </span>
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_retro"
-                data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1')"
-                data-type-xml="date"
-                type="date" />
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
         <label class="question or-branch pre-init non-select ">
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
-                lang="ur">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
+                  lang="ur">
                 حفاظتی ٹیکا ملنے کی تاریخ، بچے کی تاریخ پیدائش کے بعد اور آج کی تاریخ سے پہلے کی
                 ہونی چاہیے
             </span>
-            <span class="or-constraint-msg active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
-                lang="en">
+            <span class="or-constraint-msg active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
+                  lang="en">
                 The date of vaccination must be greater than the child's birthdate and less than
                 today.
             </span>
 
-            <span class="or-constraint-msg " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
-                lang="Roman Urdu">
+            <span class="or-constraint-msg "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:jr:constraintMsg"
+                  lang="Roman Urdu">
                 Hifaazati teeka milnay ki tareekh, bachay ki tareekh-e-pedaaish ke baad aur aaj ki
                 tareekh se phlay ki honi chahiye.
             </span>
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
-                lang="ur">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
+                  lang="ur">
                 خسرہ 2
             </span>
-            <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
-                lang="en">
+            <span class="question-label active"
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
+                  lang="en">
                 Measles2
             </span>
 
-            <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
-                lang="Roman Urdu">
+            <span class="question-label "
+                  data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro:label"
+                  lang="Roman Urdu">
                 Measles2
             </span>
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_retro"
-                data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2')"
-                data-type-xml="date"
-                type="date" />
+                   data-constraint=".&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today "
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2')"
+                   data-type-xml="date"
+                   type="date"/>
         </label>
     </section>
     <!--end of group -->
     <label class="question or-appearance-minimal ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_2:label"
-            lang="ur">آج کون کون سی
+              lang="ur">آج کون کون سی
             ویکسین دی گئی ہیں؟
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_2:label"
-            lang="en">Vaccines
+              lang="en">Vaccines
             administered
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccines_2:label"
-            lang="Roman Urdu">Aaj kon kon si
+              lang="Roman Urdu">Aaj kon kon si
             vaccine di gai hain?
         </span>
         <span class="required">*</span>
-        <select name="/Offsite_Child_Vaccination_Followup/vaccines_2" data-constraint="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0') , .&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), .&gt;=  /Offsite_Child_Vaccination_Followup/six_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), .&gt;= /Offsite_Child_Vaccination_Followup/ten_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), .&gt;= /Offsite_Child_Vaccination_Followup/forteen_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), .&gt;= /Offsite_Child_Vaccination_Followup/nine_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), .&gt;=  /Offsite_Child_Vaccination_Followup/fifteen_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today ))))))"
-            data-type-xml="select"
-            multiple="multiple"
-            required="required">
-            <option class="itemset-template" data-items-path="instance('vaccines')/root/item[name != if(  /Offsite_Child_Vaccination_Followup/e_bcg  != '', 'bcg' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv0  != '', 'opv0' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta2  != '', 'penta2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta1  != '', 'penta1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta3  != '', 'penta3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv1  != '', 'opv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv2  != '', 'opv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv3  != '', 'opv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv1  != '', 'pcv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv2  != '', 'pcv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv3  != '', 'pcv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles1  != '', 'measles1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles2  != '', 'measles2' , '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'bcg'), 'bcg', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0'), 'opv0', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1'), 'penta1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1'), 'opv1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1'), 'pcv1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2'), 'penta2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2'), 'opv2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2'), 'pcv2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3'), 'penta3', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3'), 'opv3', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv3'), 'pcv3', '') and name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv'), 'ipv', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1'), 'measles1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2'), 'measles2', '')]"
-                value="">
+        <select name="/Offsite_Child_Vaccination_Followup/vaccines_2"
+                data-constraint="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0') , .&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), .&gt;=  /Offsite_Child_Vaccination_Followup/six_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), .&gt;= /Offsite_Child_Vaccination_Followup/ten_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), .&gt;= /Offsite_Child_Vaccination_Followup/forteen_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), .&gt;= /Offsite_Child_Vaccination_Followup/nine_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), .&gt;=  /Offsite_Child_Vaccination_Followup/fifteen_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today ))))))"
+                data-type-xml="select"
+                multiple="multiple"
+                required="required">
+            <option class="itemset-template"
+                    data-items-path="instance('vaccines')/root/item[name != if(  /Offsite_Child_Vaccination_Followup/e_bcg  != '', 'bcg' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv0  != '', 'opv0' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta2  != '', 'penta2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta1  != '', 'penta1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_penta3  != '', 'penta3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv1  != '', 'opv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv2  != '', 'opv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_opv3  != '', 'opv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv1  != '', 'pcv1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv2  != '', 'pcv2' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_pcv3  != '', 'pcv3' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles1  != '', 'measles1' , '') and  name != if(  /Offsite_Child_Vaccination_Followup/e_measles2  != '', 'measles2' , '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'bcg'), 'bcg', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0'), 'opv0', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1'), 'penta1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1'), 'opv1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1'), 'pcv1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2'), 'penta2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2'), 'opv2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2'), 'pcv2', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3'), 'penta3', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3'), 'opv3', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv3'), 'pcv3', '') and name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv'), 'ipv', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1'), 'measles1', '') and  name != if(selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2'), 'measles2', '')]"
+                    value="">
                 ...
             </option>
         </select>
         <span style="display:none;" class="or-option-translations"></span>
         <span class="itemset-labels" data-label-ref="itextId" data-label-type="itext"
-            data-value-ref="name">
+              data-value-ref="name">
             <span class="option-label " data-itext-id="static_instance-vaccines-0" lang="ur">بی سی
                 جی
             </span>
@@ -3687,10 +3843,10 @@
                 BCG
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-0"
-                lang="openmrs_code">1570AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">1570AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-0"
-                lang="Roman Urdu">BCG
+                  lang="Roman Urdu">BCG
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1" lang="ur">او پی
                 وی 0
@@ -3699,10 +3855,10 @@
                 OPV 0
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-1"
-                lang="Roman Urdu">OPV 0
+                  lang="Roman Urdu">OPV 0
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2" lang="ur">پی سی
                 وی 1
@@ -3711,10 +3867,10 @@
                 PCV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-2"
-                lang="Roman Urdu">PCV 1
+                  lang="Roman Urdu">PCV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3" lang="ur">او پی
                 وی 1
@@ -3723,10 +3879,10 @@
                 OPV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-3"
-                lang="Roman Urdu">OPV 1
+                  lang="Roman Urdu">OPV 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4" lang="ur">پینٹا
                 ویلنٹ 1
@@ -3735,10 +3891,10 @@
                 Pentavalent 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-4"
-                lang="Roman Urdu">Pentavalent 1
+                  lang="Roman Urdu">Pentavalent 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5" lang="ur">پی سی
                 وی 2
@@ -3747,10 +3903,10 @@
                 PCV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-5"
-                lang="Roman Urdu">PCV 2
+                  lang="Roman Urdu">PCV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6" lang="ur">او پی
                 وی 2
@@ -3759,10 +3915,10 @@
                 OPV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-6"
-                lang="Roman Urdu">OPV 2
+                  lang="Roman Urdu">OPV 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7" lang="ur">پینٹا
                 ویلنٹ 2
@@ -3771,10 +3927,10 @@
                 Pentavalent 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-7"
-                lang="Roman Urdu">Pentavalent 2
+                  lang="Roman Urdu">Pentavalent 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8" lang="ur">پی سی
                 وی 3
@@ -3783,10 +3939,10 @@
                 PCV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8"
-                lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-8"
-                lang="Roman Urdu">PCV 3
+                  lang="Roman Urdu">PCV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9" lang="ur">او پی
                 وی 3
@@ -3795,10 +3951,10 @@
                 OPV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9"
-                lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">783AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-9"
-                lang="Roman Urdu">OPV 3
+                  lang="Roman Urdu">OPV 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10" lang="ur">پینٹا
                 ویلنٹ 3
@@ -3807,10 +3963,10 @@
                 Pentavalent 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10"
-                lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">162339AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-10"
-                lang="Roman Urdu">Pentavalent 3
+                  lang="Roman Urdu">Pentavalent 3
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11" lang="ur">آئی پی
                 وی
@@ -3819,10 +3975,10 @@
                 IPV
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11"
-                lang="openmrs_code">82242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">82242AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-11"
-                lang="Roman Urdu">IPV
+                  lang="Roman Urdu">IPV
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12" lang="ur">خسرہ
                 1
@@ -3831,10 +3987,10 @@
                 Measles 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12"
-                lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-12"
-                lang="Roman Urdu">Khasra 1
+                  lang="Roman Urdu">Khasra 1
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13" lang="ur">خسرہ
                 2
@@ -3843,295 +3999,317 @@
                 Measles 2
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13"
-                lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                  lang="openmrs_code">79409AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             </span>
             <span class="option-label " data-itext-id="static_instance-vaccines-13"
-                lang="Roman Urdu">Khasra 2
+                  lang="Roman Urdu">Khasra 2
             </span>
         </span>
     </label>
     <label class="question non-select ">
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccination_date:label"
-            lang="ur">تاریخ
+              lang="ur">تاریخ
         </span>
         <span class="question-label active" data-itext-id="/Offsite_Child_Vaccination_Followup/vaccination_date:label"
-            lang="en">Vaccination
+              lang="en">Vaccination
             date
         </span>
 
         <span class="question-label " data-itext-id="/Offsite_Child_Vaccination_Followup/vaccination_date:label"
-            lang="Roman Urdu">Tareekh
+              lang="Roman Urdu">Tareekh
         </span>
         <span class="required">*</span>
-        <input name="/Offsite_Child_Vaccination_Followup/vaccination_date" data-constraint="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0') , .&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), .&gt;=  /Offsite_Child_Vaccination_Followup/six_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), .&gt;= /Offsite_Child_Vaccination_Followup/ten_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), .&gt;= /Offsite_Child_Vaccination_Followup/forteen_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), .&gt;= /Offsite_Child_Vaccination_Followup/nine_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), .&gt;=  /Offsite_Child_Vaccination_Followup/fifteen_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today ))))))"
-            data-type-xml="date"
-            required="required"
-            type="date" />
+        <input name="/Offsite_Child_Vaccination_Followup/vaccination_date"
+               data-constraint="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0') , .&gt;=  /Offsite_Child_Vaccination_Followup/existing_birth_date  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), .&gt;=  /Offsite_Child_Vaccination_Followup/six_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), .&gt;= /Offsite_Child_Vaccination_Followup/ten_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3') or selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), .&gt;= /Offsite_Child_Vaccination_Followup/forteen_weeks  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), .&gt;= /Offsite_Child_Vaccination_Followup/nine_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today , if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), .&gt;=  /Offsite_Child_Vaccination_Followup/fifteen_months  and .&lt;= /Offsite_Child_Vaccination_Followup/today ))))))"
+               data-type-xml="date"
+               required="required"
+               type="date"/>
     </label>
     <fieldset style="display:none;" id="or-preload-items">
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/start" data-preload="timestamp"
-                data-preload-params="start" data-type-xml="dateTime" type="hidden" />
+                   data-preload-params="start" data-type-xml="dateTime" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/end" data-preload="timestamp"
-                data-preload-params="end" data-type-xml="dateTime" type="hidden" />
+                   data-preload-params="end" data-type-xml="dateTime" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/today" data-preload="date"
-                data-preload-params="today" data-type-xml="date" type="hidden" />
+                   data-preload-params="today" data-type-xml="date" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/deviceid" data-preload="property"
-                data-preload-params="deviceid" data-type-xml="string" type="hidden" />
+                   data-preload-params="deviceid" data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/subscriberid" data-preload="property"
-                data-preload-params="subscriberid" data-type-xml="string" type="hidden" />
+                   data-preload-params="subscriberid" data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/simserial" data-preload="property"
-                data-preload-params="simserial" data-type-xml="string" type="hidden" />
+                   data-preload-params="simserial" data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/phonenumber" data-preload="property"
-                data-preload-params="phonenumber" data-type-xml="string" type="hidden" />
+                   data-preload-params="phonenumber" data-type-xml="string" type="hidden"/>
         </label>
     </fieldset>
     <fieldset style="display:none;" id="or-calculated-items">
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/child_age" data-calculate="int(( /Offsite_Child_Vaccination_Followup/today  -  /Offsite_Child_Vaccination_Followup/existing_birth_date ) div 30.42)"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/child_age"
+                   data-calculate="int(( /Offsite_Child_Vaccination_Followup/today  -  /Offsite_Child_Vaccination_Followup/existing_birth_date ) div 30.42)"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/six_weeks" data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 42"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/six_weeks"
+                   data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 42"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/ten_weeks" data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 70"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/ten_weeks"
+                   data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 70"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/forteen_weeks" data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 98"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/forteen_weeks"
+                   data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 98"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/nine_months" data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 245"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/nine_months"
+                   data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 245"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/fifteen_months" data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 458"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/fifteen_months"
+                   data-calculate=" /Offsite_Child_Vaccination_Followup/existing_birth_date  + 458"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv0_dose" data-calculate="0"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv0')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv1_dose" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv1_dose" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta1_dose"
-                data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1')"
-                data-type-xml="string" type="hidden" />
+                   data-calculate="1"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv2_dose" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'pcv2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv2_dose" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta2_dose"
-                data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
-                data-type-xml="string" type="hidden" />
+                   data-calculate="2"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/pcv3_dose" data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/opv3_dose" data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'opv3')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/penta3_dose"
-                data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3')"
-                data-type-xml="string" type="hidden" />
+                   data-calculate="3"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'penta3')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/measles1_dose"
-                data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1')"
-                data-type-xml="string" type="hidden" />
+                   data-calculate="1"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/vaccines_group/measles2_dose"
-                data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2')"
-                data-type-xml="string" type="hidden" />
+                   data-calculate="2"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'measles2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/bcg" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/bcg"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'bcg'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/opv0" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/opv0"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/opv0_dose_today" data-calculate="0"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv0')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/pcv1" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/pcv1"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/pcv1_dose_today" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/opv1" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/opv1"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/opv1_dose_today" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/penta1" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/penta1"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/penta1_dose_today" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/pcv2" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/pcv2"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/pcv2_dose_today" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/opv2" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/opv2"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/opv2_dose_today" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/penta2" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/penta2"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/penta2_dose_today" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/pcv3" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/pcv3"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/pcv3_dose_today" data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv3')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'pcv3')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/opv3" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/opv3"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/opv3_dose_today" data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'opv3')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/penta3" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/penta3"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/penta3_dose_today" data-calculate="3"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'penta3')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/ipv" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'ipv'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/ipv"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'ipv'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines , 'ipv')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/measles1" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/measles1"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/measles1_dose_today" data-calculate="1"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles1')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/measles2" data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
-                data-type-xml="string"
-                type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/measles2"
+                   data-calculate="if(selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2'), /Offsite_Child_Vaccination_Followup/vaccination_date ,'')"
+                   data-type-xml="string"
+                   type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/measles2_dose_today" data-calculate="2"
-                data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2')"
-                data-type-xml="string" type="hidden" />
+                   data-relevant="selected( /Offsite_Child_Vaccination_Followup/vaccines_2 , 'measles2')"
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
             <input name="/Offsite_Child_Vaccination_Followup/meta/instanceID" data-calculate="concat('uuid:', uuid())"
-                data-type-xml="string" type="hidden" />
+                   data-type-xml="string" type="hidden"/>
         </label>
         <label class="calculation non-select ">
-            <input name="/Offsite_Child_Vaccination_Followup/formhub/uuid" data-calculate="'1f044493db3745dd9e7067bc637256ca'"
-                data-type-xml="string" type="hidden" />
+            <input name="/Offsite_Child_Vaccination_Followup/formhub/uuid"
+                   data-calculate="'1f044493db3745dd9e7067bc637256ca'"
+                   data-type-xml="string" type="hidden"/>
         </label>
     </fieldset>
 </form>

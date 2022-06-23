@@ -1,23 +1,15 @@
 package org.opensrp.web.rest.v2;
 
-import static org.opensrp.web.Constants.LIMIT;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants;
 import org.opensrp.domain.setting.Setting;
@@ -42,6 +34,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.opensrp.web.Constants.LIMIT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -196,7 +190,7 @@ public class SettingResourceTest {
         Mockito.when(settingService.saveSetting(ArgumentMatchers.any(String.class))).thenReturn("setting_123");
         MvcResult result =
                 mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/").contentType(MediaType.APPLICATION_JSON).content(
-                        "EXPECTED_SETTINGS.getBytes()")).andExpect(MockMvcResultMatchers.status().isBadRequest())
+                                "EXPECTED_SETTINGS.getBytes()")).andExpect(MockMvcResultMatchers.status().isBadRequest())
                         .andReturn();
         Mockito.verifyNoInteractions(settingService);
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());

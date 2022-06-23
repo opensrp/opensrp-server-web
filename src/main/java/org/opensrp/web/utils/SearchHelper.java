@@ -1,21 +1,20 @@
 package org.opensrp.web.utils;
 
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.web.rest.RestUtils;
 import org.smartregister.domain.Client;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.Client.GENDER;
 
 public class SearchHelper {
 

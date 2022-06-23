@@ -1,14 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static java.text.MessageFormat.format;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,17 +27,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.text.MessageFormat.format;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 @Controller
 @RequestMapping(value = "/rest/validate/")
 public class ValidateResource {
 
-    private static Logger logger = LogManager.getLogger(ValidateResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ValidateResource.class.toString());
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
-    private EventService eventService;
+    private final EventService eventService;
 
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
     @Autowired

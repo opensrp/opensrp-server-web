@@ -1,14 +1,6 @@
 package org.opensrp.web.rest.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static java.util.Arrays.asList;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -21,6 +13,13 @@ import org.smartregister.domain.Address;
 import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 
 public class SearchResourceTest extends BaseResourceTest {
@@ -116,7 +115,7 @@ public class SearchResourceTest extends BaseResourceTest {
     public void shouldSearchClientWithBirthDate() throws Exception {
         Client expectedClient = createOneSearchableClient();
 
-        String searchQuery = "birthdate=" + birthDate.toLocalDate().toString() + ":" + birthDate.toLocalDate().toString();
+        String searchQuery = "birthdate=" + birthDate.toLocalDate() + ":" + birthDate.toLocalDate();
         JsonNode actualObj = searchClient(searchQuery);
         Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 
@@ -128,7 +127,7 @@ public class SearchResourceTest extends BaseResourceTest {
         Client expectedClient = createOneSearchableClient();
 
         String searchQuery =
-                "lastEdited=" + DATE_CREATED.toLocalDate().toString() + ":" + DATE_CREATED.toLocalDate().toString();
+                "lastEdited=" + DATE_CREATED.toLocalDate() + ":" + DATE_CREATED.toLocalDate();
         JsonNode actualObj = searchClient(searchQuery);
         Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 

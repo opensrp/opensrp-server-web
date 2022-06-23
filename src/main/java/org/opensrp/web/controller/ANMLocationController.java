@@ -1,11 +1,7 @@
 package org.opensrp.web.controller;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,11 +20,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.text.MessageFormat;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
 @Controller
 public class ANMLocationController {
-    private static Logger logger = LogManager.getLogger(ANMLocationController.class.toString());
+    private static final Logger logger = LogManager.getLogger(ANMLocationController.class.toString());
     private final String opensrpANMVillagesURL;
-    private HttpAgent httpAgent;
+    private final HttpAgent httpAgent;
 
     @Autowired
     public ANMLocationController(@Value("#{opensrp['opensrp.anm.villages.url']}") String opensrpANMVillagesURL,

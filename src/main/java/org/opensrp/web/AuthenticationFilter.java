@@ -1,15 +1,14 @@
 package org.opensrp.web;
 
-import static org.opensrp.common.AllConstants.HTTP.WWW_AUTHENTICATE_HEADER;
-
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+
+import static org.opensrp.common.AllConstants.HTTP.WWW_AUTHENTICATE_HEADER;
 
 public class AuthenticationFilter extends OncePerRequestFilter {
 

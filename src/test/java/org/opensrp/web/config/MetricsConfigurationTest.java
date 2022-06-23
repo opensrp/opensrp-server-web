@@ -1,8 +1,7 @@
 package org.opensrp.web.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -13,8 +12,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})

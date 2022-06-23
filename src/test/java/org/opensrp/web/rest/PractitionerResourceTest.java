@@ -1,23 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +21,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 
 public class PractitionerResourceTest extends BaseResourceTest<Practitioner> {
 

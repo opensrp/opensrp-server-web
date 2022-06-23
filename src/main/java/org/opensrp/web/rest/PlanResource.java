@@ -1,23 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.PAGE_SIZE;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -42,17 +29,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 /**
  * @author Vincent Karuri
@@ -76,7 +62,7 @@ public class PlanResource {
             .registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter())
             .registerTypeAdapter(Time.class, new TimingRepeatTimeTypeConverter()).create();
-    private static Logger logger = LogManager.getLogger(PlanResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(PlanResource.class.toString());
     private PlanService planService;
     private PhysicalLocationService locationService;
 
@@ -409,7 +395,7 @@ public class PlanResource {
         PlanSearchBean planSearchBean = createPlanSearchBean(false, 0, 5, null, null, null, useContextFilters);
 
         List<PlanDefinition> plans = planService.getAllPlans(planSearchBean);
-        return (plans != null && !plans.isEmpty()) ? false : true;
+        return plans == null || plans.isEmpty();
     }
 
     static class PlanSyncRequestWrapper {

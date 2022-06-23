@@ -2,7 +2,6 @@ package org.opensrp.web.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.opensrp.web.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

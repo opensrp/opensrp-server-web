@@ -3,11 +3,10 @@
  */
 package org.opensrp.web.dto;
 
-import org.joda.time.DateTime;
-import org.smartregister.domain.Task;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.joda.time.DateTime;
+import org.smartregister.domain.Task;
 
 /**
  * @author Samuel Githengi created on 11/18/20

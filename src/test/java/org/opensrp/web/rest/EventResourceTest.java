@@ -1,20 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.nullable;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.common.AllConstants.Event.*;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -39,17 +28,26 @@ import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
+import static org.opensrp.common.AllConstants.Event.*;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
     private final static String BASE_URL = "/rest/event";
 
-    private String eventType = "Spray";
+    private final String eventType = "Spray";
 
     private EventService eventService;
 
@@ -80,9 +78,9 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
     private EventResource eventResource;
 
-    private String ADD_REQUEST_PAYLOAD = "{\"clients\":[{\"birthdate\":\"1970-01-01T05:00:00.000Z\",\"firstName\":\"Test\",\"gender\":\"Male\",\"lastName\":\"User\",\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"}],\"events\":[{\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\"entityType\":\"ec_family\",\"eventDate\":\"2020-05-02T23:26:21.685Z\"}]}";
+    private final String ADD_REQUEST_PAYLOAD = "{\"clients\":[{\"birthdate\":\"1970-01-01T05:00:00.000Z\",\"firstName\":\"Test\",\"gender\":\"Male\",\"lastName\":\"User\",\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"}],\"events\":[{\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\"entityType\":\"ec_family\",\"eventDate\":\"2020-05-02T23:26:21.685Z\"}]}";
 
-    private String POST_SYNC_REQUEST = "{\n"
+    private final String POST_SYNC_REQUEST = "{\n"
             + "\t\"providerId\": \"test\",\n"
             + "\t\"locationId\": \"test\",\n"
             + "\t\"baseEntityId\": \"test\",\n"
@@ -505,7 +503,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
         when(multimediaService.retrieveFile(anyString())).thenReturn(imageFile);
         when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/export-data").param("eventTypes", "looks_good,flag_problem")
-                .param("planIdentifier", "15421904649873"))
+                        .param("planIdentifier", "15421904649873"))
                 .andExpect(status().isOk()).andReturn();
         verify(eventService, times(2)).exportEventData(anyString(), anyString(), nullable(Date.class), nullable(Date.class));
         verify(eventService)

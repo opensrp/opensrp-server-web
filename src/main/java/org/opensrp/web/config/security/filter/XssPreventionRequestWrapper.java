@@ -7,32 +7,30 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.owasp.encoder.Encode;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
 public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 
-    private static Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
+    private static final Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
 
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private byte[] rawData;
 
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
-    private ResettableServletInputStream servletStream;
+    private final ResettableServletInputStream servletStream;
 
     public XssPreventionRequestWrapper(HttpServletRequest request) {
         super(request);

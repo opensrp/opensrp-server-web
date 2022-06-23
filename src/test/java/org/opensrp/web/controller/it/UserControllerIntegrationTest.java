@@ -1,9 +1,6 @@
 package org.opensrp.web.controller.it;
 
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opensrp.api.domain.Time;
@@ -13,6 +10,8 @@ import org.smartregister.domain.User;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
+
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 public class UserControllerIntegrationTest extends BaseResourceTest {
 

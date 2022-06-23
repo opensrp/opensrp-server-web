@@ -3,8 +3,6 @@
  */
 package org.opensrp.web.utils;
 
-import static org.mockito.Mockito.when;
-
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
@@ -19,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.mockito.Mockito.when;
 
 /**
  * @author Samuel Githengi created on 06/25/20

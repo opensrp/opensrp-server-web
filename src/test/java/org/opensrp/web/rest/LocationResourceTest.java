@@ -1,36 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,11 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.opensrp.api.util.LocationTree;
@@ -75,14 +44,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -123,9 +92,9 @@ public class LocationResourceTest {
     private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
     @Mock
     private PlanService planService;
-    private String MESSAGE = "The server encountered an error processing the request.";
-    private String BASE_URL = "/rest/location/";
-    private boolean DEFAULT_RETURN_BOOLEAN = true;
+    private final String MESSAGE = "The server encountered an error processing the request.";
+    private final String BASE_URL = "/rest/location/";
+    private final boolean DEFAULT_RETURN_BOOLEAN = true;
 
     public static PhysicalLocation createStructure() {
         return LocationResource.gson.fromJson(structureJson, PhysicalLocation.class);
@@ -136,8 +105,8 @@ public class LocationResourceTest {
         MockitoAnnotations.initMocks(this);
         mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(locationResource)
                 .setControllerAdvice(new GlobalExceptionHandler()).
-                        addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-                        build();
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
     }
 
     @Test
@@ -193,7 +162,7 @@ public class LocationResourceTest {
         when(locationService.findLocationsByServerVersion(1542640316113l)).thenReturn(expected);
 
         MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\"}".getBytes()))
+                        .content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\"}".getBytes()))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByServerVersion(1542640316113l);
         verifyNoMoreInteractions(locationService);
@@ -227,7 +196,7 @@ public class LocationResourceTest {
         expected.add(createLocation());
         when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
         MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-                .content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"]}").getBytes()))
+                        .content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"]}").getBytes()))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByNames(locationNames, 0l);
         verifyNoMoreInteractions(locationService);
@@ -248,7 +217,7 @@ public class LocationResourceTest {
         expected.add(createLocation());
         when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
         result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-                .content(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"]}").getBytes()))
+                        .content(("{\"serverVersion\":\"0\",\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"]}").getBytes()))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByNames(locationNames, 0l);
         verifyNoMoreInteractions(locationService);
@@ -272,7 +241,7 @@ public class LocationResourceTest {
         expected.add(createLocation());
         when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-                .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+                        .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByNames(locationNames, 0l);
         verifyNoMoreInteractions(locationService);
@@ -293,7 +262,7 @@ public class LocationResourceTest {
         expected.add(createLocation());
         when(locationService.findLocationsByNames(locationNames, 0l)).thenReturn(expected);
         result = mockMvc.perform(get(BASE_URL + "/sync").param(BaseEntity.SERVER_VERSIOIN, "0")
-                .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
+                        .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.LOCATION_NAMES, locationNames))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByNames(locationNames, 0l);
         verifyNoMoreInteractions(locationService);
@@ -424,7 +393,7 @@ public class LocationResourceTest {
         when(locationService.findStructuresByParentAndServerVersion(null, 1542640316l))
                 .thenThrow(new IllegalArgumentException());
         MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).
-                content("{\"serverVersion\", \"1542640316\"}".getBytes()))
+                        content("{\"serverVersion\", \"1542640316\"}".getBytes()))
                 .andExpect(status().isBadRequest()).andReturn();
         verify(locationService, never()).findStructuresByParentAndServerVersion(anyString(), anyLong());
         verifyNoMoreInteractions(locationService);
@@ -473,7 +442,7 @@ public class LocationResourceTest {
     @Test
     public void testCreateLocationWithInvalidJson() throws Exception {
         mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.substring(4).getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.substring(4).getBytes()))
                 .andExpect(status().isBadRequest());
         verify(locationService, never()).add(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -482,7 +451,7 @@ public class LocationResourceTest {
     @Test
     public void testCreateStructure() throws Exception {
         mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "false").content(structureJson.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "false").content(structureJson.getBytes()))
                 .andExpect(status().isCreated());
         verify(locationService).add(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -501,7 +470,7 @@ public class LocationResourceTest {
     @Test
     public void testUpdateLocation() throws Exception {
         mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.getBytes()))
                 .andExpect(status().isCreated());
         verify(locationService).update(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -512,7 +481,7 @@ public class LocationResourceTest {
     @Test
     public void testUpdateLocationWithInvalidJson() throws Exception {
         mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.substring(6).getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(parentJson.substring(6).getBytes()))
                 .andExpect(status().isBadRequest());
         verify(locationService, never()).update(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -530,7 +499,7 @@ public class LocationResourceTest {
     @Test
     public void testUpdateStructure() throws Exception {
         mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "false").content(structureJson.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "false").content(structureJson.getBytes()))
                 .andExpect(status().isCreated());
         verify(locationService).update(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -541,7 +510,7 @@ public class LocationResourceTest {
     @Test
     public void testUpdateStructureWithInvalidJson() throws Exception {
         mockMvc.perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "false").content(parentJson.substring(8).getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "false").content(parentJson.substring(8).getBytes()))
                 .andExpect(status().isBadRequest());
         verify(locationService, never()).update(argumentCaptor.capture());
         verifyNoMoreInteractions(locationService);
@@ -554,7 +523,7 @@ public class LocationResourceTest {
         locations.add(createStructure());
         String request = LocationResource.gson.toJson(locations);
         mockMvc.perform(post(BASE_URL + "add").contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(request.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(request.getBytes()))
                 .andExpect(status().isCreated());
 
         ArgumentCaptor<Boolean> isParentArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
@@ -571,7 +540,7 @@ public class LocationResourceTest {
     @Test
     public void saveBatchWithInvalidJson() throws Exception {
         mockMvc.perform(post(BASE_URL + "add").contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(structureJson.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(structureJson.getBytes()))
                 .andExpect(status().isBadRequest());
 
         ArgumentCaptor<Boolean> isParentArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
@@ -591,7 +560,7 @@ public class LocationResourceTest {
 
         doThrow(new RuntimeException()).when(locationService).saveLocations(anyList(), anyBoolean());
         mockMvc.perform(post(BASE_URL + "add").contentType(MediaType.APPLICATION_JSON)
-                .param(LocationResource.IS_JURISDICTION, "true").content(request.getBytes()))
+                        .param(LocationResource.IS_JURISDICTION, "true").content(request.getBytes()))
                 .andExpect(status().isInternalServerError());
 
         verify(locationService).saveLocations(anyList(), anyBoolean());
@@ -673,7 +642,7 @@ public class LocationResourceTest {
         List<PhysicalLocation> locations = Collections.singletonList(createLocation());
         when(locationService.findLocationsByProperties(true, null, null)).thenReturn(locations);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/findByProperties")
-                .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.RETURN_GEOMETRY, "true"))
+                        .param(LocationResource.IS_JURISDICTION, "true").param(LocationResource.RETURN_GEOMETRY, "true"))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByProperties(true, null, null);
         assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
@@ -862,7 +831,7 @@ public class LocationResourceTest {
     public void testGetSearchLocationsWithParams() throws Exception {
         List<PhysicalLocation> expected = new ArrayList<>();
         expected.add(createSearchLocation());
-        when(locationService.searchLocations((LocationSearchBean) any())).thenReturn(expected);
+        when(locationService.searchLocations(any())).thenReturn(expected);
         MvcResult result = mockMvc
                 .perform(
                         get(BASE_URL + "search-by-tag/").param("locationTagId", "2").param("name", "a")
@@ -872,7 +841,7 @@ public class LocationResourceTest {
         LocationSearchcBean expectedLocations = new LocationSearchcBean();
         expectedLocations.setLocations(expected);
         expectedLocations.setTotal(0);
-        verify(locationService).searchLocations((LocationSearchBean) any());
+        verify(locationService).searchLocations(any());
         verifyNoMoreInteractions(locationService);
         assertEquals(LocationResource.gson.toJson(expectedLocations), result.getResponse().getContentAsString());
     }
@@ -892,7 +861,7 @@ public class LocationResourceTest {
         when(locationService.countLocationsByServerVersion(1542640316113l)).thenReturn(totalRecords);
 
         MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\", \"return_count\":true}".getBytes()))
+                        .content("{\"serverVersion\":\"1542640316113\", \"is_jurisdiction\":\"true\", \"return_count\":true}".getBytes()))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByServerVersion(1542640316113l);
         verify(locationService).countLocationsByServerVersion(1542640316113l);
@@ -916,7 +885,7 @@ public class LocationResourceTest {
         long totalRecords = 5l;
         when(locationService.countLocationsByNames(locationNames, 0l)).thenReturn(totalRecords);
         MvcResult result = mockMvc.perform(post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON)
-                .content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"],\"return_count\":true}").getBytes()))
+                        .content(("{\"serverVersion\":0,\"is_jurisdiction\":\"true\", \"location_names\":[\"" + locationNames + "\"],\"return_count\":true}").getBytes()))
                 .andExpect(status().isOk()).andReturn();
         verify(locationService).findLocationsByNames(locationNames, 0l);
         verify(locationService).countLocationsByNames(locationNames, 0l);
@@ -1022,7 +991,7 @@ public class LocationResourceTest {
     @Test
     public void testImportLocationsWithStartPageParam() throws Exception {
         MvcResult result = mockMvc.perform(
-                post(BASE_URL + "/dhis2/import?startPage=2&beginning=false").contentType(MediaType.APPLICATION_JSON))
+                        post(BASE_URL + "/dhis2/import?startPage=2&beginning=false").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();
 
         verify(dhis2ImportOrganizationUnits).importOrganizationUnits("2");

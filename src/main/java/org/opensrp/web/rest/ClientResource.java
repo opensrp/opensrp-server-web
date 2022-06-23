@@ -1,34 +1,6 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.BaseEntity.ADDRESS_TYPE;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.CITY_VILLAGE;
-import static org.opensrp.common.AllConstants.BaseEntity.COUNTRY;
-import static org.opensrp.common.AllConstants.BaseEntity.COUNTY_DISTRICT;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.BaseEntity.SERVER_VERSIOIN;
-import static org.opensrp.common.AllConstants.BaseEntity.STATE_PROVINCE;
-import static org.opensrp.common.AllConstants.BaseEntity.SUB_DISTRICT;
-import static org.opensrp.common.AllConstants.BaseEntity.SUB_TOWN;
-import static org.opensrp.common.AllConstants.BaseEntity.TOWN;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.CLIENTTYPE;
-import static org.opensrp.common.AllConstants.Client.DEATH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.ORDERBYFIELDNAAME;
-import static org.opensrp.common.AllConstants.Client.ORDERBYTYPE;
-import static org.opensrp.common.AllConstants.Client.PROVIDERID;
-import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.rest.RestUtils.getDateFilter;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -52,10 +24,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.opensrp.common.AllConstants.BaseEntity.*;
+import static org.opensrp.common.AllConstants.Client.*;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
+import static org.opensrp.web.Constants.DEFAULT_LIMIT;
+import static org.opensrp.web.rest.RestUtils.*;
 
 @Controller
 @RequestMapping(value = "/rest/client")
@@ -154,7 +132,7 @@ public class ClientResource extends RestResource<Client> {
             List<String> relationshipTypes = StringUtils.isBlank(relationships) ?
                     new ArrayList<>() :
                     Arrays.asList(relationships.split(","));
-            logger.info("Relationship types: " + relationshipTypes.toString());
+            logger.info("Relationship types: " + relationshipTypes);
             if (!relationshipTypes.isEmpty()) {
                 List<Client> clientRelationships = getRelationships(clients, relationshipTypes);
                 clients.addAll(clientRelationships);

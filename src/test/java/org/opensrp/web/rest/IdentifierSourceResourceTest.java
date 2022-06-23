@@ -1,20 +1,8 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +26,15 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 
@@ -58,8 +55,8 @@ public class IdentifierSourceResourceTest {
         MockitoAnnotations.initMocks(this);
         mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(identifierSourceResource)
                 .setControllerAdvice(new GlobalExceptionHandler()).
-                        addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-                        build();
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
     }
 
     @Test
@@ -101,7 +98,7 @@ public class IdentifierSourceResourceTest {
         IdentifierSource identifierSource = createIdentifierSource();
         doNothing().when(identifierSourceService).add(any(IdentifierSource.class));
         MvcResult result = mockMvc.perform(post(BASE_URL, new Gson().toJson(identifierSource))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andReturn();
         assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
@@ -112,7 +109,7 @@ public class IdentifierSourceResourceTest {
         IdentifierSource identifierSource = createIdentifierSource();
         doNothing().when(identifierSourceService).update(any(IdentifierSource.class));
         MvcResult result = mockMvc.perform(put(BASE_URL, new Gson().toJson(identifierSource))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andReturn();
         assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());

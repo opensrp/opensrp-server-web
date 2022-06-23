@@ -1,18 +1,7 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
-import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +34,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.Stock.PROVIDERID;
+import static org.opensrp.common.AllConstants.Stock.TIMESTAMP;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -106,7 +105,7 @@ public class StockResourceTest {
                 .thenReturn(expected);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "getall")
-                .param("limit", "1"))
+                        .param("limit", "1"))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -176,8 +175,8 @@ public class StockResourceTest {
                 .thenReturn(null);
 
         mockMvc.perform(get(BASE_URL + "/sync")
-                .param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
-                .param("limit", "1"))
+                        .param(AllConstants.BaseEntity.SERVER_VERSIOIN, "15421904649873")
+                        .param("limit", "1"))
                 .andExpect(status().isInternalServerError())
                 .andReturn();
     }
@@ -211,7 +210,7 @@ public class StockResourceTest {
                 .thenReturn(null);
 
         MvcResult result = mockMvc.perform(
-                post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
+                        post(BASE_URL + "/sync").contentType(MediaType.APPLICATION_JSON).content(POST_SYNC_PAYLOAD.getBytes()))
                 .andExpect(status().isInternalServerError()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -245,7 +244,7 @@ public class StockResourceTest {
     public void testSave() throws Exception {
         when(stockService.addorUpdateStock(any(Stock.class))).thenReturn(createStock());
         MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-                .content(SYNC_PAYLOAD.getBytes()))
+                        .content(SYNC_PAYLOAD.getBytes()))
                 .andExpect(status().isCreated()).andReturn();
 
         assertEquals(result.getResponse().getContentAsString(), "");
@@ -255,7 +254,7 @@ public class StockResourceTest {
     public void testSaveWithBlankData() throws Exception {
         when(stockService.addorUpdateStock(any(Stock.class))).thenReturn(createStock());
         MvcResult result = mockMvc.perform(post(BASE_URL + "/add").contentType(MediaType.APPLICATION_JSON)
-                .content("".getBytes()))
+                        .content("".getBytes()))
                 .andExpect(status().isBadRequest()).andReturn();
         assertEquals(result.getResponse().getContentAsString(), "");
     }
@@ -288,7 +287,7 @@ public class StockResourceTest {
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
         Mockito.doNothing().when(stockService).addInventory(any(Inventory.class), anyString());
         MvcResult result = mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(INVENTORY_PAYLOAD.getBytes()))
+                        .content(INVENTORY_PAYLOAD.getBytes()))
                 .andExpect(status().isCreated()).andReturn();
         verify(stockService).addInventory(any(Inventory.class), anyString());
         assertEquals("", result.getResponse().getContentAsString());
@@ -303,8 +302,8 @@ public class StockResourceTest {
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
         Mockito.doNothing().when(stockService).updateInventory(any(Inventory.class), anyString());
         MvcResult result = mockMvc.perform(
-                put(BASE_URL + "/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
-                        .content(INVENTORY_PAYLOAD.getBytes()))
+                        put(BASE_URL + "/{id}", "ead1e3ef-b086-4d99-89f5-3dfc5f67709e").contentType(MediaType.APPLICATION_JSON)
+                                .content(INVENTORY_PAYLOAD.getBytes()))
                 .andExpect(status().isCreated()).andReturn();
         verify(stockService).updateInventory(any(Inventory.class), anyString());
         assertEquals(result.getResponse().getContentAsString(), "");
@@ -370,8 +369,8 @@ public class StockResourceTest {
         when(stockService.validateBulkInventoryData(anyList())).thenReturn(csvBulkImportDataSummary);
 
         MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
-                        .file(file))
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
+                                .file(file))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -400,8 +399,8 @@ public class StockResourceTest {
         when(stockService.validateBulkInventoryData(anyList())).thenReturn(csvBulkImportDataSummary);
 
         MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
-                        .file(file))
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/inventory/validate")
+                                .file(file))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -430,8 +429,8 @@ public class StockResourceTest {
         when(stockService.convertandPersistInventorydata(anyList(), anyString())).thenReturn(csvBulkImportDataSummary);
 
         MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
-                        .file(file))
+                        MockMvcRequestBuilders.multipart(BASE_URL + "/import/inventory")
+                                .file(file))
                 .andExpect(status().isOk())
                 .andReturn();
 

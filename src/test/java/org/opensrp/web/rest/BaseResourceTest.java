@@ -1,16 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -33,6 +27,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.*;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -83,7 +79,7 @@ public abstract class BaseResourceTest<T> {
     protected JsonNode postRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -96,7 +92,7 @@ public abstract class BaseResourceTest<T> {
     protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -109,7 +105,7 @@ public abstract class BaseResourceTest<T> {
     protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                put(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        put(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();

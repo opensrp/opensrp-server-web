@@ -1,10 +1,5 @@
 package org.opensrp.web.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -19,6 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.ModelMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class HealthControllerTest {
 

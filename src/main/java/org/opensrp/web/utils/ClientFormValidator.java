@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,20 +20,16 @@ import org.springframework.lang.NonNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClientFormValidator {
 
-    private static String PROPERTIES_FILE_NAME = "properties_file_name";
-    private static Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
-    private ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
-    private ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
-    private ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
-    private ClientFormService clientFormService;
+    private static final String PROPERTIES_FILE_NAME = "properties_file_name";
+    private static final Logger logger = LogManager.getLogger(ClientFormValidator.class.toString());
+    private final ArrayList<String> jsonPathForSubFormReferences = new ArrayList<>();
+    private final ArrayList<String> jsonPathForRuleReferences = new ArrayList<>();
+    private final ArrayList<String> jsonPathForPropertyFileReferences = new ArrayList<>();
+    private final ClientFormService clientFormService;
 
     public ClientFormValidator(@NonNull ClientFormService clientFormService) {
         this.clientFormService = clientFormService;

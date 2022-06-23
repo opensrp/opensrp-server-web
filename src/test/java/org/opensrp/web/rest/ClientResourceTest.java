@@ -1,30 +1,9 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
@@ -52,10 +31,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
+import static org.springframework.test.web.AssertionErrors.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -83,7 +72,7 @@ public class ClientResourceTest {
     private ObjectMapper objectMapper;
     @InjectMocks
     private ClientResource clientResource;
-    private String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON = "{\n"
+    private final String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON = "{\n"
             + "\t\"clients\": [{\n"
             + "\t\t\"firstName\": \"Test\",\n"
             + "\t\t\"lastName\": \"User\"\n"
@@ -165,9 +154,9 @@ public class ClientResourceTest {
         when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-                param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
-                .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-                .param(CLIENTTYPE, ALLCLIENTS))
+                        param(AllConstants.BaseEntity.BASE_ENTITY_ID, "15421904649873")
+                        .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+                        .param(CLIENTTYPE, ALLCLIENTS))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -197,9 +186,9 @@ public class ClientResourceTest {
         when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-                param(BASE_ENTITY_ID, "15421904649873")
-                .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-                .param(CLIENTTYPE, HOUSEHOLD))
+                        param(BASE_ENTITY_ID, "15421904649873")
+                        .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+                        .param(CLIENTTYPE, HOUSEHOLD))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -225,9 +214,9 @@ public class ClientResourceTest {
         when(clientService.findMembersByRelationshipId(anyString())).thenReturn(expectedClients);
         when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-                param(BASE_ENTITY_ID, "15421904649873")
-                .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-                .param(CLIENTTYPE, HOUSEHOLDMEMEBR))
+                        param(BASE_ENTITY_ID, "15421904649873")
+                        .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+                        .param(CLIENTTYPE, HOUSEHOLDMEMEBR))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -255,9 +244,9 @@ public class ClientResourceTest {
         when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-                param(BASE_ENTITY_ID, "15421904649873")
-                .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-                .param(CLIENTTYPE, ANC))
+                        param(BASE_ENTITY_ID, "15421904649873")
+                        .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+                        .param(CLIENTTYPE, ANC))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();
@@ -286,10 +275,10 @@ public class ClientResourceTest {
         when(objectMapper.writeValueAsString(any(Object.class))).thenReturn(EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "/searchByCriteria").
-                param(BASE_ENTITY_ID, "15421904649873")
-                .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
-                .param(CLIENTTYPE, CHILD)
-                .param(LOCATION_ID, "location1,location2"))
+                        param(BASE_ENTITY_ID, "15421904649873")
+                        .param(PAGE_NUMBER, "1").param(PAGE_SIZE, "10").param(SEARCHTEXT, "abc").param(GENDER, "male")
+                        .param(CLIENTTYPE, CHILD)
+                        .param(LOCATION_ID, "location1,location2"))
                 .andExpect(status().isOk()).andReturn();
 
         String responseString = result.getResponse().getContentAsString();

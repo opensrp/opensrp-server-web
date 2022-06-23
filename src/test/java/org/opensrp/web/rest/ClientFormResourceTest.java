@@ -1,29 +1,11 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import org.apache.http.entity.ContentType;
 import org.hamcrest.core.StringStartsWith;
 import org.joda.time.DateTime;
@@ -58,6 +40,14 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
@@ -161,10 +151,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("strict", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("strict", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -196,11 +186,11 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("strict", "true")
-                .param("is_json_validator", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("strict", "true")
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -231,10 +221,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("strict", "True")
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("strict", "True")
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isNoContent())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -262,10 +252,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("strict", "True")
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("strict", "True")
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -303,9 +293,9 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -349,10 +339,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("is_json_validator", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -375,10 +365,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -408,11 +398,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -440,11 +430,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName)
-                        .param("is_json_validator", "true"))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName)
+                                .param("is_json_validator", "true"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -475,10 +465,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -508,12 +498,12 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName)
-                        .param("is_json_validator", "true"))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName)
+                                .param("is_json_validator", "true"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -542,10 +532,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -574,10 +564,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -606,10 +596,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -699,11 +689,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult mvcResult = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -726,11 +716,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -758,11 +748,11 @@ public class ClientFormResourceTest {
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);
 
         MvcResult mvcResult = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -787,10 +777,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -820,10 +810,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -851,10 +841,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -876,11 +866,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -902,10 +892,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -934,11 +924,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -960,9 +950,9 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -982,7 +972,7 @@ public class ClientFormResourceTest {
     @Test
     public void testGetAllFilesRelatedToReleaseWithoutIdentifier() throws Exception {
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", ""))
+                        .param("identifier", ""))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertEquals("Request parameter cannot be empty", result.getResponse().getContentAsString());
@@ -995,7 +985,7 @@ public class ClientFormResourceTest {
         when(manifestService.getManifest(identifier)).thenReturn(new Manifest());
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -1009,7 +999,7 @@ public class ClientFormResourceTest {
         when(manifestService.getManifest(identifier)).thenReturn(initTestManifest());
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
@@ -1023,7 +1013,7 @@ public class ClientFormResourceTest {
         when(manifestService.getManifest(identifier)).thenReturn(initTestManifest2());
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
@@ -1039,7 +1029,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false))
                 .thenReturn(new ArrayList<>());
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1086,7 +1076,7 @@ public class ClientFormResourceTest {
                 });
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1122,7 +1112,7 @@ public class ClientFormResourceTest {
                 });
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1158,7 +1148,7 @@ public class ClientFormResourceTest {
                 });
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1181,11 +1171,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_relation", relatedJsonIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_relation", relatedJsonIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -1290,7 +1280,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getDraftsClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
-                .param("is_draft", "true"))
+                        .param("is_draft", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -1320,7 +1310,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getJsonWidgetValidatorClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
-                .param("is_json_validator", "true"))
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();

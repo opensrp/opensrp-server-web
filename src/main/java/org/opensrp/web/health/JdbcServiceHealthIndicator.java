@@ -11,9 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 
-import java.util.concurrent.Callable;
-
 import javax.sql.DataSource;
+import java.util.concurrent.Callable;
 
 @Profile("postgres")
 @Component

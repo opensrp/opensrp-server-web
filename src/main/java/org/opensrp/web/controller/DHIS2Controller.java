@@ -1,7 +1,6 @@
 package org.opensrp.web.controller;
 
 import com.google.gson.Gson;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensrp.connector.dhis2.DHIS2AggregateConnector;

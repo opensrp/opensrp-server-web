@@ -1,9 +1,5 @@
 package org.opensrp.web.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,13 +14,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public class CustomErrorResourceTest {
 
     private MockMvc mockMvc;
 
-    private String ERROR_ENDPOINT = "/error";
+    private final String ERROR_ENDPOINT = "/error";
 
     @InjectMocks
     private CustomErrorResource customErrorResource;
@@ -41,7 +41,7 @@ public class CustomErrorResourceTest {
     @Test
     public void testErrorEndpointReturnsJsonString() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 

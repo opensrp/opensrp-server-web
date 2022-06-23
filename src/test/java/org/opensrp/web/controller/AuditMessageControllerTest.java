@@ -1,11 +1,5 @@
 package org.opensrp.web.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.opensrp.common.audit.AuditMessageType.FORM_SUBMISSION;
-import static org.opensrp.common.audit.AuditMessageType.SMS;
-
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.opensrp.common.audit.AuditMessageType.FORM_SUBMISSION;
+import static org.opensrp.common.audit.AuditMessageType.SMS;
 
 public class AuditMessageControllerTest {
     @Mock

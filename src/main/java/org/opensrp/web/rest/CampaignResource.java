@@ -1,11 +1,8 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -27,12 +24,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+
 @Controller
 @RequestMapping(value = "/rest/campaign")
 public class CampaignResource {
     public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
-    private static Logger logger = LogManager.getLogger(CampaignResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(CampaignResource.class.toString());
     private CampaignService campaignService;
 
     @Autowired
