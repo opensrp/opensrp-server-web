@@ -48,6 +48,20 @@ public class UniqueIdControllerTest {
 
     private final String BASE_URL = "/uniqueids";
     private final String ERROR_MESSAGE = "\"Sorry, an error occured when generating the qr code pdf\"";
+    private final String EXPECTED_IDENTIFIER = "{\n"
+            + "    \"identifiers\": [\n"
+            + "        \"AAAB-9\",\n"
+            + "        \"AAA1-6\",\n"
+            + "        \"AAA2-4\",\n"
+            + "        \"AABA-0\",\n"
+            + "        \"AABB-8\",\n"
+            + "        \"AAB1-5\",\n"
+            + "        \"AAB2-3\",\n"
+            + "        \"AA1A-7\",\n"
+            + "        \"AA1B-5\",\n"
+            + "        \"AA11-2\"\n"
+            + "    ]\n"
+            + "}";
     @Autowired
     protected WebApplicationContext webApplicationContext;
     protected ObjectMapper mapper = new ObjectMapper();
@@ -64,20 +78,6 @@ public class UniqueIdControllerTest {
     private Authentication authentication;
     @Mock
     private ObjectMapper objectMapper;
-    private final String EXPECTED_IDENTIFIER = "{\n"
-            + "    \"identifiers\": [\n"
-            + "        \"AAAB-9\",\n"
-            + "        \"AAA1-6\",\n"
-            + "        \"AAA2-4\",\n"
-            + "        \"AABA-0\",\n"
-            + "        \"AABB-8\",\n"
-            + "        \"AAB1-5\",\n"
-            + "        \"AAB2-3\",\n"
-            + "        \"AA1A-7\",\n"
-            + "        \"AA1B-5\",\n"
-            + "        \"AA11-2\"\n"
-            + "    ]\n"
-            + "}";
 
     @Before
     public void setUp() {

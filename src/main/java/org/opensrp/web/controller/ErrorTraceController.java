@@ -37,9 +37,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/errorhandler")
 public class ErrorTraceController {
 
-    private String opensrpSiteUrl;
-
     private final ErrorTraceService errorTraceService;
+    private String opensrpSiteUrl;
 
     @Autowired
     public ErrorTraceController(ErrorTraceService errorTraceService) {

@@ -54,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         TestSecurityConfig.class})
 public class UserResourceTest {
 
+    private final String BASE_URL = "/rest/user";
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     @Autowired
@@ -72,11 +73,7 @@ public class UserResourceTest {
     private String usersURL;
     @Captor
     private ArgumentCaptor<ResetPasswordBean> resetPasswordBeanCaptor;
-
     private MockMvc mockMvc;
-
-    private final String BASE_URL = "/rest/user";
-
     private UserResource userResource;
 
     @Before

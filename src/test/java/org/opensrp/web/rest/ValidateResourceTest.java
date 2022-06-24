@@ -32,6 +32,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ValidateResourceTest {
 
     private final String BASE_URL = "/rest/validate/";
+    private final String INVALID_JSON = "{\n"
+            + "  \"client\" : {\n"
+            + "  \"firstName\" : \"Test\" \n"
+            + "  }\n"
+            + "}";
+    private final String SYNC_REQUEST_PAYLOAD = "{\n"
+            + "\t\"clients\": \"[ 1 , 2 ]\",\n"
+            + "\t\"events\": \"[ 1 , 2]\"\n"
+            + "}";
+    private final String SYNC_REQUEST_STRING_PAYLOAD = "{\n"
+            + "\t\"clients\": \"[ 1 , 2 ]\",\n"
+            + "\t\"events\": \"[ 1 , 2]\"\n"
+            + "}";
     @Autowired
     protected WebApplicationContext webApplicationContext;
     protected ObjectMapper mapper = new ObjectMapper();
@@ -42,21 +55,6 @@ public class ValidateResourceTest {
     private EventService eventService;
     @InjectMocks
     private ValidateResource validateResource;
-    private final String INVALID_JSON = "{\n"
-            + "  \"client\" : {\n"
-            + "  \"firstName\" : \"Test\" \n"
-            + "  }\n"
-            + "}";
-
-    private final String SYNC_REQUEST_PAYLOAD = "{\n"
-            + "\t\"clients\": \"[ 1 , 2 ]\",\n"
-            + "\t\"events\": \"[ 1 , 2]\"\n"
-            + "}";
-
-    private final String SYNC_REQUEST_STRING_PAYLOAD = "{\n"
-            + "\t\"clients\": \"[ 1 , 2 ]\",\n"
-            + "\t\"events\": \"[ 1 , 2]\"\n"
-            + "}";
 
     @Before
     public void setUp() {

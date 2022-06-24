@@ -29,9 +29,9 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 @Controller
 @RequestMapping(value = "/rest/campaign")
 public class CampaignResource {
+    private static final Logger logger = LogManager.getLogger(CampaignResource.class.toString());
     public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
-    private static final Logger logger = LogManager.getLogger(CampaignResource.class.toString());
     private CampaignService campaignService;
 
     @Autowired

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.*;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
@@ -35,7 +36,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -45,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ProductCatalogueResourceTest {
 
+    private final String BASE_URL = "/rest/product-catalogue";
     @Autowired
     protected WebApplicationContext webApplicationContext;
     protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
@@ -57,7 +60,6 @@ public class ProductCatalogueResourceTest {
     @Captor
     private ArgumentCaptor<ProductCatalogue> argumentCaptor;
     private MockMvc mockMvc;
-    private final String BASE_URL = "/rest/product-catalogue";
 
     @Before
     public void setUp() throws Exception {
@@ -139,7 +141,7 @@ public class ProductCatalogueResourceTest {
 
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 
-        Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+        doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
         when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
         when(multimediaService.findByCaseId(anyString())).thenReturn(null);
         when(multipartFile.getContentType()).thenReturn("");
@@ -155,7 +157,7 @@ public class ProductCatalogueResourceTest {
 
         verify(multimediaService).findByCaseId(anyString());
 
-        verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+        verify(multimediaService).saveFile(any(MultimediaDTO.class), any(byte[].class),
                 anyString());
 
         ProductCatalogue catalogue = argumentCaptor.getValue();
@@ -178,10 +180,10 @@ public class ProductCatalogueResourceTest {
 
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(getMockedAuthentication());
 
-        Mockito.doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
+        doNothing().when(productCatalogueService).add(any(ProductCatalogue.class));
         when(productCatalogueService.getProductCatalogueByName(anyString())).thenReturn(productCatalogue);
         when(multimediaService.findByCaseId(anyString())).thenReturn(multimedia);
-        Mockito.doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
+        doNothing().when(multimediaService).deleteMultimedia(any(Multimedia.class));
         when(multipartFile.getContentType()).thenReturn("");
         when(multipartFile.getBytes()).thenReturn(bytes);
         when(multipartFile.getOriginalFilename()).thenReturn("Midwifery kit image");
@@ -195,7 +197,7 @@ public class ProductCatalogueResourceTest {
 
         verify(multimediaService).deleteMultimedia(any(Multimedia.class));
 
-        verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+        verify(multimediaService).saveFile(any(MultimediaDTO.class), any(byte[].class),
                 anyString());
 
         ProductCatalogue catalogue = argumentCaptor.getValue();

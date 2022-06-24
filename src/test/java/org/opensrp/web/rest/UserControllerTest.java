@@ -66,9 +66,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class UserControllerTest {
 
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
-
     @Autowired
     protected WebApplicationContext webApplicationContext;
     @Value("#{opensrp['keycloak.configuration.endpoint']}")
@@ -93,8 +93,6 @@ public class UserControllerTest {
     private PlanService planService;
     @Autowired
     private KeycloakRestTemplate restTemplate;
-
-    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 
     @Before
     public void setUp() {

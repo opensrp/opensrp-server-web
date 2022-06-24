@@ -28,9 +28,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class ReportResource {
 
     private static final Logger logger = LogManager.getLogger(ReportResource.class.toString());
+    private final ReportService reportService;
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private final ReportService reportService;
 
     @Autowired
     public ReportResource(ReportService reportService) {

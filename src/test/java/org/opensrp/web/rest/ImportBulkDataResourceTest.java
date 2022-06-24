@@ -31,15 +31,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class ImportBulkDataResourceTest {
 
+    private final String BASE_URL = "/rest/import";
     private MockMvc mockMvc;
-
     @InjectMocks
     private ImportBulkDataResource importBulkDataResource;
-
     @Mock
     private ImportBulkDataService importBulkDataService;
-
-    private final String BASE_URL = "/rest/import";
 
     @Before
     public void setUp() throws Exception {

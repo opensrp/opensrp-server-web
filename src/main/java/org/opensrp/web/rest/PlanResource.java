@@ -58,11 +58,11 @@ public class PlanResource {
     public static final String OPENSRP_EVENT_ID = "opensrpEventId";
     private static final String IS_DELETED = "is_deleted";
     private static final String FALSE = "false";
+    private static final Logger logger = LogManager.getLogger(PlanResource.class.toString());
     public static Gson gson = new GsonBuilder()
             .registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter("yyyy-MM-dd"))
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter())
             .registerTypeAdapter(Time.class, new TimingRepeatTimeTypeConverter()).create();
-    private static final Logger logger = LogManager.getLogger(PlanResource.class.toString());
     private PlanService planService;
     private PhysicalLocationService locationService;
 

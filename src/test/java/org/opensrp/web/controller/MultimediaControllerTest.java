@@ -2,7 +2,11 @@ package org.opensrp.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
@@ -49,17 +53,17 @@ public class MultimediaControllerTest {
 
     @Test
     public void testUploadShouldUploadFileWithCorrectName() throws Exception {
-        MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
-        Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
-        Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
-        Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+        MultipartFile multipartFile = mock(MultipartFile.class);
+        doReturn("originalName").when(multipartFile).getOriginalFilename();
+        doReturn("image/jpeg").when(multipartFile).getContentType();
+        doReturn(new byte[10]).when(multipartFile).getBytes();
 
         multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
 
         ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
         // verify call
-        Mockito.verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
+        verify(multimediaService).saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class),
                 stringArgumentCaptor.capture());
 
         // verify call arguments
@@ -68,7 +72,7 @@ public class MultimediaControllerTest {
 
     @Test
     public void testDownloadWithAuth() throws IOException {
-        MultimediaController controller = Mockito.spy(new MultimediaController());
+        MultimediaController controller = spy(new MultimediaController());
 
         MultimediaService multimediaService = mock(MultimediaService.class);
         HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
@@ -79,15 +83,15 @@ public class MultimediaControllerTest {
         controller.downloadFileWithAuth(httpServletResponse, "fileName");
 
         // verify call to the service
-        Mockito.verify(multimediaService).retrieveFile(anyString());
+        verify(multimediaService).retrieveFile(anyString());
     }
 
     @Test
     public void testUploadShouldReturnBadRequestWithInvalidEntityId() throws Exception {
         MultipartFile multipartFile = mock(MultipartFile.class);
-        Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
-        Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
-        Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+        doReturn("originalName").when(multipartFile).getOriginalFilename();
+        doReturn("image/jpeg").when(multipartFile).getContentType();
+        doReturn(new byte[10]).when(multipartFile).getBytes();
 
         ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id" + "\r", "file-category",
                 multipartFile);
@@ -98,9 +102,9 @@ public class MultimediaControllerTest {
     @Test
     public void testUploadShouldReturnBadRequestWithSpecialCharacterFileName() throws Exception {
         MultipartFile multipartFile = mock(MultipartFile.class);
-        Mockito.doReturn("originalName" + "\t").when(multipartFile).getOriginalFilename();
-        Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
-        Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+        doReturn("originalName" + "\t").when(multipartFile).getOriginalFilename();
+        doReturn("image/jpeg").when(multipartFile).getContentType();
+        doReturn(new byte[10]).when(multipartFile).getBytes();
 
         ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category",
                 multipartFile);

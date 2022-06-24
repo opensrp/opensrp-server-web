@@ -744,7 +744,7 @@ public class ClientFormResourceTest {
         ClientForm formValidator = new ClientForm();
         formValidator.setJson("\"{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\",\"aefi_form\"]}}\"");
 
-        Mockito.doReturn(formValidator)
+        doReturn(formValidator)
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);
 
         MvcResult mvcResult = mockMvc.perform(
@@ -805,7 +805,7 @@ public class ClientFormResourceTest {
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/attention_flag.yml",
                 "application/x-yaml", TestFileContent.ATTENTION_FLAGS_YAML_FILE.getBytes());
 
-        Mockito.doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
+        doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
         when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestList());
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 

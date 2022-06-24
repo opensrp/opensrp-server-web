@@ -22,10 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public class CustomErrorResourceTest {
 
-    private MockMvc mockMvc;
-
     private final String ERROR_ENDPOINT = "/error";
-
+    private MockMvc mockMvc;
     @InjectMocks
     private CustomErrorResource customErrorResource;
 

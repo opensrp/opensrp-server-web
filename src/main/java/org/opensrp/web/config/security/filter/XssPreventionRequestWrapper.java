@@ -25,12 +25,9 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
     private static final Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    private byte[] rawData;
-
     private final HttpServletRequest request;
-
     private final ResettableServletInputStream servletStream;
+    private byte[] rawData;
 
     public XssPreventionRequestWrapper(HttpServletRequest request) {
         super(request);

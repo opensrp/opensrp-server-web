@@ -28,11 +28,11 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
     private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\", \\\"remove_structure.json\\\"]}\"}";
     private final static String existingManifestJson = "{\"forms_version\":\"1.0.2\",\"identifiers\":[\"add_structure.json\"]}";
     private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"add_structure.json\",\"remove_structure.json\"]}";
-    private ManifestService manifestService;
-    private ClientFormService clientFormService;
     private final ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
     private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     private final ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
+    private ManifestService manifestService;
+    private ClientFormService clientFormService;
 
     private static Manifest initTestManifest() {
         Manifest manifest = new Manifest();

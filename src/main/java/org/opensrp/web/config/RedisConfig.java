@@ -27,19 +27,15 @@ import org.springframework.data.redis.core.RedisTemplate;
 @EnableCaching
 public class RedisConfig {
 
-    @Value("#{opensrp['redis.host']}")
-    private String redisHost;
-
-    @Value("#{opensrp['redis.port']}")
-    private int redisPort;
-
-    @Value("#{opensrp['redis.password']}")
-    private String redisPassword;
-
     private final int redisDatabase = 0;
-
     @Value("#{opensrp['redis.pool.max.connections']}")
     private final int redisMaxConnections = 0;
+    @Value("#{opensrp['redis.host']}")
+    private String redisHost;
+    @Value("#{opensrp['redis.port']}")
+    private int redisPort;
+    @Value("#{opensrp['redis.password']}")
+    private String redisPassword;
 
     @Profile("lettuce")
     @Bean(name = "lettuceConnectionFactory")

@@ -58,15 +58,12 @@ public class XlsDataImportController {
     public static final String MEASLES_VACCINE = "measles";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    @Value("#{opensrp['multimedia.allowed.file.types']}")
-    private String allowedMimeTypes;
-
     private final ClientService clientService;
     private final EventService eventService;
     private final OpenmrsIDService openmrsIDService;
-
     private final DateTimeFormatter parseDate = DateTimeFormat.forPattern(DATE_FORMAT);
+    @Value("#{opensrp['multimedia.allowed.file.types']}")
+    private String allowedMimeTypes;
 
 
     @Autowired

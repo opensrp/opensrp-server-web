@@ -1,5 +1,23 @@
 package org.opensrp.web.controller;
 
+import static org.opensrp.web.rest.RestUtils.zipFiles;
+import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLConnection;
+
+import java.util.List;
+import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.google.gson.Gson;
 import org.apache.http.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,18 +38,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
-import java.util.zip.ZipOutputStream;
 
-import static org.opensrp.web.rest.RestUtils.zipFiles;
-import static org.opensrp.web.utils.MultimediaUtil.hasSpecialCharacters;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping("/multimedia")

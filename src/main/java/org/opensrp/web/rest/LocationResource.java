@@ -72,9 +72,9 @@ public class LocationResource {
     public static final String INCLUDE_INACTIVE = "includeInactive";
     private static final String FALSE = "false";
     private static final String TRUE = "true";
+    private static final Logger logger = LogManager.getLogger(LocationResource.class.toString());
     public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HHmm")
             .registerTypeAdapter(LocationProperty.class, new PropertiesConverter()).create();
-    private static final Logger logger = LogManager.getLogger(LocationResource.class.toString());
     private PhysicalLocationService locationService;
 
     private PlanService planService;

@@ -20,12 +20,12 @@ import org.opensrp.domain.Multimedia;
 import org.opensrp.repository.MultimediaRepository;
 import org.opensrp.search.UploadValidationBean;
 import org.opensrp.service.*;
+import org.smartregister.utils.DateTimeTypeConverter;
 import org.opensrp.web.bean.UploadBean;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.smartregister.domain.Client;
 import org.smartregister.domain.Event;
-import org.smartregister.utils.DateTimeTypeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -49,7 +49,6 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.opensrp.web.rest.UploadController.DEFAULT_RESIDENCE;
 import static org.opensrp.web.rest.UploadController.FILE_CATEGORY;
@@ -129,14 +128,14 @@ public class UploadControllerTest {
         Client client = new Client("");
         clients.add(Pair.of(client, null));
         validationBean.setAnalyzedData(clients);
-        doReturn(new Client("12345")).when(clientService).findClient(Mockito.any(Client.class));
+        doReturn(new Client("12345")).when(clientService).findClient(any(Client.class));
 
-        IdentifierSource identifierSource = Mockito.mock(IdentifierSource.class);
-        when(identifierSourceService.findByIdentifier(Mockito.anyString())).thenReturn(identifierSource);
-        when(uniqueIdentifierService.generateIdentifiers(Mockito.any(IdentifierSource.class), Mockito.anyInt(), Mockito.anyString())).thenReturn(results);
-        when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        IdentifierSource identifierSource = mock(IdentifierSource.class);
+        when(identifierSourceService.findByIdentifier(anyString())).thenReturn(identifierSource);
+        when(uniqueIdentifierService.generateIdentifiers(any(IdentifierSource.class), anyInt(), anyString())).thenReturn(results);
+        when(uploadService.validateFieldValues(any(), anyString(), Mockito.any()))
                 .thenReturn(validationBean);
-        when(multimediaService.saveFile(Mockito.any(), Mockito.any(), Mockito.anyString())).thenReturn("success");
+        when(multimediaService.saveFile(any(), any(), anyString())).thenReturn("success");
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders
@@ -147,15 +146,15 @@ public class UploadControllerTest {
                 .andReturn();
 
         // verify validation
-        verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
+        verify(uploadService, times(1)).validateFieldValues(any(), anyString(), any());
 
         // verify data was created and inserted
-        verify(clientService, times(1)).addorUpdate(Mockito.any(Client.class));
-        verify(eventService, times(1)).addorUpdateEvent(Mockito.any(Event.class),
+        verify(clientService, times(1)).addorUpdate(any(Client.class));
+        verify(eventService, times(1)).addorUpdateEvent(any(Event.class),
                 anyString());
 
         // verify file was saved
-        verify(multimediaService, times(1)).saveFile(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(multimediaService, times(1)).saveFile(any(), any(), any());
 
         assertTrue(result.getResponse().getContentAsString().contains("size"));
         assertTrue(result.getResponse().getContentAsString().contains("imported"));
@@ -177,7 +176,7 @@ public class UploadControllerTest {
         errors.add("Sample error");
         validationBean.setErrors(errors);
 
-        when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        when(uploadService.validateFieldValues(any(), anyString(), any()))
                 .thenReturn(validationBean);
 
         MvcResult result = mockMvc.perform(
@@ -187,7 +186,7 @@ public class UploadControllerTest {
                 )
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
+        verify(uploadService, times(1)).validateFieldValues(any(), anyString(), any());
         assertTrue(result.getResponse().getContentAsString().contains("errors"));
     }
 
@@ -202,7 +201,7 @@ public class UploadControllerTest {
         validationBean.setRowsToCreate(2);
         validationBean.setHeaderColumns(4);
 
-        when(uploadService.validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        when(uploadService.validateFieldValues(any(), anyString(), any()))
                 .thenReturn(validationBean);
 
         MvcResult result = mockMvc.perform(
@@ -211,7 +210,7 @@ public class UploadControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andReturn();
-        verify(uploadService, times(1)).validateFieldValues(Mockito.any(), Mockito.anyString(), Mockito.any());
+        verify(uploadService, times(1)).validateFieldValues(any(), anyString(), any());
         assertEquals(gson.toJson(validationBean), result.getResponse().getContentAsString());
     }
 
@@ -257,16 +256,16 @@ public class UploadControllerTest {
     public void testGetUploadTemplateReadsClientsAndReturnsCSV() throws Exception {
         when(uploadService.getCSVConfig("ChildRegistration")).thenReturn(new ArrayList<>());
 
-        when(physicalLocationService.findLocationByIdsWithChildren(Mockito.anyBoolean(), Mockito.anySet(), Mockito.anyInt())).thenReturn(new ArrayList<>());
+        when(physicalLocationService.findLocationByIdsWithChildren(anyBoolean(), anySet(), anyInt())).thenReturn(new ArrayList<>());
 
         List<Client> clients = new ArrayList<>();
         clients.add(new Client("base_entity_id"));
 
-        when(clientService.findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList())).thenReturn(clients);
+        when(clientService.findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), anyList())).thenReturn(clients);
         MvcResult result = mockMvc.perform(get(BASE_URL + "/template?location_id=12345&event_name=ChildRegistration"))
                 .andExpect(status().isOk())
                 .andReturn();
-        verify(clientService, times(1)).findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), Mockito.anyList());
+        verify(clientService, times(1)).findAllByAttributes(Mockito.matches(DEFAULT_RESIDENCE), anyList());
 
         verifyNoMoreInteractions(clientService);
         assertEquals("text/csv", result.getResponse().getContentType());
@@ -307,7 +306,7 @@ public class UploadControllerTest {
         mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "fileName.csv"))
                 .andExpect(status().isOk())
                 .andReturn();
-        verify(multimediaService, times(2)).retrieveFile(Mockito.anyString());
+        verify(multimediaService, times(2)).retrieveFile(anyString());
 
         verifyNoMoreInteractions(multimediaService);
     }

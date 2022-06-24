@@ -27,8 +27,8 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
     private final static String DELETE_ENDPOINT = "delete/";
     private final String locationTagJson = "{\"active\":true,\"name\":\"Country\",\"description\":\"descriptions\",\"id\":0}";
-    private LocationTagService locationTagService;
     private final ArgumentCaptor<LocationTag> argumentCaptor = ArgumentCaptor.forClass(LocationTag.class);
+    private LocationTagService locationTagService;
     @Captor
     private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
