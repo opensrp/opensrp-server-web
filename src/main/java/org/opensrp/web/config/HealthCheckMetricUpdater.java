@@ -16,13 +16,11 @@ import java.util.Map;
 @Component
 public class HealthCheckMetricUpdater {
 
+    private final Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
     @Autowired
     private MeterRegistry registry;
-
     @Autowired
     private HealthService healthService;
-
-    private final Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
 
     @PostConstruct
     private void init() {

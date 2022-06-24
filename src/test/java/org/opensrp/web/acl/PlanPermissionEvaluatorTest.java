@@ -35,34 +35,25 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class PlanPermissionEvaluatorTest {
 
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
     @Mock
     private Authentication authentication;
-
     @InjectMocks
     private PlanPermissionEvaluator planPermissionEvaluator;
-
     @Mock
     private PhysicalLocationService locationService;
-
     @Mock
     private LocationRepository locationRepository;
-
     @Mock
     private PractitionerService practitionerService;
-
     @Mock
     private OrganizationService organizationService;
-
     @Mock
     private PractitionerRoleService practitionerRoleService;
-
     @Mock
     private PractitionerRoleRepository practitionerRoleRepository;
-
     @Mock
     private PractitionerRepository practitionerRepository;
-
-    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 
     @Before
     public void setup() {

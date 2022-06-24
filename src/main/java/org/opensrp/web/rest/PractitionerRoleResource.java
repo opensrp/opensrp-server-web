@@ -34,9 +34,9 @@ import static org.opensrp.web.Constants.*;
 public class PractitionerRoleResource {
 
     public static final String IDENTIFIER = "identifier";
+    private static final Logger logger = LogManager.getLogger(PractitionerRoleResource.class.toString());
     public static Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new TaskDateTimeTypeConverter())
             .registerTypeAdapter(LocalDate.class, new DateTypeConverter()).create();
-    private static final Logger logger = LogManager.getLogger(PractitionerRoleResource.class.toString());
     private PractitionerRoleService practitionerRoleService;
 
     @Autowired

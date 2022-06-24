@@ -1,7 +1,29 @@
 package org.opensrp.web.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -41,19 +63,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.opensrp.web.HttpHeaderFactory.allowOrigin;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 public class UserController {

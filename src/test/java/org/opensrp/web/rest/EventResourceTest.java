@@ -48,38 +48,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
     private final static String BASE_URL = "/rest/event";
 
     private final String eventType = "Spray";
-
-    private EventService eventService;
-
-    private ClientService clientService;
-
-    private MultimediaService multimediaService;
-
-    @Captor
-    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
-    @Captor
-    private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-
-    @Captor
-    private ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
-
-    @Captor
-    private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
-
-    @Captor
-    private ArgumentCaptor<EventSearchBean> eventSearchBeanArgumentCaptor = ArgumentCaptor.forClass(EventSearchBean.class);
-
-    @Captor
-    private ArgumentCaptor<Client> clientArgumentCaptor = ArgumentCaptor.forClass(Client.class);
-
-    @Captor
-    private ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-
-    private EventResource eventResource;
-
     private final String ADD_REQUEST_PAYLOAD = "{\"clients\":[{\"birthdate\":\"1970-01-01T05:00:00.000Z\",\"firstName\":\"Test\",\"gender\":\"Male\",\"lastName\":\"User\",\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"}],\"events\":[{\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\"entityType\":\"ec_family\",\"eventDate\":\"2020-05-02T23:26:21.685Z\"}]}";
-
     private final String POST_SYNC_REQUEST = "{\n"
             + "\t\"providerId\": \"test\",\n"
             + "\t\"locationId\": \"test\",\n"
@@ -89,6 +58,24 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
             + "\t\"teamId\": \"test\",\n"
             + "\t\"limit\": 5\n"
             + "}";
+    private EventService eventService;
+    private ClientService clientService;
+    private MultimediaService multimediaService;
+    @Captor
+    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    @Captor
+    private ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+    @Captor
+    private ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
+    @Captor
+    private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
+    @Captor
+    private ArgumentCaptor<EventSearchBean> eventSearchBeanArgumentCaptor = ArgumentCaptor.forClass(EventSearchBean.class);
+    @Captor
+    private ArgumentCaptor<Client> clientArgumentCaptor = ArgumentCaptor.forClass(Client.class);
+    @Captor
+    private ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+    private EventResource eventResource;
 
     public EventResourceTest() throws IOException {
         super();

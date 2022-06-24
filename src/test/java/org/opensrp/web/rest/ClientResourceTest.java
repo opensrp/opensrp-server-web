@@ -62,6 +62,13 @@ public class ClientResourceTest {
     private static final String GENDER = "gender";
     private static final String CLIENTTYPE = "clientType";
     private final String BASE_URL = "/rest/client";
+    private final String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON = "{\n"
+            + "\t\"clients\": [{\n"
+            + "\t\t\"firstName\": \"Test\",\n"
+            + "\t\t\"lastName\": \"User\"\n"
+            + "\t}],\n"
+            + "\t\"total\": 1\n"
+            + "}";
     @Autowired
     protected WebApplicationContext webApplicationContext;
     protected ObjectMapper mapper = new ObjectMapper();
@@ -72,14 +79,6 @@ public class ClientResourceTest {
     private ObjectMapper objectMapper;
     @InjectMocks
     private ClientResource clientResource;
-    private final String EXPECTED_CLIENT_SYNC_BEAN_RESPONSE_JSON = "{\n"
-            + "\t\"clients\": [{\n"
-            + "\t\t\"firstName\": \"Test\",\n"
-            + "\t\t\"lastName\": \"User\"\n"
-            + "\t}],\n"
-            + "\t\"total\": 1\n"
-            + "}";
-
 
     @Before
     public void setUp() {

@@ -100,7 +100,6 @@ public class SettingResource {
 
             SettingConfigurations = settingService.findSettings(settingQueryBean, treeNodeHashMap);
 
-            SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
             String settingsArrayString = BaseTypeHandler.mapper.writeValueAsString(SettingConfigurations);
 
             responseEntity = new ResponseEntity<>(new JSONArray(settingsArrayString).toString(), responseHeaders,

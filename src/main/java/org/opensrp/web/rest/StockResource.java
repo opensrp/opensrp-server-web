@@ -56,9 +56,9 @@ public class StockResource extends RestResource<Stock> {
     private static final String SAMPLE_CSV_FILE = "/importsummaryreport.csv";
     private static final String RETURN_PRODUCT = "returnProduct";
     private static final Logger logger = LogManager.getLogger(StockResource.class.toString());
+    private final StockService stockService;
     Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private final StockService stockService;
 
     @Autowired
     public StockResource(StockService stockService) {

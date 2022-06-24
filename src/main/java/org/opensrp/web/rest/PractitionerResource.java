@@ -34,9 +34,9 @@ public class PractitionerResource {
     public static final String IDENTIFIER = "identifier";
     public static final String USER_ID = "userId";
     public static final String GET_PRACTITIONER_BY_USER_URL = "/user/{userId}";
+    private static final Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
     public static Gson gson = new GsonBuilder().setDateFormat(DATETIME_IN_UTC_FORMAT_STRING)
             .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
-    private static final Logger logger = LogManager.getLogger(PractitionerResource.class.toString());
     private PractitionerService practitionerService;
 
     @Autowired

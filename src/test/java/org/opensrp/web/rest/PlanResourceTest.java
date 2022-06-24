@@ -63,14 +63,12 @@ public class PlanResourceTest extends BaseSecureResourceTest<PlanDefinition> {
             + "      },\n" + "      \"reason\": \"\",\n" + "      \"goalId\": \"\",\n"
             + "      \"subjectCodableConcept\": {\n" + "        \"text\": \"\"\n" + "      },\n"
             + "      \"taskTemplate\": \"\"\n" + "    }\n" + "  ],\n" + "  \"serverVersion\": 0\n" + "}";
+    private final ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
+    private final Class<ArrayList<String>> listClass = (Class<ArrayList<String>>) (Class) ArrayList.class;
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     private PlanService planService;
     private PhysicalLocationService locationService;
-    private final ArgumentCaptor<PlanDefinition> argumentCaptor = ArgumentCaptor.forClass(PlanDefinition.class);
-
-    private final Class<ArrayList<String>> listClass = (Class<ArrayList<String>>) (Class) ArrayList.class;
-
     @Captor
     private ArgumentCaptor<ArrayList<String>> listArgumentCaptor = ArgumentCaptor.forClass(listClass);
 

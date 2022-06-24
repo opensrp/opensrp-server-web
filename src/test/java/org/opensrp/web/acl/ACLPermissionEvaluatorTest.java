@@ -34,52 +34,37 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ACLPermissionEvaluatorTest {
 
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
     @Mock
     private PlanPermissionEvaluator planPermissionEvaluator;
-
     @Mock
     private OrganizationPermissionEvaluator organizationPermissionEvaluator;
-
     @Mock
     private UserPermissionEvaluator userPermissionEvaluator;
-
     @Mock
     private LocationPermissionEvaluator locationPermissionEvaluator;
-
     @Mock
     private EventPermissionEvaluator eventPermissionEvaluator;
-
     @Mock
     private ClientPermissionEvaluator clientPermissionEvaluator;
-
     @Mock
     private Authentication authentication;
-
     @Mock
     private PhysicalLocationService locationService;
-
     @Mock
     private LocationRepository locationRepository;
-
     @Mock
     private PractitionerService practitionerService;
-
     @Mock
     private OrganizationService organizationService;
-
     @Mock
     private PractitionerRoleService practitionerRoleService;
-
     @Mock
     private PractitionerRoleRepository practitionerRoleRepository;
-
     @Mock
     private PractitionerRepository practitionerRepository;
-
     @InjectMocks
     private ACLPermissionEvaluator aclPermissionEvaluator;
-
-    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
 
     @Before
     public void setup() {

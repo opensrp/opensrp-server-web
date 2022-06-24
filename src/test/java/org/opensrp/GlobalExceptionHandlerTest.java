@@ -29,14 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class GlobalExceptionHandlerTest {
 
+    private final String BASE_URL = "/rest/campaign/";
+    private final String MESSAGE = "The server encountered an error processing the request.";
     protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
     @InjectMocks
     private CampaignResource campaignResource;
     @Mock
     private CampaignService campaignService;
     private MockMvc mockMvc;
-    private final String BASE_URL = "/rest/campaign/";
-    private final String MESSAGE = "The server encountered an error processing the request.";
 
     @Before
     public void setUp() throws Exception {

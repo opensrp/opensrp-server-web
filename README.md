@@ -161,6 +161,7 @@ jvm_threads_states_threads{state="blocked",} 0.0
 > Available metrics:
 > `all,log4j2,jvm_thread,jvm_thread,jvm_gc,jvm_mem,cpu,uptime,db,disk_space`
 
-> Health indicators [above](#health-endpoint) are added as gauge meters with name in the following pattern; health\_check\_%s, `%s` is a placeholder for service name e.g health\_check\_postgres
+> Health indicators [above](#health-endpoint) are added as gauge meters with name in the following pattern;
+> health\_check\_%s, `%s` is a placeholder for service name e.g health\_check\_postgres
 
 The above configs can be updated on `opensrp.properties` file.

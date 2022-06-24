@@ -270,7 +270,6 @@ public class SettingResourceTest {
         SettingResource settingResource = webApplicationContext.getBean(SettingResource.class);
         settingResource.setSettingService(settingService, openmrsLocationService);
         String documentId = "settings-document-id-2";
-        SettingTypeHandler settingTypeHandler = new SettingTypeHandler();
         SettingConfiguration settingConfigurations = BaseTypeHandler.mapper
                 .readValue(settingJsonUpdate, SettingConfiguration.class);
         Mockito.when(settingRepository.get("settings-document-id-2")).thenReturn(settingConfigurations);
