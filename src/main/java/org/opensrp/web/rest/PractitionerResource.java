@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
-import org.opensrp.search.BaseSearchBean;
 import org.opensrp.search.PractitionerSearchBean;
 import org.opensrp.service.PractitionerService;
 import org.smartregister.domain.Practitioner;
@@ -156,20 +155,20 @@ public class PractitionerResource {
 	private PractitionerSearchBean createPractitionerSearchBean(Integer pageNumber, Integer pageSize, String orderByType,
 			String orderByFieldName, Long serverVersion) {
 
-		BaseSearchBean.OrderByType orderByTypeEnum;
-		BaseSearchBean.FieldName fieldName;
+		PractitionerSearchBean.OrderByType orderByTypeEnum;
+		PractitionerSearchBean.FieldName fieldName;
 		orderByTypeEnum =
-				orderByType != null ? BaseSearchBean.OrderByType.valueOf(orderByType) : BaseSearchBean.OrderByType.DESC;
+				orderByType != null ? PractitionerSearchBean.OrderByType.valueOf(orderByType) : PractitionerSearchBean.OrderByType.DESC;
 		fieldName =
-				orderByFieldName != null ? BaseSearchBean.FieldName.valueOf(orderByFieldName) : BaseSearchBean.FieldName.id;
+				orderByFieldName != null ? PractitionerSearchBean.FieldName.valueOf(orderByFieldName) : PractitionerSearchBean.FieldName.id;
 
-		return PractitionerSearchBean.builder()
-				.pageNumber(pageNumber)
-				.pageSize(pageSize)
-				.orderByType(orderByTypeEnum)
-				.orderByFieldName(fieldName)
-				.serverVersion(serverVersion)
-				.build();
+		PractitionerSearchBean practitionerSearchBean = new PractitionerSearchBean();
+		practitionerSearchBean.setPageNumber(pageNumber);
+		practitionerSearchBean.setPageSize(pageSize);
+		practitionerSearchBean.setOrderByType(orderByTypeEnum);
+		practitionerSearchBean.setOrderByFieldName(fieldName);
+		practitionerSearchBean.setServerVersion(serverVersion);
+		return practitionerSearchBean;
 
 	}
 
