@@ -1,33 +1,25 @@
 package org.opensrp.web.rest.it;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.smartregister.domain.Address;
+import org.smartregister.domain.Client;
 import org.opensrp.repository.postgres.ClientsRepositoryImpl;
 import org.opensrp.repository.postgres.EventsRepositoryImpl;
 import org.opensrp.web.rest.SearchResource;
-import org.smartregister.domain.Address;
-import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-@RunWith(MockitoJUnitRunner.class)
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class SearchResourceTest extends BaseResourceTest {
-	MockHttpServletRequest mockHttpServletRequest;
-
-
 
 	private final static String BASE_URL = "/rest/search/";
 
@@ -47,7 +39,7 @@ public class SearchResourceTest extends BaseResourceTest {
 
 	public static final String FEMALE = "female";
 
-	@Mock
+	@Autowired
 	private SearchResource searchResource;
 
 	@Autowired
@@ -77,7 +69,6 @@ public class SearchResourceTest extends BaseResourceTest {
 	DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
 
 	DateTime deathDate = new DateTime(1l, DateTimeZone.UTC);
-	String phoneNumber = "0727000000";
 
 	Address address = new Address().withAddressType(addressType).withCountry(country).withStateProvince(stateProvince)
 			.withCityVillage(cityVillage).withCountyDistrict(countryDistrict).withSubDistrict(subDistrict).withTown(town);
@@ -142,43 +133,11 @@ public class SearchResourceTest extends BaseResourceTest {
 	public void shouldSearchClientWithBirthDate() throws Exception {
 		Client expectedClient = createOneSearchableClient();
 
-		String searchQuery = "birthdate=" + birthDate.toLocalDate() + ":" + birthDate.toLocalDate();
+		String searchQuery = "birthdate=" + birthDate.toLocalDate().toString() + ":" + birthDate.toLocalDate().toString();
 		JsonNode actualObj = searchClient(searchQuery);
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 
 		assertEquals(expectedClient, actualClient);
-	}
-	@Test
-	public void shouldSearchClientWithBirthDateWithoutColons() throws Exception {
-		Client expectedClient = createOneSearchableClient();
-		String searchQuery = "birthdate=" + birthDate.toLocalDate();
-		JsonNode actualObj = searchClient(searchQuery);
-		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
-		assertEquals(expectedClient, actualClient);
-	}
-	@Test
-	public void shouldSearchClientWithMobileNumber() throws Exception {
-		Client expectedClient = createOneSearchableClient();
-		String searchQuery = "phone_number=" + phoneNumber;
-		JsonNode actualObj = searchClient(searchQuery);
-		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
-		assertEquals(expectedClient, actualClient);
-	}
-	@Test
-	public void shouldSearchClientByAltName() throws Exception {
-		mockHttpServletRequest= new MockHttpServletRequest();
-		Client expectedClient = createOneSearchableClient();
-		String searchQuery = "alt_name=" + "ona";
-		JsonNode actualObj = searchClient(searchQuery);
-		mockHttpServletRequest.addParameter("ff",firstName);
-		mockHttpServletRequest.addParameter("alt_phone_number",phoneNumber);
-		mockHttpServletRequest.addParameter("alt_name","ona");
-		mockHttpServletRequest.addParameter("attribute","next_contact_date:2022-06-15");
-		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
-       verify(searchResource,times(1)).search(mockHttpServletRequest);
-		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
-		assertEquals(expectedClient, actualClient);
-
 	}
 
 	@Test
@@ -186,13 +145,12 @@ public class SearchResourceTest extends BaseResourceTest {
 		Client expectedClient = createOneSearchableClient();
 
 		String searchQuery =
-				"lastEdited=" + DATE_CREATED.toLocalDate() + ":" + DATE_CREATED.toLocalDate();
+				"lastEdited=" + DATE_CREATED.toLocalDate().toString() + ":" + DATE_CREATED.toLocalDate().toString();
 		JsonNode actualObj = searchClient(searchQuery);
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 
 		assertEquals(expectedClient, actualClient);
 	}
-
 
 	@Test
 	public void shouldSearchClientWithAttribute() throws Exception {
@@ -204,7 +162,6 @@ public class SearchResourceTest extends BaseResourceTest {
 
 		assertEquals(expectedClient, actualClient);
 	}
-
 
 	private JsonNode searchClient(String query) throws Exception {
 		String searchQuery = "search?" + query;
@@ -225,16 +182,12 @@ public class SearchResourceTest extends BaseResourceTest {
 		otherClient.setDateCreated(DATE_CREATED);
 		otherClient.withIdentifier("fsdf", "sfdf");
 		otherClient.withAttribute("sfdf", "sfdf");
-		otherClient.withAttribute("alt_phone_number",phoneNumber);
-		otherClient.withAttribute("alt_name","ona");
 		Client otherClient2 = (Client) new Client("3").withFirstName("dd").withMiddleName("fdf").withLastName("sfd")
 				.withGender(FEMALE).withBirthdate(birthDate, false).withDeathdate(deathDate, true).withAddress(address);
 		;
 		otherClient2.setDateCreated(DATE_CREATED);
 		otherClient2.withIdentifier("hg", "ghgh");
 		otherClient2.withAttribute("hg", "hgh");
-		otherClient2.withAttribute("alt_phone_number",phoneNumber);
-		otherClient2.withAttribute("alt_name","ona");
 
 		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
 

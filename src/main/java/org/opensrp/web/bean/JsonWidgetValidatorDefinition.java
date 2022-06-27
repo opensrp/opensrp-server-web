@@ -27,21 +27,5 @@ public class JsonWidgetValidatorDefinition {
 		private String title;
 
 		private ArrayList<String> fields;
-
-		public String getTitle() {
-			return title;
-		}
-
-		public void setTitle(String title) {
-			this.title = title;
-		}
-
-		public ArrayList<String> getFields() {
-			return fields;
-		}
-
-		public void setFields(ArrayList<String> fields) {
-			this.fields = fields;
-		}
 	}
 }
