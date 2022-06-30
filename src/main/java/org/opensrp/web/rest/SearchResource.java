@@ -22,10 +22,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.*;
+import static org.opensrp.common.AllConstants.Client.ALT_NAME;
+import static org.opensrp.common.AllConstants.Client.PHONE_NUMBER;
+import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
+import static org.opensrp.common.AllConstants.Client.LAST_NAME;
+import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
+import static org.opensrp.common.AllConstants.Client.ATTRIBUTE;
+import static org.opensrp.common.AllConstants.Client.IDENTIFIER;
+import static org.opensrp.common.AllConstants.Client.GENDER;
+import static org.opensrp.common.AllConstants.Client.NAME;
+import static org.opensrp.common.AllConstants.Client.ALT_PHONE_NUMBER;
+import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
