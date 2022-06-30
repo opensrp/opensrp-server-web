@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opensrp.common.AllConstants;
 import org.opensrp.repository.PlanRepository;
 import org.opensrp.service.TaskGenerator;
 import org.opensrp.service.ExportEventDataMapper;
@@ -98,6 +99,8 @@ public class SearchResourceTest {
 		mockHttpServletRequest.addParameter("alt_name", firstName);
 		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
+		mockHttpServletRequest.addParameter(AllConstants.Client.BIRTH_DATE, String.valueOf(birthDate));
+		mockHttpServletRequest.addParameter(AllConstants.Client.LAST_UPDATE, String.valueOf(birthDate));
 		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
 		Assert.assertNotNull(clients);
