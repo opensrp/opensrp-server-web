@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opensrp.common.AllConstants;
 import org.opensrp.repository.PlanRepository;
 import org.opensrp.service.TaskGenerator;
 import org.opensrp.service.ExportEventDataMapper;
@@ -29,6 +30,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.opensrp.common.AllConstants.OpenSRPEvent.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Client.BIRTH_DATE;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
@@ -97,6 +101,7 @@ public class SearchResourceTest {
 		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
 		mockHttpServletRequest.addParameter("alt_name", firstName);
 		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
+		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
 		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
