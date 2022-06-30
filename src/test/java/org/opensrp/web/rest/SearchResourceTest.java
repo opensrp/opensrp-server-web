@@ -8,19 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opensrp.common.AllConstants;
-import org.opensrp.repository.PlanRepository;
-import org.opensrp.service.TaskGenerator;
-import org.opensrp.service.ExportEventDataMapper;
-import org.smartregister.domain.Client;
 import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
+import org.opensrp.repository.PlanRepository;
 import org.opensrp.repository.SearchRepository;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.SearchService;
+import org.opensrp.service.*;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
+import org.smartregister.domain.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,9 +25,6 @@ import org.springframework.web.context.WebApplicationContext;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.opensrp.common.AllConstants.OpenSRPEvent.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Client.BIRTH_DATE;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
