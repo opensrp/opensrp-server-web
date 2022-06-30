@@ -22,24 +22,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Client.ALT_NAME;
-import static org.opensrp.common.AllConstants.Client.PHONE_NUMBER;
-import static org.opensrp.common.AllConstants.Client.FIRST_NAME;
-import static org.opensrp.common.AllConstants.Client.LAST_NAME;
-import static org.opensrp.common.AllConstants.Client.MIDDLE_NAME;
-import static org.opensrp.common.AllConstants.Client.ATTRIBUTE;
-import static org.opensrp.common.AllConstants.Client.IDENTIFIER;
-import static org.opensrp.common.AllConstants.Client.GENDER;
-import static org.opensrp.common.AllConstants.Client.NAME;
-import static org.opensrp.common.AllConstants.Client.ALT_PHONE_NUMBER;
-import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
+import static org.opensrp.common.AllConstants.Client.*;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
 
 @Controller
@@ -75,6 +61,7 @@ public class SearchResource extends RestResource<Client> {
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
 		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
+		Optional<String> altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, request));
 		Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(NAME, request));
@@ -83,7 +70,7 @@ public class SearchResource extends RestResource<Client> {
 		DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
 		DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
 		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
-		
+
 		if (birthdate != null) {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
@@ -92,25 +79,18 @@ public class SearchResource extends RestResource<Client> {
 			searchBean.setLastEditFrom(lastEdit[0]);
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
-		Map<String, String> attributeMap = null;
+
+		Map<String, String> attributeMap = new HashMap<>();
 		String attributes = getStringFilter(ATTRIBUTE, request);
 		if (!StringUtils.isBlank(attributes)) {
 			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
 			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-
-			attributeMap = new HashMap<>();
 			attributeMap.put(attributeType, attributeValue);
 		}
-		if (phoneNumber.isPresent()) {
-			attributeMap = new HashMap<>();
-			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
-		}
-		if (alternateName.isPresent()) {
-			attributeMap = new HashMap<>();
-			attributeMap.put(ALT_NAME, alternateName.get());
-		}
+		phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
+		altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
+		alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
 		searchBean.setAttributes(attributeMap);
-
 		Map<String, String> identifierMap = null;
 		String identifiers = getStringFilter(IDENTIFIER, request);
 		if (!StringUtils.isBlank(identifiers)) {

@@ -234,6 +234,7 @@ public class SearchResourceTest extends BaseResourceTest {
 		otherClient2.withIdentifier("hg", "ghgh");
 		otherClient2.withAttribute("hg", "hgh");
 		otherClient2.withAttribute("alt_phone_number",phoneNumber);
+		otherClient2.withAttribute("phone_number",phoneNumber);
 		otherClient2.withAttribute("alt_name","ona");
 
 		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
