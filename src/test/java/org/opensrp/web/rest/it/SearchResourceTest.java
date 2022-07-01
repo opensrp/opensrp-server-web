@@ -201,6 +201,14 @@ public class SearchResourceTest extends BaseResourceTest {
 		assertEquals(expectedClient, actualClient);
 
 	}
+	@Test
+	public void shouldSearchClientWithAltMobileNumber() throws Exception {
+		Client expectedClient = createOneSearchableClient();
+		String searchQuery = "alt_phone_number=" + phoneNumber;
+		JsonNode actualObj = searchClient(searchQuery);
+		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
+		assertEquals(expectedClient, actualClient);
+	}
 
 	private JsonNode searchClient(String query) throws Exception {
 		String searchQuery = "search?" + query;
@@ -222,6 +230,7 @@ public class SearchResourceTest extends BaseResourceTest {
 		otherClient.withIdentifier("fsdf", "sfdf");
 		otherClient.withAttribute("sfdf", "sfdf");
 		otherClient.withAttribute("alt_phone_number","0727000000");
+		otherClient.withAttribute("phone_number","0727000000");
 		otherClient.withAttribute("alt_name","ona");
 		Client otherClient2 = (Client) new Client("3").withFirstName("dd").withMiddleName("fdf").withLastName("sfd")
 				.withGender(FEMALE).withBirthdate(birthDate, false).withDeathdate(deathDate, true).withAddress(address);
@@ -229,6 +238,7 @@ public class SearchResourceTest extends BaseResourceTest {
 		otherClient2.withIdentifier("hg", "ghgh");
 		otherClient2.withAttribute("hg", "hgh");
 		otherClient2.withAttribute("alt_phone_number","0727000000");
+		otherClient2.withAttribute("phone_number","0727000000");
 		otherClient2.withAttribute("alt_name","ona");
 
 		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
