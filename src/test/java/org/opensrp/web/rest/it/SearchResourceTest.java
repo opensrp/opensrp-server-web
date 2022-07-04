@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
@@ -156,6 +155,7 @@ public class SearchResourceTest extends BaseResourceTest {
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
+
 	@Test
 	public void shouldSearchClientWithMobileNumber() throws Exception {
 		Client expectedClient = createOneSearchableClient();
@@ -164,6 +164,18 @@ public class SearchResourceTest extends BaseResourceTest {
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
+
+	@Test
+	public void shouldSearchClientWithoutAltMobileNumber() throws Exception {
+		Client expectedClient = createDifferentClient();
+		String searchQuery = "alt_phone_number=" + phoneNumber;
+		JsonNode actualObj = searchClient(searchQuery);
+		Client actualClient = mapper.treeToValue(actualObj.get(1), Client.class);
+		assertNotEquals(expectedClient.toString().length(), actualClient.toString().length());
+		assertNotEquals(expectedClient.getAttributes().get("alt_phone_number"),
+				actualClient.getAttributes().get("alt_phone_number"));
+	}
+
 	@Test
 	public void shouldSearchClientAltWithMobileNumber() throws Exception {
 		Client expectedClient = createOneSearchableClient();
@@ -172,6 +184,7 @@ public class SearchResourceTest extends BaseResourceTest {
 		Client actualClient = mapper.treeToValue(actualObj.get(0), Client.class);
 		assertEquals(expectedClient, actualClient);
 	}
+
 	@Test
 	public void shouldSearchClientByAltName() throws Exception {
 		mockHttpServletRequest= new MockHttpServletRequest();
@@ -241,12 +254,40 @@ public class SearchResourceTest extends BaseResourceTest {
 		otherClient2.setDateCreated(DATE_CREATED);
 		otherClient2.withIdentifier("hg", "ghgh");
 		otherClient2.withAttribute("hg", "hgh");
-		otherClient2.withAttribute("alt_phone_number",phoneNumber);
-		otherClient2.withAttribute("phone_number",phoneNumber);
-		otherClient2.withAttribute("alt_name","ona");
+		otherClient2.withAttribute("alt_phone_number", phoneNumber);
+		otherClient2.withAttribute("phone_number", phoneNumber);
+		otherClient2.withAttribute("alt_name", "ona");
 
 		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
 
+		return expectedClient;
+	}
+
+	private Client createDifferentClient() {
+		Client expectedClient = (Client) new Client("1").withFirstName(firstName).withMiddleName(MIDDLE_NAME)
+				.withLastName(LAST_NAME).withGender(male).withBirthdate(birthDate, false).withDeathdate(deathDate, true)
+				.withAddress(address);
+		expectedClient.setDateCreated(DATE_CREATED);
+		expectedClient.withIdentifier(IDENTIFIER_TYPE, IDENTIFIER);
+		expectedClient.withAttribute(ATTRIBUTES_NAME, ATTRIBUTES_VALUE);
+
+		Client otherClient = (Client) new Client("2").withFirstName("ff").withMiddleName("fd").withLastName("sfdf")
+				.withGender(FEMALE).withBirthdate(birthDate, false).withDeathdate(deathDate, true).withAddress(address);
+		otherClient.setDateCreated(DATE_CREATED);
+		otherClient.withIdentifier("fsdf", "sfdf");
+		otherClient.withAttribute("sfdf", "sfdf");
+		otherClient.withAttribute("phone_number", "0727000000");
+		otherClient.withAttribute("alt_name", "ona");
+		Client otherClient2 = (Client) new Client("3").withFirstName("dd").withMiddleName("fdf").withLastName("sfd")
+				.withGender(FEMALE).withBirthdate(birthDate, false).withDeathdate(deathDate, true).withAddress(address);
+		otherClient2.setDateCreated(DATE_CREATED);
+		otherClient2.withIdentifier("hg", "ghgh");
+		otherClient2.withAttribute("hg", "hgh");
+		otherClient2.withAttribute("alt_phone_number", "0727000000");
+		otherClient2.withAttribute("phone_number", "0727000000");
+		otherClient2.withAttribute("alt_name", "ona");
+
+		addObjectToRepository(asList(expectedClient, otherClient, otherClient2), allClients);
 		return expectedClient;
 	}
 
