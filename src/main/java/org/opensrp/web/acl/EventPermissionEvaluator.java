@@ -54,6 +54,6 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
 					});
 			/* @formatter:on */
 		}
-		return false;
+		return targetId == null;
 	}
 }

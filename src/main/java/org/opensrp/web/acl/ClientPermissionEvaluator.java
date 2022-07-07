@@ -57,7 +57,6 @@ public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
 					});
 			/* @formatter:on */
 		}
-		return false;
+		return targetId == null;
 	}
-
 }

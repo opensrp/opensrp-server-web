@@ -3,14 +3,14 @@
  */
 package org.opensrp.web.acl;
 
+import org.opensrp.domain.Organization;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.opensrp.domain.Organization;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Samuel Githengi created on 06/17/20
@@ -52,7 +52,7 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 					});
 			/* @formatter:on */
 		}
-		return false;
+		return targetId == null;
 	}
 	
 	@Override
@@ -61,8 +61,6 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 		return getAssignedLocations(authentication.getName())
 				.stream()
 				.anyMatch(a->a.getOrganizationId().equals(organization.getIdentifier()));
-		
 		/* @formatter:on */
 	}
-	
 }

@@ -3,14 +3,14 @@
  */
 package org.opensrp.web.acl;
 
+import org.smartregister.domain.PlanDefinition;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.smartregister.domain.PlanDefinition;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Samuel Githengi created on 06/04/20
@@ -98,7 +98,6 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 						});
 			/* @formatter:on */
 		}
-		return false;
+		return targetId == null;
 	}
-	
 }

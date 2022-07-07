@@ -1,14 +1,9 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,10 +22,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.text.MessageFormat.format;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/validate/")
@@ -82,7 +81,7 @@ public class ValidateResource {
 							missingClientIds.add(clientId);
 						}
 					} catch (Exception e) {
-						logger.error("Client Sync Valiation Failed, BaseEntityId: " + clientId, e);
+						logger.error("Client Sync Validation Failed, BaseEntityId: " + clientId, e);
 					}
 				}
 			}
@@ -97,9 +96,8 @@ public class ValidateResource {
 						if (event == null) {
 							missingEventIds.add(eventId);
 						}
-
 					} catch (Exception e) {
-						logger.error("Event Sync Valiation Failed, FormSubmissionId: " + eventId, e);
+						logger.error("Event Sync Validation Failed, FormSubmissionId: " + eventId, e);
 					}
 				}
 			}

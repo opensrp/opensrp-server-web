@@ -37,12 +37,11 @@ public class LocationPermissionEvaluator extends BasePermissionEvaluator<Physica
 			return hasPermissionOnJurisdictions(authentication, identifiers);
 			/* @formatter:on */
 		}
-		return false;
+		return targetId == null;
 	}
 
 	@Override
 	public boolean hasPermission(Authentication authentication, PhysicalLocation jurisdiction) {
 		return hasPermissionOnJurisdiction(authentication, jurisdiction.getId());
 	}
-
 }
