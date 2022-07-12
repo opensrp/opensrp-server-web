@@ -294,7 +294,17 @@ public class EventResource extends RestResource<Event> {
 							&& withFamilyEvents) {
 						List<String> clientRelationships = clients.get(0).getRelationships().get(Constants.FAMILY);
 						for (String familyRelationship : clientRelationships) {
-							EventSyncBean familyEvents = sync(null, null, familyRelationship, "0", null, null, null, false, false);
+							EventSyncBean familyEvents = sync(
+									null,
+									null,
+									familyRelationship,
+									"0",
+									null,
+									null,
+									null,
+									false,
+									false
+							);
 							combinedEvents.addAll(familyEvents.getEvents());
 							combinedClients.addAll(familyEvents.getClients());
 						}
@@ -373,7 +383,7 @@ public class EventResource extends RestResource<Event> {
 		//TO DO research on ways to improve this
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User user = currentUser(authentication);
+		User user = RestUtils.currentUser(authentication);
 
 		if (Utils.checkRoleIfRoleExists(user.getRoles(), Role.PII_DATA_MASK)) {
 
@@ -475,37 +485,76 @@ public class EventResource extends RestResource<Event> {
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<String> save(@RequestBody String data, Authentication authentication) {
-
+		String username = RestUtils.currentUser(authentication).getUsername();
 		List<String> failedClientsIds = new ArrayList<>();
 		List<String> failedEventIds = new ArrayList<>();
-		Map<String, Object> response = new HashMap<String, Object>();
-		JSONObject syncData = new JSONObject(data);
-		if (!syncData.has("clients") && !syncData.has("events")) {
-			return new ResponseEntity<>(BAD_REQUEST);
-		}
+		Map<String, Object> response = new HashMap<>();
 
-		if (syncData.has("clients")) {
-			ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
-					new TypeToken<ArrayList<Client>>() {
+		try {
+			JSONObject syncData = new JSONObject(data);
+			if (!syncData.has("clients") && !syncData.has("events")) {
+				return new ResponseEntity<>(BAD_REQUEST);
+			}
 
-					}.getType());
+			if (syncData.has("clients")) {
+				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
+						new TypeToken<ArrayList<Client>>() {
 
-			for (Client client : clients) {
-				clientService.addorUpdate(client);
+						}.getType());
+
+				logger.info("[SYNC_INFO] {} Clients submitted by user {}", clients.size(), username);
+
+				for (Client client : clients) {
+					try {
+						clientService.addorUpdate(client);
+					}
+					catch (Exception e) {
+						logger.error("Client {} failed to sync", client.getBaseEntityId(), e);
+						failedClientsIds.add(client.getId());
+					}
+				}
+			}
+
+			if (syncData.has("events")) {
+				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
+						new TypeToken<ArrayList<Event>>() {
+
+						}.getType());
+
+				logger.info("[SYNC_INFO] {} Events submitted by user {}", events.size(), username);
+
+				for (Event event : events) {
+					try {
+						event = eventService.processOutOfArea(event);
+						eventService.addorUpdateEvent(event, username);
+
+						logger.info(
+								"[SYNC_INFO] Event {} of type {} saved",
+								event.getFormSubmissionId(),
+								event.getEventType()
+						);
+					}
+					catch (Exception e) {
+						logger.error(
+								"Event {} of type {} for client {} failed to sync",
+								event.getFormSubmissionId(),
+								event.getEventType(),
+								event.getBaseEntityId(),
+								e
+						);
+						failedEventIds.add(event.getFormSubmissionId());
+					}
+				}
 			}
 		}
-
-		if (syncData.has("events")) {
-			ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
-					new TypeToken<ArrayList<Event>>() {
-
-					}.getType());
-
-			for (Event event : events) {
-				event = eventService.processOutOfArea(event);
-				eventService.addorUpdateEvent(event, currentUser(authentication).getUsername());
-			}
+		catch (Exception e) {
+			logger.error("Sync data processing failed with exception: ", e);
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
+
+		logger.info("[SYNC_INFO] Number of Events NOT saved: {}", failedEventIds.size());
+		logger.info("[SYNC_INFO] Number of Clients NOT saved: {}", failedClientsIds.size());
+
 		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
 			return new ResponseEntity<>(CREATED);
 		} else {
@@ -526,7 +575,7 @@ public class EventResource extends RestResource<Event> {
 	@Override
 	public Event create(Event o) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return eventService.addEvent(o, currentUser(authentication).getUsername());
+		return eventService.addEvent(o, RestUtils.currentUser(authentication).getUsername());
 	}
 
 	@Override
@@ -801,11 +850,11 @@ public class EventResource extends RestResource<Event> {
 		for (String baseEntityId : baseEntityIds) {
 			List<Client> siblings = clientService.findGlobalByRelationship(baseEntityId);
 
-			siblings.stream().forEach(entry-> entry.getBaseEntityId());
+			siblings.stream().forEach(entry -> entry.getBaseEntityId());
 			relations.addAll(
 					siblings.stream()
-					.map(child -> child.getBaseEntityId())
-					.collect(Collectors.toList())
+							.map(child -> child.getBaseEntityId())
+							.collect(Collectors.toList())
 			);
 		}
 
