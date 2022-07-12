@@ -383,7 +383,7 @@ public class EventResource extends RestResource<Event> {
 		//TO DO research on ways to improve this
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User user = RestUtils.currentUser(authentication);
+		User user = currentUser(authentication);
 
 		if (Utils.checkRoleIfRoleExists(user.getRoles(), Role.PII_DATA_MASK)) {
 
@@ -485,7 +485,7 @@ public class EventResource extends RestResource<Event> {
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
 	public ResponseEntity<String> save(@RequestBody String data, Authentication authentication) {
-		String username = RestUtils.currentUser(authentication).getUsername();
+		String username = currentUser(authentication).getUsername();
 		List<String> failedClientsIds = new ArrayList<>();
 		List<String> failedEventIds = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
@@ -510,7 +510,7 @@ public class EventResource extends RestResource<Event> {
 					}
 					catch (Exception e) {
 						logger.error("Client {} failed to sync", client.getBaseEntityId(), e);
-						failedClientsIds.add(client.getId());
+						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
 			}
@@ -528,20 +528,10 @@ public class EventResource extends RestResource<Event> {
 						event = eventService.processOutOfArea(event);
 						eventService.addorUpdateEvent(event, username);
 
-						logger.info(
-								"[SYNC_INFO] Event {} of type {} saved",
-								event.getFormSubmissionId(),
-								event.getEventType()
-						);
+						logger.info("[SYNC_INFO] Event {} of type {} saved", event.getFormSubmissionId(), event.getEventType());
 					}
 					catch (Exception e) {
-						logger.error(
-								"Event {} of type {} for client {} failed to sync",
-								event.getFormSubmissionId(),
-								event.getEventType(),
-								event.getBaseEntityId(),
-								e
-						);
+						logger.error("Event {} of type {} for client {} failed to sync", event.getFormSubmissionId(), event.getEventType(), event.getBaseEntityId(), e);
 						failedEventIds.add(event.getFormSubmissionId());
 					}
 				}
@@ -575,7 +565,7 @@ public class EventResource extends RestResource<Event> {
 	@Override
 	public Event create(Event o) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return eventService.addEvent(o, RestUtils.currentUser(authentication).getUsername());
+		return eventService.addEvent(o, currentUser(authentication).getUsername());
 	}
 
 	@Override
