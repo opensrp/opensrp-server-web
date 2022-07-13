@@ -1,33 +1,10 @@
 package org.opensrp.web.rest;
 
-import static java.text.MessageFormat.format;
-import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
-import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
-import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
-import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
-import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
-import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
-import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
-import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
-import static org.opensrp.common.AllConstants.Event.TEAM;
-import static org.opensrp.common.AllConstants.Event.TEAM_ID;
-import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
-import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
-import static org.opensrp.web.rest.RestUtils.getStringFilter;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -60,10 +37,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
+import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
+import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
+import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
+import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
+import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
+import static org.opensrp.common.AllConstants.Event.PROVIDER_ID;
+import static org.opensrp.common.AllConstants.Event.TEAM;
+import static org.opensrp.common.AllConstants.Event.TEAM_ID;
+import static org.opensrp.common.AllConstants.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.RETURN_COUNT;
+import static org.opensrp.web.Constants.TOTAL_RECORDS;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
+import static org.opensrp.web.rest.RestUtils.getIntegerFilter;
+import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(value = "/rest/event")
@@ -350,7 +350,12 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	@RequestMapping(headers = { "Accept=application/json" }, method = POST, value = "/add")
-	public ResponseEntity<HttpStatus> save(@RequestBody String data, Authentication authentication) {
+	public ResponseEntity<String> save(@RequestBody String data, Authentication authentication) {
+		String username = authentication.getName();
+		List<String> failedClientsIds = new ArrayList<>();
+		List<String> failedEventIds = new ArrayList<>();
+		Map<String, Object> response = new HashMap<>();
+
 		try {
 			JSONObject syncData = new JSONObject(data);
 			if (!syncData.has("clients") && !syncData.has("events")) {
@@ -358,45 +363,69 @@ public class EventResource extends RestResource<Event> {
 			}
 
 			if (syncData.has("clients")) {
-				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData,"clients"),
-				    new TypeToken<ArrayList<Client>>() {}.getType());
+				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
+						new TypeToken<ArrayList<Client>>() {
+
+						}.getType());
+
+				logger.info("[SYNC_INFO] {} Clients submitted by user {}", clients.size(), username);
+
 				for (Client client : clients) {
 					try {
 						clientService.addorUpdate(client);
 					}
 					catch (Exception e) {
-						logger.error(
-						    "Client" + client.getBaseEntityId() == null ? "" : client.getBaseEntityId() + " failed to sync",
-						    e);
+						logger.error("[SYNC_INFO] Client {} failed to sync", client.getBaseEntityId(), e);
+						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
-
 			}
+
 			if (syncData.has("events")) {
-				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData,"events"),
-				    new TypeToken<ArrayList<Event>>() {}.getType());
+				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
+						new TypeToken<ArrayList<Event>>() {
+
+						}.getType());
+
+				logger.info("[SYNC_INFO] {} Events submitted by user {}", events.size(), username);
+
 				for (Event event : events) {
 					try {
 						event = eventService.processOutOfArea(event);
-						eventService.addorUpdateEvent(event,authentication.getName());
+						eventService.addorUpdateEvent(event, username);
+
+						logger.info("[SYNC_INFO] Event {} of type {} saved", event.getFormSubmissionId(), event.getEventType());
 					}
 					catch (Exception e) {
-						logger.error(
-						    "Event of type " + event.getEventType() + " for client " + event.getBaseEntityId() == null ? ""
-						            : event.getBaseEntityId() + " failed to sync",
-						    e);
+						logger.error("[SYNC_INFO] Event {} of type {} for client {} failed to sync", event.getFormSubmissionId(), event.getEventType(), event.getBaseEntityId(), e);
+						failedEventIds.add(event.getFormSubmissionId());
 					}
 				}
 			}
-
 		}
-		catch (
-
-		Exception e) {
-			logger.error(format("Sync data processing failed with exception {0}.- ", e));
+		catch (Exception e) {
+			logger.error("[SYNC_INFO] Sync data processing failed with exception: ", e);
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(CREATED);
+
+		logger.info("[SYNC_INFO] Number of Events NOT saved: {}", failedEventIds.size());
+		logger.info("[SYNC_INFO] Number of Clients NOT saved: {}", failedClientsIds.size());
+
+		if (failedClientsIds.isEmpty() && failedEventIds.isEmpty()) {
+			return new ResponseEntity<>(CREATED);
+		} else {
+			JsonArray clientsArray = (JsonArray) gson.toJsonTree(failedClientsIds, new TypeToken<List<String>>() {
+
+			}.getType());
+
+			JsonArray eventsArray = (JsonArray) gson.toJsonTree(failedEventIds, new TypeToken<List<String>>() {
+
+			}.getType());
+
+			response.put("failed_events", eventsArray);
+			response.put("failed_clients", clientsArray);
+			return new ResponseEntity<>(gson.toJson(response), CREATED);
+		}
 	}
 
 	@Override
