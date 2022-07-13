@@ -91,9 +91,11 @@ public class SearchResourceTest {
 		mockHttpServletRequest = new MockHttpServletRequest();
 		mockHttpServletRequest.addParameter("ff", "ona");
 		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
+		mockHttpServletRequest.addParameter("alt_phone_number", phoneNumber);
 		mockHttpServletRequest.addParameter("alt_name", firstName);
 		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
+		mockHttpServletRequest.addParameter("identifier", "fsdf"+":"+ "sfdf");
 		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
 		Assert.assertNotNull(clients);

@@ -75,6 +75,7 @@ public class SearchResource extends RestResource<Client> {
 		String middleName = getStringFilter(MIDDLE_NAME, request);
 		String lastName = getStringFilter(LAST_NAME, request);
 		Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
+		Optional<String> altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, request));
 		Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter(NAME, request));
@@ -94,23 +95,16 @@ public class SearchResource extends RestResource<Client> {
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
 
-		Map<String, String> attributeMap = null;
+		Map<String, String> attributeMap = new HashMap<>();
 		String attributes = getStringFilter(ATTRIBUTE, request);
 		if (!StringUtils.isBlank(attributes)) {
 			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
 			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-
-			attributeMap = new HashMap<String, String>();
 			attributeMap.put(attributeType, attributeValue);
 		}
-		if (phoneNumber.isPresent()) {
-			attributeMap = new HashMap<>();
-			attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
-		}
-		if (alternateName.isPresent()) {
-			attributeMap = new HashMap<>();
-			attributeMap.put(ALT_NAME, alternateName.get());
-		}
+		phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
+		altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
+		alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
 		searchBean.setAttributes(attributeMap);
 
 		Map<String, String> identifierMap = null;
