@@ -1,8 +1,78 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+import org.json.JSONObject;
+import org.opensrp.api.domain.User;
+import org.opensrp.common.AllConstants.BaseEntity;
+import org.opensrp.domain.Multimedia;
+import org.opensrp.dto.ExportEventDataSummary;
+import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
+import org.opensrp.dto.ExportImagesSummary;
+import org.opensrp.search.EventSearchBean;
+import org.opensrp.service.ClientService;
+import org.opensrp.service.EventService;
+import org.opensrp.service.MultimediaService;
+import org.opensrp.service.PlanProcessingStatusService;
+import org.opensrp.util.constants.PlanProcessingStatusConstants;
+import org.opensrp.web.Constants;
+import org.opensrp.web.bean.EventSyncBean;
+import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.SyncParam;
+import org.opensrp.web.config.Role;
+import org.opensrp.web.utils.MaskingUtils;
+import org.opensrp.web.utils.Utils;
+import org.smartregister.domain.Client;
+import org.smartregister.domain.Event;
+import org.smartregister.utils.DateTimeTypeConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipOutputStream;
+
 import static org.opensrp.common.AllConstants.BaseEntity.BASE_ENTITY_ID;
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
+import static org.opensrp.common.AllConstants.CLIENTS_FETCH_BATCH_SIZE;
 import static org.opensrp.common.AllConstants.Event.ENTITY_TYPE;
 import static org.opensrp.common.AllConstants.Event.EVENT_DATE;
 import static org.opensrp.common.AllConstants.Event.EVENT_TYPE;
@@ -23,78 +93,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipOutputStream;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
-import com.google.gson.JsonArray;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
-import org.json.JSONObject;
-import org.opensrp.api.domain.User;
-import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.dto.ExportImagesSummary;
-import org.opensrp.dto.ExportEventDataSummary;
-import org.opensrp.dto.ExportFlagProblemEventImageMetadata;
-import org.opensrp.search.EventSearchBean;
-import org.opensrp.service.ClientService;
-import org.opensrp.service.EventService;
-import org.opensrp.service.MultimediaService;
-import org.opensrp.service.PlanProcessingStatusService;
-import org.opensrp.util.constants.PlanProcessingStatusConstants;
-import org.opensrp.web.Constants;
-import org.opensrp.web.bean.EventSyncBean;
-import org.opensrp.web.bean.Identifier;
-import org.opensrp.web.bean.SyncParam;
-import org.opensrp.web.config.Role;
-import org.opensrp.web.utils.MaskingUtils;
-import org.opensrp.web.utils.Utils;
-import org.smartregister.domain.Client;
-import org.smartregister.domain.Event;
-import org.opensrp.domain.Multimedia;
-import org.smartregister.utils.DateTimeTypeConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.GetMapping;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/rest/event")
@@ -439,6 +437,7 @@ public class EventResource extends RestResource<Event> {
 		List<String> failedClientsIds = new ArrayList<>();
 		List<String> failedEventIds = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
+
 		try {
 			long timeBeforeSync = System.currentTimeMillis();
 			JSONObject syncData = new JSONObject(data);
@@ -448,8 +447,12 @@ public class EventResource extends RestResource<Event> {
 
 			if (syncData.has("clients")) {
 				ArrayList<Client> clients = gson.fromJson(Utils.getStringFromJSON(syncData, "clients"),
-				    new TypeToken<ArrayList<Client>>() {}.getType());
+						new TypeToken<ArrayList<Client>>() {
+
+						}.getType());
+
 				logger.info("[SYNC_INFO] {} Clients submitted by user {}", clients.size(), username);
+
 				long timeBeforeSavingClients = System.currentTimeMillis();
 				for (Client client : clients) {
 					try {
@@ -459,20 +462,22 @@ public class EventResource extends RestResource<Event> {
 										getExecutionTime(timeBeforeSavingClient));
 					}
 					catch (Exception e) {
-						client.getBaseEntityId();
 						logger.error("Client {} failed to sync", client.getBaseEntityId(), e);
-						failedClientsIds.add(client.getId());
+						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
 				logger.info("[SYNC_INFO] Saved {} clients in {} seconds", clients.size(),
 						getExecutionTime(timeBeforeSavingClients));
-
 			}
 
 			if (syncData.has("events")) {
 				ArrayList<Event> events = gson.fromJson(Utils.getStringFromJSON(syncData, "events"),
-				    new TypeToken<ArrayList<Event>>() {}.getType());
+						new TypeToken<ArrayList<Event>>() {
+
+						}.getType());
+
 				logger.info("[SYNC_INFO] {} Events submitted by user {}", events.size(), username);
+
 				long timeBeforeSavingEvents = System.currentTimeMillis();
 				for (Event event : events) {
 					try {
@@ -494,9 +499,8 @@ public class EventResource extends RestResource<Event> {
 						}
 					}
 					catch (Exception e) {
-						logger.error("Event of type {} for client {} failed to sync", event.getEventType(),
-										event.getBaseEntityId(), e);
-						failedEventIds.add(event.getId());
+						logger.error("Event of type {} for client {} failed to sync", event.getEventType(), event.getBaseEntityId(), e);
+						failedEventIds.add(event.getFormSubmissionId());
 					}
 				}
 				logger.info("[SYNC_INFO] Saved {} events in {} seconds", events.size(),
