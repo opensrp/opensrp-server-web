@@ -78,7 +78,25 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 
 	private EventResource eventResource;
 
-	private String ADD_REQUEST_PAYLOAD = "{\"clients\":[{\"birthdate\":\"1970-01-01T05:00:00.000Z\",\"firstName\":\"Test\",\"gender\":\"Male\",\"lastName\":\"User\",\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"}],\"events\":[{\"baseEntityId\":\"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\"entityType\":\"ec_family\",\"eventDate\":\"2020-05-02T23:26:21.685Z\"}]}";
+	private String ADD_REQUEST_PAYLOAD = "{\n"
+			+ "  \"clients\": [\n"
+			+ "    {\n"
+			+ "      \"birthdate\": \"1970-01-01T05:00:00.000Z\",\n"
+			+ "      \"firstName\": \"Test\",\n"
+			+ "      \"gender\": \"Male\",\n"
+			+ "      \"lastName\": \"User\",\n"
+			+ "      \"baseEntityId\": \"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\"\n"
+			+ "    }\n"
+			+ "  ],\n"
+			+ "  \"events\": [\n"
+			+ "    {\n"
+			+ "      \"baseEntityId\": \"502f5f2d-5a06-4f71-8f8a-b19a846b9a93\",\n"
+			+ "      \"formSubmissionId\": \"f60212b9-cd89-472c-9d66-53148aad8949\",\n"
+			+ "      \"entityType\": \"ec_family\",\n"
+			+ "      \"eventDate\": \"2020-05-02T23:26:21.685Z\"\n"
+			+ "    }\n"
+			+ "  ]\n"
+			+ "}";
 
 	private String POST_SYNC_REQUEST = "{\n"
 			+ "\t\"providerId\": \"test\",\n"
@@ -361,26 +379,28 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 	}
 
 	@Test
-	public void testSaveThrowsExceptionFromClientService() throws Exception {
+	public void testClientSaveFailAddsBaseEntityIdToResponseList() throws Exception {
 		Event event = createEvent();
 		doThrow(new IllegalArgumentException()).when(clientService).addorUpdate(any(Client.class));
 		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doReturn(event).when(eventService).addorUpdateEvent(any(Event.class), anyString());
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isBadRequest());
+		JsonNode data = postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		assertEquals(1, data.get("failed_clients").size());
+		assertEquals("502f5f2d-5a06-4f71-8f8a-b19a846b9a93", data.get("failed_clients").get(0).asText());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
 		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
-		// verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
-		// assertEquals(eventArgumentCaptor.getValue().getEventType(), "Family Member Registration");
 	}
 
 	@Test
-	public void testSaveThrowsExceptionFromEventService() throws Exception {
+	public void testEventSaveFailAddsEventFormSubmissionIdToResponseList() throws Exception {
     	Client client = createClient();
 		Event event = createEvent();
 		doReturn(client).when(clientService).addorUpdate(any(Client.class));
 		doReturn(event).when(eventService).processOutOfArea(any(Event.class));
 		doThrow(new IllegalArgumentException()).when(eventService).addorUpdateEvent(any(Event.class), anyString());
-		postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isBadRequest());
+		JsonNode data = postRequestWithJsonContent(BASE_URL + "/add", ADD_REQUEST_PAYLOAD, status().isCreated());
+		assertEquals(1, data.get("failed_events").size());
+		assertEquals("a2fba8d2-42f5-4811-b982-57609f1815fe", data.get("failed_events").get(0).asText());
 		verify(clientService).addorUpdate(clientArgumentCaptor.capture());
 		assertEquals(clientArgumentCaptor.getValue().getFirstName(), "Test");
 		verify(eventService).addorUpdateEvent(eventArgumentCaptor.capture(), anyString());
