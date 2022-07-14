@@ -52,7 +52,7 @@ public class ValidateResource {
 
 	/**
 	 * Validate that the client and event ids reference actual documents
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
@@ -112,12 +112,11 @@ public class ValidateResource {
 			response.put("clients", clientsArray);
 
 			return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-
 		} catch (Exception e) {
 			logger.error(format("Validation Sync failed data processing failed with exception {0}.- ", e));
 			response.put("msg", "Error occurred");
-			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 
+			return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
