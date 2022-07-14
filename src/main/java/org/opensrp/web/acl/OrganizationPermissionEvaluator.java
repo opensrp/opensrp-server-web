@@ -20,15 +20,15 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof String) {
+	public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
+		if (object instanceof String) {
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
-			        .anyMatch(assignedLocation -> assignedLocation.getOrganizationId().equals(targetId));
+			        .anyMatch(assignedLocation -> assignedLocation.getOrganizationId().equals(object));
 			/* @formatter:on */
-		} else if (isCollectionOfString(targetId)) {
-			Collection<String> identifiers = (Collection<String>) targetId;
+		} else if (isCollectionOfString(object)) {
+			Collection<String> identifiers = (Collection<String>) object;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
@@ -36,10 +36,10 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 						return identifiers.contains(assignedLocation.getOrganizationId());
 						});
 			/* @formatter:on */
-		} else if (targetId instanceof Organization) {
-			return hasPermission(authentication, (Organization) targetId);
-		} else if (isCollectionOfResources(targetId, Organization.class)) {
-			Collection<Organization> organizations = (Collection<Organization>) targetId;
+		} else if (object instanceof Organization) {
+			return hasPermission(authentication, (Organization) object);
+		} else if (isCollectionOfResources(object, Organization.class)) {
+			Collection<Organization> organizations = (Collection<Organization>) object;
 			/* @formatter:off */
 			Set<String> identifiers=getAssignedLocations(authentication.getName())
 					.stream()
@@ -52,7 +52,7 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 					});
 			/* @formatter:on */
 		}
-		return targetId == null;
+		return object == null;
 	}
 	
 	@Override

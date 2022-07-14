@@ -20,15 +20,15 @@ public class LocationPermissionEvaluator extends BasePermissionEvaluator<Physica
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof String) {
-			return hasPermissionOnJurisdiction(authentication, (String) targetId);
-		} else if (isCollectionOfString(targetId)) {
-			return hasPermissionOnJurisdictions(authentication, (Collection<String>) targetId);
-		} else if (targetId instanceof PhysicalLocation) {
-			return hasPermission(authentication, (PhysicalLocation) targetId);
-		} else if (isCollectionOfResources(targetId, PhysicalLocation.class)) {
-			Collection<PhysicalLocation> jurisdictions = (Collection<PhysicalLocation>) targetId;
+	public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
+		if (object instanceof String) {
+			return hasPermissionOnJurisdiction(authentication, (String) object);
+		} else if (isCollectionOfString(object)) {
+			return hasPermissionOnJurisdictions(authentication, (Collection<String>) object);
+		} else if (object instanceof PhysicalLocation) {
+			return hasPermission(authentication, (PhysicalLocation) object);
+		} else if (isCollectionOfResources(object, PhysicalLocation.class)) {
+			Collection<PhysicalLocation> jurisdictions = (Collection<PhysicalLocation>) object;
 			/* @formatter:off */
 			Set<String> identifiers =jurisdictions
 					.stream()
@@ -37,7 +37,7 @@ public class LocationPermissionEvaluator extends BasePermissionEvaluator<Physica
 			return hasPermissionOnJurisdictions(authentication, identifiers);
 			/* @formatter:on */
 		}
-		return targetId == null;
+		return object == null;
 	}
 
 	@Override

@@ -15,8 +15,8 @@ import java.io.Serializable;
 public class UserPermissionEvaluator extends BasePermissionEvaluator<String> {
 	
 	@Override
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		return authentication.getName().equals(targetId);
+	public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
+		return authentication.getName().equals(object);
 	}
 	
 	@Override
