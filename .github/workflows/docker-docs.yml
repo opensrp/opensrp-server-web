@@ -7,6 +7,11 @@ on:
     branches:
       - master
 
+  pull_request:
+    paths:
+      - 'docs/how-to-use-docker-image.md'
+    branches:
+      - add-docker-hub-docs-ci
 jobs:
   update-docker-hub-documentation:
     runs-on: ubuntu-latest
