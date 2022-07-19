@@ -117,7 +117,7 @@ volumes:
     external: true
 
 ```
-And to run execute:
+And then run:
  ```bash
  docker-compose up
  ```
