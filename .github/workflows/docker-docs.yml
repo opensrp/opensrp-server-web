@@ -2,10 +2,10 @@ name: Update Docker Hub Documentation
 
 on:
   push:
-    branches:
-      - master
     paths:
       - 'docs/how-to-use-docker-image.md'
+    branches:
+      - master
 
 jobs:
   update-docker-hub-documentation:
