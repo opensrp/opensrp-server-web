@@ -121,12 +121,15 @@ public abstract class BaseSecureResourceTest<T> {
 
 	protected JsonNode postRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 		MvcResult mvcResult = this.mockMvc
-				.perform(post(url)
+				.perform(
+						post(url)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(data.getBytes())
 						.accept(MediaType.APPLICATION_JSON)
-						.with(requestPostProcessors))
-				.andExpect(expectedStatus).andReturn();
+						.with(requestPostProcessors)
+				)
+				.andExpect(expectedStatus)
+				.andReturn();
 
 		String responseString = mvcResult.getResponse().getContentAsString();
 		if (responseString.isEmpty()) {

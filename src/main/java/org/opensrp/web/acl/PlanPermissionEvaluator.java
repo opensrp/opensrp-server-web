@@ -3,14 +3,14 @@
  */
 package org.opensrp.web.acl;
 
+import org.smartregister.domain.PlanDefinition;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.smartregister.domain.PlanDefinition;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Samuel Githengi created on 06/04/20
@@ -42,20 +42,20 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 	
 	/**
 	 * @param authentication
-	 * @param targetId
+	 * @param object
 	 * @param permission
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
-		if (targetId instanceof String) {
+	public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
+		if (object instanceof String) {
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
-			        .anyMatch(assignedLocation -> assignedLocation.getPlanId().equals(targetId));
+			        .anyMatch(assignedLocation -> assignedLocation.getPlanId().equals(object));
 			/* @formatter:on */
-		} else if (isCollectionOfString(targetId)) {
-			Collection<String> identifiers = (Collection<String>) targetId;
+		} else if (isCollectionOfString(object)) {
+			Collection<String> identifiers = (Collection<String>) object;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
@@ -63,8 +63,8 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 						return identifiers.contains(assignedLocation.getPlanId());
 						});
 			/* @formatter:on */
-		} else if (targetId instanceof PlanDefinition) {
-			PlanDefinition plan = (PlanDefinition) targetId;
+		} else if (object instanceof PlanDefinition) {
+			PlanDefinition plan = (PlanDefinition) object;
 			/* @formatter:off */
 			return getAssignedLocations(authentication.getName())
 					.stream()
@@ -75,8 +75,8 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 								.anyMatch(judisdiction -> judisdiction.getCode().equals(assignedLocation.getJurisdictionId()));
 						});
 			/* @formatter:on */
-		} else if (isCollectionOfResources(targetId, PlanDefinition.class)) {
-			Collection<PlanDefinition> plans = (Collection<PlanDefinition>) targetId;
+		} else if (isCollectionOfResources(object, PlanDefinition.class)) {
+			Collection<PlanDefinition> plans = (Collection<PlanDefinition>) object;
 			Set<String> planIdentifiers = new HashSet<>();
 			Set<String> jurisdictionIdentifiers = new HashSet<>();
 			/* @formatter:off */
@@ -98,7 +98,6 @@ public class PlanPermissionEvaluator extends BasePermissionEvaluator<PlanDefinit
 						});
 			/* @formatter:on */
 		}
-		return false;
+		return object == null;
 	}
-	
 }
