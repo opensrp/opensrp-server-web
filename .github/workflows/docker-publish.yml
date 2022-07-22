@@ -4,6 +4,8 @@ on:
   push:
     # Publish `master` as Docker `master` tag.
     # See also https://github.com/crazy-max/ghaction-docker-meta#basic
+    paths-ignore:
+      - 'docs/**'
     branches:
       - master
 
