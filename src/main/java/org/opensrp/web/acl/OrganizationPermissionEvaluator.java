@@ -20,15 +20,15 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
-        if (object instanceof String) {
+    public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
+        if (targetId instanceof String) {
             /* @formatter:off */
             return getAssignedLocations(authentication.getName())
                     .stream()
-                    .anyMatch(assignedLocation -> assignedLocation.getOrganizationId().equals(object));
+                    .anyMatch(assignedLocation -> assignedLocation.getOrganizationId().equals(targetId));
             /* @formatter:on */
-        } else if (isCollectionOfString(object)) {
-            Collection<String> identifiers = (Collection<String>) object;
+        } else if (isCollectionOfString(targetId)) {
+            Collection<String> identifiers = (Collection<String>) targetId;
             /* @formatter:off */
             return getAssignedLocations(authentication.getName())
                     .stream()
@@ -36,10 +36,10 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
                         return identifiers.contains(assignedLocation.getOrganizationId());
                     });
             /* @formatter:on */
-        } else if (object instanceof Organization) {
-            return hasPermission(authentication, (Organization) object);
-        } else if (isCollectionOfResources(object, Organization.class)) {
-            Collection<Organization> organizations = (Collection<Organization>) object;
+        } else if (targetId instanceof Organization) {
+            return hasPermission(authentication, (Organization) targetId);
+        } else if (isCollectionOfResources(targetId, Organization.class)) {
+            Collection<Organization> organizations = (Collection<Organization>) targetId;
             /* @formatter:off */
             Set<String> identifiers = getAssignedLocations(authentication.getName())
                     .stream()
@@ -52,7 +52,7 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
                     });
             /* @formatter:on */
         }
-        return object == null;
+        return false;
     }
 
     @Override
@@ -61,6 +61,8 @@ public class OrganizationPermissionEvaluator extends BasePermissionEvaluator<Org
         return getAssignedLocations(authentication.getName())
                 .stream()
                 .anyMatch(a -> a.getOrganizationId().equals(organization.getIdentifier()));
+
         /* @formatter:on */
     }
+
 }

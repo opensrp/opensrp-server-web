@@ -1,8 +1,6 @@
 package org.opensrp.web.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.search.ClientSearchBean;
@@ -46,13 +44,11 @@ import static org.opensrp.web.rest.RestUtils.getStringFilter;
 @RequestMapping(value = "/rest/search")
 public class SearchResource extends RestResource<Client> {
 
-    private static Logger logger = LogManager.getLogger(SearchResource.class.toString());
+    private final SearchService searchService;
 
-    private SearchService searchService;
+    private final ClientService clientService;
 
-    private ClientService clientService;
-
-    private EventService eventService;
+    private final EventService eventService;
 
     @Autowired
     public SearchResource(SearchService searchService, ClientService clientService, EventService eventService) {
@@ -74,7 +70,6 @@ public class SearchResource extends RestResource<Client> {
         String middleName = getStringFilter(MIDDLE_NAME, request);
         String lastName = getStringFilter(LAST_NAME, request);
         Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
-        Optional<String> altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, request));
         Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
         ClientSearchBean searchBean = new ClientSearchBean();
         searchBean.setNameLike(getStringFilter(NAME, request));
@@ -94,16 +89,23 @@ public class SearchResource extends RestResource<Client> {
             searchBean.setLastEditTo(lastEdit[1]);
         }
 
-        Map<String, String> attributeMap = new HashMap<>();
+        Map<String, String> attributeMap = null;
         String attributes = getStringFilter(ATTRIBUTE, request);
         if (!StringUtils.isBlank(attributes)) {
             String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
             String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
+
+            attributeMap = new HashMap<String, String>();
             attributeMap.put(attributeType, attributeValue);
         }
-        phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
-        altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
-        alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
+        if (phoneNumber.isPresent()) {
+            attributeMap = new HashMap<>();
+            attributeMap.put(ALT_PHONE_NUMBER, phoneNumber.get());
+        }
+        if (alternateName.isPresent()) {
+            attributeMap = new HashMap<>();
+            attributeMap.put(ALT_NAME, alternateName.get());
+        }
         searchBean.setAttributes(attributeMap);
 
         Map<String, String> identifierMap = null;

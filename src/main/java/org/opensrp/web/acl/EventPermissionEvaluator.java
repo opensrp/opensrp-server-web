@@ -24,9 +24,9 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
         /* @formatter:on */
     }
 
-    public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
-        if (object instanceof Event) {
-            Event event = (Event) object;
+    public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
+        if (targetId instanceof Event) {
+            Event event = (Event) targetId;
             /* @formatter:off */
             return getAssignedLocations(authentication.getName())
                     .stream()
@@ -35,8 +35,8 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
                                 assignedLocation.getOrganizationId().equals(event.getTeamId());
                     });
             /* @formatter:on */
-        } else if (isCollectionOfResources(object, Event.class)) {
-            Collection<Event> events = (Collection<Event>) object;
+        } else if (isCollectionOfResources(targetId, Event.class)) {
+            Collection<Event> events = (Collection<Event>) targetId;
             Set<String> organizationIdentifiers = new HashSet<>();
             Set<String> jurisdictionIdentifiers = new HashSet<>();
             /* @formatter:off */
@@ -54,6 +54,6 @@ public class EventPermissionEvaluator extends BasePermissionEvaluator<Event> {
                     });
             /* @formatter:on */
         }
-        return object == null;
+        return false;
     }
 }

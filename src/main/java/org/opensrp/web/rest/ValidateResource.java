@@ -81,7 +81,7 @@ public class ValidateResource {
                             missingClientIds.add(clientId);
                         }
                     } catch (Exception e) {
-                        logger.error("Client Sync Validation Failed, BaseEntityId: " + clientId, e);
+                        logger.error("Client Sync Valiation Failed, BaseEntityId: " + clientId, e);
                     }
                 }
             }
@@ -96,8 +96,9 @@ public class ValidateResource {
                         if (event == null) {
                             missingEventIds.add(eventId);
                         }
+
                     } catch (Exception e) {
-                        logger.error("Event Sync Validation Failed, FormSubmissionId: " + eventId, e);
+                        logger.error("Event Sync Valiation Failed, FormSubmissionId: " + eventId, e);
                     }
                 }
             }
@@ -112,11 +113,12 @@ public class ValidateResource {
             response.put("clients", clientsArray);
 
             return new ResponseEntity<>(gson.toJson(response), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+
         } catch (Exception e) {
             logger.error(format("Validation Sync failed data processing failed with exception {0}.- ", e));
             response.put("msg", "Error occurred");
-
             return new ResponseEntity<>(new Gson().toJson(response), HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
     }
 }

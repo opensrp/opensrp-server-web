@@ -27,9 +27,9 @@ public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
         /* @formatter:on */
     }
 
-    public boolean hasObjectPermission(Authentication authentication, Serializable object, Object permission) {
-        if (object instanceof Client) {
-            Client client = (Client) object;
+    public boolean hasObjectPermission(Authentication authentication, Serializable targetId, Object permission) {
+        if (targetId instanceof Client) {
+            Client client = (Client) targetId;
             /* @formatter:off */
             return getAssignedLocations(authentication.getName())
                     .stream()
@@ -38,8 +38,8 @@ public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
                                 assignedLocation.getOrganizationId().equals(client.getTeamId());
                     });
             /* @formatter:on */
-        } else if (isCollectionOfResources(object, Client.class)) {
-            Collection<Client> clients = (Collection<Client>) object;
+        } else if (isCollectionOfResources(targetId, Client.class)) {
+            Collection<Client> clients = (Collection<Client>) targetId;
             Set<String> organizationIdentifiers = new HashSet<>();
             Set<String> jurisdictionIdentifiers = new HashSet<>();
             /* @formatter:off */
@@ -57,6 +57,7 @@ public class ClientPermissionEvaluator extends BasePermissionEvaluator<Client> {
                     });
             /* @formatter:on */
         }
-        return object == null;
+        return false;
     }
+
 }
