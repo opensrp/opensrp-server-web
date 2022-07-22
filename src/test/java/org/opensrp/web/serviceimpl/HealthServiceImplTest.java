@@ -26,52 +26,52 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
-@ActiveProfiles(profiles = { "jedis", "postgres", "oauth2", "rabbitmq" })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = {"jedis", "postgres", "oauth2", "rabbitmq"})
 public class HealthServiceImplTest {
 
-	@Autowired
-	private HealthServiceImpl healthService;
+    @Autowired
+    private HealthServiceImpl healthService;
 
-	@Mock
-	private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+    @Mock
+    private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
 
-	@Mock
-	private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
+    @Mock
+    private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
 
-	@Mock
-	private RedisServiceHealthIndicator redisServiceHealthIndicator;
+    @Mock
+    private RedisServiceHealthIndicator redisServiceHealthIndicator;
 
-	@Mock
-	private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
+    @Mock
+    private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
 
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-	}
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
-	@Test
-	public void testAggregateHealthCheck() {
-		Callable<ModelMap> mapCallable = new Callable<ModelMap>() {
+    @Test
+    public void testAggregateHealthCheck() {
+        Callable<ModelMap> mapCallable = new Callable<ModelMap>() {
 
-			@Override
-			public ModelMap call() throws Exception {
-				ModelMap modelMap = new ModelMap();
-				modelMap.put(Constants.HealthIndicator.STATUS, false);
-				modelMap.put(Constants.HealthIndicator.INDICATOR, "serviceA");
-				return modelMap;
-			}
-		};
-		doReturn(mapCallable).when(jdbcServiceHealthIndicator).doHealthCheck();
-		doReturn(mapCallable).when(rabbitmqServiceHealthIndicator).doHealthCheck();
-		doReturn(mapCallable).when(redisServiceHealthIndicator).doHealthCheck();
-		doReturn(mapCallable).when(keycloakServiceHealthIndicator).doHealthCheck();
-		HealthServiceImpl spyHealthService = spy(healthService);
-		Whitebox.setInternalState(spyHealthService,"buildVersion", "3.2");
-		ModelMap modelMap = spyHealthService.aggregateHealthCheck();
-		assertNotNull(modelMap);
-		assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
-		assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));
-		assertTrue(modelMap.containsKey(Constants.HealthIndicator.TIME));
-	}
+            @Override
+            public ModelMap call() throws Exception {
+                ModelMap modelMap = new ModelMap();
+                modelMap.put(Constants.HealthIndicator.STATUS, false);
+                modelMap.put(Constants.HealthIndicator.INDICATOR, "serviceA");
+                return modelMap;
+            }
+        };
+        doReturn(mapCallable).when(jdbcServiceHealthIndicator).doHealthCheck();
+        doReturn(mapCallable).when(rabbitmqServiceHealthIndicator).doHealthCheck();
+        doReturn(mapCallable).when(redisServiceHealthIndicator).doHealthCheck();
+        doReturn(mapCallable).when(keycloakServiceHealthIndicator).doHealthCheck();
+        HealthServiceImpl spyHealthService = spy(healthService);
+        Whitebox.setInternalState(spyHealthService, "buildVersion", "3.2");
+        ModelMap modelMap = spyHealthService.aggregateHealthCheck();
+        assertNotNull(modelMap);
+        assertTrue(modelMap.containsKey(Constants.HealthIndicator.PROBLEMS));
+        assertTrue(modelMap.containsKey(Constants.HealthIndicator.SERVICES));
+        assertTrue(modelMap.containsKey(Constants.HealthIndicator.TIME));
+    }
 }

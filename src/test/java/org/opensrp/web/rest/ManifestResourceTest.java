@@ -15,42 +15,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
-    private ManifestService manifestService;
-    private ClientFormService clientFormService;
-
     private final static String BASE_URL = "/rest/manifest";
-    private ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
-    private ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    private ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
-
     private final static String manifestJson = "{\"identifier\":\"mani1234\",\"json\":\"{\\\"forms_version\\\":\\\"1.0.3\\\"}\",\"appVersion\":\"123456\",\"appId\":\"1234567frde\"}";
     private final static String manifestJsonOnlyValue = "{\"json\": \"{\\\"forms_version\\\":\\\"1.0.3\\\",\\\"identifiers\\\":[\\\"add_structure.json\\\", \\\"remove_structure.json\\\"]}\"}";
     private final static String existingManifestJson = "{\"forms_version\":\"1.0.2\",\"identifiers\":[\"add_structure.json\"]}";
     private final static String expectedManifestJson = "{\"forms_version\":\"1.0.3\",\"identifiers\":[\"add_structure.json\",\"remove_structure.json\"]}";
-
-    @Before
-    public void setUp() {
-        manifestService = mock(ManifestService.class);
-        clientFormService = mock(ClientFormService.class);
-        ManifestResource manifestResource = webApplicationContext.getBean(ManifestResource.class);
-        manifestResource.setManifestService(manifestService);
-        manifestResource.setClientFormService(clientFormService);
-        manifestResource.setObjectMapper(mapper);
-    }
+    private final ArgumentCaptor<Manifest> argumentCaptor = ArgumentCaptor.forClass(Manifest.class);
+    private final ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<Boolean> booleanArgumentCaptor = ArgumentCaptor.forClass(Boolean.class);
+    private ManifestService manifestService;
+    private ClientFormService clientFormService;
 
     private static Manifest initTestManifest() {
         Manifest manifest = new Manifest();
@@ -96,6 +78,16 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         return manifest;
     }
 
+    @Before
+    public void setUp() {
+        manifestService = mock(ManifestService.class);
+        clientFormService = mock(ClientFormService.class);
+        ManifestResource manifestResource = webApplicationContext.getBean(ManifestResource.class);
+        manifestResource.setManifestService(manifestService);
+        manifestResource.setClientFormService(clientFormService);
+        manifestResource.setObjectMapper(mapper);
+    }
+
     @Test
     public void testAllGetManifest() throws Exception {
         List<Manifest> expectedManifests = new ArrayList<>();
@@ -109,7 +101,8 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         doReturn(expectedManifests).when(manifestService).getAllManifest();
 
         String actualManifestsString = getResponseAsString(BASE_URL, null, MockMvcResultMatchers.status().isOk());
-        List<Manifest> actualManifests = mapper.readValue(actualManifestsString, new TypeReference<List<Manifest>>() {});
+        List<Manifest> actualManifests = mapper.readValue(actualManifestsString, new TypeReference<List<Manifest>>() {
+        });
 
         assertListsAreSameIgnoringOrder(actualManifests, expectedManifests);
     }
@@ -128,7 +121,8 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         String actualManifestsString = getResponseAsString(BASE_URL + "/mani1234", null,
                 MockMvcResultMatchers.status().isOk());
-        Manifest actualManifest = mapper.readValue(actualManifestsString, new TypeReference<Manifest>() {});
+        Manifest actualManifest = mapper.readValue(actualManifestsString, new TypeReference<Manifest>() {
+        });
 
         assertNotNull(actualManifest);
         assertEquals(actualManifest.getIdentifier(), expectedManifest.getIdentifier());
@@ -251,7 +245,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         List<Manifest> capturedManifests = manifestListArgumentCaptor.getValue();
         assertEquals(10, capturedManifests.size());
 
-        for (Manifest manifest: capturedManifests) {
+        for (Manifest manifest : capturedManifests) {
             assertEquals("org.smartregister.giz", manifest.getAppId());
             assertEquals("0.0.1", manifest.getAppVersion());
             assertEquals("opd/registration.json", manifest.getIdentifier());
@@ -282,7 +276,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         doReturn(manifest).when(manifestService).getManifestByAppId(eq("org.smartregister.giz"));
 
-        String responseString = getResponseAsString(BASE_URL + "/appId/org.smartregister.giz",  null, MockMvcResultMatchers.status().isOk());
+        String responseString = getResponseAsString(BASE_URL + "/appId/org.smartregister.giz", null, MockMvcResultMatchers.status().isOk());
 
         verify(manifestService).getManifestByAppId(eq("org.smartregister.giz"));
         Manifest returned = mapper.readValue(responseString, Manifest.class);
@@ -307,7 +301,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
 
-        String responseString = getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
+        String responseString = getResponseAsString(BASE_URL + "/search", String.format("app_id=%s&app_version=%s", appId, appVersion)
                 , MockMvcResultMatchers.status().isOk());
 
         verify(manifestService).getManifestsByAppId(eq(appId));
@@ -323,7 +317,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
         String appId = "org.smartregister.giz";
         String appVersion = "0.0.1";
 
-        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, appVersion)
+        getResponseAsString(BASE_URL + "/search", String.format("app_id=%s&app_version=%s", appId, appVersion)
                 , MockMvcResultMatchers.status().isNotFound());
 
         verify(manifestService).getManifestsByAppId(eq(appId));
@@ -349,7 +343,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
 
-        String responseString = getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
+        String responseString = getResponseAsString(BASE_URL + "/search", String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
                 , MockMvcResultMatchers.status().isOk());
 
         verify(manifestService).getManifestsByAppId(eq(appId));
@@ -378,7 +372,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
 
-        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s&strict=true", appId, requestedAppVersion)
+        getResponseAsString(BASE_URL + "/search", String.format("app_id=%s&app_version=%s&strict=true", appId, requestedAppVersion)
                 , MockMvcResultMatchers.status().isNotFound());
 
         verify(manifestService).getManifest(eq(appId), eq(requestedAppVersion));
@@ -404,7 +398,7 @@ public class ManifestResourceTest extends BaseResourceTest<Manifest> {
 
         doReturn(manifestList).when(manifestService).getManifestsByAppId(eq(appId));
 
-        getResponseAsString(BASE_URL + "/search",  String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
+        getResponseAsString(BASE_URL + "/search", String.format("app_id=%s&app_version=%s", appId, requestedAppVersion)
                 , MockMvcResultMatchers.status().isNotFound());
 
         verify(manifestService).getManifestsByAppId(eq(appId));

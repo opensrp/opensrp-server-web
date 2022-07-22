@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClientMigrationFileResourceShadow extends ClientMigrationFileResource {
 
-	@Override
-	public void setClientMigrationFileService(ClientMigrationFileService clientMigrationFileService) {
-		super.setClientMigrationFileService(clientMigrationFileService);
-	}
+    @Override
+    public void setClientMigrationFileService(ClientMigrationFileService clientMigrationFileService) {
+        super.setClientMigrationFileService(clientMigrationFileService);
+    }
 
-	@Override
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		super.setObjectMapper(objectMapper);
-	}
+    @Override
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        super.setObjectMapper(objectMapper);
+    }
 
 }

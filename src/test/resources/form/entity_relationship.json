@@ -7,7 +7,6 @@
     "from": "pkwoman.id",
     "to": "pkchild.relationalid"
   },
-
   {
     "parent": "stock",
     "child": "reports",

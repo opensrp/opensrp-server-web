@@ -17,28 +17,28 @@ public interface Constants {
     String NO_OF_EVENTS = "no_of_events";
     String ERROR_OCCURRED = "Error occurred";
     String FAILURE = "Failure occurred";
-    String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request." ;
+    String DEFAULT_EXCEPTION_HANDLER_MESSAGE = "The server encountered an error processing the request.";
 
-    public static final String RETURN_COUNT= "return_count";
-    public static final String TOTAL_RECORDS = "total_records";
+    String RETURN_COUNT = "return_count";
+    String TOTAL_RECORDS = "total_records";
 
-    public static final String PAGE_NUMBER = "pageNumber";
+    String PAGE_NUMBER = "pageNumber";
 
-    public static final String PAGE_SIZE = "pageSize";
+    String PAGE_SIZE = "pageSize";
 
-    public static final String SERVER_VERSION = "serverVersion";
+    String SERVER_VERSION = "serverVersion";
 
-    public static final String ORDER_BY_TYPE = "orderByType";
+    String ORDER_BY_TYPE = "orderByType";
 
-    public static final String ORDER_BY_FIELD_NAME = "orderByFieldName";
+    String ORDER_BY_FIELD_NAME = "orderByFieldName";
 
-    public static final String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    String DATETIME_IN_UTC_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     String LOCATIONS = "locations";
 
-	String NULL = "null";
+    String NULL = "null";
 
-	interface ContentType {
+    interface ContentType {
         String APPLICATION_YAML = "application/x-yaml";
         String TEXT_YAML = "text/yaml";
     }
@@ -55,8 +55,8 @@ public interface Constants {
         String APP_ID = "app_id";
         String STRICT = "strict";
         String APP_VERSION = "app_version";
-        String IS_DRAFT= "is_draft";
-        String IS_JSON_VALIDATOR= "is_json_validator";
+        String IS_DRAFT = "is_draft";
+        String IS_JSON_VALIDATOR = "is_json_validator";
         String LIMIT = "limit";
         String PAGE = "page";
         String IDENTIFIER = "identifier";

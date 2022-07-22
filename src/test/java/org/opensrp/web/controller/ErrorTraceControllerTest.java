@@ -25,37 +25,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ErrorTraceControllerTest {
 
-	@InjectMocks
-	private ErrorTraceController errorTraceController;
+    private final String BASE_URL = "/errorhandler";
+    @InjectMocks
+    private ErrorTraceController errorTraceController;
+    @Mock
+    private ErrorTraceService errorTraceService;
+    private MockMvc mockMvc;
 
-	@Mock
-	private ErrorTraceService errorTraceService;
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(errorTraceController)
+                .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
+    }
 
-	private final String BASE_URL = "/errorhandler";
+    @Test
+    public void testAllErrorsShouldReturnListIfExists() throws Exception {
+        ErrorTrace errorTrace = new ErrorTrace();
+        errorTrace.setErrorType("error");
+        errorTrace.setId("1");
+        List<ErrorTrace> errorTraceList = Collections.singletonList(errorTrace);
+        doReturn(errorTraceList).when(errorTraceService).getAllErrors();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/errortrace"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-	private MockMvc mockMvc;
-
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		mockMvc = MockMvcBuilders.standaloneSetup(errorTraceController)
-		        .addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
-	}
-
-	@Test
-	public void testAllErrorsShouldReturnListIfExists() throws Exception {
-		ErrorTrace errorTrace = new ErrorTrace();
-		errorTrace.setErrorType("error");
-		errorTrace.setId("1");
-		List<ErrorTrace> errorTraceList = Collections.singletonList(errorTrace);
-		doReturn(errorTraceList).when(errorTraceService).getAllErrors();
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/errortrace"))
-							.andExpect(status().isOk())
-							.andReturn();
-
-		List<ErrorTrace> responseResult = new Gson().fromJson(result.getResponse().getContentAsString(),  new TypeToken<List<ErrorTrace>>(){}.getType());
-		assertNotNull(responseResult);
-		assertEquals(1, responseResult.size());
-	}
+        List<ErrorTrace> responseResult = new Gson().fromJson(result.getResponse().getContentAsString(), new TypeToken<List<ErrorTrace>>() {
+        }.getType());
+        assertNotNull(responseResult);
+        assertEquals(1, responseResult.size());
+    }
 
 }

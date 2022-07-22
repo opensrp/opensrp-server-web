@@ -42,14 +42,19 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Controller
-@RequestMapping (value = "/rest/clientForm")
+@RequestMapping(value = "/rest/clientForm")
 public class ClientFormResource {
 
     public static final String FORM_IDENTIFIERS = "identifiers";
 
     public static final String FORMS_VERSION = "forms_version";
 
-    private static Logger logger = LogManager.getLogger(ClientFormResource.class.toString());
+    private static final Logger logger = LogManager.getLogger(ClientFormResource.class.toString());
+    private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
+        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(o1.getVersion());
+        final DefaultArtifactVersion otherArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
+        return artifactVersion.compareTo(otherArtifactVersion);
+    };
     protected ObjectMapper objectMapper;
     private ClientFormService clientFormService;
     private ManifestService manifestService;
@@ -142,13 +147,7 @@ public class ClientFormResource {
         return new ResponseEntity<>(objectMapper.writeValueAsString(completeClientForm), HttpStatus.OK);
     }
 
-    private final Comparator<IdVersionTuple> idVersionTupleByVersionComparator = (o1, o2) -> {
-        final DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(o1.getVersion());
-        final DefaultArtifactVersion otherArtifactVersion = new DefaultArtifactVersion(o2.getVersion());
-        return artifactVersion.compareTo(otherArtifactVersion);
-    };
-
-    private ClientFormMetadata getMostRecentWithVersion(@NonNull final String formIdentifier, final boolean isJsonValidator, @Nullable final String formVersionCap){
+    private ClientFormMetadata getMostRecentWithVersion(@NonNull final String formIdentifier, final boolean isJsonValidator, @Nullable final String formVersionCap) {
         final List<IdVersionTuple> availableFormIdVersions = clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, isJsonValidator);
         final Optional<IdVersionTuple> maxInCapLimitIdVersionTuple;
         if (formVersionCap != null) {
@@ -191,19 +190,19 @@ public class ClientFormResource {
         }
 
         Manifest manifest = manifestService.getManifest(releaseIdentifier);
-        if (manifest == null || StringUtils.isBlank(manifest.getJson())){
+        if (manifest == null || StringUtils.isBlank(manifest.getJson())) {
             return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NOT_FOUND);
         }
 
         JSONObject json = new JSONObject(manifest.getJson());
-        if (!json.has(FORM_IDENTIFIERS)){
+        if (!json.has(FORM_IDENTIFIERS)) {
             return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NO_CONTENT);
         }
 
         JSONArray fileIdentifiers = json.getJSONArray(FORM_IDENTIFIERS);
-        if (fileIdentifiers == null || fileIdentifiers.length() <= 0){
+        if (fileIdentifiers == null || fileIdentifiers.length() <= 0) {
             return new ResponseEntity<>("This manifest does not have any files related to it",
                     HttpStatus.NO_CONTENT);
         }
@@ -257,7 +256,7 @@ public class ClientFormResource {
         String fileContentString = new String(bytes);
 
         ResponseEntity<String> errorMessageForInvalidContent1 = checkYamlPropertiesValidity(fileContentType,
-                fileContentString,  jsonFile.getOriginalFilename());
+                fileContentString, jsonFile.getOriginalFilename());
         if (errorMessageForInvalidContent1 != null)
             return errorMessageForInvalidContent1;
 
@@ -270,7 +269,7 @@ public class ClientFormResource {
         logger.debug(fileContentString);
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
-                formName, module, isJsonValidator, identifier, relation));
+                        formName, module, isJsonValidator, identifier, relation));
 
         if (completeClientForm == null) {
             return new ResponseEntity<>("Unknown error. Kindly confirm that the form does not already exist on the server", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -279,12 +278,12 @@ public class ClientFormResource {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    private String getFormVersion(String formVersion){
+    private String getFormVersion(String formVersion) {
         String version = formVersion;
         if (StringUtils.isBlank(formVersion)) {
             version = generateFormVersion(2);
         }
-        return  version;
+        return version;
     }
 
     private String getIdentifier(String formIdentifier, MultipartFile jsonFile) {
@@ -311,7 +310,7 @@ public class ClientFormResource {
                 for (int i = 0; i < manifestList.size(); i++) {
                     Manifest manifest = manifestList.get(i);
                     final String newVersion = deriveNewFormVersionFromManifest(manifest);
-                    if (StringUtils.isNotBlank(newVersion)){
+                    if (StringUtils.isNotBlank(newVersion)) {
                         formVersion = newVersion;
                         break;
                     }
@@ -326,7 +325,7 @@ public class ClientFormResource {
         return formVersion;
     }
 
-    private String deriveNewFormVersionFromManifest(final Manifest manifest){
+    private String deriveNewFormVersionFromManifest(final Manifest manifest) {
         final String manifestJson = manifest.getJson();
         if (StringUtils.isBlank(manifestJson)) {
             return null;
@@ -342,8 +341,8 @@ public class ClientFormResource {
         return FormConfigUtils.getNewVersion(version);
     }
 
-    private ClientFormMetadata getClientFormMetadata(String formVersion, String formName,String module,
-            boolean isJsonValidator, String identifier, String relation) {
+    private ClientFormMetadata getClientFormMetadata(String formVersion, String formName, String module,
+                                                     boolean isJsonValidator, String identifier, String relation) {
         ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
         clientFormMetadata.setVersion(formVersion);
         clientFormMetadata.setIdentifier(identifier);
@@ -351,11 +350,11 @@ public class ClientFormResource {
         clientFormMetadata.setIsJsonValidator(isJsonValidator);
         clientFormMetadata.setCreatedAt(new Date());
         clientFormMetadata.setModule(module);
-        if(!isJsonValidator) {
+        if (!isJsonValidator) {
             clientFormMetadata.setIsDraft(true); //After any upload all the files will need to be a draft except for the json
             // widget validators.
         }
-        if (!StringUtils.isBlank(relation)){
+        if (!StringUtils.isBlank(relation)) {
             clientFormMetadata.setRelation(relation);
         }
         return clientFormMetadata;
@@ -393,24 +392,23 @@ public class ClientFormResource {
                 return new ResponseEntity<>("Kindly make sure that the following fields are still in the form : " + String.join(", ", missingFields)
                         + ". The fields cannot be removed as per the Administrator policy", HttpStatus.BAD_REQUEST);
             }
-        }
-        else if (isYamlContentType(fileContentType,  fileName)) {
-	        HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
-	        if (!missingPropertyFileReferences.isEmpty()) {
-		        String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
-		        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-	        }
+        } else if (isYamlContentType(fileContentType, fileName)) {
+            HashSet<String> missingPropertyFileReferences = clientFormValidator.checkForMissingYamlPropertyFileReferences(fileContentString);
+            if (!missingPropertyFileReferences.isEmpty()) {
+                String errorMessage = "Form upload failed. Kindly make sure that the following property file(s) are uploaded before: " + String.join(", ", missingPropertyFileReferences);
+                return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+            }
         }
         return null;
     }
 
-	private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString, @NonNull String fileName) {
-		String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType, fileName);
-		if (errorMessageForInvalidContent != null) {
-			return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
-		}
-		return null;
-	}
+    private ResponseEntity<String> checkYamlPropertiesValidity(String fileContentType, String fileContentString, @NonNull String fileName) {
+        String errorMessageForInvalidContent = checkValidJsonYamlPropertiesStructure(fileContentString, fileContentType, fileName);
+        if (errorMessageForInvalidContent != null) {
+            return new ResponseEntity<>("File content error:\n" + errorMessageForInvalidContent, HttpStatus.BAD_REQUEST);
+        }
+        return null;
+    }
 
     @VisibleForTesting
     @Nullable
@@ -423,7 +421,7 @@ public class ClientFormResource {
                 logger.error("JSON File upload is invalid JSON", ex);
                 return ex.getMessage();
             }
-        } else if (isYamlContentType(contentType,fileName)) {
+        } else if (isYamlContentType(contentType, fileName)) {
             String errorMessage;
             try {
                 (new MVELRuleFactory(new YamlRuleDefinitionReader())).createRule(new BufferedReader(new StringReader(fileContentString)));
@@ -435,7 +433,7 @@ public class ClientFormResource {
             try {
                 new Yaml().load(fileContentString);
                 return null;
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 logger.error("YAML file upload is invalid", ex);
                 errorMessage += "\n\n" + ex.getMessage();
             }

@@ -1,16 +1,10 @@
 package org.opensrp.web.rest;
 
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.put;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -28,11 +22,13 @@ import org.springframework.test.web.server.ResultMatcher;
 import org.springframework.test.web.server.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.*;
 
 /**
  * Created by Vincent Karuri on 06/05/2019
@@ -42,14 +38,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public abstract class BaseResourceTest<T> {
 
+    protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     @Autowired
     protected WebApplicationContext webApplicationContext;
-
     protected MockMvc mockMvc;
-
     protected ObjectMapper mapper = new ObjectMapper();
-
-    protected final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     @Before
     public void bootStrap() {
@@ -69,7 +62,7 @@ public abstract class BaseResourceTest<T> {
     protected String getResponseAsString(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
         String finalUrl = url;
-        if (parameter != null &&!parameter.isEmpty()) {
+        if (parameter != null && !parameter.isEmpty()) {
             finalUrl = finalUrl + "?" + parameter;
         }
 
@@ -80,13 +73,13 @@ public abstract class BaseResourceTest<T> {
         if (responseString.isEmpty()) {
             return null;
         }
-        return  responseString;
+        return responseString;
     }
 
     protected JsonNode postRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -99,7 +92,7 @@ public abstract class BaseResourceTest<T> {
     protected String postRequestWithJsonContentAndReturnString(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        post(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -112,7 +105,7 @@ public abstract class BaseResourceTest<T> {
     protected JsonNode putRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
 
         MvcResult mvcResult = this.mockMvc.perform(
-                put(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
+                        put(url).contentType(MediaType.APPLICATION_JSON).body(data.getBytes()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(expectedStatus).andReturn();
 
         String responseString = mvcResult.getResponse().getContentAsString();
@@ -126,7 +119,7 @@ public abstract class BaseResourceTest<T> {
     protected String deleteRequestWithParams(String url, String parameter, ResultMatcher expectedStatus) throws Exception {
 
         String finalUrl = url;
-        if (parameter != null &&!parameter.isEmpty()) {
+        if (parameter != null && !parameter.isEmpty()) {
             finalUrl = finalUrl + "?" + parameter;
         }
 
@@ -137,7 +130,7 @@ public abstract class BaseResourceTest<T> {
         if (responseString.isEmpty()) {
             return null;
         }
-        return  responseString;
+        return responseString;
     }
 
     protected String deleteRequestWithJsonContent(String url, String data, ResultMatcher expectedStatus) throws Exception {
@@ -148,10 +141,12 @@ public abstract class BaseResourceTest<T> {
         if (responseString.isEmpty()) {
             return null;
         }
-        return  responseString;
+        return responseString;
     }
 
-    /** Objects in the list should have a unique uuid identifier field **/
+    /**
+     * Objects in the list should have a unique uuid identifier field
+     **/
     protected abstract void assertListsAreSameIgnoringOrder(List<T> expectedList, List<T> actualList);
 
     protected Date convertDate(String dateString, String dateFormat) {

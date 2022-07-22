@@ -18,9 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.AssertionErrors.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,18 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 public class GlobalExceptionHandlerTest {
 
+    private final String BASE_URL = "/rest/campaign/";
+    private final String MESSAGE = "The server encountered an error processing the request.";
+    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
     @InjectMocks
     private CampaignResource campaignResource;
-
     @Mock
     private CampaignService campaignService;
-
     private MockMvc mockMvc;
-
-    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
-
-    private String BASE_URL = "/rest/campaign/";
-    private String MESSAGE = "The server encountered an error processing the request.";
 
     @Before
     public void setUp() throws Exception {
@@ -56,7 +52,7 @@ public class GlobalExceptionHandlerTest {
                 .thenThrow(new RuntimeException());
 
         MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/{identifier}",
-                "IRS_2018_S1")).
+                        "IRS_2018_S1")).
                 andExpect(status().isInternalServerError())
                 .andReturn();
 

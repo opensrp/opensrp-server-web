@@ -32,106 +32,99 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.AssertionErrors.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
 
 public class IdentifierSourceResourceTest {
 
-	@Mock
-	private IdentifierSourceService identifierSourceService;
+    private final String BASE_URL = "/rest/identifier-source";
+    @Autowired
+    protected WebApplicationContext webApplicationContext;
+    protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    @Mock
+    private IdentifierSourceService identifierSourceService;
+    @InjectMocks
+    private IdentifierSourceResource identifierSourceResource;
+    private MockMvc mockMvc;
 
-	@Autowired
-	protected WebApplicationContext webApplicationContext;
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(identifierSourceResource)
+                .setControllerAdvice(new GlobalExceptionHandler()).
+                addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
+                build();
+    }
 
-	@InjectMocks
-	private IdentifierSourceResource identifierSourceResource;
+    @Test
+    public void testGetAll() throws Exception {
+        List<IdentifierSource> identifierSourceList = new ArrayList();
+        identifierSourceList.add(createIdentifierSource());
+        when(identifierSourceService.findAllIdentifierSources()).thenReturn(identifierSourceList);
+        MvcResult result = mockMvc.perform(get(BASE_URL))
+                .andExpect(status().isOk())
+                .andReturn();
 
-	private MockMvc mockMvc;
+        String responseString = result.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            fail("Test case failed");
+        }
+        JsonNode actualObj = mapper.readTree(responseString);
+        assertEquals(actualObj.size(), 1);
+        assertEquals(actualObj.get(0).get("id").asInt(), 1);
+    }
 
-	protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
+    @Test
+    public void testFindByIdentifier() throws Exception {
+        IdentifierSource identifierSource = createIdentifierSource();
+        when(identifierSourceService.findByIdentifier(anyString())).thenReturn(identifierSource);
+        MvcResult result = mockMvc.perform(get(BASE_URL + "/{identifier}", "Test-1"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-	private final String BASE_URL = "/rest/identifier-source";
+        String responseString = result.getResponse().getContentAsString();
+        if (responseString.isEmpty()) {
+            fail("Test case failed");
+        }
+        JsonNode actualObj = mapper.readTree(responseString);
+        assertEquals(actualObj.get("id").asInt(), 1);
+    }
 
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(identifierSourceResource)
-				.setControllerAdvice(new GlobalExceptionHandler()).
-						addFilter(new CrossSiteScriptingPreventionFilter(), "/*").
-						build();
-	}
+    @Test
+    public void testCreateIdentifierSourceShouldInvokeAddMethod() throws Exception {
+        IdentifierSource identifierSource = createIdentifierSource();
+        doNothing().when(identifierSourceService).add(any(IdentifierSource.class));
+        MvcResult result = mockMvc.perform(post(BASE_URL, new Gson().toJson(identifierSource))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+        assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+    }
 
-	@Test
-	public void testGetAll() throws Exception {
-		List<IdentifierSource> identifierSourceList = new ArrayList();
-		identifierSourceList.add(createIdentifierSource());
-		when(identifierSourceService.findAllIdentifierSources()).thenReturn(identifierSourceList);
-		MvcResult result = mockMvc.perform(get(BASE_URL))
-				.andExpect(status().isOk())
-				.andReturn();
+    @Test
+    public void testUpdateIdentifierSourceShouldInvokeUpdateMethod() throws Exception {
+        IdentifierSource identifierSource = createIdentifierSource();
+        doNothing().when(identifierSourceService).update(any(IdentifierSource.class));
+        MvcResult result = mockMvc.perform(put(BASE_URL, new Gson().toJson(identifierSource))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+        assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+    }
 
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			fail("Test case failed");
-		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		assertEquals(actualObj.size(), 1);
-		assertEquals(actualObj.get(0).get("id").asInt(),1);
-	}
-
-	@Test
-	public void testFindByIdentifier() throws Exception {
-		IdentifierSource identifierSource = createIdentifierSource();
-		when(identifierSourceService.findByIdentifier(anyString())).thenReturn(identifierSource);
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/{identifier}","Test-1"))
-				.andExpect(status().isOk())
-				.andReturn();
-
-		String responseString = result.getResponse().getContentAsString();
-		if (responseString.isEmpty()) {
-			fail("Test case failed");
-		}
-		JsonNode actualObj = mapper.readTree(responseString);
-		assertEquals(actualObj.get("id").asInt(),1);
-	}
-
-	@Test
-	public void testCreateIdentifierSourceShouldInvokeAddMethod() throws Exception {
-		IdentifierSource identifierSource = createIdentifierSource();
-		doNothing().when(identifierSourceService).add(any(IdentifierSource.class));
-		MvcResult result = mockMvc.perform(post(BASE_URL, new Gson().toJson(identifierSource))
-				             .contentType(MediaType.APPLICATION_JSON))
-							.andExpect(status().isCreated())
-							.andReturn();
-     	assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
-	}
-
-	@Test
-	public void testUpdateIdentifierSourceShouldInvokeUpdateMethod() throws Exception {
-		IdentifierSource identifierSource = createIdentifierSource();
-		doNothing().when(identifierSourceService).update(any(IdentifierSource.class));
-		MvcResult result = mockMvc.perform(put(BASE_URL, new Gson().toJson(identifierSource))
-				             .contentType(MediaType.APPLICATION_JSON))
-							.andExpect(status().isCreated())
-							.andReturn();
-		assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
-	}
-
-	private IdentifierSource createIdentifierSource() {
-		IdentifierSource identifierSource = new IdentifierSource();
-		identifierSource.setId(1l);
-		identifierSource.setIdentifier("Test-1");
-		identifierSource.setBaseCharacterSet("AB12");
-		identifierSource.setFirstIdentifierBase("ab12");
-		identifierSource.setMinLength(4);
-		identifierSource.setMaxLength(4);
-		return identifierSource;
-	}
+    private IdentifierSource createIdentifierSource() {
+        IdentifierSource identifierSource = new IdentifierSource();
+        identifierSource.setId(1l);
+        identifierSource.setIdentifier("Test-1");
+        identifierSource.setBaseCharacterSet("AB12");
+        identifierSource.setFirstIdentifierBase("ab12");
+        identifierSource.setMinLength(4);
+        identifierSource.setMaxLength(4);
+        return identifierSource;
+    }
 
 
 }

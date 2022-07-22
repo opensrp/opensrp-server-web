@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CampaignResourceShadow extends CampaignResource {
-	
-	@Override
-	public void setCampaignService(CampaignService campaignService) {
-		super.setCampaignService(campaignService);
-	}
+
+    @Override
+    public void setCampaignService(CampaignService campaignService) {
+        super.setCampaignService(campaignService);
+    }
 
 }

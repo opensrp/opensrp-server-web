@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.rest.shadow;
 
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ViewConfigurationResourceShadow extends ViewConfigurationResource {
-	
-	@Override
-	public void setViewConfigurationService(ViewConfigurationService viewConfigurationService) {
-		super.setViewConfigurationService(viewConfigurationService);
-	}
+
+    @Override
+    public void setViewConfigurationService(ViewConfigurationService viewConfigurationService) {
+        super.setViewConfigurationService(viewConfigurationService);
+    }
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import org.apache.http.entity.ContentType;
 import org.hamcrest.core.StringStartsWith;
 import org.joda.time.DateTime;
@@ -42,28 +41,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
 
-@RunWith (SpringJUnit4ClassRunner.class)
-@ContextConfiguration (loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
-@ActiveProfiles (profiles = { "jedis", "postgres", "basic_auth" })
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = {"jedis", "postgres", "basic_auth"})
 public class ClientFormResourceTest {
 
+    private final String BASE_URL = "/rest/clientForm/";
     @Autowired
     protected WebApplicationContext webApplicationContext;
     protected ObjectMapper mapper = new ObjectMapper().enableDefaultTyping();
@@ -71,7 +62,51 @@ public class ClientFormResourceTest {
     private ClientFormService clientFormService;
     private ManifestService manifestService;
 
-    private final String BASE_URL = "/rest/clientForm/";
+    private static Manifest initTestManifest() {
+        Manifest manifest = new Manifest();
+        String identifier = "mani1234";
+        String appVersion = "1234234";
+        String json = "{\"name\":\"test\"}";
+        String appId = "1234567op";
+
+        manifest.setAppId(appId);
+        manifest.setAppVersion(appVersion);
+        manifest.setIdentifier(identifier);
+        manifest.setJson(json);
+
+        return manifest;
+    }
+
+    private static Manifest initTestManifest2() {
+        Manifest manifest = new Manifest();
+        String identifier = "mani1234";
+        String appVersion = "1234234";
+        String json = "{\"forms_version\":\"0.0.1\",\n"
+                + "            \"identifiers\":[]}";
+        String appId = "1234567op";
+
+        manifest.setAppId(appId);
+        manifest.setAppVersion(appVersion);
+        manifest.setIdentifier(identifier);
+        manifest.setJson(json);
+
+        return manifest;
+    }
+
+    private static Manifest initTestManifest3() {
+        Manifest manifest = new Manifest();
+        String identifier = "mani1234";
+        String appVersion = "1234234";
+        String json = "{\"forms_version\":\"0.0.1\",\"identifiers\":[\"opd/reg.json\"]}";
+        String appId = "1234567op";
+
+        manifest.setAppId(appId);
+        manifest.setAppVersion(appVersion);
+        manifest.setIdentifier(identifier);
+        manifest.setJson(json);
+
+        return manifest;
+    }
 
     @Before
     public void setUp() {
@@ -116,10 +151,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("strict", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("strict", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -128,7 +163,6 @@ public class ClientFormResourceTest {
         assertEquals("opd/reg.json", jsonNode.get("clientFormMetadata").get("identifier").textValue());
         assertEquals("0.0.3", jsonNode.get("clientFormMetadata").get("version").textValue());
     }
-
 
     @Test
     public void testSearchForFormByFormVersionShouldReturnSpecificJsonValidatorVersion() throws Exception {
@@ -152,11 +186,11 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("strict", "true")
-                .param("is_json_validator", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("strict", "true")
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -187,10 +221,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("strict", "True")
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("strict", "True")
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isNoContent())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -218,10 +252,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("strict", "True")
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("strict", "True")
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -259,9 +293,9 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -277,7 +311,6 @@ public class ClientFormResourceTest {
         verify(clientFormService).getClientFormById(3L);
         verify(clientFormService).getClientFormMetadataById(3L);
     }
-
 
     @Test
     public void testSearchForFormByFormVersionShouldReturnNextJsonValidatorVersion() throws Exception {
@@ -306,10 +339,10 @@ public class ClientFormResourceTest {
         when(clientFormService.getClientFormMetadataById(3L)).thenReturn(clientFormMetadata);
 
         MvcResult result = mockMvc.perform(get(BASE_URL)
-                .param("form_identifier", formIdentifier)
-                .param("form_version", formVersion)
-                .param("current_form_version", currentFormVersion)
-                .param("is_json_validator", "true"))
+                        .param("form_identifier", formIdentifier)
+                        .param("form_version", formVersion)
+                        .param("current_form_version", currentFormVersion)
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -332,10 +365,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -365,11 +398,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -397,11 +430,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName)
-                        .param("is_json_validator", "true"))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName)
+                                .param("is_json_validator", "true"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -432,10 +465,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -465,12 +498,12 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName)
-                        .param("is_json_validator", "true"))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName)
+                                .param("is_json_validator", "true"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -492,32 +525,32 @@ public class ClientFormResourceTest {
     public void testAddClientFormWhenGivenJSONAndWithMinorVersionGreaterThan999() throws Exception {
         String formIdentifier = "opd/reg.json";
         String formName = "REGISTRATION FORM";
-    MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
-            "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
+        MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/reg.json",
+                "application/json", TestFileContent.JSON_FORM_FILE.getBytes());
 
-    when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestMinorVersionGreaterThan1000());
-    when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
+        when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestMinorVersionGreaterThan1000());
+        when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-    fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
-            .andExpect(status().isCreated())
-            .andReturn();
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-    ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
-    ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
-    verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
-    verify(manifestService).getAllManifest(anyInt());
+        ArgumentCaptor<ClientForm> clientFormArgumentCaptor = ArgumentCaptor.forClass(ClientForm.class);
+        ArgumentCaptor<ClientFormMetadata> clientFormMetadataArgumentCaptor = ArgumentCaptor.forClass(ClientFormMetadata.class);
+        verify(clientFormService).addClientForm(clientFormArgumentCaptor.capture(), clientFormMetadataArgumentCaptor.capture());
+        verify(manifestService).getAllManifest(anyInt());
 
-    assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
-    ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
-    assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
-    assertEquals("1.0.0", clientFormMetadata.getVersion());
-    assertEquals(formName, clientFormMetadata.getLabel());
-    assertNull(clientFormMetadata.getModule());
-}
+        assertEquals(TestFileContent.JSON_FORM_FILE, clientFormArgumentCaptor.getValue().getJson().toString());
+        ClientFormMetadata clientFormMetadata = clientFormMetadataArgumentCaptor.getValue();
+        assertEquals(formIdentifier, clientFormMetadata.getIdentifier());
+        assertEquals("1.0.0", clientFormMetadata.getVersion());
+        assertEquals(formName, clientFormMetadata.getLabel());
+        assertNull(clientFormMetadata.getModule());
+    }
 
     @Test
     public void testAddClientFormWhenGivenJSONAndWithNoFormVersion() throws Exception {
@@ -531,10 +564,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -563,10 +596,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -644,8 +677,6 @@ public class ClientFormResourceTest {
         return manifestList;
     }
 
-
-
     @Test
     public void testAddClientFormWhenGivenJSONWithMissingReferencesShouldReturn400() throws Exception {
         String formIdentifier = "opd/reg.json";
@@ -658,11 +689,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult mvcResult = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -685,11 +716,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -713,15 +744,15 @@ public class ClientFormResourceTest {
         ClientForm formValidator = new ClientForm();
         formValidator.setJson("\"{\"cannot_remove\":{\"title\":\"Fields you cannot remove\",\"fields\":[\"reaction_vaccine_duration\",\"reaction_vaccine_dosage\",\"aefi_form\"]}}\"");
 
-        Mockito.doReturn(formValidator)
+        doReturn(formValidator)
                 .when(clientFormService).getMostRecentFormValidator(formIdentifier);
 
         MvcResult mvcResult = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -746,10 +777,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -774,15 +805,15 @@ public class ClientFormResourceTest {
         MockMultipartFile file = new MockMultipartFile("form", "path/to/opd/attention_flag.yml",
                 "application/x-yaml", TestFileContent.ATTENTION_FLAGS_YAML_FILE.getBytes());
 
-        Mockito.doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
+        doReturn(true).when(clientFormService).isClientFormExists("attention_flags.properties");
         when(manifestService.getAllManifest(anyInt())).thenReturn(getManifestList());
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -809,11 +840,11 @@ public class ClientFormResourceTest {
 
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
-        MvcResult result =  mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+        MvcResult result = mockMvc.perform(
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -835,11 +866,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -861,10 +892,10 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -893,11 +924,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         MvcResult result = mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_identifier", formIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_identifier", formIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -919,9 +950,9 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -940,57 +971,57 @@ public class ClientFormResourceTest {
 
     @Test
     public void testGetAllFilesRelatedToReleaseWithoutIdentifier() throws Exception {
-	    MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-			    .param("identifier", ""))
-			    .andExpect(status().isBadRequest())
-			    .andReturn();
-	    assertEquals("Request parameter cannot be empty", result.getResponse().getContentAsString());
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", ""))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertEquals("Request parameter cannot be empty", result.getResponse().getContentAsString());
     }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoValidManifest() throws Exception {
-		String identifier = "0.0.5";
+    @Test
+    public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoValidManifest() throws Exception {
+        String identifier = "0.0.5";
 
-		when(manifestService.getManifest(identifier)).thenReturn(new Manifest());
+        when(manifestService.getManifest(identifier)).thenReturn(new Manifest());
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isNotFound())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isNotFound())
+                .andReturn();
 
-		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
-	}
+        assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+    }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoFormIdentifierInManifest() throws Exception {
-		String identifier = "0.0.5";
+    @Test
+    public void testGetAllFilesRelatedToReleaseWithIdentifierAndNoFormIdentifierInManifest() throws Exception {
+        String identifier = "0.0.5";
 
-		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest());
+        when(manifestService.getManifest(identifier)).thenReturn(initTestManifest());
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isNoContent())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isNoContent())
+                .andReturn();
 
-		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
-	}
+        assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+    }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseWithIdentifierAndEmptyFormIdentifierList() throws Exception {
-		String identifier = "0.0.5";
+    @Test
+    public void testGetAllFilesRelatedToReleaseWithIdentifierAndEmptyFormIdentifierList() throws Exception {
+        String identifier = "0.0.5";
 
-		when(manifestService.getManifest(identifier)).thenReturn(initTestManifest2());
+        when(manifestService.getManifest(identifier)).thenReturn(initTestManifest2());
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isNoContent())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isNoContent())
+                .andReturn();
 
-		assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
-	}
+        assertEquals("This manifest does not have any files related to it", result.getResponse().getContentAsString());
+    }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseResponseEmptyForFilesNotFound() throws Exception {
+    @Test
+    public void testGetAllFilesRelatedToReleaseResponseEmptyForFilesNotFound() throws Exception {
         final String identifier = "0.0.5";
         final String formIdentifier = "opd/reg.json";
         final Manifest manifest = initTestManifest3();
@@ -998,7 +1029,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false))
                 .thenReturn(new ArrayList<>());
         MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-                .param("identifier", identifier))
+                        .param("identifier", identifier))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1007,7 +1038,7 @@ public class ClientFormResourceTest {
         assertTrue(jsonNode.isEmpty());
     }
 
-    private List<ClientFormMetadata> getSampleClientFormMetadata(@SuppressWarnings("SameParameterValue") final String formIdentifier, String[] versions){
+    private List<ClientFormMetadata> getSampleClientFormMetadata(@SuppressWarnings("SameParameterValue") final String formIdentifier, String[] versions) {
         List<ClientFormMetadata> clientFormMetadataList = new ArrayList<>(versions.length);
         for (int i = 0; i < versions.length; i++) {
             ClientFormMetadata clientFormMetadata = new ClientFormMetadata();
@@ -1021,20 +1052,20 @@ public class ClientFormResourceTest {
         return clientFormMetadataList;
     }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseResponseCorrespondsFormVersion() throws Exception {
-		final String identifier = "0.0.5";
-		final String formIdentifier = "opd/reg.json";
-		final Manifest manifest = initTestManifest3();
-		when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
+    @Test
+    public void testGetAllFilesRelatedToReleaseResponseCorrespondsFormVersion() throws Exception {
+        final String identifier = "0.0.5";
+        final String formIdentifier = "opd/reg.json";
+        final Manifest manifest = initTestManifest3();
+        when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
 
-		final String[] fileVersions = new String[]{"0.0.1", "0.0.2", "0.0.3"};
-		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
-		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+        final String[] fileVersions = new String[]{"0.0.1", "0.0.2", "0.0.3"};
+        List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+        List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
                 .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
                 .collect(Collectors.toList());
 
-		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
         when(clientFormService.getClientFormMetadataById(any(Long.class)))
                 .thenAnswer(invocation -> {
                     Long metadataFormId = invocation.getArgument(0);
@@ -1044,33 +1075,33 @@ public class ClientFormResourceTest {
                             .orElse(null);
                 });
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isOk())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isOk())
+                .andReturn();
 
         final String expectedResponseFileVersion = "0.0.2"; // expected fileVersion to be generated from manifest
 
-		final String responseString = result.getResponse().getContentAsString();
-		final JsonNode jsonNode = mapper.readTree(responseString);
-		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
-		assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
-	}
+        final String responseString = result.getResponse().getContentAsString();
+        final JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+        assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
+    }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseResponseFindsHighestBelowManifestFormVersion() throws Exception {
-		final String identifier = "0.0.5";
-		final String formIdentifier = "opd/reg.json";
-		final Manifest manifest = initTestManifest3();
+    @Test
+    public void testGetAllFilesRelatedToReleaseResponseFindsHighestBelowManifestFormVersion() throws Exception {
+        final String identifier = "0.0.5";
+        final String formIdentifier = "opd/reg.json";
+        final Manifest manifest = initTestManifest3();
         when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
 
         final String[] fileVersions = new String[]{"0.0.1", "0.0.3", "0.0.4"};
-		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
-		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+        List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+        List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
                 .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
                 .collect(Collectors.toList());
 
-		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
         when(clientFormService.getClientFormMetadataById(any(Long.class)))
                 .thenAnswer(invocation -> {
                     Long metadataFormId = invocation.getArgument(0);
@@ -1080,34 +1111,34 @@ public class ClientFormResourceTest {
                             .orElse(null);
                 });
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isOk())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		final String expectedResultFileVersion = "0.0.1"; // since no file version of matching "0.0.2" exists
+        final String expectedResultFileVersion = "0.0.1"; // since no file version of matching "0.0.2" exists
 
-		final String responseString = result.getResponse().getContentAsString();
-		final JsonNode jsonNode = mapper.readTree(responseString);
-		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
-		assertEquals(expectedResultFileVersion, jsonNode.get(0).get("version").textValue());
-	}
+        final String responseString = result.getResponse().getContentAsString();
+        final JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+        assertEquals(expectedResultFileVersion, jsonNode.get(0).get("version").textValue());
+    }
 
-	@Test
-	public void testGetAllFilesRelatedToReleaseResponseFindsMostRecentFormVersionIfNoMatchingOrBelow() throws Exception {
-		final String identifier = "0.0.5";
-		final String formIdentifier = "opd/reg.json";
-		final Manifest manifest = initTestManifest3();
+    @Test
+    public void testGetAllFilesRelatedToReleaseResponseFindsMostRecentFormVersionIfNoMatchingOrBelow() throws Exception {
+        final String identifier = "0.0.5";
+        final String formIdentifier = "opd/reg.json";
+        final Manifest manifest = initTestManifest3();
         when(manifestService.getManifest(eq(identifier))).thenReturn(manifest);
 
         final String[] fileVersions = new String[]{"0.0.4", "0.0.5", "0.0.7"};
-		List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
-		List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
+        List<ClientFormMetadata> clientFormMetadataList = getSampleClientFormMetadata(formIdentifier, fileVersions);
+        List<IdVersionTuple> idVersionTuples = clientFormMetadataList.stream()
                 .map(clientFormMetadata -> new IdVersionTuple(clientFormMetadata.getId(), clientFormMetadata.getVersion()))
                 .collect(Collectors.toList());
 
-		when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
-		when(clientFormService.getClientFormMetadataById(any(Long.class)))
+        when(clientFormService.getAvailableClientFormMetadataVersionByIdentifier(formIdentifier, false)).thenReturn(idVersionTuples);
+        when(clientFormService.getClientFormMetadataById(any(Long.class)))
                 .thenAnswer(invocation -> {
                     Long argClientFormMetadataId = invocation.getArgument(0);
                     return clientFormMetadataList.stream()
@@ -1116,66 +1147,20 @@ public class ClientFormResourceTest {
                             .orElse(null);
                 });
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
-				.param("identifier", identifier))
-				.andExpect(status().isOk())
-				.andReturn();
+        MvcResult result = mockMvc.perform(get(BASE_URL + "release-related-files")
+                        .param("identifier", identifier))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		final String expectedResponseFileVersion = "0.0.7"; // most recent, since no matching "0.0.2" or below
-		String responseString = result.getResponse().getContentAsString();
-		JsonNode jsonNode = mapper.readTree(responseString);
-		assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
-		assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
-	}
-
-	private static Manifest initTestManifest() {
-		Manifest manifest = new Manifest();
-		String identifier = "mani1234";
-		String appVersion = "1234234";
-		String json = "{\"name\":\"test\"}";
-		String appId = "1234567op";
-
-		manifest.setAppId(appId);
-		manifest.setAppVersion(appVersion);
-		manifest.setIdentifier(identifier);
-		manifest.setJson(json);
-
-		return manifest;
-	}
-
-	private static Manifest initTestManifest2() {
-		Manifest manifest = new Manifest();
-		String identifier = "mani1234";
-		String appVersion = "1234234";
-		String json = "{\"forms_version\":\"0.0.1\",\n"
-				+ "            \"identifiers\":[]}";
-		String appId = "1234567op";
-
-		manifest.setAppId(appId);
-		manifest.setAppVersion(appVersion);
-		manifest.setIdentifier(identifier);
-		manifest.setJson(json);
-
-		return manifest;
-	}
-
-	private static Manifest initTestManifest3() {
-		Manifest manifest = new Manifest();
-		String identifier = "mani1234";
-		String appVersion = "1234234";
-		String json = "{\"forms_version\":\"0.0.1\",\"identifiers\":[\"opd/reg.json\"]}";
-		String appId = "1234567op";
-
-		manifest.setAppId(appId);
-		manifest.setAppVersion(appVersion);
-		manifest.setIdentifier(identifier);
-		manifest.setJson(json);
-
-		return manifest;
-	}
+        final String expectedResponseFileVersion = "0.0.7"; // most recent, since no matching "0.0.2" or below
+        String responseString = result.getResponse().getContentAsString();
+        JsonNode jsonNode = mapper.readTree(responseString);
+        assertEquals(formIdentifier, jsonNode.get(0).get("identifier").textValue());
+        assertEquals(expectedResponseFileVersion, jsonNode.get(0).get("version").textValue());
+    }
 
     @Test
-    public void testCanAddClientFormWithRelation() throws Exception{
+    public void testCanAddClientFormWithRelation() throws Exception {
         String relatedJsonIdentifier = "json.form/child-registration.json";
         String formVersion = "0.1.1";
         String formName = "CHILD CALCULATION";
@@ -1186,11 +1171,11 @@ public class ClientFormResourceTest {
         when(clientFormService.addClientForm(any(ClientForm.class), any(ClientFormMetadata.class))).thenReturn(mock(ClientFormService.CompleteClientForm.class));
 
         mockMvc.perform(
-                fileUpload(BASE_URL)
-                        .file(file)
-                        .param("form_relation", relatedJsonIdentifier)
-                        .param("form_version", formVersion)
-                        .param("form_name", formName))
+                        fileUpload(BASE_URL)
+                                .file(file)
+                                .param("form_relation", relatedJsonIdentifier)
+                                .param("form_version", formVersion)
+                                .param("form_name", formName))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -1218,7 +1203,7 @@ public class ClientFormResourceTest {
     @Test
     public void testIsClientFormContentTypeValidShouldReturnTrueWhenGivenTextYamlContentTypeForYamlFile() throws Exception {
         ClientFormResource clientFormResource = webApplicationContext.getBean(ClientFormResource.class);
-        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML,"anc_register.yml"));
+        assertTrue(clientFormResource.isClientFormContentTypeValid(Constants.ContentType.TEXT_YAML, "anc_register.yml"));
     }
 
     @Test
@@ -1295,7 +1280,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getDraftsClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
-                .param("is_draft", "true"))
+                        .param("is_draft", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();
@@ -1325,7 +1310,7 @@ public class ClientFormResourceTest {
         when(clientFormService.getJsonWidgetValidatorClientFormMetadata(true)).thenReturn(clientFormMetadataList);
 
         MvcResult result = mockMvc.perform(get(BASE_URL + "metadata")
-                .param("is_json_validator", "true"))
+                        .param("is_json_validator", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseString = result.getResponse().getContentAsString();

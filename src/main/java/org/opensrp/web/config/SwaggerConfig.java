@@ -38,7 +38,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
     private ServletContext servletContext;
 
     @Bean
-    public Docket api(){
+    public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
@@ -50,7 +50,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
                 .build()
                 .apiInfo(getApiInfo())
                 .securityContexts(Lists.newArrayList(securityContext()))
-                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER), new ApiKey(BEARER,AUTHORIZATION,HEADER)));
+                .securitySchemes(Lists.newArrayList(new ApiKey(BASIC, AUTHORIZATION, HEADER), new ApiKey(BEARER, AUTHORIZATION, HEADER)));
     }
 
     public ApiInfo getApiInfo() {

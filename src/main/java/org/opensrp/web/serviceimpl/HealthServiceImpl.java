@@ -26,72 +26,65 @@ import java.util.concurrent.Future;
 @Service("HealthServiceImpl")
 public class HealthServiceImpl implements HealthService {
 
-	private static final Logger logger = LogManager.getLogger(HealthServiceImpl.class.toString());
+    private static final Logger logger = LogManager.getLogger(HealthServiceImpl.class.toString());
+    private final String buildVersion = this.getClass().getPackage().getImplementationVersion();
+    @Autowired
+    private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+    @Autowired(required = false)
+    private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
+    @Autowired
+    private RedisServiceHealthIndicator redisServiceHealthIndicator;
+    @Autowired(required = false)
+    private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
+    private List<ServiceHealthIndicator> healthIndicators;
 
-	@Autowired
-	private JdbcServiceHealthIndicator jdbcServiceHealthIndicator;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
-	@Autowired(required = false)
-	private RabbitmqServiceHealthIndicator rabbitmqServiceHealthIndicator;
+    @Override
+    public List<ServiceHealthIndicator> getHealthIndicators() {
+        if (healthIndicators == null) {
+            healthIndicators = new ArrayList<>();
+            healthIndicators.add(jdbcServiceHealthIndicator);
+            healthIndicators.add(redisServiceHealthIndicator);
+            if (rabbitmqServiceHealthIndicator != null)
+                healthIndicators.add(rabbitmqServiceHealthIndicator);
+            if (keycloakServiceHealthIndicator != null)
+                healthIndicators.add(keycloakServiceHealthIndicator);
+        }
+        return healthIndicators;
+    }
 
-	@Autowired
-	private RedisServiceHealthIndicator redisServiceHealthIndicator;
+    @Override
+    public ModelMap aggregateHealthCheck() {
+        ModelMap servicesObjectMap = new ModelMap();
+        ModelMap problemsObjectMap = new ModelMap();
+        ModelMap resultPayload = new ModelMap();
+        List<Callable<ModelMap>> callableList = new ArrayList<>();
+        for (ServiceHealthIndicator serviceHealthIndicator : getHealthIndicators()) {
+            callableList.add(serviceHealthIndicator.doHealthCheck());
+        }
 
-	@Autowired(required = false)
-	private KeycloakServiceHealthIndicator keycloakServiceHealthIndicator;
+        try {
+            List<Future<ModelMap>> futureList = taskExecutor.getThreadPoolExecutor().invokeAll(callableList);
+            for (Future<ModelMap> resultFuture : futureList) {
+                ModelMap modelMap = resultFuture.get();
+                Boolean status = (Boolean) modelMap.get(Constants.HealthIndicator.STATUS);
+                String indicator = (String) modelMap.get(Constants.HealthIndicator.INDICATOR);
+                if (!status)
+                    problemsObjectMap.put(indicator, modelMap.get(Constants.HealthIndicator.EXCEPTION));
+                servicesObjectMap.put(indicator, status);
+            }
+            resultPayload.put(Constants.HealthIndicator.PROBLEMS, problemsObjectMap);
+            resultPayload.put(Constants.HealthIndicator.SERVICES, servicesObjectMap);
+            resultPayload.put(Constants.HealthIndicator.TIME,
+                    new SimpleDateFormat(Constants.HealthIndicator.DATE_TIME_FORMAT).format(new Date()));
+            if (StringUtils.isNotBlank(buildVersion))
+                resultPayload.put(Constants.HealthIndicator.VERSION, buildVersion);
 
-	private final String buildVersion = this.getClass().getPackage().getImplementationVersion();
-
-	private List<ServiceHealthIndicator> healthIndicators;
-
-	@Autowired
-	private ThreadPoolTaskExecutor taskExecutor;
-
-	@Override
-	public List<ServiceHealthIndicator> getHealthIndicators() {
-		if (healthIndicators == null) {
-			healthIndicators = new ArrayList<>();
-			healthIndicators.add(jdbcServiceHealthIndicator);
-			healthIndicators.add(redisServiceHealthIndicator);
-			if (rabbitmqServiceHealthIndicator != null)
-				healthIndicators.add(rabbitmqServiceHealthIndicator);
-			if (keycloakServiceHealthIndicator != null)
-				healthIndicators.add(keycloakServiceHealthIndicator);
-		}
-		return healthIndicators;
-	}
-
-	@Override
-	public ModelMap aggregateHealthCheck() {
-		ModelMap servicesObjectMap = new ModelMap();
-		ModelMap problemsObjectMap = new ModelMap();
-		ModelMap resultPayload = new ModelMap();
-		List<Callable<ModelMap>> callableList = new ArrayList<>();
-		for (ServiceHealthIndicator serviceHealthIndicator : getHealthIndicators()) {
-			callableList.add(serviceHealthIndicator.doHealthCheck());
-		}
-
-		try {
-			List<Future<ModelMap>> futureList = taskExecutor.getThreadPoolExecutor().invokeAll(callableList);
-			for (Future<ModelMap> resultFuture : futureList) {
-				ModelMap modelMap = resultFuture.get();
-				Boolean status = (Boolean) modelMap.get(Constants.HealthIndicator.STATUS);
-				String indicator = (String) modelMap.get(Constants.HealthIndicator.INDICATOR);
-				if (!status)
-					problemsObjectMap.put(indicator, modelMap.get(Constants.HealthIndicator.EXCEPTION));
-				servicesObjectMap.put(indicator, status);
-			}
-			resultPayload.put(Constants.HealthIndicator.PROBLEMS, problemsObjectMap);
-			resultPayload.put(Constants.HealthIndicator.SERVICES, servicesObjectMap);
-			resultPayload.put(Constants.HealthIndicator.TIME,
-					new SimpleDateFormat(Constants.HealthIndicator.DATE_TIME_FORMAT).format(new Date()));
-			if (StringUtils.isNotBlank(buildVersion))
-				resultPayload.put(Constants.HealthIndicator.VERSION, buildVersion);
-
-		}
-		catch (InterruptedException | ExecutionException e) {
-			logger.error(e);
-		}
-		return resultPayload;
-	}
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(e);
+        }
+        return resultPayload;
+    }
 }

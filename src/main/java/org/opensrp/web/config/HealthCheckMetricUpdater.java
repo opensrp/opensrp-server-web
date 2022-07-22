@@ -16,31 +16,29 @@ import java.util.Map;
 @Component
 public class HealthCheckMetricUpdater {
 
-	@Autowired
-	private MeterRegistry registry;
+    private final Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
+    @Autowired
+    private MeterRegistry registry;
+    @Autowired
+    private HealthService healthService;
 
-	@Autowired
-	private HealthService healthService;
+    @PostConstruct
+    private void init() {
+        for (ServiceHealthIndicator healthIndicator : healthService.getHealthIndicators()) {
+            Gauge.builder(String.format(Constants.HealthIndicator.HEALTH_CHECK_PLACEHOLDER,
+                                    healthIndicator.getHealthIndicatorKey()),
+                            () -> healthCheckIndicatorMap.getOrDefault(healthIndicator.getHealthIndicatorKey(), 0.0))
+                    .register(registry);
+        }
+    }
 
-	private Map<String, Double> healthCheckIndicatorMap = new HashMap<>();
-
-	@PostConstruct
-	private void init() {
-		for (ServiceHealthIndicator healthIndicator : healthService.getHealthIndicators()) {
-			Gauge.builder(String.format(Constants.HealthIndicator.HEALTH_CHECK_PLACEHOLDER,
-									healthIndicator.getHealthIndicatorKey()),
-							() -> healthCheckIndicatorMap.getOrDefault(healthIndicator.getHealthIndicatorKey(), 0.0))
-					.register(registry);
-		}
-	}
-
-	public void updateHealthStatusMetrics() {
-		ModelMap modelMap = healthService.aggregateHealthCheck();
-		ModelMap serviceMap = (ModelMap) modelMap.get(Constants.HealthIndicator.SERVICES);
-		for (Map.Entry<String, Object> entry : serviceMap.entrySet()) {
-			String indicator = entry.getKey();
-			Boolean status = (Boolean) entry.getValue();
-			healthCheckIndicatorMap.put(indicator, status ? 1.0 : 0.0);
-		}
-	}
+    public void updateHealthStatusMetrics() {
+        ModelMap modelMap = healthService.aggregateHealthCheck();
+        ModelMap serviceMap = (ModelMap) modelMap.get(Constants.HealthIndicator.SERVICES);
+        for (Map.Entry<String, Object> entry : serviceMap.entrySet()) {
+            String indicator = entry.getKey();
+            Boolean status = (Boolean) entry.getValue();
+            healthCheckIndicatorMap.put(indicator, status ? 1.0 : 0.0);
+        }
+    }
 }

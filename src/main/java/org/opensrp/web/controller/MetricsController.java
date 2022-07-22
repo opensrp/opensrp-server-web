@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/metrics")
 public class MetricsController {
 
-	@Autowired
-	private PrometheusMeterRegistry registry;
+    @Autowired
+    private PrometheusMeterRegistry registry;
 
-	@GetMapping
-	public ResponseEntity<String> index() {
-		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf(TextFormat.CONTENT_TYPE_004))
-				.body(registry.scrape());
-	}
+    @GetMapping
+    public ResponseEntity<String> index() {
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf(TextFormat.CONTENT_TYPE_004))
+                .body(registry.scrape());
+    }
 }

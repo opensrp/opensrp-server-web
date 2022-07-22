@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClientFormResourceShadow extends ClientFormResource {
 
-	@Override
-	public void setClientFormService(ClientFormService clientFormService, ManifestService manifestService) {
-		super.setClientFormService(clientFormService, manifestService);
-	}
+    @Override
+    public void setClientFormService(ClientFormService clientFormService, ManifestService manifestService) {
+        super.setClientFormService(clientFormService, manifestService);
+    }
 
 
-	@Override
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		super.setObjectMapper(objectMapper);
-	}
+    @Override
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        super.setObjectMapper(objectMapper);
+    }
 
 }

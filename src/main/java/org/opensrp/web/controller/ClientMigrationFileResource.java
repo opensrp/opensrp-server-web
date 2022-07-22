@@ -26,11 +26,10 @@ import java.util.Date;
 @RequestMapping(value = "/rest/client-migration-file")
 public class ClientMigrationFileResource {
 
-    private static Logger logger = LogManager.getLogger(ClientMigrationFileResource.class.toString());
-    private ClientMigrationFileService clientMigrationFileService;
-    protected ObjectMapper objectMapper;
-
     public static final String MIGRATION_FILENAME_PATTERN = "(\\d).(up|down).sql";
+    private static final Logger logger = LogManager.getLogger(ClientMigrationFileResource.class.toString());
+    protected ObjectMapper objectMapper;
+    private ClientMigrationFileService clientMigrationFileService;
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
@@ -44,10 +43,10 @@ public class ClientMigrationFileResource {
 
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String> create(@RequestParam(value = "identifier", required = false) String finalIdentifier,
-            @RequestParam(value = "filename", required = false) String finalFilename,
-            @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
-            @RequestParam(value = "version") int version,
-            @RequestParam("migration_file") MultipartFile migrationFile) {
+                                         @RequestParam(value = "filename", required = false) String finalFilename,
+                                         @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
+                                         @RequestParam(value = "version") int version,
+                                         @RequestParam("migration_file") MultipartFile migrationFile) {
         ResponseEntity<String> errorResponse = addOrUpdateClientMigrationFile(true, finalIdentifier, finalFilename,
                 jurisdiction, version, migrationFile);
         if (errorResponse != null) {
@@ -58,7 +57,7 @@ public class ClientMigrationFileResource {
     }
 
     private ResponseEntity<String> addOrUpdateClientMigrationFile(boolean newRecord, String finalIdentifier, String finalFilename, String jurisdiction,
-            int version, MultipartFile migrationFile) {
+                                                                  int version, MultipartFile migrationFile) {
         if (migrationFile.isEmpty()) {
             return new ResponseEntity<>("Migration file is empty/missing", HttpStatus.BAD_REQUEST);
         }
@@ -106,12 +105,12 @@ public class ClientMigrationFileResource {
         return null;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @RequestMapping(method = RequestMethod.PUT, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String> update(@RequestParam(value = "identifier", required = false) String finalIdentifier,
-            @RequestParam(value = "filename", required = false) String finalFilename,
-            @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
-            @RequestParam(value = "version") int version,
-            @RequestParam("migration_file") MultipartFile migrationFile) {
+                                         @RequestParam(value = "filename", required = false) String finalFilename,
+                                         @RequestParam(value = "jurisdiction", required = false) String jurisdiction,
+                                         @RequestParam(value = "version") int version,
+                                         @RequestParam("migration_file") MultipartFile migrationFile) {
         ResponseEntity<String> errorResponse = addOrUpdateClientMigrationFile(false, finalIdentifier, finalFilename,
                 jurisdiction, version, migrationFile);
         if (errorResponse != null) {

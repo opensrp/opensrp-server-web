@@ -3,7 +3,6 @@ package org.opensrp.web.rest.v2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,21 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 import static org.opensrp.web.Constants.LIMIT;
 
@@ -48,193 +40,189 @@ import static org.opensrp.web.Constants.LIMIT;
 @RequestMapping(value = Constants.RestEndpointUrls.SETTINGS_V2_URL)
 public class SettingResource {
 
-	private static final Logger logger = LogManager.getLogger(SettingResource.class.toString());
+    public static final String SETTING_IDENTIFIER = "identifier";
+    public static final String METADATA_VERSION = "metadata_version";
+    private static final Logger logger = LogManager.getLogger(SettingResource.class.toString());
+    public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
 
-	public static final String SETTING_IDENTIFIER = "identifier";
+    protected ObjectMapper objectMapper;
 
-	public static final String METADATA_VERSION = "metadata_version";
+    private SettingService settingService;
 
-	public static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-			.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter()).create();
+    private PhysicalLocationService physicalLocationService;
 
-	protected ObjectMapper objectMapper;
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-	private SettingService settingService;
+    @Autowired
+    public void setSettingService(SettingService settingService, PhysicalLocationService openmrsLocationService) {
+        this.settingService = settingService;
+        this.physicalLocationService = openmrsLocationService;
+    }
 
-	private PhysicalLocationService physicalLocationService;
+    /**
+     * Gets settings by the unique is
+     *
+     * @param identifier {@link String} - settings identifier
+     * @return setting {@link Setting} - the settings object
+     */
+    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getByUniqueId(@PathVariable(Constants.RestPartVariables.ID) String identifier) {
+        SettingSearchBean settingQueryBean = new SettingSearchBean();
+        settingQueryBean.setId(identifier);
+        List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean, null);
 
-	@Autowired
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
+        return new ResponseEntity<>(gson.toJson(extractSettings(settingConfigurations)), RestUtils.getJSONUTF8Headers(),
+                HttpStatus.OK);
+    }
 
-	@Autowired
-	public void setSettingService(SettingService settingService, PhysicalLocationService openmrsLocationService) {
-		this.settingService = settingService;
-		this.physicalLocationService = openmrsLocationService;
-	}
+    private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
+        LocationTree locationTree = physicalLocationService.buildLocationTreeHierachyWithAncestors(locationId, false);
+        Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
+        if (locationTree != null) {
+            treeNodeHashMap = locationTree.getLocationsHierarchy();
+        }
 
-	/**
-	 * Gets settings by the unique is
-	 *
-	 * @param identifier {@link String} - settings identifier
-	 * @return setting {@link Setting} - the settings object
-	 */
-	@GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getByUniqueId(@PathVariable(Constants.RestPartVariables.ID) String identifier) {
-		SettingSearchBean settingQueryBean = new SettingSearchBean();
-		settingQueryBean.setId(identifier);
-		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean, null);
+        return treeNodeHashMap;
+    }
 
-		return new ResponseEntity<>(gson.toJson(extractSettings(settingConfigurations)), RestUtils.getJSONUTF8Headers(),
-				HttpStatus.OK);
-	}
+    /**
+     * Fetch v2 compatible setting ordered by serverVersion ascending
+     *
+     * @return A list of settings
+     */
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
+        String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
+        String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
+        String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
+        String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
+        String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
+        String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
+        boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
+        String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
+        String limit = RestUtils.getStringFilter(LIMIT, request);
+        Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
 
-	private Map<String, TreeNode<String, Location>> getChildParentLocationTree(String locationId) {
-		LocationTree locationTree = physicalLocationService.buildLocationTreeHierachyWithAncestors(locationId, false);
-		Map<String, TreeNode<String, Location>> treeNodeHashMap = new HashMap<>();
-		if (locationTree != null) {
-			treeNodeHashMap = locationTree.getLocationsHierarchy();
-		}
+        if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
+                && StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)
+                && StringUtils.isBlank(metadataVersion)) {
+            return new ResponseEntity<>("All parameters cannot be null for this endpoint",
+                    RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
+        }
 
-		return treeNodeHashMap;
-	}
+        long lastSyncedServerVersion = 0L;
+        long lastMetadataVersion = 0L;
+        int pageLimit = 0;
+        if (StringUtils.isNotBlank(serverVersion)) {
+            lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
+        }
 
-	/**
-	 * Fetch v2 compatible setting ordered by serverVersion ascending
-	 *
-	 * @return A list of settings
-	 */
-	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> getAllSettings(HttpServletRequest request) {
-		String serverVersion = RestUtils.getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
-		String providerId = RestUtils.getStringFilter(AllConstants.Event.PROVIDER_ID, request);
-		String locationId = RestUtils.getStringFilter(AllConstants.Event.LOCATION_ID, request);
-		String team = RestUtils.getStringFilter(AllConstants.Event.TEAM, request);
-		String teamId = RestUtils.getStringFilter(AllConstants.Event.TEAM_ID, request);
-		String identifier = RestUtils.getStringFilter(SETTING_IDENTIFIER, request);
-		boolean resolveSettings = RestUtils.getBooleanFilter(AllConstants.Event.RESOLVE_SETTINGS, request);
-		String metadataVersion = RestUtils.getStringFilter(METADATA_VERSION, request);
-		String limit = RestUtils.getStringFilter(LIMIT, request);
-		Map<String, TreeNode<String, Location>> treeNodeHashMap = null;
+        if (StringUtils.isNotBlank(metadataVersion)) {
+            lastMetadataVersion = Long.parseLong(metadataVersion);
+        }
 
-		if (StringUtils.isBlank(team) && StringUtils.isBlank(providerId) && StringUtils.isBlank(locationId)
-				&& StringUtils.isBlank(teamId) && StringUtils.isBlank(team) && StringUtils.isBlank(serverVersion)
-				&& StringUtils.isBlank(metadataVersion)) {
-			return new ResponseEntity<>("All parameters cannot be null for this endpoint",
-					RestUtils.getJSONUTF8Headers(), HttpStatus.BAD_REQUEST);
-		}
+        if (StringUtils.isNotBlank(limit)) {
+            pageLimit = Integer.parseInt(limit);
+        }
 
-		long lastSyncedServerVersion = 0L;
-		long lastMetadataVersion = 0L;
-		int pageLimit = 0;
-		if (StringUtils.isNotBlank(serverVersion)) {
-			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
-		}
+        SettingSearchBean settingQueryBean = new SettingSearchBean();
+        settingQueryBean.setTeam(team);
+        settingQueryBean.setTeamId(teamId);
+        settingQueryBean.setProviderId(providerId);
+        settingQueryBean.setLocationId(locationId);
+        settingQueryBean.setServerVersion(lastSyncedServerVersion);
+        settingQueryBean.setMetadataVersion(lastMetadataVersion);
+        settingQueryBean.setLimit(pageLimit);
+        if (StringUtils.isNotBlank(identifier)) {
+            settingQueryBean.setIdentifier(identifier);
+        }
+        if (StringUtils.isNotBlank(locationId)) {
+            settingQueryBean.setResolveSettings(resolveSettings);
+            treeNodeHashMap = getChildParentLocationTree(locationId);
+        }
 
-		if (StringUtils.isNotBlank(metadataVersion)) {
-			lastMetadataVersion = Long.parseLong(metadataVersion);
-		}
+        List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean,
+                treeNodeHashMap);
+        List<Setting> settingList = extractSettings(settingConfigurations);
 
-		if (StringUtils.isNotBlank(limit)) {
-			pageLimit = Integer.parseInt(limit);
-		}
+        return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
+    }
 
-		SettingSearchBean settingQueryBean = new SettingSearchBean();
-		settingQueryBean.setTeam(team);
-		settingQueryBean.setTeamId(teamId);
-		settingQueryBean.setProviderId(providerId);
-		settingQueryBean.setLocationId(locationId);
-		settingQueryBean.setServerVersion(lastSyncedServerVersion);
-		settingQueryBean.setMetadataVersion(lastMetadataVersion);
-		settingQueryBean.setLimit(pageLimit);
-		if (StringUtils.isNotBlank(identifier)) {
-			settingQueryBean.setIdentifier(identifier);
-		}
-		if (StringUtils.isNotBlank(locationId)) {
-			settingQueryBean.setResolveSettings(resolveSettings);
-			treeNodeHashMap = getChildParentLocationTree(locationId);
-		}
+    private List<Setting> extractSettings(List<SettingConfiguration> settingConfigurations) {
+        List<Setting> settingList = new ArrayList<>();
+        if (settingConfigurations != null && settingConfigurations.size() > 0) {
+            for (SettingConfiguration settingConfiguration : settingConfigurations) {
+                settingList.addAll(settingConfiguration.getSettings());
+            }
+        }
 
-		List<SettingConfiguration> settingConfigurations = settingService.findSettings(settingQueryBean,
-				treeNodeHashMap);
-		List<Setting> settingList = extractSettings(settingConfigurations);
+        return settingList;
+    }
 
-		return new ResponseEntity<>(gson.toJson(settingList), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
-	}
+    /**
+     * Creates a setting
+     *
+     * @param entity {@link Setting} - the settings object
+     * @return
+     */
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
+    public ResponseEntity<String> create(@RequestBody String entity) {
+        return performCreateOrUpdate(entity, 0L);
+    }
 
-	private List<Setting> extractSettings(List<SettingConfiguration> settingConfigurations) {
-		List<Setting> settingList = new ArrayList<>();
-		if (settingConfigurations != null && settingConfigurations.size() > 0) {
-			for (SettingConfiguration settingConfiguration : settingConfigurations) {
-				settingList.addAll(settingConfiguration.getSettings());
-			}
-		}
+    /**
+     * Update a setting
+     *
+     * @param entity {@link Setting} - the settings object
+     * @param id     {@link Long} - the settings-metadata id
+     * @return
+     */
+    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
+    public ResponseEntity<String> update(@RequestBody String entity,
+                                         @PathVariable(Constants.RestPartVariables.ID) Long id) {
+        return performCreateOrUpdate(entity, id);
+    }
 
-		return settingList;
-	}
+    private ResponseEntity<String> performCreateOrUpdate(String entity, Long id) {
+        try {
+            Setting setting = objectMapper.readValue(entity, Setting.class);
+            if (id > 0) {
+                setting.setSettingMetadataId(String.valueOf(id));
+            }
+            setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
+            String responseSettings = settingService.addOrUpdateSettings(setting);
+            String response = "Settings created or updated successfully.";
+            if (StringUtils.isNotBlank(responseSettings)) {
+                response = responseSettings + String.format("%s%s", " The following settings might not be saved ",
+                        responseSettings);
+            }
 
-	/**
-	 * Creates a setting
-	 *
-	 * @param entity {@link Setting} - the settings object
-	 * @return
-	 */
-	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> create(@RequestBody String entity) {
-		return performCreateOrUpdate(entity, 0L);
-	}
+            return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.CREATED);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
-	/**
-	 * Update a setting
-	 *
-	 * @param entity {@link Setting} - the settings object
-	 * @param id     {@link Long} - the settings-metadata id
-	 * @return
-	 */
-	@PutMapping(value = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> update(@RequestBody String entity,
-			@PathVariable(Constants.RestPartVariables.ID) Long id) {
-		return performCreateOrUpdate(entity, id);
-	}
-
-	private ResponseEntity<String> performCreateOrUpdate(String entity, Long id) {
-		try {
-			Setting setting = objectMapper.readValue(entity, Setting.class);
-			if (id > 0) {
-				setting.setSettingMetadataId(String.valueOf(id));
-			}
-			setting.setV1Settings(false); //used to differentiate the payload from the two endpoints
-			String responseSettings = settingService.addOrUpdateSettings(setting);
-			String response = "Settings created or updated successfully.";
-			if (StringUtils.isNotBlank(responseSettings)) {
-				response = responseSettings + String.format("%s%s", " The following settings might not be saved ",
-						responseSettings);
-			}
-
-			return new ResponseEntity<>(response, RestUtils.getJSONUTF8Headers(), HttpStatus.CREATED);
-		}
-		catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Deletes a settings by primary key
-	 *
-	 * @param id {@link Long}
-	 * @return
-	 */
-	@DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
-		if (id == null) {
-			return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
-					HttpStatus.BAD_REQUEST);
-		} else {
-			settingService.deleteSetting(id);
-			return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
-					HttpStatus.NO_CONTENT);
-		}
-	}
+    /**
+     * Deletes a settings by primary key
+     *
+     * @param id {@link Long}
+     * @return
+     */
+    @DeleteMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> delete(@PathVariable(Constants.RestPartVariables.ID) Long id) {
+        if (id == null) {
+            return new ResponseEntity<>("Settings id is required", RestUtils.getJSONUTF8Headers(),
+                    HttpStatus.BAD_REQUEST);
+        } else {
+            settingService.deleteSetting(id);
+            return new ResponseEntity<>("Settings deleted successfully", RestUtils.getJSONUTF8Headers(),
+                    HttpStatus.NO_CONTENT);
+        }
+    }
 }

@@ -19,33 +19,31 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml" })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml"})
 public class CustomErrorResourceTest {
 
-	private MockMvc mockMvc;
+    private final String ERROR_ENDPOINT = "/error";
+    private MockMvc mockMvc;
+    @InjectMocks
+    private CustomErrorResource customErrorResource;
 
-	private String ERROR_ENDPOINT = "/error";
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
 
-	@InjectMocks
-	private CustomErrorResource customErrorResource;
+        mockMvc = MockMvcBuilders.standaloneSetup(customErrorResource)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+    @Test
+    public void testErrorEndpointReturnsJsonString() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
-		mockMvc = MockMvcBuilders.standaloneSetup(customErrorResource)
-				.setControllerAdvice(new GlobalExceptionHandler())
-				.build();
-	}
-
-	@Test
-	public void testErrorEndpointReturnsJsonString() throws Exception {
-		MvcResult mvcResult = mockMvc.perform(get(ERROR_ENDPOINT)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-
-		String responseString = mvcResult.getResponse().getContentAsString();
-		assertEquals("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}", responseString);
-	}
+        String responseString = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"message\":\"OK\",\"status\":\"200 OK\",\"data\":null,\"success\":true}", responseString);
+    }
 }

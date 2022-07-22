@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -26,8 +25,7 @@ public class TestDatabaseConfig {
             doReturn(connection).when(dataSource).getConnection();
             doReturn(databaseMetaData).when(connection).getMetaData();
             doReturn(databaseUrl).when(databaseMetaData).getURL();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return dataSource;

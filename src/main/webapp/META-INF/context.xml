@@ -1,23 +1,9 @@
 <Context>
-<Resource
-		name="jdbc/openSRPDB"
-		auth="Container"
-		type="javax.sql.DataSource"
-		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-		initialSize="5"
-		maxActive="55"
-		maxIdle="21"
-		minIdle="13"
-		timeBetweenEvictionRunsMillis="34000"
-		minEvictableIdleTimeMillis="55000"
-		validationQuery="SELECT 1"
-		validationInterval="34"
-		testOnBorrow="true"
-		removeAbandoned="true"
-		removeAbandonedTimeout="233"
-		username="opensrp_admin"
-		password="admin"
-		driverClassName="org.postgresql.Driver"
-		url="jdbc:postgresql://localhost:5432/opensrp"
-     />
+    <Resource name="jdbc/openSRPDB" auth="Container" driverClassName="org.postgresql.Driver"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" initialSize="5" maxActive="55"
+              maxIdle="21" minEvictableIdleTimeMillis="55000" minIdle="13"
+              password="admin" removeAbandoned="true" removeAbandonedTimeout="233"
+              testOnBorrow="true" timeBetweenEvictionRunsMillis="34000" type="javax.sql.DataSource"
+              url="jdbc:postgresql://localhost:5432/opensrp" username="opensrp_admin" validationInterval="34"
+              validationQuery="SELECT 1"/>
 </Context>

@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Create your fake alerts here!</title>
-    <link rel="stylesheet" href="../stylesheets/fakeforms.css">
+    <link href="../stylesheets/fakeforms.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="../js/fakeactions.js"></script>
 </head>
@@ -13,55 +13,78 @@
 </div>
 
 <div id="forms">
-    <div id="alertCreate" class="formDiv">
+    <div class="formDiv" id="alertCreate">
         <span class="title">Create Alert</span>
 
-        <form id="createAlert" class="form">
-            <label for="createAlert-caseID">Case ID</label><input type="text" id="createAlert-caseID" class="field mapping">
-            <input type="hidden" id="createAlert-actionTarget" class="field mapping" value="alert">
+        <form class="form" id="createAlert">
+            <label for="createAlert-caseID">Case ID</label><input class="field mapping"
+                                                                  id="createAlert-caseID"
+                                                                  type="text">
+            <input class="field mapping" id="createAlert-actionTarget" type="hidden" value="alert">
 
-            <label for="createAlert-anmIdentifier">ANM ID</label><input type="text" id="createAlert-anmIdentifier" class="anm mapping">
+            <label for="createAlert-anmIdentifier">ANM ID</label><input class="anm mapping"
+                                                                        id="createAlert-anmIdentifier"
+                                                                        type="text">
 
-            <label for="createAlert-beneficiaryType">Beneficiary Type</label><input type="text" id="createAlert-beneficiaryType" class="data mapping">
-            <label for="createAlert-visitCode">Visit Code</label><input type="text" id="createAlert-visitCode" class="data mapping">
-            <input type="hidden" id="createAlert-alertPriority" class="data mapping" value="normal">
-            <label for="createAlert-startDate">Start Date</label><input type="text" id="createAlert-startDate" class="data mapping">
-            <label for="createAlert-expiryDate">Expiry Date</label><input type="text" id="createAlert-expiryDate" class="data mapping">
+            <label for="createAlert-beneficiaryType">Beneficiary Type</label><input class="data mapping"
+                                                                                    id="createAlert-beneficiaryType"
+                                                                                    type="text">
+            <label for="createAlert-visitCode">Visit Code</label><input class="data mapping"
+                                                                        id="createAlert-visitCode"
+                                                                        type="text">
+            <input class="data mapping" id="createAlert-alertPriority" type="hidden" value="normal">
+            <label for="createAlert-startDate">Start Date</label><input class="data mapping"
+                                                                        id="createAlert-startDate"
+                                                                        type="text">
+            <label for="createAlert-expiryDate">Expiry Date</label><input class="data mapping"
+                                                                          id="createAlert-expiryDate"
+                                                                          type="text">
 
-            <input type="submit" id="createAlert-submit" value="Submit form!">
+            <input id="createAlert-submit" type="submit" value="Submit form!">
         </form>
 
         <span class="formStatus" id="createAlert-status" style="opacity: 0; ">.</span>
     </div>
 
-    <div id="alertDelete" class="formDiv">
+    <div class="formDiv" id="alertDelete">
         <span class="title">Delete Alerts for a visit code</span>
 
-        <form id="deleteAlert" class="form">
-            <label for="deleteAlert-caseID">Case ID</label><input type="text" id="deleteAlert-caseID" class="field mapping">
-            <input type="hidden" id="deleteAlert-actionTarget" class="field mapping" value="alert">
+        <form class="form" id="deleteAlert">
+            <label for="deleteAlert-caseID">Case ID</label><input class="field mapping"
+                                                                  id="deleteAlert-caseID"
+                                                                  type="text">
+            <input class="field mapping" id="deleteAlert-actionTarget" type="hidden" value="alert">
 
-            <label for="deleteAlert-anmIdentifier">ANM ID</label><input type="text" id="deleteAlert-anmIdentifier" class="anm mapping">
+            <label for="deleteAlert-anmIdentifier">ANM ID</label><input class="anm mapping"
+                                                                        id="deleteAlert-anmIdentifier"
+                                                                        type="text">
 
-            <label for="deleteAlert-visitCode">Visit Code</label><input type="text" id="deleteAlert-visitCode" class="data mapping">
+            <label for="deleteAlert-visitCode">Visit Code</label><input class="data mapping"
+                                                                        id="deleteAlert-visitCode"
+                                                                        type="text">
 
             <p></p>
-            <input type="submit" id="deleteAlert-submit" value="Submit form!">
+            <input id="deleteAlert-submit" type="submit" value="Submit form!">
         </form>
 
         <span class="formStatus" id="deleteAlert-status" style="opacity: 0; ">.</span>
     </div>
 
-    <div id="alertDeleteAll" class="formDiv">
+    <div class="formDiv" id="alertDeleteAll">
         <span class="title">Delete All Alerts for a case (mother)</span>
 
-        <form id="deleteAllAlerts" class="form">
-            <label for="deleteAllAlerts-caseID">Case ID</label><input type="text" id="deleteAllAlerts-caseID" class="field mapping">
-            <input type="hidden" id="deleteAllAlerts-actionTarget" class="field mapping" value="alert">
+        <form class="form" id="deleteAllAlerts">
+            <label for="deleteAllAlerts-caseID">Case ID</label><input class="field mapping"
+                                                                      id="deleteAllAlerts-caseID"
+                                                                      type="text">
+            <input class="field mapping" id="deleteAllAlerts-actionTarget" type="hidden"
+                   value="alert">
 
-            <label for="deleteAllAlerts-anmIdentifier">ANM ID</label><input type="text" id="deleteAllAlerts-anmIdentifier" class="anm mapping">
+            <label for="deleteAllAlerts-anmIdentifier">ANM ID</label><input class="anm mapping"
+                                                                            id="deleteAllAlerts-anmIdentifier"
+                                                                            type="text">
 
-            <input type="submit" id="deleteAllAlerts-submit" value="Submit form!">
+            <input id="deleteAllAlerts-submit" type="submit" value="Submit form!">
         </form>
 
         <span class="formStatus" id="deleteAllAlerts-status" style="opacity: 0; ">.</span>

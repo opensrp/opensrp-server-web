@@ -11,66 +11,66 @@ import static org.junit.Assert.assertTrue;
 
 public class UserPermissionEvaluatorTest {
 
-	private UserPermissionEvaluator userPermissionEvaluator;
+    private UserPermissionEvaluator userPermissionEvaluator;
 
-	@Before
-	public void setUp() {
-		userPermissionEvaluator = new UserPermissionEvaluator();
-	}
+    @Before
+    public void setUp() {
+        userPermissionEvaluator = new UserPermissionEvaluator();
+    }
 
-	@Test
-	public void testHasObjectPermission() {
-		Authentication authentication = getMockedAuthentication();
-		Boolean hasObjectPermission = userPermissionEvaluator.hasObjectPermission(authentication, "admin", null);
-		assertTrue(hasObjectPermission);
-	}
+    @Test
+    public void testHasObjectPermission() {
+        Authentication authentication = getMockedAuthentication();
+        Boolean hasObjectPermission = userPermissionEvaluator.hasObjectPermission(authentication, "admin", null);
+        assertTrue(hasObjectPermission);
+    }
 
-	@Test
-	public void testHasPermission() {
-		Authentication authentication = getMockedAuthentication();
-		Boolean hasPermission = userPermissionEvaluator.hasPermission(authentication, "admin");
-		assertTrue(hasPermission);
-	}
+    @Test
+    public void testHasPermission() {
+        Authentication authentication = getMockedAuthentication();
+        Boolean hasPermission = userPermissionEvaluator.hasPermission(authentication, "admin");
+        assertTrue(hasPermission);
+    }
 
-	private Authentication getMockedAuthentication() {
-		Authentication authentication = new Authentication() {
+    private Authentication getMockedAuthentication() {
+        Authentication authentication = new Authentication() {
 
-			@Override
-			public Collection<? extends GrantedAuthority> getAuthorities() {
-				return null;
-			}
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
 
-			@Override
-			public Object getCredentials() {
-				return "";
-			}
+            @Override
+            public Object getCredentials() {
+                return "";
+            }
 
-			@Override
-			public Object getDetails() {
-				return null;
-			}
+            @Override
+            public Object getDetails() {
+                return null;
+            }
 
-			@Override
-			public Object getPrincipal() {
-				return "Test User";
-			}
+            @Override
+            public Object getPrincipal() {
+                return "Test User";
+            }
 
-			@Override
-			public boolean isAuthenticated() {
-				return false;
-			}
+            @Override
+            public boolean isAuthenticated() {
+                return false;
+            }
 
-			@Override
-			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-				// do nothing
-			}
+            @Override
+            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+                // do nothing
+            }
 
-			@Override
-			public String getName() {
-				return "admin";
-			}
-		};
+            @Override
+            public String getName() {
+                return "admin";
+            }
+        };
 
-		return authentication;
-	}
+        return authentication;
+    }
 }

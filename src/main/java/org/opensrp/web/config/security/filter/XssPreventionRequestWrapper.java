@@ -22,101 +22,97 @@ import java.util.Map;
 
 public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 
-	private static Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
+    private static final Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
 
-	private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private final HttpServletRequest request;
+    private final ResettableServletInputStream servletStream;
+    private byte[] rawData;
 
-	private byte[] rawData;
+    public XssPreventionRequestWrapper(HttpServletRequest request) {
+        super(request);
+        this.request = request;
+        this.servletStream = new ResettableServletInputStream();
+    }
 
-	private HttpServletRequest request;
+    private static JsonNode encode(JsonNode node) {
+        if (node.isValueNode()) {
+            if (JsonNodeType.STRING == node.getNodeType()) {
+                return JsonNodeFactory.instance.textNode(Encode.forHtmlContent(node.asText()));
+            } else if (JsonNodeType.NULL == node.getNodeType()) {
+                return null;
+            } else {
+                return node;
+            }
+        } else if (node.isNull()) {
+            return null;
+        } else if (node.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) node;
+            ArrayNode cleanedNewArrayNode = mapper.createArrayNode();
+            for (JsonNode jsonNode : arrayNode) {
+                cleanedNewArrayNode.add(encode(jsonNode));
+            }
+            return cleanedNewArrayNode;
+        } else {
+            ObjectNode encodedObjectNode = mapper.createObjectNode();
+            for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
+                Map.Entry<String, JsonNode> entry = it.next();
+                encodedObjectNode.set(Encode.forHtmlContent(entry.getKey()), encode(entry.getValue()));
+            }
+            return encodedObjectNode;
+        }
+    }
 
-	private ResettableServletInputStream servletStream;
+    private static boolean isValidJSON(final String json) throws IOException {
+        boolean valid = true;
+        try {
+            mapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            logger.error("Error while processing JSON", e);
+            valid = false;
+        }
+        return valid;
+    }
 
-	public XssPreventionRequestWrapper(HttpServletRequest request) {
-		super(request);
-		this.request = request;
-		this.servletStream = new ResettableServletInputStream();
-	}
-	
-	@Override
-	public ServletInputStream getInputStream() throws IOException {
-		if (rawData == null) {
-			rawData = IOUtils.toByteArray(this.request.getInputStream());
-			servletStream.stream = new ByteArrayInputStream(rawData);
-		}
-		updateParameters();
-		return servletStream;
-	}
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        if (rawData == null) {
+            rawData = IOUtils.toByteArray(this.request.getInputStream());
+            servletStream.stream = new ByteArrayInputStream(rawData);
+        }
+        updateParameters();
+        return servletStream;
+    }
 
-	@Override
-	public BufferedReader getReader() throws IOException {
-		if (rawData == null) {
-			rawData = IOUtils.toByteArray(this.request.getReader(), StandardCharsets.UTF_8.name());
-			servletStream.stream = new ByteArrayInputStream(rawData);
-		}
-		updateParameters();
-		return new BufferedReader(new InputStreamReader(servletStream));
-	}
+    @Override
+    public BufferedReader getReader() throws IOException {
+        if (rawData == null) {
+            rawData = IOUtils.toByteArray(this.request.getReader(), StandardCharsets.UTF_8.name());
+            servletStream.stream = new ByteArrayInputStream(rawData);
+        }
+        updateParameters();
+        return new BufferedReader(new InputStreamReader(servletStream));
+    }
 
-	private void updateParameters() throws IOException {
-		String requestBody = new String(rawData, StandardCharsets.UTF_8);
-		if (isValidJSON(requestBody)) {
-			JsonNode jsonNode = mapper.readTree(requestBody);
-			JsonNode updatedJsonNode = encode(jsonNode);
-			String encodedJsonString = updatedJsonNode.toString();
-			rawData = encodedJsonString.getBytes();
-			servletStream.stream = new ByteArrayInputStream(rawData);
-		}
-	}
+    private void updateParameters() throws IOException {
+        String requestBody = new String(rawData, StandardCharsets.UTF_8);
+        if (isValidJSON(requestBody)) {
+            JsonNode jsonNode = mapper.readTree(requestBody);
+            JsonNode updatedJsonNode = encode(jsonNode);
+            String encodedJsonString = updatedJsonNode.toString();
+            rawData = encodedJsonString.getBytes();
+            servletStream.stream = new ByteArrayInputStream(rawData);
+        }
+    }
 
-	private static JsonNode encode(JsonNode node) {
-		if (node.isValueNode()) {
-			if (JsonNodeType.STRING == node.getNodeType()) {
-				return JsonNodeFactory.instance.textNode(Encode.forHtmlContent(node.asText()));
-			} else if (JsonNodeType.NULL == node.getNodeType()) {
-				return null;
-			} else {
-				return node;
-			}
-		} else if (node.isNull()) {
-			return null;
-		} else if (node.isArray()) {
-			ArrayNode arrayNode = (ArrayNode) node;
-			ArrayNode cleanedNewArrayNode = mapper.createArrayNode();
-			for (JsonNode jsonNode : arrayNode) {
-				cleanedNewArrayNode.add(encode(jsonNode));
-			}
-			return cleanedNewArrayNode;
-		} else {
-			ObjectNode encodedObjectNode = mapper.createObjectNode();
-			for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
-				Map.Entry<String, JsonNode> entry = it.next();
-				encodedObjectNode.set(Encode.forHtmlContent(entry.getKey()), encode(entry.getValue()));
-			}
-			return encodedObjectNode;
-		}
-	}
+    private class ResettableServletInputStream extends ServletInputStream {
 
-	private static boolean isValidJSON(final String json) throws IOException {
-		boolean valid = true;
-		try {
-			mapper.readTree(json);
-		}
-		catch (JsonProcessingException e) {
-			logger.error("Error while processing JSON", e);
-			valid = false;
-		}
-		return valid;
-	}
+        private InputStream stream;
 
-	private class ResettableServletInputStream extends ServletInputStream {
-
-		private InputStream stream;
-
-		@Override
-		public int read() throws IOException {
-			return stream.read();
-		}
-	}
+        @Override
+        public int read() throws IOException {
+            return stream.read();
+        }
+    }
 
 }

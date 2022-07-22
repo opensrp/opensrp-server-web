@@ -8,25 +8,25 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class is added to provide support for Multipart Request for PUT method.
- *
+ * <p>
  * By defaut only POST is checked
  * Therefore, the method is overridden to provide support for both POST and PUT
  */
 
 public class PostAndPutCommonsMultipartResolver extends CommonsMultipartResolver {
 
-	private static final String POST_METHOD = "POST";
-	private static final String PUT_METHOD = "PUT";
+    private static final String POST_METHOD = "POST";
+    private static final String PUT_METHOD = "PUT";
 
-	@Override
-	public boolean isMultipart(HttpServletRequest request) {
+    @Override
+    public boolean isMultipart(HttpServletRequest request) {
 
-		boolean isMultipartRequest = false;
-		if (request != null && (POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD
-				.equalsIgnoreCase(request.getMethod()))) {
-			isMultipartRequest = FileUploadBase.isMultipartContent(new ServletRequestContext(request));
-		}
+        boolean isMultipartRequest = false;
+        if (request != null && (POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD
+                .equalsIgnoreCase(request.getMethod()))) {
+            isMultipartRequest = FileUploadBase.isMultipartContent(new ServletRequestContext(request));
+        }
 
-		return isMultipartRequest;
-	}
+        return isMultipartRequest;
+    }
 }

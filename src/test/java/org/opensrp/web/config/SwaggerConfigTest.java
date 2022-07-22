@@ -29,21 +29,15 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(JUnit4.class)
 public class SwaggerConfigTest {
-    private SwaggerConfig swaggerConfig;
-
     private static final String AUTHORIZATION = "Authorization";
     private static final String BASIC = "Basic";
     private static final String BEARER = "Bearer";
     private static final String HEADER = "header";
-
+    private SwaggerConfig swaggerConfig;
     @Mock
     private ServletContext servletContext;
 
@@ -62,7 +56,7 @@ public class SwaggerConfigTest {
         when(swaggerConfig.securityContext()).thenReturn(createTestSecurityContext());
         Docket docket = swaggerConfig.api();
         assertNotNull(docket);
-        assertEquals(docket.getDocumentationType(), DocumentationType.SWAGGER_2.SWAGGER_2);
+        assertEquals(docket.getDocumentationType(), DocumentationType.SWAGGER_2);
         assertNotNull(docket.select());
     }
 
@@ -105,7 +99,7 @@ public class SwaggerConfigTest {
     }
 
     private Docket createTestDocket() {
-        return new Docket(DocumentationType.SWAGGER_2.SWAGGER_2)
+        return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .build()
@@ -131,12 +125,12 @@ public class SwaggerConfigTest {
                 .build();
     }
 
-	private List<SecurityReference> getDefaultAuth() {
-		AuthorizationScope authorizationScope
-				= new AuthorizationScope("global", "accessEverything");
-		AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-		authorizationScopes[0] = authorizationScope;
-		return Lists.newArrayList(
-				new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
-	}
+    private List<SecurityReference> getDefaultAuth() {
+        AuthorizationScope authorizationScope
+                = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return Lists.newArrayList(
+                new SecurityReference("Basic", authorizationScopes), new SecurityReference("Bearer", authorizationScopes));
+    }
 }

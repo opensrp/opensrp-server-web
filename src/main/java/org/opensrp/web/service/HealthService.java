@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface HealthService {
 
-	ModelMap aggregateHealthCheck();
+    ModelMap aggregateHealthCheck();
 
-	List<ServiceHealthIndicator> getHealthIndicators();
+    List<ServiceHealthIndicator> getHealthIndicators();
 }

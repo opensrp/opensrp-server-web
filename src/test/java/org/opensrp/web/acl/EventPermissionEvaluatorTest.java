@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.opensrp.domain.AssignedLocations;
-import org.smartregister.domain.Event;
 import org.opensrp.repository.LocationRepository;
 import org.opensrp.repository.PractitionerRepository;
 import org.opensrp.repository.PractitionerRoleRepository;
@@ -14,6 +13,7 @@ import org.opensrp.service.OrganizationService;
 import org.opensrp.service.PhysicalLocationService;
 import org.opensrp.service.PractitionerRoleService;
 import org.opensrp.service.PractitionerService;
+import org.smartregister.domain.Event;
 import org.smartregister.domain.Practitioner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,155 +34,145 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class EventPermissionEvaluatorTest {
 
-	@Mock
-	private Authentication authentication;
+    private final List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
+    @Mock
+    private Authentication authentication;
+    @InjectMocks
+    private EventPermissionEvaluator eventPermissionEvaluator;
+    @Mock
+    private PhysicalLocationService locationService;
+    @Mock
+    private LocationRepository locationRepository;
+    @Mock
+    private PractitionerService practitionerService;
+    @Mock
+    private OrganizationService organizationService;
+    @Mock
+    private PractitionerRoleService practitionerRoleService;
+    @Mock
+    private PractitionerRoleRepository practitionerRoleRepository;
+    @Mock
+    private PractitionerRepository practitionerRepository;
 
-	@InjectMocks
-	private EventPermissionEvaluator eventPermissionEvaluator;
+    @Before
+    public void setup() {
+        initMocks(this);
+        eventPermissionEvaluator = new EventPermissionEvaluator();
+        locationService.setLocationRepository(locationRepository);
+        eventPermissionEvaluator.setLocationService(locationService);
+        when(authentication.getName()).thenReturn("user");
+        when(authentication.getAuthorities()).thenAnswer(a -> roles.stream().map(role -> new GrantedAuthority() {
 
-	@Mock
-	private PhysicalLocationService locationService;
+            private static final long serialVersionUID = 1L;
 
-	@Mock
-	private LocationRepository locationRepository;
+            @Override
+            public String getAuthority() {
+                return role;
+            }
+        }).collect(Collectors.toList()));
+    }
 
-	@Mock
-	private PractitionerService practitionerService;
+    @Test
+    public void testHasPermission() {
+        Event event = new Event();
+        event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
 
-	@Mock
-	private OrganizationService organizationService;
+        List<AssignedLocations> assignedLocations = new ArrayList<>();
+        AssignedLocations assignedLocation = new AssignedLocations();
+        assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+        assignedLocations.add(assignedLocation);
+        List<Long> organizationalIds = Collections.singletonList(12233l);
+        Practitioner practitioner = new Practitioner();
+        practitioner.setIdentifier("practitioner-id");
+        ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
+                organizationalIds);
 
-	@Mock
-	private PractitionerRoleService practitionerRoleService;
+        List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
+        org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
+        practitionerRole.setIdentifier("practitioner-role-id");
+        practitionerRole.setOrganizationId(12345l);
+        practitionerRoles.add(practitionerRole);
 
-	@Mock
-	private PractitionerRoleRepository practitionerRoleRepository;
+        doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
+        doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
+        doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
+        doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
+        doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
+        doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
+        boolean hasPermission = eventPermissionEvaluator.hasPermission(authentication, event);
+        assertTrue(hasPermission);
+    }
 
-	@Mock
-	private PractitionerRepository practitionerRepository;
+    @Test
+    public void testHasObjectPermissionWithAnEvent() {
+        Event event = new Event();
+        event.setTeamId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+        event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
 
-	private List<String> roles = Arrays.asList("ROLE_USER", "ROLE_ADMIN");
+        List<AssignedLocations> assignedLocations = new ArrayList<>();
+        AssignedLocations assignedLocation = new AssignedLocations();
+        assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+        assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
 
+        assignedLocations.add(assignedLocation);
+        List<Long> organizationalIds = Collections.singletonList(12233l);
+        Practitioner practitioner = new Practitioner();
+        practitioner.setIdentifier("practitioner-id");
+        ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
+                organizationalIds);
 
-	@Before
-	public void setup() {
-		initMocks(this);
-		eventPermissionEvaluator = new EventPermissionEvaluator();
-		locationService.setLocationRepository(locationRepository);
-		eventPermissionEvaluator.setLocationService(locationService);
-		when(authentication.getName()).thenReturn("user");
-		when(authentication.getAuthorities()).thenAnswer(a -> roles.stream().map(role -> new GrantedAuthority() {
+        List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
+        org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
+        practitionerRole.setIdentifier("practitioner-role-id");
+        practitionerRole.setOrganizationId(12345l);
+        practitionerRoles.add(practitionerRole);
 
-			private static final long serialVersionUID = 1L;
+        doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
+        doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
+        doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
+        doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
+        doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
+        doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 
-			@Override
-			public String getAuthority() {
-				return role;
-			}
-		}).collect(Collectors.toList()));
-	}
+        boolean hasPermission = eventPermissionEvaluator.hasObjectPermission(authentication, event, null);
+        assertTrue(hasPermission);
+    }
 
-	@Test
-	public void testHasPermission() {
-		Event event = new Event();
-		event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+    @Test
+    public void testHasObjectPermissionWithCollectionOfResources() {
+        Event event = new Event();
+        event.setTeamId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+        event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
+        List<Event> events = new ArrayList<>();
+        events.add(event);
+        events.add(event);
 
-		List<AssignedLocations> assignedLocations = new ArrayList<>();
-		AssignedLocations assignedLocation = new AssignedLocations();
-		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		assignedLocations.add(assignedLocation);
-		List<Long> organizationalIds = Collections.singletonList(12233l);
-		Practitioner practitioner = new Practitioner();
-		practitioner.setIdentifier("practitioner-id");
-		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
-				organizationalIds);
+        List<AssignedLocations> assignedLocations = new ArrayList<>();
+        AssignedLocations assignedLocation = new AssignedLocations();
+        assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
+        assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
 
-		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
-		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
-		practitionerRole.setIdentifier("practitioner-role-id");
-		practitionerRole.setOrganizationId(12345l);
-		practitionerRoles.add(practitionerRole);
+        assignedLocations.add(assignedLocation);
+        List<Long> organizationalIds = Collections.singletonList(12233l);
+        Practitioner practitioner = new Practitioner();
+        practitioner.setIdentifier("practitioner-id");
+        ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
+                organizationalIds);
 
-		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
-		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
-		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
-		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
-		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
-		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-		boolean hasPermission = eventPermissionEvaluator.hasPermission(authentication,event);
-		assertTrue(hasPermission);
-	}
+        List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
+        org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
+        practitionerRole.setIdentifier("practitioner-role-id");
+        practitionerRole.setOrganizationId(12345l);
+        practitionerRoles.add(practitionerRole);
 
-	@Test
-	public void testHasObjectPermissionWithAnEvent() {
-		Event event = new Event();
-		event.setTeamId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
+        doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
+        doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
+        doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
+        doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
+        doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
+        doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
 
-		List<AssignedLocations> assignedLocations = new ArrayList<>();
-		AssignedLocations assignedLocation = new AssignedLocations();
-		assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
-
-		assignedLocations.add(assignedLocation);
-		List<Long> organizationalIds = Collections.singletonList(12233l);
-		Practitioner practitioner = new Practitioner();
-		practitioner.setIdentifier("practitioner-id");
-		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
-				organizationalIds);
-
-		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
-		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
-		practitionerRole.setIdentifier("practitioner-role-id");
-		practitionerRole.setOrganizationId(12345l);
-		practitionerRoles.add(practitionerRole);
-
-		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
-		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
-		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
-		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
-		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
-		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-
-		boolean hasPermission = eventPermissionEvaluator.hasObjectPermission(authentication, event,null);
-		assertTrue(hasPermission);
-	}
-
-	@Test
-	public void testHasObjectPermissionWithCollectionOfResources() {
-		Event event = new Event();
-		event.setTeamId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		event.setLocationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
-		List<Event> events = new ArrayList<>();
-		events.add(event);
-		events.add(event);
-
-		List<AssignedLocations> assignedLocations = new ArrayList<>();
-		AssignedLocations assignedLocation = new AssignedLocations();
-		assignedLocation.setOrganizationId("cd09a3d4-01d9-485c-a1c5-a2eb078a61be");
-		assignedLocation.setJurisdictionId("cd09a3d4-01d9-485c-a1c5-a2eb078a61bf");
-
-		assignedLocations.add(assignedLocation);
-		List<Long> organizationalIds = Collections.singletonList(12233l);
-		Practitioner practitioner = new Practitioner();
-		practitioner.setIdentifier("practitioner-id");
-		ImmutablePair<Practitioner, List<Long>> practitionerListImmutablePair = new ImmutablePair<>(practitioner,
-				organizationalIds);
-
-		List<org.opensrp.domain.postgres.PractitionerRole> practitionerRoles = new ArrayList<>();
-		org.opensrp.domain.postgres.PractitionerRole practitionerRole = new org.opensrp.domain.postgres.PractitionerRole();
-		practitionerRole.setIdentifier("practitioner-role-id");
-		practitionerRole.setOrganizationId(12345l);
-		practitionerRoles.add(practitionerRole);
-
-		doReturn(practitionerRoles).when(practitionerRoleService).getPgRolesForPractitioner(anyString());
-		doReturn(practitionerRoles).when(practitionerRoleRepository).getPgRolesForPractitioner(anyString());
-		doReturn(practitioner).when(practitionerRepository).getPractitionerByUserId(anyString());
-		doReturn(practitionerListImmutablePair).when(practitionerService).getOrganizationsByUserId(anyString());
-		doReturn(assignedLocations).when(organizationService).findAssignedLocationsAndPlans(any(List.class));
-		doReturn(assignedLocations).when(locationService).getAssignedLocations(anyString());
-
-		boolean hasPermission = eventPermissionEvaluator.hasObjectPermission(authentication, (Serializable) events,null);
-		assertTrue(hasPermission);
-	}
+        boolean hasPermission = eventPermissionEvaluator.hasObjectPermission(authentication, (Serializable) events, null);
+        assertTrue(hasPermission);
+    }
 }

@@ -6,19 +6,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationStartupListener implements ApplicationListener<ContextRefreshedEvent> {
-	
-	public static final String APPLICATION_ID = "/opensrp";
+
+    public static final String APPLICATION_ID = "/opensrp";
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-    	System.out.println(contextRefreshedEvent.getApplicationContext().getId());
+        System.out.println(contextRefreshedEvent.getApplicationContext().getId());
         if (contextRefreshedEvent.getApplicationContext().getId().endsWith(APPLICATION_ID)) {
 //            scheduler.startJob(eventsSchedule);
 //            scheduler.startJob(atomfeedSchedule);
 //            scheduler.startJob(encounterSchedule);
 //            scheduler.startJob(dhis2Schedule);
 //            scheduler.startJob(validateSyncedToOMRS);
-        	System.out.println("STARTED ALL SCHEDULES");
+            System.out.println("STARTED ALL SCHEDULES");
         }
     }
 
