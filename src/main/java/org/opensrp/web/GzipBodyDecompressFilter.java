@@ -12,13 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -130,7 +124,22 @@ public class GzipBodyDecompressFilter implements Filter {
 		public ServletInputStream getInputStream() throws IOException {
 			final ByteArrayInputStream sourceStream = new ByteArrayInputStream(bytes);
 			return new ServletInputStream() {
-				
+
+				@Override
+				public boolean isFinished() {
+					return false;
+				}
+
+				@Override
+				public boolean isReady() {
+					return false;
+				}
+
+				@Override
+				public void setReadListener(ReadListener readListener) {
+
+				}
+
 				public int read() throws IOException {
 					return sourceStream.read();
 				}
