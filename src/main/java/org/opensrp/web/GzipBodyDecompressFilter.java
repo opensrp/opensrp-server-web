@@ -124,6 +124,7 @@ public class GzipBodyDecompressFilter implements Filter {
 		public ServletInputStream getInputStream() throws IOException {
 			final ByteArrayInputStream sourceStream = new ByteArrayInputStream(bytes);
 			return new ServletInputStream() {
+				private ReadListener readListener;
 
 				@Override
 				public boolean isFinished() {
@@ -137,7 +138,7 @@ public class GzipBodyDecompressFilter implements Filter {
 
 				@Override
 				public void setReadListener(ReadListener readListener) {
-
+					this.readListener = readListener;
 				}
 
 				public int read() throws IOException {
