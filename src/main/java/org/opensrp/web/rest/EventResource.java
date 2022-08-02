@@ -509,7 +509,7 @@ public class EventResource extends RestResource<Event> {
 						clientService.addorUpdate(client);
 					}
 					catch (Exception e) {
-						logger.error("[SYNC_INFO] Sync failed for client {} - {}", client.getBaseEntityId(), gson.toJson(client), e);
+						logger.error("[SYNC_INFO] Sync failed for client {}; identifiers: {}", client.getBaseEntityId(), gson.toJson(client.getIdentifiers()), e);
 						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
@@ -532,11 +532,10 @@ public class EventResource extends RestResource<Event> {
 					}
 					catch (Exception e) {
 						logger.error(
-								"[SYNC_INFO] Sync failed for event {}; type: {} for client {} - {}",
+								"[SYNC_INFO] Sync failed for event {}; type: {} for client {}",
 								event.getFormSubmissionId(),
 								event.getEventType(),
 								event.getBaseEntityId(),
-								gson.toJson(event),
 								e
 						);
 						failedEventIds.add(event.getFormSubmissionId());
