@@ -462,7 +462,7 @@ public class EventResource extends RestResource<Event> {
 										getExecutionTime(timeBeforeSavingClient));
 					}
 					catch (Exception e) {
-						logger.error("Client {} failed to sync", client.getBaseEntityId(), e);
+						logger.error("[SYNC_INFO] Sync failed for client {}; identifiers: {}", client.getBaseEntityId(), gson.toJson(client.getIdentifiers()), e);
 						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
@@ -499,7 +499,13 @@ public class EventResource extends RestResource<Event> {
 						}
 					}
 					catch (Exception e) {
-						logger.error("Event of type {} for client {} failed to sync", event.getEventType(), event.getBaseEntityId(), e);
+						logger.error(
+								"[SYNC_INFO] Sync failed for event {}; type: {} for client {}",
+								event.getFormSubmissionId(),
+								event.getEventType(),
+								event.getBaseEntityId(),
+								e
+						);
 						failedEventIds.add(event.getFormSubmissionId());
 					}
 				}
@@ -510,7 +516,7 @@ public class EventResource extends RestResource<Event> {
 					getExecutionTime(timeBeforeSync));
 		}
 		catch (Exception e) {
-			logger.error("Sync data processing failed with exception: ", e);
+			logger.error("[SYNC_INFO] Sync data processing failed with exception: ", e);
 			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
 		}
 
