@@ -114,20 +114,24 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 
 		private InputStream stream;
 		private ReadListener readListener;
+		private boolean isFinished;
 
 		@Override
 		public int read() throws IOException {
-			return stream.read();
+			int data = this.stream.read();
+			if(data == -1)
+				this.isFinished = true;
+			return data;
 		}
 
 		@Override
 		public boolean isFinished() {
-			return false;
+			return isFinished;
 		}
 
 		@Override
 		public boolean isReady() {
-			return false;
+			return true;
 		}
 
 		@Override
