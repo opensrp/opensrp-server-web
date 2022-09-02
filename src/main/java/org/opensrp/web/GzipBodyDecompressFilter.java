@@ -122,34 +122,7 @@ public class GzipBodyDecompressFilter implements Filter {
 		 */
 		@Override
 		public ServletInputStream getInputStream() throws IOException {
-			final ByteArrayInputStream sourceStream = new ByteArrayInputStream(bytes);
-			return new ServletInputStream() {
-				private ReadListener readListener;
-
-				@Override
-				public boolean isFinished() {
-					return false;
-				}
-
-				@Override
-				public boolean isReady() {
-					return false;
-				}
-
-				@Override
-				public void setReadListener(ReadListener readListener) {
-					this.readListener = readListener;
-				}
-
-				public int read() throws IOException {
-					return sourceStream.read();
-				}
-				
-				public void close() throws IOException {
-					super.close();
-					sourceStream.close();
-				}
-			};
+			return new CachedBodyServletInputStream(bytes);
 		}
 		
 		/**
