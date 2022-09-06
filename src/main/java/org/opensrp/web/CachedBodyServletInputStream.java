@@ -30,7 +30,11 @@ public class CachedBodyServletInputStream extends ServletInputStream {
 
     @Override
     public void setReadListener(ReadListener readListener) {
-
+        try {
+            readListener.onDataAvailable();
+        } catch (IOException e) {
+            readListener.onError(e);
+        }
     }
 
     @Override

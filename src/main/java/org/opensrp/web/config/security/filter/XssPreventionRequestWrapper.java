@@ -113,7 +113,6 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 	private class ResettableServletInputStream extends ServletInputStream {
 
 		private InputStream stream;
-		private ReadListener readListener;
 		private boolean isFinished;
 
 		@Override
@@ -136,7 +135,11 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 
 		@Override
 		public void setReadListener(ReadListener readListener) {
-			this.readListener = readListener;
+			try {
+				readListener.onDataAvailable();
+			} catch (IOException e) {
+				readListener.onError(e);
+			}
 		}
 	}
 

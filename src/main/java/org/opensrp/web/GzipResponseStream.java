@@ -78,11 +78,15 @@ public class GzipResponseStream extends ServletOutputStream {
 
 	@Override
 	public boolean isReady() {
-		return this.output.isReady();
+		return true;
 	}
 
 	@Override
 	public void setWriteListener(WriteListener writeListener) {
-		this.output.setWriteListener(writeListener);
+		try {
+			writeListener.onWritePossible();
+		} catch (IOException e){
+			writeListener.onError(e);
+		}
 	}
 }
