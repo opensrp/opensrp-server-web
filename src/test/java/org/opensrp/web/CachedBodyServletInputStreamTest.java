@@ -16,8 +16,8 @@ public class CachedBodyServletInputStreamTest {
         String content = "This is a test request";
         CachedBodyServletInputStream cachedBodyServletInputStream  = new CachedBodyServletInputStream(content.getBytes(StandardCharsets.UTF_8));
         Assert.assertFalse(cachedBodyServletInputStream.isFinished);
-        int data;
-        while(( data = cachedBodyServletInputStream.read() )!= -1){
+
+        while(cachedBodyServletInputStream.read() != -1){
             // do nothing
         }
 
