@@ -110,7 +110,8 @@ public class GzipBodyDecompressFilter implements Filter {
 				final InputStream in = new GZIPInputStream(request.getInputStream());
 				bytes = ByteStreams.toByteArray(in);
 			}
-			catch (EOFException e) {
+			catch (Exception e) {
+				logger.error(e.getMessage(), e);
 				bytes = new byte[0];
 			}
 		}
