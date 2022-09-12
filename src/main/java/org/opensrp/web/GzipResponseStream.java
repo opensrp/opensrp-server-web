@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -75,4 +76,17 @@ public class GzipResponseStream extends ServletOutputStream {
 		return (this.closed);
 	}
 
+	@Override
+	public boolean isReady() {
+		return true;
+	}
+
+	@Override
+	public void setWriteListener(WriteListener writeListener) {
+		try {
+			writeListener.onWritePossible();
+		} catch (IOException e){
+			writeListener.onError(e);
+		}
+	}
 }

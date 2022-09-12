@@ -1,7 +1,6 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.smartregister</groupId>
 
@@ -17,8 +16,8 @@
         <main.basedir>${project.basedir}</main.basedir>
         <hibernate-entitymanager.version>5.4.24.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.3.22</spring.version>
-        <spring.security.version>5.7.2</spring.security.version>
+        <spring.version>5.2.21.RELEASE</spring.version>
+        <spring.security.version>5.2.15.RELEASE</spring.security.version>
         <spring.security.oauth.version>2.4.2.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
         <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
@@ -29,6 +28,7 @@
         <opensrp.connector.version>2.4.1-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
+        <opensrp-server-openlmis-stock-version>1.1.2-SNAPSHOT</opensrp-server-openlmis-stock-version>
         <lombok.version>1.18.12</lombok.version>
         <log4j.version>2.17.1</log4j.version>
     </properties>
@@ -106,6 +106,7 @@
             <id>spring plugin repo</id>
             <url>https://repo.spring.io/plugins-release/</url>
         </repository>
+
     </repositories>
 
     <dependencies>
@@ -194,7 +195,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -211,11 +212,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
         <dependency>
@@ -263,7 +259,17 @@
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
+            <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-security-adapter</artifactId>
+            <version>16.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.12.1</version>
         </dependency>
         <dependency>
             <groupId>org.owasp.encoder</groupId>
@@ -276,7 +282,7 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--		HTTP session replication dependency-->
+        <!--HTTP session replication dependency-->
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
@@ -287,7 +293,11 @@
             <artifactId>jedis</artifactId>
             <version>${redis.jedis.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.10</version>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -342,20 +352,37 @@
             <version>3.3.0</version>
         </dependency>
         <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.26</version>
+        </dependency>
+        <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <version>2.6.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.0.22.Final</version>
         </dependency>
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
             <version>5.6.0</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>${redis.lettuce.version}</version>
+            <version>6.1.6.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -368,11 +395,16 @@
             <version>1.5.0</version>
         </dependency>
         <dependency>
+            <groupId>org.smartregister</groupId>
+            <artifactId>opensrp-server-openlmis-stock</artifactId>
+            <version>${opensrp-server-openlmis-stock-version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
             <version>${log4j.version}</version>
@@ -430,7 +462,13 @@
                     <source>11</source>
                     <target>11</target>
                     <encoding>UTF-8</encoding>
-
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -512,7 +550,7 @@
                             <port>${jetty.port}</port>
                         </connector>
                         <connector
-                            implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
@@ -648,7 +686,10 @@
                 <dhis2.sync.enabled>default</dhis2.sync.enabled>
                 <atomfeed.enabled>default</atomfeed.enabled>
                 <rapidpro.enabled>default</rapidpro.enabled>
+                <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
+                <openlmis.stock.profile>default</openlmis.stock.profile>
                 <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
+                <plan.generation.profile>default</plan.generation.profile>
             </properties>
         </profile>
         <profile>
@@ -730,6 +771,7 @@
             <properties>
                 <dhis2.sync.vaccine.tracker>dhis2-sync-vaccine-tracker</dhis2.sync.vaccine.tracker>
                 <dhis2.sync.enabled>dhis2-sync</dhis2.sync.enabled>
+
             </properties>
         </profile>
         <profile>
@@ -799,6 +841,31 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>rabbitmq</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>opensrp.queuing.service</name>
+                    <value>rabbitmq</value>
+                </property>
+            </activation>
+            <properties>
+                <opensrp.queuing.service.profile>rabbitmq</opensrp.queuing.service.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>openlmis-stock</id>
+            <properties>
+                <openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>plan-generation</id>
+            <properties>
+                <plan.generation.profile>plan-generation</plan.generation.profile>
+            </properties>
         </profile>
     </profiles>
 </project>
