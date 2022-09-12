@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.owasp.encoder.Encode;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -21,17 +22,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
-	
+
 	private static Logger logger = LogManager.getLogger(XssPreventionRequestWrapper.class);
-	
+
 	private static ObjectMapper mapper = new ObjectMapper();
-	
+
 	private byte[] rawData;
-	
+
 	private HttpServletRequest request;
-	
+
 	private ResettableServletInputStream servletStream;
-	
+
 	public XssPreventionRequestWrapper(HttpServletRequest request) {
 		super(request);
 		this.request = request;
@@ -47,7 +48,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		updateParameters();
 		return servletStream;
 	}
-	
+
 	@Override
 	public BufferedReader getReader() throws IOException {
 		if (rawData == null) {
@@ -57,7 +58,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		updateParameters();
 		return new BufferedReader(new InputStreamReader(servletStream));
 	}
-	
+
 	private void updateParameters() throws IOException {
 		String requestBody = new String(rawData, StandardCharsets.UTF_8);
 		if (isValidJSON(requestBody)) {
@@ -68,7 +69,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 			servletStream.stream = new ByteArrayInputStream(rawData);
 		}
 	}
-	
+
 	private static JsonNode encode(JsonNode node) {
 		if (node.isValueNode()) {
 			if (JsonNodeType.STRING == node.getNodeType()) {
@@ -89,14 +90,14 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 			return cleanedNewArrayNode;
 		} else {
 			ObjectNode encodedObjectNode = mapper.createObjectNode();
-			for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext();) {
+			for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext(); ) {
 				Map.Entry<String, JsonNode> entry = it.next();
 				encodedObjectNode.set(Encode.forHtmlContent(entry.getKey()), encode(entry.getValue()));
 			}
 			return encodedObjectNode;
 		}
 	}
-	
+
 	private static boolean isValidJSON(final String json) throws IOException {
 		boolean valid = true;
 		try {
@@ -108,15 +109,38 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 		}
 		return valid;
 	}
-	
+
 	private class ResettableServletInputStream extends ServletInputStream {
-		
+
 		private InputStream stream;
-		
+		private boolean isFinished;
+
 		@Override
 		public int read() throws IOException {
-			return stream.read();
+			int data = this.stream.read();
+			if(data == -1)
+				this.isFinished = true;
+			return data;
+		}
+
+		@Override
+		public boolean isFinished() {
+			return isFinished;
+		}
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			try {
+				readListener.onDataAvailable();
+			} catch (IOException e) {
+				readListener.onError(e);
+			}
 		}
 	}
-	
+
 }
