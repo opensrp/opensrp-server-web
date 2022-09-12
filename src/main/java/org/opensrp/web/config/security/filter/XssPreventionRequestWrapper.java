@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.owasp.encoder.Encode;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -112,10 +113,33 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 	private class ResettableServletInputStream extends ServletInputStream {
 
 		private InputStream stream;
+		private boolean isFinished;
 
 		@Override
 		public int read() throws IOException {
-			return stream.read();
+			int data = this.stream.read();
+			if(data == -1)
+				this.isFinished = true;
+			return data;
+		}
+
+		@Override
+		public boolean isFinished() {
+			return isFinished;
+		}
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			try {
+				readListener.onDataAvailable();
+			} catch (IOException e) {
+				readListener.onError(e);
+			}
 		}
 	}
 
