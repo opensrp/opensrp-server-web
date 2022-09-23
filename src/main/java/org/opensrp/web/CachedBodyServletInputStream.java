@@ -1,5 +1,8 @@
 package org.opensrp.web;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import java.io.ByteArrayInputStream;
@@ -10,6 +13,7 @@ public class CachedBodyServletInputStream extends ServletInputStream {
 
     private InputStream cachedBodyInputSteam;
     boolean isFinished = false;
+    private Logger logger = LogManager.getLogger(CachedBodyServletInputStream.class.toString());
 
     public CachedBodyServletInputStream(byte[] cachedBody) {
         this.cachedBodyInputSteam = new ByteArrayInputStream(cachedBody);
@@ -33,6 +37,7 @@ public class CachedBodyServletInputStream extends ServletInputStream {
         try {
             readListener.onDataAvailable();
         } catch (IOException e) {
+            logger.error(e.getMessage(), e);
             readListener.onError(e);
         }
     }

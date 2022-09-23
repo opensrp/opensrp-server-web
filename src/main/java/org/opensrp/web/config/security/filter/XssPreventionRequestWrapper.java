@@ -138,6 +138,7 @@ public class XssPreventionRequestWrapper extends HttpServletRequestWrapper {
 			try {
 				readListener.onDataAvailable();
 			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
 				readListener.onError(e);
 			}
 		}
