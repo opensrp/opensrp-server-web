@@ -11,6 +11,7 @@ import org.opensrp.util.DateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @EnableWebMvc
 @ComponentScan
 @EnableAsync
+@EnableAspectJAutoProxy
 public class WebConfig {
 	
 	@Bean
