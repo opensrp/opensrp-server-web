@@ -1,5 +1,8 @@
 package org.opensrp.web;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
@@ -22,6 +25,8 @@ public class GzipResponseStream extends ServletOutputStream {
 	protected HttpServletResponse response = null;
 
 	protected ServletOutputStream output = null;
+
+	private Logger logger = LogManager.getLogger(GzipResponseStream.class.toString());
 
 	public GzipResponseStream(HttpServletResponse response) throws IOException {
 		super();
@@ -86,6 +91,7 @@ public class GzipResponseStream extends ServletOutputStream {
 		try {
 			writeListener.onWritePossible();
 		} catch (IOException e){
+			logger.error(e.getMessage(), e);
 			writeListener.onError(e);
 		}
 	}
