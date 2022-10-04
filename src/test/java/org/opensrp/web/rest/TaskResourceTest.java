@@ -65,7 +65,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath*:test-webmvc-config.xml", })
 @ActiveProfiles(profiles = { "jedis", "postgres", "basic_auth" })
 public class TaskResourceTest {
 	
