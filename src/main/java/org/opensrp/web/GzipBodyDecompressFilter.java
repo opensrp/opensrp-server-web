@@ -1,8 +1,6 @@
 
 package org.opensrp.web;
 
-import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -48,7 +46,7 @@ public class GzipBodyDecompressFilter implements Filter {
 	
 	/**
 	 * Analyzes servlet request for possible gzipped body. When Content-Encoding header has "gzip"
-	 * value and request method is POST we read all the gzipped stream and is it haz any data unzip
+	 * value and request method is POST we read all the gzipped stream and if it has any data unzip
 	 * it. In case when gzip Content-Encoding header specified but body is not actually in gzip
 	 * format we will throw ZipException.
 	 *
@@ -104,11 +102,11 @@ public class GzipBodyDecompressFilter implements Filter {
 		/**
 		 * Constructs a request object wrapping the given request. In case if Content-Encoding
 		 * contains "gzip" we wrap the input stream into byte array to original input stream has
-		 * nothing in it but hew wrapped input stream always returns reproducible ungzipped input
+		 * nothing in it but new wrapped input stream always returns reproducible ungzipped input
 		 * stream.
 		 *
 		 * @param request request which input stream will be wrapped.
-		 * @throws java.io.IOException when input stream reqtieval failed.
+		 * @throws java.io.IOException when input stream retrieval failed.
 		 */
 		public GzippedInputStreamWrapper(final HttpServletRequest request) throws IOException {
 			super(request);
@@ -116,7 +114,8 @@ public class GzipBodyDecompressFilter implements Filter {
 				final InputStream in = new GZIPInputStream(request.getInputStream());
 				bytes = ByteStreams.toByteArray(in);
 			}
-			catch (EOFException e) {
+			catch (Exception e) {
+				logger.error(e.getMessage(), e);
 				bytes = new byte[0];
 			}
 		}
@@ -128,18 +127,7 @@ public class GzipBodyDecompressFilter implements Filter {
 		 */
 		@Override
 		public ServletInputStream getInputStream() throws IOException {
-			final ByteArrayInputStream sourceStream = new ByteArrayInputStream(bytes);
-			return new ServletInputStream() {
-				
-				public int read() throws IOException {
-					return sourceStream.read();
-				}
-				
-				public void close() throws IOException {
-					super.close();
-					sourceStream.close();
-				}
-			};
+			return new CachedBodyServletInputStream(bytes);
 		}
 		
 		/**
