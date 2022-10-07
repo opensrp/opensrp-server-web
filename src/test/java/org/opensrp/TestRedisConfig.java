@@ -22,22 +22,19 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 @Configuration
 @EnableCaching
-public class TestRedisConfig {
+public class TestRedisConfig extends TestRedisInstance {
 	
 	@Value("#{opensrp['redis.host']}")
 	private String redisHost;
-	
-	@Value("#{opensrp['redis.port']}")
-	private int redisPort;
-	
+
 	private int redisDatabase = 0;
 	
 	@Value("#{opensrp['redis.pool.max.connections']}")
 	private int redisMaxConnections = 0;
 	
-	
 	private RedisStandaloneConfiguration redisStandaloneConfiguration() {
-		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
+		int port = TestRedisInstance.redisContainer.getMappedPort(TestRedisInstance.DOCKER_EXPOSE_PORT);
+		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, port);
 		redisStandaloneConfiguration.setDatabase(redisDatabase);
 		return redisStandaloneConfiguration;
 	}
