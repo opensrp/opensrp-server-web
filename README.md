@@ -154,3 +154,18 @@ jvm_threads_states_threads{state="blocked",} 0.0
 > Health indicators [above](#health-endpoint) are added as gauge meters with name in the following pattern; health\_check\_%s, `%s` is a placeholder for service name e.g health\_check\_postgres
 
 The above configs can be updated on `opensrp.properties` file.
+
+### Redis for High Availability
+Redis Sentinel support is added on openSRP server web. To enable redis sentinel the following configurations were added:
+
+#### Configurations for the redis sentinel
+
+| Configuration        | Description                                                                     | Type                         | Default      |
+|----------------------|---------------------------------------------------------------------------------|------------------------------|--------------|
+| redis.sentinels      | Comma separated string of redis sentinel e.g. "localhost:26379,localhost:26380" | String                       | ""           |
+| redis.master         | Name of the set of redis instances to monitor.                                  | String                       | "mymaster"   |
+| redis.architecture   | Refers to the deployment strategy used i.e standalone or sentinel               | String                       | "standalone" |
+
+#### Supported Redis Architecture
+- Standalone - Deploy single redis instance (master).
+- Sentinel - Deploy more than one redis instance made up of sentinel and a master, which would handle automatic fail-over in case a master is not available.
