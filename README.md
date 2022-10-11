@@ -160,11 +160,11 @@ Redis Sentinel support is added on openSRP server web. To enable redis sentinel 
 
 #### Configurations for the redis sentinel
 
-| Configuration        | Description                                                                     | Type                         | Default      |
-|----------------------|---------------------------------------------------------------------------------|------------------------------|--------------|
-| redis.sentinels      | Comma separated string of redis sentinel e.g. "localhost:26379,localhost:26380" | String                       | ""           |
-| redis.master         | Name of the set of redis instances to monitor.                                  | String                       | "mymaster"   |
-| redis.architecture   | Refers to the deployment strategy used i.e standalone or sentinel               | String                       | "standalone" |
+| Configuration        | Description                                                                                                    | Type                         | Default      |
+|----------------------|----------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
+| redis.sentinels      | Comma separated string of redis sentinel e.g. "localhost:26379,localhost:26380".                               | String                       | ""           |
+| redis.master         | Name of the set of redis instances to monitor. Its a name used to identify a redis master and its replicas.    | String                       | "mymaster"   |
+| redis.architecture   | Refers to the deployment topology used i.e standalone or sentinel.                                             | String                       | "standalone" |
 
 #### Supported Redis Architecture
 - Standalone - Deploy single redis instance (master).
