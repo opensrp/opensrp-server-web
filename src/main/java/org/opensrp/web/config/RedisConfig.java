@@ -94,7 +94,8 @@ public class RedisConfig {
 	}
 
 	private RedisSentinelConfiguration redisSentinelConfiguration() {
-		RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration(redisMaster, new HashSet<>(Arrays.asList(redisSentinels.split(","))));
+		String []redisSentinelsArray = StringUtils.isBlank(redisSentinels) ? new String[0] : redisSentinels.split(",");
+		RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration(redisMaster, new HashSet<>(Arrays.asList(redisSentinelsArray)));
 		redisSentinelConfiguration.setDatabase(redisDatabase);
 		if(StringUtils.isNotBlank(redisPassword))
 			redisSentinelConfiguration.setPassword(redisPassword);
