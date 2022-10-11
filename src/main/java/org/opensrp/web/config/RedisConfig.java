@@ -3,6 +3,7 @@
  */
 package org.opensrp.web.config;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -11,7 +12,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -19,6 +22,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author Samuel Githengi created on 05/11/20
@@ -40,17 +46,37 @@ public class RedisConfig {
 	
 	@Value("#{opensrp['redis.pool.max.connections']}")
 	private int redisMaxConnections = 0;
-	
+
+	@Value("#{opensrp['redis.architecture'] ?: 'standalone'}")
+	private String redisArchitecture;
+
+	@Value("#{opensrp['redis.sentinels'] ?: ''}")
+	private String redisSentinels;
+	@Value("#{opensrp['redis.master'] ?: ''}")
+	private String redisMaster;
+
+	protected enum Architecture {
+		STANDALONE,
+		SENTINEL
+	}
 	@Profile("lettuce")
 	@Bean(name = "lettuceConnectionFactory")
 	public RedisConnectionFactory lettuceConnectionFactory() {
 		LettuceClientConfiguration lettuceClientConfiguration = LettucePoolingClientConfiguration.builder()
 		        .poolConfig(poolConfig()).build();
-		LettuceConnectionFactory redisConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration(),
+		return new LettuceConnectionFactory(getRedisConnectionFactory(getArchitecture()),
 		        lettuceClientConfiguration);
-		return redisConnectionFactory;
 	}
-	
+
+	private RedisConfiguration getRedisConnectionFactory(Architecture architecture) {
+		RedisConfiguration configuration = null;
+		if (architecture == Architecture.SENTINEL)
+			configuration = redisSentinelConfiguration();
+		else if (architecture == Architecture.STANDALONE)
+			configuration = redisStandaloneConfiguration();
+		return configuration;
+	}
+
 	@Profile("lettuce")
 	@Bean(name = "redisTemplate")
 	public RedisTemplate<String, String> lettuceTemplate() {
@@ -59,21 +85,23 @@ public class RedisConfig {
 		return template;
 	}
 	
-	@Profile("lettuce")
-	@Bean
-	CacheManager lettuceCacheManager() {
-		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
-		        .fromConnectionFactory(lettuceConnectionFactory());
-		return builder.build();
-	}
-	
 	private RedisStandaloneConfiguration redisStandaloneConfiguration() {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
 		redisStandaloneConfiguration.setDatabase(redisDatabase);
-		redisStandaloneConfiguration.setPassword(redisPassword);
+		if(StringUtils.isNotBlank(redisPassword))
+			redisStandaloneConfiguration.setPassword(redisPassword);
 		return redisStandaloneConfiguration;
 	}
-	
+
+	private RedisSentinelConfiguration redisSentinelConfiguration() {
+		String []redisSentinelsArray = StringUtils.isBlank(redisSentinels) ? new String[0] : redisSentinels.split(",");
+		RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration(redisMaster, new HashSet<>(Arrays.asList(redisSentinelsArray)));
+		redisSentinelConfiguration.setDatabase(redisDatabase);
+		if(StringUtils.isNotBlank(redisPassword))
+			redisSentinelConfiguration.setPassword(redisPassword);
+		return redisSentinelConfiguration;
+	}
+
 	@SuppressWarnings("rawtypes")
 	private GenericObjectPoolConfig poolConfig() {
 		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
@@ -86,11 +114,20 @@ public class RedisConfig {
 	public RedisConnectionFactory jedisConnectionFactory() {
 		JedisClientConfiguration clientConfiguration = JedisClientConfiguration.builder().usePooling()
 		        .poolConfig(poolConfig()).build();
-		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration(),
-		        clientConfiguration);
-		return jedisConnectionFactory;
+		return getJedisConnectionFactory(clientConfiguration);
 	}
-	
+
+	private JedisConnectionFactory getJedisConnectionFactory(JedisClientConfiguration clientConfiguration) {
+		JedisConnectionFactory connectionFactory = null;
+		Architecture architecture = getArchitecture();
+		if(architecture == Architecture.STANDALONE)
+			connectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration(), clientConfiguration);
+		else if (architecture == Architecture.SENTINEL) {
+			connectionFactory = new JedisConnectionFactory(redisSentinelConfiguration(), clientConfiguration);
+		}
+		return connectionFactory;
+	}
+
 	@Profile("jedis")
 	@Bean(name = "redisTemplate")
 	public RedisTemplate<String, String> jedisTemplate() {
@@ -99,11 +136,28 @@ public class RedisConfig {
 		return template;
 	}
 
-	@Profile("jedis")
+	@Profile("lettuce")
 	@Bean
-	CacheManager cacheManager() {
+	public CacheManager lettuceCacheManager() {
 		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
-		        .fromConnectionFactory(jedisConnectionFactory());
+				.fromConnectionFactory(lettuceConnectionFactory());
 		return builder.build();
 	}
+
+	@Profile("jedis")
+	@Bean
+	public CacheManager cacheManager() {
+		RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.RedisCacheManagerBuilder
+				.fromConnectionFactory(jedisConnectionFactory());
+		return builder.build();
+	}
+
+	private Architecture getArchitecture() {
+		try {
+			return Architecture.valueOf(redisArchitecture.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException(String.format("Missing or Invalid redis architecture config: current redis.architecture is '%s'", redisArchitecture));
+		}
+	}
+
 }
