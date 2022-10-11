@@ -156,6 +156,7 @@ jvm_threads_states_threads{state="blocked",} 0.0
 The above configs can be updated on `opensrp.properties` file.
 
 ### Redis for High Availability
+
 Redis Sentinel support is added on openSRP server web. To enable redis sentinel the following configurations were added:
 
 #### Configurations for the redis sentinel
@@ -167,5 +168,6 @@ Redis Sentinel support is added on openSRP server web. To enable redis sentinel 
 | redis.architecture   | Refers to the deployment topology used i.e standalone or sentinel.                                             | String                       | "standalone" |
 
 #### Supported Redis Architecture
-- Standalone - Deploy single redis instance (master).
-- Sentinel - Deploy more than one redis instance made up of sentinel and a master, which would handle automatic fail-over in case a master is not available.
+
+*   Standalone - Deploy single redis instance (master).
+*   Sentinel - Deploy more than one redis instance made up of sentinel and a master, which would handle automatic fail-over in case a master is not available.
