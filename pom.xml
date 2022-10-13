@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.2.9-SNAPSHOT</version>
+    <version>3.2.10-ALPHA1-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -25,7 +25,7 @@
         <redis.lettuce.version>6.1.6.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.2.6-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.2.7-ALPHA1-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.4.1-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
@@ -376,6 +376,17 @@
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
             <version>5.5.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.13</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
@@ -865,6 +876,12 @@
             <id>openlmis-stock</id>
             <properties>
                 <openlmis.stock.profile>openlmis-stock</openlmis.stock.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>district-report</id>
+            <properties>
+                <district.report.generation.enabled>district-report</district.report.generation.enabled>
             </properties>
         </profile>
     </profiles>
