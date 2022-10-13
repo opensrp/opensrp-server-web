@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>3.2.7-ALPHA1-SNAPSHOT</version>
+    <version>3.2.10-ALPHA1-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -16,8 +16,8 @@
         <main.basedir>${project.basedir}</main.basedir>
         <hibernate-entitymanager.version>5.4.24.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.2.21.RELEASE</spring.version>
-        <spring.security.version>5.3.13.RELEASE</spring.security.version>
+        <spring.version>5.3.22</spring.version>
+        <spring.security.version>5.7.2</spring.security.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
         <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
@@ -25,7 +25,7 @@
         <redis.lettuce.version>6.1.6.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>3.2.6-ALPHA1-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>3.2.7-ALPHA1-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.4.1-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
@@ -195,7 +195,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -217,7 +217,7 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
-            <version>5.4.0</version>
+            <version>5.5.12</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.zxing/core -->
@@ -430,6 +430,13 @@
             <artifactId>guava</artifactId>
             <version>31.0.1-jre</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.29.2-GA</version>
+        </dependency>
+
     </dependencies>
 
     <build>
