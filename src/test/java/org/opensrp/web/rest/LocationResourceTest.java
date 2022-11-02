@@ -748,6 +748,7 @@ public class LocationResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(), mapCaptor.capture());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertFalse(booleanCaptor.getValue());
 		assertEquals("", stringCaptor.getValue());
 	}
 	@Test
@@ -762,6 +763,7 @@ public class LocationResourceTest {
 				.andExpect(status().isOk()).andReturn();
 		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(), mapCaptor.capture());
 		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertFalse(booleanCaptor.getValue());
 		assertEquals("", stringCaptor.getValue());
 	}
 
