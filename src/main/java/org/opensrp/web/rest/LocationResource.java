@@ -42,7 +42,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
