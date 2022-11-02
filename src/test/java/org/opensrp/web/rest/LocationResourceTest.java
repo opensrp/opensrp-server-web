@@ -736,6 +736,36 @@ public class LocationResourceTest {
 		assertTrue(booleanCaptor.getValue());
 		assertEquals("", stringCaptor.getValue());
 	}
+	@Test
+	public void testFindByLocationPropertiesByDoubleQuotesParentIdString() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(anyBoolean(), anyString(), any(Map.class)))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "false")
+						.param(LocationResource.PROPERTIES_FILTER, "status:Active,parentId:\"\""))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(), mapCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertFalse(booleanCaptor.getValue());
+		assertEquals("", stringCaptor.getValue());
+	}
+	@Test
+	public void testFindByLocationPropertiesByEmptyParentIdString() throws Exception {
+		List<PhysicalLocation> locations = Collections.singletonList(createLocation());
+		when(locationService.findLocationsByProperties(anyBoolean(), anyString(), any(Map.class)))
+				.thenReturn(locations);
+		MvcResult result = mockMvc
+				.perform(get(BASE_URL + "/findByProperties").param(LocationResource.IS_JURISDICTION, "true")
+						.param(LocationResource.RETURN_GEOMETRY, "false")
+						.param(LocationResource.PROPERTIES_FILTER, "status:Active,parentId:"))
+				.andExpect(status().isOk()).andReturn();
+		verify(locationService).findLocationsByProperties(booleanCaptor.capture(), stringCaptor.capture(), mapCaptor.capture());
+		assertEquals(LocationResource.gson.toJson(locations), result.getResponse().getContentAsString());
+		assertFalse(booleanCaptor.getValue());
+		assertEquals("", stringCaptor.getValue());
+	}
 
 	@Test
 	public void testFindByLocationPropertiesWithError() throws Exception {
