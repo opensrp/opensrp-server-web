@@ -17,7 +17,7 @@
         <hibernate-entitymanager.version>5.4.24.Final</hibernate-entitymanager.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>5.3.22</spring.version>
-        <spring.security.version>5.7.2</spring.security.version>
+        <spring.security.version>5.7.5</spring.security.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
         <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
@@ -556,8 +556,7 @@
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>${jetty.port}</port>
                         </connector>
-                        <connector
-                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
