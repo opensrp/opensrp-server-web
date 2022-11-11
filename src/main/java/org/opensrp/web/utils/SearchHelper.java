@@ -60,18 +60,10 @@ public class SearchHelper {
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
 
-		String zeirId = RestUtils.getStringFilter(ZEIR_ID, request);
-		String opensrpId = RestUtils.getStringFilter(OPENSRP_ID, request);
-		String simprintsGuid = RestUtils.getStringFilter(SIM_PRINT_GUID, request);
-
 		searchBean.setFirstName(RestUtils.getStringFilter(FIRST_NAME, request));
 		searchBean.setMiddleName(RestUtils.getStringFilter(MIDDLE_NAME, request));
 		searchBean.setLastName(RestUtils.getStringFilter(LAST_NAME, request));
 		searchBean.setGender(RestUtils.getStringFilter(GENDER, request));
-
-		String inActive = RestUtils.getStringFilter(INACTIVE, request);
-		String lostToFollowUp = RestUtils.getStringFilter(LOST_TO_FOLLOW_UP, request);
-		String nfcCardIdentifier = RestUtils.getStringFilter(NFC_CARD_IDENTIFIER, request);
 
 		DateTime[] birthdate = RestUtils
 				.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
@@ -82,39 +74,17 @@ public class SearchHelper {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
 		}
-		Map<String, String> identifiers = new HashMap<String, String>();
-		//
-		if (!StringUtils.isBlank(zeirId)) {
-			identifiers.put(ZEIR_ID, zeirId);
-			identifiers.put("ZEIR_ID", zeirId); //Maintains backward compatibility with upper case key
-		}
 
-		if (!StringUtils.isBlank(opensrpId)) {
-			identifiers.put(OPENSRP_ID, opensrpId);
-		}
-		if (!StringUtils.isBlank(simprintsGuid)) {
-			identifiers.put(SIM_PRINT_GUID, simprintsGuid);
-		}
 
-		Map<String, String> attributes = new HashMap<String, String>();
-		if (!StringUtils.isBlank(inActive) || !StringUtils.isBlank(lostToFollowUp)
-				|| !StringUtils.isBlank(nfcCardIdentifier)) {
+		Map<String, String> commonSearchParams = new HashMap<>();
+		commonSearchParams.put(ZEIR_ID,  RestUtils.getStringFilter(ZEIR_ID, request));
+		commonSearchParams.put(OPENSRP_ID, RestUtils.getStringFilter(OPENSRP_ID, request));
+		commonSearchParams.put(SIM_PRINT_GUID, RestUtils.getStringFilter(SIM_PRINT_GUID, request));
+		commonSearchParams.put(INACTIVE, RestUtils.getStringFilter(INACTIVE, request));
+		commonSearchParams.put(LOST_TO_FOLLOW_UP, RestUtils.getStringFilter(LOST_TO_FOLLOW_UP, request));
+		commonSearchParams.put(NFC_CARD_IDENTIFIER, RestUtils.getStringFilter(NFC_CARD_IDENTIFIER, request));
 
-			if (!StringUtils.isBlank(inActive)) {
-				attributes.put(INACTIVE, inActive);
-			}
-
-			if (!StringUtils.isBlank(lostToFollowUp)) {
-				attributes.put(LOST_TO_FOLLOW_UP, lostToFollowUp);
-			}
-
-			if (!StringUtils.isBlank(nfcCardIdentifier)) {
-				attributes.put("NFC_Card_Identifier", nfcCardIdentifier);//Key different case than constant
-			}
-		}
-
-		searchBean.setIdentifiers(identifiers);
-		searchBean.setAttributes(attributes);
+		setIdentifiersAndAttributeToChildSearchBean(commonSearchParams, searchBean);
 
 		boolean isValid = isSearchValid(searchBean);
 
@@ -135,27 +105,7 @@ public class SearchHelper {
 		motherSearchBean.setFirstName(RestUtils.getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, request));
 		motherSearchBean.setLastName(RestUtils.getStringFilter(MOTHER_GUARDIAN_LAST_NAME, request));
 
-
-		Map<String, String> motherAttributes = new HashMap<>();
-		if (!StringUtils.isBlank(motherGuardianNrc)) {
-			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
-		}
-		if (!StringUtils.isBlank(compassRelationshipId)) {
-			motherAttributes.put(COMPASS_RELATIONSHIP_ID, compassRelationshipId);
-		}
-
-		String nameLike = null;
-
-		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
-				&& StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
-				&& StringUtils.isBlank(motherSearchBean.getLastName())) {
-			String[] arr = motherSearchBean.getFirstName().split("\\s+");
-			nameLike = arr[0];
-			motherSearchBean.setFirstName(null);
-		}
-
-		motherSearchBean.setNameLike(nameLike);
-		motherSearchBean.setAttributes(motherAttributes);
+		setNameLikeAndAtrributesOnMotherSearchBean(motherGuardianNrc,compassRelationshipId, motherSearchBean);
 
 		boolean isValid = isSearchValid(motherSearchBean);
 
@@ -177,18 +127,10 @@ public class SearchHelper {
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
 
-		String zeirId = jsonObject.getString(ZEIR_ID);
-		String opensrpId = jsonObject.getString(OPENSRP_ID);
-		String simprintsGuid = jsonObject.getString(SIM_PRINT_GUID);
-
 		searchBean.setFirstName(jsonObject.getString(FIRST_NAME));
 		searchBean.setMiddleName(jsonObject.getString(MIDDLE_NAME));
 		searchBean.setLastName(jsonObject.getString(LAST_NAME));
 		searchBean.setGender(jsonObject.getString(GENDER));
-
-		String inActive = jsonObject.getString(INACTIVE);
-		String lostToFollowUp = jsonObject.getString(LOST_TO_FOLLOW_UP);
-		String nfcCardIdentifier = jsonObject.getString(NFC_CARD_IDENTIFIER);
 
 		DateTime[] birthdate = RestUtils
 				.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
@@ -199,8 +141,77 @@ public class SearchHelper {
 			searchBean.setBirthdateFrom(birthdate[0]);
 			searchBean.setBirthdateTo(birthdate[1]);
 		}
+
+		Map<String, String> commonSearchParams = new HashMap<>();
+		commonSearchParams.put(ZEIR_ID, jsonObject.getString(ZEIR_ID));
+		commonSearchParams.put(OPENSRP_ID, jsonObject.getString(OPENSRP_ID));
+		commonSearchParams.put(SIM_PRINT_GUID, jsonObject.getString(SIM_PRINT_GUID));
+		commonSearchParams.put(INACTIVE, jsonObject.getString(INACTIVE));
+		commonSearchParams.put(LOST_TO_FOLLOW_UP, jsonObject.getString(LOST_TO_FOLLOW_UP));
+		commonSearchParams.put(NFC_CARD_IDENTIFIER, jsonObject.getString(NFC_CARD_IDENTIFIER));
+
+		setIdentifiersAndAttributeToChildSearchBean(commonSearchParams, searchBean);
+
+		boolean isValid = isSearchValid(searchBean);
+
+		return new SearchEntityWrapper(isValid, searchBean, limit);
+	}
+
+	public static SearchEntityWrapper motherSearchParamProcessor(JSONObject jsonObject) throws ParseException {
+
+		ClientSearchBean motherSearchBean = new ClientSearchBean();
+
+		Integer limit = setCoreFilters(jsonObject, motherSearchBean);
+
+		String motherGuardianNrc = jsonObject.getString(MOTHER_GUARDIAN_NRC_NUMBER);
+		String compassRelationshipId = jsonObject.getString(MOTHER_COMPASS_RELATIONSHIP_ID);
+
+		motherSearchBean.setFirstName(jsonObject.getString(MOTHER_GUARDIAN_FIRST_NAME));
+		motherSearchBean.setLastName(jsonObject.getString(MOTHER_GUARDIAN_LAST_NAME));
+
+		setNameLikeAndAtrributesOnMotherSearchBean(motherGuardianNrc,compassRelationshipId, motherSearchBean);
+
+		boolean isValid = isSearchValid(motherSearchBean);
+
+		return new SearchEntityWrapper(isValid, motherSearchBean, limit);
+	}
+
+	public static void setNameLikeAndAtrributesOnMotherSearchBean(String motherGuardianNrc,
+																  String compassRelationshipId,
+																  ClientSearchBean motherSearchBean){
+		Map<String, String> motherAttributes = new HashMap<>();
+		if (!StringUtils.isBlank(motherGuardianNrc)) {
+			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
+		}
+		if (!StringUtils.isBlank(compassRelationshipId)) {
+			motherAttributes.put(COMPASS_RELATIONSHIP_ID, compassRelationshipId);
+		}
+
+		String nameLike = null;
+
+		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
+				&& StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
+				&& StringUtils.isBlank(motherSearchBean.getLastName())) {
+			String[] arr = motherSearchBean.getFirstName().split("\\s+");
+			nameLike = arr[0];
+			motherSearchBean.setFirstName(null);
+		}
+
+		motherSearchBean.setNameLike(nameLike);
+		motherSearchBean.setAttributes(motherAttributes);
+
+	}
+
+	public static void setIdentifiersAndAttributeToChildSearchBean(Map<String, String> commonSearchParams, ClientSearchBean searchBean){
 		Map<String, String> identifiers = new HashMap<String, String>();
-		//
+
+		String zeirId = commonSearchParams.get(ZEIR_ID);
+		String opensrpId = commonSearchParams.get(OPENSRP_ID);
+		String simprintsGuid = commonSearchParams.get(SIM_PRINT_GUID);
+		String lostToFollowUp = commonSearchParams.get(LOST_TO_FOLLOW_UP);
+		String inActive = commonSearchParams.get(INACTIVE);
+		String nfcCardIdentifier = commonSearchParams.get(NFC_CARD_IDENTIFIER);
+
 		if (!StringUtils.isBlank(zeirId)) {
 			identifiers.put(ZEIR_ID, zeirId);
 			identifiers.put("ZEIR_ID", zeirId); //Maintains backward compatibility with upper case key
@@ -233,49 +244,7 @@ public class SearchHelper {
 		searchBean.setIdentifiers(identifiers);
 		searchBean.setAttributes(attributes);
 
-		boolean isValid = isSearchValid(searchBean);
-
-		return new SearchEntityWrapper(isValid, searchBean, limit);
 	}
-
-	public static SearchEntityWrapper motherSearchParamProcessor(JSONObject jsonObject) throws ParseException {
-
-		ClientSearchBean motherSearchBean = new ClientSearchBean();
-
-		Integer limit = setCoreFilters(jsonObject, motherSearchBean);
-
-		String motherGuardianNrc = jsonObject.getString(MOTHER_GUARDIAN_NRC_NUMBER);
-		String compassRelationshipId = jsonObject.getString(MOTHER_COMPASS_RELATIONSHIP_ID);
-
-		motherSearchBean.setFirstName(jsonObject.getString(MOTHER_GUARDIAN_FIRST_NAME));
-		motherSearchBean.setLastName(jsonObject.getString(MOTHER_GUARDIAN_LAST_NAME));
-
-		Map<String, String> motherAttributes = new HashMap<>();
-		if (!StringUtils.isBlank(motherGuardianNrc)) {
-			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
-		}
-		if (!StringUtils.isBlank(compassRelationshipId)) {
-			motherAttributes.put(COMPASS_RELATIONSHIP_ID, compassRelationshipId);
-		}
-
-		String nameLike = null;
-
-		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
-				&& StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
-				&& StringUtils.isBlank(motherSearchBean.getLastName())) {
-			String[] arr = motherSearchBean.getFirstName().split("\\s+");
-			nameLike = arr[0];
-			motherSearchBean.setFirstName(null);
-		}
-
-		motherSearchBean.setNameLike(nameLike);
-		motherSearchBean.setAttributes(motherAttributes);
-
-		boolean isValid = isSearchValid(motherSearchBean);
-
-		return new SearchEntityWrapper(isValid, motherSearchBean, limit);
-	}
-
 
 	public static Integer setCoreFilters(HttpServletRequest request, ClientSearchBean searchBean) throws ParseException {
 
