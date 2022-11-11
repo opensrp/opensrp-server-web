@@ -19,24 +19,35 @@ import static org.opensrp.common.AllConstants.Client.GENDER;
 
 public class SearchHelper {
 
+	private static final String ZEIR_ID = "zeir_id";
+	private static final String OPENSRP_ID = "opensrp_id";
+
+	private static final String SIM_PRINT_GUID = "simprints_guid";
+
+	private static final String FIRST_NAME = "first_name";
+	private static final String MIDDLE_NAME = "middle_name";
+	private static final String LAST_NAME = "last_name";
+	private static final String BIRTH_DATE = "birth_date";
+
+	//Attributes
+	private static final String INACTIVE = "inactive";
+	private static final String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
+	private static final String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
+
+	// Mother
+	private static final String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
+	private static final String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
+	private static final String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
+	private static final String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
+
+	private static final String NRC_NUMBER_KEY = "NRC_Number";
+	private static final String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
+
 	public static SearchEntityWrapper childSearchParamProcessor(HttpServletRequest request) throws ParseException {
 
 		ClientSearchBean searchBean = new ClientSearchBean();
 
-		String ZEIR_ID = "zeir_id";
-		String OPENSRP_ID = "opensrp_id";
 
-		String SIM_PRINT_GUID = "simprints_guid";
-
-		String FIRST_NAME = "first_name";
-		String MIDDLE_NAME = "middle_name";
-		String LAST_NAME = "last_name";
-		String BIRTH_DATE = "birth_date";
-
-		//Attributes
-		String INACTIVE = "inactive";
-		String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
-		String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
 
 		Integer limit = RestUtils.getIntegerFilter("limit", request);
 		if (limit == null || limit.intValue() == 0) {
@@ -116,11 +127,7 @@ public class SearchHelper {
 
 		Integer limit = setCoreFilters(request, motherSearchBean);
 
-		// Mother
-		String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
-		String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
-		String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
-		String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
+
 
 		String motherGuardianNrc = RestUtils.getStringFilter(MOTHER_GUARDIAN_NRC_NUMBER, request);
 		String compassRelationshipId = RestUtils.getStringFilter(MOTHER_COMPASS_RELATIONSHIP_ID, request);
@@ -128,8 +135,6 @@ public class SearchHelper {
 		motherSearchBean.setFirstName(RestUtils.getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, request));
 		motherSearchBean.setLastName(RestUtils.getStringFilter(MOTHER_GUARDIAN_LAST_NAME, request));
 
-		String NRC_NUMBER_KEY = "NRC_Number";
-		String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
 
 		Map<String, String> motherAttributes = new HashMap<>();
 		if (!StringUtils.isBlank(motherGuardianNrc)) {
@@ -160,21 +165,6 @@ public class SearchHelper {
 	public static SearchEntityWrapper childSearchParamProcessor(JSONObject jsonObject) throws ParseException {
 
 		ClientSearchBean searchBean = new ClientSearchBean();
-
-		String ZEIR_ID = "zeir_id";
-		String OPENSRP_ID = "opensrp_id";
-
-		String SIM_PRINT_GUID = "simprints_guid";
-
-		String FIRST_NAME = "first_name";
-		String MIDDLE_NAME = "middle_name";
-		String LAST_NAME = "last_name";
-		String BIRTH_DATE = "birth_date";
-
-		//Attributes
-		String INACTIVE = "inactive";
-		String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
-		String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
 
 		Integer limit = jsonObject.optInt("limit");
 		if (limit == 0) {
@@ -254,20 +244,11 @@ public class SearchHelper {
 
 		Integer limit = setCoreFilters(jsonObject, motherSearchBean);
 
-		// Mother
-		String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
-		String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
-		String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
-		String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
-
 		String motherGuardianNrc = jsonObject.getString(MOTHER_GUARDIAN_NRC_NUMBER);
 		String compassRelationshipId = jsonObject.getString(MOTHER_COMPASS_RELATIONSHIP_ID);
 
 		motherSearchBean.setFirstName(jsonObject.getString(MOTHER_GUARDIAN_FIRST_NAME));
 		motherSearchBean.setLastName(jsonObject.getString(MOTHER_GUARDIAN_LAST_NAME));
-
-		String NRC_NUMBER_KEY = "NRC_Number";
-		String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
 
 		Map<String, String> motherAttributes = new HashMap<>();
 		if (!StringUtils.isBlank(motherGuardianNrc)) {
