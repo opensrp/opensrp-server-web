@@ -2,6 +2,7 @@ package org.opensrp.web.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.web.rest.RestUtils;
 import org.smartregister.domain.Client;
@@ -156,6 +157,145 @@ public class SearchHelper {
 		return new SearchEntityWrapper(isValid, motherSearchBean, limit);
 	}
 
+	public static SearchEntityWrapper childSearchParamProcessor(JSONObject jsonObject) throws ParseException {
+
+		ClientSearchBean searchBean = new ClientSearchBean();
+
+		String ZEIR_ID = "zeir_id";
+		String OPENSRP_ID = "opensrp_id";
+
+		String SIM_PRINT_GUID = "simprints_guid";
+
+		String FIRST_NAME = "first_name";
+		String MIDDLE_NAME = "middle_name";
+		String LAST_NAME = "last_name";
+		String BIRTH_DATE = "birth_date";
+
+		//Attributes
+		String INACTIVE = "inactive";
+		String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
+		String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
+
+		Integer limit = jsonObject.optInt("limit");
+		if (limit == 0) {
+			limit = 100;
+		}
+
+		DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
+		if (lastEdit != null) {
+			searchBean.setLastEditFrom(lastEdit[0]);
+			searchBean.setLastEditTo(lastEdit[1]);
+		}
+
+		String zeirId = jsonObject.getString(ZEIR_ID);
+		String opensrpId = jsonObject.getString(OPENSRP_ID);
+		String simprintsGuid = jsonObject.getString(SIM_PRINT_GUID);
+
+		searchBean.setFirstName(jsonObject.getString(FIRST_NAME));
+		searchBean.setMiddleName(jsonObject.getString(MIDDLE_NAME));
+		searchBean.setLastName(jsonObject.getString(LAST_NAME));
+		searchBean.setGender(jsonObject.getString(GENDER));
+
+		String inActive = jsonObject.getString(INACTIVE);
+		String lostToFollowUp = jsonObject.getString(LOST_TO_FOLLOW_UP);
+		String nfcCardIdentifier = jsonObject.getString(NFC_CARD_IDENTIFIER);
+
+		DateTime[] birthdate = RestUtils
+				.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+
+		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+
+		if (birthdate != null) {
+			searchBean.setBirthdateFrom(birthdate[0]);
+			searchBean.setBirthdateTo(birthdate[1]);
+		}
+		Map<String, String> identifiers = new HashMap<String, String>();
+		//
+		if (!StringUtils.isBlank(zeirId)) {
+			identifiers.put(ZEIR_ID, zeirId);
+			identifiers.put("ZEIR_ID", zeirId); //Maintains backward compatibility with upper case key
+		}
+
+		if (!StringUtils.isBlank(opensrpId)) {
+			identifiers.put(OPENSRP_ID, opensrpId);
+		}
+		if (!StringUtils.isBlank(simprintsGuid)) {
+			identifiers.put(SIM_PRINT_GUID, simprintsGuid);
+		}
+
+		Map<String, String> attributes = new HashMap<String, String>();
+		if (!StringUtils.isBlank(inActive) || !StringUtils.isBlank(lostToFollowUp)
+				|| !StringUtils.isBlank(nfcCardIdentifier)) {
+
+			if (!StringUtils.isBlank(inActive)) {
+				attributes.put(INACTIVE, inActive);
+			}
+
+			if (!StringUtils.isBlank(lostToFollowUp)) {
+				attributes.put(LOST_TO_FOLLOW_UP, lostToFollowUp);
+			}
+
+			if (!StringUtils.isBlank(nfcCardIdentifier)) {
+				attributes.put("NFC_Card_Identifier", nfcCardIdentifier);//Key different case than constant
+			}
+		}
+
+		searchBean.setIdentifiers(identifiers);
+		searchBean.setAttributes(attributes);
+
+		boolean isValid = isSearchValid(searchBean);
+
+		return new SearchEntityWrapper(isValid, searchBean, limit);
+	}
+
+	public static SearchEntityWrapper motherSearchParamProcessor(JSONObject jsonObject) throws ParseException {
+
+		ClientSearchBean motherSearchBean = new ClientSearchBean();
+
+		Integer limit = setCoreFilters(jsonObject, motherSearchBean);
+
+		// Mother
+		String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
+		String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
+		String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
+		String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
+
+		String motherGuardianNrc = jsonObject.getString(MOTHER_GUARDIAN_NRC_NUMBER);
+		String compassRelationshipId = jsonObject.getString(MOTHER_COMPASS_RELATIONSHIP_ID);
+
+		motherSearchBean.setFirstName(jsonObject.getString(MOTHER_GUARDIAN_FIRST_NAME));
+		motherSearchBean.setLastName(jsonObject.getString(MOTHER_GUARDIAN_LAST_NAME));
+
+		String NRC_NUMBER_KEY = "NRC_Number";
+		String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
+
+		Map<String, String> motherAttributes = new HashMap<>();
+		if (!StringUtils.isBlank(motherGuardianNrc)) {
+			motherAttributes.put(NRC_NUMBER_KEY, motherGuardianNrc);
+		}
+		if (!StringUtils.isBlank(compassRelationshipId)) {
+			motherAttributes.put(COMPASS_RELATIONSHIP_ID, compassRelationshipId);
+		}
+
+		String nameLike = null;
+
+		if (!StringUtils.isBlank(motherSearchBean.getFirstName())
+				&& StringUtils.containsWhitespace(motherSearchBean.getFirstName().trim())
+				&& StringUtils.isBlank(motherSearchBean.getLastName())) {
+			String[] arr = motherSearchBean.getFirstName().split("\\s+");
+			nameLike = arr[0];
+			motherSearchBean.setFirstName(null);
+		}
+
+		motherSearchBean.setNameLike(nameLike);
+		motherSearchBean.setAttributes(motherAttributes);
+
+		boolean isValid = isSearchValid(motherSearchBean);
+
+		return new SearchEntityWrapper(isValid, motherSearchBean, limit);
+	}
+
+
 	public static Integer setCoreFilters(HttpServletRequest request, ClientSearchBean searchBean) throws ParseException {
 
 		Integer limit = RestUtils.getIntegerFilter("limit", request);
@@ -164,6 +304,22 @@ public class SearchHelper {
 		}
 
 		DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
+		if (lastEdit != null) {
+			searchBean.setLastEditFrom(lastEdit[0]);
+			searchBean.setLastEditTo(lastEdit[1]);
+		}
+
+		return limit;
+	}
+
+	public static Integer setCoreFilters(JSONObject jsonObject, ClientSearchBean searchBean) throws ParseException {
+
+		Integer limit = jsonObject.getInt("limit");
+		if (limit == 0) {
+			limit = 100;
+		}
+
+		DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
 		if (lastEdit != null) {
 			searchBean.setLastEditFrom(lastEdit[0]);
 			searchBean.setLastEditTo(lastEdit[1]);
@@ -266,6 +422,18 @@ public class SearchHelper {
 		String motherGuardianPhoneNumber = RestUtils.getStringFilter(MOTHER_GUARDIAN_PHONE_NUMBER, request);
 		motherGuardianPhoneNumber = StringUtils.isBlank(motherGuardianPhoneNumber)
 				? RestUtils.getStringFilter(CONTACT_PHONE_NUMBER, request)
+				: motherGuardianPhoneNumber;
+
+		return motherGuardianPhoneNumber;
+	}
+
+	public static String getContactPhoneNumberParam(JSONObject jsonObject) {
+		//Search by mother contact number
+		String MOTHER_GUARDIAN_PHONE_NUMBER = "mother_contact_phone_number";
+		String CONTACT_PHONE_NUMBER = "contact_phone_number";
+		String motherGuardianPhoneNumber = jsonObject.getString(MOTHER_GUARDIAN_PHONE_NUMBER);
+		motherGuardianPhoneNumber = StringUtils.isBlank(motherGuardianPhoneNumber)
+				? jsonObject.getString(CONTACT_PHONE_NUMBER)
 				: motherGuardianPhoneNumber;
 
 		return motherGuardianPhoneNumber;

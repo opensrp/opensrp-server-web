@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.opensrp.common.AllConstants.BaseEntity;
 import org.opensrp.search.ClientSearchBean;
 import org.opensrp.service.ClientService;
@@ -17,6 +18,7 @@ import org.smartregister.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -199,7 +201,88 @@ public class SearchResource extends RestResource<Client> {
 			return new ArrayList<ChildMother>();
 		}
 	}
-	
+
+	@RequestMapping(method = RequestMethod.POST, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
+	private List<ChildMother> searchPathByPost(@RequestBody String jsonRequestBody) throws ParseException {
+		try {
+
+			//Process clients search via demographics
+
+			ClientSearchBean searchBean = new ClientSearchBean();
+			List<Client> children = new ArrayList<Client>();
+			JSONObject jsonRequestBodyObject = new JSONObject(jsonRequestBody);
+			SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(jsonRequestBodyObject);
+
+			if (childSearchEntity.isValid()) {
+				searchBean = childSearchEntity.getClientSearchBean();
+				children = searchService.searchClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
+						searchBean.getLastName(), childSearchEntity.getLimit());
+			}
+
+			//Process mothers search via mother demographics
+
+			SearchEntityWrapper motherSearchEntity = SearchHelper.motherSearchParamProcessor(jsonRequestBodyObject);
+			ClientSearchBean motherSearchBean = new ClientSearchBean();
+			List<Client> mothers = new ArrayList<Client>();
+
+			if (motherSearchEntity.isValid()) {
+				motherSearchBean = motherSearchEntity.getClientSearchBean();
+				mothers = searchService.searchClient(motherSearchBean, motherSearchBean.getFirstName(),
+						motherSearchBean.getMiddleName(), motherSearchBean.getLastName(), motherSearchEntity.getLimit());
+			}
+
+			//Process clients search via contact phone number
+
+			String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(jsonRequestBodyObject);
+
+			List<String> clientBaseEntityIds = getClientBaseEntityIdsByContactPhoneNumber(contactPhoneNumber);
+
+			List<Client> eventChildren = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientBaseEntityIds);
+
+			children = SearchHelper.intersection(children, eventChildren);// Search conjunction is "AND" find intersection
+
+			List<Client> linkedMothers = new ArrayList<Client>();
+
+			String RELATIONSHIP_KEY = "mother";
+			if (!children.isEmpty()) {
+				List<String> clientIds = new ArrayList<String>();
+				for (Client c : children) {
+					String relationshipId = SearchHelper.getRelationalId(c, RELATIONSHIP_KEY);
+					if (relationshipId != null && !clientIds.contains(relationshipId)) {
+						clientIds.add(relationshipId);
+					}
+				}
+
+				linkedMothers = clientService.findByFieldValue(BaseEntity.BASE_ENTITY_ID, clientIds);
+
+			}
+
+			List<Client> linkedChildren = new ArrayList<Client>();
+
+			if (!mothers.isEmpty()) {
+				for (Client client : mothers) {
+					linkedChildren.addAll(clientService.findByRelationship(client.getBaseEntityId()));
+				}
+			}
+
+			children = SearchHelper.intersection(children, linkedChildren);// Search conjunction is "AND" find intersection
+
+			for (Client linkedMother : linkedMothers) {
+				if (!SearchHelper.contains(mothers, linkedMother)) {
+					mothers.add(linkedMother);
+				}
+			}
+
+			return SearchHelper.processSearchResult(children, mothers, RELATIONSHIP_KEY);
+
+		}
+		catch (Exception e) {
+
+			logger.error("", e);
+			return new ArrayList<ChildMother>();
+		}
+	}
+
 	public List<String> getClientBaseEntityIdsByContactPhoneNumber(String motherGuardianPhoneNumber) {
 		List<String> clientBaseEntityIds = new ArrayList<String>();
 		

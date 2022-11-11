@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
@@ -85,6 +86,20 @@ public class RestUtils {
 	  DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
 	  DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
 	  return new DateTime[]{d1,d2};
+	}
+
+	public static DateTime[] getDateRangeFilter(String filter, JSONObject jsonObject) throws ParseException
+	{
+		String strval = jsonObject.optString(filter);
+		if(strval.equals("")){
+			return null;
+		}
+		if (!strval.contains(":")) {
+			return new DateTime[] { new DateTime(strval), new DateTime(strval) };
+		}
+		DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+		DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
+		return new DateTime[]{d1,d2};
 	}
 
 	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
