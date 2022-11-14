@@ -113,7 +113,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     		.ignoringAntMatchers("/rest/**","/multimedia/**","/actions/**")
     	.and()
     		.logout()
-    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"));
+    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"))
+		.and().headers().httpStrictTransportSecurity().includeSubDomains(true).maxAgeInSeconds(31536000);
 		/* @formatter:on */
 	}
 	
