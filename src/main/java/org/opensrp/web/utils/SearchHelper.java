@@ -127,10 +127,10 @@ public class SearchHelper {
 			searchBean.setLastEditTo(lastEdit[1]);
 		}
 
-		searchBean.setFirstName(jsonObject.getString(FIRST_NAME));
-		searchBean.setMiddleName(jsonObject.getString(MIDDLE_NAME));
-		searchBean.setLastName(jsonObject.getString(LAST_NAME));
-		searchBean.setGender(jsonObject.getString(GENDER));
+		searchBean.setFirstName(jsonObject.optString(FIRST_NAME));
+		searchBean.setMiddleName(jsonObject.optString(MIDDLE_NAME));
+		searchBean.setLastName(jsonObject.optString(LAST_NAME));
+		searchBean.setGender(jsonObject.optString(GENDER));
 
 		DateTime[] birthdate = RestUtils
 				.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
@@ -143,12 +143,12 @@ public class SearchHelper {
 		}
 
 		Map<String, String> commonSearchParams = new HashMap<>();
-		commonSearchParams.put(ZEIR_ID, jsonObject.getString(ZEIR_ID));
-		commonSearchParams.put(OPENSRP_ID, jsonObject.getString(OPENSRP_ID));
-		commonSearchParams.put(SIM_PRINT_GUID, jsonObject.getString(SIM_PRINT_GUID));
-		commonSearchParams.put(INACTIVE, jsonObject.getString(INACTIVE));
-		commonSearchParams.put(LOST_TO_FOLLOW_UP, jsonObject.getString(LOST_TO_FOLLOW_UP));
-		commonSearchParams.put(NFC_CARD_IDENTIFIER, jsonObject.getString(NFC_CARD_IDENTIFIER));
+		commonSearchParams.put(ZEIR_ID, jsonObject.optString(ZEIR_ID));
+		commonSearchParams.put(OPENSRP_ID, jsonObject.optString(OPENSRP_ID));
+		commonSearchParams.put(SIM_PRINT_GUID, jsonObject.optString(SIM_PRINT_GUID));
+		commonSearchParams.put(INACTIVE, jsonObject.optString(INACTIVE));
+		commonSearchParams.put(LOST_TO_FOLLOW_UP, jsonObject.optString(LOST_TO_FOLLOW_UP));
+		commonSearchParams.put(NFC_CARD_IDENTIFIER, jsonObject.optString(NFC_CARD_IDENTIFIER));
 
 		setIdentifiersAndAttributeToChildSearchBean(commonSearchParams, searchBean);
 
@@ -163,11 +163,11 @@ public class SearchHelper {
 
 		Integer limit = setCoreFilters(jsonObject, motherSearchBean);
 
-		String motherGuardianNrc = jsonObject.getString(MOTHER_GUARDIAN_NRC_NUMBER);
-		String compassRelationshipId = jsonObject.getString(MOTHER_COMPASS_RELATIONSHIP_ID);
+		String motherGuardianNrc = jsonObject.optString(MOTHER_GUARDIAN_NRC_NUMBER);
+		String compassRelationshipId = jsonObject.optString(MOTHER_COMPASS_RELATIONSHIP_ID);
 
-		motherSearchBean.setFirstName(jsonObject.getString(MOTHER_GUARDIAN_FIRST_NAME));
-		motherSearchBean.setLastName(jsonObject.getString(MOTHER_GUARDIAN_LAST_NAME));
+		motherSearchBean.setFirstName(jsonObject.optString(MOTHER_GUARDIAN_FIRST_NAME));
+		motherSearchBean.setLastName(jsonObject.optString(MOTHER_GUARDIAN_LAST_NAME));
 
 		setNameLikeAndAtrributesOnMotherSearchBean(motherGuardianNrc,compassRelationshipId, motherSearchBean);
 
@@ -264,7 +264,7 @@ public class SearchHelper {
 
 	public static Integer setCoreFilters(JSONObject jsonObject, ClientSearchBean searchBean) throws ParseException {
 
-		Integer limit = jsonObject.getInt("limit");
+		int limit = jsonObject.optInt("limit");
 		if (limit == 0) {
 			limit = 100;
 		}
@@ -381,9 +381,9 @@ public class SearchHelper {
 		//Search by mother contact number
 		String MOTHER_GUARDIAN_PHONE_NUMBER = "mother_contact_phone_number";
 		String CONTACT_PHONE_NUMBER = "contact_phone_number";
-		String motherGuardianPhoneNumber = jsonObject.getString(MOTHER_GUARDIAN_PHONE_NUMBER);
+		String motherGuardianPhoneNumber = jsonObject.optString(MOTHER_GUARDIAN_PHONE_NUMBER);
 		motherGuardianPhoneNumber = StringUtils.isBlank(motherGuardianPhoneNumber)
-				? jsonObject.getString(CONTACT_PHONE_NUMBER)
+				? jsonObject.optString(CONTACT_PHONE_NUMBER)
 				: motherGuardianPhoneNumber;
 
 		return motherGuardianPhoneNumber;
