@@ -10,7 +10,6 @@ import org.smartregister.domain.Client;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.AssertTrue;
 import java.text.ParseException;
 import java.util.*;
 

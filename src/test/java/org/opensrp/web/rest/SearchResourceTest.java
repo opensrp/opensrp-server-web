@@ -3,7 +3,6 @@ package org.opensrp.web.rest;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
