@@ -3,6 +3,7 @@ package org.opensrp.web.rest;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,5 +100,16 @@ public class SearchResourceTest {
 		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
 		Assert.assertNotNull(clients);
+	}
+
+	@Test
+	public void shouldSearchClientPost() throws ParseException {
+		String jsonRequestString = "{\"ff\":\"ona\",\"identifier\":\"fsdf:sfdf\",\"alt_name\":\"name\"," +
+				"\"alt_phone_number\":\"0727000000\",\"dob\":\"1970-01-01T00:00:00.000Z\",\"phone_number\":\"0727000000\"," +
+				"\"attribute\":\"next_contact_date:2022-06-15\"}";
+		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
+		List<Client> clients = searchResource.searchByPost(jsonRequestString);
+		Assert.assertNotNull(clients);
+
 	}
 }

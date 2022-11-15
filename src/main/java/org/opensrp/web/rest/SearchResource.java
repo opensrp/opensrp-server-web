@@ -1,5 +1,6 @@
 package org.opensrp.web.rest;
 
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.opensrp.common.AllConstants.BaseEntity.LAST_UPDATE;
 import static org.opensrp.common.AllConstants.Client.ALT_NAME;
@@ -120,7 +122,58 @@ public class SearchResource extends RestResource<Client> {
 		searchBean.setIdentifiers(identifierMap);
 		return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
 	}
-	
+
+	@RequestMapping(method = RequestMethod.POST, value = "/search", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public List<Client> searchByPost(@RequestBody String jsonRequestBody) throws ParseException {//TODO search should not call different url but only add params
+		JSONObject jsonObject = new JSONObject(jsonRequestBody);
+		String firstName = jsonObject.optString(FIRST_NAME);
+		String middleName = jsonObject.optString(MIDDLE_NAME);
+		String lastName = jsonObject.optString(LAST_NAME);
+		Optional<String> phoneNumber = Optional.ofNullable(jsonObject.optString(PHONE_NUMBER));
+		Optional<String> altPhoneNumber = Optional.ofNullable(jsonObject.optString(ALT_PHONE_NUMBER));
+		Optional<String> alternateName = Optional.ofNullable(jsonObject.optString(ALT_NAME));
+		ClientSearchBean searchBean = new ClientSearchBean();
+		searchBean.setNameLike(jsonObject.optString(NAME));
+
+		searchBean.setGender(jsonObject.optString(GENDER));
+		DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+		DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
+		//TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+
+		if (birthdate != null) {
+			searchBean.setBirthdateFrom(birthdate[0]);
+			searchBean.setBirthdateTo(birthdate[1]);
+		}
+		if (lastEdit != null) {
+			searchBean.setLastEditFrom(lastEdit[0]);
+			searchBean.setLastEditTo(lastEdit[1]);
+		}
+		Map<String, String> attributeMap = new HashMap<>();
+		String attributes = jsonObject.optString(ATTRIBUTE);
+		if (!StringUtils.isBlank(attributes)) {
+			String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
+			String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
+			attributeMap.put(attributeType, attributeValue);
+		}
+		phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
+		altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
+		alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
+		searchBean.setAttributes(attributeMap);
+
+		Map<String, String> identifierMap = null;
+		String identifiers = jsonObject.optString(IDENTIFIER);
+		if (!StringUtils.isBlank(identifiers)) {
+			String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
+			String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
+
+			identifierMap = new HashMap<String, String>();
+			identifierMap.put(identifierType, identifierValue);
+		}
+
+		searchBean.setIdentifiers(identifierMap);
+		return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
 	private List<ChildMother> searchPathBy(HttpServletRequest request) throws ParseException {
 
@@ -132,7 +185,7 @@ public class SearchResource extends RestResource<Client> {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/path", produces = { MediaType.APPLICATION_JSON_VALUE })
-	private List<ChildMother> searchPathByPost(@RequestBody String jsonRequestBody) throws ParseException {
+	private List<ChildMother> searchPathBy(@RequestBody String jsonRequestBody) throws ParseException {
 
 			JSONObject jsonRequestBodyObject = new JSONObject(jsonRequestBody);
 			SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(jsonRequestBodyObject);
