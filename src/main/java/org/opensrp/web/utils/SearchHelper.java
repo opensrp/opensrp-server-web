@@ -19,29 +19,29 @@ import static org.opensrp.common.AllConstants.Client.GENDER;
 
 public class SearchHelper {
 
-	private static final String ZEIR_ID = "zeir_id";
-	private static final String OPENSRP_ID = "opensrp_id";
+	public static final String ZEIR_ID = "zeir_id";
+	public static final String OPENSRP_ID = "opensrp_id";
 
-	private static final String SIM_PRINT_GUID = "simprints_guid";
+	public static final String SIM_PRINT_GUID = "simprints_guid";
 
-	private static final String FIRST_NAME = "first_name";
-	private static final String MIDDLE_NAME = "middle_name";
-	private static final String LAST_NAME = "last_name";
-	private static final String BIRTH_DATE = "birth_date";
+	public static final String FIRST_NAME = "first_name";
+	public static final String MIDDLE_NAME = "middle_name";
+	public static final String LAST_NAME = "last_name";
+	public static final String BIRTH_DATE = "birth_date";
 
 	//Attributes
-	private static final String INACTIVE = "inactive";
-	private static final String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
-	private static final String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
+	public static final String INACTIVE = "inactive";
+	public static final String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
+	public static final String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
 
 	// Mother
-	private static final String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
-	private static final String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
-	private static final String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
-	private static final String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
+	public static final String MOTHER_GUARDIAN_FIRST_NAME = "mother_first_name";
+	public static final String MOTHER_GUARDIAN_LAST_NAME = "mother_last_name";
+	public static final String MOTHER_GUARDIAN_NRC_NUMBER = "mother_nrc_number";
+	public static final String MOTHER_COMPASS_RELATIONSHIP_ID = "mother_compass_relationship_id";
 
-	private static final String NRC_NUMBER_KEY = "NRC_Number";
-	private static final String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
+	public static final String NRC_NUMBER_KEY = "NRC_Number";
+	public static final String COMPASS_RELATIONSHIP_ID = "Compass_Relationship_ID";
 
 	public static SearchEntityWrapper childSearchParamProcessor(HttpServletRequest request) throws ParseException {
 
@@ -116,7 +116,8 @@ public class SearchHelper {
 
 		ClientSearchBean searchBean = new ClientSearchBean();
 
-		Integer limit = jsonObject.optInt("limit");
+		Integer limit = !jsonObject.optString("limit").equals("") ? Integer.parseInt(jsonObject.optString("limit"))
+		: jsonObject.optInt("limit");
 		if (limit == 0) {
 			limit = 100;
 		}
@@ -264,7 +265,8 @@ public class SearchHelper {
 
 	public static Integer setCoreFilters(JSONObject jsonObject, ClientSearchBean searchBean) throws ParseException {
 
-		int limit = jsonObject.optInt("limit");
+		Integer limit = !jsonObject.optString("limit").equals("") ? Integer.parseInt(jsonObject.optString("limit"))
+				: jsonObject.optInt("limit");
 		if (limit == 0) {
 			limit = 100;
 		}
