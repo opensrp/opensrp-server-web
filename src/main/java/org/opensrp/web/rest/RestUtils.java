@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.ObjectStorageMultimediaFileManager;
@@ -53,12 +54,7 @@ public class RestUtils {
 	  String strval = getStringFilter(filter, req);
 	  return strval == null ? null : Integer.parseInt(strval);
 	}
-	
-	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
-		String stringFilter = getStringFilter(filter, req);
-		return Boolean.parseBoolean(stringFilter);
-	}
-	
+
 	public static Float getFloatFilter(String filter, HttpServletRequest req)
 	{
 	  String strval = getStringFilter(filter, req);
@@ -73,21 +69,42 @@ public class RestUtils {
 	
 	public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException
 	{
-	  String strval = getStringFilter(filter, req);
-	  if(strval == null){
-		  return null;
-	  }
-	  DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
-	  DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
-	  return new DateTime[]{d1,d2};
+		String strval = getStringFilter(filter, req);
+		if(strval == null){
+			return null;
+		}
+		if (!strval.contains(":")) {
+			return new DateTime[] { new DateTime(strval), new DateTime(strval) };
+		}
+		DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+		DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
+		return new DateTime[]{d1,d2};
 	}
-	
-	
+
+	public static DateTime[] getDateRangeFilter(String filter, JSONObject jsonObject) throws ParseException
+	{
+		String strval = jsonObject.optString(filter);
+		if(strval.equals("")){
+			return null;
+		}
+		if (!strval.contains(":")) {
+			return new DateTime[] { new DateTime(strval), new DateTime(strval) };
+		}
+		DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+		DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
+		return new DateTime[]{d1,d2};
+	}
+
+	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
+		String stringFilter = getStringFilter(filter, req);
+		return Boolean.parseBoolean(stringFilter);
+	}
+
 	public static void main(String[] args) {
 		System.out.println(new DateTime("​1458932400000"));
 	}
 	
-	public static String setDateFilter(Date date) throws ParseException
+	public static synchronized String setDateFilter(Date date) throws ParseException
 	{
 	  return date == null ? null : SDF.format(date);
 	}
