@@ -87,7 +87,7 @@ public class SearchResourceTest {
 	}
 
 	@Test
-	public void shouldSearchClient() throws ParseException {
+	public void shouldSearchClientWithGetRequest() throws ParseException {
 		mockHttpServletRequest = new MockHttpServletRequest();
 		mockHttpServletRequest.addParameter("ff", "ona");
 		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
@@ -102,7 +102,7 @@ public class SearchResourceTest {
 	}
 
 	@Test
-	public void shouldSearchClientPost() throws ParseException {
+	public void shouldSearchClientWithPostRequest() throws ParseException {
 		String jsonRequestString = "{\"ff\":\"ona\",\"identifier\":\"fsdf:sfdf\",\"alt_name\":\"name\"," +
 				"\"alt_phone_number\":\"0727000000\",\"dob\":\"1970-01-01T00:00:00.000Z\",\"phone_number\":\"0727000000\"," +
 				"\"attribute\":\"next_contact_date:2022-06-15\"}";
