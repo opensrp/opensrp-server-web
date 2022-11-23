@@ -174,7 +174,7 @@ public class SearchResource extends RestResource<Client> {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/path", produces = {MediaType.APPLICATION_JSON_VALUE})
-    private List<ChildMother> searchPathBy(HttpServletRequest request) throws ParseException {
+    private List<ChildMother> searchPathByGet(HttpServletRequest request) throws ParseException {
 
         String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(request);
         SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(request);
@@ -184,7 +184,7 @@ public class SearchResource extends RestResource<Client> {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/path", produces = {MediaType.APPLICATION_JSON_VALUE})
-    private List<ChildMother> searchPathBy(@RequestBody String jsonRequestBody) throws ParseException {
+    private List<ChildMother> searchPathByPost(@RequestBody String jsonRequestBody) throws ParseException {
 
         JSONObject jsonRequestBodyObject = new JSONObject(jsonRequestBody);
         SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(jsonRequestBodyObject);
