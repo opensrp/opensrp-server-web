@@ -19,106 +19,115 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.json.JSONObject;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.ObjectStorageMultimediaFileManager;
 import org.springframework.http.HttpHeaders;
 
 public class RestUtils {
-	public static final String DATE_FORMAT = "dd-MM-yyyy";
-	public static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
-	public static final String DATETIME_FORMAT = "dd-MM-yyyy HH:mm";
-	public static final SimpleDateFormat SDTF = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+    public static final String DATE_FORMAT = "dd-MM-yyyy";
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
+    public static final String DATETIME_FORMAT = "dd-MM-yyyy HH:mm";
+    public static final SimpleDateFormat SDTF = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
-	private static final Logger logger = LogManager.getLogger(RestUtils.class.toString());
+    private static final Logger logger = LogManager.getLogger(RestUtils.class.toString());
 
 
-	public static String getStringFilter(String filter, HttpServletRequest req)
-	{
-	  return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
-	}
+    public static String getStringFilter(String filter, HttpServletRequest req) {
+        return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Enum getEnumFilter(String filter, Class cls, HttpServletRequest req) {
+        String filterVal = getStringFilter(filter, req);
+        if (filterVal != null) {
+            return Enum.valueOf(cls, filterVal);
+        }
+        return null;
+    }
+
+    public static Integer getIntegerFilter(String filter, HttpServletRequest req) {
+        String strval = getStringFilter(filter, req);
+        return strval == null ? null : Integer.parseInt(strval);
+    }
+
+    public static Float getFloatFilter(String filter, HttpServletRequest req) {
+        String strval = getStringFilter(filter, req);
+        return strval == null ? null : Float.parseFloat(strval);
+    }
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Enum getEnumFilter(String filter, Class cls, HttpServletRequest req)
-	{
-	  String filterVal = getStringFilter(filter, req);
-	  if (filterVal != null) {
-	    return Enum.valueOf(cls, filterVal);
-	  }
-	  return null;
-	}
-	
-	public static Integer getIntegerFilter(String filter, HttpServletRequest req)
-	{
-	  String strval = getStringFilter(filter, req);
-	  return strval == null ? null : Integer.parseInt(strval);
-	}
-	
-	public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
-		String stringFilter = getStringFilter(filter, req);
-		return Boolean.parseBoolean(stringFilter);
-	}
-	
-	public static Float getFloatFilter(String filter, HttpServletRequest req)
-	{
-	  String strval = getStringFilter(filter, req);
-	  return strval == null ? null : Float.parseFloat(strval);
-	}
-	
-	public static DateTime getDateFilter(String filter, HttpServletRequest req) throws ParseException
-	{
-	  String strval = getStringFilter(filter, req);
-	  return strval == null ? null : new DateTime(strval);
-	}
-	
-	public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException
-	{
-	  String strval = getStringFilter(filter, req);
-	  if(strval == null){
-		  return null;
-	  }
-	  DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
-	  DateTime d2 = new DateTime(strval.substring(strval.indexOf(":")+1));
-	  return new DateTime[]{d1,d2};
-	}
-	
-	
-	public static void main(String[] args) {
-		System.out.println(new DateTime("​1458932400000"));
-	}
-	
-	public static String setDateFilter(Date date) throws ParseException
-	{
-	  return date == null ? null : SDF.format(date);
-	}
-	
-	public static <T> void verifyRequiredProperties(List<String> properties, T entity) {
-		if(properties != null)
-		for (String p : properties) {
-			Field[] aaa = entity.getClass().getDeclaredFields();
-			for (Field field : aaa) {
-				if(field.getName().equals(p)){
-					field.setAccessible(true);
-					try {
-						if(field.get(entity) == null || field.get(entity).toString().trim().equalsIgnoreCase("")){
-							throw new RuntimeException("A required field "+p+" was found empty");
-						}
-					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
-						throw new RuntimeException("A required field "+p+" was not found in resource class");
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-	
-	public static HttpHeaders getJSONUTF8Headers() {
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-		return responseHeaders;
-	}
+    public static DateTime getDateFilter(String filter, HttpServletRequest req) throws ParseException {
+        String strval = getStringFilter(filter, req);
+        return strval == null ? null : new DateTime(strval);
+    }
+
+    public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException {
+        String strval = getStringFilter(filter, req);
+        if (strval == null) {
+            return null;
+        }
+        if (!strval.contains(":")) {
+            return new DateTime[]{new DateTime(strval), new DateTime(strval)};
+        }
+        DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+        DateTime d2 = new DateTime(strval.substring(strval.indexOf(":") + 1));
+        return new DateTime[]{d1, d2};
+    }
+
+    public static DateTime[] getDateRangeFilter(String filter, JSONObject jsonObject) throws ParseException {
+        String strval = jsonObject.optString(filter);
+        if (strval.equals("")) {
+            return null;
+        }
+        if (!strval.contains(":")) {
+            return new DateTime[]{new DateTime(strval), new DateTime(strval)};
+        }
+        DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
+        DateTime d2 = new DateTime(strval.substring(strval.indexOf(":") + 1));
+        return new DateTime[]{d1, d2};
+    }
+
+    public static boolean getBooleanFilter(String filter, HttpServletRequest req) {
+        String stringFilter = getStringFilter(filter, req);
+        return Boolean.parseBoolean(stringFilter);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new DateTime("​1458932400000"));
+    }
+
+    public static synchronized String setDateFilter(Date date) throws ParseException {
+        return date == null ? null : SDF.format(date);
+    }
+
+    public static <T> void verifyRequiredProperties(List<String> properties, T entity) {
+        if (properties != null)
+            for (String p : properties) {
+                Field[] aaa = entity.getClass().getDeclaredFields();
+                for (Field field : aaa) {
+                    if (field.getName().equals(p)) {
+                        field.setAccessible(true);
+                        try {
+                            if (field.get(entity) == null || field.get(entity).toString().trim().equalsIgnoreCase("")) {
+                                throw new RuntimeException("A required field " + p + " was found empty");
+                            }
+                        } catch (IllegalArgumentException e) {
+                            e.printStackTrace();
+                            throw new RuntimeException("A required field " + p + " was not found in resource class");
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+    }
+
+    public static HttpHeaders getJSONUTF8Headers() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add("Content-Type", "application/json; charset=utf-8");
+        return responseHeaders;
+    }
 
     /**
      * Zips multimedia files and writes content to {@param zipOutputStream}
@@ -127,35 +136,35 @@ public class RestUtils {
      * @param multimediaFiles
      * @throws IOException
      */
-	public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles, MultimediaFileManager fileManager) throws IOException {
-		for (Multimedia multiMedia : multimediaFiles) {
-			FileInputStream inputStream;
-			File file = fileManager.retrieveFile(multiMedia.getFilePath());
-			if (file != null) {
-				logger.info("Adding " + file.getName());
-				zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-				try {
-					inputStream = new FileInputStream(file);
-				} catch (FileNotFoundException e) {
-					logger.warn("Could not find file " + file.getAbsolutePath());
-					continue;
-				}
+    public static void zipFiles(ZipOutputStream zipOutputStream, List<Multimedia> multimediaFiles, MultimediaFileManager fileManager) throws IOException {
+        for (Multimedia multiMedia : multimediaFiles) {
+            FileInputStream inputStream;
+            File file = fileManager.retrieveFile(multiMedia.getFilePath());
+            if (file != null) {
+                logger.info("Adding " + file.getName());
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                try {
+                    inputStream = new FileInputStream(file);
+                } catch (FileNotFoundException e) {
+                    logger.warn("Could not find file " + file.getAbsolutePath());
+                    continue;
+                }
 
-				// Write the contents of the file
-				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-				int data;
-				while ((data = bufferedInputStream.read()) != -1) {
-					zipOutputStream.write(data);
-				}
-				bufferedInputStream.close();
-				zipOutputStream.closeEntry();
-				logger.info("Done downloading file " + file.getName());
+                // Write the contents of the file
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                int data;
+                while ((data = bufferedInputStream.read()) != -1) {
+                    zipOutputStream.write(data);
+                }
+                bufferedInputStream.close();
+                zipOutputStream.closeEntry();
+                logger.info("Done downloading file " + file.getName());
 
-				// clean up temp files (may want to cache in future)
-				if (fileManager instanceof ObjectStorageMultimediaFileManager) {
-					file.delete();
-				}
-			}
-		}
-	}
+                // clean up temp files (may want to cache in future)
+                if (fileManager instanceof ObjectStorageMultimediaFileManager) {
+                    file.delete();
+                }
+            }
+        }
+    }
 }
