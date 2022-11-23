@@ -14,6 +14,7 @@ import org.opensrp.repository.PlanRepository;
 import org.opensrp.repository.SearchRepository;
 import org.opensrp.service.ClientService;
 import org.opensrp.service.EventService;
+import org.opensrp.service.ExportEventDataMapper;
 import org.opensrp.service.SearchService;
 import org.opensrp.service.TaskGenerator;
 import org.opensrp.web.rest.it.TestWebContextLoader;
@@ -41,6 +42,8 @@ public class SearchResourceTest {
     private ClientService clientService;
 
     private EventService eventService;
+
+    private ExportEventDataMapper exportEventDataMapper;
 
     private TaskGenerator taskGenerator;
 
