@@ -43,6 +43,10 @@ public class RestUtils {
         return StringUtils.isBlank(req.getParameter(filter)) ? null : req.getParameter(filter);
     }
 
+    public static String getStringFilter(String filter, JSONObject jsonObject) {
+        return StringUtils.isBlank(jsonObject.optString(filter)) ? null : jsonObject.optString(filter);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Enum getEnumFilter(String filter, Class cls, HttpServletRequest req) {
         String filterVal = getStringFilter(filter, req);

@@ -126,10 +126,10 @@ public class SearchHelper {
             searchBean.setLastEditTo(lastEdit[1]);
         }
 
-        searchBean.setFirstName(jsonObject.optString(FIRST_NAME));
-        searchBean.setMiddleName(jsonObject.optString(MIDDLE_NAME));
-        searchBean.setLastName(jsonObject.optString(LAST_NAME));
-        searchBean.setGender(jsonObject.optString(GENDER));
+        searchBean.setFirstName(RestUtils.getStringFilter(FIRST_NAME, jsonObject));
+        searchBean.setMiddleName(RestUtils.getStringFilter(MIDDLE_NAME, jsonObject));
+        searchBean.setLastName(RestUtils.getStringFilter(LAST_NAME, jsonObject));
+        searchBean.setGender(RestUtils.getStringFilter(GENDER, jsonObject));
 
         DateTime[] birthdate = RestUtils
                 .getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
@@ -142,12 +142,12 @@ public class SearchHelper {
         }
 
         Map<String, String> commonSearchParams = new HashMap<>();
-        commonSearchParams.put(ZEIR_ID, jsonObject.optString(ZEIR_ID));
-        commonSearchParams.put(OPENSRP_ID, jsonObject.optString(OPENSRP_ID));
-        commonSearchParams.put(SIM_PRINT_GUID, jsonObject.optString(SIM_PRINT_GUID));
-        commonSearchParams.put(INACTIVE, jsonObject.optString(INACTIVE));
-        commonSearchParams.put(LOST_TO_FOLLOW_UP, jsonObject.optString(LOST_TO_FOLLOW_UP));
-        commonSearchParams.put(NFC_CARD_IDENTIFIER, jsonObject.optString(NFC_CARD_IDENTIFIER));
+        commonSearchParams.put(ZEIR_ID, RestUtils.getStringFilter(ZEIR_ID, jsonObject));
+        commonSearchParams.put(OPENSRP_ID, RestUtils.getStringFilter(OPENSRP_ID, jsonObject));
+        commonSearchParams.put(SIM_PRINT_GUID, RestUtils.getStringFilter(SIM_PRINT_GUID, jsonObject));
+        commonSearchParams.put(INACTIVE, RestUtils.getStringFilter(INACTIVE, jsonObject));
+        commonSearchParams.put(LOST_TO_FOLLOW_UP, RestUtils.getStringFilter(LOST_TO_FOLLOW_UP, jsonObject));
+        commonSearchParams.put(NFC_CARD_IDENTIFIER, RestUtils.getStringFilter(NFC_CARD_IDENTIFIER, jsonObject));
 
         setIdentifiersAndAttributeToChildSearchBean(commonSearchParams, searchBean);
 
@@ -162,11 +162,11 @@ public class SearchHelper {
 
         Integer limit = setCoreFilters(jsonObject, motherSearchBean);
 
-        String motherGuardianNrc = jsonObject.optString(MOTHER_GUARDIAN_NRC_NUMBER);
-        String compassRelationshipId = jsonObject.optString(MOTHER_COMPASS_RELATIONSHIP_ID);
+        String motherGuardianNrc = RestUtils.getStringFilter(MOTHER_GUARDIAN_NRC_NUMBER, jsonObject);
+        String compassRelationshipId = RestUtils.getStringFilter(MOTHER_COMPASS_RELATIONSHIP_ID, jsonObject);
 
-        motherSearchBean.setFirstName(jsonObject.optString(MOTHER_GUARDIAN_FIRST_NAME));
-        motherSearchBean.setLastName(jsonObject.optString(MOTHER_GUARDIAN_LAST_NAME));
+        motherSearchBean.setFirstName(RestUtils.getStringFilter(MOTHER_GUARDIAN_FIRST_NAME, jsonObject));
+        motherSearchBean.setLastName(RestUtils.getStringFilter(MOTHER_GUARDIAN_LAST_NAME, jsonObject));
 
         setNameLikeAndAtrributesOnMotherSearchBean(motherGuardianNrc, compassRelationshipId, motherSearchBean);
 
