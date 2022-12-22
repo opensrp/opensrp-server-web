@@ -174,7 +174,7 @@ public class SearchResource extends RestResource<Client> {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/path", produces = {MediaType.APPLICATION_JSON_VALUE})
-    private List<ChildMother> searchPathByGet(HttpServletRequest request) throws ParseException {
+    public List<ChildMother> searchPathByGet(HttpServletRequest request) throws ParseException {
 
         String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(request);
         SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(request);
@@ -184,12 +184,13 @@ public class SearchResource extends RestResource<Client> {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/path", produces = {MediaType.APPLICATION_JSON_VALUE})
-    private List<ChildMother> searchPathByPost(@RequestBody String jsonRequestBody) throws ParseException {
+    public List<ChildMother> searchPathByPost(@RequestBody String jsonRequestBody) throws ParseException {
 
         JSONObject jsonRequestBodyObject = new JSONObject(jsonRequestBody);
+
+        String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(jsonRequestBodyObject);
         SearchEntityWrapper childSearchEntity = SearchHelper.childSearchParamProcessor(jsonRequestBodyObject);
         SearchEntityWrapper motherSearchEntity = SearchHelper.motherSearchParamProcessor(jsonRequestBodyObject);
-        String contactPhoneNumber = SearchHelper.getContactPhoneNumberParam(jsonRequestBodyObject);
 
         return searchAndProcess(childSearchEntity, motherSearchEntity, contactPhoneNumber);
 
@@ -204,7 +205,7 @@ public class SearchResource extends RestResource<Client> {
             List<Client> children = new ArrayList<Client>();
             if (childSearchEntity.isValid()) {
                 searchBean = childSearchEntity.getClientSearchBean();
-                children = searchService.searchClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
+                children = searchService.searchGlobalClient(searchBean, searchBean.getFirstName(), searchBean.getMiddleName(),
                         searchBean.getLastName(), childSearchEntity.getLimit());
             }
 
@@ -215,7 +216,7 @@ public class SearchResource extends RestResource<Client> {
 
             if (motherSearchEntity.isValid()) {
                 motherSearchBean = motherSearchEntity.getClientSearchBean();
-                mothers = searchService.searchClient(motherSearchBean, motherSearchBean.getFirstName(),
+                mothers = searchService.searchGlobalClient(motherSearchBean, motherSearchBean.getFirstName(),
                         motherSearchBean.getMiddleName(), motherSearchBean.getLastName(), motherSearchEntity.getLimit());
             }
 
