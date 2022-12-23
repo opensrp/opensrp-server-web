@@ -1,6 +1,8 @@
 package org.opensrp.web.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -72,105 +74,15 @@ public class SearchResource extends RestResource<Client> {
      */
     @Override
     public List<Client> search(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
-        String firstName = getStringFilter(FIRST_NAME, request);
-        String middleName = getStringFilter(MIDDLE_NAME, request);
-        String lastName = getStringFilter(LAST_NAME, request);
-        Optional<String> phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
-        Optional<String> altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, request));
-        Optional<String> alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
-        ClientSearchBean searchBean = new ClientSearchBean();
-        searchBean.setNameLike(getStringFilter(NAME, request));
-
-        searchBean.setGender(getStringFilter(GENDER, request));
-        DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE,
-                request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
-        DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
-        //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
-
-        if (birthdate != null) {
-            searchBean.setBirthdateFrom(birthdate[0]);
-            searchBean.setBirthdateTo(birthdate[1]);
-        }
-        if (lastEdit != null) {
-            searchBean.setLastEditFrom(lastEdit[0]);
-            searchBean.setLastEditTo(lastEdit[1]);
-        }
-
-        Map<String, String> attributeMap = new HashMap<>();
-        String attributes = getStringFilter(ATTRIBUTE, request);
-        if (!StringUtils.isBlank(attributes)) {
-            String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
-            String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-            attributeMap.put(attributeType, attributeValue);
-        }
-        phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
-        altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
-        alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
-        searchBean.setAttributes(attributeMap);
-
-        Map<String, String> identifierMap = null;
-        String identifiers = getStringFilter(IDENTIFIER, request);
-        if (!StringUtils.isBlank(identifiers)) {
-            String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
-            String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
-
-            identifierMap = new HashMap<>();
-            identifierMap.put(identifierType, identifierValue);
-        }
-
-        searchBean.setIdentifiers(identifierMap);
-        return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
+        Pair<ClientSearchBean, Triple<String, String, String>> result = extractNamesAndCreateClientSearchBean(request);
+        return searchService.searchClient(result.getLeft(), result.getRight().getLeft(), result.getRight().getMiddle(), result.getRight().getRight(), null);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/search", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<Client> searchByPost(@RequestBody String jsonRequestBody) throws ParseException {//TODO search should not call different url but only add params
-        JSONObject jsonObject = new JSONObject(jsonRequestBody);
-        String firstName = jsonObject.optString(FIRST_NAME);
-        String middleName = jsonObject.optString(MIDDLE_NAME);
-        String lastName = jsonObject.optString(LAST_NAME);
-        Optional<String> phoneNumber = Optional.ofNullable(jsonObject.optString(PHONE_NUMBER));
-        Optional<String> altPhoneNumber = Optional.ofNullable(jsonObject.optString(ALT_PHONE_NUMBER));
-        Optional<String> alternateName = Optional.ofNullable(jsonObject.optString(ALT_NAME));
-        ClientSearchBean searchBean = new ClientSearchBean();
-        searchBean.setNameLike(jsonObject.optString(NAME));
+        Pair<ClientSearchBean, Triple<String, String, String>> result = extractNamesAndCreateClientSearchBean(jsonRequestBody);
+        return searchService.searchClient(result.getLeft(), result.getRight().getLeft(), result.getRight().getMiddle(), result.getRight().getRight(), null);
 
-        searchBean.setGender(jsonObject.optString(GENDER));
-        DateTime[] birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
-        DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
-        //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
-
-        if (birthdate != null) {
-            searchBean.setBirthdateFrom(birthdate[0]);
-            searchBean.setBirthdateTo(birthdate[1]);
-        }
-        if (lastEdit != null) {
-            searchBean.setLastEditFrom(lastEdit[0]);
-            searchBean.setLastEditTo(lastEdit[1]);
-        }
-        Map<String, String> attributeMap = new HashMap<>();
-        String attributes = jsonObject.optString(ATTRIBUTE);
-        if (!StringUtils.isBlank(attributes)) {
-            String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
-            String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-            attributeMap.put(attributeType, attributeValue);
-        }
-        phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
-        altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
-        alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
-        searchBean.setAttributes(attributeMap);
-
-        Map<String, String> identifierMap = null;
-        String identifiers = jsonObject.optString(IDENTIFIER);
-        if (!StringUtils.isBlank(identifiers)) {
-            String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
-            String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
-
-            identifierMap = new HashMap<String, String>();
-            identifierMap.put(identifierType, identifierValue);
-        }
-
-        searchBean.setIdentifiers(identifierMap);
-        return searchService.searchClient(searchBean, firstName, middleName, lastName, null);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/path", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -290,6 +202,100 @@ public class SearchResource extends RestResource<Client> {
         return clientBaseEntityIds;
     }
 
+    public Pair<ClientSearchBean, Triple<String, String, String>> extractNamesAndCreateClientSearchBean(Object object) throws ParseException {
+
+        String firstName = null;
+        String middleName = null;
+        String lastName = null;
+        String name = null;
+        String gender = null;
+        String attributes = null;
+        String identifiers  = null;
+        Optional<String> phoneNumber, altPhoneNumber, alternateName;
+        DateTime[] birthdate, lastEdit;
+
+        ClientSearchBean searchBean = new ClientSearchBean();
+
+        if(object instanceof HttpServletRequest){
+            HttpServletRequest request = (HttpServletRequest) object;
+            firstName = getStringFilter(FIRST_NAME, request);
+            middleName = getStringFilter(MIDDLE_NAME, request);
+            lastName = getStringFilter(LAST_NAME, request);
+
+            phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, request));
+            altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, request));
+            alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, request));
+
+            name = getStringFilter(NAME, request);
+            gender = getStringFilter(GENDER, request);
+
+            birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
+            //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+             attributes = getStringFilter(ATTRIBUTE, request);
+             identifiers = getStringFilter(IDENTIFIER, request);
+
+        } else {
+            JSONObject jsonObject = new JSONObject((String) object);
+
+            firstName = RestUtils.getStringFilter(FIRST_NAME, jsonObject);
+            middleName = RestUtils.getStringFilter(MIDDLE_NAME, jsonObject);
+            lastName = RestUtils.getStringFilter(LAST_NAME, jsonObject);
+
+            phoneNumber = Optional.ofNullable(RestUtils.getStringFilter(PHONE_NUMBER, jsonObject));
+            altPhoneNumber = Optional.ofNullable(RestUtils.getStringFilter(ALT_PHONE_NUMBER, jsonObject));
+            alternateName = Optional.ofNullable(RestUtils.getStringFilter(ALT_NAME, jsonObject));
+
+
+            name = RestUtils.getStringFilter(NAME, jsonObject);
+            gender = RestUtils.getStringFilter(GENDER, jsonObject);
+
+            birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
+            //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
+
+            attributes = RestUtils.getStringFilter(ATTRIBUTE, jsonObject);
+            identifiers = RestUtils.getStringFilter(IDENTIFIER, jsonObject);
+
+        }
+
+        searchBean.setNameLike(name);
+        searchBean.setGender(gender);
+
+        if (birthdate != null) {
+            searchBean.setBirthdateFrom(birthdate[0]);
+            searchBean.setBirthdateTo(birthdate[1]);
+        }
+        if (lastEdit != null) {
+            searchBean.setLastEditFrom(lastEdit[0]);
+            searchBean.setLastEditTo(lastEdit[1]);
+        }
+
+        Map<String, String> attributeMap = new HashMap<>();
+
+
+        if (!StringUtils.isBlank(attributes)) {
+            String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
+            String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
+            attributeMap.put(attributeType, attributeValue);
+        }
+        phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
+        altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
+        alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
+        searchBean.setAttributes(attributeMap);
+
+        Map<String, String>  identifierMap = new HashMap<>();
+        if (!StringUtils.isBlank(identifiers)) {
+            String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
+            String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
+            identifierMap.put(identifierType, identifierValue);
+        }
+
+
+        searchBean.setIdentifiers(identifierMap);
+
+        return Pair.of(searchBean, Triple.of(firstName, lastName, middleName));
+    }
     @Override
     public List<Client> filter(String query) {
         // TODO Auto-generated method stub
