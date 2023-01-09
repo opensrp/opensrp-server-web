@@ -245,37 +245,36 @@ public class SearchHelper {
 
     }
 
-    public static Integer setCoreFilters(HttpServletRequest request, ClientSearchBean searchBean) throws ParseException {
+    public static Integer setCoreFilters(Object object, ClientSearchBean searchBean) throws ParseException {
 
-        Integer limit = RestUtils.getIntegerFilter("limit", request);
-        if (limit == null || limit.intValue() == 0) {
+        Integer limit = 0;
+        DateTime[] lastEdit = null;
+
+
+        if( object instanceof HttpServletRequest ){
+            HttpServletRequest request = (HttpServletRequest) object;
+            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
+            limit = RestUtils.getIntegerFilter("limit", request);
+        }
+
+        if( object instanceof JSONObject ){
+            JSONObject jsonObject = (JSONObject) object;
+            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
+            limit = !jsonObject.optString("limit").equals("") ? Integer.parseInt(jsonObject.optString("limit"))
+                    : jsonObject.optInt("limit");
+        }
+
+        if (limit == null || limit == 0) {
             limit = 100;
         }
 
-        DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
         if (lastEdit != null) {
             searchBean.setLastEditFrom(lastEdit[0]);
             searchBean.setLastEditTo(lastEdit[1]);
         }
 
         return limit;
-    }
 
-    public static Integer setCoreFilters(JSONObject jsonObject, ClientSearchBean searchBean) throws ParseException {
-
-        Integer limit = !jsonObject.optString("limit").equals("") ? Integer.parseInt(jsonObject.optString("limit"))
-                : jsonObject.optInt("limit");
-        if (limit == 0) {
-            limit = 100;
-        }
-
-        DateTime[] lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
-        if (lastEdit != null) {
-            searchBean.setLastEditFrom(lastEdit[0]);
-            searchBean.setLastEditTo(lastEdit[1]);
-        }
-
-        return limit;
     }
 
     /**
