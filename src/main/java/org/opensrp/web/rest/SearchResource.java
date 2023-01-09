@@ -45,6 +45,7 @@ import static org.opensrp.common.AllConstants.Client.NAME;
 import static org.opensrp.common.AllConstants.Client.ALT_PHONE_NUMBER;
 import static org.opensrp.common.AllConstants.Client.BIRTH_DATE;
 import static org.opensrp.web.rest.RestUtils.getStringFilter;
+import static org.opensrp.web.rest.RestUtils.getDateRangeFilter;
 
 @Controller
 @RequestMapping(value = "/rest/search")
@@ -204,15 +205,18 @@ public class SearchResource extends RestResource<Client> {
 
     public Pair<ClientSearchBean, Triple<String, String, String>> extractNamesAndCreateClientSearchBean(Object object) throws ParseException {
 
-        String firstName = null;
-        String middleName = null;
-        String lastName = null;
-        String name = null;
-        String gender = null;
-        String attributes = null;
-        String identifiers  = null;
-        Optional<String> phoneNumber, altPhoneNumber, alternateName;
-        DateTime[] birthdate, lastEdit;
+        String firstName;
+        String middleName;
+        String lastName;
+        String name;
+        String gender;
+        String attributes;
+        String identifiers;
+        Optional<String> phoneNumber;
+        Optional<String> altPhoneNumber;
+        Optional<String> alternateName;
+        DateTime[] birthdate;
+        DateTime[] lastEdit;
 
         ClientSearchBean searchBean = new ClientSearchBean();
 
@@ -229,8 +233,8 @@ public class SearchResource extends RestResource<Client> {
             name = getStringFilter(NAME, request);
             gender = getStringFilter(GENDER, request);
 
-            birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
-            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
+            birthdate = getDateRangeFilter(BIRTH_DATE, request);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+            lastEdit = getDateRangeFilter(LAST_UPDATE, request);//TODO client by provider id
             //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
              attributes = getStringFilter(ATTRIBUTE, request);
              identifiers = getStringFilter(IDENTIFIER, request);
@@ -238,24 +242,24 @@ public class SearchResource extends RestResource<Client> {
         } else {
             JSONObject jsonObject = new JSONObject((String) object);
 
-            firstName = RestUtils.getStringFilter(FIRST_NAME, jsonObject);
-            middleName = RestUtils.getStringFilter(MIDDLE_NAME, jsonObject);
-            lastName = RestUtils.getStringFilter(LAST_NAME, jsonObject);
+            firstName = getStringFilter(FIRST_NAME, jsonObject);
+            middleName = getStringFilter(MIDDLE_NAME, jsonObject);
+            lastName = getStringFilter(LAST_NAME, jsonObject);
 
-            phoneNumber = Optional.ofNullable(RestUtils.getStringFilter(PHONE_NUMBER, jsonObject));
-            altPhoneNumber = Optional.ofNullable(RestUtils.getStringFilter(ALT_PHONE_NUMBER, jsonObject));
-            alternateName = Optional.ofNullable(RestUtils.getStringFilter(ALT_NAME, jsonObject));
+            phoneNumber = Optional.ofNullable(getStringFilter(PHONE_NUMBER, jsonObject));
+            altPhoneNumber = Optional.ofNullable(getStringFilter(ALT_PHONE_NUMBER, jsonObject));
+            alternateName = Optional.ofNullable(getStringFilter(ALT_NAME, jsonObject));
 
 
-            name = RestUtils.getStringFilter(NAME, jsonObject);
-            gender = RestUtils.getStringFilter(GENDER, jsonObject);
+            name = getStringFilter(NAME, jsonObject);
+            gender = getStringFilter(GENDER, jsonObject);
 
-            birthdate = RestUtils.getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
-            lastEdit = RestUtils.getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
+            birthdate = getDateRangeFilter(BIRTH_DATE, jsonObject);//TODO add ranges like fhir do http://hl7.org/fhir/search.html
+            lastEdit = getDateRangeFilter(LAST_UPDATE, jsonObject);//TODO client by provider id
             //TODO lookinto Swagger https://slack-files.com/files-pri-safe/T0EPSEJE9-F0TBD0N77/integratingswagger.pdf?c=1458211183-179d2bfd2e974585c5038fba15a86bf83097810a
 
-            attributes = RestUtils.getStringFilter(ATTRIBUTE, jsonObject);
-            identifiers = RestUtils.getStringFilter(IDENTIFIER, jsonObject);
+            attributes = getStringFilter(ATTRIBUTE, jsonObject);
+            identifiers = getStringFilter(IDENTIFIER, jsonObject);
 
         }
 
