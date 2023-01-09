@@ -277,24 +277,26 @@ public class SearchResource extends RestResource<Client> {
 
         Map<String, String> attributeMap = new HashMap<>();
 
-
         if (!StringUtils.isBlank(attributes)) {
-            String attributeType = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[0];
-            String attributeValue = StringUtils.isBlank(attributes) ? null : attributes.split(":", -1)[1];
-            attributeMap.put(attributeType, attributeValue);
+            String[] attributeParts = attributes.split(":", -1);
+            if (attributeParts.length == 2) {
+                attributeMap.put(attributeParts[0], attributeParts[1]); // put attributeType and attributeValue as key value pair
+            }
         }
+
         phoneNumber.ifPresent(phoneValue -> attributeMap.put(PHONE_NUMBER, phoneValue));
         altPhoneNumber.ifPresent(altPhoneValue -> attributeMap.put(ALT_PHONE_NUMBER, altPhoneValue));
         alternateName.ifPresent(altNameValue -> attributeMap.put(ALT_NAME, altNameValue));
+
         searchBean.setAttributes(attributeMap);
 
         Map<String, String>  identifierMap = new HashMap<>();
         if (!StringUtils.isBlank(identifiers)) {
-            String identifierType = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[0];
-            String identifierValue = StringUtils.isBlank(identifiers) ? null : identifiers.split(":", -1)[1];
-            identifierMap.put(identifierType, identifierValue);
+            String[] identifierParts = identifiers.split(":", -1);
+            if (identifierParts.length == 2) {
+                identifierMap.put(identifierParts[0], identifierParts[1]); // put identifierType and identifierValue key value pair
+            }
         }
-
 
         searchBean.setIdentifiers(identifierMap);
 
