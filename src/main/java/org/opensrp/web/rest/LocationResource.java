@@ -440,7 +440,7 @@ public class LocationResource {
 			@RequestParam(value = "toDate", required = false) String toDate) {
 
 		Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+				Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(structureIdsPair.getLeft());
 		identifiers.setLastServerVersion(structureIdsPair.getRight());
@@ -525,7 +525,7 @@ public class LocationResource {
 			@RequestParam(value = "toDate", required = false) String toDate) {
 
 		Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+				Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(locationIdsPair.getLeft());
 		identifiers.setLastServerVersion(locationIdsPair.getRight());

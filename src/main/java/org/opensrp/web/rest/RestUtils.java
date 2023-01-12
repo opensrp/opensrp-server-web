@@ -12,6 +12,7 @@ import org.opensrp.api.domain.User;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
+import org.opensrp.web.utils.Utils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 
@@ -71,29 +72,25 @@ public class RestUtils {
         return strval == null ? null : new DateTime(strval);
     }
 
-    public static DateTime[] getDateRangeFilter(String filter, HttpServletRequest req) throws ParseException {
-        String strval = getStringFilter(filter, req);
+    public static DateTime[] getDateRangeFilter(String filter, Object object) throws ParseException {
+        String strval;
+
+        if(object instanceof HttpServletRequest){
+            HttpServletRequest req = (HttpServletRequest) object;
+            strval = getStringFilter(filter, req);
+        } else {
+            JSONObject jsonObject = (JSONObject) object;
+            strval = getStringFilter(filter, jsonObject);
+        }
+
         if (strval == null) {
             return null;
         }
         if (!strval.contains(":")) {
-            return new DateTime[]{new DateTime(strval), new DateTime(strval)};
+            return new DateTime[]{Utils.getDateTimeFromString(strval),Utils.getDateTimeFromString(strval)};
         }
-        DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
-        DateTime d2 = new DateTime(strval.substring(strval.indexOf(":") + 1));
-        return new DateTime[]{d1, d2};
-    }
-
-    public static DateTime[] getDateRangeFilter(String filter, JSONObject jsonObject) throws ParseException {
-        String strval = jsonObject.optString(filter);
-        if (strval.equals("")) {
-            return null;
-        }
-        if (!strval.contains(":")) {
-            return new DateTime[]{new DateTime(strval), new DateTime(strval)};
-        }
-        DateTime d1 = new DateTime(strval.substring(0, strval.indexOf(":")));
-        DateTime d2 = new DateTime(strval.substring(strval.indexOf(":") + 1));
+        DateTime d1 = Utils.getDateTimeFromString(strval.substring(0, strval.indexOf(":")));
+        DateTime d2 = Utils.getDateTimeFromString(strval.substring(strval.indexOf(":") + 1));
         return new DateTime[]{d1, d2};
     }
 

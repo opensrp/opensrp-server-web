@@ -647,8 +647,8 @@ public class EventResource extends RestResource<Event> {
 		try {
 
 			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
-					Constants.DEFAULT_GET_ALL_IDS_LIMIT, Utils.getDateTimeFromString(fromDate),
-					Utils.getDateTimeFromString(toDate));
+					Constants.DEFAULT_GET_ALL_IDS_LIMIT, Utils.getDateFromString(fromDate),
+					Utils.getDateFromString(toDate));
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
@@ -682,8 +682,8 @@ public class EventResource extends RestResource<Event> {
 			logger.info("Temp DIR is =============" + tempDirectory);
 			for (String eventType : eventTypes) {
 				ExportEventDataSummary exportEventDataSummary = eventService
-						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
-								Utils.getDateTimeFromString(toDate));
+						.exportEventData(planIdentifier, eventType, Utils.getDateFromString(fromDate),
+								Utils.getDateFromString(toDate));
 
 				missionName = exportEventDataSummary != null &&
 						exportEventDataSummary.getMissionName() != null ?
@@ -757,7 +757,7 @@ public class EventResource extends RestResource<Event> {
 
 			ExportImagesSummary exportImagesSummary =
 					eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
-							Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+							Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 			String imagesDirectoryName;
 			if (firstTime) {
 				formatted = df.format(new Date());

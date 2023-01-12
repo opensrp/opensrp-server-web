@@ -5,6 +5,7 @@ package org.opensrp.web.utils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -26,15 +27,19 @@ public class Utils {
 		}
 	}
 
-	public static Date getDateTimeFromString(@Nullable String date) {
+	public static Date getDateFromString(@Nullable String date) {
+		return Objects.requireNonNull(getDateTimeFromString(date)).toDate();
+	}
+
+	public static DateTime getDateTimeFromString(@Nullable String date) {
 		if (StringUtils.isNotBlank(date)) {
 			try {
 				Long aLong = Long.parseLong(date);
-				return new DateTime(aLong).toDate();
+				return new DateTime(aLong);
 			}
 			catch (NumberFormatException e) {
 				try {
-					return new DateTime(date).toDate();
+					return new DateTime(date);
 				}
 				catch (IllegalArgumentException illegalArgumentException) {
 					return null;

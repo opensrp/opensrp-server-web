@@ -251,7 +251,7 @@ public class TaskResource {
 	        @RequestParam(value = "toDate", required = false) String toDate) {
 		
 		Pair<List<String>, Long> taskIdsPair = taskService.findAllTaskIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-		    Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+		    Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());

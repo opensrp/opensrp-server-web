@@ -324,7 +324,7 @@ public class PlanResource {
 											  @RequestParam(value = "toDate", required = false) String toDate) {
 
 		Pair<List<String>, Long> planIdsPair = planService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isDeleted,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+				Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(planIdsPair.getLeft());
 		identifiers.setLastServerVersion(planIdsPair.getRight());

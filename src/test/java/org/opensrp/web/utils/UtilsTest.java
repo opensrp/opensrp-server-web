@@ -45,7 +45,7 @@ public class UtilsTest {
 
 	@Test
 	public void testGetDateTimeFromStringShouldReturnDate(){
-		Date date = Utils.getDateTimeFromString("1615895228000");
+		Date date = Utils.getDateFromString("1615895228000");
 		Assert.assertNotNull(date);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
@@ -56,9 +56,9 @@ public class UtilsTest {
 
 	@Test
 	public void testGetDateTimeFromStringShouldReturnNull(){
-		Date date = Utils.getDateTimeFromString("wrongdate");
+		Date date = Utils.getDateFromString("wrongdate");
 		Assert.assertNull(date);
-		date = Utils.getDateTimeFromString(null);
+		date = Utils.getDateFromString(null);
 		Assert.assertNull(date);
 	}
 
