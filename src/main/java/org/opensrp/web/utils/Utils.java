@@ -28,7 +28,11 @@ public class Utils {
 	}
 
 	public static Date getDateFromString(@Nullable String date) {
-		return Objects.requireNonNull(getDateTimeFromString(date)).toDate();
+		DateTime dateTime = getDateTimeFromString(date);
+		if(dateTime != null){
+			return dateTime.toDate();
+		}
+		return null;
 	}
 
 	public static DateTime getDateTimeFromString(@Nullable String date) {
