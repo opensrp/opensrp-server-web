@@ -76,7 +76,7 @@ public class RestUtils {
 	}
 
 	public static DateTime[] getDateRangeFilter(String filter, Object object) throws ParseException {
-		String strval;
+		String strval = null;
 
 		if (object instanceof HttpServletRequest) {
 			HttpServletRequest req = (HttpServletRequest) object;
