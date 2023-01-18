@@ -94,7 +94,7 @@ public class MultimediaControllerTest {
 		Whitebox.setInternalState(controller, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 
-		controller.downloadFileWithAuth(httpServletResponse, "fileName", "testUser", "password", httpServletRequest);
+		controller.downloadFileWithAuth(httpServletResponse, "password", httpServletRequest);
 
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());

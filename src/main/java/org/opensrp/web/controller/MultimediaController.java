@@ -81,14 +81,10 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param fileName
-	 * @param userName
-	 * @param password
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
-	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName,
-			@RequestHeader(value = "username") String userName,
-			@RequestHeader(value = "password") String password, HttpServletRequest request) {
+	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName, HttpServletRequest request) {
 
 		try {
 			if (hasSpecialCharacters(fileName)) {
@@ -96,16 +92,14 @@ public class MultimediaController {
 				return;
 			}
 
-			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-				if (file != null) {
-					if (fileName.endsWith("mp4")) {
-						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
-					}
-					downloadFile(file, response);
-				} else {
-					writeFileNotFound(response);
+			File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+			if (file != null) {
+				if (fileName.endsWith("mp4")) {
+					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
 				}
+				downloadFile(file, response);
+			} else {
+				writeFileNotFound(response);
 			}
 		} catch (Exception e) {
 			logger.error("", e);
