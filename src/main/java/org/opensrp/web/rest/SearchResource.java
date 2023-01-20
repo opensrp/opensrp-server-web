@@ -76,7 +76,7 @@ public class SearchResource extends RestResource<Client> {
 	@Override
 	public List<Client> search(HttpServletRequest request)
 			throws ParseException {//TODO search should not call different url but only add params
-		Pair<ClientSearchBean, Triple<String, String, String>> result = extractNamesAndCreateClientSearchBean(request);
+		Pair<ClientSearchBean, Triple<String, String, String>> result = extractSearchParams(request);
 		return searchService.searchClient(result.getLeft(), result.getRight().getLeft(), result.getRight().getMiddle(),
 				result.getRight().getRight(), null);
 	}
@@ -84,7 +84,7 @@ public class SearchResource extends RestResource<Client> {
 	@RequestMapping(method = RequestMethod.POST, value = "/search", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<Client> searchByPost(@RequestBody String jsonRequestBody)
 			throws ParseException {//TODO search should not call different url but only add params
-		Pair<ClientSearchBean, Triple<String, String, String>> result = extractNamesAndCreateClientSearchBean(
+		Pair<ClientSearchBean, Triple<String, String, String>> result = extractSearchParams(
 				jsonRequestBody);
 		return searchService.searchClient(result.getLeft(), result.getRight().getLeft(), result.getRight().getMiddle(),
 				result.getRight().getRight(), null);
@@ -209,7 +209,7 @@ public class SearchResource extends RestResource<Client> {
 		return clientBaseEntityIds;
 	}
 
-	public Pair<ClientSearchBean, Triple<String, String, String>> extractNamesAndCreateClientSearchBean(Object object)
+	public Pair<ClientSearchBean, Triple<String, String, String>> extractSearchParams(Object object)
 			throws ParseException {
 
 		String firstName;
