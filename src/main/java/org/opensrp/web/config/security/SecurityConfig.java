@@ -1,11 +1,9 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.config.security;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -14,7 +12,6 @@ import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
 import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.opensrp.web.config.Role;
-import org.opensrp.web.rest.EventResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -45,13 +42,13 @@ import static org.springframework.http.HttpMethod.*;
  */
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
-	
+
 	@Value("#{opensrp['opensrp.cors.allowed.source']}")
 	private String opensrpAllowedSources;
-	
+
 	@Value("#{opensrp['opensrp.cors.max.age']}")
 	private long corsMaxAge;
-	
+
 	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
 	private Resource keycloakConfigFileResource;
 
@@ -70,13 +67,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Value("#{opensrp['hsts.max.age.in.seconds']}")
 	private Integer hstsMaxAgeInSeconds;
 
-
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
-	
-	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
-	private static Logger logger = LogManager.getLogger(SecurityConfig.class.toString());
 
+	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
 
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
@@ -85,12 +79,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		SimpleAuthorityMapper grantedAuthorityMapper = new SimpleAuthorityMapper();
 		grantedAuthorityMapper.setPrefix("ROLE_");
-		
+
 		KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
 		keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(grantedAuthorityMapper);
 		auth.authenticationProvider(keycloakAuthenticationProvider);
 	}
-	
+
 	/**
 	 * Defines the session authentication strategy.
 	 */
@@ -99,7 +93,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
 		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
 	}
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
@@ -137,7 +131,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		}
 		/* @formatter:on */
 	}
-	
+
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		/* @formatter:off */
@@ -146,7 +140,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.and().ignoring().mvcMatchers("/images/**");
 		/* @formatter:on */
 	}
-	
+
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
@@ -158,24 +152,24 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
-	
+
 	@Bean
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public KeycloakRestTemplate keycloakRestTemplate() {
 		return new KeycloakRestTemplate(keycloakClientRequestFactory);
 	}
-	
+
 	@Bean
 	public KeycloakDeployment keycloakDeployment() throws IOException {
 		if (!keycloakConfigFileResource.isReadable()) {
 			throw new FileNotFoundException(String.format("Unable to locate Keycloak configuration file: %s",
-			    keycloakConfigFileResource.getFilename()));
+					keycloakConfigFileResource.getFilename()));
 		}
-		
-		try(InputStream inputStream=keycloakConfigFileResource.getInputStream()){
+
+		try (InputStream inputStream = keycloakConfigFileResource.getInputStream()) {
 			return KeycloakDeploymentBuilder.build(inputStream);
 		}
-		
+
 	}
-	
+
 }
