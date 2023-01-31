@@ -4,6 +4,8 @@
 package org.opensrp.web.config.security;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -12,6 +14,7 @@ import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
 import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.opensrp.web.config.Role;
+import org.opensrp.web.rest.EventResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -58,11 +61,23 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Value("#{opensrp['metrics.permitAll'] ?: false }")
 	private boolean metricsPermitAll;
 
+	@Value("#{opensrp['hsts.header.on'] ?: false }")
+	private boolean hstsHeaderOn;
+
+	@Value("#{opensrp['hsts.include.subdomain'] ?: false }")
+	private boolean hstsIncludeSubdomain;
+
+	@Value("#{opensrp['hsts.max.age.in.seconds']}")
+	private Integer hstsMaxAgeInSeconds;
+
+
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
 	private static final String CORS_ALLOWED_HEADERS = "origin,content-type,accept,x-requested-with,Authorization";
-	
+	private static Logger logger = LogManager.getLogger(SecurityConfig.class.toString());
+
+
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
 	 */
@@ -113,8 +128,13 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     		.ignoringAntMatchers("/rest/**","/multimedia/**","/actions/**")
     	.and()
     		.logout()
-    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"))
-		.and().headers().httpStrictTransportSecurity().includeSubDomains(true).maxAgeInSeconds(31536000);
+    		.logoutRequestMatcher(new AntPathRequestMatcher("logout.do", "GET"));
+		if(hstsHeaderOn){
+			http.headers()
+					.httpStrictTransportSecurity()
+					.includeSubDomains(hstsIncludeSubdomain)
+					.maxAgeInSeconds(hstsMaxAgeInSeconds);
+		}
 		/* @formatter:on */
 	}
 	
