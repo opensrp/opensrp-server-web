@@ -83,7 +83,7 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Bean
 	public JdbcTokenStore tokenStore() {
-		return new JdbcTokenStore(dataSource);
+		return new OpenMRSJdbcTokenStore(dataSource);
 	}
 	
 }
