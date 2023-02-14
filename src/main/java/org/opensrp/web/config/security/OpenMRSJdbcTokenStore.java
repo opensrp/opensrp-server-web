@@ -17,21 +17,20 @@ public class OpenMRSJdbcTokenStore extends JdbcTokenStore {
     @Override
     public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
         try {
+
             // use reflection to access private fields in superclass
-            Field jdbcTemplateField = Class.forName("org.springframework.security.oauth2.provider.token.store.JdbcTokenStore")
-                    .getDeclaredField("jdbcTemplate");
+            Field jdbcTemplateField = JdbcTokenStore.class.getDeclaredField("jdbcTemplate");
             jdbcTemplateField.setAccessible(true);
             JdbcTemplate template = (JdbcTemplate) jdbcTemplateField.get(null);
 
-            Field authenticationKeyGeneratorField = Class.forName("org.springframework.security.oauth2.provider.token.store.JdbcTokenStore")
-                    .getDeclaredField("jdbcTemplate");
+            Field authKeyGeneratorField = JdbcTokenStore.class.getDeclaredField("authenticationKeyGenerator");
             jdbcTemplateField.setAccessible(true);
-            AuthenticationKeyGenerator authKeyGenerator = (AuthenticationKeyGenerator) authenticationKeyGeneratorField.get(null);
+            AuthenticationKeyGenerator authKeyGenerator = (AuthenticationKeyGenerator) authKeyGeneratorField.get(null);
 
             final String key = authKeyGenerator.extractKey(authentication);
             template.update("delete from oauth_access_token where authentication_id = ?", key);
 
-        } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         } finally {
             super.storeAccessToken(token, authentication);
