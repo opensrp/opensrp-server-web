@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.config.security;
 
@@ -10,10 +10,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
+import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -26,15 +31,15 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 @Configuration
 @Profile("oauth2")
-public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
+public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 	
 	@Autowired
 	private OauthAuthenticationProvider opensrpAuthenticationProvider;
 	
 	@Autowired
 	private ClientDetailsService clientDetailsService;
-
-	@Qualifier( value = "openSRPDataSource")
+	
+	@Qualifier(value = "openSRPDataSource")
 	@Autowired
 	private DataSource dataSource;
 	
@@ -67,14 +72,13 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 		/* @formatter:on */
 	}
 	
-	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(opensrpAuthenticationProvider).eraseCredentials(false);
-	}	
+	}
 	
 	public DefaultTokenServices tokenServices() {
-		DefaultTokenServices tokenServices= new DefaultTokenServices();
+		DefaultTokenServices tokenServices = new DefaultTokenServices();
 		tokenServices.setTokenStore(tokenStore());
 		tokenServices.setSupportRefreshToken(true);
 		tokenServices.setClientDetailsService(clientDetailsService);
@@ -83,7 +87,18 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig{
 	
 	@Bean
 	public JdbcTokenStore tokenStore() {
-		return new OpenMRSJdbcTokenStore(dataSource);
+		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		final AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+		return new JdbcTokenStore(dataSource) {
+			
+			@Override
+			public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
+				final String key = authenticationKeyGenerator.extractKey(authentication);
+				jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?", key);
+				super.storeAccessToken(token, authentication);
+			}
+			
+		};
 	}
 	
 }
