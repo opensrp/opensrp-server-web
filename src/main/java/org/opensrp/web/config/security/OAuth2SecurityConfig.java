@@ -3,6 +3,8 @@
  */
 package org.opensrp.web.config.security;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opensrp.web.config.Role;
 import org.opensrp.web.security.OauthAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,12 +91,17 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 	public JdbcTokenStore tokenStore() {
 		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		final AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+		Logger logger = LogManager.getLogger(JdbcTokenStore.class.toString());
 		return new JdbcTokenStore(dataSource) {
 			
 			@Override
 			public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
 				final String key = authenticationKeyGenerator.extractKey(authentication);
-				jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?", key);
+				if( key == null || authentication == null)
+					return;
+				int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?", key);
+				String isSuccess = ( rowsAffected > 0 ) ? "Success" : "Failure";
+				logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key, isSuccess);
 				super.storeAccessToken(token, authentication);
 			}
 			
