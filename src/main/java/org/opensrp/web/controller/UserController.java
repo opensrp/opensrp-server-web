@@ -200,13 +200,18 @@ public class UserController {
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
-			
-			for (AssignedLocations assignedLocation : organizationService
-			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
-				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
-					locationIds.add(assignedLocation.getJurisdictionId());
-				if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
-					planIdentifiers.add(assignedLocation.getPlanId());
+
+			if (practionerOrganizationIds != null && practionerOrganizationIds.right.size() > 0) {
+				for (AssignedLocations assignedLocation : organizationService
+						.findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
+					if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
+						locationIds.add(assignedLocation.getJurisdictionId());
+					if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
+						planIdentifiers.add(assignedLocation.getPlanId());
+				}
+			} else {
+				throw new MissingTeamAssignmentException(
+						"User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
 			}
 			
 			jurisdictions.addAll(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
