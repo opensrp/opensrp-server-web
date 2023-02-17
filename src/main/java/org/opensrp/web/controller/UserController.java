@@ -51,7 +51,6 @@ import org.opensrp.service.PlanService;
 import org.opensrp.service.PractitionerService;
 import org.opensrp.web.exceptions.MissingTeamAssignmentException;
 import org.opensrp.web.rest.RestUtils;
-import org.slf4j.LoggerFactory;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition.PlanStatus;
@@ -201,14 +200,19 @@ public class UserController {
 		try {
 			String userId = u.getBaseEntityId();
 			practionerOrganizationIds = practitionerService.getOrganizationsByUserId(userId);
-			
-			for (AssignedLocations assignedLocation : organizationService
-			        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
-				if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
-					locationIds.add(assignedLocation.getJurisdictionId());
-				if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
-					planIdentifiers.add(assignedLocation.getPlanId());
-			}
+
+            if (practionerOrganizationIds != null && practionerOrganizationIds.right.size() > 0) {
+                for (AssignedLocations assignedLocation : organizationService
+                        .findAssignedLocationsAndPlans(practionerOrganizationIds.right)) {
+                    if (StringUtils.isNotBlank(assignedLocation.getJurisdictionId()))
+                        locationIds.add(assignedLocation.getJurisdictionId());
+                    if (StringUtils.isNotBlank(assignedLocation.getPlanId()))
+                        planIdentifiers.add(assignedLocation.getPlanId());
+                }
+            } else {
+                throw new MissingTeamAssignmentException(
+                        "User not mapped on any location. Make sure that user is assigned to an organization with valid Location(s) ");
+            }
 			
 			jurisdictions.addAll(locationService.findLocationByIdsWithChildren(false, locationIds, Integer.MAX_VALUE));
 			
