@@ -102,6 +102,8 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 					int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?", key);
 					String isSuccess = ( rowsAffected > 0 ) ? "Success" : "Failure";
 					logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key, isSuccess);
+				} else {
+					logger.info("authentication object is null");
 				}
 				
 				super.storeAccessToken(token, authentication);
