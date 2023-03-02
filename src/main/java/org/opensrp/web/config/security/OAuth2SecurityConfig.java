@@ -97,11 +97,13 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 			@Override
 			public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
 				
-				if( authentication != null){
+				if (authentication != null) {
 					final String key = authenticationKeyGenerator.extractKey(authentication);
-					int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?", key);
-					String isSuccess = ( rowsAffected > 0 ) ? "Success" : "Failure";
-					logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key, isSuccess);
+					int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?",
+							key);
+					String isSuccess = (rowsAffected > 0) ? "Success" : "Failure";
+					logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key,
+							isSuccess);
 				} else {
 					logger.info("authentication object is null");
 				}
