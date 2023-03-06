@@ -1,7 +1,11 @@
 package org.opensrp.web.config.security;
 
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opensrp.TestDatabaseConfig;
+import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,15 +14,21 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class OAuth2SecurityConfigTest extends TestCase {
 	
 	
 	
-	public void testTokenStore() {
+	@Test
+	public void testTokenStore() throws SQLException {
 		
 		OAuth2SecurityConfig oAuth2SecurityConfig = new OAuth2SecurityConfig();
 		DataSource dataSource = Mockito.mock(DataSource.class);
@@ -26,9 +36,11 @@ public class OAuth2SecurityConfigTest extends TestCase {
 		
 		JdbcTokenStore jdbcTokenStore = oAuth2SecurityConfig.tokenStore();
 		
-		JdbcTemplate jdbcTemplateMock = Mockito.mock(JdbcTemplate.class);
+		JdbcTemplate jdbcTemplateMock = new TestDatabaseConfig().jdbcTemplate();
+		Mockito.when(dataSource.getConnection()).thenReturn(Mockito.mock(Connection.class));
+
 		AuthenticationKeyGenerator authenticationKeyGenerator = Mockito.mock(AuthenticationKeyGenerator.class);
-		Mockito.when(jdbcTemplateMock.update(Mockito.anyString())).thenReturn(1);
+		Mockito.when(jdbcTemplateMock.update(Mockito.eq("delete from oauth_access_token where authentication_id = ?"), Mockito.eq("4e19bbaa33fc65f5951b336d7c11f6fc"))).thenReturn(1);
 		
 	//	Mockito.when(authenticationKeyGenerator.extractKey(Mockito.any())).thenReturn("some-key");
 		Whitebox.setInternalState(jdbcTokenStore, "jdbcTemplate", jdbcTemplateMock);
@@ -44,6 +56,6 @@ public class OAuth2SecurityConfigTest extends TestCase {
 		Mockito.spy(jdbcTokenStore);
 		
 		jdbcTokenStore.storeAccessToken(tokenMock, authenticationMock);
-		Mockito.verify(jdbcTemplateMock.update(Mockito.anyString()));
+		Mockito.verify(jdbcTemplateMock.update(Mockito.anyString(), Mockito.anyString()));
 	}
 }
