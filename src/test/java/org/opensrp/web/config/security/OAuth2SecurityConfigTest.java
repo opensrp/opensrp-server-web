@@ -24,8 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
-@ActiveProfiles(profiles = {"postgres"})
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = {"classpath:test-webmvc-config.xml",})
+@ActiveProfiles(profiles = {"postgres", "jedis"})
 public class OAuth2SecurityConfigTest extends TestCase {
 	
 	
