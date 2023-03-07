@@ -23,15 +23,19 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader = TestWebContextLoader.class, locations = { "classpath:test-webmvc-config.xml", })
+@ActiveProfiles(profiles = {"postgres"})
 public class OAuth2SecurityConfigTest extends TestCase {
 	
 	
-	
+	@Autowired
+	DataSource dataSource;
 	@Test
 	public void testTokenStore() throws SQLException {
 		
 		OAuth2SecurityConfig oAuth2SecurityConfig = new OAuth2SecurityConfig();
-		DataSource dataSource = Mockito.mock(DataSource.class);
+//		DataSource dataSource = Mockito.mock(DataSource.class);
 		Whitebox.setInternalState(oAuth2SecurityConfig, "dataSource", dataSource);
 		
 		JdbcTokenStore jdbcTokenStore = oAuth2SecurityConfig.tokenStore();
