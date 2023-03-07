@@ -35,10 +35,14 @@ public class TestRedisConfig {
 	@Value("#{opensrp['redis.pool.max.connections']}")
 	private int redisMaxConnections = 0;
 	
+	@Value("#{opensrp['redis.password']}")
+	private String redisPassword;
+	
 	
 	private RedisStandaloneConfiguration redisStandaloneConfiguration() {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
 		redisStandaloneConfiguration.setDatabase(redisDatabase);
+		redisStandaloneConfiguration.setPassword(redisPassword);
 		return redisStandaloneConfiguration;
 	}
 	
