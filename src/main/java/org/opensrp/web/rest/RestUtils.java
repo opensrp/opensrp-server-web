@@ -103,9 +103,9 @@ public class RestUtils {
 		return Boolean.parseBoolean(stringFilter);
 	}
 
-	public static void main(String[] args) {
-		System.out.println(new DateTime("​1458932400000"));
-	}
+	//public static void main(String[] args) {
+	//	System.out.println(new DateTime("​1458932400000"));
+	//}
 
 	public static synchronized String setDateFilter(Date date) throws ParseException {
 		return date == null ? null : SDF.format(date);
@@ -124,11 +124,11 @@ public class RestUtils {
 							}
 						}
 						catch (IllegalArgumentException e) {
-							e.printStackTrace();
+							logger.error(e);
 							throw new RuntimeException("A required field " + p + " was not found in resource class");
 						}
 						catch (IllegalAccessException e) {
-							e.printStackTrace();
+							logger.error(e);
 						}
 					}
 				}
