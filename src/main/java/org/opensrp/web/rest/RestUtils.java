@@ -48,7 +48,7 @@ public class RestUtils {
 	}
 
 	public static String getStringFilter(String filter, JSONObject jsonObject) {
-		return StringUtils.isBlank(jsonObject.optString(filter)) ? null : jsonObject.optString(filter);
+		return jsonObject.optString(filter);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -102,10 +102,6 @@ public class RestUtils {
 		String stringFilter = getStringFilter(filter, req);
 		return Boolean.parseBoolean(stringFilter);
 	}
-
-	//public static void main(String[] args) {
-	//	System.out.println(new DateTime("​1458932400000"));
-	//}
 
 	public static synchronized String setDateFilter(Date date) throws ParseException {
 		return date == null ? null : SDF.format(date);
