@@ -22,7 +22,11 @@ import static org.opensrp.common.AllConstants.Client.SEARCHTEXT;
 import static org.opensrp.common.AllConstants.Event.LOCATION_ID;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -129,7 +133,8 @@ public class ClientResource extends RestResource<Client> {
 	}
 
 	@Override
-	public List<Client> search(HttpServletRequest request) throws ParseException {//TODO search should not call different url but only add params
+	public List<Client> search(HttpServletRequest request)
+			throws ParseException {//TODO search should not call different url but only add params
 		List<Client> clients = new ArrayList<>();
 		ClientSearchBean searchBean = new ClientSearchBean();
 		searchBean.setNameLike(getStringFilter("name", request));
@@ -224,7 +229,8 @@ public class ClientResource extends RestResource<Client> {
 		List<Client> dependantClients = new ArrayList<>();
 		List<Client> clientsToRemove = new ArrayList<>();
 		for (Client client : clients) {
-			List<Client> dependants = clientService.findByRelationshipIdAndType(searchRelationship, client.getBaseEntityId());
+			List<Client> dependants = clientService
+					.findByRelationshipIdAndType(searchRelationship, client.getBaseEntityId());
 			if (dependants.size() > 0) {
 				dependantClients.addAll(dependants);
 			} else {
@@ -304,7 +310,8 @@ public class ClientResource extends RestResource<Client> {
 			searchBean.setStartDate(startDate);
 			DateTime endDate = getDateFilter(ENDDATE, request);
 			searchBean.setEndDate(endDate);
-		} catch (ParseException e) {
+		}
+		catch (ParseException e) {
 			logger.error(e.getMessage());
 		}
 
@@ -376,7 +383,8 @@ public class ClientResource extends RestResource<Client> {
 			if (HOUSEHOLD.equalsIgnoreCase(clientType)) {
 				total = clientService.findTotalCountHouseholdByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
 			} else if (ALLCLIENTS.equalsIgnoreCase(clientType)) {
-				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean).getTotalCount();
+				total = clientService.findTotalCountAllClientsByCriteria(clientSearchBean, addressSearchBean)
+						.getTotalCount();
 			} else if (ANC.equalsIgnoreCase(clientType)) {
 				clientSearchBean.setClientType(null);
 				total = clientService.findCountANCByCriteria(clientSearchBean, addressSearchBean);
@@ -427,27 +435,27 @@ public class ClientResource extends RestResource<Client> {
 	@RequestMapping(value = "/findIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
+			@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
 			@RequestParam(value = IS_ARCHIVED, defaultValue = FALSE, required = false) boolean isArchived,
 			@RequestParam(value = "fromDate", required = false) String fromDate,
 			@RequestParam(value = "toDate", required = false) String toDate) {
 		Pair<List<String>, Long> taskIdsPair = clientService.findAllIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT, isArchived,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+				Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(taskIdsPair.getLeft());
 		identifiers.setLastServerVersion(taskIdsPair.getRight());
 		return new ResponseEntity<>(identifiers, HttpStatus.OK);
 	}
-	
+
 	/**
 	 * Fetch clients ordered by serverVersion ascending order
 	 *
 	 * @return a response with clients
 	 */
-	@GetMapping(value = "/getAll", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/getAll", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public List<Client> getAll(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion,
-			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit){
+			@RequestParam(value = SERVER_VERSIOIN) long serverVersion,
+			@RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") int limit) {
 
 		return clientService.findByServerVersion(serverVersion, limit);
 	}
@@ -457,9 +465,9 @@ public class ClientResource extends RestResource<Client> {
 	 *
 	 * @return a response with clients
 	 */
-	@GetMapping(value = "/countAll", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/countAll", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<ModelMap> countAll(
-			@RequestParam(value = SERVER_VERSIOIN)  long serverVersion){
+			@RequestParam(value = SERVER_VERSIOIN) long serverVersion) {
 		Long countOfClients = clientService.countAll(serverVersion);
 		ModelMap modelMap = new ModelMap();
 		modelMap.put("count", countOfClients != null ? countOfClients : 0);

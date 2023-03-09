@@ -12,7 +12,11 @@ import org.opensrp.repository.ClientsRepository;
 import org.opensrp.repository.EventsRepository;
 import org.opensrp.repository.PlanRepository;
 import org.opensrp.repository.SearchRepository;
-import org.opensrp.service.*;
+import org.opensrp.service.ClientService;
+import org.opensrp.service.EventService;
+import org.opensrp.service.ExportEventDataMapper;
+import org.opensrp.service.SearchService;
+import org.opensrp.service.TaskGenerator;
 import org.opensrp.web.rest.it.TestWebContextLoader;
 import org.opensrp.web.utils.SearchHelper;
 import org.smartregister.domain.Client;
@@ -44,16 +48,14 @@ public class SearchResourceTest {
 	private TaskGenerator taskGenerator;
 
 	private PlanRepository planRepository;
+
 	MockHttpServletRequest mockHttpServletRequest;
+
 	String phoneNumber = "0727000000";
-	String town = "town";
 
 	String firstName = "name";
 
-	String male = "male";
-
 	DateTime birthDate = new DateTime(0l, DateTimeZone.UTC);
-
 
 	@Before
 	public void setUp() {
@@ -87,7 +89,7 @@ public class SearchResourceTest {
 	}
 
 	@Test
-	public void shouldSearchClient() throws ParseException {
+	public void shouldSearchClientWithGetRequest() throws ParseException {
 		mockHttpServletRequest = new MockHttpServletRequest();
 		mockHttpServletRequest.addParameter("ff", "ona");
 		mockHttpServletRequest.addParameter("phone_number", phoneNumber);
@@ -95,9 +97,20 @@ public class SearchResourceTest {
 		mockHttpServletRequest.addParameter("alt_name", firstName);
 		mockHttpServletRequest.addParameter("attribute", "next_contact_date:2022-06-15");
 		mockHttpServletRequest.addParameter("dob", String.valueOf(birthDate));
-		mockHttpServletRequest.addParameter("identifier", "fsdf"+":"+ "sfdf");
-		SearchResource searchResource=new SearchResource(searchService,clientService,eventService);
+		mockHttpServletRequest.addParameter("identifier", "fsdf" + ":" + "sfdf");
+		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
 		List<Client> clients = searchResource.search(mockHttpServletRequest);
 		Assert.assertNotNull(clients);
+	}
+
+	@Test
+	public void shouldSearchClientWithPostRequest() throws ParseException {
+		String jsonRequestString = "{\"ff\":\"ona\",\"identifier\":\"fsdf:sfdf\",\"alt_name\":\"name\"," +
+				"\"alt_phone_number\":\"0727000000\",\"dob\":\"1970-01-01T00:00:00.000Z\",\"phone_number\":\"0727000000\"," +
+				"\"attribute\":\"next_contact_date:2022-06-15\"}";
+		SearchResource searchResource = new SearchResource(searchService, clientService, eventService);
+		List<Client> clients = searchResource.searchByPost(jsonRequestString);
+		Assert.assertNotNull(clients);
+
 	}
 }

@@ -140,7 +140,8 @@ public class EventResource extends RestResource<Event> {
 
 		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
-			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, false);
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit,
+					returnCount, false);
 
 			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
@@ -202,7 +203,8 @@ public class EventResource extends RestResource<Event> {
 	 * @return Events found matching the client IDs
 	 * @throws JsonProcessingException
 	 */
-	@RequestMapping(value = "/sync-out-of-catchment", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(value = "/sync-out-of-catchment", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
 	protected ResponseEntity<String> syncOutOfCatchment(HttpServletRequest request) throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 
@@ -216,7 +218,8 @@ public class EventResource extends RestResource<Event> {
 		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
 
 		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
-			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, true);
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit,
+					returnCount, true);
 
 			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
@@ -231,7 +234,8 @@ public class EventResource extends RestResource<Event> {
 	}
 
 	@RequestMapping(value = "/sync-out-of-catchment", method = POST, produces = { MediaType.APPLICATION_JSON_VALUE })
-	protected ResponseEntity<String> syncOutOfCatchmentByPost(@RequestBody SyncParam syncParam) throws JsonProcessingException {
+	protected ResponseEntity<String> syncOutOfCatchmentByPost(@RequestBody SyncParam syncParam)
+			throws JsonProcessingException {
 		EventSyncBean response = new EventSyncBean();
 
 		try {
@@ -343,7 +347,8 @@ public class EventResource extends RestResource<Event> {
 		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit, returnCount, isOutOfCatchment);
 	}
 
-	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit, boolean returnCount, boolean isOutOfCatchment) {
+	private EventSyncBean getEventsAndClients(EventSearchBean eventSearchBean, Integer limit, boolean returnCount,
+			boolean isOutOfCatchment) {
 		List<Event> events = new ArrayList<Event>();
 		List<String> clientIds = new ArrayList<String>();
 		List<Client> clients = new ArrayList<Client>();
@@ -406,7 +411,8 @@ public class EventResource extends RestResource<Event> {
 			List<String> relationships = getRelationships(baseEntityIds);
 			eventSearchBean.setBaseEntityId(eventSearchBean.getBaseEntityId() + "," + String.join(",", relationships));
 
-			return eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
+			return eventService.findOutOfCatchmentEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc",
+					limit == null ? 25 : limit);
 		} else {
 			return eventService.findEvents(eventSearchBean, BaseEntity.SERVER_VERSIOIN, "asc", limit == null ? 25 : limit);
 		}
@@ -449,7 +455,8 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setServerVersion(serverVersion > 0 ? serverVersion + 1 : serverVersion);
 		eventSearchBean.setEventType(eventType);
 		return new ResponseEntity<>(
-				objectMapper.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false, false)),
+				objectMapper
+						.writeValueAsString(getEventsAndClients(eventSearchBean, limit == null ? 25 : limit, false, false)),
 				getJSONUTF8Headers(), OK);
 	}
 
@@ -509,7 +516,8 @@ public class EventResource extends RestResource<Event> {
 						clientService.addorUpdate(client);
 					}
 					catch (Exception e) {
-						logger.error("[SYNC_INFO] Sync failed for client {}; identifiers: {}", client.getBaseEntityId(), gson.toJson(client.getIdentifiers()), e);
+						logger.error("[SYNC_INFO] Sync failed for client {}; identifiers: {}", client.getBaseEntityId(),
+								gson.toJson(client.getIdentifiers()), e);
 						failedClientsIds.add(client.getBaseEntityId());
 					}
 				}
@@ -528,7 +536,8 @@ public class EventResource extends RestResource<Event> {
 						event = eventService.processOutOfArea(event);
 						eventService.addorUpdateEvent(event, username);
 
-						logger.info("[SYNC_INFO] Event {} of type {} saved", event.getFormSubmissionId(), event.getEventType());
+						logger.info("[SYNC_INFO] Event {} of type {} saved", event.getFormSubmissionId(),
+								event.getEventType());
 					}
 					catch (Exception e) {
 						logger.error(
@@ -647,8 +656,8 @@ public class EventResource extends RestResource<Event> {
 		try {
 
 			Pair<List<String>, Long> eventIdsPair = eventService.findAllIdsByEventType(eventType, isDeleted, serverVersion,
-					Constants.DEFAULT_GET_ALL_IDS_LIMIT, Utils.getDateTimeFromString(fromDate),
-					Utils.getDateTimeFromString(toDate));
+					Constants.DEFAULT_GET_ALL_IDS_LIMIT, Utils.getDateFromString(fromDate),
+					Utils.getDateFromString(toDate));
 			Identifier identifiers = new Identifier();
 			identifiers.setIdentifiers(eventIdsPair.getLeft());
 			identifiers.setLastServerVersion(eventIdsPair.getRight());
@@ -682,8 +691,8 @@ public class EventResource extends RestResource<Event> {
 			logger.info("Temp DIR is =============" + tempDirectory);
 			for (String eventType : eventTypes) {
 				ExportEventDataSummary exportEventDataSummary = eventService
-						.exportEventData(planIdentifier, eventType, Utils.getDateTimeFromString(fromDate),
-								Utils.getDateTimeFromString(toDate));
+						.exportEventData(planIdentifier, eventType, Utils.getDateFromString(fromDate),
+								Utils.getDateFromString(toDate));
 
 				missionName = exportEventDataSummary != null &&
 						exportEventDataSummary.getMissionName() != null ?
@@ -757,7 +766,7 @@ public class EventResource extends RestResource<Event> {
 
 			ExportImagesSummary exportImagesSummary =
 					eventService.getImagesMetadataForFlagProblemEvent(planIdentifier, eventType,
-							Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+							Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 			String imagesDirectoryName;
 			if (firstTime) {
 				formatted = df.format(new Date());

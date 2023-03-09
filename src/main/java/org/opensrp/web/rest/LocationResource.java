@@ -112,13 +112,13 @@ public class LocationResource {
 	public static final String DEFAULT_PAGE_SIZE = "1000";
 
 	public static final String RETURN_TAGS = "return_tags";
-	
+
 	public static final String RETURN_STRUCTURE_COUNT = "return_structure_count";
 
 	public static final String INCLUDE_INACTIVE = "includeInactive";
 
 	private PhysicalLocationService locationService;
-	
+
 	private PlanService planService;
 
 	private DHIS2ImportOrganizationUnits dhis2ImportOrganizationUnits;
@@ -129,7 +129,7 @@ public class LocationResource {
 	public void setLocationService(PhysicalLocationService locationService) {
 		this.locationService = locationService;
 	}
-	
+
 	@Autowired
 	public void setPlanService(PlanService planService) {
 		this.planService = planService;
@@ -173,15 +173,15 @@ public class LocationResource {
 		Boolean isJurisdiction = locationSyncRequestWrapper.getIsJurisdiction();
 		String locationNames = StringUtils.join(locationSyncRequestWrapper.getLocationNames(), ",");
 		String parentIds = StringUtils.join(locationSyncRequestWrapper.getParentId(), ",");
-		List<String> locationIds=locationSyncRequestWrapper.getLocationIds();
+		List<String> locationIds = locationSyncRequestWrapper.getLocationIds();
 		boolean returnCount = locationSyncRequestWrapper.isReturnCount();
 
 		HttpHeaders headers = RestUtils.getJSONUTF8Headers();
 		Long locationCount = 0l;
 		if (isJurisdiction) {
-			String locations="[]";
+			String locations = "[]";
 			if (locationIds != null && !locationIds.isEmpty()) {
-				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds,currentServerVersion));
+				locations = gson.toJson(locationService.findLocationsByIds(true, locationIds, currentServerVersion));
 				if (returnCount) {
 					locationCount = locationService.countLocationsByIds(locationIds, currentServerVersion);
 					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
@@ -207,19 +207,23 @@ public class LocationResource {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 
-			String structures = gson.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
-			if (returnCount){
-				Long structureCount = locationService.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
+			String structures = gson
+					.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
+			if (returnCount) {
+				Long structureCount = locationService
+						.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(structureCount));
 			}
 			return new ResponseEntity<>(structures, headers, HttpStatus.OK);
 		}
 	}
 
-	@RequestMapping(value = "/findStructuresByAncestor", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> getStructuresByAncestor(@RequestParam(name = "id") final String ancestorId){
+	@RequestMapping(value = "/findStructuresByAncestor", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<String> getStructuresByAncestor(@RequestParam(name = "id") final String ancestorId) {
 		final long serverVersion = 0L;
-		List<PhysicalLocation> locationAndTheirChildren = locationService.findLocationByIdWithChildren(false, ancestorId, Integer.MAX_VALUE);
+		List<PhysicalLocation> locationAndTheirChildren = locationService
+				.findLocationByIdWithChildren(false, ancestorId, Integer.MAX_VALUE);
 		String parentIds = locationAndTheirChildren.stream()
 				.map(PhysicalLocation::getId)
 				.collect(Collectors.joining(","));
@@ -247,14 +251,14 @@ public class LocationResource {
 		if (isJurisdiction) {
 			if (StringUtils.isBlank(locationNames)) {
 				String locations = gson.toJson(locationService.findLocationsByServerVersion(currentServerVersion));
-				if (returnCount){
+				if (returnCount) {
 					locationCount = locationService.countLocationsByServerVersion(currentServerVersion);
 					headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
 				}
 				return new ResponseEntity<>(locations, headers, HttpStatus.OK);
 			}
 			String locations = gson.toJson(locationService.findLocationsByNames(locationNames, currentServerVersion));
-			if (returnCount){
+			if (returnCount) {
 				locationCount = locationService.countLocationsByNames(locationNames, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(locationCount));
 			}
@@ -264,9 +268,11 @@ public class LocationResource {
 			if (StringUtils.isBlank(parentIds)) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
-			String structures = gson.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
-			if (returnCount){
-				Long structureCount = locationService.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
+			String structures = gson
+					.toJson(locationService.findStructuresByParentAndServerVersion(parentIds, currentServerVersion));
+			if (returnCount) {
+				Long structureCount = locationService
+						.countStructuresByParentAndServerVersion(parentIds, currentServerVersion);
 				headers.add(TOTAL_RECORDS, String.valueOf(structureCount));
 			}
 			return new ResponseEntity<>(structures, headers, HttpStatus.OK);
@@ -284,7 +290,7 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation",e);
+			logger.error("The request doesnt contain a valid location representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -300,7 +306,7 @@ public class LocationResource {
 			return new ResponseEntity<>(HttpStatus.CREATED);
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation",e);
+			logger.error("The request doesnt contain a valid location representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -323,7 +329,7 @@ public class LocationResource {
 
 		}
 		catch (JsonSyntaxException e) {
-			logger.error("The request doesnt contain a valid location representation",e);
+			logger.error("The request doesnt contain a valid location representation", e);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -364,7 +370,7 @@ public class LocationResource {
 				if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
 						|| PARENT_ID_NO_UNDERSCORE.equalsIgnoreCase(filterArray[0]))) {
 					parentId = Constants.NULL.equalsIgnoreCase(filterArray[1]) || StringUtils.isBlank(filterArray[1])
-							?  "" : filterArray [1];
+							? "" : filterArray[1];
 
 				} else if (filterArray.length == 2) {
 					filters.put(filterArray[0], filterArray[1]);
@@ -435,12 +441,13 @@ public class LocationResource {
 	@RequestMapping(value = "/findStructureIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = SERVER_VERSION) long serverVersion,
 			@RequestParam(value = "fromDate", required = false) String fromDate,
 			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> structureIdsPair = locationService.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+		Pair<List<String>, Long> structureIdsPair = locationService
+				.findAllStructureIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+						Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(structureIdsPair.getLeft());
 		identifiers.setLastServerVersion(structureIdsPair.getRight());
@@ -478,7 +485,9 @@ public class LocationResource {
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(
-					gson.toJson(locationService.findAllStructures(returnGeometry, serverVersion, pageLimit, pageNumber, orderByType, orderByFieldName)),
+					gson.toJson(locationService
+							.findAllStructures(returnGeometry, serverVersion, pageLimit, pageNumber, orderByType,
+									orderByFieldName)),
 					RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 		}
 
@@ -520,12 +529,13 @@ public class LocationResource {
 	@RequestMapping(value = "/findLocationIds", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Identifier> findLocationIds(
-			@RequestParam(value = SERVER_VERSION)  long serverVersion,
+			@RequestParam(value = SERVER_VERSION) long serverVersion,
 			@RequestParam(value = "fromDate", required = false) String fromDate,
 			@RequestParam(value = "toDate", required = false) String toDate) {
 
-		Pair<List<String>, Long> locationIdsPair = locationService.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
-				Utils.getDateTimeFromString(fromDate), Utils.getDateTimeFromString(toDate));
+		Pair<List<String>, Long> locationIdsPair = locationService
+				.findAllLocationIds(serverVersion, DEFAULT_GET_ALL_IDS_LIMIT,
+						Utils.getDateFromString(fromDate), Utils.getDateFromString(toDate));
 		Identifier identifiers = new Identifier();
 		identifiers.setIdentifiers(locationIdsPair.getLeft());
 		identifiers.setLastServerVersion(locationIdsPair.getRight());
@@ -574,7 +584,7 @@ public class LocationResource {
 
 		return new ResponseEntity<>(gson.toJson(tree), RestUtils.getJSONUTF8Headers(), HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/hierarchy/plan/{plan}", method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<String> generateLocationTreeForPlan(
@@ -603,7 +613,7 @@ public class LocationResource {
 
 	@PostMapping(value = "/dhis2/import", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.TEXT_PLAIN_VALUE })
-	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage",required = false) String startPage,
+	public ResponseEntity<String> importLocations(@RequestParam(value = "startPage", required = false) String startPage,
 			@RequestParam("beginning") Boolean beginning) {
 
 		final String DHIS_IMPORT_JOB_STATUS_END_POINT = "/rest/location/dhis2/status";
@@ -640,7 +650,6 @@ public class LocationResource {
 	public Set<LocationDetail> generateLocationTreeWithAncestors(@PathVariable("locationId") String locationId) {
 		return locationService.buildLocationHeirarchyWithAncestors(locationId);
 	}
-
 
 	@Data
 	static class LocationSyncRequestWrapper {

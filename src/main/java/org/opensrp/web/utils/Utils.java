@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opensrp.web.utils;
 
@@ -16,7 +16,7 @@ import org.springframework.lang.Nullable;
  * @author Samuel Githengi created on 06/12/20
  */
 public class Utils {
-	
+
 	public static String getStringFromJSON(JSONObject jsonObject, String key) {
 		Object value = jsonObject.get(key);
 		if (value instanceof JSONArray) {
@@ -26,15 +26,23 @@ public class Utils {
 		}
 	}
 
-	public static Date getDateTimeFromString(@Nullable String date) {
+	public static Date getDateFromString(@Nullable String date) {
+		DateTime dateTime = getDateTimeFromString(date);
+		if (dateTime != null) {
+			return dateTime.toDate();
+		}
+		return null;
+	}
+
+	public static DateTime getDateTimeFromString(@Nullable String date) {
 		if (StringUtils.isNotBlank(date)) {
 			try {
 				Long aLong = Long.parseLong(date);
-				return new DateTime(aLong).toDate();
+				return new DateTime(aLong);
 			}
 			catch (NumberFormatException e) {
 				try {
-					return new DateTime(date).toDate();
+					return new DateTime(date);
 				}
 				catch (IllegalArgumentException illegalArgumentException) {
 					return null;
@@ -45,7 +53,6 @@ public class Utils {
 		}
 	}
 
-	
 	public static boolean checkRoleIfRoleExists(List<String> roleList, String role) {
 		for (String roleName : roleList)
 			if (StringUtils.containsIgnoreCase(roleName, role))
