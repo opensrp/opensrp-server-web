@@ -1,0 +1,13 @@
+name: My CodeQL Analysis
+description: A sample CodeQL analysis
+
+paths:
+  - src
+# Ignore the "docs" and "src/test" directories
+paths-ignore:
+  - 'docs/**'
+  - 'src/test/**'
+
+# # Specify the CodeQL queries to run
+# queries:
+#   - my-query.ql
