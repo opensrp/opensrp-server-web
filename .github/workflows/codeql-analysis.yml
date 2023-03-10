@@ -80,27 +80,35 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+      id: run-analysis
       with:
         category: "/language:${{matrix.language}}"
         config-file: ./.github/codeql/codeql-config.yml
-        sarif_file: ./java.sarif
 
-    - uses: github/codeql-action/upload-sarif@v2
+    # Upload SARIF file to GitHub Code Scanning Alerts
+    - name: Upload SARIF to GitHub
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.run-analysis.outputs.sarif }}
+
+    - name: Upload CodeQL results as an artifact
+      uses: actions/upload-artifact@v3
       with:
         # Path to SARIF file relative to the root of the repository
-        sarif_file: ./java.sarif
+        name: results.sarif
+        path: ${{ steps.run-analysis.outputs.sarif }}
 
-    - name: Import CodeQL Findings to DefectDojo
-      uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
-      with:
-        defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
-        defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
-        defectdojo-password: ${{ secrets.DEFECTOJO_PASSWORD }}
-        defectdojo-product-type: OPENSRP
-        defectdojo-product: OpenSRP-Server-Web
-        defectdojo-environment-type: Test
-        defectdojo-scan-type: SARIF
-        defectdojo-engagement-name: Github Actions Initiated CodeQL Code Scan
-        scan-results-file-name: java.sarif
+    # - name: Import CodeQL Findings to DefectDojo
+    #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+    #   with:
+    #     defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
+    #     defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
+    #     defectdojo-password: ${{ secrets.DEFECTOJO_PASSWORD }}
+    #     defectdojo-product-type: OPENSRP
+    #     defectdojo-product: OpenSRP-Server-Web
+    #     defectdojo-environment-type: Test
+    #     defectdojo-scan-type: SARIF
+    #     defectdojo-engagement-name: Github Actions Initiated CodeQL Code Scan
+    #     scan-results-file-name: results.sarif
 
 
