@@ -83,20 +83,21 @@ jobs:
       id: run-analysis
       with:
         category: "/language:${{matrix.language}}"
-        config-file: ./.github/codeql/codeql-config.yml
+        # config-file: ./.github/codeql/codeql-config.yml
+        output: results.sarif
 
-    # Upload SARIF file to GitHub Code Scanning Alerts
-    - name: Upload SARIF to GitHub
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: ${{ steps.run-analysis.outputs.sarif }}
+    # # Upload SARIF file to GitHub Code Scanning Alerts
+    # - name: Upload SARIF to GitHub
+    #   uses: github/codeql-action/upload-sarif@v2
+    #   with:
+    #     sarif_file: ${{ steps.run-analysis.outputs.sarif }}
 
     - name: Upload CodeQL results as an artifact
       uses: actions/upload-artifact@v3
       with:
         # Path to SARIF file relative to the root of the repository
         name: results.sarif
-        path: ${{ steps.run-analysis.outputs.sarif }}
+        path: './results.sarif'
 
     # - name: Import CodeQL Findings to DefectDojo
     #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
