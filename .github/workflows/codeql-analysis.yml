@@ -104,6 +104,6 @@ jobs:
         defectdojo-environment-type: Test
         defectdojo-scan-type: SARIF
         defectdojo-engagement-name: Github Actions Initiated CodeQL Code Scan
-        scan-results-file-name: java.sarif/java.sarif
+        scan-results-file-name: './results/java.sarif'
 
 
