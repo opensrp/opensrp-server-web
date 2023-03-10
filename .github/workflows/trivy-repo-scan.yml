@@ -4,7 +4,7 @@ on:
     branches:
       # - master
       # - v2*
-      - Trivy-CI-vuln-scan    #To be deleted
+      - security-ci-scan   #To be deleted
 
     # Publish `v1.2.3` tags as releases.
     # tags:
