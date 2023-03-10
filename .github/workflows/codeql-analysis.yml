@@ -84,7 +84,7 @@ jobs:
       id: run-analysis
       with:
         category: "/language:${{matrix.language}}"        
-        output: 'results.sarif'
+        output: 'results'
 
     # # Upload SARIF file to GitHub Code Scanning Alerts
     # - name: Upload SARIF to GitHub
@@ -97,7 +97,7 @@ jobs:
       with:
         # Path to SARIF file relative to the root of the repository
         name: "results.sarif"
-        path: './results.sarif'
+        path: './results/java.sarif'
 
     - name: Import CodeQL Findings to DefectDojo
       uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
