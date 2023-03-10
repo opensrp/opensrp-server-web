@@ -102,7 +102,7 @@ jobs:
         defectdojo-product-type: OPENSRP
         defectdojo-product: OpenSRP-Server-Web
         defectdojo-environment-type: Test
-        defectdojo-scan-type: CodeQL Scan (SARIF) 
+        defectdojo-scan-type: SARIF
         defectdojo-engagement-name: Github Actions Initiated CodeQL Code Scan
         scan-results-file-name: './results/java.sarif'
 
