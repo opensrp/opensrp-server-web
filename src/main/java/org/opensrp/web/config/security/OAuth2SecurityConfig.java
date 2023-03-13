@@ -112,6 +112,4 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 		};
 	}
 	
-	
-	
 }
