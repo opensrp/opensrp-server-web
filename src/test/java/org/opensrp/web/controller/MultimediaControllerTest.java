@@ -94,7 +94,7 @@ public class MultimediaControllerTest {
 		Whitebox.setInternalState(controller, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 
-		controller.downloadFileWithAuth(httpServletResponse, "password", httpServletRequest);
+		controller.downloadFileWithAuth(httpServletResponse, "fileName", "testUser", "password", httpServletRequest);
 
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());
@@ -126,10 +126,6 @@ public class MultimediaControllerTest {
 
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterFileName() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
-
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		Whitebox.setInternalState(multimediaController, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
@@ -141,8 +137,7 @@ public class MultimediaControllerTest {
 		doReturn("file_path").when(fileManager).getMultimediaFilePath(any(MultimediaDTO.class), anyString());
 		doReturn(fileManager).when(multimediaService).getFileManager();
 
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id")
-				.headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id"))
 				.andExpect(content().string(FILE_NAME_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
@@ -150,18 +145,13 @@ public class MultimediaControllerTest {
 
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterEntityId() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
-
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		Whitebox.setInternalState(multimediaController, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 		File file = mock(File.class);
 		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
 		when(file.getName()).thenReturn("testFile" + ".pdf");
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*")
-				.headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id*"))
 				.andExpect(content().string(ENTITY_ID_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
