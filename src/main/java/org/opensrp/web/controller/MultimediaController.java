@@ -81,10 +81,14 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param fileName
+	 * @param userName
+	 * @param password
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
-	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName, HttpServletRequest request) {
+	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName,
+			@RequestHeader(value = "username") String userName,
+			@RequestHeader(value = "password") String password, HttpServletRequest request) {
 
 		try {
 			if (hasSpecialCharacters(fileName)) {
@@ -92,14 +96,16 @@ public class MultimediaController {
 				return;
 			}
 
-			File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-			if (file != null) {
-				if (fileName.endsWith("mp4")) {
-					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+			if (authenticate(userName, password, request).isAuthenticated()) {
+				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+				if (file != null) {
+					if (fileName.endsWith("mp4")) {
+						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
+					}
+					downloadFile(file, response);
+				} else {
+					writeFileNotFound(response);
 				}
-				downloadFile(file, response);
-			} else {
-				writeFileNotFound(response);
 			}
 		} catch (Exception e) {
 			logger.error("", e);
@@ -118,15 +124,13 @@ public class MultimediaController {
 	 */
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
 	public void downloadFileByClientId(HttpServletResponse response, @PathVariable("baseEntityId") String baseEntityId,
-			@RequestHeader(value = "username") String userName,
-			@RequestHeader(value = "password") String password, HttpServletRequest request) {
-
+									   HttpServletRequest request) {
 		try {
 			if (hasSpecialCharacters(baseEntityId)) {
 				specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
 				return;
 			}
-			downloadFileWithAuth(baseEntityId, userName, password, request, response);
+			downloadFileByBaseEntityId(baseEntityId, request, response);
 		} catch (Exception e) {
 			logger.error("Exception occurred in downloading file by client ID ", e);
 		}
@@ -219,11 +223,28 @@ public class MultimediaController {
 	 * @param request
 	 * @param response
 	 */
-	private void downloadFileWithAuth(String baseEntityId, String userName, String password, HttpServletRequest request,
-			HttpServletResponse response) {
+	private void downloadFileWithAuth(String baseEntityId, String userName, String password,
+									  HttpServletRequest request, HttpServletResponse response) {
 		try {
 			if (!authenticate(userName, password, request).isAuthenticated()) { return; }
+
+			downloadFileByBaseEntityId(baseEntityId, request, response);
+		} catch (Exception e) {
+			logger.error("", e);
+		}
+	}
+
+	/**
+	 * Download file by baseEntityId
+	 *
+	 * @param baseEntityId
+	 * @param request
+	 * @param response
+	 */
+	private void downloadFileByBaseEntityId(String baseEntityId, HttpServletRequest request, HttpServletResponse response) {
+		try {
 			MultimediaDTO multimediaDTO = new MultimediaDTO(baseEntityId, "", "image/jpeg", null, "");
+
 			File file = multimediaService.retrieveFile(multimediaService.getFileManager().getMultimediaFilePath(multimediaDTO, baseEntityId));
 			if (file != null) {
 				downloadFile(file, response);
@@ -231,7 +252,7 @@ public class MultimediaController {
 				writeFileNotFound(response);
 			}
 		} catch (Exception e) {
-			logger.error("", e);
+			logger.error("File download failed", e);
 		}
 	}
 
