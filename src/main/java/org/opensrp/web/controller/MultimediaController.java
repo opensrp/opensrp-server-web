@@ -130,7 +130,7 @@ public class MultimediaController {
 				specialCharactersError(response, ENTITY_ID_ERROR_MESSAGE);
 				return;
 			}
-			downloadFileByBaseEntityId(baseEntityId, request, response);
+			downloadFileByBaseEntityId(baseEntityId, response);
 		} catch (Exception e) {
 			logger.error("Exception occurred in downloading file by client ID ", e);
 		}
@@ -228,7 +228,7 @@ public class MultimediaController {
 		try {
 			if (!authenticate(userName, password, request).isAuthenticated()) { return; }
 
-			downloadFileByBaseEntityId(baseEntityId, request, response);
+			downloadFileByBaseEntityId(baseEntityId, response);
 		} catch (Exception e) {
 			logger.error("", e);
 		}
@@ -238,10 +238,9 @@ public class MultimediaController {
 	 * Download file by baseEntityId
 	 *
 	 * @param baseEntityId
-	 * @param request
 	 * @param response
 	 */
-	private void downloadFileByBaseEntityId(String baseEntityId, HttpServletRequest request, HttpServletResponse response) {
+	private void downloadFileByBaseEntityId(String baseEntityId, HttpServletResponse response) {
 		try {
 			MultimediaDTO multimediaDTO = new MultimediaDTO(baseEntityId, "", "image/jpeg", null, "");
 
