@@ -192,26 +192,6 @@ public class MultimediaController {
 	}
 
 	/**
-	 * Downloads file on successful authentication
-	 *
-	 * @param baseEntityId
-	 * @param userName
-	 * @param password
-	 * @param request
-	 * @param response
-	 */
-	private void downloadFileWithAuth(String baseEntityId, String userName, String password,
-									  HttpServletRequest request, HttpServletResponse response) {
-		try {
-			if (!authenticate(userName, password, request).isAuthenticated()) { return; }
-
-			downloadFileByBaseEntityId(baseEntityId, response);
-		} catch (Exception e) {
-			logger.error("", e);
-		}
-	}
-
-	/**
 	 * Download file by baseEntityId
 	 *
 	 * @param baseEntityId
