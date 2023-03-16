@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,13 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -81,31 +74,24 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param fileName
-	 * @param userName
-	 * @param password
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/download/{fileName:.+}", method = RequestMethod.GET)
-	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName,
-			@RequestHeader(value = "username") String userName,
-			@RequestHeader(value = "password") String password, HttpServletRequest request) {
-
+	public void downloadFileWithAuth(HttpServletResponse response, @PathVariable("fileName") String fileName, HttpServletRequest request) {
 		try {
 			if (hasSpecialCharacters(fileName)) {
 				specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
 				return;
 			}
 
-			if (authenticate(userName, password, request).isAuthenticated()) {
-				File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
-				if (file != null) {
-					if (fileName.endsWith("mp4")) {
-						file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
-					}
-					downloadFile(file, response);
-				} else {
-					writeFileNotFound(response);
+			File file = multimediaService.retrieveFile(multiMediaDir + File.separator + "images" + File.separator + fileName.trim());
+			if (file != null) {
+				if (fileName.endsWith("mp4")) {
+					file = new File(multiMediaDir + File.separator + "videos" + File.separator + fileName.trim());
 				}
+				downloadFile(file, response);
+			} else {
+				writeFileNotFound(response);
 			}
 		} catch (Exception e) {
 			logger.error("", e);
@@ -118,8 +104,6 @@ public class MultimediaController {
 	 *
 	 * @param response
 	 * @param baseEntityId
-	 * @param userName
-	 * @param password
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/profileimage/{baseEntityId}", method = RequestMethod.GET)
@@ -146,20 +130,13 @@ public class MultimediaController {
 	 * @param entityId
 	 * @param contentType
 	 * @param fileCategory
-	 * @param userName
-	 * @param password
 	 */
 	@RequestMapping(value = "/media/{entity-id}", method = RequestMethod.GET)
 	public void downloadFiles(HttpServletResponse response,
 			HttpServletRequest request,
 			@PathVariable("entity-id") String entityId,
 			@RequestParam(value = "content-type", required = false) String contentType,
-			@RequestParam(value = "file-category", required = false) String fileCategory,
-			@RequestHeader(value = "username") String userName,
-			@RequestHeader(value = "password") String password) {
-
-
-		if (!authenticate(userName, password, request).isAuthenticated()) { return; }
+			@RequestParam(value = "file-category", required = false) String fileCategory) {
 
 		if (!TextUtils.isBlank(fileCategory) && MULTI_VERSION.equals(fileCategory)) {
 			List<Multimedia> multimediaFiles = multimediaService
@@ -175,7 +152,7 @@ public class MultimediaController {
 			}
 		} else {
 			// default to single profile image retrieval logic
-			downloadFileWithAuth(entityId, userName, password, request, response);
+			downloadFileByBaseEntityId(entityId, response);
 		}
 	}
 
@@ -270,8 +247,7 @@ public class MultimediaController {
 	 * @throws Exception
 	 */
 	private void downloadFile(File file, HttpServletResponse response) throws Exception {
-
-		if(hasSpecialCharacters(file.getName())) {
+		if (hasSpecialCharacters(file.getName())) {
 			specialCharactersError(response, FILE_NAME_ERROR_MESSAGE);
 			return;
 		}

@@ -2,11 +2,7 @@ package org.opensrp.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.opensrp.dto.form.MultimediaDTO;
 import org.opensrp.service.MultimediaService;
 import org.opensrp.service.multimedia.FileSystemMultimediaFileManager;
@@ -14,7 +10,6 @@ import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter;
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,9 +28,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.opensrp.web.controller.MultimediaController.ENTITY_ID_ERROR_MESSAGE;
 import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -94,7 +87,7 @@ public class MultimediaControllerTest {
 		Whitebox.setInternalState(controller, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 
-		controller.downloadFileWithAuth(httpServletResponse, "fileName", "testUser", "password", httpServletRequest);
+		controller.downloadFileWithAuth(httpServletResponse, "fileName", httpServletRequest);
 
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());
@@ -157,19 +150,13 @@ public class MultimediaControllerTest {
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
 
-
 	@Test
 	public void testDownloadFileWithAuthWithSpecialCharacterFileName() throws Exception {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("username", "testUser");
-		httpHeaders.add("password", "password");
-
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		Whitebox.setInternalState(multimediaController, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 		
-		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf")
-				.headers(httpHeaders))
+		MvcResult result = mockMvc.perform(get(BASE_URL + "/download/{fileName:.+}", "test*.pdf"))
 				.andExpect(content().string(FILE_NAME_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
