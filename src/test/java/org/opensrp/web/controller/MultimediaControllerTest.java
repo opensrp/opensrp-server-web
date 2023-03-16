@@ -35,19 +35,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 public class MultimediaControllerTest {
-
+	
 	@InjectMocks
 	private MultimediaController multimediaController;
-
+	
 	@Mock
 	private MultimediaService multimediaService;
-
+	
 	private MockMvc mockMvc;
-
+	
 	private final String allowedMimeTypes = "application/octet-stream,image/jpeg,image/gif,image/png";
+	
 	private final String ENTITY_ID_ERROR = "Entity Id should not contain any special character!";
+	
 	private final String BASE_URL = "/multimedia";
-
+	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -55,30 +57,30 @@ public class MultimediaControllerTest {
 				addFilter(new CrossSiteScriptingPreventionFilter(), "/*").build();
 		ReflectionTestUtils.setField(multimediaController, "allowedMimeTypes", allowedMimeTypes);
 	}
-
+	
 	@Test
 	public void testUploadShouldUploadFileWithCorrectName() throws Exception {
 		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
 		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
-
+		
 		multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
-
+		
 		ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-
+		
 		// verify call
 		Mockito.verify(multimediaService)
 				.saveFile(Mockito.any(MultimediaDTO.class), Mockito.any(byte[].class), stringArgumentCaptor.capture());
-
+		
 		// verify call arguments
 		assertEquals(stringArgumentCaptor.getValue(), "originalName");
 	}
-
+	
 	@Test
 	public void testDownloadWithAuth() {
 		MultimediaController controller = Mockito.spy(new MultimediaController());
-
+		
 		MultimediaService multimediaService = mock(MultimediaService.class);
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
 		HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
@@ -86,37 +88,39 @@ public class MultimediaControllerTest {
 		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
 		Whitebox.setInternalState(controller, "provider", provider);
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
-
+		
 		controller.downloadFileWithAuth(httpServletResponse, "fileName", httpServletRequest);
-
+		
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());
 	}
-
+	
 	@Test
 	public void testUploadShouldReturnBadRequestWithInvalidEntityId() throws Exception {
 		MultipartFile multipartFile = mock(MultipartFile.class);
 		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
-
-		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id"+"\r", "file-category", multipartFile);
+		
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id" + "\r", "file-category",
+				multipartFile);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-		assertEquals(response.getBody(),ENTITY_ID_ERROR);
+		assertEquals(response.getBody(), ENTITY_ID_ERROR);
 	}
-
+	
 	@Test
 	public void testUploadShouldReturnBadRequestWithSpecialCharacterFileName() throws Exception {
 		MultipartFile multipartFile = mock(MultipartFile.class);
 		Mockito.doReturn("originalName" + "\t").when(multipartFile).getOriginalFilename();
 		Mockito.doReturn("image/jpeg").when(multipartFile).getContentType();
 		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
-
-		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category", multipartFile);
+		
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category",
+				multipartFile);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
 		assertEquals(response.getBody(), FILE_NAME_ERROR_MESSAGE);
 	}
-
+	
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterFileName() throws Exception {
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
@@ -124,18 +128,18 @@ public class MultimediaControllerTest {
 		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
 		File file = mock(File.class);
 		when(multimediaService.retrieveFile(anyString())).thenReturn(file);
-		when(file.getName()).thenReturn("testFile"+ "\r" + ".pdf");
-
+		when(file.getName()).thenReturn("testFile" + "\r" + ".pdf");
+		
 		MultimediaFileManager fileManager = mock(FileSystemMultimediaFileManager.class);
 		doReturn("file_path").when(fileManager).getMultimediaFilePath(any(MultimediaDTO.class), anyString());
 		doReturn(fileManager).when(multimediaService).getFileManager();
-
+		
 		MvcResult result = mockMvc.perform(get(BASE_URL + "/profileimage/{baseEntityId}", "base-entity-id"))
 				.andExpect(content().string(FILE_NAME_ERROR_MESSAGE))
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
-
+	
 	@Test
 	public void testDownloadFileByClientIdWithSpecialCharacterEntityId() throws Exception {
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
@@ -149,7 +153,7 @@ public class MultimediaControllerTest {
 				.andReturn();
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
-
+	
 	@Test
 	public void testDownloadFileWithAuthWithSpecialCharacterFileName() throws Exception {
 		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
@@ -162,45 +166,67 @@ public class MultimediaControllerTest {
 		assertEquals(result.getResponse().getStatus(), HttpStatus.BAD_REQUEST.value());
 	}
 	
+	@Test
+	public void testDownloadFileWithAuthWithClientCallsDownloadFileWithBaseEntityId() throws Exception {
+		MultimediaController controller = Mockito.spy(new MultimediaController());
+		
+		MultimediaService multimediaService = mock(MultimediaService.class);
+		DrishtiAuthenticationProvider provider = mock(DrishtiAuthenticationProvider.class);
+		HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		Whitebox.setInternalState(controller, "multimediaService", multimediaService);
+		Whitebox.setInternalState(controller, "provider", provider);
+		Mockito.doReturn(getMockedAuthentication()).when(provider).authenticate(any(Authentication.class));
+		
+		MultimediaFileManager fileManager = mock(FileSystemMultimediaFileManager.class);
+		doReturn("file_path").when(fileManager).getMultimediaFilePath(any(MultimediaDTO.class), anyString());
+		doReturn(fileManager).when(multimediaService).getFileManager();
+		
+		controller.downloadFileByClientId(httpServletResponse, "base-entity-id", httpServletRequest);
+		
+		// verify call to the service
+		Mockito.verify(multimediaService).retrieveFile(anyString());
+	}
+	
 	private Authentication getMockedAuthentication() {
 		Authentication authentication = new Authentication() {
-
+			
 			@Override
 			public Collection<? extends GrantedAuthority> getAuthorities() {
 				return null;
 			}
-
+			
 			@Override
 			public Object getCredentials() {
 				return "";
 			}
-
+			
 			@Override
 			public Object getDetails() {
 				return null;
 			}
-
+			
 			@Override
 			public Object getPrincipal() {
 				return "Test User";
 			}
-
+			
 			@Override
 			public boolean isAuthenticated() {
 				return true;
 			}
-
+			
 			@Override
 			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
+			
 			}
-
+			
 			@Override
 			public String getName() {
 				return "admin";
 			}
 		};
-
+		
 		return authentication;
 	}
 }
