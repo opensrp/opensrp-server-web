@@ -12,7 +12,6 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -191,7 +190,6 @@ public class MultimediaControllerTest {
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());
 	}
-	
 	
 	@Test
 	public void testUploadFilesWithMimeTypeThatIsNotAllowedReturnsBadRequest() throws Exception {
