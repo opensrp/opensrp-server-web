@@ -1,5 +1,6 @@
 package org.opensrp.web.controller;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
@@ -11,6 +12,7 @@ import org.opensrp.web.config.security.filter.CrossSiteScriptingPreventionFilter
 import org.opensrp.web.security.DrishtiAuthenticationProvider;
 import org.powermock.reflect.Whitebox;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +34,9 @@ import static org.mockito.Mockito.*;
 import static org.opensrp.web.controller.MultimediaController.ENTITY_ID_ERROR_MESSAGE;
 import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class MultimediaControllerTest {
 	
@@ -186,6 +190,20 @@ public class MultimediaControllerTest {
 		
 		// verify call to the service
 		Mockito.verify(multimediaService).retrieveFile(anyString());
+	}
+	
+	
+	@Test
+	public void testUploadFilesWithMimeTypeThatIsNotAllowedReturnsBadRequest() throws Exception {
+		MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+		Mockito.doReturn("originalName").when(multipartFile).getOriginalFilename();
+		Mockito.doReturn("pdf").when(multipartFile).getContentType();
+		Mockito.doReturn(new byte[10]).when(multipartFile).getBytes();
+		
+		ResponseEntity<String> response = multimediaController.uploadFiles("providerID", "entity-id", "file-category",
+				multipartFile);
+		
+		Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
 	
 	private Authentication getMockedAuthentication() {
