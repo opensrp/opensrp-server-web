@@ -33,9 +33,7 @@ import static org.mockito.Mockito.*;
 import static org.opensrp.web.controller.MultimediaController.ENTITY_ID_ERROR_MESSAGE;
 import static org.opensrp.web.controller.MultimediaController.FILE_NAME_ERROR_MESSAGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class MultimediaControllerTest {
 	
