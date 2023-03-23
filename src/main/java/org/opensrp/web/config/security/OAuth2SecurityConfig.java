@@ -89,27 +89,38 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 	
 	@Bean
 	public JdbcTokenStore tokenStore() {
-		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		final AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
-		Logger logger = LogManager.getLogger(JdbcTokenStore.class.toString());
-		return new JdbcTokenStore(dataSource) {
-			
-			@Override
-			public void storeAccessToken(final OAuth2AccessToken token, final OAuth2Authentication authentication) {
-				logger.info("Invoking store access token method");
-				if (authentication != null) {
-					final String key = authenticationKeyGenerator.extractKey(authentication);
-					int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?",
-							key);
-					String isSuccess = (rowsAffected > 0) ? "Success" : "Failure";
-					logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key,
-							isSuccess);
-				}
-				
-				super.storeAccessToken(token, authentication);
+		return new CustomJdbcTokenStore(dataSource);
+	}
+	
+	public class CustomJdbcTokenStore extends JdbcTokenStore {
+		
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		
+		AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+		
+		Logger logger = LogManager.getLogger(CustomJdbcTokenStore.class.toString());
+		
+		public CustomJdbcTokenStore(DataSource dataSource) {
+			super(dataSource);
+		}
+		
+		@Override
+		public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
+			logger.info("Invoking store access token method");
+			if (authentication != null) {
+				final String key = authenticationKeyGenerator.extractKey(authentication);
+				int rowsAffected = jdbcTemplate.update("delete from oauth_access_token where authentication_id = ?",
+						key);
+				String isSuccess = (rowsAffected > 0) ? "Success" : "Failure";
+				logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key,
+						isSuccess);
 			}
 			
-		};
+			super.storeAccessToken(token, authentication);
+		}
+		
 	}
+	
+	;
 	
 }
