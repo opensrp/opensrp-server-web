@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -433,7 +434,7 @@ public class ClientFormResource {
                 errorMessage = ex.getMessage();
             }
             try {
-                new Yaml().load(fileContentString);
+                new Yaml(new SafeConstructor()).load(fileContentString);
                 return null;
             }catch (Exception ex) {
                 logger.error("YAML file upload is invalid", ex);
