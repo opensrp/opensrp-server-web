@@ -115,12 +115,14 @@ public class OAuth2SecurityConfig extends BasicAuthSecurityConfig {
 				logger.info("Attempt to delete authentication_id {} from oauth_access_token table was a {}", key,
 						isSuccess);
 			}
-			
+			storeAccessTokenInSuper(token, authentication);
+		}
+		
+		// added to suppress call to super#storeAccesToken when testing
+		public void storeAccessTokenInSuper(OAuth2AccessToken token, OAuth2Authentication authentication){
 			super.storeAccessToken(token, authentication);
 		}
 		
 	}
-	
-	;
 	
 }
