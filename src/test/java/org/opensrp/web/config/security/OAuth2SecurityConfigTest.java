@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,8 +28,6 @@ public class OAuth2SecurityConfigTest {
 	public void testTokenStore() throws SQLException {
 		OAuth2SecurityConfig oAuth2SecurityConfig = new OAuth2SecurityConfig();
 		DataSource mockDatasource = Mockito.mock(DataSource.class);
-		
-		Mockito.when(mockDatasource.getConnection()).thenReturn(Mockito.mock(Connection.class));
 		Whitebox.setInternalState(oAuth2SecurityConfig, "dataSource", mockDatasource);
 		
 		OAuth2SecurityConfig.CustomJdbcTokenStore customJdbcTokenStore = (OAuth2SecurityConfig.CustomJdbcTokenStore) Mockito.spy(
@@ -38,7 +35,6 @@ public class OAuth2SecurityConfigTest {
 		JdbcTemplate jdbcTemplate = Mockito.mock(JdbcTemplate.class);
 		Mockito.when(jdbcTemplate.update(Mockito.anyString())).thenReturn(1);
 		Mockito.lenient().doNothing().when(customJdbcTokenStore).storeAccessTokenInSuper(Mockito.any(), Mockito.any());
-		
 		AuthenticationKeyGenerator authenticationKeyGenerator = Mockito.spy(new DefaultAuthenticationKeyGenerator());
 		Whitebox.setInternalState(customJdbcTokenStore, "authenticationKeyGenerator", authenticationKeyGenerator);
 		Whitebox.setInternalState(customJdbcTokenStore, "jdbcTemplate", jdbcTemplate);
