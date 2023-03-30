@@ -94,7 +94,7 @@ jobs:
         path: './results/java.sarif'
 
     - name: Import CodeQL Findings to DefectDojo
-      uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+      uses: portswigger-cloud/defectdojo-import-scan@v1.0.0
       with:
         defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
         defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
