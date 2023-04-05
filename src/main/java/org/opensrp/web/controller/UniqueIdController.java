@@ -98,7 +98,7 @@ public class UniqueIdController extends OpenmrsService {
 		        FileOutputStream fileOutputStream = new FileOutputStream(qrCodesDir + File.separator + fileName);
 		        OutputStream os = response.getOutputStream();) {
 			user = openmrsUserService.getUser(currentPrincipalName);
-			if (!checkRoleIfRoleExitst(user.getRoles(), "opensrp-generate-qr-code")) {
+			if (!checkRoleIfRoleExits(user.getRoles(), "opensrp-generate-qr-code")) {
 				return new ResponseEntity<>("Sorry, insufficient privileges to generate ID QR codes", HttpStatus.OK);
 			}
 			
@@ -120,7 +120,7 @@ public class UniqueIdController extends OpenmrsService {
 		return new ResponseEntity<>(new Gson().toJson("" + message), HttpStatus.OK);
 	}
 	
-	boolean checkRoleIfRoleExitst(List<String> roleList, String role) {
+	boolean checkRoleIfRoleExits(List<String> roleList, String role) {
 		for (String roleName : roleList)
 			if (StringUtils.containsIgnoreCase(roleName, role))
 				return true;
