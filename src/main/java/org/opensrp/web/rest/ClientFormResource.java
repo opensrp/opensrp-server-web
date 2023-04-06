@@ -267,8 +267,9 @@ public class ClientFormResource {
         if (errorMessage != null)
             return errorMessage;
 
-
-        logger.debug(fileContentString);
+        if (fileContentString.matches("\\w*")) {
+            logger.debug(fileContentString);
+        }
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
                 formName, module, isJsonValidator, identifier, relation));
