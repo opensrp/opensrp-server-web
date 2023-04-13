@@ -166,7 +166,9 @@ public class ClientResource extends RestResource<Client> {
 
 	private void includeClientRelatives(HttpServletRequest request, List<Client> clients) {
 		String searchRelationship = getStringFilter(SEARCH_RELATIONSHIP, request);
-		logger.info("Search relationship: " + searchRelationship);
+		if (searchRelationship.matches("\\w*")) {
+			logger.info(String.format("Search relationship: %s"),searchRelationship);
+		}
 		if (StringUtils.isBlank(searchRelationship)) {
 			String relationships = getStringFilter(RELATIONSHIPS, request);
 			List<String> relationshipTypes = StringUtils.isBlank(relationships) ?
