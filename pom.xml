@@ -107,6 +107,7 @@
             <id>spring plugin repo</id>
             <url>https://repo.spring.io/plugins-release/</url>
         </repository>
+
     </repositories>
 
     <dependencies>
@@ -264,7 +265,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-security-adapter</artifactId>
-            <version>16.1.0</version>
+            <version>20.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -696,6 +697,7 @@
                 <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
                 <openlmis.stock.profile>default</openlmis.stock.profile>
                 <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
+                <plan.generation.profile>default</plan.generation.profile>
             </properties>
         </profile>
         <profile>
