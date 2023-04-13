@@ -196,14 +196,14 @@ public class RestUtils {
 				fis = new FileInputStream(aFile);
 				zipEntry = new ZipEntry(StringUtils.isNotBlank(filePath) ? filePath.replace(tempDirectory, "") : fileName);
 				if (fileName.matches("\\w*")) {
-					logger.info(String.format("Writing file %s to zip file"), filePath);
+					logger.info(String.format("Writing file %s to zip file", filePath));
 				}
 			}
 			else {
 				fis = new FileInputStream(filePath);
 				zipEntry = new ZipEntry(filePath);
 				if (filePath.matches("\\w*")) {
-					logger.info(String.format("Writing file %s to zip file"), filePath);
+					logger.info(String.format("Writing file %s to zip file", filePath));
 				}
 			}
 			zipStream.putNextEntry(zipEntry);

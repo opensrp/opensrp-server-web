@@ -48,7 +48,7 @@ public class RapidproMessageListener {
 		MessageFactory messageFactory = null;
 		messageFactory = MessageFactory.getMessageFactory(MessageType.ANNOUNCEMENT);
 		if (provider.matches("\\w*")) {
-			logger.info(String.format("request receive for camp announcement message provider: %s"), provider);
+			logger.info(String.format("request receive for camp announcement message provider: %s, provider"));
 		}
 		try {
 			List<Camp> camps = allCamp.findAllActiveByProvider(provider);
