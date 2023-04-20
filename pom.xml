@@ -107,7 +107,6 @@
             <id>spring plugin repo</id>
             <url>https://repo.spring.io/plugins-release/</url>
         </repository>
-
     </repositories>
 
     <dependencies>
@@ -697,7 +696,6 @@
                 <opensrp.queuing.service.profile>default</opensrp.queuing.service.profile>
                 <openlmis.stock.profile>default</openlmis.stock.profile>
                 <dhis2.sync.vaccine.tracker>default</dhis2.sync.vaccine.tracker>
-                <plan.generation.profile>default</plan.generation.profile>
             </properties>
         </profile>
         <profile>
