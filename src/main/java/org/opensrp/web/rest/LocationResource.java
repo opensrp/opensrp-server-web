@@ -1,49 +1,36 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
-import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
-import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.StructureDetails;
+import org.opensrp.search.LocationSearchBean;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.LocationSearchcBean;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
-import org.opensrp.domain.StructureDetails;
-import org.opensrp.search.LocationSearchBean;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
-import org.opensrp.web.bean.Identifier;
-import org.opensrp.web.bean.LocationSearchcBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,25 +38,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import lombok.Data;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.config.SwaggerDocStringHelper.*;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -641,6 +619,23 @@ public class LocationResource {
 		return locationService.buildLocationHeirarchyWithAncestors(locationId);
 	}
 
+    /**
+     * Get count of all locations
+     *
+     * @param serverVersion
+     * @return
+     */
+    @RequestMapping(value = "/count", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> countLocations(@RequestParam(value = SERVER_VERSION) long serverVersion) {
+        Map<String, Long> locationCount = new HashMap<>();
+        locationCount.put("locationCount", locationService.countAllLocations(serverVersion));
+
+        return new ResponseEntity<>(
+                gson.toJson(locationCount),
+                RestUtils.getJSONUTF8Headers(),
+                HttpStatus.OK
+        );
+    }
 
 	@Data
 	static class LocationSyncRequestWrapper {
