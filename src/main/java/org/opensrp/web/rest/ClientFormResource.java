@@ -267,7 +267,7 @@ public class ClientFormResource {
         if (errorMessage != null)
             return errorMessage;
 
-        if (fileContentString.matches("\\w*")) {
+        if (fileContentString.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
             logger.debug(fileContentString);
         }
         ClientFormService.CompleteClientForm completeClientForm =

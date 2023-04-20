@@ -11,6 +11,7 @@ import org.opensrp.api.domain.User;
 import org.opensrp.domain.Multimedia;
 import org.opensrp.service.multimedia.MultimediaFileManager;
 import org.opensrp.service.multimedia.S3MultimediaFileManager;
+import org.opensrp.web.Constants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 
@@ -195,14 +196,14 @@ public class RestUtils {
 				aFile = new File(StringUtils.isNotBlank(filePath) ? filePath : fileName);
 				fis = new FileInputStream(aFile);
 				zipEntry = new ZipEntry(StringUtils.isNotBlank(filePath) ? filePath.replace(tempDirectory, "") : fileName);
-				if (fileName.matches("\\w*")) {
+				if (fileName.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
 					logger.info(String.format("Writing file %s to zip file", filePath));
 				}
 			}
 			else {
 				fis = new FileInputStream(filePath);
 				zipEntry = new ZipEntry(filePath);
-				if (filePath.matches("\\w*")) {
+				if (filePath.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
 					logger.info(String.format("Writing file %s to zip file", filePath));
 				}
 			}

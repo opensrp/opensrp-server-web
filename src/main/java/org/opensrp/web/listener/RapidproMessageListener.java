@@ -11,9 +11,9 @@ import org.opensrp.connector.rapidpro.MessageFactory;
 import org.opensrp.connector.rapidpro.MessageService;
 import org.opensrp.connector.rapidpro.MessageType;
 import org.opensrp.connector.repository.couch.AllCamp;
+import org.opensrp.web.Constants;
 import org.smartregister.domain.Event;
 import org.opensrp.service.EventService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -47,8 +47,8 @@ public class RapidproMessageListener {
 	public void campAnnouncementListener(String provider) {
 		MessageFactory messageFactory = null;
 		messageFactory = MessageFactory.getMessageFactory(MessageType.ANNOUNCEMENT);
-		if (provider.matches("\\w*")) {
-			logger.info(String.format("request receive for camp announcement message provider: %s, provider"));
+		if (provider.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
+			logger.info(String.format("request receive for camp announcement message provider: %s", provider));
 		}
 		try {
 			List<Camp> camps = allCamp.findAllActiveByProvider(provider);

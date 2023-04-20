@@ -31,6 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
+import org.opensrp.web.Constants;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Client;
 import org.opensrp.search.AddressSearchBean;
@@ -166,7 +167,7 @@ public class ClientResource extends RestResource<Client> {
 
 	private void includeClientRelatives(HttpServletRequest request, List<Client> clients) {
 		String searchRelationship = getStringFilter(SEARCH_RELATIONSHIP, request);
-		if (searchRelationship.matches("\\w*")) {
+		if (searchRelationship.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
 			logger.info(String.format("Search relationship: %s",searchRelationship));
 		}
 		if (StringUtils.isBlank(searchRelationship)) {
