@@ -6,7 +6,7 @@
 
     <artifactId>opensrp-server-web</artifactId>
     <packaging>war</packaging>
-    <version>2.10.10-SNAPSHOT</version>
+    <version>2.10.11-ALPHA-SNAPSHOT</version>
     <name>opensrp-server-web</name>
     <description>OpenSRP Server Web Application</description>
     <url>https://github.com/OpenSRP/opensrp-server-web</url>
@@ -22,6 +22,7 @@
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
         <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
         <redis.jedis.version>3.8.0</redis.jedis.version>
+		<redis.lettuce.version>6.1.6.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
         <opensrp.core.version>2.14.8-ALPHA-SNAPSHOT</opensrp.core.version>
@@ -221,7 +222,7 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
-            <version>5.5.13</version>
+            <version>5.5.13.3</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.zxing/core -->
