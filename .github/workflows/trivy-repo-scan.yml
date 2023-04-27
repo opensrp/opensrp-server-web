@@ -59,7 +59,7 @@ jobs:
           path: './trivy-repo-full-results.json'
 
       - name: Import Trivy Findings to DefectDojo
-        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        uses: portswigger-cloud/defectdojo-import-scan@v1
         with:
           defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
           defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
