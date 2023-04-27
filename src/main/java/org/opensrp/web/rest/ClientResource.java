@@ -167,7 +167,7 @@ public class ClientResource extends RestResource<Client> {
 
 	private void includeClientRelatives(HttpServletRequest request, List<Client> clients) {
 		String searchRelationship = getStringFilter(SEARCH_RELATIONSHIP, request);
-		if (searchRelationship.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
+		if ( StringUtils.isNotBlank(searchRelationship) && searchRelationship.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
 			logger.info(String.format("Search relationship: %s",searchRelationship));
 		}
 		if (StringUtils.isBlank(searchRelationship)) {
