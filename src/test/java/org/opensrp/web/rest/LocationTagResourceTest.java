@@ -10,6 +10,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.opensrp.service.LocationTagService;
 import org.smartregister.domain.LocationTag;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.web.server.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.doThrow;
 
 public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 
@@ -93,6 +96,49 @@ public class LocationTagResourceTest extends BaseResourceTest<LocationTag> {
 		assertEquals(argumentCaptor.getValue().getName(), expectedLocationTag.getName());
 
 	}
+
+	@Test
+	public void testCreateNewLocationTagDoesNotAddLocationTagWhenJsonProcessingExceptionIsThrown() throws Exception {
+
+		postRequestWithJsonContentAndReturnString(BASE_URL, "{\"ids\":\"0\"}", MockMvcResultMatchers.status().isBadRequest());
+
+		verifyNoInteractions(locationTagService);
+
+	}
+
+	@Test
+	public void testCreateNewLocationTagCallsAddOrUpdateLocationTagAndReturnsABadHTTPResponseStatusWhenIllegalArgumentExceptionIsThrown() throws Exception {
+
+		doThrow(new IllegalArgumentException()).when(locationTagService).addOrUpdateLocationTag(any());
+		LocationTag expectedLocationTag = initTestLocationTag1();
+
+		postRequestWithJsonContentAndReturnString(BASE_URL, locationTagJson, MockMvcResultMatchers.status().isBadRequest());
+
+		verify(locationTagService).addOrUpdateLocationTag(argumentCaptor.capture());
+		assertEquals(argumentCaptor.getValue().getName(), expectedLocationTag.getName());
+	}
+
+	@Test
+	public void testCreateNewLocationTagCallsAddOrUpdateLocationTagAndReturnsAConflictHTTPResponseStatusWhenDuplicateKeyExceptionIsThrown() throws Exception {
+
+		doThrow(new DuplicateKeyException("Id is duplicated")).when(locationTagService).addOrUpdateLocationTag(any());
+		LocationTag expectedLocationTag = initTestLocationTag1();
+
+		postRequestWithJsonContentAndReturnString(BASE_URL, locationTagJson, MockMvcResultMatchers.status().isConflict());
+
+		verify(locationTagService).addOrUpdateLocationTag(argumentCaptor.capture());
+		assertEquals(argumentCaptor.getValue().getName(), expectedLocationTag.getName());
+	}
+
+	@Test
+	public void testCreateNewLocationTagDoesNotCallAddOrUpdateLocationTagWhenJsonProcessingException() throws Exception {
+
+		postRequestWithJsonContentAndReturnString(BASE_URL, "{\"ids\":\"0\"}", MockMvcResultMatchers.status().isBadRequest());
+
+		verifyNoInteractions(locationTagService);
+
+	}
+
 
 	@Test
 	public void testShouldUpdateExistingLocationTagResource() throws Exception {
