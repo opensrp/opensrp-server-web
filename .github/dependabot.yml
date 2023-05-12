@@ -1,0 +1,47 @@
+version: 2
+updates:
+  # Keep maven dependencies up-to-date
+  - package-ecosystem: maven
+    # Look for `pom.xml`  in the `root` directory
+    directory: "/"
+    # Check the maven registry for updates every day (weekdays)
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    target-branch: 
+      - "master"
+      - "v2"
+    # Raise all maven pull requests with custom labels
+    labels:
+      - "maven dependencies"
+    commit-message:
+      prefix: requirements
+    reviewers:
+      - "hilpitome"
+      - "ekigamba"
+
+
+  # Keep docker dependencies up-to-date
+  - package-ecosystem: docker
+    # Look for `Dockerfile`  in the `root` directory
+    directory: "/"
+    # Check the docker registry for updates every day (weekdays)
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    target-branch: 
+      - "master"
+      - "v2"
+    # Raise all docker pull requests with custom labels
+    labels:
+      - "docker dependencies"
+    commit-message:
+      prefix: requirements
+    reviewers:
+      - "ukanga"
+      - "bennsimon"
+      - "qiarie"
+      - "manutarus"
+      - "hilpitome"
+      - "ekigamba"
+      - "ndegwamartin"

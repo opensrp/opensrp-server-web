@@ -33,7 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -266,8 +268,9 @@ public class ClientFormResource {
         if (errorMessage != null)
             return errorMessage;
 
-
-        logger.debug(fileContentString);
+        if (fileContentString.matches(Constants.ALPHA_NUMERIC_MATCHER)) {
+            logger.debug(fileContentString);
+        }
         ClientFormService.CompleteClientForm completeClientForm =
                 clientFormService.addClientForm(getClientForm(fileContentString), getClientFormMetadata(version,
                 formName, module, isJsonValidator, identifier, relation));
@@ -433,7 +436,7 @@ public class ClientFormResource {
                 errorMessage = ex.getMessage();
             }
             try {
-                new Yaml().load(fileContentString);
+                new Yaml(new SafeConstructor(new LoaderOptions())).load(fileContentString);
                 return null;
             }catch (Exception ex) {
                 logger.error("YAML file upload is invalid", ex);

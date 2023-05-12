@@ -19,8 +19,10 @@ import org.opensrp.web.Constants;
 import org.opensrp.web.bean.JsonWidgetValidatorDefinition;
 
 import org.springframework.lang.NonNull;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.ComposerException;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -131,7 +133,7 @@ public class ClientFormValidator {
         HashSet<String> propertyFileReferences = new HashSet<>();
         HashSet<String> missingPropertyFileReferences = new HashSet<>();
         try {
-            Map<Object, Object> document = new Yaml().load(fileContent);
+            Map<Object, Object> document = new Yaml(new SafeConstructor(new LoaderOptions())).load(fileContent);
             if (document.containsKey(PROPERTIES_FILE_NAME)) {
                 propertyFileReferences.add((String) document.get(PROPERTIES_FILE_NAME));
             }
