@@ -71,14 +71,24 @@ jobs:
 #          defectdojo-engagement-name: Github Actions Initiated Trivy SAST Scan
 #          scan-results-file-name: trivy-repo-full-results.json
 
-      - name: Export Trivy report to DefectDojo
-        uses: defectdojo/defectdojo-action@v1
-        with:
-          api_url: ${{ secrets.DEFECTDOJO_API_URL }}
-          api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
-          engagement_id: 45
-          test_id: 247
-          file: './trivy-repo-full-results.json'
+#      - name: Export Trivy report to DefectDojo
+#        uses: defectdojo/defectdojo-action@v1
+#        with:
+#          api_url: ${{ secrets.DEFECTDOJO_API_URL }}
+#          api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+#          engagement_id: 45
+#          test_id: 247
+#          file: './trivy-repo-full-results.json'
+
+      -  name: Export report to DefectDojo
+         run: |
+           curl -X POST -H "Content-Type: application/json" \
+           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
+           -d @trivy-repo-full-results.json \
+           "${DEFECTDOJO_API_URL}/api/v2/engagements/45/tests/247/import-scan/"
+         env:
+           DEFECTDOJO_API_URL: ${{ secrets.DEFECTDOJO_API_URL }}
+           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
 
       - name: Create summary of trivy issues on Repository Full scan
         run: |
