@@ -58,18 +58,27 @@ jobs:
           name: "trivy-repo-full-results.json"
           path: './trivy-repo-full-results.json'
 
-      - name: Import Trivy Findings to DefectDojo
-        uses: portswigger-cloud/defectdojo-import-scan@v1
+#      - name: Import Trivy Findings to DefectDojo
+#        uses: portswigger-cloud/defectdojo-import-scan@v1
+#        with:
+#          defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
+#          defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
+#          defectdojo-password: ${{ secrets.DEFECTOJO_PASSWORD }}
+#          defectdojo-product-type: OPENSRP
+#          defectdojo-product: OpenSRP-Server-Web
+#          defectdojo-environment-type: Test
+#          defectdojo-scan-type: Trivy Scan
+#          defectdojo-engagement-name: Github Actions Initiated Trivy SAST Scan
+#          scan-results-file-name: trivy-repo-full-results.json
+
+      - name: Export Trivy report to DefectDojo
+        uses: defectdojo/defectdojo-action@v1
         with:
-          defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
-          defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
-          defectdojo-password: ${{ secrets.DEFECTOJO_PASSWORD }}
-          defectdojo-product-type: OPENSRP
-          defectdojo-product: OpenSRP-Server-Web
-          defectdojo-environment-type: Test
-          defectdojo-scan-type: Trivy Scan
-          defectdojo-engagement-name: Github Actions Initiated Trivy SAST Scan
-          scan-results-file-name: trivy-repo-full-results.json
+          api_url: ${{ secrets.DEFECTDOJO_API_URL }}
+          api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          engagement_id: 45
+          test_id: 247
+          file: './trivy-repo-full-results.json'
 
       - name: Create summary of trivy issues on Repository Full scan
         run: |
