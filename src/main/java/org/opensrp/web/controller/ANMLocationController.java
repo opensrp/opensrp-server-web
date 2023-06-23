@@ -1,15 +1,12 @@
 package org.opensrp.web.controller;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-import java.text.MessageFormat;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.opensrp.common.util.HttpAgent;
 import org.opensrp.common.util.HttpResponse;
+import org.opensrp.common.util.HttpUtil;
 import org.opensrp.dto.VillagesDTO;
 import org.opensrp.web.rest.RestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,29 +18,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.text.MessageFormat;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 public class ANMLocationController {
     private static Logger logger = LogManager.getLogger(ANMLocationController.class.toString());
     private final String opensrpANMVillagesURL;
-    private HttpAgent httpAgent;
 
     @Autowired
     public ANMLocationController(@Value("#{opensrp['opensrp.anm.villages.url']}") String opensrpANMVillagesURL,
-                                 UserController userController,
-                                 HttpAgent httpAgent) {
+                                 UserController userController) {
         this.opensrpANMVillagesURL = opensrpANMVillagesURL;
-        this.httpAgent = httpAgent;
     }
 
-    @RequestMapping(method = GET, value = "/anm-villages",produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = GET, value = "/anm-villages", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<VillagesDTO> villagesForANM(Authentication authentication) {
         HttpResponse response = new HttpResponse(false, null);
         try {
             String anmIdentifier = RestUtils.currentUser(authentication).getUsername();
-            response = httpAgent.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier);
+            response = HttpUtil.get(opensrpANMVillagesURL + "?anm-id=" + anmIdentifier, null);
             VillagesDTO villagesDTOs = new Gson().fromJson(response.body(),
                     new TypeToken<VillagesDTO>() {
                     }.getType());
