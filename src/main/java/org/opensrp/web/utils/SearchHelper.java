@@ -33,6 +33,7 @@ public class SearchHelper {
 		String BIRTH_DATE = "birth_date";
 
 		//Attributes
+		String ACTIVE = "active";
 		String INACTIVE = "inactive";
 		String LOST_TO_FOLLOW_UP = "lost_to_follow_up";
 		String NFC_CARD_IDENTIFIER = "nfc_card_identifier";
@@ -57,6 +58,7 @@ public class SearchHelper {
 		searchBean.setLastName(RestUtils.getStringFilter(LAST_NAME, request));
 		searchBean.setGender(RestUtils.getStringFilter(GENDER, request));
 
+		String active = RestUtils.getStringFilter(ACTIVE, request);
 		String inActive = RestUtils.getStringFilter(INACTIVE, request);
 		String lostToFollowUp = RestUtils.getStringFilter(LOST_TO_FOLLOW_UP, request);
 		String nfcCardIdentifier = RestUtils.getStringFilter(NFC_CARD_IDENTIFIER, request);
@@ -85,8 +87,12 @@ public class SearchHelper {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		if (!StringUtils.isBlank(inActive) || !StringUtils.isBlank(lostToFollowUp)
-				|| !StringUtils.isBlank(nfcCardIdentifier)) {
+		if (!StringUtils.isBlank(active) || !StringUtils.isBlank(inActive)
+				|| !StringUtils.isBlank(lostToFollowUp) || !StringUtils.isBlank(nfcCardIdentifier)) {
+
+			if (!StringUtils.isBlank(active)) {
+				attributes.put(ACTIVE, active);
+			}
 
 			if (!StringUtils.isBlank(inActive)) {
 				attributes.put(INACTIVE, inActive);
@@ -100,6 +106,7 @@ public class SearchHelper {
 				attributes.put("NFC_Card_Identifier", nfcCardIdentifier);//Key different case than constant
 			}
 		}
+
 
 		searchBean.setIdentifiers(identifiers);
 		searchBean.setAttributes(attributes);
