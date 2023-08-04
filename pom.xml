@@ -354,7 +354,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -556,8 +556,7 @@
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>${jetty.port}</port>
                         </connector>
-                        <connector
-                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
