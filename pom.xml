@@ -264,7 +264,7 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-security-adapter</artifactId>
-            <version>16.1.0</version>
+            <version>20.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -556,8 +556,7 @@
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>${jetty.port}</port>
                         </connector>
-                        <connector
-                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
