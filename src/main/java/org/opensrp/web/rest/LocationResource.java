@@ -1,49 +1,36 @@
 package org.opensrp.web.rest;
 
-import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
-import static org.opensrp.web.Constants.DEFAULT_GET_ALL_IDS_LIMIT;
-import static org.opensrp.web.Constants.DEFAULT_LIMIT;
-import static org.opensrp.web.Constants.LIMIT;
-import static org.opensrp.web.Constants.RETURN_COUNT;
-import static org.opensrp.web.Constants.TOTAL_RECORDS;
-import static org.opensrp.web.Constants.PAGE_NUMBER;
-import static org.opensrp.web.Constants.ORDER_BY_TYPE;
-import static org.opensrp.web.Constants.ORDER_BY_FIELD_NAME;
-import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT;
-import static org.opensrp.web.config.SwaggerDocStringHelper.GET_LOCATION_TREE_BY_ID_ENDPOINT_NOTES;
-import static org.opensrp.web.config.SwaggerDocStringHelper.LOCATION_RESOURCE;
-
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opensrp.api.util.LocationTree;
 import org.opensrp.common.AllConstants.BaseEntity;
-import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.connector.dhis2.location.DHIS2ImportLocationsStatusService;
+import org.opensrp.connector.dhis2.location.DHIS2ImportOrganizationUnits;
 import org.opensrp.domain.LocationDetail;
+import org.opensrp.domain.StructureDetails;
+import org.opensrp.search.LocationSearchBean;
+import org.opensrp.service.PhysicalLocationService;
+import org.opensrp.service.PlanService;
 import org.opensrp.web.Constants;
+import org.opensrp.web.bean.Identifier;
+import org.opensrp.web.bean.LocationSearchcBean;
 import org.opensrp.web.utils.Utils;
 import org.smartregister.domain.Jurisdiction;
 import org.smartregister.domain.LocationProperty;
 import org.smartregister.domain.PhysicalLocation;
 import org.smartregister.domain.PlanDefinition;
-import org.opensrp.domain.StructureDetails;
-import org.opensrp.search.LocationSearchBean;
-import org.opensrp.service.PhysicalLocationService;
-import org.opensrp.service.PlanService;
 import org.smartregister.utils.PropertiesConverter;
-import org.opensrp.web.bean.Identifier;
-import org.opensrp.web.bean.LocationSearchcBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,25 +38,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import lombok.Data;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.opensrp.common.AllConstants.OpenSRPEvent.Form.SERVER_VERSION;
+import static org.opensrp.web.Constants.*;
+import static org.opensrp.web.config.SwaggerDocStringHelper.*;
 
 @Controller
 @RequestMapping(value = "/rest/location")
@@ -346,6 +324,10 @@ public class LocationResource {
 	 * @param isJurisdiction    boolean which when true the search is done on jurisdictions and when false search is on structures
 	 * @param returnGeometry    boolean which controls if geometry is returned
 	 * @param propertiesFilters list of params with each param having name and value e.g name:House1
+	 * Amend to accept parentId in the following formats;
+	 * 1. parentId:
+	 * 2. parentId:""
+	 * 3. parentId:null
 	 * @return the structures or jurisdictions matching the params
 	 */
 	@RequestMapping(value = "/findByProperties", method = RequestMethod.GET, produces = {
@@ -361,10 +343,8 @@ public class LocationResource {
 			filters = new HashMap<>();
 			for (String filter : propertiesFilters) {
 				String[] filterArray = filter.split(":");
-				if (filterArray.length == 2 && (PARENT_ID.equalsIgnoreCase(filterArray[0])
-						|| PARENT_ID_NO_UNDERSCORE.equalsIgnoreCase(filterArray[0]))) {
-					parentId = Constants.NULL.equalsIgnoreCase(filterArray[1]) || StringUtils.isBlank(filterArray[1])
-							?  "" : filterArray [1];
+				if (PARENT_ID.equalsIgnoreCase(filterArray[0]) || PARENT_ID_NO_UNDERSCORE.equalsIgnoreCase(filterArray[0])) {
+					parentId = filterArray.length == 1 ? "" : filterArray[1] == null || filterArray[1].trim().equals("\"\"") || Constants.NULL.equalsIgnoreCase(filterArray[1]) ? "" : filterArray[1];
 
 				} else if (filterArray.length == 2) {
 					filters.put(filterArray[0], filterArray[1]);
