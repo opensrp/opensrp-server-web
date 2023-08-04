@@ -20,7 +20,7 @@
         <spring.security.version>5.7.2</spring.security.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
         <spring.fox.swagger.version>3.0.0</spring.fox.swagger.version>
-        <spring.data.redis>2.2.13.RELEASE</spring.data.redis>
+        <spring.data.redis>2.7.2</spring.data.redis>
         <redis.jedis.version>3.8.0</redis.jedis.version>
         <redis.lettuce.version>6.1.6.RELEASE</redis.lettuce.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
@@ -556,8 +556,7 @@
                         <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>${jetty.port}</port>
                         </connector>
-                        <connector
-                                implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
                             <port>8443</port>
                             <keystore>${main.basedir}/configs/assets/security/drishti_server.keystore</keystore>
                             <keyPassword>mouse monitor cube</keyPassword>
