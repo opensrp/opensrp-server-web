@@ -24,7 +24,7 @@
         <redis.jedis.version>3.8.0</redis.jedis.version>
         <opensrp.updatePolicy>always</opensrp.updatePolicy>
         <nexus-staging-maven-plugin.version>1.5.1</nexus-staging-maven-plugin.version>
-        <opensrp.core.version>2.14.5-SNAPSHOT</opensrp.core.version>
+        <opensrp.core.version>2.14.8-SNAPSHOT</opensrp.core.version>
         <opensrp.connector.version>2.4.1-SNAPSHOT</opensrp.connector.version>
         <opensrp.interface.version>2.0.1-SNAPSHOT</opensrp.interface.version>
         <powermock.version>2.0.5</powermock.version>
