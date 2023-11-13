@@ -145,6 +145,20 @@ public class UniqueIdControllerTest {
 		}
 		assertEquals(responseString,ERROR_MESSAGE);
 	}
+	
+	@Test
+	public void testCheckIfRoleExistsReturnsTrueIfRoleExists(){
+		List<String> roles = new ArrayList<>();
+		roles.add("role-1");
+		assertEquals(true, uniqueIdController.checkRoleIfRoleExits(roles,"role-1"));
+	}
+	
+	@Test
+	public void testCheckIfRoleExistsReturnsFalseIfRoleDoesNotExist(){
+		List<String> roles = new ArrayList<>();
+		roles.add("role-1");
+		assertEquals(false, uniqueIdController.checkRoleIfRoleExits(roles,"role-2"));
+	}
 
 	private Authentication getMockedAuthentication() {
 		Authentication authentication = new Authentication() {
