@@ -17,7 +17,7 @@ public class StructureRepositoryEventListener  implements ApplicationListener<St
 	@Override
 	public void onApplicationEvent(StructureCreateOrUpdateEvent structureCreateOrUpdateEvent) {
 		Structure structure = (Structure) structureCreateOrUpdateEvent.getSource();
-		logger.info("Receiving Strucute Event");
+		logger.info("Receiving Structure Event");
 		physicalLocationService.regenerateTasksForOperationalArea(structure);
 	}
 }
