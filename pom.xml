@@ -78,10 +78,10 @@
 
     <repositories>
         <repository>
-            <id>spring-maven-release</id>
-            <name>Spring Maven Release Repository</name>
-            <url>https://maven.springframework.org/release</url>
-        </repository>
+             <id>repository.spring.milestone</id> 
+             <name>Spring Milestone Repository</name> 
+             <url>https://repo.spring.io/milestone</url> 
+	</repository>
         <repository>
             <id>jcenter-release</id>
             <name>jcenter</name>
