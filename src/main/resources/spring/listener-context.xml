@@ -16,6 +16,9 @@
 	<task:scheduler pool-size="1" id="dhis2Scheduler"/>
     <task:scheduler pool-size="1" id="messageScheduler"/>
 
+	<bean id="structureRepositoryEventListener"
+		  class="org.opensrp.web.listener.StructureRepositoryEventListener"/>
+
 	<beans profile="rapidpro">
 		<bean id="dhis2" class="org.opensrp.web.listener.DHIS2ConnectorListener"></bean>
 		<task:scheduled-tasks scheduler="dhis2Scheduler">
