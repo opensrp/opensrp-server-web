@@ -15,9 +15,9 @@
 		testOnBorrow="true"
 		removeAbandoned="true"
 		removeAbandonedTimeout="233"
-		username="eusm_mg"
+		username="opensrp_admin"
 		password="admin"
 		driverClassName="org.postgresql.Driver"
-		url="jdbc:postgresql://localhost:5432/eusmdb"
+		url="jdbc:postgresql://localhost:5432/opensrp"
      />
 </Context>
