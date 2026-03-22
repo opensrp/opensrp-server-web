@@ -105,6 +105,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 			+ "\t\"serverVersion\": 15421904649873,\n"
 			+ "\t\"team\": \"test\",\n"
 			+ "\t\"teamId\": \"test\",\n"
+			+ "\t\"eventType\": \"teamId:Close Referral,LTFU Feedback\",\n"
 			+ "\t\"limit\": 5\n"
 			+ "}";
 
@@ -454,7 +455,8 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		doReturn(createClient()).when(clientService).getByBaseEntityId(anyString());
 
 		String parameter = PROVIDER_ID + "=providerId&" + LOCATION_ID + "=locationId&" + BASE_ENTITY_ID + "=base-entity-id&"
-				+ SERVER_VERSIOIN + "=15421904649873&" + TEAM + "=team&" + TEAM_ID + "=team_id";
+				+ SERVER_VERSIOIN + "=15421904649873&" + TEAM + "=team&" + TEAM_ID + "=team_id&"
+				+ EVENT_TYPE + "=teamId:Close Referral,LTFU Feedback";
 		String response = getResponseAsString(BASE_URL + "/sync", parameter, status().isOk());
 		JsonNode actualObj = mapper.readTree(response);
 		verify(eventService).findEvents(eventSearchBeanArgumentCaptor.capture(), stringArgumentCaptor.capture(),
@@ -462,6 +464,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(25));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+		assertEquals("teamId:Close Referral,LTFU Feedback", eventSearchBeanArgumentCaptor.getValue().getEventType());
 		assertEquals(actualObj.size(), 4);
 		assertEquals(actualObj.get("clients").size(), 1);
 		assertEquals(actualObj.get("events").size(), 1);
@@ -485,6 +488,7 @@ public class EventResourceTest extends BaseSecureResourceTest<Event> {
 		assertEquals(integerArgumentCaptor.getValue(), new Integer(5));
 		assertEquals(stringArgumentCaptor.getAllValues().get(0), SERVER_VERSIOIN);
 		assertEquals(stringArgumentCaptor.getAllValues().get(1), "asc");
+		assertEquals("teamId:Close Referral,LTFU Feedback", eventSearchBeanArgumentCaptor.getValue().getEventType());
 	}
 
 	@Test
