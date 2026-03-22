@@ -15,6 +15,7 @@ public class SyncParam {
 	private String serverVersion;
 	private String team;
 	private String teamId;
+	private String eventType;
 	private Integer limit;
 	@JsonProperty("return_count")
 	private boolean returnCount;
@@ -65,6 +66,14 @@ public class SyncParam {
 
 	public void setTeamId(String teamId) {
 		this.teamId = teamId;
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
 	}
 
 	public Integer getLimit() {

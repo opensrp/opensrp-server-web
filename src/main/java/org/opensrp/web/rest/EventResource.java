@@ -135,12 +135,14 @@ public class EventResource extends RestResource<Event> {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		String team = getStringFilter(TEAM, request);
 		String teamId = getStringFilter(TEAM_ID, request);
+		String eventType = getStringFilter(EVENT_TYPE, request);
 		Integer limit = getIntegerFilter("limit", request);
 		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
 
 		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
 
-			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, false);
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId,
+					eventType, limit, returnCount, false);
 
 			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
@@ -172,7 +174,7 @@ public class EventResource extends RestResource<Event> {
 
 				EventSyncBean eventSyncBean = sync(syncParam.getProviderId(), syncParam.getLocationId(),
 						syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
-						syncParam.getTeamId(),
+						syncParam.getTeamId(), syncParam.getEventType(),
 						syncParam.getLimit(), syncParam.isReturnCount(),
 						false);
 
@@ -212,11 +214,13 @@ public class EventResource extends RestResource<Event> {
 		String serverVersion = getStringFilter(BaseEntity.SERVER_VERSIOIN, request);
 		String team = getStringFilter(TEAM, request);
 		String teamId = getStringFilter(TEAM_ID, request);
+		String eventType = getStringFilter(EVENT_TYPE, request);
 		Integer limit = getIntegerFilter("limit", request);
 		boolean returnCount = Boolean.getBoolean(getStringFilter(RETURN_COUNT, request));
 
 		if (team != null || providerId != null || locationId != null || baseEntityId != null || teamId != null) {
-			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, limit, returnCount, true);
+			EventSyncBean eventSyncBean = sync(providerId, locationId, baseEntityId, serverVersion, team, teamId,
+					eventType, limit, returnCount, true);
 
 			HttpHeaders headers = getJSONUTF8Headers();
 			if (returnCount) {
@@ -240,7 +244,7 @@ public class EventResource extends RestResource<Event> {
 
 				EventSyncBean eventSyncBean = sync(syncParam.getProviderId(), syncParam.getLocationId(),
 						syncParam.getBaseEntityId(), syncParam.getServerVersion(), syncParam.getTeam(),
-						syncParam.getTeamId(), syncParam.getLimit(), syncParam.isReturnCount(),
+						syncParam.getTeamId(), syncParam.getEventType(), syncParam.getLimit(), syncParam.isReturnCount(),
 						true);
 
 				HttpHeaders headers = getJSONUTF8Headers();
@@ -327,6 +331,12 @@ public class EventResource extends RestResource<Event> {
 
 	public EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion, String team,
 			String teamId, Integer limit, boolean returnCount, boolean isOutOfCatchment) {
+		return sync(providerId, locationId, baseEntityId, serverVersion, team, teamId, null, limit, returnCount,
+				isOutOfCatchment);
+	}
+
+	public EventSyncBean sync(String providerId, String locationId, String baseEntityId, String serverVersion, String team,
+			String teamId, String eventType, Integer limit, boolean returnCount, boolean isOutOfCatchment) {
 		Long lastSyncedServerVersion = null;
 		if (serverVersion != null) {
 			lastSyncedServerVersion = Long.parseLong(serverVersion) + 1;
@@ -339,6 +349,7 @@ public class EventResource extends RestResource<Event> {
 		eventSearchBean.setLocationId(locationId);
 		eventSearchBean.setBaseEntityId(baseEntityId);
 		eventSearchBean.setServerVersion(lastSyncedServerVersion);
+		eventSearchBean.setEventType(eventType);
 
 		return getEventsAndClients(eventSearchBean, limit == null || limit == 0 ? 25 : limit, returnCount, isOutOfCatchment);
 	}
